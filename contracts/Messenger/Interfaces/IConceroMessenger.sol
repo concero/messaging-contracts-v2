@@ -1,9 +1,13 @@
 pragma solidity 0.8.20;
 
-interface IConceroMessage {
+interface IConceroMessenger {
     //////////////////////////
     /////TYPES DEFINITIONS////
     //////////////////////////
+
+    enum Relayer {
+        Symbiosis
+    }
 
     struct Message {
         uint64 dstChainSelector;
@@ -20,20 +24,8 @@ interface IConceroMessage {
         uint256 amount;
     }
 
-    enum Relayer {
-        Symbiosis
-    }
-
     struct EVMArgs {
         uint32 gasLimit;
-    }
-
-    struct ChainSelectors {
-        uint64 arbitrumChainSelector;
-        uint64 baseChainSelector;
-        uint64 polygonChainSelector;
-        uint64 avalancheChainSelector;
-        uint64 optimismChainSelector;
     }
 
     //////////////////////

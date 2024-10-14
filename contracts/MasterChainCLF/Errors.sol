@@ -1,0 +1,2 @@
+error OnlyAllowedOperator();
+error MessageAlreadyProcessed();

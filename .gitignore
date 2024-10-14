@@ -1,39 +1,34 @@
 # dependencies
 node_modules
 
-# yarn
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-
-# eslint
-.eslintcache
-
-# misc
-.DS_Store
-
-# IDE
-.vscode
-.idea
-
-# cli
-.env.*
+# env files
 .env
-!.env.deployments.*
-!.env.clf
-!.env.tokens
-!.env.clccip
 
-packages/hardhat/deployments
+# coverage
+coverage
+coverage.json
 
-# ignoring all js files in /hardhat/
-packages/hardhat/**/*.js
-packages/nextjs/**/*.js
+# typechain
+typechain
+typechain-types
 
-# except for the CLF js dist files
-!packages/hardhat/tasks/CLFScripts/dist/**/*.js
+# hardhat files
+cache
+artifacts
 
-bun.lockb
+# zkSync files
+artifacts-zk
+cache-zk
+
+# deployments
+deployments/localhost
+
+# other
+temp
+
+
+packages/foundry/out
+packages/foundry/node_modules
+packages/foundry/cache
+
+.idea

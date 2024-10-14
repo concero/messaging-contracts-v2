@@ -7,10 +7,10 @@ interface IConceroMessage {
 
     struct Message {
         uint64 dstChainSelector;
-        TokenAmount[] tokensAmounts;
+        address feeToken;
+        address receiver;
+        TokenAmount[] tokenAmounts;
         Relayer[] relayers;
-        bytes feeToken;
-        bytes receiver;
         bytes data;
         bytes extraArgs;
     }
@@ -26,6 +26,14 @@ interface IConceroMessage {
 
     struct EVMArgs {
         uint32 gasLimit;
+    }
+
+    struct ChainSelectors {
+        uint64 arbitrumChainSelector;
+        uint64 baseChainSelector;
+        uint64 polygonChainSelector;
+        uint64 avalancheChainSelector;
+        uint64 optimismChainSelector;
     }
 
     //////////////////////

@@ -16,8 +16,8 @@ contract MasterChainCLF is FunctionsClient, MasterChainCLFStorage {
 
     struct Message {
         bytes32 id;
-        uint64 dstChainSelector;
         uint64 srcChainSelector;
+        uint64 dstChainSelector;
         uint64 srcChainBlockNumber;
         address receiver;
         IConceroRouter.TokenAmount[] tokenAmounts;
@@ -124,11 +124,7 @@ contract MasterChainCLF is FunctionsClient, MasterChainCLFStorage {
     ////INTERNAL FUNCTIONS////
     //////////////////////////
 
-    function fulfillRequest(
-        bytes32 requestId,
-        bytes memory response,
-        bytes memory err
-    ) internal override {
+    function fulfillRequest(bytes32, bytes memory response, bytes memory err) internal override {
         if (err.length != 0) {
             emit CLFRequestError(err);
             return;
@@ -158,7 +154,7 @@ contract MasterChainCLF is FunctionsClient, MasterChainCLFStorage {
         return _sendRequest(req.encodeCBOR(), i_clfSubscriptionId, CLF_GAS_LIMIT, i_clfDonId);
     }
 
-    function _onlyAllowedOperator() internal {
+    function _onlyAllowedOperator() internal view {
         if (!s_isAllowedOperators[msg.sender]) revert OnlyAllowedOperator();
     }
 }

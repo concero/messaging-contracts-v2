@@ -24,13 +24,13 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         i_USDC = usdc;
     }
 
-    function sendMessage(Message calldata message) external payable {
+    function sendMessage(MessageRequest calldata req) external payable {
         // step 1: validate the message (fee tokens, receiver)
         // TODO: mb validate data and extraArgs
-        uint256 fee = getFee(message);
+        uint256 fee = getFee(req);
 
         //step 2: get fees from the user
-        if (message.feeToken == i_USDC) {
+        if (req.feeToken == i_USDC) {
             IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), fee);
         }
 
@@ -39,15 +39,15 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         //step 4: emit the message
         // TODO: add custom nonce to id generation
         bytes32 messageId = keccak256(
-            abi.encode(message, block.number, block.prevrandao, msg.sender)
+            abi.encode(req.message, block.number, block.prevrandao, msg.sender)
         );
 
-        emit ConceroMessage(messageId, message);
+        emit ConceroMessage(messageId, req.message);
     }
 
-    function getFee(Message calldata message) public view returns (uint256) {
-        _validateFeeToken(message.feeToken);
-        _validateDstChainSelector(message.dstChainSelector);
+    function getFee(MessageRequest calldata req) public view returns (uint256) {
+        _validateFeeToken(req.feeToken);
+        _validateDstChainSelector(req.message.dstChainSelector);
 
         // TODO: add fee calculation logic
         return 50_000; // fee in usdc
@@ -83,7 +83,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         }
     }
 
-    function _isTestnetChainSupported(uint64 chainSelector) internal view returns (bool) {
+    function _isTestnetChainSupported(uint64 chainSelector) internal pure returns (bool) {
         if (
             chainSelector == CHAIN_SELECTOR_ARBITRUM_SEPOLIA ||
             chainSelector == CHAIN_SELECTOR_BASE_SEPOLIA ||
@@ -96,7 +96,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         return false;
     }
 
-    function _isMainnetChainSupported(uint64 chainSelector) internal view returns (bool) {
+    function _isMainnetChainSupported(uint64 chainSelector) internal pure returns (bool) {
         if (
             chainSelector == CHAIN_SELECTOR_ARBITRUM ||
             chainSelector == CHAIN_SELECTOR_BASE ||

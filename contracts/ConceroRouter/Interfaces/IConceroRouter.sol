@@ -9,9 +9,13 @@ interface IConceroRouter {
         Symbiosis
     }
 
+    struct MessageRequest {
+        address feeToken;
+        Message message;
+    }
+
     struct Message {
         uint64 dstChainSelector;
-        address feeToken;
         address receiver;
         TokenAmount[] tokenAmounts;
         Relayer[] relayers;

@@ -1,6 +1,6 @@
 pragma solidity 0.8.20;
 
-import {IConceroMessenger} from "../Messenger/Interfaces/IConceroMessenger.sol";
+import {IConceroRouter} from "../ConceroRouter/Interfaces/IConceroRouter.sol";
 import {MasterChainCLFStorage} from "./MasterChainCLFStorage.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
@@ -20,8 +20,8 @@ contract MasterChainCLF is FunctionsClient, MasterChainCLFStorage {
         uint64 srcChainSelector;
         uint64 srcChainBlockNumber;
         address receiver;
-        IConceroMessenger.TokenAmount[] tokenAmounts;
-        IConceroMessenger.Relayer[] relayers;
+        IConceroRouter.TokenAmount[] tokenAmounts;
+        IConceroRouter.Relayer[] relayers;
         bytes data;
         bytes extraArgs;
     }
@@ -112,12 +112,12 @@ contract MasterChainCLF is FunctionsClient, MasterChainCLFStorage {
     //////ADMIN FUNCTIONS/////
     //////////////////////////
 
-    function addAllowedOperator(address _operator) external payable onlyOwner {
-        s_isAllowedOperators[_operator] = true;
+    function addAllowedOperator(address operator) external payable onlyOwner {
+        s_isAllowedOperators[operator] = true;
     }
 
-    function removeAllowedOperator(address _operator) external payable onlyOwner {
-        s_isAllowedOperators[_operator] = false;
+    function removeAllowedOperator(address operator) external payable onlyOwner {
+        s_isAllowedOperators[operator] = false;
     }
 
     //////////////////////////

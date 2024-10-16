@@ -5,7 +5,7 @@ import updateEnvVariable from "../utils/updateEnvVariable";
 import log from "../utils/log";
 import { getEnvVar } from "../utils";
 
-const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<void> = async function (
+const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
     hre: HardhatRuntimeEnvironment,
 ) {
     const { deployer } = await hre.getNamedAccounts();
@@ -36,6 +36,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<void> = a
             `deployments.${networkType}`,
         );
     }
+    return conceroRouterDeploy;
 };
 
 export default deployConceroRouter;

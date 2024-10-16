@@ -43,6 +43,7 @@ export const networkEnvKeys: Record<string, string> = {
     polygonAmoy: "POLYGON_AMOY",
     // tests
     hardhat: "BASE",
+    localhost: "BASE",
 };
 
 export const functionsGatewayUrls = {

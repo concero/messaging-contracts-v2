@@ -45,6 +45,143 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         emit ConceroMessage(messageId, req.message);
     }
 
+    /**
+     * @notice Submits a message report, verifies the signatures, and processes the report data.
+     * @param reportContext Report context containing config digest, epoch, and extra hash.
+     * @param report Serialized report data.
+     * @param rs Array of R components of the signatures.
+     * @param ss Array of S components of the signatures.
+     * @param rawVs Concatenated V components of the signatures.
+     */
+    function submitMessageReport(
+        bytes32[3] calldata reportContext,
+        bytes calldata report,
+        bytes32[] calldata rs,
+        bytes32[] calldata ss,
+        bytes calldata rawVs
+    ) external {
+        // Step 1: Recompute the hash
+        bytes32 h = _computeReportHash(reportContext, report);
+
+        // Step 2: Recover and verify the signatures
+        _verifySignatures(h, rs, ss, rawVs);
+
+        // Step 3: Decode and process the report data
+        _processReport(report);
+        //TODO: further actions with report: operator reward, passing the TX to user etc
+
+    }
+
+    //////////////////////////////////
+    ////////INTERNAL FUNCTIONS////////
+    //////////////////////////////////
+
+    /**
+     * @notice Computes the hash of the report and report context.
+     * @param reportContext The context of the report.
+     * @param report The serialized report data.
+     * @return The computed hash of the report.
+     */
+    function _computeReportHash(
+        bytes32[3] calldata reportContext,
+        bytes calldata report
+    ) internal pure returns (bytes32) {
+        bytes32 reportHash = keccak256(report);
+        bytes memory messageToHash = abi.encodePacked(
+            reportHash,
+            reportContext[0],
+            reportContext[1],
+            reportContext[2]
+        );
+        return keccak256(messageToHash);
+    }
+
+    /**
+     * @notice Verifies the signatures of the report.
+     * @param h The computed hash of the report.
+     * @param rs Array of R components of the signatures.
+     * @param ss Array of S components of the signatures.
+     * @param rawVs Concatenated V components of the signatures.
+     */
+    function _verifySignatures(
+        bytes32 h,
+        bytes32[] calldata rs,
+        bytes32[] calldata ss,
+        bytes calldata rawVs
+    ) internal view {
+        uint256 numSignatures = rs.length;
+
+        if (numSignatures != ss.length || numSignatures != rawVs.length) {
+            revert("Mismatched signature arrays");
+        }
+
+        uint256 expectedNumSignatures = 3; // Adjust according to your requirements
+
+        if (numSignatures != expectedNumSignatures) {
+            revert("Incorrect number of signatures");
+        }
+
+        address[] memory signers = new address[](numSignatures);
+
+        for (uint256 i = 0; i < numSignatures; i++) {
+            uint8 v = uint8(rawVs[i]) + 27; // rawVs contains values 0 or 1, add 27 to get 27 or 28
+            bytes32 r = rs[i];
+            bytes32 s = ss[i];
+
+            // Recover the signer's address
+            address signer = ecrecover(h, v, r, s);
+
+            if (signer == address(0)) {
+                revert("Invalid signature");
+            }
+
+            // Check for duplicate signatures
+            for (uint256 j = 0; j < i; j++) {
+                if (signers[j] == signer) {
+                    revert("Duplicate signature detected");
+                }
+            }
+
+            // Verify that the signer is authorized
+            if (!s_isAuthorizedSigner[signer]) {
+                revert("Unauthorized signer");
+            }
+
+            signers[i] = signer;
+        }
+    }
+
+    /**
+     * @notice Decodes the report data and processes it.
+     * @param report The serialized report data.
+     */
+    function _processReport(bytes calldata report) internal {
+        (
+            bytes32[] memory requestIds,
+            bytes[] memory results,
+            bytes[] memory errors,
+            bytes[] memory onchainMetadata,
+            bytes[] memory offchainMetadata
+        ) = abi.decode(
+            report,
+            (bytes32[], bytes[], bytes[], bytes[], bytes[])
+        );
+
+        uint256 numberOfFulfillments = requestIds.length;
+
+        for (uint256 i = 0; i < numberOfFulfillments; i++) {
+            bytes32 requestId = requestIds[i];
+            bytes memory result = results[i];
+            bytes memory error = errors[i];
+            bytes memory metadata = onchainMetadata[i];
+            bytes memory offchainMeta = offchainMetadata[i];
+
+            emit ReportProcessed(requestId, result, error, metadata, offchainMeta);
+        }
+    }
+
+
+
     function getFee(MessageRequest calldata req) public view returns (uint256) {
         _validateFeeToken(req.feeToken);
         _validateDstChainSelector(req.message.dstChainSelector);

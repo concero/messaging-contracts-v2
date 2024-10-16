@@ -11,6 +11,11 @@ export type CNetworkNames = "localhost" |
 export type NetworkType = "mainnet" | "testnet";
 
 export type CLFNetwork = {
+  forking: {
+    enabled: boolean;
+    url: string;
+    blockNumber: number;
+  };
   saveDeployments: boolean;
   functionsRouter: envString;
   functionsDonId: envString;

@@ -1,18 +1,13 @@
 import "@nomicfoundation/hardhat-chai-matchers";
-import { ethers } from "hardhat";
+import { switchFork } from "./utils/switchFork";
+import deployConceroRouter from "../../deploy/ConceroRouter";
+
+const hre = require("hardhat");
 
 describe("emit event and run clf", () => {
     it("should emit event", async () => {
-        const ContractFactory = await ethers.getContractFactory("Test");
+        await switchFork("base");
 
-        const contract = await ContractFactory.deploy();
-
-        await contract.deployed();
-
-        const tx = await contract.emitEvent();
-
-        const receipt = await tx.wait();
-
-        console.log(receipt.events);
+        await deployConceroRouter(hre);
     });
 });

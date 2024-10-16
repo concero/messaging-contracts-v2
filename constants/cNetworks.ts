@@ -41,6 +41,8 @@ export const networkEnvKeys: Record<string, string> = {
     avalancheFuji: "FUJI",
     baseSepolia: "BASE_SEPOLIA",
     polygonAmoy: "POLYGON_AMOY",
+    // tests
+    hardhat: "BASE",
 };
 
 export const functionsGatewayUrls = {
@@ -67,8 +69,8 @@ export const cNetworks: Record<CNetworkNames, CNetwork> = {
     hardhat: {
         chainId: 31337,
         forking: {
-            url: "https://rpc.ankr.com/base",
-            enabled: true,
+            url: "http://127.0.0.1:8545/",
+            enabled: false,
             blockNumber: 21122997,
         },
         accounts: [
@@ -264,6 +266,12 @@ export const cNetworks: Record<CNetworkNames, CNetwork> = {
     },
     // MAINNETS
     base: {
+        forking: {
+            // url: "https://rpc.ankr.com/base",
+            jsonRpcUrl: "http://127.0.0.1:8545/",
+            enabled: true,
+            blockNumber: 21122997,
+        },
         type: networkTypes.mainnet,
         saveDeployments,
         chainId: 8453,

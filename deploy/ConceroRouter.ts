@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import cNetworks, { networkEnvKeys } from "../constants/cNetworks";
 import updateEnvVariable from "../utils/updateEnvVariable";
 import log from "../utils/log";
-import { getEnvVar } from "../utils";
+import { getClients, getEnvVar } from "../utils";
 
 const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
     hre: HardhatRuntimeEnvironment,
@@ -21,11 +21,15 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
 
     const args = { ...defaultArgs };
 
+    const { publicClient } = getClients(cNetworks[name].viemChain);
+    const gasPrice = String(await publicClient.getGasPrice());
+
     const conceroRouterDeploy = (await deploy("ConceroRouter", {
         from: deployer,
         args: [args.usdc],
         log: true,
         autoMine: true,
+        gasPrice,
     })) as Deployment;
 
     log(`Deployed at: ${conceroRouterDeploy.address}`, "deployConceroRouter", name);

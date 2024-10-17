@@ -14,6 +14,7 @@ import {
     sepolia,
 } from "viem/chains";
 import { urls } from "./rpcUrls";
+import { localhostViemChain } from "../utils/localhostViemChain";
 
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
 const deployerPK = process.env.DEPLOYER_PRIVATE_KEY;
@@ -53,6 +54,7 @@ export const functionsGatewayUrls = {
 
 export const cNetworks: Record<CNetworkNames, CNetwork> = {
     localhost: {
+        chainId: 31337,
         accounts: [deployerPK, proxyDeployerPK],
         // mock CLF data
         functionsDonId: process.env.CLF_DONID_SEPOLIA,
@@ -66,6 +68,7 @@ export const cNetworks: Record<CNetworkNames, CNetwork> = {
         linkToken: process.env.LINK_SEPOLIA,
         linkPriceFeed: process.env.LINK_PRICEFEED_SEPOLIA,
         ccipRouter: process.env.CL_CCIP_ROUTER_SEPOLIA,
+        viemChain: localhostViemChain,
     } as HardhatNetworkUserConfig,
     hardhat: {
         chainId: 31337,
@@ -385,4 +388,5 @@ export const cNetworks: Record<CNetworkNames, CNetwork> = {
         name: "avalanche",
     },
 };
+
 export default cNetworks;

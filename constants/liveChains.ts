@@ -1,34 +1,34 @@
-import { CNetwork } from "../types/CNetwork";
-import chains from "./cNetworks";
-import { ConceroChains } from "../types/chains";
+import { type CNetwork } from "../types/CNetwork";
+import { cNetworks } from "./cNetworks";
+import { type ConceroChains } from "../types/chains";
 
 export const liveChains: CNetwork[] = [
-  chains.baseSepolia,
-  chains.arbitrumSepolia,
-  chains.avalancheFuji,
-  // chains.optimismSepolia,
-  // chains.polygonAmoy,
+    cNetworks.baseSepolia,
+    cNetworks.arbitrumSepolia,
+    cNetworks.avalancheFuji,
+    // cNetworks.optimismSepolia,
+    // cNetworks.polygonAmoy,
 ];
 
-// export const liveChains: CNetwork[] = [chains.polygon, chains.base, chains.arbitrum, chains.avalanche];
+// export const liveChains: CNetwork[] = [cNetworks.polygon, cNetworks.base, cNetworks.arbitrum, cNetworks.avalanche];
 
 export const conceroChains: ConceroChains = {
-  testnet: {
-    parentPool: [chains.baseSepolia],
-    childPool: [chains.arbitrumSepolia, chains.avalancheFuji],
-    infra: [chains.arbitrumSepolia, chains.avalancheFuji, chains.baseSepolia],
-  },
-  mainnet: {
-    parentPool: [chains.base],
-    childPool: [chains.polygon, chains.arbitrum, chains.avalanche],
-    infra: [chains.polygon, chains.arbitrum, chains.avalanche, chains.base],
-  },
+    testnet: {
+        parentPool: [cNetworks.baseSepolia],
+        childPool: [cNetworks.arbitrumSepolia, cNetworks.avalancheFuji],
+        infra: [cNetworks.arbitrumSepolia, cNetworks.avalancheFuji, cNetworks.baseSepolia],
+    },
+    mainnet: {
+        parentPool: [cNetworks.base],
+        childPool: [cNetworks.polygon, cNetworks.arbitrum, cNetworks.avalanche],
+        infra: [cNetworks.polygon, cNetworks.arbitrum, cNetworks.avalanche, cNetworks.base],
+    },
 };
 
 export const testnetChains: CNetwork[] = Array.from(
-  new Set([...conceroChains.testnet.parentPool, ...conceroChains.testnet.childPool, ...conceroChains.testnet.infra]),
+    new Set([...conceroChains.testnet.parentPool, ...conceroChains.testnet.childPool, ...conceroChains.testnet.infra]),
 );
 
 export const mainnetChains: CNetwork[] = Array.from(
-  new Set([...conceroChains.mainnet.parentPool, ...conceroChains.mainnet.childPool, ...conceroChains.mainnet.infra]),
+    new Set([...conceroChains.mainnet.parentPool, ...conceroChains.mainnet.childPool, ...conceroChains.mainnet.infra]),
 );

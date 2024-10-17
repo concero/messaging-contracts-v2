@@ -12,6 +12,7 @@ const networkColors: Record<CNetworkNames, string> = {
     avalancheFuji: "\x1b[31m", // red
     baseSepolia: "\x1b[36m", // cyan
     hardhat: "\x1b[32m", // green
+    localhost: "\x1b[32m", // green
 };
 const reset = "\x1b[0m";
 

@@ -1,6 +1,8 @@
 import deployConceroRouter from "../../deploy/ConceroRouter";
 import { getClients, getEnvVar } from "../../utils";
 import { cNetworks, networkEnvKeys } from "../../constants";
+import { approve } from "./utils/approve";
+import { parseUnits } from "viem";
 
 const hre = require("hardhat");
 
@@ -18,20 +20,22 @@ describe("Concero Router", () => {
         );
 
         const { publicClient, walletClient } = getClients(cNetworks.localhost.viemChain);
-
+        const feeToken = getEnvVar(`USDC_${networkEnvKeys["base"]}`);
         const messageRequest = {
-            feeToken: getEnvVar(`USDC_${networkEnvKeys["base"]}`),
+            feeToken,
             message: {
                 dstChainSelector: getEnvVar("CL_CCIP_CHAIN_SELECTOR_ARBITRUM_SEPOLIA"),
                 receiver: walletClient.account.address,
                 tokenAmounts: [],
                 relayers: [],
-                data: "0x1",
-                extraArgs: "0x0",
+                data: walletClient.account.address,
+                extraArgs: "0x01010",
             },
         };
 
-        const request = await publicClient.simulateContract({
+        await approve(feeToken, deploymentAddress, parseUnits("1", 6), walletClient, publicClient);
+
+        const hash = await walletClient.writeContract({
             address: deploymentAddress,
             abi: conceroRouterAbi,
             functionName: "sendMessage",
@@ -39,7 +43,7 @@ describe("Concero Router", () => {
             args: [messageRequest],
             chain: cNetworks.localhost.viemChain,
         });
-        const hash = await walletClient.writeContract(request);
+
         console.log("Message sent with hash:", hash);
     });
 });

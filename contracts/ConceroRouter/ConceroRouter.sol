@@ -69,7 +69,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         // Step 3: Decode and process the report data
         _processReport(report);
         //TODO: further actions with report: operator reward, passing the TX to user etc
-
     }
 
     //////////////////////////////////
@@ -162,10 +161,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             bytes[] memory errors,
             bytes[] memory onchainMetadata,
             bytes[] memory offchainMetadata
-        ) = abi.decode(
-            report,
-            (bytes32[], bytes[], bytes[], bytes[], bytes[])
-        );
+        ) = abi.decode(report, (bytes32[], bytes[], bytes[], bytes[], bytes[]));
 
         uint256 numberOfFulfillments = requestIds.length;
 
@@ -179,8 +175,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             emit ReportProcessed(requestId, result, error, metadata, offchainMeta);
         }
     }
-
-
 
     function getFee(MessageRequest calldata req) public view returns (uint256) {
         _validateFeeToken(req.feeToken);

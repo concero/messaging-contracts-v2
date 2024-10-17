@@ -30,8 +30,6 @@ describe("Concero Router", () => {
             message: "Hello World",
         };
 
-        console.log(message);
-
         const request = await publicClient.simulateContract({
             address: deploymentAddress,
             abi: conceroRouterAbi,

@@ -10,18 +10,19 @@ import "./Constants.sol";
 contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     using SafeERC20 for IERC20;
 
-    ///////////////////////////////
-    /////IMMUTABLE VARIABLES //////
-    ///////////////////////////////
+    /*IMMUTABLE VARIABLES*/
 
     address internal immutable i_USDC;
+    address internal immutable i_signer_0;
+    address internal immutable i_signer_1;
+    address internal immutable i_signer_2;
 
-    //////////////////////////////////
-    ////////EXTERNAL FUNCTIONS////////
-    //////////////////////////////////
 
-    constructor(address usdc) {
+    constructor(address usdc, address signer_0, address signer_1, address signer_2) {
         i_USDC = usdc;
+        i_signer_0 = signer_0;
+        i_signer_1 = signer_1;
+        i_signer_2 = signer_2;
     }
 
     function sendMessage(MessageRequest calldata req) external payable {
@@ -142,7 +143,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             }
 
             // Verify that the signer is authorized
-            if (!s_isAuthorizedSigner[signer]) {
+            if (!isAuthorizedSigner(signer)) {
                 revert("Unauthorized signer");
             }
 
@@ -191,6 +192,10 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     //////////////////////////////////
     ////////INTERNAL FUNCTIONS////////
     //////////////////////////////////
+
+    function isAuthorizedSigner(address signer) internal view returns (bool) {
+        return (signer == i_signer_0 || signer == i_signer_1 || signer == i_signer_2);
+    }
 
     function _validateFeeToken(address feeToken) internal view {
         // add this line in future: && feeToken != address(0)

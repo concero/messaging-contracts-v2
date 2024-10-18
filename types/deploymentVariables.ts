@@ -3,28 +3,14 @@ import { ProxyEnum } from "../constants/deploymentVariables";
 export type IProxyType = keyof typeof ProxyEnum;
 
 type ProxyEnvPrefixes = {
-  [key in ProxyEnum]: string;
+    [key in ProxyEnum]: string;
 };
 export type EnvPrefixes = ProxyEnvPrefixes & {
-  infraProxyAdmin: string;
-  bridge: string;
-  dexSwap: string;
-  orchestrator: string;
-  parentPoolProxyAdmin: string;
-  parentPool: string;
-  childPoolProxyAdmin: string;
-  childPool: string;
-  automation: string;
-  lpToken: string;
-  create3Factory: string;
-  pause: string;
-  uniswapRouter: string;
-  poolMessenger0: string;
-  poolMessenger1: string;
-  poolMessenger2: string;
-  infraMessenger0: string;
-  infraMessenger1: string;
-  infraMessenger2: string;
+    routerProxyAdmin: string;
+    clfRouterProxyAdmin: string;
+    lpToken: string;
+    create3Factory: string;
+    pause: string;
 };
 /**
  * Update an environment variable in the .env file

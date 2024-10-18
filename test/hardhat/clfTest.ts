@@ -1,4 +1,4 @@
-import { cNetworks, networkEnvKeys } from "../../constants";
+import { conceroNetworks, networkEnvKeys } from "../../constants";
 import { getEnvVar } from "../../utils";
 import { approve } from "./utils/approve";
 import { encodeAbiParameters, parseUnits } from "viem";
@@ -41,7 +41,7 @@ describe("Concero Router", () => {
             functionName: "sendMessage",
             account: walletClient.account,
             args: [messageRequest],
-            chain: cNetworks.localhost.viemChain,
+            chain: conceroNetworks.localhost.viemChain,
         });
 
         console.log("Message sent with hash:", hash);

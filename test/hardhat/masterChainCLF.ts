@@ -1,5 +1,5 @@
 import deployConceroRouter from "../../deploy/ConceroRouter";
-import { cNetworks, networkEnvKeys } from "../../constants";
+import { conceroNetworks, networkEnvKeys } from "../../constants";
 import { getClients, getEnvVar } from "../../utils";
 import { base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
@@ -36,7 +36,7 @@ describe("Concero Router", () => {
             functionName: "sendMessage",
             account: walletClient.account,
             args: [message],
-            chain: cNetworks.localhost,
+            chain: conceroNetworks.localhost,
         });
         const hash = await walletClient.writeContract(request);
         console.log("Message sent with hash:", hash);

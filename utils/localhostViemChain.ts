@@ -1,7 +1,7 @@
 import { defineChain } from "viem";
 
 export const localhostViemChain = defineChain({
-    id: 31337,
+    id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
     name: "localhost",
     nativeCurrency: {
         decimals: 18,

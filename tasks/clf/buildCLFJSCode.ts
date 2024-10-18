@@ -4,10 +4,10 @@ run with: yarn hardhat clf-build-script --path ./CLFScripts/DST.js
  */
 
 import { task, types } from "hardhat/config";
+import fs from "fs";
+import path from "path";
 
 export const pathToScript = [__dirname, "../", "../", "./clf/"];
-const fs = require("fs");
-const path = require("path");
 
 function checkFileAccessibility(filePath) {
     if (!fs.existsSync(filePath)) {
@@ -73,15 +73,9 @@ export function buildScript(fileToBuild: string) {
     checkFileAccessibility(fileToBuild);
 
     try {
-        let fileContent = fs.readFileSync(fileToBuild, "utf8");
-        fileContent = replaceEnvironmentVariables(fileContent);
-        let cleanedUpFile = cleanupFile(fileContent);
-        let minifiedFile = minifyFile(cleanedUpFile);
-        // let scriptType = "pool";
-        //
-        // if (fileToBuild.split("/").includes("infra")) {
-        //     scriptType = "infra";
-        // }
+        const fileContent = fs.readFileSync(fileToBuild, "utf8");
+        const cleanedUpFile = replaceEnvironmentVariables(cleanupFile(fileContent));
+        const minifiedFile = minifyFile(cleanedUpFile);
 
         saveProcessedFile(cleanedUpFile, fileToBuild);
         saveProcessedFile(minifiedFile, fileToBuild.replace(".js", ".min.js"));

@@ -28,7 +28,7 @@
             }
         },
         {
-            "files": "./clf/*",
+            "files": "./clf/src/*",
             "options": {
                 "arrowParens": "avoid",
                 "printWidth": 120,

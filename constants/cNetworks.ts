@@ -54,7 +54,7 @@ export const functionsGatewayUrls = {
 
 export const cNetworks: Record<CNetworkNames, CNetwork> = {
     localhost: {
-        chainId: 31337,
+        chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         accounts: [deployerPK, proxyDeployerPK],
         // mock CLF data
         functionsDonId: process.env.CLF_DONID_SEPOLIA,
@@ -71,11 +71,11 @@ export const cNetworks: Record<CNetworkNames, CNetwork> = {
         viemChain: localhostViemChain,
     } as HardhatNetworkUserConfig,
     hardhat: {
-        chainId: 31337,
+        chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         forking: {
-            url: "http://127.0.0.1:8545/",
+            url: process.env.LOCALHOST_FORK_RPC_URL,
             enabled: false,
-            blockNumber: 21122997,
+            blockNumber: Number(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
         },
         accounts: [
             {

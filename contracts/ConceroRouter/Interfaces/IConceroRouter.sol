@@ -36,7 +36,7 @@ interface IConceroRouter {
     ////////EVENTS////////
     //////////////////////
 
-    event ConceroMessage(bytes32 id, Message message);
+    event ConceroMessage(bytes32 indexed id, Message message);
     event ReportProcessed(
         bytes32 indexed requestId,
         bytes result,

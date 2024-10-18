@@ -1,18 +1,19 @@
-import deployConceroRouter from "../../deploy/ConceroRouter";
-import { getClients, getEnvVar } from "../../utils";
 import { cNetworks, networkEnvKeys } from "../../constants";
+import { getClients, getEnvVar } from "../../utils";
 import { approve } from "./utils/approve";
-import { parseUnits } from "viem";
+import { encodeAbiParameters, parseUnits } from "viem";
+import { decodeLogWrapper } from "./utils/decodeLogWrapper";
+import { CLFType, runCLFSimulation } from "../../utils/runCLFSimulation";
 
 const hre = require("hardhat");
 
-let deploymentAddress = null;
 describe("Concero Router", () => {
-    it("Should deploy Concero Router", async function () {
-        const deployment = await deployConceroRouter(hre);
-        deploymentAddress = deployment.address;
-        console.log("Concero Router deployed at:", deploymentAddress);
-    });
+    let deploymentAddress = "0x23494105b6B8cEaA0eB9c051b7e4484724641821";
+
+    // it("Should deploy Concero Router", async function () {
+    //     const deployment = await deployConceroRouter(hre);
+    //     deploymentAddress = deployment.address;
+    // });
 
     it("Should deploy the contract and call sendMessage", async function () {
         const { abi: conceroRouterAbi } = await import(
@@ -45,5 +46,61 @@ describe("Concero Router", () => {
         });
 
         console.log("Message sent with hash:", hash);
+        const { status, logs } = await publicClient.waitForTransactionReceipt({ hash });
+
+        if (status != "success") {
+            throw new Error(`Transaction failed`);
+        }
+
+        const decodedLogs = logs.map(log => decodeLogWrapper(conceroRouterAbi, log));
+        const messageLog = decodedLogs.find(log => log?.eventName === "ConceroMessage");
+
+        if (!messageLog) {
+            throw new Error(`ConceroMessage log not found`);
+        }
+
+        const message = {
+            id: messageLog.args.id,
+            srcChainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST),
+            dstChainSelector: BigInt(messageLog.args.message.dstChainSelector),
+            srcChainBlockNumber: BigInt(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
+            receiver: messageLog.args.message.receiver,
+            tokenAmounts: messageLog.args.message.tokenAmounts,
+            relayers: messageLog.args.message.relayers,
+            data: messageLog.args.message.data,
+            extraArgs: messageLog.args.message.extraArgs,
+        };
+
+        const encodedMessage = encodeAbiParameters(
+            [
+                { name: "id", type: "bytes32" },
+                { name: "srcChainSelector", type: "uint64" },
+                { name: "dstChainSelector", type: "uint64" },
+                { name: "srcChainBlockNumber", type: "uint64" },
+                { name: "receiver", type: "address" },
+                { name: "tokenAmounts", type: "tuple(address, uint256)[]" },
+                { name: "relayers", type: "uint8[]" },
+                { name: "data", type: "bytes" },
+                { name: "extraArgs", type: "bytes" },
+            ],
+            [
+                message.id,
+                message.srcChainSelector,
+                message.dstChainSelector,
+                message.srcChainBlockNumber,
+                message.receiver,
+                message.tokenAmounts,
+                message.relayers,
+                message.data,
+                message.extraArgs,
+            ],
+        );
+
+        const results = await runCLFSimulation(CLFType.requestReport, ["0x0", "0x0", encodedMessage], {
+            print: false,
+            rebuild: true,
+        });
+
+        console.log(results);
     });
 });

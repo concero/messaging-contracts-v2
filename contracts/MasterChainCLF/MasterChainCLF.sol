@@ -101,7 +101,7 @@ contract MasterChainCLF is FunctionsClient, MasterChainCLFStorage {
         bytes[] memory clfReqArgs = new bytes[](3);
         clfReqArgs[0] = abi.encodePacked(i_ethersJsCodeHash);
         clfReqArgs[1] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
-        clfReqArgs[2] = abi.encodePacked(abi.encode(message));
+        clfReqArgs[2] = abi.encode(message);
 
         _prepareAndSendCLFRequest(clfReqArgs);
 

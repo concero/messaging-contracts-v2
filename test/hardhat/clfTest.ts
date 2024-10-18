@@ -1,5 +1,5 @@
 import { cNetworks, networkEnvKeys } from "../../constants";
-import { getClients, getEnvVar } from "../../utils";
+import { getEnvVar } from "../../utils";
 import { approve } from "./utils/approve";
 import { encodeAbiParameters, parseUnits } from "viem";
 import { decodeLogWrapper } from "./utils/decodeLogWrapper";
@@ -20,7 +20,6 @@ describe("Concero Router", () => {
             "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
         );
 
-        const { publicClient, walletClient } = getClients(cNetworks.localhost.viemChain);
         const feeToken = getEnvVar(`USDC_${networkEnvKeys["base"]}`);
         const messageRequest = {
             feeToken,
@@ -59,11 +58,15 @@ describe("Concero Router", () => {
             throw new Error(`ConceroMessage log not found`);
         }
 
+        const blockNumber = await publicClient.getBlockNumber();
+
+        console.log(blockNumber);
+
         const message = {
             id: messageLog.args.id,
             srcChainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST),
             dstChainSelector: BigInt(messageLog.args.message.dstChainSelector),
-            srcChainBlockNumber: BigInt(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
+            srcChainBlockNumber: blockNumber,
             receiver: messageLog.args.message.receiver,
             tokenAmounts: messageLog.args.message.tokenAmounts,
             relayers: messageLog.args.message.relayers,

@@ -69,10 +69,6 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
                 privateKey: testDeployerPK,
                 balance: "10000000000000000000000",
             },
-            {
-                privateKey: testDeployerPK,
-                balance: "10000000000000000000000",
-            },
         ],
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         confirmations: 1,
@@ -94,7 +90,12 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
         rpcUrls: [rpcUrl.localhost],
         confirmations: 1,
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
-        accounts: [deployerPK, proxyDeployerPK],
+        accounts: [testDeployerPK],
+        forking: {
+            url: `https://base-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+            enabled: true,
+            blockNumber: Number(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
+        },
     },
 };
 

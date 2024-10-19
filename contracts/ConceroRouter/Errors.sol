@@ -7,4 +7,4 @@ error DuplicateSignatureDetected(address signer);
 error UnauthorizedSigner(address signer);
 error UnsupportedFeeToken();
 error UnsupportedChainSelector();
-error UnsupportedDstChain();
+error InsufficientFee();

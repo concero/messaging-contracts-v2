@@ -21,6 +21,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
     const args = {
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
         chainSelector: getEnvVar(`CL_CCIP_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
+        owner: deployer,
         clfDonSigner_0: getEnvVar(`CLF_DON_SIGNING_KEY_0_${networkEnvKeys[name]}`),
         clfDonSigner_1: getEnvVar(`CLF_DON_SIGNING_KEY_1_${networkEnvKeys[name]}`),
         clfDonSigner_2: getEnvVar(`CLF_DON_SIGNING_KEY_2_${networkEnvKeys[name]}`),
@@ -32,6 +33,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         args: [
             args.usdc,
             args.chainSelector,
+            args.owner,
             args.clfDonSigner_0,
             args.clfDonSigner_1,
             args.clfDonSigner_2,
@@ -39,6 +41,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         ],
         log: true,
         autoMine: true,
+        skipIfAlreadyDeployed: false,
     })) as Deployment;
 
     log(`Deployed at: ${conceroRouterDeploy.address}`, "deployConceroRouter", name);

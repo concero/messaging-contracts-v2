@@ -27,6 +27,7 @@ import { localhostViemChain } from "../utils/localhostViemChain";
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
 const proxyDeployerPK = getEnvVar("PROXY_DEPLOYER_PRIVATE_KEY");
 const deployerPK = getEnvVar("DEPLOYER_PRIVATE_KEY");
+const testDeployerPK = getEnvVar("TESTS_WALLET_PRIVATE_KEY");
 
 export const networkTypes: Record<NetworkType, NetworkType> = {
     mainnet: "mainnet",
@@ -56,18 +57,20 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
     hardhat: "LOCALHOST",
 };
 
-export const testNetwork: Record<ConceroTestNetworkNames, ConceroNetwork> = {
+export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = {
     hardhat: {
         id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         name: "hardhat",
+        chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         type: networkTypes.testnet,
+        saveDeployments: false,
         accounts: [
             {
-                privateKey: deployerPK,
+                privateKey: testDeployerPK,
                 balance: "10000000000000000000000",
             },
             {
-                privateKey: deployerPK,
+                privateKey: testDeployerPK,
                 balance: "10000000000000000000000",
             },
         ],
@@ -84,7 +87,9 @@ export const testNetwork: Record<ConceroTestNetworkNames, ConceroNetwork> = {
         name: "localhost",
         type: networkTypes.testnet,
         id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
+        chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         viemChain: localhostViemChain,
+        saveDeployments: false,
         url: rpcUrl.localhost,
         rpcUrls: [rpcUrl.localhost],
         confirmations: 1,
@@ -244,5 +249,5 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 export const conceroNetworks: Record<ConceroNetworkNames, ConceroNetwork> = {
     ...testnetNetworks,
     ...mainnetNetworks,
-    ...testNetwork,
+    ...testingNetworks,
 };

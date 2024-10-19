@@ -18,6 +18,7 @@ export const rpcUrl: Record<string, string> = {
 
 // Warning: ANKR endpoints are limited to 30 requests/sec and not suitable for production use
 export const urls: Record<string, string[]> = {
+    hardhat: [rpcUrl.localhost],
     localhost: [rpcUrl.localhost],
     mainnet: [
         `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,

@@ -27,6 +27,7 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         clfDonHostedSecretsSlotId: 0n,
         ethersJsCodeHash: getHashSum(ETHERS_JS_URL),
         requestCLFMessageReportJsCodeHash: getHashSum("../clf/dist/requestReport.js"),
+        owner: deployer,
     };
 
     const { publicClient } = getFallbackClients(chain);
@@ -42,6 +43,7 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
             args.clfDonHostedSecretsSlotId,
             args.ethersJsCodeHash,
             args.requestCLFMessageReportJsCodeHash,
+            args.owner,
         ],
         log: true,
         autoMine: true,

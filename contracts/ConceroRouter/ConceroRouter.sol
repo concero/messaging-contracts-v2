@@ -13,16 +13,20 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     /*IMMUTABLE VARIABLES*/
 
     address internal immutable i_USDC;
-    address internal immutable i_signer_0;
-    address internal immutable i_signer_1;
-    address internal immutable i_signer_2;
+    address internal immutable i_clfDonSigner_0;
+    address internal immutable i_clfDonSigner_1;
+    address internal immutable i_clfDonSigner_2;
 
-
-    constructor(address usdc, address signer_0, address signer_1, address signer_2) {
+    constructor(
+        address usdc,
+        address clfDonSigner_0,
+        address clfDonSigner_1,
+        address clfDonSigner_2
+    ) {
         i_USDC = usdc;
-        i_signer_0 = signer_0;
-        i_signer_1 = signer_1;
-        i_signer_2 = signer_2;
+        i_clfDonSigner_0 = clfDonSigner_0;
+        i_clfDonSigner_1 = clfDonSigner_1;
+        i_clfDonSigner_2 = clfDonSigner_2;
     }
 
     function sendMessage(MessageRequest calldata req) external payable {
@@ -65,10 +69,10 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         bytes32 h = _computeReportHash(reportContext, report);
 
         // Step 2: Recover and verify the signatures
-        _verifySignatures(h, rs, ss, rawVs);
+        _verifyClfReportSignatures(h, rs, ss, rawVs);
 
         // Step 3: Decode and process the report data
-        _processReport(report);
+        _processClfReport(report);
         //TODO: further actions with report: operator reward, passing the TX to user etc
     }
 
@@ -96,6 +100,22 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         return keccak256(messageToHash);
     }
 
+    function getFee(MessageRequest calldata req) public view returns (uint256) {
+        _validateFeeToken(req.feeToken);
+        _validateDstChainSelector(req.message.dstChainSelector);
+
+        // TODO: add fee calculation logic
+        return 50_000; // fee in usdc
+    }
+
+    function isChainSupported(uint64 chainSelector) external view returns (bool) {
+        return _isChainSupported(chainSelector);
+    }
+
+    //////////////////////////////////
+    ////////INTERNAL FUNCTIONS////////
+    //////////////////////////////////
+
     /**
      * @notice Verifies the signatures of the report.
      * @param h The computed hash of the report.
@@ -103,7 +123,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
      * @param ss Array of S components of the signatures.
      * @param rawVs Concatenated V components of the signatures.
      */
-    function _verifySignatures(
+    function _verifyClfReportSignatures(
         bytes32 h,
         bytes32[] calldata rs,
         bytes32[] calldata ss,
@@ -143,7 +163,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             }
 
             // Verify that the signer is authorized
-            if (!isAuthorizedSigner(signer)) {
+            if (!_isAuthorizedClfDonSigner(signer)) {
                 revert("Unauthorized signer");
             }
 
@@ -155,7 +175,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
      * @notice Decodes the report data and processes it.
      * @param report The serialized report data.
      */
-    function _processReport(bytes calldata report) internal {
+    function _processClfReport(bytes calldata report) internal {
         (
             bytes32[] memory requestIds,
             bytes[] memory results,
@@ -177,24 +197,10 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         }
     }
 
-    function getFee(MessageRequest calldata req) public view returns (uint256) {
-        _validateFeeToken(req.feeToken);
-        _validateDstChainSelector(req.message.dstChainSelector);
-
-        // TODO: add fee calculation logic
-        return 50_000; // fee in usdc
-    }
-
-    function isChainSupported(uint64 chainSelector) external view returns (bool) {
-        return _isChainSupported(chainSelector);
-    }
-
-    //////////////////////////////////
-    ////////INTERNAL FUNCTIONS////////
-    //////////////////////////////////
-
-    function isAuthorizedSigner(address signer) internal view returns (bool) {
-        return (signer == i_signer_0 || signer == i_signer_1 || signer == i_signer_2);
+    function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {
+        return (clfDonSigner == i_clfDonSigner_0 ||
+            clfDonSigner == i_clfDonSigner_1 ||
+            clfDonSigner == i_clfDonSigner_2);
     }
 
     function _validateFeeToken(address feeToken) internal view {

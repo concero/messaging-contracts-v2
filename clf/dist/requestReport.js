@@ -8,7 +8,7 @@
 	const chainMap = {
 		['1111111111111111111']: {
 			urls: ['http://127.0.0.1:8545'],
-			confirmations: 3n,
+			confirmations: 0n,
 			chainId: '0x7A69',
 			conceroRouterAddress: '0x23494105b6B8cEaA0eB9c051b7e4484724641821',
 		},
@@ -48,20 +48,24 @@
 	const provider = new FunctionsJsonRpcProvider(
 		chainMap[srcChainSelector].urls[Math.floor(Math.random() * chainMap[srcChainSelector].urls.length)],
 	);
+	const getLogByMessageId = async _messageId => {
+		const logs = await provider.getLogs({
+			address: chainMap[srcChainSelector].conceroRouterAddress,
+			topics: [null, messageId],
+			fromBlock: latestBlockNumber - 1000n,
+			toBlock: latestBlockNumber,
+		});
+		if (!logs.length) throw new Error('NLF');
+		return logs[0];
+	};
 	let latestBlockNumber = BigInt(await provider.getBlockNumber());
 	const {confirmations} = chainMap[srcChainSelector];
+	const srcBlockNumber = await getLogByMessageId(messageId).then(log => BigInt(log.blockNumber));
 	while (latestBlockNumber - BigInt(srcBlockNumber) < confirmations) {
 		latestBlockNumber = BigInt(await provider.getBlockNumber());
 		await sleep(3000);
 	}
-	const logs = await provider.getLogs({
-		address: chainMap[srcChainSelector].conceroRouterAddress,
-		topics: [null, messageId],
-		fromBlock: latestBlockNumber - 1000n,
-		toBlock: latestBlockNumber,
-	});
-	if (!logs.length) throw new Error('NLF');
-	const log = logs[0];
+	const log = await getLogByMessageId(messageId);
 	const abi = [
 		'event ConceroMessage(bytes32 indexed, tuple(uint64, uint64, address, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
 	];
@@ -70,6 +74,7 @@
 	const decodedLog = contract.parseLog(logData);
 	const [logMessageId, logMessageArgs] = decodedLog.args;
 	if (logMessageId.toLowerCase() !== messageId.toLowerCase()) throw new Error('WMID');
+	console.log(logMessageArgs[0]);
 	if (logMessageArgs[0] !== BigInt(srcChainSelector)) throw new Error('WSC');
 	if (logMessageArgs[1] !== BigInt(dstChainSelector)) throw new Error('WDC');
 	if (logMessageArgs[2].toLowerCase() !== receiver.toLowerCase()) throw new Error('WRV');

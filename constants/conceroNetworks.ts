@@ -42,15 +42,18 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
     polygonZkEvm: "POLYGON_ZKEVM",
     avalanche: "AVALANCHE",
     base: "BASE",
+
     // testnets
-    localhost: "BASE",
-    hardhat: "BASE",
     sepolia: "SEPOLIA",
     optimismSepolia: "OPTIMISM_SEPOLIA",
     arbitrumSepolia: "ARBITRUM_SEPOLIA",
     avalancheFuji: "FUJI",
     baseSepolia: "BASE_SEPOLIA",
     polygonAmoy: "POLYGON_AMOY",
+
+    //test
+    localhost: "LOCALHOST",
+    hardhat: "LOCALHOST",
 };
 
 export const testNetwork: Record<ConceroTestNetworkNames, ConceroNetwork> = {

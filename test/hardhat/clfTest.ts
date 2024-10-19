@@ -65,9 +65,10 @@ describe("Concero Router", () => {
 
         const message = {
             id: messageLog.args.id,
-            srcChainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST),
+            srcChainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST,
             dstChainSelector: BigInt(messageLog.args.message.dstChainSelector),
             receiver: messageLog.args.message.receiver,
+            sender: messageLog.args.message.sender,
             tokenAmounts: messageLog.args.message.tokenAmounts,
             relayers: messageLog.args.message.relayers,
             data: messageLog.args.message.data,
@@ -76,20 +77,20 @@ describe("Concero Router", () => {
 
         const encodedMessage = encodeAbiParameters(
             [
-                { name: "id", type: "bytes32" },
                 { name: "srcChainSelector", type: "uint64" },
                 { name: "dstChainSelector", type: "uint64" },
                 { name: "receiver", type: "address" },
+                { name: "sender", type: "address" },
                 { name: "tokenAmounts", type: "tuple(address, uint256)[]" },
                 { name: "relayers", type: "uint8[]" },
                 { name: "data", type: "bytes" },
                 { name: "extraArgs", type: "bytes" },
             ],
             [
-                message.id,
                 message.srcChainSelector,
                 message.dstChainSelector,
                 message.receiver,
+                message.sender,
                 message.tokenAmounts,
                 message.relayers,
                 message.data,
@@ -97,7 +98,7 @@ describe("Concero Router", () => {
             ],
         );
 
-        const results = await runCLFSimulation(CLFType.requestReport, ["0x0", "0x0", encodedMessage], {
+        const results = await runCLFSimulation(CLFType.requestReport, ["0x0", "0x0", message.id, encodedMessage], {
             print: false,
             rebuild: true,
         });

@@ -23,6 +23,8 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         signer_2: getEnvVar(`CLF_DON_SIGNING_KEY_0_${networkEnvKeys[name]}`),
     };
 
+    console.log("args:", args);
+
     const { publicClient } = getClients(conceroNetworks[name].viemChain);
     const gasPrice = String(await publicClient.getGasPrice());
 

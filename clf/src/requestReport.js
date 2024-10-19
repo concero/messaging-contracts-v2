@@ -5,6 +5,7 @@
 			['uint64', 'uint64', 'address', 'address', 'tuple(address, uint256)[]', 'uint8[]', 'bytes', 'bytes'],
 			conceroMessage,
 		);
+
 	const chainMap = {
 		// testnets
 
@@ -76,7 +77,7 @@
 
 		['${CL_CCIP_CHAIN_SELECTOR_LOCALHOST}']: {
 			urls: ['${LOCALHOST_FORK_RPC_URL}'],
-			confirmations: 1n,
+			confirmations: 0n,
 			chainId: '0x7A69',
 			conceroRouterAddress: '0x23494105b6B8cEaA0eB9c051b7e4484724641821',
 		},
@@ -113,27 +114,34 @@
 		res.set(encodedMessageHash, 33);
 		return res;
 	};
+
 	const provider = new FunctionsJsonRpcProvider(
 		chainMap[srcChainSelector].urls[Math.floor(Math.random() * chainMap[srcChainSelector].urls.length)],
 	);
+
+	const getLogByMessageId = async _messageId => {
+		const logs = await provider.getLogs({
+			address: chainMap[srcChainSelector].conceroRouterAddress,
+			topics: [null, messageId],
+			fromBlock: latestBlockNumber - 1000n,
+			toBlock: latestBlockNumber,
+		});
+
+		if (!logs.length) throw new Error('NLF');
+
+		return logs[0];
+	};
+
 	let latestBlockNumber = BigInt(await provider.getBlockNumber());
 	const {confirmations} = chainMap[srcChainSelector];
+	const srcBlockNumber = await getLogByMessageId(messageId).then(log => BigInt(log.blockNumber));
 
 	while (latestBlockNumber - BigInt(srcBlockNumber) < confirmations) {
 		latestBlockNumber = BigInt(await provider.getBlockNumber());
 		await sleep(3000);
 	}
 
-	const logs = await provider.getLogs({
-		address: chainMap[srcChainSelector].conceroRouterAddress,
-		topics: [null, messageId],
-		fromBlock: latestBlockNumber - 1000n,
-		toBlock: latestBlockNumber,
-	});
-
-	if (!logs.length) throw new Error('NLF');
-
-	const log = logs[0];
+	const log = await getLogByMessageId(messageId);
 	const abi = [
 		'event ConceroMessage(bytes32 indexed, tuple(uint64, uint64, address, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
 	];

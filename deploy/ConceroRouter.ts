@@ -17,6 +17,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
 
     const args = {
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
+        chainSelector: getEnvVar(`CL_CCIP_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
         signer_0: getEnvVar(`CLF_DON_SIGNING_KEY_0_${networkEnvKeys[name]}`),
         signer_1: getEnvVar(`CLF_DON_SIGNING_KEY_0_${networkEnvKeys[name]}`),
         signer_2: getEnvVar(`CLF_DON_SIGNING_KEY_0_${networkEnvKeys[name]}`),
@@ -27,7 +28,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
 
     const conceroRouterDeploy = (await deploy("ConceroRouter", {
         from: deployer,
-        args: [args.usdc, args.signer_0, args.signer_1, args.signer_2],
+        args: [args.usdc, args.chainSelector, args.signer_0, args.signer_1, args.signer_2],
         log: true,
         autoMine: true,
         gasPrice,

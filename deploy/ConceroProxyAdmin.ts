@@ -1,6 +1,6 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { conceroNetworks } from "../constants/conceroNetworks";
+import { conceroNetworks } from "../constants";
 import { getEnvVar, updateEnvAddress } from "../utils";
 import log from "../utils/log";
 

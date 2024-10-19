@@ -1,36 +1,37 @@
 import { conceroNetworks, networkEnvKeys } from "../../constants";
-import { getEnvVar } from "../../utils";
+import { getClients, getEnvVar } from "../../utils";
 import { approve } from "./utils/approve";
 import { encodeAbiParameters, parseUnits } from "viem";
 import { decodeLogWrapper } from "./utils/decodeLogWrapper";
 import { CLFType, runCLFSimulation } from "../../utils/runCLFSimulation";
+import deployConceroRouter from "../../deploy/ConceroRouter";
 
 const hre = require("hardhat");
 
 describe("Concero Router", () => {
     let deploymentAddress = "0x23494105b6B8cEaA0eB9c051b7e4484724641821";
 
-    // it("Should deploy Concero Router", async function () {
-    //     const deployment = await deployConceroRouter(hre);
-    //     deploymentAddress = deployment.address;
-    // });
+    it("Should deploy Concero Router", async function () {
+        const deployment = await deployConceroRouter(hre);
+        deploymentAddress = deployment.address;
+    });
 
     it("Should deploy the contract and call sendMessage", async function () {
         const { abi: conceroRouterAbi } = await import(
             "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
         );
 
+        const { publicClient, walletClient } = getClients(conceroNetworks.localhost.viemChain);
+
         const feeToken = getEnvVar(`USDC_${networkEnvKeys["base"]}`);
         const messageRequest = {
             feeToken,
-            message: {
-                dstChainSelector: getEnvVar("CL_CCIP_CHAIN_SELECTOR_ARBITRUM_SEPOLIA"),
-                receiver: walletClient.account.address,
-                tokenAmounts: [],
-                relayers: [],
-                data: walletClient.account.address,
-                extraArgs: "0x01010",
-            },
+            dstChainSelector: getEnvVar("CL_CCIP_CHAIN_SELECTOR_ARBITRUM_SEPOLIA"),
+            receiver: walletClient.account.address,
+            tokenAmounts: [],
+            relayers: [],
+            data: walletClient.account.address,
+            extraArgs: "0x01010",
         };
 
         await approve(feeToken, deploymentAddress, parseUnits("1", 6), walletClient, publicClient);
@@ -66,7 +67,6 @@ describe("Concero Router", () => {
             id: messageLog.args.id,
             srcChainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST),
             dstChainSelector: BigInt(messageLog.args.message.dstChainSelector),
-            srcChainBlockNumber: blockNumber,
             receiver: messageLog.args.message.receiver,
             tokenAmounts: messageLog.args.message.tokenAmounts,
             relayers: messageLog.args.message.relayers,
@@ -79,7 +79,6 @@ describe("Concero Router", () => {
                 { name: "id", type: "bytes32" },
                 { name: "srcChainSelector", type: "uint64" },
                 { name: "dstChainSelector", type: "uint64" },
-                { name: "srcChainBlockNumber", type: "uint64" },
                 { name: "receiver", type: "address" },
                 { name: "tokenAmounts", type: "tuple(address, uint256)[]" },
                 { name: "relayers", type: "uint8[]" },
@@ -90,7 +89,6 @@ describe("Concero Router", () => {
                 message.id,
                 message.srcChainSelector,
                 message.dstChainSelector,
-                message.srcChainBlockNumber,
                 message.receiver,
                 message.tokenAmounts,
                 message.relayers,

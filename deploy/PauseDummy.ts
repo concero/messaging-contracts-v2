@@ -1,10 +1,8 @@
-import {Deployment} from "hardhat-deploy/types";
-import {HardhatRuntimeEnvironment} from "hardhat/types";
-import conceroNetworks, {networkEnvKeys} from "../constants/conceroNetworks";
+import { Deployment } from "hardhat-deploy/types";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { conceroNetworks, networkEnvKeys } from "../constants";
 import updateEnvVariable from "../utils/updateEnvVariable";
 import log from "../utils/log";
-
-, { networkEnvKeys } from "../constants/conceroNetworks";
 
 const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = async function (
     hre: HardhatRuntimeEnvironment,

@@ -3,6 +3,7 @@ import {
     type ConceroNetwork,
     ConceroNetworkNames,
     ConceroTestnetNetworkNames,
+    ConceroTestNetworkNames,
     NetworkType,
 } from "../types/ConceroNetwork";
 import {
@@ -20,7 +21,8 @@ import {
     sepolia,
 } from "viem/chains";
 import { urls } from "./rpcUrls";
-import { getEnvVar } from "../utils/getEnvVar";
+import { getEnvVar } from "../utils";
+import { localhostViemChain } from "../utils/localhostViemChain";
 
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
 const proxyDeployerPK = getEnvVar("PROXY_DEPLOYER_PRIVATE_KEY");
@@ -42,6 +44,7 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
     base: "BASE",
     // testnets
     localhost: "BASE",
+    hardhat: "BASE",
     sepolia: "SEPOLIA",
     optimismSepolia: "OPTIMISM_SEPOLIA",
     arbitrumSepolia: "ARBITRUM_SEPOLIA",
@@ -50,18 +53,44 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
     polygonAmoy: "POLYGON_AMOY",
 };
 
-export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork> = {
+export const testNetwork: Record<ConceroTestNetworkNames, ConceroNetwork> = {
+    hardhat: {
+        id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
+        name: "hardhat",
+        type: networkTypes.testnet,
+        accounts: [
+            {
+                privateKey: deployerPK,
+                balance: "10000000000000000000000",
+            },
+            {
+                privateKey: deployerPK,
+                balance: "10000000000000000000000",
+            },
+        ],
+        chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
+        confirmations: 1,
+        viemChain: localhostViemChain,
+        forking: {
+            url: `https://base-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+            enabled: true,
+            blockNumber: Number(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
+        },
+    },
     localhost: {
         name: "localhost",
         type: networkTypes.testnet,
-        id: 1337,
-        viemChain: base,
-        url: "http://localhost:8545",
-        rpcUrls: ["http://localhost:8545"],
-        confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
-        chainSelector: "15971525489660198786",
+        id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
+        viemChain: localhostViemChain,
+        url: process.env.LOCALHOST_FORK_RPC_URL as string,
+        rpcUrls: [process.env.LOCALHOST_FORK_RPC_URL as string],
+        confirmations: 1,
+        chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         accounts: [deployerPK, proxyDeployerPK],
     },
+};
+
+export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork> = {
     sepolia: {
         name: "sepolia",
         type: networkTypes.testnet,
@@ -212,4 +241,5 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 export const conceroNetworks: Record<ConceroNetworkNames, ConceroNetwork> = {
     ...testnetNetworks,
     ...mainnetNetworks,
+    ...testNetwork,
 };

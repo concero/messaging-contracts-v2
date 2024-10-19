@@ -1,19 +1,10 @@
 (async () => {
-	const [_, __, conceroMessage] = bytesArgs;
-	const [
-		messageId,
-		_srcChainSelector,
-		dstChainSelector,
-		srcBlockNumber,
-		receiver,
-		tokenAmounts,
-		relayers,
-		data,
-		extraArgs,
-	] = new ethers.AbiCoder().decode(
-		['bytes32', 'uint64', 'uint64', 'uint64', 'address', 'tuple(address, uint256)[]', 'uint8[]', 'bytes', 'bytes'],
-		conceroMessage,
-	);
+	const [_, __, messageId, conceroMessage] = bytesArgs;
+	const [_srcChainSelector, dstChainSelector, receiver, sender, tokenAmounts, relayers, data, extraArgs] =
+		new ethers.AbiCoder().decode(
+			['uint64', 'uint64', 'address', 'address', 'tuple(address, uint256)[]', 'uint8[]', 'bytes', 'bytes'],
+			conceroMessage,
+		);
 	const chainMap = {
 		// testnets
 
@@ -85,7 +76,7 @@
 
 		['${CL_CCIP_CHAIN_SELECTOR_LOCALHOST}']: {
 			urls: ['${LOCALHOST_FORK_RPC_URL}'],
-			confirmations: 3n,
+			confirmations: 1n,
 			chainId: '0x7A69',
 			conceroRouterAddress: '0x23494105b6B8cEaA0eB9c051b7e4484724641821',
 		},
@@ -144,7 +135,7 @@
 
 	const log = logs[0];
 	const abi = [
-		'event ConceroMessage(bytes32 indexed, tuple(uint64, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
+		'event ConceroMessage(bytes32 indexed, tuple(uint64, uint64, address, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
 	];
 	const contract = new ethers.Interface(abi);
 	const logData = {topics: [log.topics[0], log.topics[1]], data: log.data};
@@ -152,20 +143,22 @@
 	const [logMessageId, logMessageArgs] = decodedLog.args;
 
 	if (logMessageId.toLowerCase() !== messageId.toLowerCase()) throw new Error('WMID');
-	if (logMessageArgs[0] !== BigInt(dstChainSelector)) throw new Error('WDC');
-	if (logMessageArgs[1].toLowerCase() !== receiver.toLowerCase()) throw new Error('WRV');
-	for (let i = 0; i < logMessageArgs[2].length; i++) {
-		if (logMessageArgs[2][i].toLowerCase() !== tokenAmounts[i].toLowerCase()) throw new Error('WTA');
+	if (logMessageArgs[0] !== BigInt(srcChainSelector)) throw new Error('WSC');
+	if (logMessageArgs[1] !== BigInt(dstChainSelector)) throw new Error('WDC');
+	if (logMessageArgs[2].toLowerCase() !== receiver.toLowerCase()) throw new Error('WRV');
+	if (logMessageArgs[3].toLowerCase() !== sender.toLowerCase()) throw new Error('WRS');
+	for (let i = 0; i < logMessageArgs[4].length; i++) {
+		if (logMessageArgs[4][i].toLowerCase() !== tokenAmounts[i].toLowerCase()) throw new Error('WTA');
 	}
-	for (let i = 0; i < logMessageArgs[3].length; i++) {
-		if (logMessageArgs[3][i] !== relayers[i]) throw new Error('WRL');
+	for (let i = 0; i < logMessageArgs[5].length; i++) {
+		if (logMessageArgs[5][i] !== relayers[i]) throw new Error('WRL');
 	}
-	if (logMessageArgs[4].toLowerCase() !== data.toLowerCase()) throw new Error('WD');
-	if (logMessageArgs[5].toLowerCase() !== extraArgs.toLowerCase()) throw new Error('WEA');
+	if (logMessageArgs[6].toLowerCase() !== data.toLowerCase()) throw new Error('WD');
+	if (logMessageArgs[7].toLowerCase() !== extraArgs.toLowerCase()) throw new Error('WEA');
 
 	const messageHash = ethers.keccak256(
 		new ethers.AbiCoder().encode(
-			['bytes32', 'tuple(uint64,address,tuple(address,uint256)[],uint8[],bytes,bytes)'],
+			['bytes32', 'tuple(uint64,uint64,address,address,tuple(address,uint256)[],uint8[],bytes,bytes)'],
 			[messageId, logMessageArgs],
 		),
 	);

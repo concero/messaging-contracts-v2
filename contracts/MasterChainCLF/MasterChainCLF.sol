@@ -5,26 +5,15 @@ import {MasterChainCLFStorage} from "./MasterChainCLFStorage.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 import "../Common/Errors.sol";
+import {IMessage} from "../Common/IMessage.sol";
 import "./Errors.sol";
 
-contract MasterChainCLF is FunctionsClient, MasterChainCLFStorage {
+contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
     using FunctionsRequest for FunctionsRequest.Request;
 
     ///////////////////////////
     ////EXTERNAL FUNCTIONS/////
     ///////////////////////////
-
-    struct Message {
-        bytes32 id;
-        uint64 srcChainSelector;
-        uint64 dstChainSelector;
-        uint64 srcChainBlockNumber;
-        address receiver;
-        IConceroRouter.TokenAmount[] tokenAmounts;
-        IConceroRouter.Relayer[] relayers;
-        bytes data;
-        bytes extraArgs;
-    }
 
     enum CLFRequestType {
         RequestCLFMessageReport
@@ -93,19 +82,23 @@ contract MasterChainCLF is FunctionsClient, MasterChainCLFStorage {
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
     }
 
-    function requestCLFMessageReport(Message calldata message) external onlyAllowedOperator {
-        if (s_clfRequestStatusByConceroId[message.id] != CLFRequestStatus.NotStarted) {
+    function requestCLFMessageReport(
+        bytes32 messageId,
+        Message calldata message
+    ) external onlyAllowedOperator {
+        if (s_clfRequestStatusByConceroId[messageId] != CLFRequestStatus.NotStarted) {
             revert MessageAlreadyProcessed();
         }
 
-        bytes[] memory clfReqArgs = new bytes[](3);
+        bytes[] memory clfReqArgs = new bytes[](4);
         clfReqArgs[0] = abi.encodePacked(i_ethersJsCodeHash);
         clfReqArgs[1] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
-        clfReqArgs[2] = abi.encode(message);
+        clfReqArgs[2] = abi.encodePacked(messageId);
+        clfReqArgs[3] = abi.encode(message);
 
         _prepareAndSendCLFRequest(clfReqArgs);
 
-        s_clfRequestStatusByConceroId[message.id] = CLFRequestStatus.Pending;
+        s_clfRequestStatusByConceroId[messageId] = CLFRequestStatus.Pending;
     }
 
     //////////////////////////

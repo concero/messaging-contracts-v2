@@ -13,17 +13,20 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     /*IMMUTABLE VARIABLES*/
 
     address internal immutable i_USDC;
+    uint64 internal immutable i_chainSelector;
     address internal immutable i_clfDonSigner_0;
     address internal immutable i_clfDonSigner_1;
     address internal immutable i_clfDonSigner_2;
 
     constructor(
         address usdc,
+        uint64 chainSelector,
         address clfDonSigner_0,
         address clfDonSigner_1,
         address clfDonSigner_2
     ) {
         i_USDC = usdc;
+        i_chainSelector = chainSelector;
         i_clfDonSigner_0 = clfDonSigner_0;
         i_clfDonSigner_1 = clfDonSigner_1;
         i_clfDonSigner_2 = clfDonSigner_2;
@@ -41,13 +44,13 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
 
         //step 3: TODO: transfer token amounts if exists
 
+        Message memory message = _buildMessage(req);
+
         //step 4: emit the message
         // TODO: add custom nonce to id generation
-        bytes32 messageId = keccak256(
-            abi.encode(req.message, block.number, block.prevrandao, msg.sender)
-        );
+        bytes32 messageId = keccak256(abi.encode(message, block.number, msg.sender));
 
-        emit ConceroMessage(messageId, req.message);
+        emit ConceroMessage(messageId, message);
     }
 
     /**
@@ -63,7 +66,8 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         bytes calldata report,
         bytes32[] calldata rs,
         bytes32[] calldata ss,
-        bytes calldata rawVs
+        bytes calldata rawVs,
+        Message calldata message
     ) external {
         // Step 1: Recompute the hash
         bytes32 h = _computeReportHash(reportContext, report);
@@ -78,7 +82,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
 
     function getFee(MessageRequest calldata req) public view returns (uint256) {
         _validateFeeToken(req.feeToken);
-        _validateDstChainSelector(req.message.dstChainSelector);
+        _validateDstChainSelector(req.dstChainSelector);
 
         // TODO: add fee calculation logic
         return 50_000; // fee in usdc
@@ -91,6 +95,20 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     //////////////////////////////////
     ////////INTERNAL FUNCTIONS////////
     //////////////////////////////////
+
+    function _buildMessage(MessageRequest calldata req) internal view returns (Message memory) {
+        return
+            Message({
+                srcChainSelector: i_chainSelector,
+                dstChainSelector: req.dstChainSelector,
+                receiver: req.receiver,
+                sender: msg.sender,
+                tokenAmounts: req.tokenAmounts,
+                relayers: req.relayers,
+                data: req.data,
+                extraArgs: req.extraArgs
+            });
+    }
 
     /**
      * @notice Computes the hash of the report and report context.

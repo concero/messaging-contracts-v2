@@ -16,8 +16,9 @@ export type ConceroTestnetNetworkNames =
     | "avalancheFuji"
     | "baseSepolia"
     | "polygonAmoy";
+export type ConceroTestNetworkNames = "localhost" | "hardhat";
 
-export type ConceroNetworkNames = ConceroMainnetNetworkNames | ConceroTestnetNetworkNames;
+export type ConceroNetworkNames = ConceroMainnetNetworkNames | ConceroTestnetNetworkNames | ConceroTestNetworkNames;
 
 export type ConceroNetwork = {
     id: number;
@@ -31,4 +32,4 @@ export type ConceroNetwork = {
     rpcUrls: string[];
 };
 
-export type NetworkType = "mainnet" | "testnet";
+export type NetworkType = "mainnet" | "testnet" | "test";

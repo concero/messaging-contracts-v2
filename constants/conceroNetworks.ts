@@ -63,7 +63,7 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
         name: "hardhat",
         chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         type: networkTypes.testnet,
-        saveDeployments: false,
+        // saveDeployments: false,
         accounts: [
             {
                 privateKey: testDeployerPK,
@@ -85,7 +85,7 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
         id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         viemChain: localhostViemChain,
-        saveDeployments: false,
+        // saveDeployments: false,
         url: rpcUrl.localhost,
         rpcUrls: [rpcUrl.localhost],
         confirmations: 1,

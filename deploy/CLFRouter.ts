@@ -33,7 +33,7 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
     const { publicClient } = getFallbackClients(chain);
     const gasPrice = String(await publicClient.getGasPrice());
 
-    const clfRouterDeploy = (await deploy("MasterChainCLF", {
+    const clfRouterDeploy = (await deploy("CLFRouter", {
         from: deployer,
         args: [
             args.functionsRouter,

@@ -3,12 +3,12 @@ pragma solidity 0.8.28;
 import "../Common/Errors.sol";
 import "./Errors.sol";
 import {IConceroRouter} from "../ConceroRouter/Interfaces/IConceroRouter.sol";
-import {MasterChainCLFStorage} from "./MasterChainCLFStorage.sol";
+import {CLFRouterStorage} from "./CLFRouterStorage.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 import {IMessage} from "../Common/IMessage.sol";
 
-contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
+contract CLFRouter is IMessage, FunctionsClient, CLFRouterStorage {
     using FunctionsRequest for FunctionsRequest.Request;
 
     ///////////////////////////

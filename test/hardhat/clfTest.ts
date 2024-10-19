@@ -1,4 +1,5 @@
 import { conceroNetworks, networkEnvKeys } from "../../constants";
+
 import { getClients, getEnvVar } from "../../utils";
 import { approve } from "./utils/approve";
 import { encodeAbiParameters, parseUnits } from "viem";
@@ -58,10 +59,6 @@ describe("Concero Router", () => {
         if (!messageLog) {
             throw new Error(`ConceroMessage log not found`);
         }
-
-        const blockNumber = await publicClient.getBlockNumber();
-
-        console.log(blockNumber);
 
         const message = {
             id: messageLog.args.id,

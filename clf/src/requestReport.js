@@ -105,13 +105,21 @@
 			return result;
 		}
 	}
-	const packResult = (_messageId, _messageHash) => {
-		const resLength = 1 + 32 + 32;
+	const packResult = (_messageId, _messageHash, chainSelector, blockNumber) => {
+		const encodeUint64 = num => {
+			const hexStr = num.toString(16).padStart(16, '0');
+			const arr = new Uint8Array(8);
+			for (let i = 0; i < arr.length; i++) {
+				arr[i] = parseInt(hexStr.slice(i * 2, i * 2 + 2), 16);
+			}
+			return arr;
+		};
+		const resLength = 1 + 32 + 32 + 8 + 8;
 		const res = new Uint8Array(resLength);
-		const encodedMessageId = Functions.encodeUint256(BigInt(_messageId));
-		const encodedMessageHash = Functions.encodeUint256(BigInt(_messageHash));
-		res.set(encodedMessageId, 1);
-		res.set(encodedMessageHash, 33);
+		res.set(Functions.encodeUint256(BigInt(_messageId)), 1);
+		res.set(Functions.encodeUint256(BigInt(_messageHash)), 33);
+		res.set(encodeUint64(chainSelector), 65);
+		res.set(encodeUint64(blockNumber), 73);
 		return res;
 	};
 
@@ -171,5 +179,5 @@
 		),
 	);
 
-	return packResult(messageId, messageHash);
+	return packResult(messageId, messageHash, srcChainSelector, srcBlockNumber);
 })();

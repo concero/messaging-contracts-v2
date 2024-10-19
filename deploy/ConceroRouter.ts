@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import updateEnvVariable from "../utils/updateEnvVariable";
 import log from "../utils/log";
-import { getEnvVar, getFallbackClients } from "../utils";
+import { getEnvVar } from "../utils";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 
 const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
@@ -27,11 +27,6 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         clfDonSigner_3: getEnvVar(`CLF_DON_SIGNING_KEY_3_${networkEnvKeys[name]}`),
     };
 
-    console.log("args:", args);
-
-    const { publicClient } = getFallbackClients(chain);
-    const gasPrice = String(await publicClient.getGasPrice());
-
     const conceroRouterDeploy = (await deploy("ConceroRouter", {
         from: deployer,
         args: [
@@ -44,7 +39,6 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         ],
         log: true,
         autoMine: true,
-        // gasPrice,
     })) as Deployment;
 
     log(`Deployed at: ${conceroRouterDeploy.address}`, "deployConceroRouter", name);

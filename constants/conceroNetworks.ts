@@ -20,7 +20,7 @@ import {
     polygonAmoy,
     sepolia,
 } from "viem/chains";
-import { urls } from "./rpcUrls";
+import { rpcUrl, urls } from "./rpcUrls";
 import { getEnvVar } from "../utils";
 import { localhostViemChain } from "../utils/localhostViemChain";
 
@@ -85,8 +85,8 @@ export const testNetwork: Record<ConceroTestNetworkNames, ConceroNetwork> = {
         type: networkTypes.testnet,
         id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         viemChain: localhostViemChain,
-        url: process.env.LOCALHOST_FORK_RPC_URL as string,
-        rpcUrls: [process.env.LOCALHOST_FORK_RPC_URL as string],
+        url: rpcUrl.localhost,
+        rpcUrls: [rpcUrl.localhost],
         confirmations: 1,
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         accounts: [deployerPK, proxyDeployerPK],

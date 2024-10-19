@@ -1,5 +1,5 @@
 import deployConceroRouter from "../../deploy/ConceroRouter";
-import { conceroNetworks, networkEnvKeys } from "../../constants";
+import { conceroNetworks, networkEnvKeys, rpcUrl } from "../../constants";
 import { getClients, getEnvVar } from "../../utils";
 import { base } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
@@ -21,7 +21,7 @@ describe("Concero Router", () => {
 
         const { publicClient, walletClient } = getClients(
             base,
-            "http://127.0.0.1:8545",
+            rpcUrl.localhost,
             privateKeyToAccount("0x" + process.env.TESTS_WALLET_PRIVATE_KEY),
         );
 

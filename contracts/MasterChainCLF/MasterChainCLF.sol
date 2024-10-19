@@ -1,4 +1,4 @@
-pragma solidity 0.8.20;
+pragma solidity 0.8.28;
 
 import {IConceroRouter} from "../ConceroRouter/Interfaces/IConceroRouter.sol";
 import {MasterChainCLFStorage} from "./MasterChainCLFStorage.sol";
@@ -49,8 +49,9 @@ contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
     }
 
     modifier onlyOwner() {
-        if (msg.sender != i_owner) revert OnlyOwner();
+        require(msg.sender == i_owner, OnlyOwner());
         _;
+
     }
 
     //////////////////////////
@@ -86,9 +87,7 @@ contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
         bytes32 messageId,
         Message calldata message
     ) external onlyAllowedOperator {
-        if (s_clfRequestStatusByConceroId[messageId] != CLFRequestStatus.NotStarted) {
-            revert MessageAlreadyProcessed();
-        }
+        require(s_clfRequestStatusByConceroId[messageId] == CLFRequestStatus.NotStarted, MessageAlreadyProcessed());
 
         bytes[] memory clfReqArgs = new bytes[](4);
         clfReqArgs[0] = abi.encodePacked(i_ethersJsCodeHash);
@@ -148,6 +147,6 @@ contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
     }
 
     function _onlyAllowedOperator() internal view {
-        if (!s_isAllowedOperators[msg.sender]) revert OnlyAllowedOperator();
+        require(s_isAllowedOperators[msg.sender], OnlyAllowedOperator());
     }
 }

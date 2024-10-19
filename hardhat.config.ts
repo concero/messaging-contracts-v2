@@ -30,14 +30,17 @@ const config: HardhatUserConfig = {
         tests: "test",
     },
     solidity: {
-        version: "0.8.20",
-        settings: {
-            // evmVersion: "paris",
-            optimizer: {
-                enabled: true,
-                runs: 200,
+        compilers: [
+            {
+                version: "0.8.28",
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 200,
+                    },
+                },
             },
-        },
+        ],
     },
     defaultNetwork: "localhost",
     namedAccounts: {

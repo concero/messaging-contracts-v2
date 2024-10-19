@@ -3,7 +3,7 @@ import CLFnetworks from "./CLFnetworks";
 import CLFSimulationConfig from "./CLFSimulationConfig";
 import { conceroNetworks, networkEnvKeys, networkTypes } from "./conceroNetworks";
 import { envPrefixes, ProxyEnum, viemReceiptConfig, writeContractConfig } from "./deploymentVariables";
-import { rpc, urls } from "./rpcUrls";
+import { rpcUrl, urls } from "./rpcUrls";
 import { deployerTargetBalances, messengerTargetBalances } from "./targetBalances";
 import { liveNetworks } from "./liveNetworks";
 
@@ -19,7 +19,7 @@ export {
     ProxyEnum,
     envPrefixes,
     urls,
-    rpc,
+    rpcUrl,
     messengerTargetBalances,
     deployerTargetBalances,
     liveNetworks,

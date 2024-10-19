@@ -1,6 +1,6 @@
-import { CNetworkNames } from "../types/CNetwork";
+import { ConceroNetworkNames } from "../types/ConceroNetwork";
 
-const networkColors: Record<CNetworkNames, string> = {
+const networkColors: Record<ConceroNetworkNames, string> = {
     mainnet: "\x1b[30m", // grey
     arbitrum: "\x1b[34m", // blue
     polygon: "\x1b[35m", // magenta
@@ -16,7 +16,7 @@ const networkColors: Record<CNetworkNames, string> = {
 };
 const reset = "\x1b[0m";
 
-export function log(message: any, functionName: string, networkName?: CNetworkNames) {
+export function log(message: any, functionName: string, networkName?: ConceroNetworkNames) {
     const greenFill = "\x1b[32m";
     const network = networkName ? `${networkColors[networkName]}[${networkName}]${reset}` : "";
 
@@ -29,7 +29,7 @@ export function warn(message: any, functionName: string) {
     console.log(`${yellowFill}[${functionName}]${reset}`, message);
 }
 
-export function err(message: any, functionName: string, networkName?: CNetworkNames) {
+export function err(message: any, functionName: string, networkName?: ConceroNetworkNames) {
     const redFill = "\x1b[31m";
     const network = networkName ? `${networkColors[networkName]}[${networkName}]${reset}` : "";
 

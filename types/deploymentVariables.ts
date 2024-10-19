@@ -1,4 +1,4 @@
-import { ProxyEnum } from "../constants/deploymentVariables";
+import { ProxyEnum } from "../constants";
 
 export type IProxyType = keyof typeof ProxyEnum;
 

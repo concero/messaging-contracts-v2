@@ -1,15 +1,15 @@
-import { getEnvVar, getFallbackClients } from "../utils";
+import { getFallbackClients } from "../utils";
 import log from "../utils/log";
 import { task } from "hardhat/config";
-import { conceroNetworks, networkEnvKeys } from "../constants/conceroNetworks";
+import { conceroNetworks } from "../constants";
+import { type Address } from "viem";
 
-export async function callContractFunction() {
+export async function callContractFunction(targetContract: Address) {
     const chain = conceroNetworks.base;
 
     const { walletClient, publicClient, account } = getFallbackClients(chain);
     const gasPrice = await publicClient.getGasPrice();
 
-    const parentPoolProxy = getEnvVar(`PARENT_POOL_PROXY_${networkEnvKeys[chain.name]}`);
     const { request: sendReq } = await publicClient.simulateContract({
         functionName: "clearDepositsOnTheWay",
         abi: [
@@ -22,7 +22,7 @@ export async function callContractFunction() {
             },
         ],
         account,
-        address: parentPoolProxy,
+        address: targetContract,
         args: [],
         gasPrice,
     });
@@ -31,16 +31,12 @@ export async function callContractFunction() {
     const { cumulativeGasUsed: sendGasUsed } = await publicClient.waitForTransactionReceipt({
         hash: sendHash,
     });
-    log(
-        `Deleted deposit on the way with from ${parentPoolProxy}. Tx: ${sendHash} Gas used: ${sendGasUsed}`,
-        "callContractFunction",
-        chain.name,
-    );
+    log(`Called Contract ${targetContract} : ${sendHash} Gas used: ${sendGasUsed}`, "callContractFunction", chain.name);
 }
 
 task("call-contract-function", "Calls a specific contract function. Use for testing and maintenance").setAction(
     async (taskArgs, hre) => {
-        await callContractFunction();
+        await callContractFunction(taskArgs.contract);
     },
 );
 

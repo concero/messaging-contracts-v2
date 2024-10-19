@@ -1,6 +1,6 @@
-pragma solidity 0.8.20;
+pragma solidity 0.8.28;
 
-interface IMasterChainCLFStorage {
+interface IMasterChainCLF {
     enum CLFRequestStatus {
         NotStarted,
         Pending,

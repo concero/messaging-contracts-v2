@@ -4,11 +4,15 @@ import log from "../utils/log";
 import { task } from "hardhat/config";
 import { abi as ownableAbi } from "@openzeppelin/contracts/build/contracts/Ownable.json";
 import { getFallbackClients } from "../utils/";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { Address } from "viem";
+import { ConceroNetworkNames } from "../types/ConceroNetwork";
 
-export async function changeOwnership(hre, targetContract, newOwner: string) {
+export async function changeOwnership(hre: HardhatRuntimeEnvironment, targetContract: Address, newOwner: string) {
     const { name: chainName } = hre.network;
     const chainId = hre.network.config.chainId;
-    const { viemChain, url } = conceroNetworks[chainName];
+    const chain = conceroNetworks[chainName as ConceroNetworkNames];
+    const { viemChain, url } = chain;
 
     if (!viemChain) {
         log(`Chain ${chainId} not found in live chains`, "changeOwnership");
@@ -36,7 +40,7 @@ export async function changeOwnership(hre, targetContract, newOwner: string) {
 task("change-ownership", "Changes the ownership of the contract")
     .addParam("newowner", "The address of the new owner")
     .addParam("targetcontract", "The address of the target contract")
-    .setAction(async taskArgs => {
+    .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
         const { name, live } = hre.network;
         if (live) {
             await changeOwnership(hre, taskArgs.targetcontract, taskArgs.newowner);

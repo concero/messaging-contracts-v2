@@ -1,4 +1,4 @@
-pragma solidity 0.8.20;
+pragma solidity 0.8.28;
 
 import "./Errors.sol";
 import {IConceroRouter} from "./Interfaces/IConceroRouter.sol";
@@ -11,25 +11,27 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     using SafeERC20 for IERC20;
 
     /*IMMUTABLE VARIABLES*/
-
     address internal immutable i_USDC;
     uint64 internal immutable i_chainSelector;
     address internal immutable i_clfDonSigner_0;
     address internal immutable i_clfDonSigner_1;
     address internal immutable i_clfDonSigner_2;
+    address internal immutable i_clfDonSigner_3;
 
     constructor(
         address usdc,
         uint64 chainSelector,
         address clfDonSigner_0,
         address clfDonSigner_1,
-        address clfDonSigner_2
+        address clfDonSigner_2,
+        address clfDonSigner_3
     ) {
         i_USDC = usdc;
         i_chainSelector = chainSelector;
         i_clfDonSigner_0 = clfDonSigner_0;
         i_clfDonSigner_1 = clfDonSigner_1;
         i_clfDonSigner_2 = clfDonSigner_2;
+        i_clfDonSigner_3 = clfDonSigner_3;
     }
 
     function sendMessage(MessageRequest calldata req) external payable {
@@ -82,7 +84,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
 
     function getFee(MessageRequest calldata req) public view returns (uint256) {
         _validateFeeToken(req.feeToken);
-        _validateDstChainSelector(req.dstChainSelector);
+        require(_isChainSupported(req.dstChainSelector), UnsupportedChainSelector());
 
         // TODO: add fee calculation logic
         return 50_000; // fee in usdc
@@ -144,16 +146,10 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         bytes calldata rawVs
     ) internal view {
         uint256 numSignatures = rs.length;
+        uint256 expectedNumSignatures = 3;
 
-        if (numSignatures != ss.length || numSignatures != rawVs.length) {
-            revert("Mismatched signature arrays");
-        }
-
-        uint256 expectedNumSignatures = 3; // Adjust according to your requirements
-
-        if (numSignatures != expectedNumSignatures) {
-            revert("Incorrect number of signatures");
-        }
+        require(numSignatures == ss.length && numSignatures == rawVs.length, MismatchedSignatureArrays());
+        require(numSignatures == expectedNumSignatures, IncorrectNumberOfSignatures(expectedNumSignatures, numSignatures));
 
         address[] memory signers = new address[](numSignatures);
 
@@ -162,25 +158,15 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             bytes32 r = rs[i];
             bytes32 s = ss[i];
 
-            // Recover the signer's address
             address signer = ecrecover(h, v, r, s);
-
-            if (signer == address(0)) {
-                revert("Invalid signature");
-            }
+            require(signer != address(0), InvalidSignature());
 
             // Check for duplicate signatures
             for (uint256 j = 0; j < i; j++) {
-                if (signers[j] == signer) {
-                    revert("Duplicate signature detected");
-                }
+                require(signers[j] != signer, DuplicateSignatureDetected(signer));
             }
 
-            // Verify that the signer is authorized
-            if (!_isAuthorizedClfDonSigner(signer)) {
-                revert("Unauthorized signer");
-            }
-
+            require(_isAuthorizedClfDonSigner(signer), UnauthorizedSigner(signer));
             signers[i] = signer;
         }
     }
@@ -212,24 +198,23 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     }
 
     function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {
-        return (clfDonSigner == i_clfDonSigner_0 ||
+        return (
+            clfDonSigner == i_clfDonSigner_0 ||
             clfDonSigner == i_clfDonSigner_1 ||
-            clfDonSigner == i_clfDonSigner_2);
+            clfDonSigner == i_clfDonSigner_2 ||
+            clfDonSigner == i_clfDonSigner_3);
     }
 
     function _validateFeeToken(address feeToken) internal view {
         // add this line in future: && feeToken != address(0)
-
-        if (feeToken != i_USDC) {
-            revert UnsupportedFeeToken();
-        }
+        require(feeToken == i_USDC, UnsupportedFeeToken());
     }
 
-    function _validateDstChainSelector(uint64 dstChainSelector) internal view {
-        if (!_isChainSupported(dstChainSelector)) {
-            revert UnsupportedDstChain();
-        }
-    }
+//    function _validateDstChainSelector(uint64 dstChainSelector) internal view {
+//        if (!_isChainSupported(dstChainSelector)) {
+//            revert UnsupportedChainSelector();
+//        }
+//    }
 
     function _isChainSupported(uint64 chainSelector) internal view returns (bool) {
         if (_isMainnet()) {
@@ -248,7 +233,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         ) {
             return true;
         }
-
         return false;
     }
 
@@ -262,7 +246,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         ) {
             return true;
         }
-
         return false;
     }
 
@@ -278,7 +261,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         ) {
             return true;
         }
-
         return false;
     }
 }

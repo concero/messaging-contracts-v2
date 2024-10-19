@@ -76,6 +76,18 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         //TODO: further actions with report: operator reward, passing the TX to user etc
     }
 
+    function getFee(MessageRequest calldata req) public view returns (uint256) {
+        _validateFeeToken(req.feeToken);
+        _validateDstChainSelector(req.message.dstChainSelector);
+
+        // TODO: add fee calculation logic
+        return 50_000; // fee in usdc
+    }
+
+    function isChainSupported(uint64 chainSelector) external view returns (bool) {
+        return _isChainSupported(chainSelector);
+    }
+
     //////////////////////////////////
     ////////INTERNAL FUNCTIONS////////
     //////////////////////////////////
@@ -99,22 +111,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         );
         return keccak256(messageToHash);
     }
-
-    function getFee(MessageRequest calldata req) public view returns (uint256) {
-        _validateFeeToken(req.feeToken);
-        _validateDstChainSelector(req.message.dstChainSelector);
-
-        // TODO: add fee calculation logic
-        return 50_000; // fee in usdc
-    }
-
-    function isChainSupported(uint64 chainSelector) external view returns (bool) {
-        return _isChainSupported(chainSelector);
-    }
-
-    //////////////////////////////////
-    ////////INTERNAL FUNCTIONS////////
-    //////////////////////////////////
 
     /**
      * @notice Verifies the signatures of the report.

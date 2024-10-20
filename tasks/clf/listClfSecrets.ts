@@ -1,10 +1,10 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
-import { CNetwork } from "../../types/CNetwork";
-import { getEthersSignerAndProvider } from "../utils/getEthersSignerAndProvider";
+import { ConceroNetwork } from "../../types/ConceroNetwork";
+import { getEthersSignerAndProvider } from "../../utils/getEthersSignerAndProvider";
 import log from "../../utils/log";
 
 export async function listSecrets(
-    chain: CNetwork,
+    chain: ConceroNetwork,
 ): Promise<{ [slotId: number]: { version: number; expiration: number } }> {
     const { signer } = getEthersSignerAndProvider(chain.url);
     const { functionsRouter, functionsDonIdAlias, functionsGatewayUrls } = chain;

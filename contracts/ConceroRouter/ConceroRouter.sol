@@ -7,7 +7,6 @@ import {IConceroRouter} from "./Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ConceroRouterStorage} from "./ConceroRouterStorage.sol";
-import "hardhat/console.sol";
 
 contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     using SafeERC20 for IERC20;

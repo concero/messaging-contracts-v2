@@ -1,11 +1,11 @@
 import { conceroNetworks } from "../../constants";
 import { getEnvAddress, getEnvVar, getFallbackClients } from "../../utils";
-
-const hre = require("hardhat");
-
-const { publicClient, walletClient, account } = getFallbackClients(conceroNetworks[hre.network.name]);
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 describe("Concero Router", async () => {
+    const hre: HardhatRuntimeEnvironment = require("hardhat");
+    const { publicClient, walletClient, account } = getFallbackClients(conceroNetworks[hre.network.name]);
+
     it("Should send a message using sendMessage", async function () {
         const { abi: conceroRouterAbi } = await import(
             "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"

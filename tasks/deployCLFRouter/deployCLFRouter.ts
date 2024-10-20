@@ -17,8 +17,8 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
     const conceroNetwork = conceroNetworks[hre.network.name];
 
     if (taskArgs.deployproxy) {
-        await deployProxyAdmin(hre, ProxyEnum.routerProxy);
-        await deployTransparentProxy(hre, ProxyEnum.routerProxy);
+        await deployProxyAdmin(hre, ProxyEnum.clfRouterProxy);
+        await deployTransparentProxy(hre, ProxyEnum.clfRouterProxy);
         const proxyAddress = getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[hre.network.name]}`) as Address;
         await addCLFConsumer(conceroNetwork, [proxyAddress]);
     }

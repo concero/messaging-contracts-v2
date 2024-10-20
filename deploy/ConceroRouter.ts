@@ -20,7 +20,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
     const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
     const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
 
-    log("Deploying...", "deployConceroRouter", name);
+    // log("Deploying...", "deployConceroRouter", name);
 
     const args = {
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),

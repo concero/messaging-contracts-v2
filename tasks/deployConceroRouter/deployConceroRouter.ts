@@ -21,6 +21,7 @@ export async function deployConceroRouterTask(taskArgs: any, hre: HardhatRuntime
         await deployConceroRouter(hre);
         await upgradeProxyImplementation(hre, ProxyEnum.routerProxy, false);
     }
+
     if (taskArgs.setvars) {
         await setVariables(hre);
     }

@@ -12,7 +12,7 @@ const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = asyn
     const { name, live } = hre.network;
     const networkType = conceroNetworks[name].type;
 
-    console.log("Deploying...", "deployPauseDummy", name);
+    // console.log("Deploying...", "deployPauseDummy", name);
 
     const deployPauseDummy = (await deploy("PauseDummy", {
         from: deployer,

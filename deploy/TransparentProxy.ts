@@ -1,10 +1,9 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { conceroNetworks } from "../constants/conceroNetworks";
+import { conceroNetworks, writeContractConfig } from "../constants";
 import log from "../utils/log";
 import { getEnvAddress, updateEnvAddress } from "../utils";
 import { IProxyType } from "../types/deploymentVariables";
-import { writeContractConfig } from "../constants";
 
 const deployTransparentProxy: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) => Promise<void> =
     async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {
@@ -21,12 +20,13 @@ const deployTransparentProxy: (hre: HardhatRuntimeEnvironment, proxyType: IProxy
         const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
         const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
 
-        log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
+        // log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
         const conceroProxyDeployment = (await deploy("TransparentUpgradeableProxy", {
             from: proxyDeployer,
             args: [initialImplementation, proxyAdmin, "0x"],
             log: true,
             autoMine: true,
+            skipIfAlreadyDeployed: false,
             maxFeePerGas,
             maxPriorityFeePerGas,
             gasLimit: writeContractConfig.gas,

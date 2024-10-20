@@ -14,7 +14,6 @@ import "@chainlink/hardhat-chainlink";
 import { conceroNetworks } from "./constants";
 import { HardhatUserConfig } from "hardhat/config";
 import "./tasks";
-import { getEnvVar } from "./utils";
 
 const enableGasReport = process.env.REPORT_GAS !== "false";
 
@@ -54,11 +53,11 @@ const config: HardhatUserConfig = {
     networks: conceroNetworks,
     etherscan: {
         apiKey: {
-            arbitrum: getEnvVar("ARBISCAN_API_KEY"),
-            mainnet: getEnvVar("ETHERSCAN_API_KEY"),
-            polygon: getEnvVar("POLYGONSCAN_API_KEY"),
-            optimism: getEnvVar("OPTIMISMSCAN_API_KEY"),
-            celo: getEnvVar("CELOSCAN_API_KEY"),
+            arbitrum: process.env.ARBISCAN_API_KEY,
+            mainnet: process.env.ETHERSCAN_API_KEY,
+            polygon: process.env.POLYGONSCAN_API_KEY,
+            optimism: process.env.OPTIMISMSCAN_API_KEY,
+            celo: process.env.CELOSCAN_API_KEY,
             avalanche: "snowtrace",
             avalancheFuji: "snowtrace",
         },

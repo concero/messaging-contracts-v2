@@ -1,5 +1,5 @@
 import { task } from "hardhat/config";
-import { conceroNetworks } from "../constants/conceroNetworks";
+import { conceroNetworks } from "../constants";
 
 function getHashSum(sourceCode: string) {
     const hash = require("crypto").createHash("sha256");
@@ -7,7 +7,7 @@ function getHashSum(sourceCode: string) {
     return hash.digest("hex");
 }
 
-task("test-script", "A test script").setAction(async taskArgs => {
+task("test-script", "A test script").setAction(async (taskArgs, hre) => {
     console.log(hre.network.name);
     const chain = conceroNetworks[hre.network.name];
 

@@ -17,8 +17,8 @@ async function setAllowedOperators(hre: HardhatRuntimeEnvironment, network: Conc
     const { abi: conceroRouterAbi } = await import(
         "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
     );
-    const { publicClient, walletClient, account } = getFallbackClients(network);
 
+    const { publicClient, walletClient, account } = getFallbackClients(network);
     const { deployer } = await hre.getNamedAccounts();
     const [conceroRouter] = getEnvAddress("router", network.name);
 

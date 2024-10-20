@@ -3,8 +3,9 @@ import { getClients, getEnvVar } from "../../utils";
 import { conceroNetworks } from "../../constants";
 import { privateKeyToAccount } from "viem/accounts";
 import { zeroHash } from "viem";
-import hre from "hardhat";
 import { deployConceroRouterTask } from "../../tasks/deployConceroRouter/deployConceroRouter";
+
+const hre = require("hardhat");
 
 describe("ConceroRouter", () => {
     before(async () => {

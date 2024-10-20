@@ -21,12 +21,13 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
     const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
     const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
 
-    log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
+    // log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
     const deployProxyAdmin = (await deploy("ConceroProxyAdmin", {
         from: proxyDeployer,
         args: [initialOwner],
         log: true,
         autoMine: true,
+        skipIfAlreadyDeployed: false,
         maxFeePerGas,
         maxPriorityFeePerGas,
         gasLimit: writeContractConfig.gas,

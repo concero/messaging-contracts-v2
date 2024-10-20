@@ -5,7 +5,7 @@ import { WalletClient } from "viem/clients/createWalletClient";
 import { PublicClient } from "viem/clients/createPublicClient";
 import { urls } from "../constants";
 import { ConceroNetwork, ConceroNetworkType } from "../types/ConceroNetwork";
-import { getEnvVar } from "./getEnvVar";
+import { getPrivateKey } from "./getPrivateKey";
 
 export function getClients(
     viemChain: Chain,
@@ -47,18 +47,5 @@ export function getFallbackClients(
 }
 
 export function getViemAccount(chainType: ConceroNetworkType, accountType: "proxyDeployer" | "deployer") {
-    let deployerPrefix;
-    switch (accountType) {
-        case "proxyDeployer":
-            deployerPrefix = "PROXY_DEPLOYER";
-            break;
-        case "deployer":
-            deployerPrefix = "DEPLOYER";
-            break;
-        default:
-            throw new Error(`Unknown account type: ${accountType}`);
-    }
-
-    const envKey = `${chainType.toUpperCase()}_${deployerPrefix}_PRIVATE_KEY`;
-    return privateKeyToAccount(`0x${getEnvVar(envKey)}`);
+    return privateKeyToAccount(`0x${getPrivateKey(chainType, accountType)}`);
 }

@@ -1,8 +1,7 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
-import { getEthersSignerAndProvider } from "../utils/getEthersSignerAndProvider";
+import { getEnvVar, getEthersSignerAndProvider } from "../../utils";
 import log from "../../utils/log";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
-import { getEnvVar } from "../../utils";
 import { networkEnvKeys } from "../../constants";
 import { clfGatewayUrls } from "../../constants/clfGatewayUrls";
 

@@ -66,7 +66,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         // TODO: add custom nonce to id generation
         bytes32 messageId = keccak256(abi.encode(message, block.number, msg.sender));
 
-        emit ConceroMessage(messageId, message);
+        emit ConceroMessageSent(messageId, message);
     }
 
     /**

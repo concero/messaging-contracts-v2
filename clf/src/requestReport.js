@@ -151,7 +151,7 @@
 
 	const log = await getLogByMessageId(messageId);
 	const abi = [
-		'event ConceroMessage(bytes32 indexed, tuple(uint64, uint64, address, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
+		'event ConceroMessageSent(bytes32 indexed, tuple(uint64, uint64, address, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
 	];
 	const contract = new ethers.Interface(abi);
 	const logData = {topics: [log.topics[0], log.topics[1]], data: log.data};

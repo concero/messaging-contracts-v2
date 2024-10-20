@@ -22,7 +22,7 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
     const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
     const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
 
-    console.log("Deploying...", "deployCLFRouter", name);
+    log("Deploying...", "deployCLFRouter", name);
 
     const args = {
         functionsRouter: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),

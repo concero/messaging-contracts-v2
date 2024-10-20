@@ -6,6 +6,7 @@ import deployProxyAdmin from "../../deploy/ConceroProxyAdmin";
 import deployTransparentProxy from "../../deploy/TransparentProxy";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { setVariables } from "../deployConceroRouter/setVariables";
+import { upgradeProxyImplementation } from "../upgradeProxyImplementation";
 
 export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
     compileContracts({ quiet: true });
@@ -15,12 +16,17 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
         await deployProxyAdmin(hre, ProxyEnum.routerProxy);
         await deployTransparentProxy(hre, ProxyEnum.routerProxy);
     }
-    await deployCLFRouter(hre);
+    if (taskArgs.deployimplementation) {
+        await deployCLFRouter(hre);
+        await upgradeProxyImplementation(hre, ProxyEnum.clfRouterProxy, false);
+    }
+
     await setVariables(hre);
 }
 
 task("deploy-clf-router", "Deploy the MasterChainCLF contract")
     .addFlag("deployproxy", "Deploy the proxy")
+    .addFlag("deployimplementation", "Deploy the implementation")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
         await deployClfRouterTask(taskArgs, hre);
     });

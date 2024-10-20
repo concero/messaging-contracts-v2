@@ -1,6 +1,6 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { conceroNetworks } from "../constants";
+import { conceroNetworks, writeContractConfig } from "../constants";
 import { getEnvVar, updateEnvAddress } from "../utils";
 import log from "../utils/log";
 
@@ -15,7 +15,11 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
     const { name, live } = hre.network;
     const networkType = conceroNetworks[name].type;
 
-    const initialOwner = getEnvVar(`PROXY_DEPLOYER_ADDRESS`);
+    const initialOwner = getEnvVar(`${networkType === "localhost" ? "TEST_" : ""}PROXY_DEPLOYER_ADDRESS`);
+
+    const gasPrice = await hre.ethers.provider.getGasPrice();
+    const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
+    const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
 
     log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
     const deployProxyAdmin = (await deploy("ConceroProxyAdmin", {
@@ -23,12 +27,13 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
         args: [initialOwner],
         log: true,
         autoMine: true,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        gasLimit: writeContractConfig.gas,
     })) as Deployment;
 
-    if (live) {
-        log(`Deployed at: ${deployProxyAdmin.address}`, `deployProxyAdmin: ${proxyType}`, name);
-        updateEnvAddress(`${proxyType}Admin`, name, deployProxyAdmin.address, `deployments.${networkType}`);
-    }
+    log(`Deployed at: ${deployProxyAdmin.address}`, `deployProxyAdmin: ${proxyType}`, name);
+    updateEnvAddress(`${proxyType}Admin`, name, deployProxyAdmin.address, `deployments.${networkType}`);
 };
 
 export default deployProxyAdmin;

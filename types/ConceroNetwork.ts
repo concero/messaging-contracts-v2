@@ -20,10 +20,11 @@ export type ConceroTestNetworkNames = "localhost" | "hardhat";
 
 export type ConceroNetworkNames = ConceroMainnetNetworkNames | ConceroTestnetNetworkNames | ConceroTestNetworkNames;
 
+export type ConceroNetworkType = "mainnet" | "testnet" | "localhost";
 export type ConceroNetwork = {
     id: number;
     name: ConceroNetworkNames;
-    type: "mainnet" | "testnet";
+    type: ConceroNetworkType;
     chainSelector: string;
     accounts: string[];
     viemChain: Chain;

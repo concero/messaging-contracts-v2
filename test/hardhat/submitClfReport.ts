@@ -1,5 +1,5 @@
 import { generateClfReport } from "./utils/generateClfReport";
-import { getClients, getEnvAddress } from "../../utils";
+import { getClients, getEnvVar } from "../../utils";
 import { conceroNetworks } from "../../constants";
 import { privateKeyToAccount } from "viem/accounts";
 import { zeroHash } from "viem";
@@ -34,7 +34,7 @@ describe("ConceroRouter", () => {
         };
 
         const hash = await walletClient.writeContract({
-            address: getEnvAddress()[0],
+            address: getEnvVar("CONCERO_CLF_ROUTER_LOCALHOST"),
             functionName: "submitMessageReport",
             args: [clfReport, message],
             abi: conceroRouterAbi,

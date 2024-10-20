@@ -1,15 +1,11 @@
 import { conceroNetworks } from "../../constants";
-import { getEnvVar, getFallbackClients } from "../../utils";
-import { Address } from "viem";
+import { getEnvAddress, getEnvVar, getFallbackClients } from "../../utils";
 
 const hre = require("hardhat");
 
 const { publicClient, walletClient, account } = getFallbackClients(conceroNetworks[hre.network.name]);
 
 describe("Concero Router", async () => {
-    let conceroRouter: Address;
-    let deployerAddress: Address;
-
     // before(async function () {
     //     const { deployer } = await hre.getNamedAccounts();
     //     deployerAddress = deployer;
@@ -46,7 +42,7 @@ describe("Concero Router", async () => {
         const message = {
             feeToken: "0x0000000000000000000000000000000000000000",
             dstChainSelector: getEnvVar(`CL_CCIP_CHAIN_SELECTOR_BASE`),
-            receiver: deployerAddress,
+            receiver: account.address,
             tokenAmounts: [],
             relayers: [],
             data: "0x1637A2cafe89Ea6d8eCb7cC7378C023f25c892b6",
@@ -55,7 +51,7 @@ describe("Concero Router", async () => {
 
         // Send the message using the deployer (who is now the allowed operator)
         const { request: sendMessageRequest } = await publicClient.simulateContract({
-            address: conceroRouter,
+            address: getEnvAddress("router", hre.network.name)[0],
             abi: conceroRouterAbi,
             functionName: "sendMessage",
             account,

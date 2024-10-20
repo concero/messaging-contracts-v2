@@ -1,14 +1,14 @@
 pragma solidity 0.8.28;
 
+import "../Common/Errors.sol";
+import "./Errors.sol";
 import {IConceroRouter} from "../ConceroRouter/Interfaces/IConceroRouter.sol";
-import {MasterChainCLFStorage} from "./MasterChainCLFStorage.sol";
+import {CLFRouterStorage} from "./CLFRouterStorage.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
-import "../Common/Errors.sol";
 import {IMessage} from "../Common/IMessage.sol";
-import "./Errors.sol";
 
-contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
+contract CLFRouter is IMessage, FunctionsClient, CLFRouterStorage {
     using FunctionsRequest for FunctionsRequest.Request;
 
     ///////////////////////////
@@ -43,15 +43,14 @@ contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
     ///////MODIFIERS//////////
     //////////////////////////
 
-    modifier onlyAllowedOperator() {
-        _onlyAllowedOperator();
-        _;
-    }
-
     modifier onlyOwner() {
         require(msg.sender == i_owner, OnlyOwner());
         _;
 
+    }
+    modifier onlyOperator() {
+        require(s_isAllowedOperator[msg.sender], OnlyAllowedOperator());
+        _;
     }
 
     //////////////////////////
@@ -72,21 +71,22 @@ contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
         uint64 clfDonHostedSecretsVersion,
         uint8 clfDonHostedSecretsSlotId,
         bytes32 ethersJsCodeHash,
-        bytes32 requestCLFMessageReportJsCodeHash
+        bytes32 requestCLFMessageReportJsCodeHash,
+        address _owner
     ) FunctionsClient(functionsRouter) {
-        i_owner = msg.sender;
         i_clfDonId = clfDonId;
         i_clfSubscriptionId = clfSubscriptionId;
         i_clfDonHostedSecretsVersion = clfDonHostedSecretsVersion;
         i_clfDonHostedSecretsSlotId = clfDonHostedSecretsSlotId;
         i_ethersJsCodeHash = ethersJsCodeHash;
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
+        i_owner = _owner;
     }
 
     function requestCLFMessageReport(
         bytes32 messageId,
         Message calldata message
-    ) external onlyAllowedOperator {
+    ) external onlyOperator {
         require(s_clfRequestStatusByConceroId[messageId] == CLFRequestStatus.NotStarted, MessageAlreadyProcessed());
 
         bytes[] memory clfReqArgs = new bytes[](4);
@@ -104,14 +104,13 @@ contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
     //////ADMIN FUNCTIONS/////
     //////////////////////////
 
-    function addAllowedOperator(address operator) external payable onlyOwner {
-        s_isAllowedOperators[operator] = true;
+    function registerOperator(address operator) external payable onlyOwner {
+        s_isAllowedOperator[operator] = true;
     }
 
-    function removeAllowedOperator(address operator) external payable onlyOwner {
-        s_isAllowedOperators[operator] = false;
+    function deregisterOperator(address operator) external payable onlyOwner {
+        s_isAllowedOperator[operator] = false;
     }
-
     //////////////////////////
     ////INTERNAL FUNCTIONS////
     //////////////////////////
@@ -144,9 +143,5 @@ contract MasterChainCLF is IMessage, FunctionsClient, MasterChainCLFStorage {
         req.addDONHostedSecrets(i_clfDonHostedSecretsSlotId, i_clfDonHostedSecretsVersion);
         req.setBytesArgs(args);
         return _sendRequest(req.encodeCBOR(), i_clfSubscriptionId, CLF_GAS_LIMIT, i_clfDonId);
-    }
-
-    function _onlyAllowedOperator() internal view {
-        require(s_isAllowedOperators[msg.sender], OnlyAllowedOperator());
     }
 }

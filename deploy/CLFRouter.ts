@@ -27,12 +27,13 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         clfDonHostedSecretsSlotId: 0n,
         ethersJsCodeHash: getHashSum(ETHERS_JS_URL),
         requestCLFMessageReportJsCodeHash: getHashSum("../clf/dist/requestReport.js"),
+        owner: deployer,
     };
 
     const { publicClient } = getFallbackClients(chain);
     const gasPrice = String(await publicClient.getGasPrice());
 
-    const clfRouterDeploy = (await deploy("MasterChainCLF", {
+    const clfRouterDeploy = (await deploy("CLFRouter", {
         from: deployer,
         args: [
             args.functionsRouter,
@@ -42,6 +43,7 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
             args.clfDonHostedSecretsSlotId,
             args.ethersJsCodeHash,
             args.requestCLFMessageReportJsCodeHash,
+            args.owner,
         ],
         log: true,
         autoMine: true,

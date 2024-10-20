@@ -16,11 +16,16 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
     const chain = conceroNetworks[name as ConceroNetworkNames];
     const { type: networkType } = chain;
 
+    const gasPrice = await hre.ethers.provider.getGasPrice();
+    const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
+    const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
+
     console.log("Deploying...", "deployConceroRouter", name);
 
     const args = {
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
         chainSelector: getEnvVar(`CL_CCIP_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
+        owner: deployer,
         clfDonSigner_0: getEnvVar(`CLF_DON_SIGNING_KEY_0_${networkEnvKeys[name]}`),
         clfDonSigner_1: getEnvVar(`CLF_DON_SIGNING_KEY_1_${networkEnvKeys[name]}`),
         clfDonSigner_2: getEnvVar(`CLF_DON_SIGNING_KEY_2_${networkEnvKeys[name]}`),
@@ -32,6 +37,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         args: [
             args.usdc,
             args.chainSelector,
+            args.owner,
             args.clfDonSigner_0,
             args.clfDonSigner_1,
             args.clfDonSigner_2,
@@ -39,6 +45,8 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         ],
         log: true,
         autoMine: true,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
     })) as Deployment;
 
     log(`Deployed at: ${conceroRouterDeploy.address}`, "deployConceroRouter", name);

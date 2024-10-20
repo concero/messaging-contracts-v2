@@ -1,16 +1,19 @@
 pragma solidity 0.8.28;
 
+import "../Common/Errors.sol";
 import "./Errors.sol";
+import "./Constants.sol";
 import {IConceroRouter} from "./Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ConceroRouterStorage} from "./ConceroRouterStorage.sol";
-import "./Constants.sol";
+import "hardhat/console.sol";
 
 contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     using SafeERC20 for IERC20;
 
     /*IMMUTABLE VARIABLES*/
+    address internal immutable i_owner;
     address internal immutable i_USDC;
     uint64 internal immutable i_chainSelector;
     address internal immutable i_clfDonSigner_0;
@@ -18,9 +21,24 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     address internal immutable i_clfDonSigner_2;
     address internal immutable i_clfDonSigner_3;
 
+    //////////////////////////
+    ///////MODIFIERS//////////
+    //////////////////////////
+
+    modifier onlyOwner() {
+        require(msg.sender == i_owner, OnlyOwner());
+        _;
+    }
+
+    modifier onlyOperator() {
+        require(s_isAllowedOperator[msg.sender], OnlyAllowedOperator());
+        _;
+    }
+
     constructor(
         address usdc,
         uint64 chainSelector,
+        address _owner,
         address clfDonSigner_0,
         address clfDonSigner_1,
         address clfDonSigner_2,
@@ -28,21 +46,17 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     ) {
         i_USDC = usdc;
         i_chainSelector = chainSelector;
+        i_owner = _owner;
         i_clfDonSigner_0 = clfDonSigner_0;
         i_clfDonSigner_1 = clfDonSigner_1;
         i_clfDonSigner_2 = clfDonSigner_2;
         i_clfDonSigner_3 = clfDonSigner_3;
     }
 
-    function sendMessage(MessageRequest calldata req) external payable {
+    function sendMessage(MessageRequest calldata req) external payable onlyOperator {
         // step 1: validate the message (fee tokens, receiver)
         // TODO: mb validate data and extraArgs
-        uint256 fee = getFee(req);
-
-        //step 2: get fees from the user
-        if (req.feeToken == i_USDC) {
-            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), fee);
-        }
+        _collectMessageFee(req.feeToken);
 
         //step 3: TODO: transfer token amounts if exists
 
@@ -52,7 +66,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         // TODO: add custom nonce to id generation
         bytes32 messageId = keccak256(abi.encode(message, block.number, msg.sender));
 
-        emit ConceroMessage(messageId, message);
+        emit NewMessage(messageId, message);
     }
 
     /**
@@ -75,21 +89,47 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         //TODO: further actions with report: operator reward, passing the TX to user etc
     }
 
-    function getFee(MessageRequest calldata req) public view returns (uint256) {
-        _validateFeeToken(req.feeToken);
-        require(_isChainSupported(req.dstChainSelector), UnsupportedChainSelector());
 
-        // TODO: add fee calculation logic
-        return 50_000; // fee in usdc
+    function getMessageFee(address feeToken) public view returns (uint256) {
+        if (feeToken == address(0)) {
+            return 50_000;
+        } else if (feeToken == i_USDC) {
+            return 50_000;
+        } else {
+            revert UnsupportedFeeToken();
+        }
     }
 
     function isChainSupported(uint64 chainSelector) external view returns (bool) {
         return _isChainSupported(chainSelector);
     }
 
+    //////////////////////////
+    //////ADMIN FUNCTIONS/////
+    //////////////////////////
+
+    function registerOperator(address operator) external payable onlyOwner {
+        s_isAllowedOperator[operator] = true;
+    }
+
+    function deregisterOperator(address operator) external payable onlyOwner {
+        s_isAllowedOperator[operator] = false;
+    }
+
     //////////////////////////////////
     ////////INTERNAL FUNCTIONS////////
     //////////////////////////////////
+
+    function _collectMessageFee(address feeToken) internal {
+        uint256 feePayable = getMessageFee(feeToken);
+
+        if (feeToken == i_USDC) {
+            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), feePayable);
+        } else if (feeToken == address(0)) {
+            require(msg.value == feePayable, InsufficientFee());
+        }
+    }
+
 
     function _buildMessage(MessageRequest calldata req) internal view returns (Message memory) {
         return
@@ -201,10 +241,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             clfDonSigner == i_clfDonSigner_3);
     }
 
-    function _validateFeeToken(address feeToken) internal view {
-        // add this line in future: && feeToken != address(0)
-        require(feeToken == i_USDC, UnsupportedFeeToken());
-    }
+
 
     function _isChainSupported(uint64 chainSelector) internal view returns (bool) {
         if (_isMainnet()) {

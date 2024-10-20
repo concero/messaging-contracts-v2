@@ -1,24 +1,48 @@
 import { generateClfReport } from "./utils/generateClfReport";
-import { getClients } from "../../utils";
+import { getClients, getEnvAddress } from "../../utils";
 import { conceroNetworks } from "../../constants";
 import { privateKeyToAccount } from "viem/accounts";
-
-const hre = require("hardhat");
+import { zeroHash } from "viem";
+import hre from "hardhat";
+import { deployConceroRouterTask } from "../../tasks/deployConceroRouter/deployConceroRouter";
 
 describe("ConceroRouter", () => {
-    // let deploymentAddress = "0x23494105b6B8cEaA0eB9c051b7e4484724641821";
-    //
-    // before(async () => {
-    //     deploymentAddress = await deployConceroRouterWrapper();
-    // });
+    before(async () => {
+        await deployConceroRouterTask({ deployProxy: true }, hre);
+    });
 
     it("Should submit and decode clf report", async function () {
-        const walletClient = getClients(
-            conceroNetworks.hardhat,
-            process.env.LOCALHOST_FORK_RPC_URL,
-            privateKeyToAccount(`0x${process.env.TESTS_WALLET_PRIVATE_KEY}`),
+        const { abi: conceroRouterAbi } = await import(
+            "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
+        );
+        const { walletClient } = getClients(
+            conceroNetworks.hardhat.viemChain,
+            process.env.LOCALHOST_RPC_URL,
+            privateKeyToAccount(`0x${process.env.TEST_DEPLOYER_PRIVATE_KEY}`),
         );
 
-        await generateClfReport("clfFulfillResponse", walletClient);
+        const clfReport = await generateClfReport("clfFulfillResponse", walletClient);
+        const message = {
+            srcChainSelector: 1n,
+            dstChainSelector: 2n,
+            receiver: walletClient.account.address,
+            sender: walletClient.account.address,
+            tokenAmounts: [],
+            relayers: [],
+            data: zeroHash,
+            extraArgs: zeroHash,
+        };
+
+        const hash = await walletClient.writeContract({
+            address: getEnvAddress()[0],
+            functionName: "submitMessageReport",
+            args: [clfReport, message],
+            abi: conceroRouterAbi,
+            chain: conceroNetworks.localhost.viemChain,
+            account: walletClient.account,
+            gas: 1000000n,
+        });
+
+        console.log(`Transaction hash: ${hash}`);
     });
 });

@@ -5,6 +5,10 @@ import { EnvTokens } from "./env.tokens";
 
 export interface env extends EnvCLA, EnvCLF, EnvCLCCIP, EnvTokens {
     // .env.wallets
+    TEST_PROXY_DEPLOYER_ADDRESS: string;
+    TEST_PROXY_DEPLOYER_PRIVATE_KEY: string;
+    TEST_DEPLOYER_ADDRESS: string;
+    TEST_DEPLOYER_PRIVATE_KEY: string;
     PROXY_DEPLOYER_ADDRESS: string;
     PROXY_DEPLOYER_PRIVATE_KEY: string;
     DEPLOYER_ADDRESS: string;
@@ -16,8 +20,6 @@ export interface env extends EnvCLA, EnvCLF, EnvCLCCIP, EnvTokens {
     MESSENGER_0_PRIVATE_KEY: string;
     MESSENGER_1_PRIVATE_KEY: string;
     MESSENGER_2_PRIVATE_KEY: string;
-    TESTS_WALLET_PRIVATE_KEY: string;
-    TESTS_WALLET_ADDRESS: string;
 
     // .env
     MAINNET_FORKING_ENABLED: string;
@@ -38,7 +40,8 @@ export interface env extends EnvCLA, EnvCLF, EnvCLCCIP, EnvTokens {
     CONCERO_BRIDGE_BASE_SEPOLIA: string;
     CONCERO_BRIDGE_FUJI: string;
     CONCERO_BRIDGE_OPTIMISM_SEPOLIA: string;
-    LOCALHOST_FORK_RPC_URL: string;
+    LOCALHOST_RPC_URL: string;
+    HARDHAT_RPC_URL: string;
 }
 
 export default env;

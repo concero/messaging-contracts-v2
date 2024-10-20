@@ -6,6 +6,8 @@ type ProxyEnvPrefixes = {
     [key in ProxyEnum]: string;
 };
 export type EnvPrefixes = ProxyEnvPrefixes & {
+    router: string;
+    clfRouter: string;
     routerProxyAdmin: string;
     clfRouterProxyAdmin: string;
     lpToken: string;

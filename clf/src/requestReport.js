@@ -76,7 +76,7 @@
 		//tests
 
 		['${CL_CCIP_CHAIN_SELECTOR_LOCALHOST}']: {
-			urls: ['${LOCALHOST_FORK_RPC_URL}'],
+			urls: ['${LOCALHOST_RPC_URL}'],
 			confirmations: 0n,
 			chainId: '0x7A69',
 			conceroRouterAddress: '0x23494105b6B8cEaA0eB9c051b7e4484724641821',

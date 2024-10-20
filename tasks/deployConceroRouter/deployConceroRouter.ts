@@ -21,13 +21,15 @@ export async function deployConceroRouterTask(taskArgs: any, hre: HardhatRuntime
         await deployConceroRouter(hre);
         await upgradeProxyImplementation(hre, ProxyEnum.routerProxy, false);
     }
-    await setVariables(hre);
+    if (taskArgs.setvars) {
+        await setVariables(hre);
+    }
 }
 
 task("deploy-router", "Deploy the ConceroRouter contract")
     .addFlag("deployproxy", "Deploy the proxy")
     .addFlag("deployimplementation", "Deploy the implementation")
-
+    .addFlag("setvars", "Set the contract variables")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
         await deployConceroRouterTask(taskArgs, hre);
     });

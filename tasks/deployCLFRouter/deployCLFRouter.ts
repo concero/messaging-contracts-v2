@@ -38,6 +38,7 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
 task("deploy-clf-router", "Deploy the MasterChainCLF contract")
     .addFlag("deployproxy", "Deploy the proxy")
     .addFlag("deployimplementation", "Deploy the implementation")
+    .addFlag("setvars", "Set the contract variables")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
         await deployClfRouterTask(taskArgs, hre);
     });

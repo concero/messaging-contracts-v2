@@ -1,12 +1,13 @@
 pragma solidity 0.8.28;
 
 import "../Common/Errors.sol";
-import "./Errors.sol";
 import "./Constants.sol";
+import "./Errors.sol";
+import {IConceroMessageClient} from "./Interfaces/IConceroMessageClient.sol";
+import {ConceroRouterStorage} from "./ConceroRouterStorage.sol";
 import {IConceroRouter} from "./Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ConceroRouterStorage} from "./ConceroRouterStorage.sol";
 
 contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     using SafeERC20 for IERC20;
@@ -73,27 +74,24 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
 
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
-     * @param report The serialized report data.
-     * @param message The message data.
+     * @param reportSubmission the serialized report data.
+     * @param message the message data.
      */
     function submitMessageReport(
         ClfDonReportSubmission calldata reportSubmission,
         Message calldata message
     ) external onlyOperator {
-        // Step 1: Recompute the hash
-        bytes32 h = _computeCLFReportHash(reportSubmission.context, reportSubmission.report);
+        // Step 1: Recover and verify the signatures
+        _verifyClfReportSignatures(reportSubmission);
 
-        // Step 2: Recover and verify the signatures
-        _verifyClfReportSignatures(
-            h,
-            reportSubmission.rs,
-            reportSubmission.ss,
-            reportSubmission.rawVs
-        );
+        // Step 2: Decode and process the report data
+        (bytes32 messageId, bytes32 messageHash) = _extractClfResponse(reportSubmission.report);
 
-        // Step 3: Decode and process the report data
-        _extractClfReportResults(reportSubmission.report);
-        //TODO: further actions with report: operator reward, passing the TX to user etc
+        // Step 3: validate the message
+        _validateMessage(message, messageId, messageHash);
+
+        // Step 4: process message
+        _processMessage(messageId, message);
     }
 
     function getMessageFee(MessageRequest calldata message) public view returns (uint256) {
@@ -131,6 +129,34 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     //////////////////////////////////
     ////////INTERNAL FUNCTIONS////////
     //////////////////////////////////
+
+    function _processMessage(bytes32 messageId, Message calldata message) internal {
+        // TODO: add operator rewards logic here
+        // add value transfer logic in the future here
+
+        EVMArgs memory args = abi.decode(message.extraArgs, (EVMArgs));
+
+        (bool success, bytes memory data) = message.receiver.call{gas: args.gasLimit}(
+            abi.encodeWithSelector(
+                IConceroMessageClient.conceroMessageReceive.selector,
+                messageId,
+                message.data
+            )
+        );
+
+        require(success, MessageProcessingFailed(data));
+
+        emit ConceroMessageReceived(messageId, message);
+    }
+
+    function _validateMessage(
+        Message calldata message,
+        bytes32 messageId,
+        bytes32 reportMessageHash
+    ) internal pure {
+        bytes32 messageHash = keccak256(abi.encode(messageId, message));
+        require(messageHash == reportMessageHash, InvalidMessageHash());
+    }
 
     function _collectMessageFee(MessageRequest calldata message) internal {
         uint256 feePayable = getMessageFee(message);
@@ -173,17 +199,16 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
 
     /**
      * @notice Verifies the signatures of the report.
-     * @param h The computed hash of the report.
-     * @param rs Array of R components of the signatures.
-     * @param ss Array of S components of the signatures.
-     * @param rawVs Concatenated V components of the signatures.
+     * @param reportSubmission The report submission data.
      */
     function _verifyClfReportSignatures(
-        bytes32 h,
-        bytes32[] calldata rs,
-        bytes32[] calldata ss,
-        bytes calldata rawVs
+        ClfDonReportSubmission calldata reportSubmission
     ) internal view {
+        bytes32 h = _computeCLFReportHash(reportSubmission.context, reportSubmission.report);
+        bytes32[] memory rs = reportSubmission.rs;
+        bytes32[] memory ss = reportSubmission.ss;
+        bytes memory rawVs = reportSubmission.rawVs;
+
         uint256 expectedNumSignatures = 3;
 
         require(
@@ -209,16 +234,20 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         }
     }
 
-    function _extractClfReportResults(bytes calldata report) internal returns (bytes[] memory) {
-        (
-            bytes32[] memory requestIds,
-            bytes[] memory results,
-            bytes[] memory errors,
-            bytes[] memory onchainMetadata,
-            bytes[] memory offchainMetadata
-        ) = abi.decode(report, (bytes32[], bytes[], bytes[], bytes[], bytes[]));
+    function _extractClfResponse(bytes calldata report) internal pure returns (bytes32, bytes32) {
+        (, bytes[] memory results, , , ) = abi.decode(
+            report,
+            (bytes32[], bytes[], bytes[], bytes[], bytes[])
+        );
 
-        return results;
+        bytes32 messageId;
+        bytes32 messageHash;
+        assembly {
+            messageId := mload(add(results, 33))
+            messageHash := mload(add(results, 65))
+        }
+
+        return (messageId, messageHash);
     }
 
     function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {

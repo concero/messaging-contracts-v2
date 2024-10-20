@@ -30,4 +30,5 @@ interface IConceroRouter is IMessage {
     //////////////////////
 
     event ConceroMessageSent(bytes32 indexed id, Message message);
+    event ConceroMessageReceived(bytes32 indexed id, Message message);
 }

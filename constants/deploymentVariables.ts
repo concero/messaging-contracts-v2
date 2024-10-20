@@ -1,11 +1,19 @@
 import type { WaitForTransactionReceiptParameters } from "viem/actions/public/waitForTransactionReceipt";
 import { WriteContractParameters } from "viem";
 import { EnvPrefixes } from "../types/deploymentVariables";
+import { ConceroNetwork } from "../types/ConceroNetwork";
 
 export const viemReceiptConfig: WaitForTransactionReceiptParameters = {
     timeout: 0,
     confirmations: 2,
 };
+export function getViemReceiptConfig(chain: ConceroNetwork): Partial<WaitForTransactionReceiptParameters> {
+    return {
+        timeout: 0,
+        confirmations: chain.confirmations,
+    };
+}
+
 export const writeContractConfig: WriteContractParameters = {
     gas: 3000000n, // 3M
 };

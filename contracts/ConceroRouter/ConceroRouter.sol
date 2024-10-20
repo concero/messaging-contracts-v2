@@ -63,22 +63,15 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
      * @param ss Array of S components of the signatures.
      * @param rawVs Concatenated V components of the signatures.
      */
-    function submitMessageReport(
-        bytes32[3] calldata reportContext,
-        bytes calldata report,
-        bytes32[] calldata rs,
-        bytes32[] calldata ss,
-        bytes calldata rawVs,
-        Message calldata message
-    ) external {
+    function submitMessageReport(ClfDonReport calldata report, Message calldata message) external {
         // Step 1: Recompute the hash
-        bytes32 h = _computeReportHash(reportContext, report);
+        bytes32 h = _computeCLFReportHash(report.context, report);
 
         // Step 2: Recover and verify the signatures
-        _verifyClfReportSignatures(h, rs, ss, rawVs);
+        _verifyClfReportSignatures(h, report.rs, report.ss, report.rawVs);
 
         // Step 3: Decode and process the report data
-        _processClfReport(report);
+        _processClfReport(report.data);
         //TODO: further actions with report: operator reward, passing the TX to user etc
     }
 
@@ -118,7 +111,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
      * @param report The serialized report data.
      * @return The computed hash of the report.
      */
-    function _computeReportHash(
+    function _computeCLFReportHash(
         bytes32[3] calldata reportContext,
         bytes calldata report
     ) internal pure returns (bytes32) {
@@ -148,8 +141,14 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         uint256 numSignatures = rs.length;
         uint256 expectedNumSignatures = 3;
 
-        require(numSignatures == ss.length && numSignatures == rawVs.length, MismatchedSignatureArrays());
-        require(numSignatures == expectedNumSignatures, IncorrectNumberOfSignatures(expectedNumSignatures, numSignatures));
+        require(
+            numSignatures == ss.length && numSignatures == rawVs.length,
+            MismatchedSignatureArrays()
+        );
+        require(
+            numSignatures == expectedNumSignatures,
+            IncorrectNumberOfSignatures(expectedNumSignatures, numSignatures)
+        );
 
         address[] memory signers = new address[](numSignatures);
 
@@ -192,14 +191,11 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             bytes memory error = errors[i];
             bytes memory metadata = onchainMetadata[i];
             bytes memory offchainMeta = offchainMetadata[i];
-
-            emit ReportProcessed(requestId, result, error, metadata, offchainMeta);
         }
     }
 
     function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {
-        return (
-            clfDonSigner == i_clfDonSigner_0 ||
+        return (clfDonSigner == i_clfDonSigner_0 ||
             clfDonSigner == i_clfDonSigner_1 ||
             clfDonSigner == i_clfDonSigner_2 ||
             clfDonSigner == i_clfDonSigner_3);
@@ -209,12 +205,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         // add this line in future: && feeToken != address(0)
         require(feeToken == i_USDC, UnsupportedFeeToken());
     }
-
-//    function _validateDstChainSelector(uint64 dstChainSelector) internal view {
-//        if (!_isChainSupported(dstChainSelector)) {
-//            revert UnsupportedChainSelector();
-//        }
-//    }
 
     function _isChainSupported(uint64 chainSelector) internal view returns (bool) {
         if (_isMainnet()) {

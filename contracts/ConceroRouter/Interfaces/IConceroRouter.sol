@@ -17,16 +17,17 @@ interface IConceroRouter is IMessage {
         bytes extraArgs;
     }
 
+    struct ClfDonReport {
+        bytes32[3] calldata context;
+        bytes calldata data;
+        bytes32[] calldata rs;
+        bytes32[] calldata ss;
+        bytes calldata rawVs;
+    }
+
     //////////////////////
     ////////EVENTS////////
     //////////////////////
 
     event ConceroMessage(bytes32 indexed id, Message message);
-    event ReportProcessed(
-        bytes32 indexed requestId,
-        bytes result,
-        bytes error,
-        bytes metadata,
-        bytes offchainMetadata
-    );
 }

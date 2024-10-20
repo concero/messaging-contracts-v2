@@ -53,7 +53,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         i_clfDonSigner_3 = clfDonSigner_3;
     }
 
-    function sendMessage(MessageRequest calldata req) external payable onlyOperator {
+    function sendMessage(MessageRequest calldata req) external payable {
         // step 1: validate the message (fee tokens, receiver)
         // TODO: mb validate data and extraArgs
         _collectMessageFee(req.feeToken);
@@ -74,7 +74,10 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
      * @param report The serialized report data.
      * @param message The message data.
      */
-    function submitMessageReport(ClfDonReport calldata report, Message calldata message) external {
+    function submitMessageReport(
+        ClfDonReport calldata report,
+        Message calldata message
+    ) external onlyOperator {
         // Step 1: Recompute the hash
         bytes32 h = _computeCLFReportHash(report.context, report.data);
 

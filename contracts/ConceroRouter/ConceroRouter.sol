@@ -66,20 +66,17 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         // TODO: add custom nonce to id generation
         bytes32 messageId = keccak256(abi.encode(message, block.number, msg.sender));
 
-        emit NewMessage(messageId, message);
+        emit ConceroMessage(messageId, message);
     }
 
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
-     * @param reportContext Report context containing config digest, epoch, and extra hash.
-     * @param report Serialized report data.
-     * @param rs Array of R components of the signatures.
-     * @param ss Array of S components of the signatures.
-     * @param rawVs Concatenated V components of the signatures.
+     * @param report The serialized report data.
+     * @param message The message data.
      */
     function submitMessageReport(ClfDonReport calldata report, Message calldata message) external {
         // Step 1: Recompute the hash
-        bytes32 h = _computeCLFReportHash(report.context, report);
+        bytes32 h = _computeCLFReportHash(report.context, report.data);
 
         // Step 2: Recover and verify the signatures
         _verifyClfReportSignatures(h, report.rs, report.ss, report.rawVs);
@@ -88,7 +85,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         _processClfReport(report.data);
         //TODO: further actions with report: operator reward, passing the TX to user etc
     }
-
 
     function getMessageFee(address feeToken) public view returns (uint256) {
         if (feeToken == address(0)) {
@@ -129,7 +125,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             require(msg.value == feePayable, InsufficientFee());
         }
     }
-
 
     function _buildMessage(MessageRequest calldata req) internal view returns (Message memory) {
         return
@@ -240,8 +235,6 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             clfDonSigner == i_clfDonSigner_2 ||
             clfDonSigner == i_clfDonSigner_3);
     }
-
-
 
     function _isChainSupported(uint64 chainSelector) internal view returns (bool) {
         if (_isMainnet()) {

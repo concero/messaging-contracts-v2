@@ -18,11 +18,11 @@ interface IConceroRouter is IMessage {
     }
 
     struct ClfDonReport {
-        bytes32[3] calldata context;
-        bytes calldata data;
-        bytes32[] calldata rs;
-        bytes32[] calldata ss;
-        bytes calldata rawVs;
+        bytes32[3] context;
+        bytes data;
+        bytes32[] rs;
+        bytes32[] ss;
+        bytes rawVs;
     }
 
     //////////////////////

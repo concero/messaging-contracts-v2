@@ -15,6 +15,8 @@ export enum ProxyEnum {
 }
 
 export const envPrefixes: EnvPrefixes = {
+    router: "CONCERO_ROUTER",
+    clfRouter: "CONCERO_CLF_ROUTER",
     routerProxy: "CONCERO_ROUTER_PROXY",
     routerProxyAdmin: "CONCERO_ROUTER_PROXY_ADMIN",
     clfRouterProxy: "CONCERO_CLF_ROUTER_PROXY",

@@ -1,6 +1,6 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployment } from "hardhat-deploy/types";
-import { getEnvVar, getFallbackClients, getHashSum, updateEnvVariable } from "../utils";
+import { getEnvVar, getHashSum, updateEnvVariable } from "../utils";
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 
@@ -17,6 +17,10 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
     const chain = conceroNetworks[name as ConceroNetworkNames];
     const { type: networkType } = chain;
 
+    const gasPrice = await hre.ethers.provider.getGasPrice();
+    const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
+    const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
+
     console.log("Deploying...", "deployCLFRouter", name);
 
     const args = {
@@ -29,9 +33,6 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         requestCLFMessageReportJsCodeHash: getHashSum("../clf/dist/requestReport.js"),
         owner: deployer,
     };
-
-    const { publicClient } = getFallbackClients(chain);
-    const gasPrice = String(await publicClient.getGasPrice());
 
     const clfRouterDeploy = (await deploy("CLFRouter", {
         from: deployer,
@@ -47,14 +48,17 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         ],
         log: true,
         autoMine: true,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
         // gasPrice, // Uncomment if custom gas price is needed
     })) as Deployment;
 
     console.log(`Deployed at: ${clfRouterDeploy.address}`, "deployCLFRouter", name);
-
-    if (live) {
-        updateEnvVariable(`CLF_ROUTER_${networkEnvKeys[name]}`, clfRouterDeploy.address, `deployments.${networkType}`);
-    }
+    updateEnvVariable(
+        `CONCERO_CLF_ROUTER_${networkEnvKeys[name]}`,
+        clfRouterDeploy.address,
+        `deployments.${networkType}`,
+    );
 
     return clfRouterDeploy;
 };

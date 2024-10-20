@@ -23,12 +23,19 @@ export function getClients(
 
 export function getFallbackClients(
     chain: ConceroNetwork,
-    account?: PrivateKeyAccount = privateKeyToAccount(`0x${process.env.DEPLOYER_PRIVATE_KEY}`),
+    account?: PrivateKeyAccount,
 ): {
     walletClient: WalletClient;
     publicClient: PublicClient;
     account: PrivateKeyAccount;
 } {
+    if (!account) {
+        account =
+            chain.type === "mainnet"
+                ? privateKeyToAccount(`0x${process.env.DEPLOYER_PRIVATE_KEY}`)
+                : privateKeyToAccount(`0x${process.env.TEST_DEPLOYER_PRIVATE_KEY}`);
+    }
+
     const { viemChain, name } = chain;
     const transport = fallback(urls[name].map(url => http(url)));
 

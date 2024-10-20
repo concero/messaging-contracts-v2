@@ -1,7 +1,10 @@
+import { getEnvVar } from "../utils";
+
 const { INFURA_API_KEY, ALCHEMY_API_KEY, BLAST_API_KEY, CHAINSTACK_API_KEY, TENDERLY_API_KEY } = process.env;
 
 export const rpcUrl: Record<string, string> = {
-    localhost: "http://127.0.0.1:8545",
+    hardhat: getEnvVar("HARDHAT_RPC_URL"),
+    localhost: getEnvVar("LOCALHOST_RPC_URL"),
     arbitrum: `https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}`,
     arbitrumSepolia: `https://arbitrum-sepolia.infura.io/v3/${INFURA_API_KEY}`,
     base: `https://base-sepolia.infura.io/v3/${INFURA_API_KEY}`,
@@ -18,7 +21,7 @@ export const rpcUrl: Record<string, string> = {
 
 // Warning: ANKR endpoints are limited to 30 requests/sec and not suitable for production use
 export const urls: Record<string, string[]> = {
-    hardhat: [rpcUrl.localhost],
+    hardhat: [rpcUrl.hardhat],
     localhost: [rpcUrl.localhost],
     mainnet: [
         `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,

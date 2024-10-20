@@ -50,13 +50,12 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
     })) as Deployment;
 
     log(`Deployed at: ${conceroRouterDeploy.address}`, "deployConceroRouter", name);
-    if (live) {
-        updateEnvVariable(
-            `CONCERO_ROUTER_${networkEnvKeys[name]}`,
-            conceroRouterDeploy.address,
-            `deployments.${networkType}`,
-        );
-    }
+    updateEnvVariable(
+        `CONCERO_ROUTER_${networkEnvKeys[name]}`,
+        conceroRouterDeploy.address,
+        `deployments.${networkType}`,
+    );
+
     return conceroRouterDeploy;
 };
 

@@ -32,4 +32,4 @@ export type ConceroNetwork = {
     rpcUrls: string[];
 };
 
-export type NetworkType = "mainnet" | "testnet" | "test";
+export type NetworkType = "mainnet" | "testnet" | "localhost";

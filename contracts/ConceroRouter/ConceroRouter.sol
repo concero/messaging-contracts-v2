@@ -59,8 +59,8 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     function sendMessage(MessageRequest calldata req) external payable {
         // step 1: validate the message (fee tokens, receiver)
         // TODO: mb validate data and extraArgs
+        require(_isChainSupported(req.dstChainSelector), UnsupportedChainSelector());
         _collectMessageFee(req);
-
         //step 3: TODO: transfer token amounts if exists
 
         Message memory message = _buildMessage(req);

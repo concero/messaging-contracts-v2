@@ -22,16 +22,20 @@ import {
 } from "viem/chains";
 import { rpcUrl, urls } from "./rpcUrls";
 import { getEnvVar } from "../utils";
-import { localhostViemChain } from "../utils/localhostViemChain";
+import { hardhatViemChain, localhostViemChain } from "../utils/localhostViemChain";
 
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
+
 const proxyDeployerPK = getEnvVar("PROXY_DEPLOYER_PRIVATE_KEY");
 const deployerPK = getEnvVar("DEPLOYER_PRIVATE_KEY");
-const testDeployerPK = getEnvVar("TESTS_WALLET_PRIVATE_KEY");
+
+const testDeployerPK = getEnvVar("TEST_DEPLOYER_PRIVATE_KEY");
+const testProxyDeployerPK = getEnvVar("TEST_PROXY_DEPLOYER_PRIVATE_KEY");
 
 export const networkTypes: Record<NetworkType, NetworkType> = {
     mainnet: "mainnet",
     testnet: "testnet",
+    localhost: "localhost",
 };
 
 export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
@@ -59,12 +63,16 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 
 export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = {
     hardhat: {
-        id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         name: "hardhat",
+        id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
-        type: networkTypes.testnet,
-        // saveDeployments: false,
+        type: networkTypes.localhost,
+        saveDeployments: false,
         accounts: [
+            {
+                privateKey: testProxyDeployerPK,
+                balance: "10000000000000000000000",
+            },
             {
                 privateKey: testDeployerPK,
                 balance: "10000000000000000000000",
@@ -72,7 +80,7 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
         ],
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         confirmations: 1,
-        viemChain: localhostViemChain,
+        viemChain: hardhatViemChain,
         forking: {
             url: `https://base-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
             enabled: true,
@@ -81,7 +89,7 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
     },
     localhost: {
         name: "localhost",
-        type: networkTypes.testnet,
+        type: networkTypes.localhost,
         id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         viemChain: localhostViemChain,
@@ -91,11 +99,6 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
         confirmations: 1,
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         accounts: [testDeployerPK],
-        forking: {
-            url: `https://base-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-            enabled: true,
-            blockNumber: Number(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
-        },
     },
 };
 

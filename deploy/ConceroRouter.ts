@@ -32,7 +32,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         clfDonSigner_3: getEnvVar(`CLF_DON_SIGNING_KEY_3_${networkEnvKeys[name]}`),
     };
 
-    const conceroRouterDeploy = (await deploy("ConceroRouter", {
+    const deployment = (await deploy("ConceroRouter", {
         from: deployer,
         args: [
             args.usdc,
@@ -49,14 +49,10 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         maxPriorityFeePerGas,
     })) as Deployment;
 
-    log(`Deployed at: ${conceroRouterDeploy.address}`, "deployConceroRouter", name);
-    updateEnvVariable(
-        `CONCERO_ROUTER_${networkEnvKeys[name]}`,
-        conceroRouterDeploy.address,
-        `deployments.${networkType}`,
-    );
+    log(`Deployed at: ${deployment.address}`, "deployConceroRouter", name);
+    updateEnvVariable(`CONCERO_ROUTER_${networkEnvKeys[name]}`, deployment.address, `deployments.${networkType}`);
 
-    return conceroRouterDeploy;
+    return deployment;
 };
 
 export default deployConceroRouter;

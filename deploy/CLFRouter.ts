@@ -3,6 +3,7 @@ import { Deployment } from "hardhat-deploy/types";
 import { getEnvVar, getHashSum, updateEnvVariable } from "../utils";
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
+import log from "../utils/log";
 
 const ETHERS_JS_URL = "https://raw.githubusercontent.com/ethers-io/ethers.js/v6.10.0/dist/ethers.umd.min.js";
 
@@ -34,7 +35,7 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         owner: deployer,
     };
 
-    const clfRouterDeploy = (await deploy("CLFRouter", {
+    const deployment = (await deploy("CLFRouter", {
         from: deployer,
         args: [
             args.functionsRouter,
@@ -53,14 +54,10 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         // gasPrice, // Uncomment if custom gas price is needed
     })) as Deployment;
 
-    console.log(`Deployed at: ${clfRouterDeploy.address}`, "deployCLFRouter", name);
-    updateEnvVariable(
-        `CONCERO_CLF_ROUTER_${networkEnvKeys[name]}`,
-        clfRouterDeploy.address,
-        `deployments.${networkType}`,
-    );
+    log(`Deployed at: ${deployment.address}`, "deployCLFRouter", name);
+    updateEnvVariable(`CONCERO_CLF_ROUTER_${networkEnvKeys[name]}`, deployment.address, `deployments.${networkType}`);
 
-    return clfRouterDeploy;
+    return deployment;
 };
 
 export default deployCLFRouter;

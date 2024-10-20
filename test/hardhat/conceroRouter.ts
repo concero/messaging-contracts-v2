@@ -6,34 +6,6 @@ const hre = require("hardhat");
 const { publicClient, walletClient, account } = getFallbackClients(conceroNetworks[hre.network.name]);
 
 describe("Concero Router", async () => {
-    // before(async function () {
-    //     const { deployer } = await hre.getNamedAccounts();
-    //     deployerAddress = deployer;
-    //
-    //     // await hre.network.provider.send("hardhat_setBalance", [deployer, "0x1000000000000000000000000"]);
-    //
-    //     const { address } = await deployConceroRouter(hre);
-    //     conceroRouter = address;
-    // });
-    //
-    // it("Should set allowed operator to deployer address", async function () {
-    //     const { abi: conceroRouterAbi } = await import(
-    //         "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
-    //     );
-    //
-    //     // Call registerOperator from the owner (deployer) account
-    //     const { request: registerOperatorRequest } = await publicClient.simulateContract({
-    //         address: conceroRouter,
-    //         abi: conceroRouterAbi,
-    //         functionName: "registerOperator",
-    //         account,
-    //         args: [deployerAddress],
-    //     });
-    //
-    //     const registerHash = await walletClient.writeContract(registerOperatorRequest);
-    //     console.log("Operator registered with hash:", registerHash);
-    // });
-
     it("Should send a message using sendMessage", async function () {
         const { abi: conceroRouterAbi } = await import(
             "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
@@ -49,9 +21,10 @@ describe("Concero Router", async () => {
             extraArgs: "0x", // Example extra args
         };
 
+        const [targetContract] = getEnvAddress("router", hre.network.name);
         // Send the message using the deployer (who is now the allowed operator)
         const { request: sendMessageRequest } = await publicClient.simulateContract({
-            address: getEnvAddress("router", hre.network.name)[0],
+            address: targetContract,
             abi: conceroRouterAbi,
             functionName: "sendMessage",
             account,

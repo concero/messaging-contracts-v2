@@ -8,7 +8,7 @@ const hre = require("hardhat");
 
 const { publicClient, walletClient, account } = getFallbackClients(
     conceroNetworks[hre.network.name],
-    privateKeyToAccount("0x" + process.env.TESTS_WALLET_PRIVATE_KEY),
+    privateKeyToAccount("0x" + process.env.TEST_DEPLOYER_PRIVATE_KEY),
 );
 
 describe("CLF Router", async () => {

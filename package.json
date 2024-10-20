@@ -7,7 +7,7 @@
     "chain": "hardhat node --network hardhat --no-deploy",
     "compile": "hardhat compile",
     "deploy": "hardhat deploy",
-    "fork": "hardhat node --network hardhat --no-deploy",
+    "fork": "hardhat node --network hardhat --no-deploy --port 8546",
     "node": "hardhat node --network localhost --no-deploy",
     "generate": "hardhat run scripts/generateAccount.ts",
     "flatten": "hardhat flatten",

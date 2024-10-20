@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getEnvAddress, getFallbackClients } from "../../utils";
+import { getEnvAddress, getFallbackClients, log } from "../../utils";
 import { conceroNetworks } from "../../constants";
 import { ConceroNetwork, ConceroNetworkNames } from "../../types/ConceroNetwork";
 
@@ -31,5 +31,5 @@ async function setAllowedOperators(hre: HardhatRuntimeEnvironment, network: Conc
     });
 
     const registerHash = await walletClient.writeContract(registerOperatorRequest);
-    console.log("Operator registered with hash:", registerHash);
+    log(`Operator registered with hash: ${registerHash}`, "setConceroRouterVariables", network.name);
 }

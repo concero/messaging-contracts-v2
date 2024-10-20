@@ -6,6 +6,7 @@ import test from "./test";
 import deployConceroRouter from "./deployConceroRouter/deployConceroRouter";
 import deployCLFRouter from "./deployCLFRouter/deployCLFRouter";
 import buildCLFJSCode from "./clf/buildCLFJSCode";
+import demo from "./demo";
 
 export default {
     test,
@@ -16,4 +17,5 @@ export default {
     deployCLFRouter,
     buildCLFJSCode,
     listHashes,
+    demo,
 };

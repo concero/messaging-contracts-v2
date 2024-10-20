@@ -74,7 +74,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
 
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
-     * @param report The serialized report data.
+     * @param reportSubmission The serialized report data.
      * @param message The message data.
      */
     function submitMessageReport(

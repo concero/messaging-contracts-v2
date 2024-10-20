@@ -12,6 +12,9 @@ import "hardhat/console.sol";
 contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     using SafeERC20 for IERC20;
 
+    /* CONSTANTS */
+    uint16 internal CONCERO_VALUE_TRANSFER_FEE_FACTOR=1_000;
+
     /*IMMUTABLE VARIABLES*/
     address internal immutable i_owner;
     address internal immutable i_USDC;
@@ -56,7 +59,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     function sendMessage(MessageRequest calldata req) external payable {
         // step 1: validate the message (fee tokens, receiver)
         // TODO: mb validate data and extraArgs
-        _collectMessageFee(req.feeToken);
+        _collectMessageFee(req);
 
         //step 3: TODO: transfer token amounts if exists
 
@@ -89,11 +92,17 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         //TODO: further actions with report: operator reward, passing the TX to user etc
     }
 
-    function getMessageFee(address feeToken) public view returns (uint256) {
-        if (feeToken == address(0)) {
-            return 50_000;
-        } else if (feeToken == i_USDC) {
-            return 50_000;
+    function getMessageFee(MessageRequest calldata message) public view returns (uint256) {
+        uint256 valueTransferFee = 0;
+
+        for (uint256 i = 0; i < message.tokenAmounts.length; i++) {
+            valueTransferFee += message.tokenAmounts[i].amount / CONCERO_VALUE_TRANSFER_FEE_FACTOR;
+        }
+
+        if (message.feeToken == address(0)) {
+            return 50_000 + valueTransferFee;
+        } else if (message.feeToken == i_USDC) {
+            return 50_000 + valueTransferFee;
         } else {
             revert UnsupportedFeeToken();
         }
@@ -119,12 +128,12 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     ////////INTERNAL FUNCTIONS////////
     //////////////////////////////////
 
-    function _collectMessageFee(address feeToken) internal {
-        uint256 feePayable = getMessageFee(feeToken);
+    function _collectMessageFee(MessageRequest calldata message) internal {
+        uint256 feePayable = getMessageFee(message);
 
-        if (feeToken == i_USDC) {
+        if (message.feeToken == i_USDC) {
             IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), feePayable);
-        } else if (feeToken == address(0)) {
+        } else if (message.feeToken == address(0)) {
             require(msg.value == feePayable, InsufficientFee());
         }
     }

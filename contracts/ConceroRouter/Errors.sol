@@ -1,7 +1,7 @@
 pragma solidity 0.8.28;
 
 error MismatchedSignatureArrays();
-error IncorrectNumberOfSignatures(uint256 expected, uint256 received);
+error IncorrectNumberOfSignatures();
 error InvalidSignature();
 error DuplicateSignatureDetected(address signer);
 error UnauthorizedSigner(address signer);

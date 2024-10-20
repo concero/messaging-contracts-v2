@@ -13,7 +13,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     using SafeERC20 for IERC20;
 
     /* CONSTANTS */
-    uint16 internal CONCERO_VALUE_TRANSFER_FEE_FACTOR=1_000;
+    uint16 internal CONCERO_VALUE_TRANSFER_FEE_FACTOR = 1_000;
 
     /*IMMUTABLE VARIABLES*/
     address internal immutable i_owner;
@@ -78,17 +78,22 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
      * @param message The message data.
      */
     function submitMessageReport(
-        ClfDonReport calldata report,
+        ClfDonReportSubmission calldata reportSubmission,
         Message calldata message
     ) external onlyOperator {
         // Step 1: Recompute the hash
-        bytes32 h = _computeCLFReportHash(report.context, report.data);
+        bytes32 h = _computeCLFReportHash(reportSubmission.context, reportSubmission.report);
 
         // Step 2: Recover and verify the signatures
-        _verifyClfReportSignatures(h, report.rs, report.ss, report.rawVs);
+        _verifyClfReportSignatures(
+            h,
+            reportSubmission.rs,
+            reportSubmission.ss,
+            reportSubmission.rawVs
+        );
 
         // Step 3: Decode and process the report data
-        _processClfReport(report.data);
+        _extractClfReportResults(reportSubmission.report);
         //TODO: further actions with report: operator reward, passing the TX to user etc
     }
 
@@ -163,12 +168,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         bytes calldata report
     ) internal pure returns (bytes32) {
         bytes32 reportHash = keccak256(report);
-        bytes memory messageToHash = abi.encodePacked(
-            reportHash,
-            reportContext[0],
-            reportContext[1],
-            reportContext[2]
-        );
+        bytes memory messageToHash = abi.encodePacked(reportHash, reportContext);
         return keccak256(messageToHash);
     }
 
@@ -185,43 +185,32 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         bytes32[] calldata ss,
         bytes calldata rawVs
     ) internal view {
-        uint256 numSignatures = rs.length;
         uint256 expectedNumSignatures = 3;
 
         require(
-            numSignatures == ss.length && numSignatures == rawVs.length,
-            MismatchedSignatureArrays()
-        );
-        require(
-            numSignatures == expectedNumSignatures,
-            IncorrectNumberOfSignatures(expectedNumSignatures, numSignatures)
+            rs.length == ss.length && rs.length == expectedNumSignatures,
+            IncorrectNumberOfSignatures()
         );
 
-        address[] memory signers = new address[](numSignatures);
+        address[] memory signers = new address[](rs.length);
 
-        for (uint256 i = 0; i < numSignatures; i++) {
+        for (uint256 i = 0; i < rs.length; i++) {
             uint8 v = uint8(rawVs[i]) + 27; // rawVs contains values 0 or 1, add 27 to get 27 or 28
             bytes32 r = rs[i];
             bytes32 s = ss[i];
 
             address signer = ecrecover(h, v, r, s);
-            require(signer != address(0), InvalidSignature());
+            require(_isAuthorizedClfDonSigner(signer), UnauthorizedSigner(signer));
 
-            // Check for duplicate signatures
             for (uint256 j = 0; j < i; j++) {
                 require(signers[j] != signer, DuplicateSignatureDetected(signer));
             }
 
-            require(_isAuthorizedClfDonSigner(signer), UnauthorizedSigner(signer));
             signers[i] = signer;
         }
     }
 
-    /**
-     * @notice Decodes the report data and processes it.
-     * @param report The serialized report data.
-     */
-    function _processClfReport(bytes calldata report) internal {
+    function _extractClfReportResults(bytes calldata report) internal returns (bytes[] memory) {
         (
             bytes32[] memory requestIds,
             bytes[] memory results,
@@ -230,18 +219,14 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             bytes[] memory offchainMetadata
         ) = abi.decode(report, (bytes32[], bytes[], bytes[], bytes[], bytes[]));
 
-        uint256 numberOfFulfillments = requestIds.length;
-
-        for (uint256 i = 0; i < numberOfFulfillments; i++) {
-            bytes32 requestId = requestIds[i];
-            bytes memory result = results[i];
-            bytes memory error = errors[i];
-            bytes memory metadata = onchainMetadata[i];
-            bytes memory offchainMeta = offchainMetadata[i];
-        }
+        return results;
     }
 
     function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {
+        if (clfDonSigner == address(0)) {
+            return false;
+        }
+
         return (clfDonSigner == i_clfDonSigner_0 ||
             clfDonSigner == i_clfDonSigner_1 ||
             clfDonSigner == i_clfDonSigner_2 ||

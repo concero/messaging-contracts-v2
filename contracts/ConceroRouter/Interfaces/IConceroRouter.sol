@@ -17,9 +17,9 @@ interface IConceroRouter is IMessage {
         bytes extraArgs;
     }
 
-    struct ClfDonReport {
+    struct ClfDonReportSubmission {
         bytes32[3] context;
-        bytes data;
+        bytes report;
         bytes32[] rs;
         bytes32[] ss;
         bytes rawVs;

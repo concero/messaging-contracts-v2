@@ -10,3 +10,4 @@ error UnsupportedChainSelector();
 error InsufficientFee();
 error InvalidMessageHash();
 error MessageProcessingFailed(bytes error);
+error MessageAlreadyProcessed(bytes32 messageId);

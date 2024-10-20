@@ -84,7 +84,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         // Step 1: Recover and verify the signatures
         _verifyClfReportSignatures(reportSubmission);
 
-        // Step 2: Decode and process the report data
+        // Step 2: Decode the report data
         (bytes32 messageId, bytes32 messageHash) = _extractClfResponse(reportSubmission.report);
 
         // Step 3: validate the message
@@ -131,6 +131,9 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     //////////////////////////////////
 
     function _processMessage(bytes32 messageId, Message calldata message) internal {
+        require(s_isMessageProcessed[messageId], MessageAlreadyProcessed(messageId));
+        s_isMessageProcessed[messageId] = true;
+
         // TODO: add operator rewards logic here
         // add value transfer logic in the future here
 

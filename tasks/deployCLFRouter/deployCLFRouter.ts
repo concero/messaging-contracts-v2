@@ -7,7 +7,6 @@ import deployTransparentProxy from "../../deploy/TransparentProxy";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { setVariables } from "../deployConceroRouter/setVariables";
 import { uploadClfSecrets } from "../clf/uploadClfSecrets";
-import { CLF_MAINNET_TTL, CLF_TESTNET_TTL } from "../../constants/clfTtl";
 
 export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
     compileContracts({ quiet: true });
@@ -21,8 +20,7 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
 
     if (taskArgs.uploadsecrets) {
         const slotId = taskArgs.slotid ?? 0;
-        const ttl = conceroNetwork.type === "mainnet" ? CLF_MAINNET_TTL : CLF_TESTNET_TTL;
-        await uploadClfSecrets([conceroNetwork], slotId, ttl);
+        await uploadClfSecrets([conceroNetwork], slotId);
     }
 
     if (taskArgs.deployimplementation) {

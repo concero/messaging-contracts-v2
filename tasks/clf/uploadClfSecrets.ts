@@ -7,14 +7,15 @@ import { getEnvVar, getEthersSignerAndProvider } from "../../utils";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
 import { networkEnvKeys } from "../../constants";
 import { clfGatewayUrls } from "../../constants/clfGatewayUrls";
+import { CLF_MAINNET_TTL, CLF_TESTNET_TTL } from "../../constants/clfTtl";
 
-export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number, ttl: number) {
+export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number) {
     const slotId = parseInt(slotid);
-    const minutesUntilExpiration = ttl;
 
     for (const chain of chains) {
         const { url, name } = chain;
         const { signer } = getEthersSignerAndProvider(url);
+        const minutesUntilExpiration = chain.type === "mainnet" ? CLF_MAINNET_TTL : CLF_TESTNET_TTL;
 
         const secretsManager = new SecretsManager({
             signer,

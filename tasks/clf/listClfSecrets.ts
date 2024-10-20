@@ -1,24 +1,24 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
-import { CNetwork } from "../../types/CNetwork";
 import { getEthersSignerAndProvider } from "../utils/getEthersSignerAndProvider";
 import log from "../../utils/log";
+import { ConceroNetwork } from "../../types/ConceroNetwork";
+import { getEnvVar } from "../../utils";
+import { networkEnvKeys } from "../../constants";
+import { clfGatewayUrls } from "../../constants/clfGatewayUrls";
 
 export async function listSecrets(
-    chain: CNetwork,
+    chain: ConceroNetwork,
 ): Promise<{ [slotId: number]: { version: number; expiration: number } }> {
     const { signer } = getEthersSignerAndProvider(chain.url);
-    const { functionsRouter, functionsDonIdAlias, functionsGatewayUrls } = chain;
-    if (!functionsGatewayUrls || functionsGatewayUrls.length === 0)
-        throw Error(`No gatewayUrls found for ${chain.name}.`);
-
     const secretsManager = new SecretsManager({
         signer,
-        functionsRouterAddress: functionsRouter,
-        donId: functionsDonIdAlias,
+        functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[chain.name]}`),
+        donId: getEnvVar(`CLF_DONID_${networkEnvKeys[chain.name]}_ALIAS`),
     });
+
     await secretsManager.initialize();
 
-    const { result } = await secretsManager.listDONHostedEncryptedSecrets(functionsGatewayUrls);
+    const { result } = await secretsManager.listDONHostedEncryptedSecrets(clfGatewayUrls[chain.type]);
     const allSecrets = {};
 
     result.nodeResponses.forEach(nodeResponse => {

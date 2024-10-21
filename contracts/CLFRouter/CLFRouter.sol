@@ -123,20 +123,20 @@ contract CLFRouter is IMessage, FunctionsClient, CLFRouterStorage {
             return;
         }
 
-        (CLFRequestType reqType, bytes memory clfRes) = abi.decode(
-            response,
-            (CLFRequestType, bytes)
-        );
+        CLFRequestType reqType;
+        assembly {
+            reqType := byte(0, mload(add(response, 0)))
+        }
 
         if (reqType == CLFRequestType.RequestCLFMessageReport) {
-            _fulfillRequestCLFMessageReport(clfRes);
-        }
-    }
+            bytes32 conceroId;
+            assembly {
+                conceroId := mload(add(response, 1))
+            }
 
-    function _fulfillRequestCLFMessageReport(bytes memory clfRes) internal {
-        (bytes32 conceroId, ) = abi.decode(clfRes, (bytes32, bytes32));
-        s_clfRequestStatusByConceroId[conceroId] = CLFRequestStatus.FulFilled;
-        emit CLFMessageReport(conceroId);
+            s_clfRequestStatusByConceroId[conceroId] = CLFRequestStatus.FulFilled;
+            emit CLFMessageReport(conceroId);
+        }
     }
 
     function _prepareAndSendCLFRequest(bytes[] memory args) internal returns (bytes32) {

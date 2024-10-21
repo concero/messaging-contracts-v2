@@ -68,24 +68,24 @@
 	const provider = new FunctionsJsonRpcProvider(
 		chainMap[srcChainSelector].urls[Math.floor(Math.random() * chainMap[srcChainSelector].urls.length)],
 	);
-	const getLogByMessageId = async _messageId => {
+	const getLogByMessageId = async (_messageId, _latestBlockNumber) => {
 		const logs = await provider.getLogs({
 			address: chainMap[srcChainSelector].conceroRouterAddress,
 			topics: [null, messageId],
-			fromBlock: latestBlockNumber - 1000n,
-			toBlock: latestBlockNumber,
+			fromBlock: _latestBlockNumber - 1000n,
+			toBlock: _latestBlockNumber,
 		});
 		if (!logs.length) throw new Error('NLF');
 		return logs[0];
 	};
 	let latestBlockNumber = BigInt(await provider.getBlockNumber());
 	const {confirmations} = chainMap[srcChainSelector];
-	const srcBlockNumber = await getLogByMessageId(messageId).then(log => BigInt(log.blockNumber));
+	const srcBlockNumber = await getLogByMessageId(messageId, latestBlockNumber).then(log => BigInt(log.blockNumber));
 	while (latestBlockNumber - BigInt(srcBlockNumber) < confirmations) {
 		latestBlockNumber = BigInt(await provider.getBlockNumber());
 		await sleep(3000);
 	}
-	const log = await getLogByMessageId(messageId);
+	const log = await getLogByMessageId(messageId, latestBlockNumber);
 	const abi = [
 		'event ConceroMessageSent(bytes32 indexed, tuple(uint64, uint64, address, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
 	];

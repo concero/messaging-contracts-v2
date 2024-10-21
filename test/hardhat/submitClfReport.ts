@@ -13,7 +13,7 @@ describe("ConceroRouter", () => {
 
     it("Should submit and decode clf report", async function () {
         const { abi: conceroRouterAbi } = await import(
-            "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
+            "../../../v2-operators/src/relayer/a/constants/ConceroRouter.json"
         );
         const { walletClient } = getClients(
             conceroNetworks.hardhat.viemChain,

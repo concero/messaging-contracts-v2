@@ -14,7 +14,7 @@ export async function sendRouterMessage(
     value?: bigint,
 ): Promise<SendRouterMessageReturnType> {
     const { abi: conceroRouterAbi } = await import(
-        "../../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
+        "../../../../v2-operators/src/relayer/a/constants/ConceroRouter.json"
     );
 
     const { walletClient, publicClient } = getFallbackClients(chain);

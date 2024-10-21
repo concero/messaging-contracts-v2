@@ -8,7 +8,7 @@ import { conceroMessageAbi } from "./utils/conceroMessageAbi";
 describe("Concero Router", () => {
     it("Should deploy the contract and call sendMessage", async function () {
         const { abi: conceroRouterAbi } = await import(
-            "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
+            "../../../v2-operators/src/relayer/a/constants/ConceroRouter.json"
         );
 
         const message = {

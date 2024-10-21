@@ -128,7 +128,8 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
 
     function withdraw(address token, uint256 amount) external payable onlyOwner {
         if (token == address(0)) {
-            i_owner.call{value: amount}("");
+            (bool success, ) = i_owner.call{value: amount}("");
+            require(success, WithdrawalFailed());
         } else {
             IERC20(token).safeTransfer(i_owner, amount);
         }

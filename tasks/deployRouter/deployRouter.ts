@@ -8,9 +8,11 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { setVariables } from "./setVariables";
 import { upgradeProxyImplementation } from "../upgradeProxyImplementation";
 
-export async function deployConceroRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
+export async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
     compileContracts({ quiet: true });
 
+    //todo: when running --deployproxy W/O --deployimplementation,
+    //the initial proxy implementation is set to paused, but should be set to existing latest impl. from env.
     if (taskArgs.deployproxy) {
         await deployProxyAdmin(hre, ProxyEnum.routerProxy);
         await deployTransparentProxy(hre, ProxyEnum.routerProxy);
@@ -31,7 +33,7 @@ task("deploy-router", "Deploy the ConceroRouter contract")
     .addFlag("deployimplementation", "Deploy the implementation")
     .addFlag("setvars", "Set the contract variables")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
-        await deployConceroRouterTask(taskArgs, hre);
+        await deployRouterTask(taskArgs, hre);
     });
 
 export default {};

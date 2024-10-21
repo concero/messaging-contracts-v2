@@ -14,7 +14,6 @@ async function setAllowedOperators(hre: HardhatRuntimeEnvironment, network: Conc
     const { abi: CLFRouterAbi } = await import("../../artifacts/contracts/CLFRouter/CLFRouter.sol/CLFRouter.json");
 
     const { publicClient, walletClient, account } = getFallbackClients(network);
-
     const operatorAddress = getWallet(network.type, "operator", "address");
     const [clfRouter] = getEnvAddress("clfRouterProxy", network.name);
 

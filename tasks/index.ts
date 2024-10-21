@@ -3,7 +3,7 @@ import changeOwnership from "./changeOwnership";
 // import upgradeProxyImplementation from "./upgradeProxyImplementation";
 import listHashes from "./clf/listHashes";
 import test from "./test";
-import deployConceroRouter from "./deployConceroRouter/deployConceroRouter";
+import deployConceroRouter from "./deployRouter/deployRouter";
 import deployCLFRouter from "./deployCLFRouter/deployCLFRouter";
 import buildCLFJSCode from "./clf/buildCLFJSCode";
 import demo from "./demo";

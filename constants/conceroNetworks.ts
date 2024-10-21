@@ -85,6 +85,7 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
             enabled: true,
             blockNumber: Number(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
         },
+        saveDeployments: false,
     },
     localhost: {
         name: "localhost",
@@ -97,6 +98,7 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
         confirmations: 1,
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         accounts: [localhostDeployerPK, localhostProxyDeployerPK],
+        saveDeployments: false,
     },
 };
 
@@ -155,6 +157,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
         chainSelector: "10344971235874465080",
         confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
         viemChain: baseSepolia,
+        saveDeployments: false,
     },
     polygonAmoy: {
         name: "polygonAmoy",

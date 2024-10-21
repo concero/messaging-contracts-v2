@@ -1,97 +1,40 @@
-import { conceroNetworks, networkEnvKeys } from "../../constants";
-import { getClients, getEnvVar } from "../../utils";
-import { approve } from "./utils/approve";
-import { encodeAbiParameters, parseUnits } from "viem";
-import { decodeLogWrapper } from "./utils/decodeLogWrapper";
+import { encodeAbiParameters } from "viem";
 import { CLFType, runCLFSimulation } from "../../utils/runCLFSimulation";
-import deployConceroRouter from "../../deploy/ConceroRouter";
+import { conceroMessageAbi } from "./utils/conceroMessageAbi";
+
+// 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000008f90b8876dee6538000000000000000000000000000000000000000000000000304611b6affba76a000000000000000000000000dddddb8a8e41c194ac6542a0ad7ba663a72741e0000000000000000000000000dddddb8a8e41c194ac6542a0ad7ba663a72741e0000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000018000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+// 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000008f90b8876dee6538000000000000000000000000000000000000000000000000304611b6affba76a000000000000000000000000dddddb8a8e41c194ac6542a0ad7ba663a72741e0000000000000000000000000dddddb8a8e41c194ac6542a0ad7ba663a72741e0000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000018000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 describe("Concero Router", () => {
-    const hre = require("hardhat");
-    let deploymentAddress = "0x23494105b6B8cEaA0eB9c051b7e4484724641821";
-
-    it("Should deploy Concero Router", async function () {
-        const deployment = await deployConceroRouter(hre);
-        deploymentAddress = deployment.address;
-    });
-
     it("Should deploy the contract and call sendMessage", async function () {
         const { abi: conceroRouterAbi } = await import(
             "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
         );
 
-        const { publicClient, walletClient } = getClients(conceroNetworks.localhost.viemChain);
-
-        const feeToken = getEnvVar(`USDC_${networkEnvKeys["base"]}`);
-        const messageRequest = {
-            feeToken,
-            dstChainSelector: getEnvVar("CL_CCIP_CHAIN_SELECTOR_ARBITRUM_SEPOLIA"),
-            receiver: walletClient.account.address,
+        const message = {
+            id: "0xdc21d6bd7c2aca2676da21de06870fef3c56a210e379990da1c044eb04bfc789",
+            srcChainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_BASE_SEPOLIA),
+            dstChainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_ARBITRUM_SEPOLIA),
+            receiver: "0xdddddb8a8e41c194ac6542a0ad7ba663a72741e0",
+            sender: "0xdddddb8a8e41c194ac6542a0ad7ba663a72741e0",
             tokenAmounts: [],
             relayers: [],
-            data: walletClient.account.address,
-            extraArgs: "0x01010",
+            data: "0x01",
+            extraArgs: "0x",
         };
 
-        await approve(feeToken, deploymentAddress, parseUnits("1", 6), walletClient, publicClient);
-
-        const hash = await walletClient.writeContract({
-            address: deploymentAddress,
-            abi: conceroRouterAbi,
-            functionName: "sendMessage",
-            account: walletClient.account,
-            args: [messageRequest],
-            chain: conceroNetworks.localhost.viemChain,
-        });
-
-        console.log("Message sent with hash:", hash);
-        const { status, logs } = await publicClient.waitForTransactionReceipt({ hash });
-
-        if (status != "success") {
-            throw new Error(`Transaction failed`);
-        }
-
-        const decodedLogs = logs.map(log => decodeLogWrapper(conceroRouterAbi, log));
-        const messageLog = decodedLogs.find(log => log?.eventName === "ConceroMessage");
-
-        if (!messageLog) {
-            throw new Error(`ConceroMessage log not found`);
-        }
-
-        const message = {
-            id: messageLog.args.id,
-            srcChainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST,
-            dstChainSelector: BigInt(messageLog.args.message.dstChainSelector),
-            receiver: messageLog.args.message.receiver,
-            sender: messageLog.args.message.sender,
-            tokenAmounts: messageLog.args.message.tokenAmounts,
-            relayers: messageLog.args.message.relayers,
-            data: messageLog.args.message.data,
-            extraArgs: messageLog.args.message.extraArgs,
-        };
-
-        const encodedMessage = encodeAbiParameters(
-            [
-                { name: "srcChainSelector", type: "uint64" },
-                { name: "dstChainSelector", type: "uint64" },
-                { name: "receiver", type: "address" },
-                { name: "sender", type: "address" },
-                { name: "tokenAmounts", type: "tuple(address, uint256)[]" },
-                { name: "relayers", type: "uint8[]" },
-                { name: "data", type: "bytes" },
-                { name: "extraArgs", type: "bytes" },
-            ],
-            [
-                message.srcChainSelector,
-                message.dstChainSelector,
-                message.receiver,
-                message.sender,
-                message.tokenAmounts,
-                message.relayers,
-                message.data,
-                message.extraArgs,
-            ],
-        );
+        const encodedMessage = encodeAbiParameters(conceroMessageAbi, [
+            {
+                srcChainSelector: message.srcChainSelector,
+                dstChainSelector: message.dstChainSelector,
+                receiver: message.receiver,
+                sender: message.sender,
+                tokenAmounts: message.tokenAmounts,
+                relayers: message.relayers,
+                data: message.data,
+                extraArgs: message.extraArgs,
+            },
+        ]);
 
         const results = await runCLFSimulation(CLFType.requestReport, ["0x0", "0x0", message.id, encodedMessage], {
             print: false,

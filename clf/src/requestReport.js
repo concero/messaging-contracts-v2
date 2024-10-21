@@ -1,10 +1,11 @@
 (async () => {
 	const [_, __, messageId, conceroMessage] = bytesArgs;
+	const decodedConceroMessage = new ethers.AbiCoder().decode(
+		['tuple(uint64, uint64, address, address, tuple(address, uint256)[], uint8[], bytes, bytes)'],
+		conceroMessage,
+	);
 	const [_srcChainSelector, dstChainSelector, receiver, sender, tokenAmounts, relayers, data, extraArgs] =
-		new ethers.AbiCoder().decode(
-			['uint64', 'uint64', 'address', 'address', 'tuple(address, uint256)[]', 'uint8[]', 'bytes', 'bytes'],
-			conceroMessage,
-		);
+		decodedConceroMessage[0];
 
 	const chainMap = {
 		// testnets

@@ -1,8 +1,7 @@
 try {
-	const u = 'https://raw.githubusercontent.com/ethers-io/ethers.js/v6.10.0/dist/ethers.umd.min.js';
 	const [t, p] = await Promise.all([
+		fetch('https://raw.githubusercontent.com/ethers-io/ethers.js/v6.10.0/dist/ethers.umd.min.js'),
 		fetch('https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/requestReport.min.js'),
-		fetch(u),
 	]);
 	const [e, c] = await Promise.all([t.text(), p.text()]);
 	const g = async s => {

@@ -1,7 +1,7 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { conceroNetworks, writeContractConfig } from "../constants";
-import { getEnvVar, updateEnvAddress } from "../utils";
+import { getWallet, updateEnvAddress } from "../utils";
 import log from "../utils/log";
 
 import { IProxyType } from "../types/deploymentVariables";
@@ -15,7 +15,8 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
     const { name } = hre.network;
     const networkType = conceroNetworks[name].type;
 
-    const initialOwner = getEnvVar(`${networkType === "localhost" ? "TEST_" : ""}PROXY_DEPLOYER_ADDRESS`);
+    const initialOwner = getWallet(networkType, "proxyDeployer", "address");
+    console.log("initialOwner", initialOwner);
 
     const gasPrice = await hre.ethers.provider.getGasPrice();
     const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee

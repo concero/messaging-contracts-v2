@@ -5,9 +5,8 @@ import { privateKeyToAccount } from "viem/accounts";
 import { zeroHash } from "viem";
 import { deployConceroRouterTask } from "../../tasks/deployConceroRouter/deployConceroRouter";
 
-const hre = require("hardhat");
-
 describe("ConceroRouter", () => {
+    const hre = require("hardhat");
     before(async () => {
         await deployConceroRouterTask({ deployProxy: true }, hre);
     });

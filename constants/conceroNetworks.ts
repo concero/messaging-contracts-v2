@@ -22,15 +22,15 @@ import {
 } from "viem/chains";
 import { rpcUrl, urls } from "./rpcUrls";
 import { hardhatViemChain, localhostViemChain } from "../utils/localhostViemChain";
-import { getPrivateKey } from "../utils";
+import { getWallet } from "../utils";
 
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
-const mainnetProxyDeployerPK = getPrivateKey("mainnet", "proxyDeployer");
-const testnetProxyDeployerPK = getPrivateKey("testnet", "proxyDeployer");
-const localhostProxyDeployerPK = getPrivateKey("localhost", "proxyDeployer");
-const mainnetDeployerPK = getPrivateKey("mainnet", "deployer");
-const testnetDeployerPK = getPrivateKey("testnet", "deployer");
-const localhostDeployerPK = getPrivateKey("localhost", "deployer");
+const mainnetProxyDeployerPK = getWallet("mainnet", "proxyDeployer", "privateKey");
+const testnetProxyDeployerPK = getWallet("testnet", "proxyDeployer", "privateKey");
+const localhostProxyDeployerPK = getWallet("localhost", "proxyDeployer", "privateKey");
+const mainnetDeployerPK = getWallet("mainnet", "deployer", "privateKey");
+const testnetDeployerPK = getWallet("testnet", "deployer", "privateKey");
+const localhostDeployerPK = getWallet("localhost", "deployer", "privateKey");
 
 export const networkTypes: Record<NetworkType, NetworkType> = {
     mainnet: "mainnet",

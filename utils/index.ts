@@ -11,7 +11,7 @@ import getHashSum from "./getHashSum";
 import { getClients, getFallbackClients } from "./getViemClients";
 import { err, log, warn } from "./log";
 import { getEnvAddress, getEnvVar } from "./getEnvVar";
-import { getPrivateKey } from "./getPrivateKey";
+import { getWallet } from "./getWallet";
 import { updateEnvAddress, updateEnvVariable } from "./updateEnvVariable";
 
 export {
@@ -33,5 +33,5 @@ export {
     err,
     updateEnvVariable,
     updateEnvAddress,
-    getPrivateKey,
+    getWallet,
 };

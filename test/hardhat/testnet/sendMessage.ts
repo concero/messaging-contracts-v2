@@ -1,35 +1,23 @@
 import { IConceroMessageRequest } from "../utils/types";
-import { getClients, getEnvVar } from "../../../utils";
+import { getEnvVar, getWallet } from "../../../utils";
 import { conceroNetworks } from "../../../constants";
-import { getViemAccount } from "../../../utils/getViemClients";
-import { sendConceroRouterMessageBase } from "../base/sendConceroRouterMessageBase";
+import { sendRouterMessage } from "../base/sendRouterMessage";
 
 describe("ConceroRouterSendMessage", () => {
     it("Should send message", async function () {
-        const conceroNetwork = conceroNetworks.baseSepolia;
+        const chain = conceroNetworks.baseSepolia;
+        const receiver = getWallet("testnet", "deployer", "address");
 
-        const { walletClient, publicClient } = getClients(
-            conceroNetworks.viemChain,
-            conceroNetwork.url,
-            getViemAccount("testnet", "deployer"),
-        );
-
-        const messageReq: IConceroMessageRequest = {
-            feeToken: getEnvVar("CONCERO_CLF_ROUTER"),
+        const message: IConceroMessageRequest = {
+            feeToken: "0x0000000000000000000000000000000000000000",
             dstChainSelector: getEnvVar("CL_CCIP_CHAIN_SELECTOR_ARBITRUM_SEPOLIA"),
-            data: "0x01",
+            receiver,
             tokenAmounts: [],
             relayers: [],
+            data: "0x01",
             extraArgs: "",
         };
 
-        const res = await sendConceroRouterMessageBase({
-            conceroRouterAddress: getEnvVar("CONCERO_ROUTER_PROXY_BASE_SEPOLIA"),
-            walletClient,
-            publicClient,
-            messageReq,
-        });
-
-        console.log("logs: ", res.logs);
+        const { hash, logs } = await sendRouterMessage(chain, message, 50_000n);
     });
 });

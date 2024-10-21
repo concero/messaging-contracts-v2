@@ -33,8 +33,8 @@ export function getFallbackClients(
     if (!account) {
         account =
             chain.type === "mainnet"
-                ? privateKeyToAccount(`0x${process.env.DEPLOYER_PRIVATE_KEY}`)
-                : privateKeyToAccount(`0x${process.env.TEST_DEPLOYER_PRIVATE_KEY}`);
+                ? privateKeyToAccount(`0x${process.env.MAINNET_DEPLOYER_PRIVATE_KEY}`)
+                : privateKeyToAccount(`0x${process.env.TESTNET_DEPLOYER_PRIVATE_KEY}`);
     }
 
     const { viemChain, name } = chain;

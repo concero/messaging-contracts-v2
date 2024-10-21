@@ -16,8 +16,6 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
     const networkType = conceroNetworks[name].type;
 
     const initialOwner = getWallet(networkType, "proxyDeployer", "address");
-    console.log("initialOwner", initialOwner);
-
     const gasPrice = await hre.ethers.provider.getGasPrice();
     const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
     const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee

@@ -6,6 +6,8 @@ import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import log from "../utils/log";
 
 const ETHERS_JS_URL = "https://raw.githubusercontent.com/ethers-io/ethers.js/v6.10.0/dist/ethers.umd.min.js";
+const requestReportJsUrl =
+    "https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/requestReport.min.js";
 
 const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
     hre: HardhatRuntimeEnvironment,
@@ -13,7 +15,7 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
     const { deployer } = await hre.getNamedAccounts();
     const { deploy } = hre.deployments;
 
-    const { name, live } = hre.network;
+    const { name } = hre.network;
 
     const chain = conceroNetworks[name as ConceroNetworkNames];
     const { type: networkType } = chain;
@@ -22,7 +24,8 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
     const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
     const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
 
-    // log("Deploying...", "deployCLFRouter", name);
+    const ethersJsCode = await fetch(ETHERS_JS_URL).then(res => res.text());
+    const requestCLFMessageReportJsCode = await fetch(requestReportJsUrl).then(res => res.text());
 
     const args = {
         functionsRouter: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
@@ -30,8 +33,8 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         clfSubscriptionId: getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`),
         clfDonHostedSecretsVersion: getEnvVar(`CLF_DON_SECRETS_VERSION_${networkEnvKeys[name]}`),
         clfDonHostedSecretsSlotId: 0n,
-        ethersJsCodeHash: getHashSum(ETHERS_JS_URL),
-        requestCLFMessageReportJsCodeHash: getHashSum("../clf/dist/requestReport.js"),
+        ethersJsCodeHash: getHashSum(ethersJsCode),
+        requestCLFMessageReportJsCodeHash: getHashSum(requestCLFMessageReportJsCode),
         owner: deployer,
     };
 

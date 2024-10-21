@@ -21,18 +21,18 @@
 		// 	chainId: '0xaa36a7',
 		// 	conceroRouterAddress: '${CONCERO_ROUTER_PROXY_SEPOLIA}',
 		// },
-		// ['${CL_CCIP_CHAIN_SELECTOR_ARBITRUM_SEPOLIA}']: {
-		// 	urls: ['https://rpc.ankr.com/arbitrum_sepolia', 'https://arbitrum-sepolia-rpc.publicnode.com'],
-		// 	confirmations: 3n,
-		// 	chainId: '0x66eee',
-		// 	conceroRouterAddress: '${CONCERO_ROUTER_PROXY_ARBITRUM_SEPOLIA}',
-		// },
-		// ['${CL_CCIP_CHAIN_SELECTOR_BASE_SEPOLIA}']: {
-		// 	urls: ['https://rpc.ankr.com/base_sepolia', 'https://base-sepolia-rpc.publicnode.com'],
-		// 	confirmations: 3n,
-		// 	chainId: '0x14a34',
-		// 	conceroRouterAddress: '${CONCERO_ROUTER_PROXY_BASE_SEPOLIA}',
-		// },
+		['${CL_CCIP_CHAIN_SELECTOR_ARBITRUM_SEPOLIA}']: {
+			urls: ['https://rpc.ankr.com/arbitrum_sepolia', 'https://arbitrum-sepolia-rpc.publicnode.com'],
+			confirmations: 3n,
+			chainId: '0x66eee',
+			conceroRouterAddress: '${CONCERO_ROUTER_PROXY_ARBITRUM_SEPOLIA}',
+		},
+		['${CL_CCIP_CHAIN_SELECTOR_BASE_SEPOLIA}']: {
+			urls: ['https://rpc.ankr.com/base_sepolia', 'https://base-sepolia-rpc.publicnode.com'],
+			confirmations: 3n,
+			chainId: '0x14a34',
+			conceroRouterAddress: '${CONCERO_ROUTER_PROXY_BASE_SEPOLIA}',
+		},
 		// ['${CL_CCIP_CHAIN_SELECTOR_OPTIMISM_SEPOLIA}']: {
 		// 	urls: ['https://rpc.ankr.com/optimism_sepolia', 'https://optimism-sepolia-rpc.publicnode.com'],
 		// 	confirmations: 3n,

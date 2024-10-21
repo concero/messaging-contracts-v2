@@ -6,8 +6,20 @@
 			conceroMessage,
 		);
 	const chainMap = {
+		['3478487238524512106']: {
+			urls: ['https://rpc.ankr.com/arbitrum_sepolia', 'https://arbitrum-sepolia-rpc.publicnode.com'],
+			confirmations: 3n,
+			chainId: '0x66eee',
+			conceroRouterAddress: '0x0302761872ECA8eBCa807BF007c381C368CF7686',
+		},
+		['10344971235874465080']: {
+			urls: ['https://rpc.ankr.com/base_sepolia', 'https://base-sepolia-rpc.publicnode.com'],
+			confirmations: 3n,
+			chainId: '0x14a34',
+			conceroRouterAddress: '0xbd5d8f8Cec7324313f87c3E4b6c32A8238C790E9',
+		},
 		['1111111111111111111']: {
-			urls: ['http://127.0.0.1:8545'],
+			urls: ['http://127.0.0.1:8546'],
 			confirmations: 0n,
 			chainId: '0x7A69',
 			conceroRouterAddress: '0x23494105b6B8cEaA0eB9c051b7e4484724641821',
@@ -75,7 +87,7 @@
 	}
 	const log = await getLogByMessageId(messageId);
 	const abi = [
-		'event ConceroMessage(bytes32 indexed, tuple(uint64, uint64, address, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
+		'event ConceroMessageSent(bytes32 indexed, tuple(uint64, uint64, address, address, tuple(address,uint256)[], uint8[], bytes, bytes))',
 	];
 	const contract = new ethers.Interface(abi);
 	const logData = {topics: [log.topics[0], log.topics[1]], data: log.data};

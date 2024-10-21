@@ -7,14 +7,15 @@ import { networkEnvKeys } from "../../constants";
 export async function addCLFConsumer(chain: ConceroNetwork, consumerAddresses: Address[]) {
     const hre = require("hardhat");
     const { confirmations, name } = chain;
-    const signer = await hre.ethers.getSigner(process.env.DEPLOYER_ADDRESS);
-    const subscriptionId = getEnvVar(`CLF_SUBID_ARBITRUM${networkEnvKeys[name]}`);
+    const adminAddress = process.env.TESTNET_DEPLOYER_ADDRESS;
+    const signer = await hre.ethers.getSigner(adminAddress);
+    const subscriptionId = getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`);
 
     for (const consumerAddress of consumerAddresses) {
         log(`Adding ${consumerAddress} to sub ${subscriptionId} on ${name}`, "addCLFConsumer");
 
         const txOptions = { confirmations };
-        const linkToken = getEnvVar(`CL_CCIP_CHAIN_${networkEnvKeys[name]}`);
+        const linkToken = getEnvVar(`CL_CCIP_CHAIN_SELECTOR_${networkEnvKeys[name]}`);
         const sm = new SubscriptionManager({
             signer,
             linkTokenAddress: linkToken,

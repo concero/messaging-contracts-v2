@@ -45,8 +45,8 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         ],
         log: true,
         autoMine: true,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
+        // maxFeePerGas,
+        // maxPriorityFeePerGas,
     })) as Deployment;
 
     log(`Deployed at: ${deployment.address}`, "deployConceroRouter", name);

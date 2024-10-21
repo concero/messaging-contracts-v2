@@ -49,8 +49,8 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         ],
         log: true,
         autoMine: true,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
+        // maxFeePerGas,
+        // maxPriorityFeePerGas,
         // gasPrice, // Uncomment if custom gas price is needed
     })) as Deployment;
 

@@ -7,7 +7,6 @@ import deployTransparentProxy from "../../deploy/TransparentProxy";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { setVariables } from "../deployConceroRouter/setVariables";
 import { upgradeProxyImplementation } from "../upgradeProxyImplementation";
-import { uploadClfSecrets } from "../clf/uploadClfSecrets";
 import { addCLFConsumer } from "../clf/addClfConsumer";
 import { Address } from "viem";
 
@@ -23,11 +22,6 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
         await addCLFConsumer(conceroNetwork, [proxyAddress]);
     }
 
-    if (taskArgs.uploadsecrets) {
-        const slotId = taskArgs.slotid ?? 0;
-        await uploadClfSecrets([conceroNetwork], slotId);
-    }
-
     if (taskArgs.deployimplementation) {
         await deployCLFRouter(hre);
         await upgradeProxyImplementation(hre, ProxyEnum.clfRouterProxy, false);
@@ -41,6 +35,7 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
 task("deploy-clf-router", "Deploy the MasterChainCLF contract")
     .addFlag("deployproxy", "Deploy the proxy")
     .addFlag("deployimplementation", "Deploy the implementation")
+    .addFlag("uploadsecrets", "Deploy the implementation")
     .addFlag("setvars", "Set the contract variables")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
         await deployClfRouterTask(taskArgs, hre);

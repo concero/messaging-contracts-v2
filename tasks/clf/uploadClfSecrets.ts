@@ -17,10 +17,16 @@ export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number)
         const { signer } = getEthersSignerAndProvider(url);
         const minutesUntilExpiration = chain.type === "mainnet" ? CLF_MAINNET_TTL : CLF_TESTNET_TTL;
 
+        console.log({
+            signer,
+            functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
+            donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
+        });
+
         const secretsManager = new SecretsManager({
             signer,
-            functionsRouterAddress: getEnvVar(`CLF_ROUTER${networkEnvKeys[name]}`),
-            donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
+            functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
+            donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}_ALIAS`),
         });
         await secretsManager.initialize();
 

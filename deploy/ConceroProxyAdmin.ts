@@ -12,7 +12,7 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 ) {
     const { proxyDeployer } = await hre.getNamedAccounts();
     const { deploy } = hre.deployments;
-    const { name, live } = hre.network;
+    const { name } = hre.network;
     const networkType = conceroNetworks[name].type;
 
     const initialOwner = getEnvVar(`${networkType === "localhost" ? "TEST_" : ""}PROXY_DEPLOYER_ADDRESS`);
@@ -28,8 +28,8 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
         log: true,
         autoMine: true,
         skipIfAlreadyDeployed: false,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
+        // maxFeePerGas,
+        // maxPriorityFeePerGas,
         gasLimit: writeContractConfig.gas,
     })) as Deployment;
 

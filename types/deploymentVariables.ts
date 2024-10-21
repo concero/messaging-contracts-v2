@@ -7,7 +7,9 @@ type ProxyEnvPrefixes = {
 };
 export type EnvPrefixes = ProxyEnvPrefixes & {
     router: string;
+    routerProxy: string;
     clfRouter: string;
+    clfRouterProxy: string;
     routerProxyAdmin: string;
     clfRouterProxyAdmin: string;
     lpToken: string;

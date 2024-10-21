@@ -5,7 +5,7 @@ import deployCLFRouter from "../../deploy/CLFRouter";
 import deployProxyAdmin from "../../deploy/ConceroProxyAdmin";
 import deployTransparentProxy from "../../deploy/TransparentProxy";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { setVariables } from "../deployConceroRouter/setVariables";
+import { setVariables } from "./setVariables";
 import { upgradeProxyImplementation } from "../upgradeProxyImplementation";
 import { addCLFConsumer } from "../clf/addClfConsumer";
 

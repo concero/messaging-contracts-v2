@@ -2,17 +2,20 @@ import { ConceroNetworkType } from "../types/ConceroNetwork";
 
 export function getWallet(
     chainType: ConceroNetworkType,
-    accountType: "proxyDeployer" | "deployer",
+    accountType: "proxyDeployer" | "deployer" | "operator",
     walletType: "privateKey" | "address",
 ) {
-    let deployerKey;
+    let prefix;
     let walletKey;
     switch (accountType) {
         case "proxyDeployer":
-            deployerKey = "PROXY_DEPLOYER";
+            prefix = "PROXY_DEPLOYER";
             break;
         case "deployer":
-            deployerKey = "DEPLOYER";
+            prefix = "DEPLOYER";
+            break;
+        case "operator":
+            prefix = "OPERATOR";
             break;
         default:
             throw new Error(`Unknown account type: ${accountType}`);
@@ -30,7 +33,7 @@ export function getWallet(
     }
 
     // Determine the environment variable key based on the wallet type
-    const envKey = `${chainType.toUpperCase()}_${deployerKey}_${walletKey}`;
+    const envKey = `${chainType.toUpperCase()}_${prefix}_${walletKey}`;
     const walletValue = process.env[envKey];
 
     if (!walletValue) {

@@ -10,9 +10,7 @@ export async function setVariables(hre: HardhatRuntimeEnvironment) {
 }
 
 async function setAllowedOperators(hre: HardhatRuntimeEnvironment, network: ConceroNetwork) {
-    const { abi: conceroRouterAbi } = await import(
-        "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
-    );
+    const { abi: conceroRouterAbi } = await import("../../../v2-operators/src/relayer/a/constants/ConceroRouter.json");
 
     const { publicClient, walletClient, account } = getFallbackClients(network);
 

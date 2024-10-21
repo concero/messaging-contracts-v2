@@ -125,13 +125,13 @@ contract CLFRouter is IMessage, FunctionsClient, CLFRouterStorage {
 
         CLFRequestType reqType;
         assembly {
-            reqType := byte(0, mload(add(response, 0)))
+            reqType := byte(0, mload(add(response, 32)))
         }
 
         if (reqType == CLFRequestType.RequestCLFMessageReport) {
             bytes32 conceroId;
             assembly {
-                conceroId := mload(add(response, 1))
+                conceroId := mload(add(response, 33))
             }
 
             s_clfRequestStatusByConceroId[conceroId] = CLFRequestStatus.FulFilled;

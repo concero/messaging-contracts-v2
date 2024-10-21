@@ -112,5 +112,5 @@
 			[messageId, logMessageArgs],
 		),
 	);
-	return packResult(messageId, messageHash, srcChainSelector, srcBlockNumber);
+	return packResult(messageId, messageHash, BigInt(srcChainSelector), BigInt(srcBlockNumber));
 })();

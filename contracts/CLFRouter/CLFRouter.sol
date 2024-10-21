@@ -46,7 +46,6 @@ contract CLFRouter is IMessage, FunctionsClient, CLFRouterStorage {
     modifier onlyOwner() {
         require(msg.sender == i_owner, OnlyOwner());
         _;
-
     }
     modifier onlyOperator() {
         require(s_isAllowedOperator[msg.sender], OnlyAllowedOperator());
@@ -87,7 +86,10 @@ contract CLFRouter is IMessage, FunctionsClient, CLFRouterStorage {
         bytes32 messageId,
         Message calldata message
     ) external onlyOperator {
-        require(s_clfRequestStatusByConceroId[messageId] == CLFRequestStatus.NotStarted, MessageAlreadyProcessed());
+        require(
+            s_clfRequestStatusByConceroId[messageId] == CLFRequestStatus.NotStarted,
+            MessageAlreadyProcessed()
+        );
 
         bytes[] memory clfReqArgs = new bytes[](4);
         clfReqArgs[0] = abi.encodePacked(i_ethersJsCodeHash);
@@ -140,7 +142,6 @@ contract CLFRouter is IMessage, FunctionsClient, CLFRouterStorage {
     function _prepareAndSendCLFRequest(bytes[] memory args) internal returns (bytes32) {
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(CLF_JS_CODE);
-        req.addDONHostedSecrets(i_clfDonHostedSecretsSlotId, i_clfDonHostedSecretsVersion);
         req.setBytesArgs(args);
         return _sendRequest(req.encodeCBOR(), i_clfSubscriptionId, CLF_GAS_LIMIT, i_clfDonId);
     }

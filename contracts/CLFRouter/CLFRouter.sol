@@ -57,7 +57,7 @@ contract CLFRouter is IMessage, FunctionsClient, CLFRouterStorage {
     //////////////////////////
 
     event CLFRequestError(bytes err);
-    event CLFMessageReport(bytes32 conceroId);
+    event CLFMessageReport(bytes32 indexed conceroId);
 
     //////////////////////////
     ////EXTERNAL FUNCTIONS////

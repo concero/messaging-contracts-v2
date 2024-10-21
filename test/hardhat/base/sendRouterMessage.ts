@@ -1,6 +1,6 @@
 import { IConceroMessageRequest } from "../utils/types";
 import { ConceroNetwork } from "../../../types/ConceroNetwork";
-import { getEnvAddress, getFallbackClients } from "../../../utils";
+import { getEnvAddress, getFallbackClients, log } from "../../../utils";
 import { viemReceiptConfig } from "../../../constants";
 
 export interface SendRouterMessageReturnType {
@@ -20,26 +20,19 @@ export async function sendRouterMessage(
     const { walletClient, publicClient } = getFallbackClients(chain);
     const [conceroRouterAddress] = getEnvAddress("routerProxy", chain.name);
 
-    // const { request } = await publicClient.simulateContract({
-    //     account: walletClient.account,
-    //     abi: conceroRouterAbi,
-    //     address: conceroRouterAddress,
-    //     functionName: "sendMessage",
-    //     args: [message],
-    //     chain: chain.viemChain,
-    //     value,
-    // });
-
-    console.log(`Sending message to ${chain.name}...`);
-    const hash = await walletClient.writeContract({
+    const { request } = await publicClient.simulateContract({
         account: walletClient.account,
         abi: conceroRouterAbi,
         address: conceroRouterAddress,
         functionName: "sendMessage",
         args: [message],
+        chain: chain.viemChain,
         value,
     });
-    console.log(hash);
+
+    const hash = await walletClient.writeContract(request);
+
+    log(`Message sent with hash: ${hash}`, "sendRouterMessage", chain.name);
     const { status, logs } = await publicClient.waitForTransactionReceipt({ hash, ...viemReceiptConfig });
 
     if (status !== "success") {

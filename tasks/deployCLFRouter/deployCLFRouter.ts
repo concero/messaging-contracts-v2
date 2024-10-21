@@ -12,7 +12,6 @@ import { Address } from "viem";
 
 export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
     compileContracts({ quiet: true });
-    // const { live, name } = hre.network;
     const conceroNetwork = conceroNetworks[hre.network.name];
 
     if (taskArgs.deployproxy) {
@@ -35,7 +34,6 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
 task("deploy-clf-router", "Deploy the MasterChainCLF contract")
     .addFlag("deployproxy", "Deploy the proxy")
     .addFlag("deployimplementation", "Deploy the implementation")
-    .addFlag("uploadsecrets", "Deploy the implementation")
     .addFlag("setvars", "Set the contract variables")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
         await deployClfRouterTask(taskArgs, hre);

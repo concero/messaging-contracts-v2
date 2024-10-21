@@ -10,7 +10,6 @@ import { upgradeProxyImplementation } from "../upgradeProxyImplementation";
 
 export async function deployConceroRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
     compileContracts({ quiet: true });
-    // const { live, name } = hre.network;
 
     if (taskArgs.deployproxy) {
         await deployProxyAdmin(hre, ProxyEnum.routerProxy);

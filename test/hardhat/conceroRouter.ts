@@ -21,7 +21,7 @@ describe("Concero Router", async () => {
             extraArgs: "0x", // Example extra args
         };
 
-        const [targetContract] = getEnvAddress("router", hre.network.name);
+        const [targetContract] = getEnvAddress("routerProxy", hre.network.name);
         // Send the message using the deployer (who is now the allowed operator)
         const { request: sendMessageRequest } = await publicClient.simulateContract({
             address: targetContract,

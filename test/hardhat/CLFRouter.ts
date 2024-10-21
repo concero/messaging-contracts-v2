@@ -39,7 +39,7 @@ describe("CLF Router", async () => {
     it("Should call requestCLFMessageReport", async function () {
         const { abi: CLFRouterAbi } = await import("../../artifacts/contracts/CLFRouter/CLFRouter.sol/CLFRouter.json");
 
-        const [CLFRouter] = getEnvAddress("clfRouter", hre.network.name);
+        const [CLFRouter] = getEnvAddress("clfRouterProxy", hre.network.name);
         // Define the message structure
         const message = {
             srcChainSelector: 1, // Example value

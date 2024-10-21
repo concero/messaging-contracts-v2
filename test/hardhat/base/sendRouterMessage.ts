@@ -18,7 +18,7 @@ export async function sendRouterMessage(
     );
 
     const { walletClient, publicClient } = getFallbackClients(chain);
-    const [conceroRouterAddress] = getEnvAddress("router", chain.name);
+    const [conceroRouterAddress] = getEnvAddress("routerProxy", chain.name);
 
     const { request } = await publicClient.simulateContract({
         account: walletClient.account,

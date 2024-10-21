@@ -5,7 +5,7 @@ export type IProxyType = keyof typeof ProxyEnum;
 type ProxyEnvPrefixes = {
     [key in ProxyEnum]: string;
 };
-export type EnvPrefixes = ProxyEnvPrefixes & {
+export type EnvPrefixes = {
     router: string;
     routerProxy: string;
     clfRouter: string;

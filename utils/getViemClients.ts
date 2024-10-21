@@ -5,7 +5,7 @@ import { WalletClient } from "viem/clients/createWalletClient";
 import { PublicClient } from "viem/clients/createPublicClient";
 import { urls } from "../constants";
 import { ConceroNetwork, ConceroNetworkType } from "../types/ConceroNetwork";
-import { getPrivateKey } from "./getPrivateKey";
+import { getWallet } from "./getWallet";
 
 export function getClients(
     viemChain: Chain,
@@ -47,5 +47,5 @@ export function getFallbackClients(
 }
 
 export function getViemAccount(chainType: ConceroNetworkType, accountType: "proxyDeployer" | "deployer") {
-    return privateKeyToAccount(`0x${getPrivateKey(chainType, accountType)}`);
+    return privateKeyToAccount(`0x${getWallet(chainType, accountType, "privateKey")}`);
 }

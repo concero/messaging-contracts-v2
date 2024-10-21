@@ -22,15 +22,15 @@ import {
 } from "viem/chains";
 import { rpcUrl, urls } from "./rpcUrls";
 import { hardhatViemChain, localhostViemChain } from "../utils/localhostViemChain";
-import { getPrivateKey } from "../utils";
+import { getWallet } from "../utils";
 
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
-const mainnetProxyDeployerPK = getPrivateKey("mainnet", "proxyDeployer");
-const testnetProxyDeployerPK = getPrivateKey("testnet", "proxyDeployer");
-const localhostProxyDeployerPK = getPrivateKey("localhost", "proxyDeployer");
-const mainnetDeployerPK = getPrivateKey("mainnet", "deployer");
-const testnetDeployerPK = getPrivateKey("testnet", "deployer");
-const localhostDeployerPK = getPrivateKey("localhost", "deployer");
+const mainnetProxyDeployerPK = getWallet("mainnet", "proxyDeployer", "privateKey");
+const testnetProxyDeployerPK = getWallet("testnet", "proxyDeployer", "privateKey");
+const localhostProxyDeployerPK = getWallet("localhost", "proxyDeployer", "privateKey");
+const mainnetDeployerPK = getWallet("mainnet", "deployer", "privateKey");
+const testnetDeployerPK = getWallet("testnet", "deployer", "privateKey");
+const localhostDeployerPK = getWallet("localhost", "deployer", "privateKey");
 
 export const networkTypes: Record<NetworkType, NetworkType> = {
     mainnet: "mainnet",
@@ -64,7 +64,6 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = {
     hardhat: {
         name: "hardhat",
-        id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         type: networkTypes.localhost,
         saveDeployments: false,
@@ -90,7 +89,6 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
     localhost: {
         name: "localhost",
         type: networkTypes.localhost,
-        id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
         viemChain: localhostViemChain,
         // saveDeployments: false,
@@ -106,7 +104,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
     sepolia: {
         name: "sepolia",
         type: networkTypes.testnet,
-        id: 11155111,
+        chainId: 11155111,
         url: urls.sepolia[0],
         rpcUrls: urls.sepolia,
         accounts: [testnetDeployerPK, testnetProxyDeployerPK],
@@ -117,7 +115,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
     avalancheFuji: {
         name: "avalancheFuji",
         type: networkTypes.testnet,
-        id: 43113,
+        chainId: 43113,
         url: urls.avalancheFuji[0],
         rpcUrls: urls.avalancheFuji,
         accounts: [testnetDeployerPK, testnetProxyDeployerPK],
@@ -128,7 +126,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
     optimismSepolia: {
         name: "optimismSepolia",
         type: networkTypes.testnet,
-        id: 11155420,
+        chainId: 11155420,
         url: urls.optimismSepolia[0],
         rpcUrls: urls.optimismSepolia,
         accounts: [testnetDeployerPK, testnetProxyDeployerPK],
@@ -139,7 +137,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
     arbitrumSepolia: {
         name: "arbitrumSepolia",
         type: networkTypes.testnet,
-        id: 421614,
+        chainId: 421614,
         url: urls.arbitrumSepolia[0],
         rpcUrls: urls.arbitrumSepolia,
         accounts: [testnetDeployerPK, testnetProxyDeployerPK],
@@ -150,7 +148,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
     baseSepolia: {
         name: "baseSepolia",
         type: networkTypes.testnet,
-        id: 84532,
+        chainId: 84532,
         url: urls.baseSepolia[0],
         rpcUrls: urls.baseSepolia,
         accounts: [testnetDeployerPK, testnetProxyDeployerPK],
@@ -161,7 +159,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
     polygonAmoy: {
         name: "polygonAmoy",
         type: networkTypes.testnet,
-        id: 80002,
+        chainId: 80002,
         url: urls.polygonAmoy[0],
         rpcUrls: urls.polygonAmoy,
         accounts: [testnetDeployerPK, testnetProxyDeployerPK],
@@ -174,7 +172,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
     mainnet: {
         name: "mainnet",
         type: networkTypes.mainnet,
-        id: 1,
+        chainId: 1,
         url: urls.mainnet[0],
         rpcUrls: urls.mainnet,
         accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
@@ -185,7 +183,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
     base: {
         name: "base",
         type: networkTypes.mainnet,
-        id: 8453,
+        chainId: 8453,
         url: urls.base[0],
         rpcUrls: urls.base,
         accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
@@ -196,7 +194,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
     arbitrum: {
         name: "arbitrum",
         type: networkTypes.mainnet,
-        id: 42161,
+        chainId: 42161,
         url: urls.arbitrum[0],
         rpcUrls: urls.arbitrum,
         accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
@@ -207,7 +205,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
     polygon: {
         name: "polygon",
         type: networkTypes.mainnet,
-        id: 137,
+        chainId: 137,
         url: urls.polygon[0],
         rpcUrls: urls.polygon,
         accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
@@ -218,7 +216,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
     avalanche: {
         name: "avalanche",
         type: networkTypes.mainnet,
-        id: 43114,
+        chainId: 43114,
         url: urls.avalanche[0],
         rpcUrls: urls.avalanche,
         accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
@@ -229,7 +227,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
     optimism: {
         name: "optimism",
         type: networkTypes.mainnet,
-        id: 10,
+        chainId: 10,
         url: urls.optimism[0],
         rpcUrls: urls.optimism,
         accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
@@ -238,7 +236,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
         viemChain: optimism,
     },
     polygonZkEvm: {
-        id: 137,
+        chainId: 137,
         name: "polygonZkEvm",
         type: networkTypes.mainnet,
         url: urls.polygonZkEvm[0],

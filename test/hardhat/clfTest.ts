@@ -6,9 +6,8 @@ import { decodeLogWrapper } from "./utils/decodeLogWrapper";
 import { CLFType, runCLFSimulation } from "../../utils/runCLFSimulation";
 import deployConceroRouter from "../../deploy/ConceroRouter";
 
-const hre = require("hardhat");
-
 describe("Concero Router", () => {
+    const hre = require("hardhat");
     let deploymentAddress = "0x23494105b6B8cEaA0eB9c051b7e4484724641821";
 
     it("Should deploy Concero Router", async function () {

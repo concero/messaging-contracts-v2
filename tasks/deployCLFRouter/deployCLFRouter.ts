@@ -1,6 +1,6 @@
 import { task } from "hardhat/config";
-import { compileContracts, getEnvVar } from "../../utils";
-import { conceroNetworks, networkEnvKeys, ProxyEnum } from "../../constants";
+import { compileContracts, getEnvAddress } from "../../utils";
+import { conceroNetworks, ProxyEnum } from "../../constants";
 import deployCLFRouter from "../../deploy/CLFRouter";
 import deployProxyAdmin from "../../deploy/ConceroProxyAdmin";
 import deployTransparentProxy from "../../deploy/TransparentProxy";
@@ -8,7 +8,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { setVariables } from "../deployConceroRouter/setVariables";
 import { upgradeProxyImplementation } from "../upgradeProxyImplementation";
 import { addCLFConsumer } from "../clf/addClfConsumer";
-import { Address } from "viem";
 
 export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
     compileContracts({ quiet: true });
@@ -17,7 +16,7 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
     if (taskArgs.deployproxy) {
         await deployProxyAdmin(hre, ProxyEnum.clfRouterProxy);
         await deployTransparentProxy(hre, ProxyEnum.clfRouterProxy);
-        const proxyAddress = getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[hre.network.name]}`) as Address;
+        const [proxyAddress] = getEnvAddress(ProxyEnum.clfRouterProxy, hre.network.name);
         await addCLFConsumer(conceroNetwork, [proxyAddress]);
     }
 

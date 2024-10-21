@@ -22,7 +22,7 @@ export type ConceroNetworkNames = ConceroMainnetNetworkNames | ConceroTestnetNet
 
 export type ConceroNetworkType = "mainnet" | "testnet" | "localhost";
 export type ConceroNetwork = {
-    id: number;
+    chainId: number;
     name: ConceroNetworkNames;
     type: ConceroNetworkType;
     chainSelector: string;

@@ -20,17 +20,26 @@ export async function sendRouterMessage(
     const { walletClient, publicClient } = getFallbackClients(chain);
     const [conceroRouterAddress] = getEnvAddress("routerProxy", chain.name);
 
-    const { request } = await publicClient.simulateContract({
+    // const { request } = await publicClient.simulateContract({
+    //     account: walletClient.account,
+    //     abi: conceroRouterAbi,
+    //     address: conceroRouterAddress,
+    //     functionName: "sendMessage",
+    //     args: [message],
+    //     chain: chain.viemChain,
+    //     value,
+    // });
+
+    console.log(`Sending message to ${chain.name}...`);
+    const hash = await walletClient.writeContract({
         account: walletClient.account,
         abi: conceroRouterAbi,
         address: conceroRouterAddress,
         functionName: "sendMessage",
         args: [message],
-        chain: chain.viemChain,
         value,
     });
-
-    const hash = await walletClient.writeContract(request);
+    console.log(hash);
     const { status, logs } = await publicClient.waitForTransactionReceipt({ hash, ...viemReceiptConfig });
 
     if (status !== "success") {

@@ -3,12 +3,12 @@ import { getClients, getEnvVar } from "../../utils";
 import { conceroNetworks } from "../../constants";
 import { privateKeyToAccount } from "viem/accounts";
 import { zeroHash } from "viem";
-import { deployConceroRouterTask } from "../../tasks/deployConceroRouter/deployConceroRouter";
+import { deployRouterTask } from "../../tasks/deployRouter/deployConceroRouter";
 
 describe("ConceroRouter", () => {
     const hre = require("hardhat");
     before(async () => {
-        await deployConceroRouterTask({ deployProxy: true }, hre);
+        await deployRouterTask({ deployProxy: true }, hre);
     });
 
     it("Should submit and decode clf report", async function () {

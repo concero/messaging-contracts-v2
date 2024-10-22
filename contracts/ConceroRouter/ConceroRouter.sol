@@ -140,7 +140,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     //////////////////////////////////
 
     function _processMessage(bytes32 messageId, Message calldata message) internal {
-        require(s_isMessageProcessed[messageId], MessageAlreadyProcessed(messageId));
+        require(!s_isMessageProcessed[messageId], MessageAlreadyProcessed(messageId));
         s_isMessageProcessed[messageId] = true;
 
         // TODO: add operator rewards logic here

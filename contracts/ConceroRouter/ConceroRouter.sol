@@ -146,17 +146,17 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         // TODO: add operator rewards logic here
         // add value transfer logic in the future here
 
-        EVMArgs memory args = abi.decode(message.extraArgs, (EVMArgs));
-
-        (bool success, bytes memory data) = message.receiver.call{gas: args.gasLimit}(
-            abi.encodeWithSelector(
-                IConceroMessageClient.conceroMessageReceive.selector,
-                messageId,
-                message.data
-            )
-        );
-
-        require(success, MessageProcessingFailed(data));
+        //        EVMArgs memory args = abi.decode(message.extraArgs, (EVMArgs));
+        //
+        //        (bool success, bytes memory data) = message.receiver.call{gas: args.gasLimit}(
+        //            abi.encodeWithSelector(
+        //                IConceroMessageClient.conceroMessageReceive.selector,
+        //                messageId,
+        //                message.data
+        //            )
+        //        );
+        //
+        //        require(success, MessageProcessingFailed(data));
 
         emit ConceroMessageReceived(messageId, message);
     }

@@ -132,10 +132,8 @@
 		const logs = await provider.getLogs({
 			address: chainMap[srcChainSelector].conceroRouterAddress,
 			topics: [null, messageId],
-			// fromBlock: _latestBlockNumber - 1000n,
-			// toBlock: _latestBlockNumber,
-			fromBlock: 16913578n - 1000n,
-			toBlock: 16913578n,
+			fromBlock: _latestBlockNumber - 1000n,
+			toBlock: _latestBlockNumber,
 		});
 
 		if (!logs.length) throw new Error('NLF');

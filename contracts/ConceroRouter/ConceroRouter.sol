@@ -230,7 +230,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
 
         address[] memory signers = new address[](rs.length);
 
-        for (uint256 i = 0; i < rs.length; i++) {
+        for (uint256 i; i < rs.length; i++) {
             uint8 v = uint8(rawVs[i]) + 27; // rawVs contains values 0 or 1, add 27 to get 27 or 28
             bytes32 r = rs[i];
             bytes32 s = ss[i];

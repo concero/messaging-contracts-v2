@@ -132,8 +132,10 @@
 		const logs = await provider.getLogs({
 			address: chainMap[srcChainSelector].conceroRouterAddress,
 			topics: [null, messageId],
-			fromBlock: _latestBlockNumber - 1000n,
-			toBlock: _latestBlockNumber,
+			// fromBlock: _latestBlockNumber - 1000n,
+			// toBlock: _latestBlockNumber,
+			fromBlock: 16913578n - 1000n,
+			toBlock: 16913578n,
 		});
 
 		if (!logs.length) throw new Error('NLF');
@@ -173,12 +175,11 @@
 	if (logMessageArgs[6].toLowerCase() !== data.toLowerCase()) throw new Error('WD');
 	if (logMessageArgs[7].toLowerCase() !== extraArgs.toLowerCase()) throw new Error('WEA');
 
-	const messageHash = ethers.keccak256(
-		new ethers.AbiCoder().encode(
-			['bytes32', 'tuple(uint64,uint64,address,address,tuple(address,uint256)[],uint8[],bytes,bytes)'],
-			[messageId, logMessageArgs],
-		),
+	const messageBytes = new ethers.AbiCoder().encode(
+		['bytes32', 'tuple(uint64,uint64,address,address,tuple(address,uint256)[],uint8[],bytes,bytes)'],
+		[messageId, [srcChainSelector, dstChainSelector, receiver, sender, tokenAmounts, relayers, data, extraArgs]],
 	);
+	const messageHash = ethers.keccak256(messageBytes);
 
 	return packResult(messageId, messageHash, BigInt(srcChainSelector), BigInt(srcBlockNumber));
 })();

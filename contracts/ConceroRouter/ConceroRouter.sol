@@ -252,11 +252,12 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             (bytes32[], bytes[], bytes[], bytes[], bytes[])
         );
 
+        bytes memory result = results[0];
         bytes32 messageId;
         bytes32 messageHash;
         assembly {
-            messageId := mload(add(results, 33))
-            messageHash := mload(add(results, 65))
+            messageId := mload(add(result, 33))
+            messageHash := mload(add(result, 65))
         }
 
         return (messageId, messageHash);

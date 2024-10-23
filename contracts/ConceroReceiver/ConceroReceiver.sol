@@ -8,7 +8,7 @@ abstract contract ConceroReceiver is IConceroReceiver {
     address internal immutable i_conceroRouter;
 
     modifier onlyRouter() {
-        if (msg.sender != address(i_conceroRouter)) {
+        if (msg.sender != i_conceroRouter) {
             revert InvalidRouter(msg.sender);
         }
         _;

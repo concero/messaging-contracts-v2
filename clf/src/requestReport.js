@@ -165,7 +165,8 @@
 	if (logMessageArgs[2].toLowerCase() !== receiver.toLowerCase()) throw new Error('WRV');
 	if (logMessageArgs[3].toLowerCase() !== sender.toLowerCase()) throw new Error('WRS');
 	for (let i = 0; i < logMessageArgs[4].length; i++) {
-		if (logMessageArgs[4][i].toLowerCase() !== tokenAmounts[i].toLowerCase()) throw new Error('WTA');
+		if (logMessageArgs[4][i][0].toLowerCase() !== tokenAmounts[i][0].toLowerCase()) throw new Error('WTT');
+		if (logMessageArgs[4][i][1] !== tokenAmounts[i][1]) throw new Error('WTA');
 	}
 	for (let i = 0; i < logMessageArgs[5].length; i++) {
 		if (logMessageArgs[5][i] !== relayers[i]) throw new Error('WRL');

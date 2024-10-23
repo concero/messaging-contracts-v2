@@ -3,8 +3,10 @@ pragma solidity 0.8.28;
 import "../Common/Errors.sol";
 import "./Constants.sol";
 import "./Errors.sol";
-import {IConceroMessageClient} from "./Interfaces/IConceroMessageClient.sol";
+
+import {IConceroReceiver} from "../ConceroReceiver/Interfaces/IConceroReceiver.sol";
 import {ConceroRouterStorage} from "./ConceroRouterStorage.sol";
+import {IConceroMessageClient} from "./Interfaces/IConceroMessageClient.sol";
 import {IConceroRouter} from "./Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -97,9 +99,9 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     function getMessageFee(MessageRequest calldata message) public view returns (uint256) {
         uint256 valueTransferFee = 0;
 
-        for (uint256 i = 0; i < message.tokenAmounts.length; i++) {
-            valueTransferFee += message.tokenAmounts[i].amount / CONCERO_VALUE_TRANSFER_FEE_FACTOR;
-        }
+        //        for (uint256 i = 0; i < message.tokenAmounts.length; i++) {
+        //            valueTransferFee += message.tokenAmounts[i].amount / CONCERO_VALUE_TRANSFER_FEE_FACTOR;
+        //        }
 
         if (message.feeToken == address(0)) {
             return 50_000 + valueTransferFee;
@@ -146,17 +148,17 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         // TODO: add operator rewards logic here
         // add value transfer logic in the future here
 
-        //        EVMArgs memory args = abi.decode(message.extraArgs, (EVMArgs));
-        //
-        //        (bool success, bytes memory data) = message.receiver.call{gas: args.gasLimit}(
-        //            abi.encodeWithSelector(
-        //                IConceroMessageClient.conceroMessageReceive.selector,
-        //                messageId,
-        //                message.data
-        //            )
-        //        );
-        //
-        //        require(success, MessageProcessingFailed(data));
+        EVMArgs memory args = abi.decode(message.extraArgs, (EVMArgs));
+
+        (bool success, bytes memory data) = message.receiver.call{gas: args.gasLimit}(
+            abi.encodeWithSelector(
+                IConceroReceiver.conceroReceive.selector,
+                messageId,
+                message.data
+            )
+        );
+
+        require(success, MessageProcessingFailed(data));
 
         emit ConceroMessageReceived(messageId, message);
     }

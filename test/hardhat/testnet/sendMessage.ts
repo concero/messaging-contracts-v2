@@ -15,7 +15,21 @@ describe("ConceroRouterSendMessage", () => {
             tokenAmounts: [{ token: "0x0000000000000000000000000000000000000000", amount: 10000000n }],
             relayers: [0],
             data: encodeAbiParameters([{ type: "string", name: "data" }], ["Hello world!"]),
-            extraArgs: encodeAbiParameters([{ type: "uint32", name: "extraArgs" }], [300000n]),
+            extraArgs: encodeAbiParameters(
+                [
+                    {
+                        components: [
+                            {
+                                name: "gasLimit",
+                                type: "uint32",
+                            },
+                        ],
+                        name: "extraArgs",
+                        type: "tuple",
+                    },
+                ],
+                [{ gasLimit: 300000n }],
+            ),
         };
 
         await sendRouterMessage(chain, message, 50_000n);

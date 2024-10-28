@@ -214,7 +214,10 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     function _verifyClfReportSignatures(
         ClfDonReportSubmission calldata reportSubmission
     ) internal view {
-        bytes32 h = _computeCLFReportHash(reportSubmission.context, reportSubmission.report);
+        bytes32 clfReportHash = _computeCLFReportHash(
+            reportSubmission.context,
+            reportSubmission.report
+        );
         bytes32[] memory rs = reportSubmission.rs;
         bytes32[] memory ss = reportSubmission.ss;
         bytes memory rawVs = reportSubmission.rawVs;
@@ -233,7 +236,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
             bytes32 r = rs[i];
             bytes32 s = ss[i];
 
-            address signer = ecrecover(h, v, r, s);
+            address signer = ecrecover(clfReportHash, v, r, s);
             require(_isAuthorizedClfDonSigner(signer), UnauthorizedSigner(signer));
 
             for (uint256 j = 0; j < i; j++) {

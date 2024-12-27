@@ -1,2 +1,9 @@
-echo 'HUSKY HOOK'
+#!/usr/bin/env sh
+set -euo pipefail  # Enforce safe scripting practices
+./$(dirname "$0")/validateBranchName.sh "$(git rev-parse --abbrev-ref HEAD)"
+
+echo "🔨 Running Hardhat compile..."
 yarn hardhat compile
+
+echo "✅ Pre-commit checks passed successfully."
+exit 0

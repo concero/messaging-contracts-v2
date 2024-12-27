@@ -1,9 +1,14 @@
 #!/usr/bin/env sh
-set -euo pipefail  # Enforce safe scripting practices
+set -euo pipefail
 ./$(dirname "$0")/validateBranchName.sh "$(git rev-parse --abbrev-ref HEAD)"
 
-echo "🔨 Running Hardhat compile..."
+# Run pre-commit checks
 yarn hardhat compile
+yarn format:ts
+yarn format:sol
+#yarn lint:ts
+#yarn lint:sol
+#forge test
 
 echo "✅ Pre-commit checks passed successfully."
 exit 0

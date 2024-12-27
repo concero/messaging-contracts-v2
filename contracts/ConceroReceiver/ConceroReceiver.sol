@@ -1,5 +1,6 @@
 pragma solidity 0.8.28;
 
+import {IMessage} from "../Common/IMessage.sol";
 import {IConceroReceiver} from "./Interfaces/IConceroReceiver.sol";
 
 error InvalidRouter(address router);

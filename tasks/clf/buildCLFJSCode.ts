@@ -4,14 +4,32 @@ run with: yarn hardhat clf-build-script --path ./CLFScripts/DST.js
  */
 
 import { task, types } from "hardhat/config";
+import log, { err } from "../../utils/log";
 import fs from "fs";
 import path from "path";
+import vm from "vm";
 
-export const pathToScript = [__dirname, "../", "../", "./clf/"];
+export const pathToScript = [__dirname, "../", "CLFScripts"];
 
 function checkFileAccessibility(filePath) {
     if (!fs.existsSync(filePath)) {
-        console.error(`The file ${filePath} does not exist.`);
+        err(`The file ${filePath} does not exist.`, "checkFileAccessibility");
+        process.exit(1);
+    }
+}
+
+/* Validates the JavaScript syntax of the file content */
+function validateSyntax(content, filePath) {
+    const ignoredErrors = [
+        "Cannot use import statement outside a module",
+        "await is only valid in async functions and the top level bodies of modules",
+    ];
+    try {
+        new vm.Script(content);
+    } catch (error) {
+        if (ignoredErrors.includes(error.message)) return;
+
+        err(`Syntax error in file ${filePath}: ${error.message}`, "validateSyntax");
         process.exit(1);
     }
 }
@@ -23,28 +41,27 @@ function replaceEnvironmentVariables(content) {
         const value = process.env[variable];
 
         if (value === undefined) {
-            console.error(`Environment variable ${variable} is missing.`);
+            err(`Environment variable ${variable} is missing.`, "replaceEnvironmentVariables");
             process.exit(1);
         }
         return `'${value}'`;
     });
 
     if (missingVariable) {
-        console.error("One or more environment variables are missing.");
+        err("One or more environment variables are missing.", "replaceEnvironmentVariables");
         process.exit(1);
     }
     return updatedContent;
 }
 
-function saveProcessedFile(content, outputPath) {
-    const outputDir = path.join(...pathToScript, "dist/");
-
+function saveProcessedFile(content: string, outputPath: string, scriptType: string, quiet: boolean): void {
+    const outputDir = path.join(...pathToScript, `dist/${scriptType}`);
     if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir);
+        fs.mkdirSync(outputDir, { recursive: true });
     }
     const outputFile = path.join(outputDir, path.basename(outputPath));
     fs.writeFileSync(outputFile, content, "utf8");
-    console.log(`Saved to ${outputFile}`);
+    if (!quiet) log(`Saved to ${outputFile}`, "saveProcessedFile");
 }
 
 function cleanupFile(content) {
@@ -61,58 +78,85 @@ function minifyFile(content) {
     return content
         .replace(/\n/g, " ") // Remove newlines
         .replace(/\t/g, " ") // Remove tabs
-        .replace(/\s\s+/g, " "); // Replace multiple spaces with a single space
+        .replace(/\s\s+/g, " ") // Replace multiple spaces with a single space
+        .replace(/;\s*/g, ";") // Remove spaces after semicolons
+        .replace(/\s*([=()+\-*\/{};,:<>])\s*/g, "$1"); // Remove spaces around operators
 }
 
-export function buildScript(fileToBuild: string) {
+function build(fileToBuild: string, quiet: boolean): void {
     if (!fileToBuild) {
-        console.error("Path to Functions script file is required.");
+        err("Path to Functions script file is required.", "buildScript");
         return;
     }
 
     checkFileAccessibility(fileToBuild);
 
     try {
-        const fileContent = fs.readFileSync(fileToBuild, "utf8");
-        const cleanedUpFile = replaceEnvironmentVariables(cleanupFile(fileContent));
+        let fileContent = fs.readFileSync(fileToBuild, "utf8");
+        validateSyntax(fileContent, fileToBuild);
+
+        fileContent = replaceEnvironmentVariables(fileContent);
+        const cleanedUpFile = cleanupFile(fileContent);
         const minifiedFile = minifyFile(cleanedUpFile);
 
-        saveProcessedFile(cleanedUpFile, fileToBuild);
-        saveProcessedFile(minifiedFile, fileToBuild.replace(".js", ".min.js"));
-    } catch (err) {
-        console.error(`Error processing file ${fileToBuild}: ${err}`);
+        let scriptType = "pool";
+        if (fileToBuild.split(path.sep).includes("infra")) {
+            scriptType = "infra";
+        }
+
+        saveProcessedFile(cleanedUpFile, fileToBuild, scriptType, quiet);
+        saveProcessedFile(minifiedFile, fileToBuild.replace(".js", ".min.js"), scriptType, quiet);
+        validateSyntax(cleanedUpFile, fileToBuild);
+        validateSyntax(minifiedFile, fileToBuild);
+    } catch (error) {
+        err(`Error processing file ${fileToBuild}: ${error}`, "buildScript");
+        process.exit(1);
+    }
+}
+async function buildScript(all: boolean, file: string | undefined, quiet: boolean): Promise<void> {
+    const basePath = "../../clf/src/";
+    if (all) {
+        const paths = ["infra", "pool"];
+
+        for (const relativePath of paths) {
+            const fullPath = path.join(basePath, pathToScript, relativePath);
+            if (fs.existsSync(fullPath)) {
+                const files = fs.readdirSync(fullPath);
+
+                for (const scriptFile of files) {
+                    if (scriptFile.endsWith(".js")) {
+                        const fileToBuild = path.join(fullPath, scriptFile);
+                        build(fileToBuild, quiet);
+                    }
+                }
+            } else {
+                err(`Directory does not exist: ${fullPath}`, "runBuildScript");
+            }
+        }
+        return;
+    }
+
+    if (file) {
+        const fileToBuild = path.join(basePath, pathToScript, "src", file);
+        build(fileToBuild, quiet);
+    } else {
+        err("No file specified.", "runBuildScript", quiet);
         process.exit(1);
     }
 }
 
-// run with: yarn hardhat clf-script-build
+// run with: yarn hardhat clf-script-build --file DST.js
 task("clf-script-build", "Builds the JavaScript source code")
     .addFlag("all", "Build all scripts")
     .addOptionalParam("file", "Path to Functions script file", undefined, types.string)
-    .setAction(async (taskArgs, hre) => {
-        if (taskArgs.all) {
-            const paths = ["src/"];
+    .addFlag("quiet", "Suppress console output")
+    .setAction(async taskArgs => {
+        // Parse taskArgs into function arguments at the top level
+        const all = taskArgs.all || false;
+        const file = taskArgs.file;
+        const quiet = taskArgs.quiet || false;
 
-            paths.forEach((_path: string) => {
-                const files = fs.readdirSync(path.join(...pathToScript, _path));
-
-                files.forEach((file: string) => {
-                    if (file.endsWith(".js")) {
-                        const fileToBuild = path.join(...pathToScript, _path, file);
-                        buildScript(fileToBuild);
-                    }
-                });
-            });
-
-            return;
-        }
-        if (taskArgs.file) {
-            const fileToBuild = path.join(...pathToScript, "src", taskArgs.file);
-            buildScript(fileToBuild);
-        } else {
-            console.error("No file specified.");
-            process.exit(1);
-        }
+        // Invoke the encapsulated function with parsed arguments
+        await buildScript(all, file, quiet);
     });
-
-export default {};
+export default buildScript;

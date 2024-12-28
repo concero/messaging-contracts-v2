@@ -43,3 +43,4 @@ validate_branch_name() {
 
 # Execute validation
 validate_branch_name "$1"
+

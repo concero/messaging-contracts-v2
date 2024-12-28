@@ -6,6 +6,7 @@
 ```bash
 git clone https://github.com/concero/v2-contracts.git
 cd v2-contracts
+ls
 npm install
 ```
 

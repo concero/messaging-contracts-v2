@@ -1,77 +1,51 @@
+// SPDX-License-Identifier: UNLICENSED
+/**
+ * @title Security Reporting
+ * @notice If you discover any security vulnerabilities, please report them responsibly.
+ * @contact email: security@concero.io
+ */
 pragma solidity 0.8.28;
 
-import "../Common/Errors.sol";
-import "./Constants.sol";
-import "./Errors.sol";
-
-import {IConceroReceiver} from "../ConceroReceiver/Interfaces/IConceroReceiver.sol";
+import {MessageLib} from "../Libraries/MessageLib.sol";
+import {SignerLib} from "../Libraries/SignerLib.sol";
+import {UnsupportedFeeToken, InsufficientFee, MessageAlreadyProcessed, InvalidReceiver} from "./Errors.sol";
+import {OnlyAllowedOperator, OnlyOwner} from "../Common/Errors.sol";
+import {ClientMessageRequest, InternalMessage, EvmSrcChainData, EvmDstChainData, ClientMessage, InternalMessageConfig} from "../Common/MessageTypes.sol";
+import {SupportedChains} from "../Libraries/SupportedChains.sol";
 import {ConceroRouterStorage} from "./ConceroRouterStorage.sol";
-import {IConceroMessageClient} from "./Interfaces/IConceroMessageClient.sol";
-import {IConceroRouter} from "./Interfaces/IConceroRouter.sol";
+import {IConceroRouter} from "../Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IConceroClient} from "../Interfaces/IConceroClient.sol";
 
 contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     using SafeERC20 for IERC20;
 
-    /* CONSTANTS */
-    uint16 internal CONCERO_VALUE_TRANSFER_FEE_FACTOR = 1_000;
-
-    /*IMMUTABLE VARIABLES*/
+    /* IMMUTABLE VARIABLES */
     address internal immutable i_owner;
+    uint24 internal immutable i_chainSelector;
     address internal immutable i_USDC;
-    uint64 internal immutable i_chainSelector;
-    address internal immutable i_clfDonSigner_0;
-    address internal immutable i_clfDonSigner_1;
-    address internal immutable i_clfDonSigner_2;
-    address internal immutable i_clfDonSigner_3;
 
-    //////////////////////////
-    ///////MODIFIERS//////////
-    //////////////////////////
-
+    /* MODIFIERS */
     modifier onlyOwner() {
         require(msg.sender == i_owner, OnlyOwner());
         _;
     }
 
-    modifier onlyOperator() {
-        require(s_isAllowedOperator[msg.sender], OnlyAllowedOperator());
-        _;
-    }
-
-    constructor(
-        address usdc,
-        uint64 chainSelector,
-        address _owner,
-        address clfDonSigner_0,
-        address clfDonSigner_1,
-        address clfDonSigner_2,
-        address clfDonSigner_3
-    ) {
-        i_USDC = usdc;
+    constructor(uint24 chainSelector, address owner) {
         i_chainSelector = chainSelector;
-        i_owner = _owner;
-        i_clfDonSigner_0 = clfDonSigner_0;
-        i_clfDonSigner_1 = clfDonSigner_1;
-        i_clfDonSigner_2 = clfDonSigner_2;
-        i_clfDonSigner_3 = clfDonSigner_3;
+        i_owner = owner;
     }
 
-    function sendMessage(MessageRequest calldata req) external payable {
-        // step 1: validate the message (fee tokens, receiver)
-        // TODO: mb validate data and extraArgs
-        require(_isChainSupported(req.dstChainSelector), UnsupportedChainSelector());
+    function sendConceroMessage(ClientMessageRequest calldata req) external payable {
         _collectMessageFee(req);
-        //step 3: TODO: transfer token amounts if exists
 
-        Message memory message = _buildMessage(req);
-
-        //step 4: emit the message
-        // TODO: add custom nonce to id generation
-        bytes32 messageId = keccak256(abi.encode(message, block.number, msg.sender));
-
-        emit ConceroMessageSent(messageId, message);
+        InternalMessage memory message = MessageLib.buildInternalMessage(
+            req,
+            abi.encode(EvmSrcChainData({sender: msg.sender, blockNumber: block.number})),
+            s_nonce
+        );
+        //        emit ConceroMessageSent(messageId, message);
     }
 
     /**
@@ -80,46 +54,102 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
      * @param message the message data.
      */
     function submitMessageReport(
-        ClfDonReportSubmission calldata reportSubmission,
-        Message calldata message
-    ) external onlyOperator {
+        SignerLib.ClfDonReportSubmission calldata reportSubmission,
+        InternalMessage calldata message
+    ) external {
+        require(
+            !s_isMessageProcessed[message.messageId],
+            MessageAlreadyProcessed(message.messageId)
+        );
+        s_isMessageProcessed[message.messageId] = true;
+
         // Step 1: Recover and verify the signatures
-        _verifyClfReportSignatures(reportSubmission);
+        SignerLib._verifyClfReportSignatures(reportSubmission);
 
         // Step 2: Decode the report data
-        (bytes32 messageId, bytes32 messageHash) = _extractClfResponse(reportSubmission.report);
+        (bytes32 messageId, bytes32 messageHash) = SignerLib._extractClfResponse(
+            reportSubmission.report
+        );
 
-        // Step 3: validate the message
-        _validateMessage(message, messageId, messageHash);
+        // Step 3: validate and decode message
+        (
+            InternalMessageConfig memory decodedMessageConfig,
+            EvmSrcChainData memory srcData, //not used
+            EvmDstChainData memory dstData,
+            bytes memory payload
+        ) = MessageLib.decodeMessage(message);
 
-        // Step 4: process message
-        _processMessage(messageId, message);
+        // Step 4: Deliver the message
+        deliverMessage(messageId, dstData, payload);
     }
 
-    function getMessageFee(MessageRequest calldata message) public view returns (uint256) {
-        uint256 valueTransferFee = 0;
+    /**
+     * @notice Delivers the message to the receiver contract if valid.
+     * @param messageId The unique identifier of the message.
+     * @param dstData The destination chain data of the message.
+     * @param payload The actual payload of the message.
+     */
+    function deliverMessage(
+        bytes32 messageId,
+        EvmDstChainData memory dstData,
+        bytes memory payload
+    ) internal {
+        ClientMessage memory clientMessage = ClientMessage({
+            messageId: messageId,
+            message: payload
+        });
 
+        require(dstData.receiver != address(0), InvalidReceiver());
+        require(isContract(dstData.receiver), InvalidReceiver());
+
+        (bool success, bytes memory reason) = dstData.receiver.call{gas: dstData.gasLimit}(
+            abi.encodeWithSelector(IConceroClient.ConceroReceive.selector, clientMessage)
+        );
+
+        if (!success) {
+            if (reason.length > 0) {
+                revert(string(reason));
+            } else {
+                revert("ConceroReceive call failed");
+            }
+        }
+    }
+
+    /**
+     * @notice Checks if the provided address is a contract.
+     * @param addr The address to check.
+     * @return bool True if the address is a contract, false otherwise.
+     */
+    function isContract(address addr) internal view returns (bool) {
+        uint256 size;
+        assembly {
+            size := extcodesize(addr)
+        }
+        return size > 0;
+    }
+
+    function getMessageFee(ClientMessageRequest calldata message) public view returns (uint256) {
+        uint256 valueTransferFee = 0;
+        // should decode config to get feetoken
+        return 1;
         //        for (uint256 i = 0; i < message.tokenAmounts.length; i++) {
         //            valueTransferFee += message.tokenAmounts[i].amount / CONCERO_VALUE_TRANSFER_FEE_FACTOR;
         //        }
 
-        if (message.feeToken == address(0)) {
-            return 50_000 + valueTransferFee;
-        } else if (message.feeToken == i_USDC) {
-            return 50_000 + valueTransferFee;
-        } else {
-            revert UnsupportedFeeToken();
-        }
+        //        if (message.feeToken == address(0)) {
+        //            return 50_000 + valueTransferFee;
+        //        } else if (message.feeToken == i_USDC) {
+        //            return 50_000 + valueTransferFee;
+        //        } else {
+        //            revert UnsupportedFeeToken();
+        //        }
     }
 
-    function isChainSupported(uint64 chainSelector) external view returns (bool) {
-        return _isChainSupported(chainSelector);
+    function isChainSupported(uint24 chainSelector) external view returns (bool) {
+        return SupportedChains.isChainSupported(chainSelector);
     }
 
-    //////////////////////////
-    //////ADMIN FUNCTIONS/////
-    //////////////////////////
-
+    /* OWNER FUNCTIONS */
     function registerOperator(address operator) external payable onlyOwner {
         s_isAllowedOperator[operator] = true;
     }
@@ -128,198 +158,23 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         s_isAllowedOperator[operator] = false;
     }
 
-    function withdraw(address token, uint256 amount) external payable onlyOwner {
+    function withdrawFees(address token, uint256 amount) external payable onlyOwner {
         if (token == address(0)) {
             (bool success, ) = i_owner.call{value: amount}("");
-            require(success, WithdrawalFailed());
         } else {
             IERC20(token).safeTransfer(i_owner, amount);
         }
     }
 
-    //////////////////////////////////
-    ////////INTERNAL FUNCTIONS////////
-    //////////////////////////////////
-
-    function _processMessage(bytes32 messageId, Message calldata message) internal {
-        require(!s_isMessageProcessed[messageId], MessageAlreadyProcessed(messageId));
-        s_isMessageProcessed[messageId] = true;
-
-        // TODO: add operator rewards logic here
-        // add value transfer logic in the future here
-
-        EVMArgs memory args = abi.decode(message.extraArgs, (EVMArgs));
-
-        (bool success, bytes memory data) = message.receiver.call{gas: args.gasLimit}(
-            abi.encodeWithSelector(IConceroReceiver.conceroReceive.selector, messageId, message)
-        );
-
-        require(success, MessageProcessingFailed(data));
-
-        emit ConceroMessageReceived(messageId, message);
-    }
-
-    function _validateMessage(
-        Message calldata message,
-        bytes32 messageId,
-        bytes32 reportMessageHash
-    ) internal pure {
-        bytes32 messageHash = keccak256(abi.encode(messageId, message));
-        require(messageHash == reportMessageHash, InvalidMessageHash());
-    }
-
-    function _collectMessageFee(MessageRequest calldata message) internal {
-        uint256 feePayable = getMessageFee(message);
-
-        if (message.feeToken == i_USDC) {
-            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), feePayable);
-        } else if (message.feeToken == address(0)) {
-            require(msg.value == feePayable, InsufficientFee());
-        }
-    }
-
-    function _buildMessage(MessageRequest calldata req) internal view returns (Message memory) {
-        return
-            Message({
-                srcChainSelector: i_chainSelector,
-                dstChainSelector: req.dstChainSelector,
-                receiver: req.receiver,
-                sender: msg.sender,
-                tokenAmounts: req.tokenAmounts,
-                relayers: req.relayers,
-                data: req.data,
-                extraArgs: req.extraArgs
-            });
-    }
-
-    /**
-     * @notice Computes the hash of the report and report context.
-     * @param reportContext The context of the report.
-     * @param report The serialized report data.
-     * @return The computed hash of the report.
-     */
-    function _computeCLFReportHash(
-        bytes32[3] calldata reportContext,
-        bytes calldata report
-    ) internal pure returns (bytes32) {
-        bytes32 reportHash = keccak256(report);
-        bytes memory messageToHash = abi.encodePacked(reportHash, reportContext);
-        return keccak256(messageToHash);
-    }
-
-    /**
-     * @notice Verifies the signatures of the report.
-     * @param reportSubmission The report submission data.
-     */
-    function _verifyClfReportSignatures(
-        ClfDonReportSubmission calldata reportSubmission
-    ) internal view {
-        bytes32 clfReportHash = _computeCLFReportHash(
-            reportSubmission.context,
-            reportSubmission.report
-        );
-        bytes32[] memory rs = reportSubmission.rs;
-        bytes32[] memory ss = reportSubmission.ss;
-        bytes memory rawVs = reportSubmission.rawVs;
-
-        uint256 expectedNumSignatures = 3;
-
-        require(
-            rs.length == ss.length && rs.length == expectedNumSignatures,
-            IncorrectNumberOfSignatures()
-        );
-
-        address[] memory signers = new address[](rs.length);
-
-        for (uint256 i; i < rs.length; i++) {
-            uint8 v = uint8(rawVs[i]) + 27; // rawVs contains values 0 or 1, add 27 to get 27 or 28
-            bytes32 r = rs[i];
-            bytes32 s = ss[i];
-
-            address signer = ecrecover(clfReportHash, v, r, s);
-            require(_isAuthorizedClfDonSigner(signer), UnauthorizedSigner(signer));
-
-            for (uint256 j = 0; j < i; j++) {
-                require(signers[j] != signer, DuplicateSignatureDetected(signer));
-            }
-
-            signers[i] = signer;
-        }
-    }
-
-    function _extractClfResponse(bytes calldata report) internal pure returns (bytes32, bytes32) {
-        (, bytes[] memory results, , , ) = abi.decode(
-            report,
-            (bytes32[], bytes[], bytes[], bytes[], bytes[])
-        );
-
-        bytes memory result = results[0];
-        bytes32 messageId;
-        bytes32 messageHash;
-        assembly {
-            messageId := mload(add(result, 33))
-            messageHash := mload(add(result, 65))
-        }
-
-        return (messageId, messageHash);
-    }
-
-    function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {
-        if (clfDonSigner == address(0)) {
-            return false;
-        }
-
-        return (clfDonSigner == i_clfDonSigner_0 ||
-            clfDonSigner == i_clfDonSigner_1 ||
-            clfDonSigner == i_clfDonSigner_2 ||
-            clfDonSigner == i_clfDonSigner_3);
-    }
-
-    function _isChainSupported(uint64 chainSelector) internal view returns (bool) {
-        if (_isMainnet()) {
-            return _isMainnetChainSupported(chainSelector);
-        } else {
-            return _isTestnetChainSupported(chainSelector);
-        }
-    }
-
-    function _isTestnetChainSupported(uint64 chainSelector) internal pure returns (bool) {
-        if (
-            chainSelector == CHAIN_SELECTOR_ARBITRUM_SEPOLIA ||
-            chainSelector == CHAIN_SELECTOR_BASE_SEPOLIA ||
-            chainSelector == CHAIN_SELECTOR_OPTIMISM_SEPOLIA ||
-            chainSelector == CHAIN_SELECTOR_POLYGON_AMOY
-        ) {
-            return true;
-        }
-        return false;
-    }
-
-    function _isMainnetChainSupported(uint64 chainSelector) internal pure returns (bool) {
-        if (
-            chainSelector == CHAIN_SELECTOR_ARBITRUM ||
-            chainSelector == CHAIN_SELECTOR_BASE ||
-            chainSelector == CHAIN_SELECTOR_POLYGON ||
-            chainSelector == CHAIN_SELECTOR_AVALANCHE ||
-            chainSelector == CHAIN_SELECTOR_OPTIMISM
-        ) {
-            return true;
-        }
-        return false;
-    }
-
-    function _isMainnet() internal view returns (bool) {
-        uint256 chainId = block.chainid;
-
-        if (
-            chainId == CHAIN_ID_ETHEREUM ||
-            chainId == CHAIN_ID_BASE ||
-            chainId == CHAIN_ID_AVALANCHE ||
-            chainId == CHAIN_ID_ARBITRUM ||
-            chainId == CHAIN_ID_POLYGON
-        ) {
-            return true;
-        }
-        return false;
+    /* INTERNAL FUNCTIONS */
+    function _collectMessageFee(ClientMessageRequest calldata message) internal {
+        //todo: maybe get rid of ClientMessageRequest.feetoken
+        //        uint256 feePayable = getMessageFee(message);
+        //
+        //        if (message.feeToken == i_USDC) {
+        //            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), feePayable);
+        //        } else if (message.feeToken == address(0)) {
+        //            require(msg.value == feePayable, InsufficientFee());
+        //        }
     }
 }

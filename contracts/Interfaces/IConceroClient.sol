@@ -6,4 +6,8 @@
  */
 pragma solidity 0.8.28;
 
-error MessageAlreadyProcessed();
+import {ClientMessage} from "../Common/MessageTypes.sol";
+
+interface IConceroClient {
+    function ConceroReceive(ClientMessage calldata message) external;
+}

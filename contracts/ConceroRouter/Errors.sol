@@ -1,14 +1,12 @@
+// SPDX-License-Identifier: UNLICENSED
+/**
+ * @title Security Reporting
+ * @notice If you discover any security vulnerabilities, please report them responsibly.
+ * @contact email: security@concero.io
+ */
 pragma solidity 0.8.28;
 
-error MismatchedSignatureArrays();
-error IncorrectNumberOfSignatures();
-error InvalidSignature();
-error DuplicateSignatureDetected(address signer);
-error UnauthorizedSigner(address signer);
 error UnsupportedFeeToken();
-error UnsupportedChainSelector();
 error InsufficientFee();
-error InvalidMessageHash();
-error MessageProcessingFailed(bytes error);
 error MessageAlreadyProcessed(bytes32 messageId);
-error WithdrawalFailed();
+error InvalidReceiver();

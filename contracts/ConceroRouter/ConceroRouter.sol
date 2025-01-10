@@ -8,18 +8,19 @@ pragma solidity 0.8.28;
 
 import {MessageLib} from "../Libraries/MessageLib.sol";
 import {SignerLib} from "../Libraries/SignerLib.sol";
+import {ConceroRouterStorage as s} from "./ConceroRouterStorage.sol";
 import {UnsupportedFeeToken, InsufficientFee, MessageAlreadyProcessed, InvalidReceiver} from "./Errors.sol";
 import {OnlyAllowedOperator, OnlyOwner} from "../Common/Errors.sol";
 import {ClientMessageRequest, InternalMessage, EvmSrcChainData, EvmDstChainData, ClientMessage, InternalMessageConfig} from "../Common/MessageTypes.sol";
 import {SupportedChains} from "../Libraries/SupportedChains.sol";
-import {ConceroRouterStorage} from "./ConceroRouterStorage.sol";
 import {IConceroRouter} from "../Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IConceroClient} from "../Interfaces/IConceroClient.sol";
 
-contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
+contract ConceroRouter is IConceroRouter {
     using SafeERC20 for IERC20;
+    using s for s.Router;
 
     /* IMMUTABLE VARIABLES */
     address internal immutable i_owner;
@@ -43,7 +44,7 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         InternalMessage memory message = MessageLib.buildInternalMessage(
             req,
             abi.encode(EvmSrcChainData({sender: msg.sender, blockNumber: block.number})),
-            s_nonce
+            s.router().nonce
         );
         //        emit ConceroMessageSent(messageId, message);
     }
@@ -58,10 +59,10 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
         InternalMessage calldata message
     ) external {
         require(
-            !s_isMessageProcessed[message.messageId],
+            !s.router().isMessageProcessed[message.messageId],
             MessageAlreadyProcessed(message.messageId)
         );
-        s_isMessageProcessed[message.messageId] = true;
+        s.router().isMessageProcessed[message.messageId] = true;
 
         // Step 1: Recover and verify the signatures
         SignerLib._verifyClfReportSignatures(reportSubmission);
@@ -150,13 +151,13 @@ contract ConceroRouter is IConceroRouter, ConceroRouterStorage {
     }
 
     /* OWNER FUNCTIONS */
-    function registerOperator(address operator) external payable onlyOwner {
-        s_isAllowedOperator[operator] = true;
-    }
-
-    function deregisterOperator(address operator) external payable onlyOwner {
-        s_isAllowedOperator[operator] = false;
-    }
+    //    function registerOperator(address operator) external payable onlyOwner {
+    //        s.router().isAllowedOperator[operator] = true;
+    //    }
+    //
+    //    function deregisterOperator(address operator) external payable onlyOwner {
+    //        s.router().isAllowedOperator[operator] = false;
+    //    }
 
     function withdrawFees(address token, uint256 amount) external payable onlyOwner {
         if (token == address(0)) {

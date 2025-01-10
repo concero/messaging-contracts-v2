@@ -6,10 +6,23 @@
  */
 pragma solidity 0.8.28;
 
-interface ICLFRouter {
-    enum CLFRequestStatus {
-        NotStarted,
-        Pending,
-        FulFilled
-    }
+enum Protocol {
+    ProtocolA,
+    ProtocolB,
+    ProtocolC,
+    ProtocolD,
+    ProtocolE,
+    ProtocolF,
+    ProtocolG,
+    ProtocolH,
+    ProtocolI,
+    ProtocolJ
 }
+
+enum CLFRequestStatus {
+    NotStarted,
+    Pending,
+    FulFilled
+}
+
+interface ICLFRouter {}

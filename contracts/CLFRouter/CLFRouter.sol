@@ -6,15 +6,18 @@
  */
 pragma solidity 0.8.28;
 
-import {InternalMessage} from "../Common/MessageTypes.sol";
-import {CLFRouterStorage} from "./CLFRouterStorage.sol";
-import {ICLFRouter} from "../Interfaces/ICLFRouter.sol";
+import {CLFRequestStatus} from "../Interfaces/ICLFRouter.sol";
+import {CLFRouterStorage as s} from "./CLFRouterStorage.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
-import {OnlyAllowedOperator, OnlyOwner} from "../Common/Errors.sol";
+import {ICLFRouter} from "../Interfaces/ICLFRouter.sol";
+import {InternalMessage} from "../Common/MessageTypes.sol";
 import {MessageAlreadyProcessed} from "./Errors.sol";
-contract CLFRouter is FunctionsClient, CLFRouterStorage {
+import {OnlyAllowedOperator, OnlyOwner} from "../Common/Errors.sol";
+
+contract CLFRouter is FunctionsClient {
     using FunctionsRequest for FunctionsRequest.Request;
+    using s for s.Router;
 
     enum CLFRequestType {
         RequestCLFMessageReport
@@ -40,7 +43,7 @@ contract CLFRouter is FunctionsClient, CLFRouterStorage {
         _;
     }
     modifier onlyOperator() {
-        require(s_isAllowedOperator[msg.sender], OnlyAllowedOperator());
+        require(s.router().isAllowedOperator[msg.sender], OnlyAllowedOperator());
         _;
     }
 
@@ -72,7 +75,8 @@ contract CLFRouter is FunctionsClient, CLFRouterStorage {
         InternalMessage calldata message
     ) external onlyOperator {
         require(
-            s_clfRequestStatusByConceroId[messageId] == CLFRequestStatus.NotStarted,
+            //            s_clfRequestStatus[messageId] == CLFRequestStatus.NotStarted,
+            s.router().isMessageSent[messageId] == false,
             MessageAlreadyProcessed()
         );
 
@@ -84,16 +88,17 @@ contract CLFRouter is FunctionsClient, CLFRouterStorage {
 
         _prepareAndSendCLFRequest(clfReqArgs);
 
-        s_clfRequestStatusByConceroId[messageId] = CLFRequestStatus.Pending;
+        //        s_clfRequestStatus[messageId] = CLFRequestStatus.Pending;
+        s.router().isMessageSent[messageId] = true;
     }
 
     /* OWNER FUNCTIONS */
     function registerOperator(address operator) external payable onlyOwner {
-        s_isAllowedOperator[operator] = true;
+        s.router().isAllowedOperator[operator] = true;
     }
 
     function deregisterOperator(address operator) external payable onlyOwner {
-        s_isAllowedOperator[operator] = false;
+        s.router().isAllowedOperator[operator] = false;
     }
 
     /* INTERNAL FUNCTIONS */
@@ -114,7 +119,7 @@ contract CLFRouter is FunctionsClient, CLFRouterStorage {
                 conceroId := mload(add(response, 33))
             }
 
-            s_clfRequestStatusByConceroId[conceroId] = CLFRequestStatus.FulFilled;
+            s.router().clfRequestStatus[conceroId] = CLFRequestStatus.FulFilled;
             emit CLFMessageReport(conceroId);
         }
     }

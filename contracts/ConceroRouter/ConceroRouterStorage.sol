@@ -6,10 +6,22 @@
  */
 pragma solidity 0.8.28;
 
-contract ConceroRouterStorage {
-    uint256 public s_nonce;
+library ConceroRouterStorage {
+    struct Router {
+        uint256 nonce;
+        uint256[50] __var_gap;
+        uint256[50] __array_gap;
+        mapping(address operator => uint256) operatorFeesEarnedUSDC;
+        mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
+        uint256[50] __mapping_gap;
+    }
 
-    mapping(address => bool) internal s_isAllowedOperator;
-    mapping(address => uint256) internal s_operatorFeesEarnedUSDC;
-    mapping(bytes32 messageId => bool isProcessed) internal s_isMessageProcessed;
+    bytes32 internal constant ROUTER_STORAGE_SLOT = keccak256("concero.router.storage");
+
+    function router() internal pure returns (Router storage s) {
+        bytes32 slot = ROUTER_STORAGE_SLOT;
+        assembly {
+            s.slot := slot
+        }
+    }
 }

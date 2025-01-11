@@ -13,9 +13,10 @@ import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/l
 import {ICLFRouter} from "../Interfaces/ICLFRouter.sol";
 import {InternalMessage} from "../Common/MessageTypes.sol";
 import {MessageAlreadyProcessed} from "./Errors.sol";
-import {OnlyAllowedOperator, OnlyOwner} from "../Common/Errors.sol";
+import {OnlyAllowedOperator} from "../Common/Errors.sol";
+import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
 
-contract CLFRouter is FunctionsClient {
+contract CLFRouter is FunctionsClient, ConceroOwnable {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Router;
 
@@ -24,24 +25,18 @@ contract CLFRouter is FunctionsClient {
     }
 
     /* IMMUTABLE VARIABLES */
-    address internal immutable i_owner;
     bytes32 internal immutable i_ethersJsCodeHash;
     bytes32 internal immutable i_requestCLFMessageReportJsCodeHash;
     bytes32 internal immutable i_clfDonId;
     uint64 internal immutable i_clfSubscriptionId;
     uint64 internal immutable i_clfDonHostedSecretsVersion;
     uint8 internal immutable i_clfDonHostedSecretsSlotId;
-
     /* CONSTANT VARIABLES */
     string internal constant CLF_JS_CODE =
         "try { const [t, p] = await Promise.all([ fetch('https://raw.githubusercontent.com/ethers-io/ethers.js/v6.10.0/dist/ethers.umd.min.js'), fetch('https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/requestReport.min.js'), ]); const [e, c] = await Promise.all([t.text(), p.text()]); const g = async s => { return ( '0x' + Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))) .map(v => ('0' + v.toString(16)).slice(-2).toLowerCase()) .join('') ); }; const r = await g(c); const x = await g(e); const b = bytesArgs[0].toLowerCase(); const o = bytesArgs[1].toLowerCase(); if (r === b && x === o) { const ethers = new Function(e + '; return ethers;')(); return await eval(c); } throw new Error(`${r}!=${b}||${x}!=${o}`); } catch (e) { throw new Error(e.message.slice(0, 255));}";
     uint32 internal constant CLF_GAS_LIMIT = 100_000;
 
     /* MODIFIERS */
-    modifier onlyOwner() {
-        require(msg.sender == i_owner, OnlyOwner());
-        _;
-    }
     modifier onlyOperator() {
         require(s.router().isAllowedOperator[msg.sender], OnlyAllowedOperator());
         _;
@@ -58,16 +53,14 @@ contract CLFRouter is FunctionsClient {
         uint64 clfDonHostedSecretsVersion,
         uint8 clfDonHostedSecretsSlotId,
         bytes32 ethersJsCodeHash,
-        bytes32 requestCLFMessageReportJsCodeHash,
-        address owner
-    ) FunctionsClient(functionsRouter) {
+        bytes32 requestCLFMessageReportJsCodeHash
+    ) FunctionsClient(functionsRouter) ConceroOwnable() {
         i_clfDonId = clfDonId;
         i_clfSubscriptionId = clfSubscriptionId;
         i_clfDonHostedSecretsVersion = clfDonHostedSecretsVersion;
         i_clfDonHostedSecretsSlotId = clfDonHostedSecretsSlotId;
         i_ethersJsCodeHash = ethersJsCodeHash;
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
-        i_owner = owner;
     }
 
     function requestCLFMessageReport(

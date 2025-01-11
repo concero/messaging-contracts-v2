@@ -6,17 +6,16 @@
  */
 pragma solidity 0.8.28;
 
-contract ConceroOwnable {
-    error OnlyOwner();
-
-    address internal immutable i_owner;
-
-    constructor(address owner) {
-        i_owner = owner;
-    }
+error NotOwner();
+abstract contract ConceroOwnable {
+    address public immutable i_owner;
 
     modifier onlyOwner() {
-        require(msg.sender == i_owner, OnlyOwner());
+        require(msg.sender == i_owner, NotOwner());
         _;
+    }
+
+    constructor() {
+        i_owner = msg.sender;
     }
 }

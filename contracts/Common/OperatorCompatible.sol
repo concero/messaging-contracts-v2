@@ -13,7 +13,7 @@ error OnlyAllowedOperator();
 contract OperatorCompatible is ConceroOwnable {
     mapping(address => bool) public s_isAllowedOperator;
 
-    constructor(address owner) ConceroOwnable(owner) {}
+    constructor() ConceroOwnable() {}
 
     modifier onlyAllowedOperator() {
         require(s_isAllowedOperator[msg.sender], OnlyAllowedOperator());

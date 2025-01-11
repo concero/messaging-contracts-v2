@@ -6,47 +6,43 @@
  */
 pragma solidity 0.8.28;
 
-import {MessageLib} from "../Libraries/MessageLib.sol";
-import {SignerLib} from "../Libraries/SignerLib.sol";
-import {ConceroRouterStorage as s} from "./ConceroRouterStorage.sol";
-import {UnsupportedFeeToken, InsufficientFee, MessageAlreadyProcessed, InvalidReceiver} from "./Errors.sol";
-import {OnlyAllowedOperator, OnlyOwner} from "../Common/Errors.sol";
-import {ClientMessageRequest, InternalMessage, EvmSrcChainData, EvmDstChainData, ClientMessage, InternalMessageConfig} from "../Common/MessageTypes.sol";
-import {SupportedChains} from "../Libraries/SupportedChains.sol";
+import "../Libraries/Utils.sol";
+import {ClientMessageRequest, InternalMessage, EvmSrcChainData, EvmDstChainData, ClientMessage, InternalMessageConfig, FeeToken} from "../Common/MessageTypes.sol";
+import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
+import {ConceroRouterStorage as s, StorageSlot} from "./ConceroRouterStorage.sol";
+import {IConceroClient} from "../Interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {MessageLib, MessageConfigConstants} from "../Libraries/MessageLib.sol";
+import {OnlyAllowedOperator, OnlyOwner} from "../Common/Errors.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IConceroClient} from "../Interfaces/IConceroClient.sol";
+import {SignerLib} from "../Libraries/SignerLib.sol";
+import {SupportedChains} from "../Libraries/SupportedChains.sol";
+import {UnsupportedFeeToken, InsufficientFee, MessageAlreadyProcessed, InvalidReceiver} from "./Errors.sol";
 
-contract ConceroRouter is IConceroRouter {
+contract ConceroRouter is IConceroRouter, ConceroOwnable {
     using SafeERC20 for IERC20;
     using s for s.Router;
+    using s for s.PriceFeed;
 
     /* IMMUTABLE VARIABLES */
-    address internal immutable i_owner;
     uint24 internal immutable i_chainSelector;
     address internal immutable i_USDC;
 
-    /* MODIFIERS */
-    modifier onlyOwner() {
-        require(msg.sender == i_owner, OnlyOwner());
-        _;
-    }
-
-    constructor(uint24 chainSelector, address owner) {
+    constructor(uint24 chainSelector) ConceroOwnable() {
         i_chainSelector = chainSelector;
-        i_owner = owner;
     }
 
     function sendConceroMessage(ClientMessageRequest calldata req) external payable {
-        _collectMessageFee(req);
+        _collectMessageFee(req.messageConfig, req.dstChainData);
 
         InternalMessage memory message = MessageLib.buildInternalMessage(
             req,
             abi.encode(EvmSrcChainData({sender: msg.sender, blockNumber: block.number})),
             s.router().nonce
         );
-        //        emit ConceroMessageSent(messageId, message);
+
+        // emit ConceroMessageSent(messageId, message);
     }
 
     /**
@@ -78,7 +74,7 @@ contract ConceroRouter is IConceroRouter {
             EvmSrcChainData memory srcData, //not used
             EvmDstChainData memory dstData,
             bytes memory payload
-        ) = MessageLib.decodeMessage(message);
+        ) = MessageLib.decodeInternalMessage(message);
 
         // Step 4: Deliver the message
         deliverMessage(messageId, dstData, payload);
@@ -101,7 +97,7 @@ contract ConceroRouter is IConceroRouter {
         });
 
         require(dstData.receiver != address(0), InvalidReceiver());
-        require(isContract(dstData.receiver), InvalidReceiver());
+        require(Utils.isContract(dstData.receiver), InvalidReceiver());
 
         (bool success, bytes memory reason) = dstData.receiver.call{gas: dstData.gasLimit}(
             abi.encodeWithSelector(IConceroClient.ConceroReceive.selector, clientMessage)
@@ -116,50 +112,24 @@ contract ConceroRouter is IConceroRouter {
         }
     }
 
-    /**
-     * @notice Checks if the provided address is a contract.
-     * @param addr The address to check.
-     * @return bool True if the address is a contract, false otherwise.
-     */
-    function isContract(address addr) internal view returns (bool) {
-        uint256 size;
-        assembly {
-            size := extcodesize(addr)
-        }
-        return size > 0;
-    }
-
-    function getMessageFee(ClientMessageRequest calldata message) public view returns (uint256) {
-        uint256 valueTransferFee = 0;
-        // should decode config to get feetoken
-        return 1;
-        //        for (uint256 i = 0; i < message.tokenAmounts.length; i++) {
-        //            valueTransferFee += message.tokenAmounts[i].amount / CONCERO_VALUE_TRANSFER_FEE_FACTOR;
-        //        }
-
-        //        if (message.feeToken == address(0)) {
-        //            return 50_000 + valueTransferFee;
-        //        } else if (message.feeToken == i_USDC) {
-        //            return 50_000 + valueTransferFee;
-        //        } else {
-        //            revert UnsupportedFeeToken();
-        //        }
-    }
-
-    function isChainSupported(uint24 chainSelector) external view returns (bool) {
-        return SupportedChains.isChainSupported(chainSelector);
-    }
-
     /* OWNER FUNCTIONS */
-    //    function registerOperator(address operator) external payable onlyOwner {
-    //        s.router().isAllowedOperator[operator] = true;
-    //    }
-    //
-    //    function deregisterOperator(address operator) external payable onlyOwner {
-    //        s.router().isAllowedOperator[operator] = false;
-    //    }
+    function getStorage(StorageSlot slotEnum, bytes32 key) external view returns (uint256) {
+        return s._getStorage(slotEnum, key);
+    }
 
-    function withdrawFees(address token, uint256 amount) external payable onlyOwner {
+    function setStorage(StorageSlot slotEnum, bytes32 key, uint256 value) external onlyOwner {
+        s._setStorage(slotEnum, key, value);
+    }
+
+    function setStorageBulk(
+        StorageSlot[] memory slotEnums,
+        bytes32[] memory keys,
+        bytes[] memory values
+    ) external onlyOwner {
+        s._setStorageBulk(slotEnums, keys, values);
+    }
+
+    function withdrawFees(address token, uint256 amount) external onlyOwner {
         if (token == address(0)) {
             (bool success, ) = i_owner.call{value: amount}("");
         } else {
@@ -168,14 +138,75 @@ contract ConceroRouter is IConceroRouter {
     }
 
     /* INTERNAL FUNCTIONS */
-    function _collectMessageFee(ClientMessageRequest calldata message) internal {
-        //todo: maybe get rid of ClientMessageRequest.feetoken
-        //        uint256 feePayable = getMessageFee(message);
-        //
-        //        if (message.feeToken == i_USDC) {
-        //            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), feePayable);
-        //        } else if (message.feeToken == address(0)) {
-        //            require(msg.value == feePayable, InsufficientFee());
-        //        }
+    function _collectMessageFee(uint256 clientMessageConfig, bytes memory dstChainData) internal {
+        FeeToken feeToken = FeeToken(
+            uint8(clientMessageConfig >> MessageConfigConstants.OFFSET_FEE_TOKEN)
+        );
+        uint256 messageFee = _calculateMessageFee(clientMessageConfig, dstChainData);
+
+        if (feeToken == FeeToken.native) {
+            require(msg.value >= messageFee, InsufficientFee());
+            payable(address(this)).transfer(messageFee);
+        } else if (feeToken == FeeToken.usdc) {
+            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), messageFee);
+        } else {
+            revert UnsupportedFeeToken();
+        }
     }
+
+    function _calculateMessageFee(
+        uint256 clientMessageConfig,
+        bytes memory dstChainData
+    ) internal view returns (uint256) {
+        EvmDstChainData memory evmDstChainData = abi.decode(dstChainData, (EvmDstChainData));
+
+        FeeToken feeToken = FeeToken(
+            uint8(clientMessageConfig >> MessageConfigConstants.OFFSET_FEE_TOKEN)
+        );
+        uint24 dstChainSelector = uint24(
+            clientMessageConfig >> MessageConfigConstants.OFFSET_DST_CHAIN
+        );
+        uint256 baseFee = 0.01 ether;
+        uint256 gasPrice = s.priceFeed().lastGasPrices[dstChainSelector];
+        uint256 gasFeeNative = gasPrice * evmDstChainData.gasLimit;
+        uint256 adjustedGasFeeNative = (gasFeeNative *
+            s.priceFeed().nativeNativeRates[dstChainSelector]) / 1 ether;
+        uint256 totalFeeNative = baseFee + adjustedGasFeeNative;
+
+        if (feeToken == FeeToken.usdc) {
+            return (totalFeeNative * s.priceFeed().nativeUsdcRate) / 1 ether;
+        } else if (feeToken == FeeToken.native) {
+            return totalFeeNative;
+        } else {
+            revert UnsupportedFeeToken();
+        }
+    }
+
+    /* EXTERNAL FUNCTIONS */
+    function getMessageFeeNative(
+        uint256 clientMessageConfig,
+        bytes memory dstChainData
+    ) external view returns (uint256) {
+        FeeToken feeToken = FeeToken(
+            uint8(clientMessageConfig >> MessageConfigConstants.OFFSET_FEE_TOKEN)
+        );
+        require(feeToken == FeeToken.native, "InvalidFeeToken");
+        return _calculateMessageFee(clientMessageConfig, dstChainData);
+    }
+
+    function getMessageFeeUSDC(
+        uint256 clientMessageConfig,
+        bytes memory dstChainData
+    ) external view returns (uint256) {
+        FeeToken feeToken = FeeToken(
+            uint8(clientMessageConfig >> MessageConfigConstants.OFFSET_FEE_TOKEN)
+        );
+        require(feeToken == FeeToken.usdc, "InvalidFeeToken");
+        return _calculateMessageFee(clientMessageConfig, dstChainData);
+    }
+
+    function isChainSupported(uint24 chainSelector) external view returns (bool) {
+        return SupportedChains.isChainSupported(chainSelector);
+    }
+
 }

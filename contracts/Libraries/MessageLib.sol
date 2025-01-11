@@ -9,17 +9,48 @@ pragma solidity 0.8.28;
 import {ClientMessageRequest, EvmSrcChainData, InternalMessage, InternalMessageConfig, EvmDstChainData} from "../Common/MessageTypes.sol";
 import {SupportedChains} from "./SupportedChains.sol";
 
+library MessageConfigConstants {
+    uint8 internal constant VERSION = 1;
+    uint256 internal constant MESSAGE_BASE_FEE_USD = 1e18 / 100; // 0.01 USD
+
+    /* OFFSETS */
+    uint8 internal constant OFFSET_VERSION = 248;
+    uint8 internal constant OFFSET_SRC_CHAIN = 224;
+    uint8 internal constant OFFSET_DST_CHAIN = 192;
+    uint8 internal constant OFFSET_MIN_SRC_CONF = 176;
+    uint8 internal constant OFFSET_MIN_DST_CONF = 160;
+    uint8 internal constant OFFSET_RELAYER_CONF = 152;
+    uint8 internal constant OFFSET_CALLBACKABLE = 151;
+    uint8 internal constant OFFSET_FEE_TOKEN = 143;
+}
+
 library MessageLib {
-    error InvalidMessageVersion(uint8 version);
     error InvalidDstChainData();
-    error InvalidMessagePayload();
     error InvalidSrcChainData();
-    error InvalidConfigVersion();
-    error InvalidAdditionalRelayers();
-    error InvalidMinSrcConfirmations();
-    error InvalidMinDstConfirmations();
-    error InvalidSrcChainSelector();
-    error InvalidDstChainSelector();
+    error InvalidClientMessageConfig(ConfigError error);
+    error InvalidInternalMessageConfig(ConfigError error);
+
+    enum ConfigError {
+        InvalidMinSrcConfirmations,
+        InvalidMinDstConfirmations,
+        InvalidAdditionalRelayers,
+        InvalidFeeToken,
+        InvalidConfigVersion,
+        InvalidRelayerConfig,
+        InvalidSrcChainSelector,
+        InvalidDstChainSelector
+    }
+
+    /* BUILD FUNCTIONS */
+    function buildInternalMessageConfig(
+        uint256 config,
+        uint24 srcChainSelector
+    ) internal pure returns (uint256) {
+        validateClientMessageConfig(config);
+        config |= uint256(MessageConfigConstants.VERSION) << MessageConfigConstants.OFFSET_VERSION;
+        config |= uint256(srcChainSelector) << MessageConfigConstants.OFFSET_SRC_CHAIN;
+        return config;
+    }
 
     function buildInternalMessage(
         ClientMessageRequest memory req,
@@ -35,7 +66,7 @@ library MessageLib {
             InternalMessage({
                 messageConfig: req.messageConfig,
                 messageId: messageId,
-                srcChainData: srcChainData, // Store as bytes
+                srcChainData: srcChainData,
                 dstChainData: req.dstChainData,
                 message: req.message
             });
@@ -48,50 +79,100 @@ library MessageLib {
         return keccak256(abi.encodePacked(sender, nonce, block.number, messageConfig));
     }
 
+    /* VALIDATION FUNCTIONS */
     function validateMessageRequest(ClientMessageRequest memory req) internal pure {
-        validateMessageConfig(req.messageConfig);
+        validateInternalMessageConfig(req.messageConfig);
         require(req.dstChainData.length > 0, InvalidDstChainData());
     }
 
-    function validateIncomingMessage(InternalMessage memory message) internal pure {
-        validateMessageConfig(message.messageConfig);
+    function validateInternalMessage_(InternalMessage memory message) internal pure {
+        validateInternalMessageConfig(message.messageConfig);
         //        require(message.srcChainData.length > 0, InvalidSrcChainData());
         require(message.dstChainData.length > 0, InvalidDstChainData());
     }
 
-    function validateMessageConfig(uint256 config) private pure {
-        InternalMessageConfig memory decodedConfig = decodeMessageConfig(config);
+    function validateClientMessageConfig(uint256 clientConfig) internal pure {
+        uint24 dstChainSelector = uint24(clientConfig >> MessageConfigConstants.OFFSET_DST_CHAIN);
+        uint16 minSrcConfirmations = uint16(
+            clientConfig >> MessageConfigConstants.OFFSET_MIN_SRC_CONF
+        );
+        uint16 minDstConfirmations = uint16(
+            clientConfig >> MessageConfigConstants.OFFSET_MIN_DST_CONF
+        );
+        uint8 additionalRelayers = uint8(
+            clientConfig >> MessageConfigConstants.OFFSET_RELAYER_CONF
+        );
+        bool isCallbackable = ((clientConfig >> MessageConfigConstants.OFFSET_CALLBACKABLE) & 1) !=
+            0;
+        uint8 feeToken = uint8(clientConfig >> MessageConfigConstants.OFFSET_FEE_TOKEN);
 
-        require(decodedConfig.version > 0, InvalidConfigVersion());
-        require(decodedConfig.additionalRelayers <= 255, InvalidAdditionalRelayers());
-        require(decodedConfig.minSrcConfirmations > 0, InvalidMinSrcConfirmations());
-        require(decodedConfig.minDstConfirmations > 0, InvalidMinDstConfirmations());
         require(
-            SupportedChains.isChainSupported(decodedConfig.srcChainSelector),
-            InvalidSrcChainSelector()
+            dstChainSelector > 0,
+            InvalidClientMessageConfig(ConfigError.InvalidDstChainSelector)
         );
         require(
-            SupportedChains.isChainSupported(decodedConfig.dstChainSelector),
-            InvalidDstChainSelector()
+            minSrcConfirmations > 0,
+            InvalidClientMessageConfig(ConfigError.InvalidMinSrcConfirmations)
+        );
+        require(
+            minDstConfirmations > 0,
+            InvalidClientMessageConfig(ConfigError.InvalidMinDstConfirmations)
+        );
+        require(
+            additionalRelayers <= 255,
+            InvalidClientMessageConfig(ConfigError.InvalidAdditionalRelayers)
+        );
+        require(feeToken <= 255, InvalidClientMessageConfig(ConfigError.InvalidFeeToken));
+    }
+
+    function validateInternalMessageConfig(uint256 config) private pure {
+        uint8 version = uint8(config >> MessageConfigConstants.OFFSET_VERSION);
+        uint8 relayerConfig = uint8(config >> MessageConfigConstants.OFFSET_RELAYER_CONF);
+        uint16 minSrcConfirmations = uint16(config >> MessageConfigConstants.OFFSET_MIN_SRC_CONF);
+        uint16 minDstConfirmations = uint16(config >> MessageConfigConstants.OFFSET_MIN_DST_CONF);
+        uint24 srcChainSelector = uint24(config >> MessageConfigConstants.OFFSET_SRC_CHAIN);
+        uint24 dstChainSelector = uint24(config >> MessageConfigConstants.OFFSET_DST_CHAIN);
+
+        require(version > 0, InvalidInternalMessageConfig(ConfigError.InvalidConfigVersion));
+        require(
+            relayerConfig <= 255,
+            InvalidInternalMessageConfig(ConfigError.InvalidRelayerConfig)
+        );
+        require(
+            minSrcConfirmations > 0,
+            InvalidInternalMessageConfig(ConfigError.InvalidMinSrcConfirmations)
+        );
+        require(
+            minDstConfirmations > 0,
+            InvalidInternalMessageConfig(ConfigError.InvalidMinDstConfirmations)
+        );
+        require(
+            SupportedChains.isChainSupported(srcChainSelector),
+            InvalidInternalMessageConfig(ConfigError.InvalidSrcChainSelector)
+        );
+        require(
+            SupportedChains.isChainSupported(dstChainSelector),
+            InvalidInternalMessageConfig(ConfigError.InvalidDstChainSelector)
         );
     }
 
-    function decodeMessageConfig(
+    /* DECODE FUNCTIONS */
+    function decodeInternalMessageConfig(
         uint256 config
     ) private pure returns (InternalMessageConfig memory) {
         return
             InternalMessageConfig({
-                version: uint8(config >> 248),
-                additionalRelayers: uint8(config >> 240),
-                minSrcConfirmations: uint16(config >> 224),
-                minDstConfirmations: uint16(config >> 208),
-                srcChainSelector: uint24(config >> 184),
-                dstChainSelector: uint24(config >> 160),
-                isCallbackable: (config & (1 << 159)) != 0
+                version: uint8(config >> MessageConfigConstants.OFFSET_VERSION),
+                srcChainSelector: uint24(config >> MessageConfigConstants.OFFSET_SRC_CHAIN),
+                dstChainSelector: uint24(config >> MessageConfigConstants.OFFSET_DST_CHAIN),
+                minSrcConfirmations: uint16(config >> MessageConfigConstants.OFFSET_MIN_SRC_CONF),
+                minDstConfirmations: uint16(config >> MessageConfigConstants.OFFSET_MIN_DST_CONF),
+                relayerConfig: uint8(config >> MessageConfigConstants.OFFSET_RELAYER_CONF),
+                isCallbackable: (config & (1 << MessageConfigConstants.OFFSET_CALLBACKABLE)) != 0
             });
     }
 
-    function decodeMessage(
+    function decodeInternalMessage(
         InternalMessage memory message
     )
         internal
@@ -103,8 +184,8 @@ library MessageLib {
             bytes memory payload
         )
     {
-        validateIncomingMessage(message);
-        decodedMessageConfig = decodeMessageConfig(message.messageConfig);
+        validateInternalMessage_(message);
+        decodedMessageConfig = decodeInternalMessageConfig(message.messageConfig);
 
         srcData = abi.decode(message.srcChainData, (EvmSrcChainData));
         dstData = abi.decode(message.dstChainData, (EvmDstChainData));

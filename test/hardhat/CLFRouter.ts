@@ -17,15 +17,15 @@
 //     //     await hre.network.provider.send("hardhat_setBalance", [deployer, "0x1000000000000000000000000"]);
 //     //
 //     //     const { address } = await deployCLFRouter(hre);
-//     //     CLFRouter = address;
+//     //     ConceroVerifier.sol = address;
 //     // });
 //     //
 //     // it("Should set allowed operator to deployer address", async function () {
-//     //     const { abi: CLFRouterAbi } = await import("../../artifacts/contracts/CLFRouter/CLFRouter.sol/CLFRouter.json");
+//     //     const { abi: CLFRouterAbi } = await import("../../artifacts/contracts/ConceroVerifier.sol/ConceroVerifier.sol.sol/ConceroVerifier.sol.json");
 //     //
 //     //     // Call registerOperator from the owner (deployer) account
 //     //     const { request: registerOperatorRequest } = await publicClient.simulateContract({
-//     //         address: CLFRouter,
+//     //         address: ConceroVerifier.sol,
 //     //         abi: CLFRouterAbi,
 //     //         functionName: "registerOperator",
 //     //         account,
@@ -37,9 +37,9 @@
 //     // });
 //     //
 //     it("Should call requestCLFMessageReport", async function () {
-//         const { abi: CLFRouterAbi } = await import("../../artifacts/contracts/CLFRouter/CLFRouter.sol/CLFRouter.json");
+//         const { abi: CLFRouterAbi } = await import("../../artifacts/contracts/ConceroVerifier.sol/ConceroVerifier.sol.sol/ConceroVerifier.sol.json");
 //
-//         const [CLFRouter] = getEnvAddress("clfRouterProxy", hre.network.name);
+//         const [ConceroVerifier.sol] = getEnvAddress("clfRouterProxy", hre.network.name);
 //         // Define the message structure
 //         const message = {
 //             srcChainSelector: 1, // Example value
@@ -62,7 +62,7 @@
 //
 //         // Call requestCLFMessageReport from the operator (deployer) account
 //         const { request: requestMessageReportRequest } = await publicClient.simulateContract({
-//             address: CLFRouter,
+//             address: ConceroVerifier.sol,
 //             abi: CLFRouterAbi,
 //             functionName: "requestCLFMessageReport",
 //             account,
@@ -74,7 +74,7 @@
 //
 //         // // Check that the message status is updated to "Pending"
 //         // const clfRequestStatus = await publicClient.readContract({
-//         //     address: CLFRouter,
+//         //     address: ConceroVerifier.sol,
 //         //     abi: CLFRouterAbi,
 //         //     functionName: "s_clfRequestStatusByConceroId",
 //         //     args: [messageId],

@@ -14,16 +14,24 @@ enum StorageSlot {
     PriceFeed
 }
 
-library ConceroRouterStorage {
-    bytes32 internal constant ROUTER_STORAGE_SLOT = keccak256("concero.router.storage");
-    bytes32 internal constant PRICEFEED_STORAGE_SLOT = keccak256("concero.priceFeed.storage");
+enum Protocol {
+    ProtocolA,
+    ProtocolB,
+    ProtocolC,
+    ProtocolD,
+    ProtocolE
+}
 
+library ConceroRouterStorage {
     struct Router {
         uint256 nonce;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
         mapping(address operator => uint256) operatorFeesEarnedUSDC;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
+        mapping(bytes32 messageId => bool isSent) isMessageSent;
+        mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;
+        mapping(bytes32 messageId => mapping(Protocol => bool)) messageConfirmationsByProtocol;
         uint256[50] __mapping_gap;
     }
 
@@ -34,6 +42,9 @@ library ConceroRouterStorage {
         mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
         uint256[50] __mapping_gap;
     }
+
+    bytes32 internal constant ROUTER_STORAGE_SLOT = keccak256("concero.router.storage");
+    bytes32 internal constant PRICEFEED_STORAGE_SLOT = keccak256("concero.priceFeed.storage");
 
     function router() internal pure returns (Router storage s) {
         bytes32 slot = ROUTER_STORAGE_SLOT;

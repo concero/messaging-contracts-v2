@@ -66,9 +66,9 @@ library MessageLib {
             InternalMessage({
                 messageConfig: req.messageConfig,
                 messageId: messageId,
+                messageHashSum: keccak256(req.message),
                 srcChainData: srcChainData,
-                dstChainData: req.dstChainData,
-                message: req.message
+                dstChainData: req.dstChainData
             });
     }
     function buildMessageId(
@@ -179,16 +179,16 @@ library MessageLib {
         pure
         returns (
             InternalMessageConfig memory decodedMessageConfig,
+            bytes32 messageHashSum,
             EvmSrcChainData memory srcData,
-            EvmDstChainData memory dstData,
-            bytes memory payload
+            EvmDstChainData memory dstData
         )
     {
         validateInternalMessage_(message);
-        decodedMessageConfig = decodeInternalMessageConfig(message.messageConfig);
 
+        decodedMessageConfig = decodeInternalMessageConfig(message.messageConfig);
+        messageHashSum = message.messageHashSum;
         srcData = abi.decode(message.srcChainData, (EvmSrcChainData));
         dstData = abi.decode(message.dstChainData, (EvmDstChainData));
-        payload = message.message;
     }
 }

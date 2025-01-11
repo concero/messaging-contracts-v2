@@ -6,17 +6,17 @@
  */
 pragma solidity 0.8.28;
 
-import {CLFRequestStatus} from "../Interfaces/ICLFRouter.sol";
-import {CLFRouterStorage as s} from "./CLFRouterStorage.sol";
+import {CLFRequestStatus} from "../Interfaces/IConceroVerifier.sol";
+import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
-import {ICLFRouter} from "../Interfaces/ICLFRouter.sol";
+import {IConceroVerifier} from "../Interfaces/IConceroVerifier.sol";
 import {InternalMessage} from "../Common/MessageTypes.sol";
 import {MessageAlreadyProcessed} from "./Errors.sol";
 import {OnlyAllowedOperator} from "../Common/Errors.sol";
 import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
 
-contract CLFRouter is FunctionsClient, ConceroOwnable {
+contract ConceroVerifier is FunctionsClient, ConceroOwnable {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Router;
 
@@ -31,6 +31,7 @@ contract CLFRouter is FunctionsClient, ConceroOwnable {
     uint64 internal immutable i_clfSubscriptionId;
     uint64 internal immutable i_clfDonHostedSecretsVersion;
     uint8 internal immutable i_clfDonHostedSecretsSlotId;
+
     /* CONSTANT VARIABLES */
     string internal constant CLF_JS_CODE =
         "try { const [t, p] = await Promise.all([ fetch('https://raw.githubusercontent.com/ethers-io/ethers.js/v6.10.0/dist/ethers.umd.min.js'), fetch('https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/requestReport.min.js'), ]); const [e, c] = await Promise.all([t.text(), p.text()]); const g = async s => { return ( '0x' + Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))) .map(v => ('0' + v.toString(16)).slice(-2).toLowerCase()) .join('') ); }; const r = await g(c); const x = await g(e); const b = bytesArgs[0].toLowerCase(); const o = bytesArgs[1].toLowerCase(); if (r === b && x === o) { const ethers = new Function(e + '; return ethers;')(); return await eval(c); } throw new Error(`${r}!=${b}||${x}!=${o}`); } catch (e) { throw new Error(e.message.slice(0, 255));}";
@@ -38,7 +39,7 @@ contract CLFRouter is FunctionsClient, ConceroOwnable {
 
     /* MODIFIERS */
     modifier onlyOperator() {
-        require(s.router().isAllowedOperator[msg.sender], OnlyAllowedOperator());
+        require(s.operator().isAllowed[msg.sender], OnlyAllowedOperator());
         _;
     }
 
@@ -68,8 +69,7 @@ contract CLFRouter is FunctionsClient, ConceroOwnable {
         InternalMessage calldata message
     ) external onlyOperator {
         require(
-            //            s_clfRequestStatus[messageId] == CLFRequestStatus.NotStarted,
-            s.router().isMessageSent[messageId] == false,
+            !s.router().pendingMessageReports[messageId],
             MessageAlreadyProcessed()
         );
 
@@ -79,23 +79,24 @@ contract CLFRouter is FunctionsClient, ConceroOwnable {
         clfReqArgs[2] = abi.encodePacked(messageId);
         clfReqArgs[3] = abi.encode(message);
 
-        _prepareAndSendCLFRequest(clfReqArgs);
-
-        //        s_clfRequestStatus[messageId] = CLFRequestStatus.Pending;
-        s.router().isMessageSent[messageId] = true;
+        bytes32 clfRequestId = _sendCLFRequest(clfReqArgs);
+        s.router().pendingCLFRequests[clfRequestId] = true;
+        s.router().pendingMessageReports[messageId] = true;
     }
 
     /* OWNER FUNCTIONS */
-    function registerOperator(address operator) external payable onlyOwner {
-        s.router().isAllowedOperator[operator] = true;
-    }
-
-    function deregisterOperator(address operator) external payable onlyOwner {
-        s.router().isAllowedOperator[operator] = false;
-    }
 
     /* INTERNAL FUNCTIONS */
-    function fulfillRequest(bytes32, bytes memory response, bytes memory err) internal override {
+    function _registerOperator(address operator) internal {
+        // Step 1: Check if OP is registered with symbiotic and has enough delegated Stake
+        s.operator().isAllowed[operator] = true;
+    }
+
+    function _deregisterOperator(address operator) internal {
+        s.operator().isAllowed[operator] = false;
+    }
+
+    function fulfillRequest(bytes32 clfRequestId, bytes memory response, bytes memory err) internal override {
         if (err.length != 0) {
             emit CLFRequestError(err);
             return;
@@ -107,17 +108,21 @@ contract CLFRouter is FunctionsClient, ConceroOwnable {
         }
 
         if (reqType == CLFRequestType.RequestCLFMessageReport) {
-            bytes32 conceroId;
+            bytes32 messageId;
             assembly {
-                conceroId := mload(add(response, 33))
+                messageId := mload(add(response, 33))
             }
 
-            s.router().clfRequestStatus[conceroId] = CLFRequestStatus.FulFilled;
-            emit CLFMessageReport(conceroId);
+            delete s.router().pendingMessageReports[messageId];
         }
+//        else if (reqType == CLFRequestType.OperatorRegistration) {
+//            _registerOperator();
+//        }
+
+       delete s.router().pendingCLFRequests[clfRequestId];
     }
 
-    function _prepareAndSendCLFRequest(bytes[] memory args) internal returns (bytes32) {
+    function _sendCLFRequest(bytes[] memory args) internal returns (bytes32) {
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(CLF_JS_CODE);
         req.setBytesArgs(args);

@@ -6,23 +6,10 @@
  */
 pragma solidity 0.8.28;
 
-enum Protocol {
-    ProtocolA,
-    ProtocolB,
-    ProtocolC,
-    ProtocolD,
-    ProtocolE,
-    ProtocolF,
-    ProtocolG,
-    ProtocolH,
-    ProtocolI,
-    ProtocolJ
-}
-
 enum CLFRequestStatus {
-    NotStarted,
-    Pending,
-    FulFilled
+    NotStarted, // 0
+    Pending, // 1
+    FulFilled // 2
 }
 
-interface ICLFRouter {}
+interface IConceroVerifier {}

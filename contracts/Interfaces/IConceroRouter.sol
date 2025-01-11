@@ -6,9 +6,9 @@
  */
 pragma solidity 0.8.28;
 
-import {InternalMessage} from "../Common/MessageTypes.sol";
+import {ClientMessageRequest} from "../Common/MessageTypes.sol";
 
 interface IConceroRouter {
-    event ConceroMessageSent(bytes32 indexed id, InternalMessage message);
+    event ConceroMessageSent(bytes32 indexed id, ClientMessageRequest message);
     event ConceroMessageReceived(bytes32 indexed id, InternalMessage message);
 }

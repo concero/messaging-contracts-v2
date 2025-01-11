@@ -11,7 +11,7 @@ error DelegateCallFailed(bytes response);
 
 library Utils {
     function safeDelegateCall(address target, bytes memory args) internal returns (bytes memory) {
-	    require(isContract(target), NotAContract(target));
+        require(isContract(target), NotAContract(target));
 
         (bool success, bytes memory response) = target.delegatecall(args);
         if (!success) {

@@ -26,7 +26,7 @@ enum FeeToken {
 }
 
 struct EvmSrcChainData {
-    address sender;
+    address sender; //may not be needed
     uint256 blockNumber; // L2s have issues with blocknumber
 }
 
@@ -49,9 +49,9 @@ struct ClientMessage {
 struct InternalMessage {
     uint256 messageConfig;
     bytes32 messageId;
+    bytes32 messageHashSum;
     bytes srcChainData;
     bytes dstChainData;
-    bytes message;
 }
 
 struct InternalMessageConfig {

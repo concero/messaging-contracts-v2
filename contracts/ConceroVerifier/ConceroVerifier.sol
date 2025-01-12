@@ -11,7 +11,7 @@ import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 import {IConceroVerifier} from "../Interfaces/IConceroVerifier.sol";
-import {InternalMessage} from "../Common/MessageTypes.sol";
+import {MessageReportRequest} from "../Common/MessageTypes.sol";
 import {MessageAlreadyProcessed} from "./Errors.sol";
 import {OnlyAllowedOperator} from "../Common/Errors.sol";
 import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
@@ -64,21 +64,20 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
     }
 
-    function requestCLFMessageReport(
-        bytes32 messageId,
-        InternalMessage calldata message
-    ) external onlyOperator {
-        require(!s.router().pendingMessageReports[messageId], MessageAlreadyProcessed());
+    function requestCLFMessageReport(MessageReportRequest calldata request) external onlyOperator {
+        require(!s.router().pendingMessageReports[request.messageId], MessageAlreadyProcessed());
 
         bytes[] memory clfReqArgs = new bytes[](4);
         clfReqArgs[0] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
-        clfReqArgs[1] = abi.encodePacked(i_ethersJsCodeHash);
-        clfReqArgs[2] = abi.encodePacked(messageId);
-        clfReqArgs[3] = abi.encode(message);
+        clfReqArgs[1] = abi.encodePacked(request.internalMessageConfig);
+        clfReqArgs[2] = abi.encodePacked(request.messageId);
+        clfReqArgs[3] = abi.encode(request.messageHashSum);
+        clfReqArgs[4] = abi.encode(request.dstChainData);
+        clfReqArgs[5] = abi.encode(request.srcChainData);
 
         bytes32 clfRequestId = _sendCLFRequest(clfReqArgs);
         s.router().pendingCLFRequests[clfRequestId] = true;
-        s.router().pendingMessageReports[messageId] = true;
+        s.router().pendingMessageReports[request.messageId] = true;
     }
 
     /* OWNER FUNCTIONS */

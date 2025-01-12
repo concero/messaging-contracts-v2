@@ -41,17 +41,18 @@ struct ClientMessageRequest {
     bytes message;
 }
 
-struct ClientMessage {
-    bytes32 messageId;
-    bytes message;
+struct MessageEventParams {
+    // @notice bytes32 indexed messageId is a preceding parameter in the event
+    uint256 internalMessageConfig;
+    bytes dstChainData;
 }
 
-struct InternalMessage {
-    uint256 messageConfig;
+struct MessageReportRequest {
+    uint256 internalMessageConfig;
     bytes32 messageId;
     bytes32 messageHashSum;
-    bytes srcChainData;
     bytes dstChainData;
+    bytes srcChainData;
 }
 
 struct InternalMessageConfig {

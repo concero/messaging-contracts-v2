@@ -7,7 +7,7 @@
 pragma solidity 0.8.28;
 
 import "../Libraries/Utils.sol";
-import {ClientMessageRequest, InternalMessage, EvmSrcChainData, EvmDstChainData, ClientMessage, InternalMessageConfig, FeeToken} from "../Common/MessageTypes.sol";
+import {ClientMessageRequest, MessageEventParams, EvmSrcChainData, EvmDstChainData, InternalMessageConfig, FeeToken} from "../Common/MessageTypes.sol";
 import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
 import {ConceroRouterStorage as s, StorageSlot} from "./ConceroRouterStorage.sol";
 import {IConceroClient} from "../Interfaces/IConceroClient.sol";
@@ -36,13 +36,10 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
     function sendConceroMessage(ClientMessageRequest calldata req) external payable {
         _collectMessageFee(req.messageConfig, req.dstChainData);
 
-        InternalMessage memory message = MessageLib.buildInternalMessage(
-            req,
-            abi.encode(EvmSrcChainData({sender: msg.sender, blockNumber: block.number})),
-            s.router().nonce
-        );
+        (bytes32 messageId, MessageEventParams memory messageEventParams) = MessageLib
+            .buildInternalMessage(req, i_chainSelector, s.router().nonce);
 
-        emit ConceroMessageSent(message.messageId, req);
+        emit ConceroMessageSent(messageId, messageEventParams);
     }
 
     /**
@@ -52,14 +49,8 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
      */
     function submitMessageReport(
         SignerLib.ClfDonReportSubmission calldata reportSubmission,
-        InternalMessage calldata message
+        bytes calldata message
     ) external {
-        require(
-            !s.router().isMessageProcessed[message.messageId],
-            MessageAlreadyProcessed(message.messageId)
-        );
-        s.router().isMessageProcessed[message.messageId] = true;
-
         // Step 1: Recover and verify the signatures
         SignerLib._verifyClfReportSignatures(reportSubmission);
 
@@ -67,16 +58,13 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
         //        (InternalMessageConfig memory decodedMessageConfig, bytes32 messageId, bytes32 messageHashSum, bytes memory srcData, bytes memory dstData) = SignerLib._extractClfResponse(
         //            reportSubmission.report
         //        );
+        //        require(
+        //            !s.router().isMessageProcessed[messageId],
+        //            MessageAlreadyProcessed(messageId)
+        //        );
+        //        s.router().isMessageProcessed[messageId] = true;
 
-        // Step 3: validate and decode message
-        //        (
-        //            InternalMessageConfig memory decodedMessageConfig,
-        //            bytes32 messageHashSum,
-        //            EvmSrcChainData memory srcData, //not used
-        //            EvmDstChainData memory dstData,
-        //        ) = MessageLib.decodeInternalMessage(message);
-
-        // Step 4: Deliver the message
+        // Step 3: Deliver the message
         //        deliverMessage(messageId, dstData, message);
     }
 
@@ -84,23 +72,18 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
      * @notice Delivers the message to the receiver contract if valid.
      * @param messageId The unique identifier of the message.
      * @param dstData The destination chain data of the message.
-     * @param payload The actual payload of the message.
+     * @param message The message data.
      */
     function deliverMessage(
         bytes32 messageId,
         EvmDstChainData memory dstData,
-        bytes memory payload
+        bytes memory message
     ) internal {
-        ClientMessage memory clientMessage = ClientMessage({
-            messageId: messageId,
-            message: payload
-        });
-
         require(dstData.receiver != address(0), InvalidReceiver());
         require(Utils.isContract(dstData.receiver), InvalidReceiver());
 
         (bool success, bytes memory reason) = dstData.receiver.call{gas: dstData.gasLimit}(
-            abi.encodeWithSelector(IConceroClient.ConceroReceive.selector, clientMessage)
+            abi.encodeWithSelector(IConceroClient.ConceroReceive.selector, messageId, message)
         );
 
         if (!success) {

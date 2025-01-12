@@ -6,8 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {ClientMessage} from "../Common/MessageTypes.sol";
-
 interface IConceroClient {
-    function ConceroReceive(ClientMessage calldata message) external;
+    function ConceroReceive(bytes32 messageId, bytes calldata message) external;
 }

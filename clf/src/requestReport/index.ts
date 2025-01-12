@@ -7,7 +7,7 @@ import { decodeConceroMessageLog, fetchConceroMessage } from "./utils";
 
 export async function main(bytesArgs: string[]) {
     if (bytesArgs.length < 6) throw new Error(ErrorType.INVALID_INPUT);
-    const [_, __, messageConfig, messageId, messageHashSum, srcBlockNumber] = bytesArgs;
+    const [_, messageConfig, messageId, messageHashSum, srcBlockNumber, relayerAddress] = bytesArgs;
 
     const decodedInternalMessageConfig = decodeInternalMessageConfig(BigInt(messageConfig));
     validateInternalMessageConfig(decodedInternalMessageConfig);

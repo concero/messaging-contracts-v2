@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {InternalMessageConfig, ClientMessage, ClientMessageConfig} from "../Common/MessageTypes.sol";
+import {InternalMessageConfig, ClientMessageConfig} from "../Common/MessageTypes.sol";
 import {IConceroClient} from "../Interfaces/IConceroClient.sol";
 import {MessageConfigConstants as MCC} from "../Libraries/MessageLib.sol";
 
@@ -23,12 +23,12 @@ abstract contract ConceroClient is IConceroClient {
         i_chainSelector = chainSelector;
     }
 
-    function conceroReceive(bytes32 messageId, ClientMessage calldata message) external {
+    function conceroReceive(bytes32 messageId, bytes calldata message) external {
         require(msg.sender == i_conceroRouter, InvalidRouter(msg.sender));
         _conceroReceive(messageId, message);
     }
 
-    function _conceroReceive(bytes32 messageId, ClientMessage calldata message) internal virtual;
+    function _conceroReceive(bytes32 messageId, bytes calldata message) internal virtual;
 
     // Client can use this to optionally build the message config on-chain
     function buildClientMessageConfig(

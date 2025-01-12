@@ -6,6 +6,8 @@ function createCustomTransport(url: string, chainIdHex: string): Transport {
         name: "customTransport",
         key: "custom",
         type: "http",
+        retryCount: 5,
+        retryDelay: 2000,
         request: async ({ method, params }) => {
             if (method === "eth_chainId") {
                 return { jsonrpc: "2.0", id: 1, result: chainIdHex };

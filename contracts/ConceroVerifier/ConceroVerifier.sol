@@ -68,10 +68,7 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
         bytes32 messageId,
         InternalMessage calldata message
     ) external onlyOperator {
-        require(
-            !s.router().pendingMessageReports[messageId],
-            MessageAlreadyProcessed()
-        );
+        require(!s.router().pendingMessageReports[messageId], MessageAlreadyProcessed());
 
         bytes[] memory clfReqArgs = new bytes[](4);
         clfReqArgs[0] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
@@ -96,7 +93,11 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
         s.operator().isAllowed[operator] = false;
     }
 
-    function fulfillRequest(bytes32 clfRequestId, bytes memory response, bytes memory err) internal override {
+    function fulfillRequest(
+        bytes32 clfRequestId,
+        bytes memory response,
+        bytes memory err
+    ) internal override {
         if (err.length != 0) {
             emit CLFRequestError(err);
             return;
@@ -115,11 +116,11 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
 
             delete s.router().pendingMessageReports[messageId];
         }
-//        else if (reqType == CLFRequestType.OperatorRegistration) {
-//            _registerOperator();
-//        }
+        //        else if (reqType == CLFRequestType.OperatorRegistration) {
+        //            _registerOperator();
+        //        }
 
-       delete s.router().pendingCLFRequests[clfRequestId];
+        delete s.router().pendingCLFRequests[clfRequestId];
     }
 
     function _sendCLFRequest(bytes[] memory args) internal returns (bytes32) {

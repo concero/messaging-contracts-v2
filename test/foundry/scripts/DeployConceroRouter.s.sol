@@ -9,11 +9,9 @@ import {console} from "forge-std/src/console.sol";
 import {PauseDummy} from "../../../contracts/PauseDummy/PauseDummy.sol";
 
 contract DeployConceroRouter is DeployHelper {
-    // @notice contract instances
     TransparentUpgradeableProxy internal conceroRouterProxy;
     ConceroRouter internal conceroRouter;
 
-    // @notice helper variables
     address public proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
     address public deployer = vm.envAddress("DEPLOYER_ADDRESS");
     uint24 public chainSelector = uint24(1);

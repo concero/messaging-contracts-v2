@@ -7,7 +7,7 @@
 pragma solidity 0.8.28;
 
 import "../Libraries/Utils.sol";
-import {ClientMessageRequest, MessageEventParams, EvmSrcChainData, EvmDstChainData, InternalMessageConfig, FeeToken} from "../Common/MessageTypes.sol";
+import {MessageEventParams, EvmSrcChainData, EvmDstChainData, InternalMessageConfig, FeeToken} from "../Common/MessageTypes.sol";
 import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
 import {ConceroRouterStorage as s, StorageSlot} from "./ConceroRouterStorage.sol";
 import {IConceroClient} from "../Interfaces/IConceroClient.sol";
@@ -33,13 +33,18 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
         i_chainSelector = chainSelector;
     }
 
-    function sendConceroMessage(ClientMessageRequest calldata req) external payable {
-        _collectMessageFee(req.messageConfig, req.dstChainData);
+    function conceroSend(
+        uint256 config,
+        bytes calldata dstChainData,
+        bytes calldata message
+    ) external payable override returns (bytes32 messageId) {
+        _collectMessageFee(config, dstChainData);
 
-        (bytes32 messageId, MessageEventParams memory messageEventParams) = MessageLib
-            .buildInternalMessage(req, i_chainSelector, s.router().nonce);
+        (bytes32 _messageId, MessageEventParams memory messageEventParams) = MessageLib
+            .buildInternalMessage(config, dstChainData, message, i_chainSelector, s.router().nonce);
 
-        emit ConceroMessageSent(messageId, messageEventParams);
+        emit ConceroMessageSent(_messageId, messageEventParams);
+        return _messageId;
     }
 
     /**
@@ -83,7 +88,7 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
         require(Utils.isContract(dstData.receiver), InvalidReceiver());
 
         (bool success, bytes memory reason) = dstData.receiver.call{gas: dstData.gasLimit}(
-            abi.encodeWithSelector(IConceroClient.ConceroReceive.selector, messageId, message)
+            abi.encodeWithSelector(IConceroClient.conceroReceive.selector, messageId, message)
         );
 
         if (!success) {

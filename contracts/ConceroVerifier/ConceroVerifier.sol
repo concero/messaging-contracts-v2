@@ -6,23 +6,20 @@
  */
 pragma solidity 0.8.28;
 
+import {CLFRequestType} from "../Interfaces/IConceroVerifier.sol";
 import {CLFRequestStatus} from "../Interfaces/IConceroVerifier.sol";
+import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
 import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 import {IConceroVerifier} from "../Interfaces/IConceroVerifier.sol";
-import {MessageReportRequest} from "../Common/MessageTypes.sol";
 import {MessageAlreadyProcessed} from "./Errors.sol";
+import {MessageReportRequest} from "../Common/MessageTypes.sol";
 import {OnlyAllowedOperator} from "../Common/Errors.sol";
-import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
 
 contract ConceroVerifier is FunctionsClient, ConceroOwnable {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Router;
-
-    enum CLFRequestType {
-        RequestCLFMessageReport
-    }
 
     /* IMMUTABLE VARIABLES */
     bytes32 internal immutable i_ethersJsCodeHash;

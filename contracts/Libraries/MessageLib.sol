@@ -6,12 +6,13 @@
  */
 pragma solidity 0.8.28;
 
-import {ClientMessageRequest, EvmSrcChainData, MessageEventParams, InternalMessageConfig, EvmDstChainData} from "../Common/MessageTypes.sol";
+import {EvmSrcChainData, MessageEventParams, InternalMessageConfig, EvmDstChainData} from "../Common/MessageTypes.sol";
 import {SupportedChains} from "./SupportedChains.sol";
 
 library MessageConfigConstants {
     uint8 internal constant VERSION = 1;
     uint256 internal constant MESSAGE_BASE_FEE_USD = 1e18 / 100; // 0.01 USD
+    uint256 internal constant MAX_MESSAGE_SIZE = 1e6; // 1 MB
 
     /* OFFSETS */
     uint8 internal constant OFFSET_VERSION = 248;
@@ -27,6 +28,7 @@ library MessageConfigConstants {
 library MessageLib {
     error InvalidDstChainData();
     error InvalidSrcChainData();
+    error MessageTooLarge();
     error InvalidClientMessageConfig(ConfigError error);
     error InvalidInternalMessageConfig(ConfigError error);
 
@@ -43,31 +45,32 @@ library MessageLib {
 
     /* BUILD FUNCTIONS */
     function buildInternalMessageConfig(
-        uint256 config,
+        uint256 clientMessageConfig,
         uint24 srcChainSelector
     ) internal pure returns (uint256) {
-        validateClientMessageConfig(config);
+        validateClientMessageConfig(clientMessageConfig);
+
+        uint256 config = clientMessageConfig;
         config |= uint256(MessageConfigConstants.VERSION) << MessageConfigConstants.OFFSET_VERSION;
         config |= uint256(srcChainSelector) << MessageConfigConstants.OFFSET_SRC_CHAIN;
         return config;
     }
 
     function buildInternalMessage(
-        ClientMessageRequest memory req,
+        uint256 config,
+        bytes calldata dstChainData,
+        bytes calldata message,
         uint24 chainSelector,
         uint256 nonce
     ) internal view returns (bytes32, MessageEventParams memory) {
-        validateClientMessageRequest(req);
+        validateClientMessageRequest(config, dstChainData, message);
 
         EvmSrcChainData memory srcChainData = EvmSrcChainData({
             sender: msg.sender,
             blockNumber: block.number
         });
 
-        uint256 internalMessageConfig = buildInternalMessageConfig(
-            req.messageConfig,
-            chainSelector
-        );
+        uint256 internalMessageConfig = buildInternalMessageConfig(config, chainSelector);
 
         bytes32 messageId = buildMessageId(
             nonce,
@@ -81,7 +84,7 @@ library MessageLib {
             messageId,
             MessageEventParams({
                 internalMessageConfig: internalMessageConfig,
-                dstChainData: req.dstChainData
+                dstChainData: dstChainData
             })
         );
     }
@@ -99,9 +102,14 @@ library MessageLib {
     }
 
     /* VALIDATION FUNCTIONS */
-    function validateClientMessageRequest(ClientMessageRequest memory req) internal pure {
-        validateClientMessageConfig(req.messageConfig);
-        require(req.dstChainData.length > 0, InvalidDstChainData());
+    function validateClientMessageRequest(
+        uint256 config,
+        bytes calldata dstChainData,
+        bytes calldata message
+    ) internal pure {
+        validateClientMessageConfig(config);
+        require(dstChainData.length > 0, InvalidDstChainData());
+        require(message.length < MessageConfigConstants.MAX_MESSAGE_SIZE, MessageTooLarge());
     }
 
     function validateInternalMessage_(MessageEventParams memory message) internal pure {

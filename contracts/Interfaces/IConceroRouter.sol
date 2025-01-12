@@ -10,5 +10,11 @@ import {MessageEventParams} from "../Common/MessageTypes.sol";
 
 interface IConceroRouter {
     event ConceroMessageSent(bytes32 indexed messageId, MessageEventParams messageEventParams);
-    event ConceroMessageReceived(bytes32 indexed id, MessageEventParams message);
+    event ConceroMessageReceived(bytes32 indexed id, MessageEventParams messageEventParams);
+
+    function conceroSend(
+        uint256 config,
+        bytes calldata dstChainData,
+        bytes calldata message
+    ) external payable returns (bytes32 messageId);
 }

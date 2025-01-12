@@ -7,5 +7,5 @@
 pragma solidity 0.8.28;
 
 interface IConceroClient {
-    function ConceroReceive(bytes32 messageId, bytes calldata message) external;
+    function conceroReceive(bytes32 messageId, bytes calldata message) external;
 }

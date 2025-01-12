@@ -35,12 +35,6 @@ struct EvmDstChainData {
     uint256 gasLimit;
 }
 
-struct ClientMessageRequest {
-    uint256 messageConfig;
-    bytes dstChainData;
-    bytes message;
-}
-
 struct MessageEventParams {
     // @notice bytes32 indexed messageId is a preceding parameter in the event
     uint256 internalMessageConfig;

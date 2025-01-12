@@ -6,10 +6,29 @@
  */
 pragma solidity 0.8.28;
 
+enum CLFRequestType {
+    RequestCLFMessageReport
+}
+
 enum CLFRequestStatus {
-    NotStarted, // 0
-    Pending, // 1
-    FulFilled // 2
+    NotStarted,
+    Pending,
+    FulFilled
+}
+
+enum ReportType {
+    MessageReport,
+    Other
+}
+
+struct MessageReportResult {
+    uint8 version;
+    ReportType reportType;
+    address operator;
+    bytes32 internalMessageConfig;
+    bytes32 messageId;
+    bytes32 messageHashSum;
+    bytes[] allowedOperators;
 }
 
 interface IConceroVerifier {}

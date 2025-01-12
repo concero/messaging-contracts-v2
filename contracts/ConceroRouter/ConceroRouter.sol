@@ -42,7 +42,7 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
             s.router().nonce
         );
 
-         emit ConceroMessageSent(messageId, req);
+        emit ConceroMessageSent(message.messageId, req);
     }
 
     /**
@@ -64,20 +64,20 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
         SignerLib._verifyClfReportSignatures(reportSubmission);
 
         // Step 2: Decode the report data
-//        (InternalMessageConfig memory decodedMessageConfig, bytes32 messageId, bytes32 messageHashSum, bytes memory srcData, bytes memory dstData) = SignerLib._extractClfResponse(
-//            reportSubmission.report
-//        );
+        //        (InternalMessageConfig memory decodedMessageConfig, bytes32 messageId, bytes32 messageHashSum, bytes memory srcData, bytes memory dstData) = SignerLib._extractClfResponse(
+        //            reportSubmission.report
+        //        );
 
         // Step 3: validate and decode message
-//        (
-//            InternalMessageConfig memory decodedMessageConfig,
-//            bytes32 messageHashSum,
-//            EvmSrcChainData memory srcData, //not used
-//            EvmDstChainData memory dstData,
-//        ) = MessageLib.decodeInternalMessage(message);
+        //        (
+        //            InternalMessageConfig memory decodedMessageConfig,
+        //            bytes32 messageHashSum,
+        //            EvmSrcChainData memory srcData, //not used
+        //            EvmDstChainData memory dstData,
+        //        ) = MessageLib.decodeInternalMessage(message);
 
         // Step 4: Deliver the message
-//        deliverMessage(messageId, dstData, message);
+        //        deliverMessage(messageId, dstData, message);
     }
 
     /**

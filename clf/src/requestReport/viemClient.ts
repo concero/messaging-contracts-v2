@@ -1,13 +1,14 @@
 import { createPublicClient, Transport, createTransport, fallback } from "viem";
 import healthyRpcs from "./healthy-rpcs.json";
+import { CONFIG } from "./constants";
 
 function createCustomTransport(url: string, chainIdHex: string): Transport {
     return createTransport({
         name: "customTransport",
         key: "custom",
         type: "http",
-        retryCount: 5,
-        retryDelay: 2000,
+        retryCount: CONFIG.VIEM.RETRY_COUNT,
+        retryDelay: CONFIG.VIEM.RETRY_DELAY,
         request: async ({ method, params }) => {
             if (method === "eth_chainId") {
                 return { jsonrpc: "2.0", id: 1, result: chainIdHex };

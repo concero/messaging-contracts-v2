@@ -6,8 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-error InvalidStorageSlot();
-error LengthMismatch();
+import {StorageLib} from "../Libraries/StorageLib.sol";
 
 enum StorageSlot {
     Router,
@@ -46,6 +45,11 @@ library ConceroRouterStorage {
     bytes32 internal constant ROUTER_STORAGE_SLOT = keccak256("concero.router.storage");
     bytes32 internal constant PRICEFEED_STORAGE_SLOT = keccak256("concero.priceFeed.storage");
 
+    function _validateSlot(bytes32 slot) internal pure returns (bool) {
+        return slot == ROUTER_STORAGE_SLOT || slot == PRICEFEED_STORAGE_SLOT;
+    }
+
+    /* SLOT-BASED STORAGE ACCESS */
     function router() internal pure returns (Router storage s) {
         bytes32 slot = ROUTER_STORAGE_SLOT;
         assembly {
@@ -60,84 +64,25 @@ library ConceroRouterStorage {
         }
     }
 
-    function _resolveSlot(StorageSlot slot) private pure returns (bytes32) {
-        if (slot == StorageSlot.Router) {
-            return ROUTER_STORAGE_SLOT;
-        } else if (slot == StorageSlot.PriceFeed) {
-            return PRICEFEED_STORAGE_SLOT;
-        } else {
-            revert InvalidStorageSlot();
-        }
+    /* GENERIC STORAGE ACCESS */
+    function _getStorage(bytes32 slot, bytes32 key) internal view returns (uint256 value) {
+        return StorageLib._getStorage(slot, key);
     }
 
-    function _setStorage(StorageSlot slotEnum, bytes32 key, uint256 value) internal {
-        bytes32 slot = _resolveSlot(slotEnum);
-
-        if (key == bytes32(0)) {
-            // Handle scalar values
-            assembly {
-                sstore(slot, value)
-            }
-        } else {
-            // Handle mappings
-            assembly {
-                let ptr := mload(0x40)
-                mstore(ptr, key)
-                mstore(add(ptr, 0x20), slot)
-                let storageSlot := keccak256(ptr, 0x40)
-                sstore(storageSlot, value)
-            }
-        }
+    function _setStorage(bytes32 slot, bytes32 key, uint256 value) internal {
+        require(_validateSlot(slot), StorageLib.InvalidStorageSlot());
+        StorageLib._setStorage(slot, key, value);
     }
 
     function _setStorageBulk(
-        StorageSlot[] memory slotEnums,
+        bytes32[] memory slots,
         bytes32[] memory keys,
         bytes[] memory values
     ) internal {
-        require(slotEnums.length == keys.length && keys.length == values.length, LengthMismatch());
-
-        for (uint256 i = 0; i < slotEnums.length; i++) {
-            bytes32 slot = _resolveSlot(slotEnums[i]);
-            bytes32 key = keys[i];
-            bytes memory value = values[i];
-
-            if (key == bytes32(0)) {
-                // Handle scalar values
-                assembly {
-                    sstore(slot, mload(add(value, 0x20)))
-                }
-            } else {
-                // Handle mappings
-                assembly {
-                    let ptr := mload(0x40)
-                    mstore(ptr, key)
-                    mstore(add(ptr, 0x20), slot)
-                    let storageSlot := keccak256(ptr, 0x40)
-                    sstore(storageSlot, mload(add(value, 0x20)))
-                }
-            }
+        for (uint256 i = 0; i < slots.length; i++) {
+            require(_validateSlot(slots[i]), StorageLib.InvalidStorageSlot());
         }
-    }
-
-    function _getStorage(StorageSlot slotEnum, bytes32 key) internal view returns (uint256 value) {
-        bytes32 slot = _resolveSlot(slotEnum);
-
-        if (key == bytes32(0)) {
-            // Handle scalar values
-            assembly {
-                value := sload(slot)
-            }
-        } else {
-            // Handle mappings
-            assembly {
-                let ptr := mload(0x40)
-                mstore(ptr, key)
-                mstore(add(ptr, 0x20), slot)
-                let storageSlot := keccak256(ptr, 0x40)
-                value := sload(storageSlot)
-            }
-        }
+        StorageLib._setStorageBulk(slots, keys, values);
     }
 
     /* PriceFeed Storage Setters */

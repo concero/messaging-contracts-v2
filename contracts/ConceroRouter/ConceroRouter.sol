@@ -28,10 +28,13 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
     /* IMMUTABLE VARIABLES */
     uint24 internal immutable i_chainSelector;
     address internal immutable i_USDC;
+    uint8 internal constant COHORTS_COUNT = 1;
 
     constructor(uint24 chainSelector) ConceroOwnable() {
         i_chainSelector = chainSelector;
     }
+    /* EXTERNAL FUNCTIONS */
+    receive() external payable {}
 
     function conceroSend(
         uint256 config,
@@ -70,6 +73,7 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
         //        s.router().isMessageProcessed[messageId] = true;
 
         // Step 3: Deliver the message
+        //        emit ConceroMessageReceived(messageId);
         //        deliverMessage(messageId, dstData, message);
     }
 
@@ -98,31 +102,8 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
                 revert("ConceroReceive call failed");
             }
         }
-    }
 
-    /* OWNER FUNCTIONS */
-    function getStorage(StorageSlot slotEnum, bytes32 key) external view returns (uint256) {
-        return s._getStorage(slotEnum, key);
-    }
-
-    function setStorage(StorageSlot slotEnum, bytes32 key, uint256 value) external onlyOwner {
-        s._setStorage(slotEnum, key, value);
-    }
-
-    function setStorageBulk(
-        StorageSlot[] memory slotEnums,
-        bytes32[] memory keys,
-        bytes[] memory values
-    ) external onlyOwner {
-        s._setStorageBulk(slotEnums, keys, values);
-    }
-
-    function withdrawFees(address token, uint256 amount) external onlyOwner {
-        if (token == address(0)) {
-            (bool success, ) = i_owner.call{value: amount}("");
-        } else {
-            IERC20(token).safeTransfer(i_owner, amount);
-        }
+        emit ConceroMessageDelivered(messageId);
     }
 
     /* INTERNAL FUNCTIONS */
@@ -170,8 +151,31 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
         }
     }
 
-    /* EXTERNAL FUNCTIONS */
-    receive() external payable {}
+    /* OWNER FUNCTIONS */
+    function setStorage(bytes32 slot, bytes32 key, uint256 value) external onlyOwner {
+        s._setStorage(slot, key, value);
+    }
+
+    function setStorageBulk(
+        bytes32[] memory slots,
+        bytes32[] memory keys,
+        bytes[] memory values
+    ) external onlyOwner {
+        s._setStorageBulk(slots, keys, values);
+    }
+
+    function withdrawFees(address token, uint256 amount) external onlyOwner {
+        if (token == address(0)) {
+            (bool success, ) = i_owner.call{value: amount}("");
+        } else {
+            IERC20(token).safeTransfer(i_owner, amount);
+        }
+    }
+
+    /* GETTER FUNCTIONS */
+    function getStorage(bytes32 slot, bytes32 key) external view returns (uint256) {
+        return s._getStorage(slot, key);
+    }
 
     function getMessageFeeNative(
         uint256 clientMessageConfig,
@@ -197,5 +201,9 @@ contract ConceroRouter is IConceroRouter, ConceroOwnable {
 
     function isChainSupported(uint24 chainSelector) external view returns (bool) {
         return SupportedChains.isChainSupported(chainSelector);
+    }
+
+    function getCohort(address operator) external view returns (uint8) {
+        return uint8(uint160(operator) % COHORTS_COUNT);
     }
 }

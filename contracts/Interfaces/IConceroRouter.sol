@@ -10,7 +10,8 @@ import {MessageEventParams} from "../Common/MessageTypes.sol";
 
 interface IConceroRouter {
     event ConceroMessageSent(bytes32 indexed messageId, MessageEventParams messageEventParams);
-    event ConceroMessageReceived(bytes32 indexed id, MessageEventParams messageEventParams);
+    event ConceroMessageReceived(bytes32 indexed id);
+    event ConceroMessageDelivered(bytes32 indexed id);
 
     function conceroSend(
         uint256 config,

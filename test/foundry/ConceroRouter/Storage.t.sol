@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {InvalidStorageSlot, LengthMismatch} from "../../../contracts/ConceroRouter/ConceroRouterStorage.sol";
 import {ConceroRouterStorage as s} from "../../../contracts/ConceroRouter/ConceroRouterStorage.sol";
 import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
@@ -10,6 +9,7 @@ import {MessageConfigConstants} from "../../../contracts/Libraries/MessageLib.so
 import {StorageSlot} from "../../../contracts/ConceroRouter/ConceroRouterStorage.sol";
 import {Test} from "forge-std/src/Test.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
+import {StorageLib} from "../../../contracts/Libraries/StorageLib.sol";
 
 contract Storage is Test {
     DeployConceroRouter internal deployScript;
@@ -21,6 +21,9 @@ contract Storage is Test {
 
     address public proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
     address public deployer = vm.envAddress("DEPLOYER_ADDRESS");
+
+    bytes32 internal constant ROUTER_STORAGE_SLOT = keccak256("concero.router.storage");
+    bytes32 internal constant PRICEFEED_STORAGE_SLOT = keccak256("concero.priceFeed.storage");
 
     function setUp() public {
         deployScript = new DeployConceroRouter();
@@ -34,10 +37,10 @@ contract Storage is Test {
         uint256 newNonce = 123;
 
         vm.startPrank(deployer);
-        conceroRouter.setStorage(StorageSlot.Router, bytes32(0), newNonce);
+        conceroRouter.setStorage(ROUTER_STORAGE_SLOT, bytes32(0), newNonce);
 
         assertEq(
-            conceroRouter.getStorage(StorageSlot.Router, bytes32(0)),
+            conceroRouter.getStorage(ROUTER_STORAGE_SLOT, bytes32(0)),
             newNonce,
             "Storage getter failed for nonce"
         );
@@ -51,9 +54,9 @@ contract Storage is Test {
         bytes32 key = bytes32(uint256(chainSelector));
 
         vm.startPrank(deployer);
-        conceroRouter.setStorage(StorageSlot.PriceFeed, key, gasPrice);
+        conceroRouter.setStorage(PRICEFEED_STORAGE_SLOT, key, gasPrice);
         assertEq(
-            conceroRouter.getStorage(StorageSlot.PriceFeed, key),
+            conceroRouter.getStorage(PRICEFEED_STORAGE_SLOT, key),
             gasPrice,
             "Storage getter failed for lastGasPrice"
         );
@@ -69,12 +72,12 @@ contract Storage is Test {
         gasPrices[0] = 5000000000;
         gasPrices[1] = 6000000000;
 
-        StorageSlot[] memory slots = new StorageSlot[](2);
+        bytes32[] memory slots = new bytes32[](2);
         bytes32[] memory keys = new bytes32[](2);
         bytes[] memory values = new bytes[](2);
 
         for (uint256 i = 0; i < 2; i++) {
-            slots[i] = StorageSlot.PriceFeed;
+            slots[i] = PRICEFEED_STORAGE_SLOT;
             keys[i] = bytes32(uint256(chainSelectors[i]));
             values[i] = abi.encode(gasPrices[i]);
         }
@@ -84,7 +87,7 @@ contract Storage is Test {
 
         for (uint256 i = 0; i < 2; i++) {
             assertEq(
-                conceroRouter.getStorage(StorageSlot.PriceFeed, keys[i]),
+                conceroRouter.getStorage(PRICEFEED_STORAGE_SLOT, keys[i]),
                 gasPrices[i],
                 "Bulk storage update failed"
             );
@@ -93,25 +96,23 @@ contract Storage is Test {
     }
 
     function test_RevertInvalidStorageSlot() public {
-        vm.expectRevert(InvalidStorageSlot.selector);
+        vm.expectRevert(StorageLib.InvalidStorageSlot.selector);
 
-        (bool success, ) = address(conceroRouter).call(
-            abi.encodeWithSignature(
-                "setStorage(uint8,bytes32,uint256)",
-                999, // Invalid storage slot enum
-                bytes32(0),
-                1
-            )
-        );
+        bytes32 invalidSlot = keccak256("invalid.slot");
 
-        assertFalse(success, "Call should have failed with InvalidStorageSlot");
+        vm.prank(deployer);
+        conceroRouter.setStorage(invalidSlot, bytes32(0), 1);
     }
+
     function test_RevertLengthMismatch() public {
-        StorageSlot[] memory slots = new StorageSlot[](2);
+        bytes32[] memory slots = new bytes32[](2);
         bytes32[] memory keys = new bytes32[](1);
         bytes[] memory values = new bytes[](2);
 
-        vm.expectRevert(LengthMismatch.selector);
+        slots[0] = PRICEFEED_STORAGE_SLOT;
+        slots[1] = ROUTER_STORAGE_SLOT;
+
+        vm.expectRevert(StorageLib.LengthMismatch.selector);
 
         vm.prank(deployer);
         conceroRouter.setStorageBulk(slots, keys, values);

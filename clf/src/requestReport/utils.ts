@@ -1,5 +1,6 @@
 import { createPublicClient, decodeAbiParameters } from "viem";
 import { ClientMessageRequest, ErrorType } from "./constants";
+import { type Address } from "../../../typechain-types";
 
 function getRandomRpc(rpcs: { url: string; chainId: string }[]) {
     return rpcs[Math.floor(Math.random() * rpcs.length)];
@@ -7,6 +8,26 @@ function getRandomRpc(rpcs: { url: string; chainId: string }[]) {
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getCohortId(operator: Address, cohortsCount: number): number {
+    // Convert address to number and calculate modulo
+    // slice(2) removes '0x' prefix, parseInt with base 16 converts hex to decimal
+    return parseInt(operator.slice(2), 16) % cohortsCount;
+}
+
+function pick<T>(array: T[], n: number): T[] {
+    if (n > array.length) {
+        throw new Error(ErrorType.INVALID_OPERATOR_COUNT);
+    }
+    const shuffled = [...array];
+
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    return shuffled.slice(0, n);
 }
 
 function decodeConceroMessageLog(conceroMessageLogData: string) {
@@ -35,4 +56,4 @@ async function fetchConceroMessage(
     return logs[0];
 }
 
-export { getRandomRpc, sleep, fetchConceroMessage, decodeConceroMessageLog };
+export { getRandomRpc, sleep, fetchConceroMessage, decodeConceroMessageLog, getCohortId, pick };

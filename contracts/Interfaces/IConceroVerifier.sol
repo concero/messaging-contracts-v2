@@ -6,6 +6,11 @@
  */
 pragma solidity 0.8.28;
 
+enum ChainType {
+    EVM,
+    NON_EVM
+}
+
 enum CLFRequestType {
     RequestCLFMessageReport
 }

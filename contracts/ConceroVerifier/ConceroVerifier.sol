@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {CLFRequestType} from "../Interfaces/IConceroVerifier.sol";
+import {CLFRequestType, ChainType} from "../Interfaces/IConceroVerifier.sol";
 import {CLFRequestStatus} from "../Interfaces/IConceroVerifier.sol";
 import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
 import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
@@ -19,7 +19,8 @@ import {OnlyAllowedOperator} from "../Common/Errors.sol";
 
 contract ConceroVerifier is FunctionsClient, ConceroOwnable {
     using FunctionsRequest for FunctionsRequest.Request;
-    using s for s.Router;
+    using s for s.Verifier;
+    using s for s.Operator;
 
     /* IMMUTABLE VARIABLES */
     bytes32 internal immutable i_ethersJsCodeHash;
@@ -28,6 +29,7 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
     uint64 internal immutable i_clfSubscriptionId;
     uint64 internal immutable i_clfDonHostedSecretsVersion;
     uint8 internal immutable i_clfDonHostedSecretsSlotId;
+    uint8 internal constant COHORTS_COUNT = 1;
 
     /* CONSTANT VARIABLES */
     string internal constant CLF_JS_CODE =
@@ -62,7 +64,7 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
     }
 
     function requestCLFMessageReport(MessageReportRequest calldata request) external onlyOperator {
-        require(!s.router().pendingMessageReports[request.messageId], MessageAlreadyProcessed());
+        require(!s.verifier().pendingMessageReports[request.messageId], MessageAlreadyProcessed());
 
         bytes[] memory clfReqArgs = new bytes[](4);
         clfReqArgs[0] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
@@ -73,11 +75,26 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
         clfReqArgs[5] = abi.encode(request.srcChainData);
 
         bytes32 clfRequestId = _sendCLFRequest(clfReqArgs);
-        s.router().pendingCLFRequests[clfRequestId] = true;
-        s.router().pendingMessageReports[request.messageId] = true;
+        s.verifier().pendingCLFRequests[clfRequestId] = true;
+        s.verifier().pendingMessageReports[request.messageId] = true;
     }
 
     /* OWNER FUNCTIONS */
+    function getStorage(bytes32 slot, bytes32 key) external view returns (uint256) {
+        return s._getStorage(slot, key);
+    }
+
+    function setStorage(bytes32 slot, bytes32 key, uint256 value) external onlyOwner {
+        s._setStorage(slot, key, value);
+    }
+
+    function setStorageBulk(
+        bytes32[] memory slots,
+        bytes32[] memory keys,
+        bytes[] memory values
+    ) external onlyOwner {
+        s._setStorageBulk(slots, keys, values);
+    }
 
     /* INTERNAL FUNCTIONS */
     function _registerOperator(address operator) internal {
@@ -110,13 +127,13 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
                 messageId := mload(add(response, 33))
             }
 
-            delete s.router().pendingMessageReports[messageId];
+            delete s.verifier().pendingMessageReports[messageId];
         }
         //        else if (reqType == CLFRequestType.OperatorRegistration) {
         //            _registerOperator();
         //        }
 
-        delete s.router().pendingCLFRequests[clfRequestId];
+        delete s.verifier().pendingCLFRequests[clfRequestId];
     }
 
     function _sendCLFRequest(bytes[] memory args) internal returns (bytes32) {
@@ -124,5 +141,14 @@ contract ConceroVerifier is FunctionsClient, ConceroOwnable {
         req.initializeRequestForInlineJavaScript(CLF_JS_CODE);
         req.setBytesArgs(args);
         return _sendRequest(req.encodeCBOR(), i_clfSubscriptionId, CLF_GAS_LIMIT, i_clfDonId);
+    }
+
+    /* GETTER FUNCTIONS */
+    function getRegisteredOperators(ChainType chainType) external view returns (bytes[] memory) {
+        return s.operator().registeredOperators[chainType];
+    }
+
+    function getCohortsCount() external pure returns (uint8) {
+        return COHORTS_COUNT;
     }
 }

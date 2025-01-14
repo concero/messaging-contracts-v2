@@ -6,10 +6,10 @@
  */
 pragma solidity 0.8.28;
 
-import {EvmSrcChainData, MessageEventParams, InternalMessageConfig, EvmDstChainData} from "../Common/MessageTypes.sol";
+import {EvmSrcChainData, MessageEventParams} from "../Common/MessageTypes.sol";
 import {SupportedChains} from "./SupportedChains.sol";
 
-library MessageConfigConstants {
+library MessageLibConstants {
     uint8 internal constant VERSION = 1;
     uint256 internal constant MESSAGE_BASE_FEE_USD = 1e18 / 100; // 0.01 USD
     uint256 internal constant MAX_MESSAGE_SIZE = 1e6; // 1 MB
@@ -51,8 +51,8 @@ library MessageLib {
         validateClientMessageConfig(clientMessageConfig);
 
         uint256 config = clientMessageConfig;
-        config |= uint256(MessageConfigConstants.VERSION) << MessageConfigConstants.OFFSET_VERSION;
-        config |= uint256(srcChainSelector) << MessageConfigConstants.OFFSET_SRC_CHAIN;
+        config |= uint256(MessageLibConstants.VERSION) << MessageLibConstants.OFFSET_VERSION;
+        config |= uint256(srcChainSelector) << MessageLibConstants.OFFSET_SRC_CHAIN;
         return config;
     }
 
@@ -109,7 +109,7 @@ library MessageLib {
     ) internal pure {
         validateClientMessageConfig(config);
         require(dstChainData.length > 0, InvalidDstChainData());
-        require(message.length < MessageConfigConstants.MAX_MESSAGE_SIZE, MessageTooLarge());
+        require(message.length < MessageLibConstants.MAX_MESSAGE_SIZE, MessageTooLarge());
     }
 
     function validateInternalMessage_(MessageEventParams memory message) internal pure {
@@ -119,19 +119,16 @@ library MessageLib {
     }
 
     function validateClientMessageConfig(uint256 clientConfig) internal pure {
-        uint24 dstChainSelector = uint24(clientConfig >> MessageConfigConstants.OFFSET_DST_CHAIN);
+        uint24 dstChainSelector = uint24(clientConfig >> MessageLibConstants.OFFSET_DST_CHAIN);
         uint16 minSrcConfirmations = uint16(
-            clientConfig >> MessageConfigConstants.OFFSET_MIN_SRC_CONF
+            clientConfig >> MessageLibConstants.OFFSET_MIN_SRC_CONF
         );
         uint16 minDstConfirmations = uint16(
-            clientConfig >> MessageConfigConstants.OFFSET_MIN_DST_CONF
+            clientConfig >> MessageLibConstants.OFFSET_MIN_DST_CONF
         );
-        uint8 additionalRelayers = uint8(
-            clientConfig >> MessageConfigConstants.OFFSET_RELAYER_CONF
-        );
-        bool isCallbackable = ((clientConfig >> MessageConfigConstants.OFFSET_CALLBACKABLE) & 1) !=
-            0;
-        uint8 feeToken = uint8(clientConfig >> MessageConfigConstants.OFFSET_FEE_TOKEN);
+        uint8 additionalRelayers = uint8(clientConfig >> MessageLibConstants.OFFSET_RELAYER_CONF);
+        bool isCallbackable = ((clientConfig >> MessageLibConstants.OFFSET_CALLBACKABLE) & 1) != 0;
+        uint8 feeToken = uint8(clientConfig >> MessageLibConstants.OFFSET_FEE_TOKEN);
 
         require(
             dstChainSelector > 0,
@@ -153,12 +150,12 @@ library MessageLib {
     }
 
     function validateInternalMessageConfig(uint256 config) private pure {
-        uint8 version = uint8(config >> MessageConfigConstants.OFFSET_VERSION);
-        uint8 relayerConfig = uint8(config >> MessageConfigConstants.OFFSET_RELAYER_CONF);
-        uint16 minSrcConfirmations = uint16(config >> MessageConfigConstants.OFFSET_MIN_SRC_CONF);
-        uint16 minDstConfirmations = uint16(config >> MessageConfigConstants.OFFSET_MIN_DST_CONF);
-        uint24 srcChainSelector = uint24(config >> MessageConfigConstants.OFFSET_SRC_CHAIN);
-        uint24 dstChainSelector = uint24(config >> MessageConfigConstants.OFFSET_DST_CHAIN);
+        uint8 version = uint8(config >> MessageLibConstants.OFFSET_VERSION);
+        uint8 relayerConfig = uint8(config >> MessageLibConstants.OFFSET_RELAYER_CONF);
+        uint16 minSrcConfirmations = uint16(config >> MessageLibConstants.OFFSET_MIN_SRC_CONF);
+        uint16 minDstConfirmations = uint16(config >> MessageLibConstants.OFFSET_MIN_DST_CONF);
+        uint24 srcChainSelector = uint24(config >> MessageLibConstants.OFFSET_SRC_CHAIN);
+        uint24 dstChainSelector = uint24(config >> MessageLibConstants.OFFSET_DST_CHAIN);
 
         require(version > 0, InvalidInternalMessageConfig(ConfigError.InvalidConfigVersion));
         require(

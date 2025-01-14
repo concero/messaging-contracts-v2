@@ -6,22 +6,21 @@
  */
 pragma solidity 0.8.28;
 
-import {StorageLib} from "../Libraries/StorageLib.sol";
-
-enum StorageSlot {
-    Router,
-    PriceFeed
-}
-
-enum Protocol {
-    ProtocolA,
-    ProtocolB,
-    ProtocolC,
-    ProtocolD,
-    ProtocolE
-}
-
 library ConceroRouterStorage {
+    enum StorageSlot {
+        Router,
+        PriceFeed
+    }
+
+    enum Protocol {
+        ProtocolA,
+        ProtocolB,
+        ProtocolC,
+        ProtocolD,
+        ProtocolE
+    }
+
+    /* STORAGE STRUCTS */
     struct Router {
         uint256 nonce;
         uint256[50] __var_gap;
@@ -62,27 +61,6 @@ library ConceroRouterStorage {
         assembly {
             s.slot := slot
         }
-    }
-
-    /* GENERIC STORAGE ACCESS */
-    function _getStorage(bytes32 slot, bytes32 key) internal view returns (uint256 value) {
-        return StorageLib._getStorage(slot, key);
-    }
-
-    function _setStorage(bytes32 slot, bytes32 key, uint256 value) internal {
-        require(_validateSlot(slot), StorageLib.InvalidStorageSlot());
-        StorageLib._setStorage(slot, key, value);
-    }
-
-    function _setStorageBulk(
-        bytes32[] memory slots,
-        bytes32[] memory keys,
-        bytes[] memory values
-    ) internal {
-        for (uint256 i = 0; i < slots.length; i++) {
-            require(_validateSlot(slots[i]), StorageLib.InvalidStorageSlot());
-        }
-        StorageLib._setStorageBulk(slots, keys, values);
     }
 
     /* PriceFeed Storage Setters */

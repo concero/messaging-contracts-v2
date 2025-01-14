@@ -4,6 +4,7 @@ import { getEnvVar, getHashSum, updateEnvVariable } from "../utils";
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import log from "../utils/log";
+import { getGasParameters } from "../utils/getGasPrice";
 
 const ETHERS_JS_URL = "https://raw.githubusercontent.com/ethers-io/ethers.js/v6.10.0/dist/ethers.umd.min.js";
 const requestReportJsUrl =
@@ -14,15 +15,12 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
 ) {
     const { deployer } = await hre.getNamedAccounts();
     const { deploy } = hre.deployments;
-
     const { name } = hre.network;
 
     const chain = conceroNetworks[name as ConceroNetworkNames];
     const { type: networkType } = chain;
 
-    const gasPrice = await hre.ethers.provider.getGasPrice();
-    const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
-    const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
+    const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
 
     const ethersJsCode = await fetch(ETHERS_JS_URL).then(res => res.text());
     const requestCLFMessageReportJsCode = await fetch(requestReportJsUrl).then(res => res.text());
@@ -52,9 +50,8 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         ],
         log: true,
         autoMine: true,
-        // maxFeePerGas,
-        // maxPriorityFeePerGas,
-        // gasPrice, // Uncomment if custom gas price is needed
+        maxFeePerGas,
+        maxPriorityFeePerGas,
     })) as Deployment;
 
     log(`Deployed at: ${deployment.address}`, "deployCLFRouter", name);

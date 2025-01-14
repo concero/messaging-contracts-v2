@@ -7,9 +7,9 @@
 pragma solidity 0.8.28;
 
 import {CLFRequestStatus, ChainType} from "../Interfaces/IConceroVerifier.sol";
-import {StorageLib} from "../Libraries/StorageLib.sol";
 
 library ConceroVerifierStorage {
+    /* STORAGE STRUCTS */
     struct Verifier {
         uint256 nonce;
         uint256[50] __var_gap;
@@ -47,26 +47,5 @@ library ConceroVerifierStorage {
         assembly {
             s.slot := slot
         }
-    }
-
-    /* GENERIC STORAGE ACCESS */
-    function _getStorage(bytes32 slot, bytes32 key) internal view returns (uint256 value) {
-        return StorageLib._getStorage(slot, key);
-    }
-
-    function _setStorage(bytes32 slot, bytes32 key, uint256 value) internal {
-        require(_validateSlot(slot), StorageLib.InvalidStorageSlot());
-        StorageLib._setStorage(slot, key, value);
-    }
-
-    function _setStorageBulk(
-        bytes32[] memory slots,
-        bytes32[] memory keys,
-        bytes[] memory values
-    ) internal {
-        for (uint256 i = 0; i < slots.length; i++) {
-            require(_validateSlot(slots[i]), StorageLib.InvalidStorageSlot());
-        }
-        StorageLib._setStorageBulk(slots, keys, values);
     }
 }

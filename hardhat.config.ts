@@ -18,6 +18,12 @@ import "./tasks";
 const enableGasReport = process.env.REPORT_GAS !== "false";
 
 const config: HardhatUserConfig = {
+    contractSizer: {
+        alphaSort: true,
+        runOnCompile: false,
+        strict: true,
+        disambiguatePaths: false,
+    },
     tenderly: {
         username: "olegkron",
         project: "own",

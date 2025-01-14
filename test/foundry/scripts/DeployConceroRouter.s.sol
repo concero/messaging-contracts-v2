@@ -56,7 +56,7 @@ contract DeployConceroRouter is DeployHelper {
 
     function _deployAndSetImplementation() internal {
         vm.startPrank(deployer);
-        conceroRouter = new ConceroRouter(chainSelector);
+        conceroRouter = new ConceroRouter(chainSelector, address(0));
         vm.stopPrank();
 
         setProxyImplementation(address(conceroRouter));

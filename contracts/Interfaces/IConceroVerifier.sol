@@ -33,7 +33,18 @@ struct MessageReportResult {
     bytes32 internalMessageConfig;
     bytes32 messageId;
     bytes32 messageHashSum;
+    bytes dstChainData;
     bytes[] allowedOperators;
 }
+
+struct OperatorRegistrationResult {
+    uint8 version;
+    address operator;
+    ChainType[] operatorChains;
+    bytes[] operatorAddresses;
+}
+
+event CLFRequestError(bytes err);
+event CLFMessageReport(bytes32 indexed conceroId);
 
 interface IConceroVerifier {}

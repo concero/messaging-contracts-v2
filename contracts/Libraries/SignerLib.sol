@@ -5,12 +5,28 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-
+import {MessageReportResult, ReportType} from "../Interfaces/IConceroVerifier.sol";
 error IncorrectNumberOfSignatures();
 error UnauthorizedSigner(address signer);
 error DuplicateSignatureDetected(address signer);
 
 library SignerLib {
+    uint8 internal constant SIZE_VERSION = 1;
+    uint8 internal constant SIZE_REPORT_TYPE = 1;
+    uint8 internal constant SIZE_OPERATOR = 32;
+    uint8 internal constant SIZE_INTERNAL_MESSAGE_CONFIG = 32;
+    uint8 internal constant SIZE_MESSAGE_ID = 32;
+    uint8 internal constant SIZE_MESSAGE_HASH_SUM = 32;
+    uint8 internal constant SIZE_DST_CHAIN_DATA_LENGTH = 4;
+    uint8 internal constant SIZE_OPERATOR_COUNT = 2;
+    uint8 internal constant SIZE_OPERATOR_ENTRY = 32;
+
+    /* CLF DON SIGNERS */
+    address internal constant CLF_DON_SIGNER_0 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
+    address internal constant CLF_DON_SIGNER_1 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
+    address internal constant CLF_DON_SIGNER_2 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
+    address internal constant CLF_DON_SIGNER_3 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
+
     struct ClfDonReportSubmission {
         bytes32[3] context;
         bytes report;
@@ -19,26 +35,96 @@ library SignerLib {
         bytes rawVs;
     }
 
-    address internal constant i_clfDonSigner_0 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant i_clfDonSigner_1 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant i_clfDonSigner_2 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant i_clfDonSigner_3 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-
-    function _extractClfResponse(bytes calldata report) internal pure returns (bytes32, bytes32) {
-        (, bytes[] memory results, , , ) = abi.decode(
-            report,
-            (bytes32[], bytes[], bytes[], bytes[], bytes[])
-        );
-
-        bytes memory result = results[0];
+    function _decodeCLFReportResponse(
+        bytes memory response
+    ) internal pure returns (MessageReportResult memory) {
+        uint256 offset = 0;
+        uint8 version;
+        uint8 reportType;
+        address operator;
+        bytes32 internalMessageConfig;
         bytes32 messageId;
-        bytes32 messageHash;
+        bytes32 messageHashSum;
+        uint32 dstChainDataLength;
+        bytes memory dstChainData;
+        uint16 allowedOperatorsCount;
+        bytes32[] memory rawAllowedOperators;
+        bytes[] memory allowedOperators;
+
         assembly {
-            messageId := mload(add(result, 33))
-            messageHash := mload(add(result, 65))
+            // Read version (1 byte) and reportType (1 byte)
+            version := byte(0, mload(add(response, offset)))
+            reportType := byte(1, mload(add(response, offset)))
+            offset := add(offset, SIZE_VERSION)
+            offset := add(offset, SIZE_REPORT_TYPE)
+
+            // Read operator (20 bytes padded to 32 bytes)
+            operator := shr(96, mload(add(response, offset)))
+            offset := add(offset, SIZE_OPERATOR)
+
+            // Read internalMessageConfig (32 bytes)
+            internalMessageConfig := mload(add(response, offset))
+            offset := add(offset, SIZE_INTERNAL_MESSAGE_CONFIG)
+
+            // Read messageId (32 bytes)
+            messageId := mload(add(response, offset))
+            offset := add(offset, SIZE_MESSAGE_ID)
+
+            // Read messageHashSum (32 bytes)
+            messageHashSum := mload(add(response, offset))
+            offset := add(offset, SIZE_MESSAGE_HASH_SUM)
+
+            // Read dstChainData length (4 bytes as uint32)
+            dstChainDataLength := shr(224, mload(add(response, offset)))
+            offset := add(offset, SIZE_DST_CHAIN_DATA_LENGTH)
         }
 
-        return (messageId, messageHash);
+        // Read dstChainData (variable length based on dstChainDataLength)
+        dstChainData = new bytes(dstChainDataLength);
+        for (uint256 i = 0; i < dstChainDataLength; i++) {
+            dstChainData[i] = response[offset + i];
+        }
+        offset += dstChainDataLength;
+
+        assembly {
+            // Read allowedOperators count (2 bytes as uint16)
+            allowedOperatorsCount := shr(240, mload(add(response, offset)))
+            offset := add(offset, SIZE_OPERATOR_COUNT)
+        }
+
+        // Initialize and read allowedOperators (32 bytes each)
+        rawAllowedOperators = new bytes32[](allowedOperatorsCount);
+        for (uint16 i = 0; i < allowedOperatorsCount; i++) {
+            assembly {
+                let operatorValue := mload(add(response, offset))
+                mstore(add(add(rawAllowedOperators, 0x20), mul(i, 0x20)), operatorValue)
+            }
+            offset += SIZE_OPERATOR_ENTRY;
+        }
+
+        allowedOperators = new bytes[](allowedOperatorsCount);
+        for (uint16 i = 0; i < allowedOperatorsCount; i++) {
+            bytes memory operatorBytes = new bytes(32);
+            assembly {
+                mstore(
+                    add(operatorBytes, 32),
+                    mload(add(add(rawAllowedOperators, 0x20), mul(i, 0x20)))
+                )
+            }
+            allowedOperators[i] = operatorBytes;
+        }
+
+        return
+            MessageReportResult({
+                version: version,
+                reportType: ReportType(reportType),
+                operator: operator,
+                internalMessageConfig: internalMessageConfig,
+                messageId: messageId,
+                messageHashSum: messageHashSum,
+                dstChainData: dstChainData,
+                allowedOperators: allowedOperators
+            });
     }
 
     function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {
@@ -46,10 +132,10 @@ library SignerLib {
             return false;
         }
 
-        return (clfDonSigner == i_clfDonSigner_0 ||
-            clfDonSigner == i_clfDonSigner_1 ||
-            clfDonSigner == i_clfDonSigner_2 ||
-            clfDonSigner == i_clfDonSigner_3);
+        return (clfDonSigner == CLF_DON_SIGNER_0 ||
+            clfDonSigner == CLF_DON_SIGNER_1 ||
+            clfDonSigner == CLF_DON_SIGNER_2 ||
+            clfDonSigner == CLF_DON_SIGNER_3);
     }
 
     /**
@@ -92,7 +178,7 @@ library SignerLib {
         address[] memory signers = new address[](rs.length);
 
         for (uint256 i; i < rs.length; i++) {
-            uint8 v = uint8(rawVs[i]) + 27; // rawVs contains values 0 or 1, add 27 to get 27 or 28
+            uint8 v = uint8(rawVs[i]) + 27;
             bytes32 r = rs[i];
             bytes32 s = ss[i];
 

@@ -70,6 +70,7 @@ export async function main(bytesArgs: string[]) {
         internalMessageConfig: messageConfigFromLog,
         messageId,
         messageHashSum: recomputedMessageHashSum,
+        dstChainData,
         allowedOperators,
     };
 
@@ -81,6 +82,7 @@ export async function main(bytesArgs: string[]) {
             "bytes32", // internalMessageConfig
             "bytes32", // messageId
             "bytes32", // messageHashSum
+            "bytes", // dstChainData
             "bytes[]", // allowedOperators
         ],
         [
@@ -90,9 +92,10 @@ export async function main(bytesArgs: string[]) {
             messageReportResult.internalMessageConfig,
             messageReportResult.messageId,
             messageReportResult.messageHashSum,
+            messageReportResult.dstChainData,
             messageReportResult.allowedOperators,
         ],
     );
 
-    return packResult(messageId, recomputedMessageHashSum, BigInt(srcChainSelector), BigInt(srcBlockNumber));
+    return packResult(encodedResult);
 }

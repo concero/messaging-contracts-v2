@@ -8,18 +8,18 @@ pragma solidity 0.8.28;
 
 library SupportedChains {
     /* MAINNET CHAIN SELECTORS */
-    uint24 constant CHAIN_SELECTOR_ETHEREUM = 1;
-    uint24 constant CHAIN_SELECTOR_OPTIMISM = 10;
-    uint24 constant CHAIN_SELECTOR_POLYGON = 137;
-    uint24 constant CHAIN_SELECTOR_BASE = 8453;
-    uint24 constant CHAIN_SELECTOR_ARBITRUM = 42161;
-    uint24 constant CHAIN_SELECTOR_AVALANCHE = 43114;
+    uint24 internal constant CHAIN_SELECTOR_ETHEREUM = 1;
+    uint24 internal constant CHAIN_SELECTOR_OPTIMISM = 10;
+    uint24 internal constant CHAIN_SELECTOR_POLYGON = 137;
+    uint24 internal constant CHAIN_SELECTOR_BASE = 8453;
+    uint24 internal constant CHAIN_SELECTOR_ARBITRUM = 42161;
+    uint24 internal constant CHAIN_SELECTOR_AVALANCHE = 43114;
 
     /* TESTNET CHAIN SELECTORS */
-    uint24 constant CHAIN_SELECTOR_ARBITRUM_SEPOLIA = 42162;
-    uint24 constant CHAIN_SELECTOR_BASE_SEPOLIA = 8454;
-    uint24 constant CHAIN_SELECTOR_OPTIMISM_SEPOLIA = 11;
-    uint24 constant CHAIN_SELECTOR_POLYGON_AMOY = 138;
+    uint24 internal constant CHAIN_SELECTOR_ARBITRUM_SEPOLIA = 42162;
+    uint24 internal constant CHAIN_SELECTOR_BASE_SEPOLIA = 8454;
+    uint24 internal constant CHAIN_SELECTOR_OPTIMISM_SEPOLIA = 11;
+    uint24 internal constant CHAIN_SELECTOR_POLYGON_AMOY = 138;
 
     function isEVMChain(uint24 chainSelector) internal pure returns (bool) {
         /* MAINNET */

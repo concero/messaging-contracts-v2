@@ -13,9 +13,8 @@ import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
 abstract contract BaseModule is ConceroOwnable {
     uint24 internal immutable i_chainSelector;
     address internal immutable i_USDC;
-    uint8 internal constant COHORTS_COUNT = 1;
-    using s for s.Operator;
 
+    using s for s.Operator;
     modifier onlyOperator() {
         require(s.operator().isAllowed[msg.sender], OnlyAllowedOperator());
         _;

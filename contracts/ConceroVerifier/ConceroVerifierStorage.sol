@@ -23,8 +23,10 @@ library ConceroVerifierStorage {
     struct Operator {
         mapping(address operator => bool) isAllowed;
         mapping(address operator => uint256 depositUSDC) deposit;
-        mapping(address operator => mapping(uint24 chainSelector => bytes walletAddress)) walletAddress;
         mapping(ChainType => bytes[] operators) registeredOperators;
+        mapping(address operator => mapping(uint24 chainSelector => bytes walletAddress)) walletAddress;
+        mapping(address operator => uint256) feesEarnedNative;
+        mapping(address operator => uint256) feesEarnedUSDC;
     }
 
     bytes32 internal constant VERIFIER_STORAGE_SLOT = keccak256("concero.verifier.storage");

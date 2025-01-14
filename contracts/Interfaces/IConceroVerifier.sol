@@ -6,13 +6,24 @@
  */
 pragma solidity 0.8.28;
 
+enum FeeTokenType {
+    native,
+    USDC
+}
 enum ChainType {
     EVM,
     NON_EVM
 }
 
-enum CLFRequestType {
-    RequestCLFMessageReport
+enum CLFReportVersion {
+    v0,
+    v1
+}
+
+enum CLFReportType {
+    Message,
+    OperatorRegistration,
+    OperatorDeregistration
 }
 
 enum CLFRequestStatus {
@@ -21,14 +32,17 @@ enum CLFRequestStatus {
     FulFilled
 }
 
-enum ReportType {
-    MessageReport,
-    Other
+struct MessageReportRequest {
+    uint256 internalMessageConfig;
+    bytes32 messageId;
+    bytes32 messageHashSum;
+    bytes dstChainData;
+    bytes srcChainData;
 }
 
 struct MessageReportResult {
     uint8 version;
-    ReportType reportType;
+    CLFReportType reportType;
     address operator;
     bytes32 internalMessageConfig;
     bytes32 messageId;
@@ -45,6 +59,9 @@ struct OperatorRegistrationResult {
 }
 
 event CLFRequestError(bytes err);
-event CLFMessageReport(bytes32 indexed conceroId);
-
+event MessageReport(bytes32 indexed conceroId);
+event OperatorRegistered(ChainType chainType, bytes operatorAddress);
+event OperatorDeregistered(ChainType chainType, bytes operatorAddress);
+event OperatorDeposited(address indexed operator, uint256 amount);
+event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
 interface IConceroVerifier {}

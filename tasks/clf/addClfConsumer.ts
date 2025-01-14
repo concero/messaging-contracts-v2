@@ -22,6 +22,7 @@ export async function addCLFConsumer(chain: ConceroNetwork, consumerAddresses: A
             functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
         });
 
+        sm.estimateFunctionsRequestCost();
         await sm.initialize();
 
         try {

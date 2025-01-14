@@ -26,6 +26,7 @@ library ConceroRouterStorage {
         uint256[50] __var_gap;
         uint256[50] __array_gap;
         mapping(address operator => uint256) operatorFeesEarnedUSDC;
+        mapping(address operator => uint256) operatorFeesEarnedNative;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageId => bool isSent) isMessageSent;
         mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;

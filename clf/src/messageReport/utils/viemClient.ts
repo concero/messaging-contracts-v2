@@ -1,6 +1,9 @@
 import { createPublicClient, Transport, createTransport, fallback } from "viem";
-import healthyRpcs from "./healthy-rpcs.json";
-import { CONFIG } from "./constants";
+import healthyRpcs from "../constants/healthy-rpcs.json";
+
+import { CONFIG } from "../constants/config";
+import { ErrorType } from "../constants/errorTypes";
+import { handleError } from "./errorHandler";
 
 function createCustomTransport(url: string, chainIdHex: string): Transport {
     return createTransport({
@@ -27,11 +30,11 @@ function createCustomTransport(url: string, chainIdHex: string): Transport {
 export function createFallbackTransport(chainSelector: string): Transport {
     const chainConfig = healthyRpcs[chainSelector];
     if (!chainConfig) {
-        throw new Error(`No chain config found for '${chainSelector}'`);
+        handleError(ErrorType.INVALID_CHAIN);
     }
 
     if (!chainConfig.rpcs[0]) {
-        throw new Error(`No RPC entries found for '${chainSelector}'`);
+        handleError(ErrorType.INVALID_RPC);
     }
 
     const chainIdHex = `0x${parseInt(chainConfig.rpcs[0].chainId, 10).toString(16)}`;
@@ -42,7 +45,7 @@ export function createFallbackTransport(chainSelector: string): Transport {
 export function getPublicClient(chainSelector: string) {
     const chainConfig = healthyRpcs[chainSelector];
     if (!chainConfig || !chainConfig.rpcs.length) {
-        throw new Error(`No RPC config found for '${chainSelector}'`);
+        handleError(ErrorType.NO_RPC_PROVIDERS);
     }
 
     const chainIdHex = `0x${parseInt(chainConfig.rpcs[0].chainId, 10).toString(16)}`;

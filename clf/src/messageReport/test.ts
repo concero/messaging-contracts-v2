@@ -1,5 +1,5 @@
-import { INTERNAL_MESSAGE_REPORT_BIT_OFFSETS as offsets, BIT_MASKS as masks } from "./constants";
 import { main } from "./index";
+import { BIT_MASKS as masks, INTERNAL_MESSAGE_REPORT_BIT_OFFSETS as offsets } from "./constants/bitOffsets";
 
 async function test() {
     // Create a valid `messageConfig`

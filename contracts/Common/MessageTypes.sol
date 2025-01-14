@@ -41,14 +41,6 @@ struct MessageEventParams {
     bytes dstChainData;
 }
 
-struct MessageReportRequest {
-    uint256 internalMessageConfig;
-    bytes32 messageId;
-    bytes32 messageHashSum;
-    bytes dstChainData;
-    bytes srcChainData;
-}
-
 struct InternalMessageConfig {
     uint8 version; //                  ─╮ Internal
     uint24 srcChainSelector; //         │ ConceroRouter config

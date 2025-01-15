@@ -1,6 +1,6 @@
 import { MessageArgs } from "../types";
 import { ErrorType } from "../constants/errorTypes";
-import { handleError } from "./errorHandler";
+import { handleError } from "../../common/errorHandler";
 
 export function validateInputs(bytesArgs: string[]): MessageArgs {
     if (bytesArgs.length < 6) handleError(ErrorType.INVALID_INPUT);

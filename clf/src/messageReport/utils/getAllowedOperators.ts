@@ -1,4 +1,4 @@
-import { ChainType } from "../enums";
+import { ChainType } from "../../common/enums";
 import { type Address } from "viem";
 import { PublicClient } from "viem/clients/createPublicClient";
 import { getMessageCohortId, getOperatorCohortId } from "./utils";
@@ -6,7 +6,7 @@ import { Hash } from "viem";
 import { ErrorType } from "../constants/errorTypes";
 import { CONCERO_VERIFIER_CONTRACT_ABI } from "../constants/abis";
 import { CONCERO_VERIFIER_CONTRACT_ADDRESS } from "../constants/conceroRouters";
-import { handleError } from "./errorHandler";
+import { handleError } from "../../common/errorHandler";
 
 /**
  * Gets all allowed operators for a given message ID based on cohort assignment
@@ -37,8 +37,7 @@ export async function getAllowedOperators(
 
         return allowedOperators;
     } catch (error) {
-        console.error("Error in getAllowedOperators:", error);
-        throw error instanceof Error ? error : new Error(ErrorType.OPERATOR_SELECTION_FAILED);
+        handleError(ErrorType.OPERATOR_SELECTION_FAILED);
     }
 }
 

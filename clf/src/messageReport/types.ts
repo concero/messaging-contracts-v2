@@ -23,4 +23,15 @@ interface InternalMessageConfig {
     isCallbackable: boolean; // bool
 }
 
-export { EvmSrcChainData, MessageArgs, InternalMessageConfig };
+interface MessageReportResult {
+    version: number;
+    reportType: number;
+    operator: string;
+    internalMessageConfig: string;
+    messageId: string;
+    messageHashSum: string;
+    dstChainData: string;
+    allowedOperators: string[];
+}
+
+export { EvmSrcChainData, MessageArgs, InternalMessageConfig, MessageReportResult };

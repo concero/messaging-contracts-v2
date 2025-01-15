@@ -2,7 +2,7 @@ import { EvmSrcChainData } from "../types";
 import { decodeAbiParameters } from "viem";
 import { ClientMessageRequest } from "../constants/abis";
 import { ErrorType } from "../constants/errorTypes";
-import { handleError } from "./errorHandler";
+import { handleError } from "../../common/errorHandler";
 
 function decodeConceroMessageLog(conceroMessageLogData: string) {
     const [messageConfig, dstChainData, message] = decodeAbiParameters([ClientMessageRequest], conceroMessageLogData);

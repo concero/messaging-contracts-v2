@@ -1,6 +1,6 @@
 import { type Address } from "../../../../typechain-types";
 import { ErrorType } from "../constants/errorTypes";
-import { handleError } from "./errorHandler";
+import { handleError } from "../../common/errorHandler";
 
 function getRandomRpc(rpcs: { url: string; chainId: string }[]) {
     return rpcs[Math.floor(Math.random() * rpcs.length)];

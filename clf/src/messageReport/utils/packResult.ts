@@ -1,69 +1,54 @@
+import { MessageReportResult } from "../types";
+import {
+    MASKS,
+    MESSAGE_REPORT_RESULT_OFFSETS as OFFSETS,
+    MESSAGE_REPORT_RESULT_SIZES as SIZES,
+} from "../constants/bitOffsets";
+
+/**
+ * Calculates the total length of the result buffer
+ */
+function calculateResultLength(dstChainDataLength: number, operatorsLength: number): number {
+    const fixedLength = OFFSETS.DST_CHAIN_LENGTH + SIZES.DST_CHAIN_DATA_LENGTH;
+    return fixedLength + dstChainDataLength + SIZES.OPERATORS_COUNT + operatorsLength * SIZES.OPERATOR_BYTES;
+}
+
 /**
  * Packs the result data into a binary format
- * @param messageReportResult - The message report result object
- * @returns Packed binary data as Uint8Array
  */
-export function packResult(messageReportResult: {
-    version: number;
-    reportType: number;
-    operator: string;
-    internalMessageConfig: string;
-    messageId: string;
-    messageHashSum: string;
-    dstChainData: string;
-    allowedOperators: string[];
-}): Uint8Array {
-    const dstChainDataBytes = new Uint8Array(Buffer.from(messageReportResult.dstChainData.replace(/^0x/, ""), "hex"));
+export function packResult(result: MessageReportResult): Uint8Array {
+    const dstChainDataBytes = new Uint8Array(Buffer.from(result.dstChainData.replace(/^0x/, ""), "hex"));
     const dstChainDataLength = dstChainDataBytes.length;
+    const operatorsLength = result.allowedOperators.length;
 
-    const operatorsLength = messageReportResult.allowedOperators.length;
-    const operatorsBytesLength = operatorsLength * 32; // Each operator is 32 bytes
+    const res = new Uint8Array(calculateResultLength(dstChainDataLength, operatorsLength));
 
-    // Total length:
-    // 1 byte (version) +
-    // 1 byte (reportType) +
-    // 32 bytes (operator address) +
-    // 32 bytes (internal message config) +
-    // 32 bytes (messageId) +
-    // 32 bytes (messageHashSum) +
-    // 4 bytes (dstChainData length) +
-    // dynamic length (dstChainData) +
-    // 2 bytes (operators count) +
-    // (32 bytes * number of operators)
-    const resLength = 1 + 1 + 32 + 32 + 32 + 32 + 4 + dstChainDataLength + 2 + operatorsBytesLength;
+    // Pack fixed fields
+    res[OFFSETS.VERSION] = result.version;
+    res[OFFSETS.REPORT_TYPE] = result.reportType;
 
-    const res = new Uint8Array(resLength);
-    let offset = 0;
+    res.set(Functions.encodeUint256(BigInt(result.operator)), OFFSETS.OPERATOR);
+    res.set(Functions.encodeUint256(BigInt(result.internalMessageConfig)), OFFSETS.MESSAGE_CONFIG);
+    res.set(Functions.encodeUint256(BigInt(result.messageId)), OFFSETS.MESSAGE_ID);
+    res.set(Functions.encodeUint256(BigInt(result.messageHashSum)), OFFSETS.MESSAGE_HASH);
 
-    res[offset] = messageReportResult.version;
-    res[offset + 1] = messageReportResult.reportType;
-    offset += 2;
-
-    res.set(Functions.encodeUint256(BigInt(messageReportResult.operator)), offset);
-    offset += 32;
-
-    res.set(Functions.encodeUint256(BigInt(messageReportResult.internalMessageConfig)), offset);
-    offset += 32;
-
-    res.set(Functions.encodeUint256(BigInt(messageReportResult.messageId)), offset);
-    offset += 32;
-
-    res.set(Functions.encodeUint256(BigInt(messageReportResult.messageHashSum)), offset);
-    offset += 32;
-
+    // Pack destination chain data
+    let offset = OFFSETS.DST_CHAIN_LENGTH;
     res.set(new Uint8Array(new Uint32Array([dstChainDataLength]).buffer), offset);
-    offset += 4;
+    offset += SIZES.DST_CHAIN_DATA_LENGTH;
 
     res.set(dstChainDataBytes, offset);
     offset += dstChainDataLength;
 
-    res[offset] = operatorsLength >> 8;
-    res[offset + 1] = operatorsLength & 0xff;
-    offset += 2;
+    // Pack operators count
+    res[offset] = (operatorsLength & MASKS.UPPER_BYTE) >> MASKS.UPPER_BYTE_SHIFT;
+    res[offset + 1] = operatorsLength & MASKS.LOWER_BYTE;
+    offset += SIZES.OPERATORS_COUNT;
 
-    for (let i = 0; i < operatorsLength; i++) {
-        res.set(Functions.encodeUint256(BigInt(messageReportResult.allowedOperators[i])), offset);
-        offset += 32;
+    // Pack operators
+    for (const operator of result.allowedOperators) {
+        res.set(Functions.encodeUint256(BigInt(operator)), offset);
+        offset += SIZES.OPERATOR_BYTES;
     }
 
     return res;

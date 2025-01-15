@@ -1,7 +1,7 @@
 import { encodeAbiParameters, keccak256 } from "viem";
 import { ClientMessageRequest } from "../constants/abis";
 import { ErrorType } from "../constants/errorTypes";
-import { handleError } from "./errorHandler";
+import { handleError } from "../../common/errorHandler";
 
 export async function verifyMessageHash(
     messageId: string,

@@ -1,6 +1,6 @@
 import { packResult } from "./utils/packResult";
-import { ChainType, ReportType } from "./enums";
-import { getPublicClient } from "./utils/viemClient";
+import { ChainType, ReportType } from "../common/enums";
+import { getPublicClient } from "../common/viemClient";
 import { decodeInternalMessageConfig, validateInternalMessageConfig } from "./utils/messageConfig";
 import { pick } from "./utils/utils";
 import { getAllowedOperators } from "./utils/getAllowedOperators";
@@ -10,7 +10,7 @@ import { verifyMessageHash } from "./utils/verifyMessageHash";
 import { validateInputs } from "./utils/validateInputs";
 import { decodeConceroMessageLog, decodeEvmSrcChainData } from "./utils/decoders";
 import { fetchConceroMessage } from "./utils/fetchConceroMessage";
-import { CustomErrorHandler, handleError } from "./utils/errorHandler";
+import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "./constants/errorTypes";
 
 export async function main(bytesArgs: string[]) {

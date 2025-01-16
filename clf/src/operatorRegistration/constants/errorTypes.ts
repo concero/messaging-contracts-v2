@@ -1,6 +1,5 @@
 enum ErrorType {
-    // General Errors
-    UNKNOWN_ERROR = 0,
+    // @dev 0 - 9: Common Errors
 
     // Configuration Errors
     CONFIG_INVALID_VERSION = 10,

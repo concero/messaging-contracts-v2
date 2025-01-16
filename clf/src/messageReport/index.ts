@@ -12,6 +12,7 @@ import { decodeConceroMessageLog, decodeEvmSrcChainData } from "./utils/decoders
 import { fetchConceroMessage } from "./utils/fetchConceroMessage";
 import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "./constants/errorTypes";
+import { CommonErrorType } from "../common/errorType";
 
 export async function main(bytesArgs: string[]) {
     try {
@@ -63,7 +64,7 @@ export async function main(bytesArgs: string[]) {
         if (error instanceof CustomErrorHandler) {
             throw error;
         } else {
-            handleError(ErrorType.UNKNOWN_ERROR); // Optionally rethrow or handle the error as needed
+            handleError(CommonErrorType.UNKNOWN_ERROR); // Optionally rethrow or handle the error as needed
         }
     }
 }

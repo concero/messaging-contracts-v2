@@ -18,7 +18,7 @@
     "clean:forge": "forge clean",
     "clean": "npm run clean:hardhat && npm run clean:forge",
     "build:messageReport": "bun build ./clf/src/messageReport/index.ts --outfile ./clf/dist/messageReport.min.js --target node",
-    "build:operatorRegistration": "bun build ./clf/src/operatorRegistration/index.ts --outfile ./clf/dist/operatorRegistration.min.js --target node",
+    "build:operatorRegistration": "bun build ./clf/src/operatorRegistration/index.ts --outfile ./clf/dist/operatorRegistration.min.js --target node"
   },
   "devDependencies": {
     "@huggingface/prettier-plugin-vertical-align": "^0.2.3",

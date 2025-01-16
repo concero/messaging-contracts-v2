@@ -1,7 +1,5 @@
 enum ErrorType {
-    // General Errors
-    UNKNOWN_ERROR = 0,
-
+    // @dev 0 - 9: Common Errors
     // Configuration Errors
     CONFIG_INVALID_VERSION = 10,
     CONFIG_INVALID_RELAYER_CONFIG = 11,
@@ -42,5 +40,6 @@ enum ErrorType {
     // Address Errors
     INVALID_RECEIVER = 60,
     INVALID_SENDER = 61,
+    INVALID_UINT256 = 62,
 }
 export { ErrorType };

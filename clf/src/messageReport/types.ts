@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { type Address, type Hash } from "viem";
 
 type EvmSrcChainData = {
     sender: Address;
@@ -26,10 +26,10 @@ interface InternalMessageConfig {
 interface MessageReportResult {
     version: number;
     reportType: number;
-    operator: string;
+    operator: Address;
     internalMessageConfig: string;
-    messageId: string;
-    messageHashSum: string;
+    messageId: Hash;
+    messageHashSum: Hash;
     dstChainData: string;
     allowedOperators: string[];
 }

@@ -1,8 +1,9 @@
 import { ErrorType } from "../constants/errorTypes";
 import { viemChains } from "../constants/viemChains";
-import { MASKS as masks, INTERNAL_MESSAGE_REPORT_BIT_OFFSETS as offsets } from "../constants/bitOffsets";
+import { INTERNAL_MESSAGE_REPORT_BIT_OFFSETS as offsets } from "../constants/bitOffsets";
 import { InternalMessageConfig } from "../types";
 import { handleError } from "../../common/errorHandler";
+import { MASKS as masks } from "../../common/bitMasks";
 
 function extractBits(config: bigint, offset: number, mask: bigint): number {
     return Number((config >> BigInt(offset)) & mask);

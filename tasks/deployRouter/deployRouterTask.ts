@@ -1,14 +1,14 @@
 import { task } from "hardhat/config";
 import { compileContracts } from "../../utils";
 import { ProxyEnum } from "../../constants";
-import deployConceroRouter from "../../deploy/ConceroRouter";
+import deployRouter from "../../deploy/ConceroRouter";
 import deployProxyAdmin from "../../deploy/ConceroProxyAdmin";
 import deployTransparentProxy from "../../deploy/TransparentProxy";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { setVariables } from "./setVariables";
-import { upgradeProxyImplementation } from "../upgradeProxyImplementation";
+import { setRouterVariables } from "./setRouterVariables";
+import { upgradeProxyImplementation } from "../utils/upgradeProxyImplementation";
 
-export async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
+async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
     compileContracts({ quiet: true });
 
     //todo: when running --deployproxy W/O --deployimplementation,
@@ -19,12 +19,12 @@ export async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnviron
     }
 
     if (taskArgs.deployimplementation) {
-        await deployConceroRouter(hre);
+        await deployRouter(hre);
         await upgradeProxyImplementation(hre, ProxyEnum.routerProxy, false);
     }
 
     if (taskArgs.setvars) {
-        await setVariables(hre);
+        await setRouterVariables(hre);
     }
 }
 
@@ -36,4 +36,4 @@ task("deploy-router", "Deploy the ConceroRouter contract")
         await deployRouterTask(taskArgs, hre);
     });
 
-export default {};
+export { deployRouterTask };

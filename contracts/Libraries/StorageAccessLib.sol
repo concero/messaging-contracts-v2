@@ -6,9 +6,9 @@
  */
 pragma solidity 0.8.28;
 
-library StorageLib {
+library StorageAccessLib {
     error LengthMismatch();
-    error InvalidStorageSlot();
+    error InvalidNamespace();
 
     function _setStorage(bytes32 slot, bytes32 key, uint256 value) internal {
         if (key == bytes32(0)) {

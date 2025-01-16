@@ -1,26 +1,33 @@
 import { main } from "./index";
-import { MASKS as masks, INTERNAL_MESSAGE_REPORT_BIT_OFFSETS as offsets } from "./constants/bitOffsets";
 
 async function test() {
-    // Create a valid `messageConfig`
+    const VERSION = 0n;
+    const SRC_CHAIN_SELECTOR = 8n;
+    const DST_CHAIN_SELECTOR = 32n;
+    const MIN_SRC_CONF = 56n;
+    const MIN_DST_CONF = 72n;
+    const RELAYER_CONFIG = 88n;
+    const IS_CALLBACKABLE = 96n;
+
     const messageConfig =
-        (1n << offsets.VERSION) | // version = 1
-        (100n << offsets.SRC_CHAIN_SELECTOR) | // srcChainSelector = 100
-        (1n << offsets.DST_CHAIN_SELECTOR) | // dstChainSelector = 1
-        (2n << offsets.MIN_SRC_CONF) | // minSrcConfirmations = 2
-        (1n << offsets.MIN_DST_CONF) | // minDstConfirmations = 1
-        (3n << offsets.RELAYER_CONFIG) | // relayerConfig = 3
-        (1n << offsets.IS_CALLBACKABLE); // isCallbackable = true
+        (1n << VERSION) | // version = 1
+        (100n << SRC_CHAIN_SELECTOR) | // srcChainSelector = 100
+        (1n << DST_CHAIN_SELECTOR) | // dstChainSelector = 1
+        (2n << MIN_SRC_CONF) | // minSrcConfirmations = 2
+        (1n << MIN_DST_CONF) | // minDstConfirmations = 1
+        (3n << RELAYER_CONFIG) | // relayerConfig = 3
+        (1n << IS_CALLBACKABLE); // isCallbackable = true
 
-    // Convert `messageConfig` to hex string for the test
-    const inputArgs = ["", "", `0x${messageConfig.toString(16)}`, "0x456", "0x789", "10"];
+    const inputArgs = [
+        "0x1234", // Dummy hash
+        "0x" + messageConfig.toString(16).padStart(64, "0"),
+        "0x0000000000000000000000000000000000000000000000000000000000000456", // messageId
+        "0x0000000000000000000000000000000000000000000000000000000000000789", // messageHashSum
+        "0x" + Buffer.from("test").toString("hex"), // srcChainData
+        "0x1234567890123456789012345678901234567890", // operatorAddress (valid ethereum address)
+    ];
 
-    try {
-        const result = await main(inputArgs);
-        console.log("Test Passed:", result);
-    } catch (error) {
-        console.error("Test Failed:", error.message);
-    }
+    await main(inputArgs);
 }
 
 test();

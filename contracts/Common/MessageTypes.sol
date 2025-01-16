@@ -14,7 +14,7 @@ pragma solidity 0.8.28;
 | dstChainSelector       | 24   | Destination chain ID                  |
 | minSrcConfirmations    | 16   | Min. source chain confirmations       |
 | minDstConfirmations    | 16   | Min. destination chain confirmations  |
-| additional_relayers    | 8    | Bitmap of additional relayers allowed |
+| relayer_config         | 8    | Bitmap of additional relayers allowed |
 | isCallbackable         | 1    | Callback flag (0: No, 1: Yes)         |
 | Reserved/Unused        | 174  | Reserved for future use               |
 */
@@ -33,12 +33,6 @@ struct EvmSrcChainData {
 struct EvmDstChainData {
     address receiver;
     uint256 gasLimit;
-}
-
-struct MessageEventParams {
-    // @notice bytes32 indexed messageId is a preceding parameter in the event
-    uint256 internalMessageConfig;
-    bytes dstChainData;
 }
 
 struct InternalMessageConfig {

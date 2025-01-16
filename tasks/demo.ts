@@ -1,13 +1,13 @@
 import { task } from "hardhat/config";
-import { setVariables as setConceroRouterVariables } from "./deployCLFRouter/setVariables";
-import { setVariables as setCLFRouterVariables } from "./deployRouter/setVariables";
-import deployCLFRouter from "../deploy/CLFRouter";
-import deployConceroRouter from "../deploy/ConceroRouter";
+import { setVerifierVariables as setConceroRouterVariables } from "./deployVerifier/setVerifierVariables";
+import { setVariables as setCLFRouterVariables } from "./deployRouter/setRouterVariables";
+import deployVerifier from "../deploy/ConceroVerifier";
+import deployRouter from "../deploy/ConceroRouter";
 
 task("deploy-infra", "Deploy contracts").setAction(async (_, hre) => {
-    await deployCLFRouter(hre);
+    await deployVerifier(hre);
     await setCLFRouterVariables(hre);
 
-    await deployConceroRouter(hre);
+    await deployRouter(hre);
     await setConceroRouterVariables(hre);
 });

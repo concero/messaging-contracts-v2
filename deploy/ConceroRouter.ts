@@ -33,7 +33,7 @@ function getCLFDonSigners(networkType: NetworkType) {
     return clfDonSigners;
 }
 
-const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
+const deployRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
     hre: HardhatRuntimeEnvironment,
 ) {
     const { deployer } = await hre.getNamedAccounts();
@@ -45,7 +45,7 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
 
     const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
 
-    // log("Deploying...", "deployConceroRouter", name);
+    // log("Deploying...", "deployRouter", name);
 
     const args = {
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
@@ -62,11 +62,11 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
         maxPriorityFeePerGas,
     })) as Deployment;
 
-    log(`Deployed at: ${deployment.address}`, "deployConceroRouter", name);
+    log(`Deployed at: ${deployment.address}`, "deployRouter", name);
     updateEnvVariable(`CONCERO_ROUTER_${networkEnvKeys[name]}`, deployment.address, `deployments.${networkType}`);
 
     return deployment;
 };
 
-export default deployConceroRouter;
-deployConceroRouter.tags = ["ConceroRouter"];
+export default deployRouter;
+deployRouter.tags = ["ConceroRouter"];

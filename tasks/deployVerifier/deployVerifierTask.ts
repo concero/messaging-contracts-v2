@@ -1,15 +1,15 @@
 import { task } from "hardhat/config";
 import { compileContracts, getEnvAddress } from "../../utils";
 import { conceroNetworks, ProxyEnum } from "../../constants";
-import deployCLFRouter from "../../deploy/CLFRouter";
+import deployVerifier from "../../deploy/ConceroVerifier";
 import deployProxyAdmin from "../../deploy/ConceroProxyAdmin";
 import deployTransparentProxy from "../../deploy/TransparentProxy";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { setVariables } from "./setVariables";
-import { upgradeProxyImplementation } from "../upgradeProxyImplementation";
-import { addCLFConsumer } from "../clf/addClfConsumer";
+import { setVerifierVariables } from "./setVerifierVariables";
+import { upgradeProxyImplementation } from "../utils/upgradeProxyImplementation";
+import { addCLFConsumer } from "../clf";
 
-export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
+async function deployVerifierTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
     compileContracts({ quiet: true });
     const conceroNetwork = conceroNetworks[hre.network.name];
 
@@ -21,12 +21,12 @@ export async function deployClfRouterTask(taskArgs: any, hre: HardhatRuntimeEnvi
     }
 
     if (taskArgs.deployimplementation) {
-        await deployCLFRouter(hre);
+        await deployVerifier(hre);
         await upgradeProxyImplementation(hre, ProxyEnum.clfRouterProxy, false);
     }
 
     if (taskArgs.setvars) {
-        await setVariables(hre);
+        await setVerifierVariables(hre);
     }
 }
 
@@ -35,7 +35,7 @@ task("deploy-clf-router", "Deploy the MasterChainCLF contract")
     .addFlag("deployimplementation", "Deploy the implementation")
     .addFlag("setvars", "Set the contract variables")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
-        await deployClfRouterTask(taskArgs, hre);
+        await deployVerifierTask(taskArgs, hre);
     });
 
-export default {};
+export { deployVerifierTask };

@@ -1,5 +1,5 @@
 import { type Address } from "../../../../typechain-types";
-import { ErrorType } from "../constants/errorTypes";
+import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 
 function getRandomRpc(rpcs: { url: string; chainId: string }[]) {

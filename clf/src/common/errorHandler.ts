@@ -1,5 +1,4 @@
-import { ErrorType } from "../messageReport/constants/errorTypes";
-import { CommonErrorType } from "./errorType";
+import { ErrorType } from "./errorType";
 
 interface CustomError extends Error {
     type: ErrorType;
@@ -11,14 +10,14 @@ class CustomErrorHandler extends Error implements CustomError {
     data: any;
 
     constructor(type: ErrorType, data: any = null) {
-        super(ErrorType[type]);
+        super(ErrorType[type]); // Convert enum value to string for error message
         this.type = type;
         this.data = data;
     }
 }
 
-function handleError(type: ErrorType | CommonErrorType): never {
+function handleError(type: ErrorType): never {
     throw new CustomErrorHandler(type);
 }
 
-export { CustomErrorHandler, handleError };
+export { CustomError, CustomErrorHandler, handleError };

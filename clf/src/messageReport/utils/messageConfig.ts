@@ -1,4 +1,4 @@
-import { ErrorType } from "../constants/errorTypes";
+import { ErrorType } from "../../common/errorType";
 import { viemChains } from "../constants/viemChains";
 import { INTERNAL_MESSAGE_REPORT_BIT_OFFSETS as offsets } from "../constants/bitOffsets";
 import { InternalMessageConfig } from "../types";

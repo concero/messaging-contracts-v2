@@ -1,5 +1,5 @@
 import { createPublicClient } from "viem";
-import { ErrorType } from "../constants/errorTypes";
+import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 
 async function fetchConceroMessage(

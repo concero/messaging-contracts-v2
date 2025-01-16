@@ -1,7 +1,7 @@
-import { getFallbackClients } from "../utils";
-import log from "../utils/log";
+import { getFallbackClients } from "../../utils";
+import log from "../../utils/log";
 import { task } from "hardhat/config";
-import { conceroNetworks } from "../constants";
+import { conceroNetworks } from "../../constants";
 import { type Address } from "viem";
 
 export async function callContractFunction(targetContract: Address) {
@@ -39,5 +39,3 @@ task("call-contract-function", "Calls a specific contract function. Use for test
         await callContractFunction(taskArgs.contract);
     },
 );
-
-export default {};

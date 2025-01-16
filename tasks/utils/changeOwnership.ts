@@ -1,12 +1,12 @@
-import { conceroNetworks, viemReceiptConfig } from "../constants";
+import { conceroNetworks, viemReceiptConfig } from "../../constants";
 import { privateKeyToAccount } from "viem/accounts";
-import log from "../utils/log";
+import log from "../../utils/log";
 import { task } from "hardhat/config";
 import { abi as ownableAbi } from "@openzeppelin/contracts/build/contracts/Ownable.json";
-import { getFallbackClients } from "../utils/";
+import { getFallbackClients } from "../../utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Address } from "viem";
-import { ConceroNetworkNames } from "../types/ConceroNetwork";
+import { ConceroNetworkNames } from "../../types/ConceroNetwork";
 
 export async function changeOwnership(hre: HardhatRuntimeEnvironment, targetContract: Address, newOwner: string) {
     const { name: chainName } = hre.network;
@@ -46,5 +46,3 @@ task("change-ownership", "Changes the ownership of the contract")
             await changeOwnership(hre, taskArgs.targetcontract, taskArgs.newowner);
         }
     });
-
-export default {};

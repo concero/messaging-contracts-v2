@@ -8,7 +8,7 @@ import {FeeToken, EvmDstChainData, EvmSrcChainData} from "../../../contracts/Com
 import {MessageLibConstants} from "../../../contracts/Libraries/MessageLib.sol";
 import {Test} from "forge-std/src/Test.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {StorageLib} from "../../../contracts/Libraries/StorageLib.sol";
+import {StorageAccessLib} from "../../../contracts/Libraries/StorageAccessLib.sol";
 
 contract Storage is Test {
     DeployConceroRouter internal deployScript;
@@ -95,7 +95,7 @@ contract Storage is Test {
     }
 
     function test_RevertInvalidStorageSlot() public {
-        vm.expectRevert(StorageLib.InvalidStorageSlot.selector);
+        vm.expectRevert(StorageAccessLib.InvalidNamespace.selector);
 
         bytes32 invalidSlot = keccak256("invalid.slot");
 
@@ -111,7 +111,7 @@ contract Storage is Test {
         slots[0] = PRICEFEED_STORAGE_SLOT;
         slots[1] = ROUTER_STORAGE_SLOT;
 
-        vm.expectRevert(StorageLib.LengthMismatch.selector);
+        vm.expectRevert(StorageAccessLib.LengthMismatch.selector);
 
         vm.prank(deployer);
         conceroRouter.setStorageBulk(slots, keys, values);

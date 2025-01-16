@@ -6,10 +6,13 @@
  */
 pragma solidity 0.8.28;
 
-import {MessageEventParams} from "../Common/MessageTypes.sol";
-
 interface IConceroRouter {
-    event ConceroMessageSent(bytes32 indexed messageId, MessageEventParams messageEventParams);
+    event ConceroMessageSent(
+        bytes32 indexed messageId,
+        uint256 internalMessageConfig,
+        bytes dstChainData,
+        bytes message
+    );
     event ConceroMessageReceived(bytes32 indexed id);
     event ConceroMessageDelivered(bytes32 indexed id);
 

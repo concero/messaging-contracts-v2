@@ -1,8 +1,7 @@
 import { createPublicClient, Transport, createTransport, fallback } from "viem";
 import healthyRpcs from "./healthy-rpcs.json";
-
 import { CONFIG } from "../messageReport/constants/config";
-import { ErrorType } from "../messageReport/constants/errorTypes";
+import { ErrorType } from "./errorType";
 import { handleError } from "./errorHandler";
 
 function createCustomTransport(url: string, chainIdHex: string): Transport {

@@ -10,7 +10,7 @@ const ETHERS_JS_URL = "https://raw.githubusercontent.com/ethers-io/ethers.js/v6.
 const requestReportJsUrl =
     "https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/requestReport.min.js";
 
-const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
+const deployVerifier: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
     hre: HardhatRuntimeEnvironment,
 ) {
     const { deployer } = await hre.getNamedAccounts();
@@ -54,11 +54,11 @@ const deployCLFRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> =
         maxPriorityFeePerGas,
     })) as Deployment;
 
-    log(`Deployed at: ${deployment.address}`, "deployCLFRouter", name);
+    log(`Deployed at: ${deployment.address}`, "deployVerifier", name);
     updateEnvVariable(`CONCERO_CLF_ROUTER_${networkEnvKeys[name]}`, deployment.address, `deployments.${networkType}`);
 
     return deployment;
 };
 
-export default deployCLFRouter;
-deployCLFRouter.tags = ["CLFRouter"];
+export default deployVerifier;
+deployVerifier.tags = ["ConceroVerifier"];

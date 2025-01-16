@@ -16,7 +16,7 @@
 //     //
 //     //     await hre.network.provider.send("hardhat_setBalance", [deployer, "0x1000000000000000000000000"]);
 //     //
-//     //     const { address } = await deployCLFRouter(hre);
+//     //     const { address } = await deployVerifier(hre);
 //     //     ConceroVerifier.sol = address;
 //     // });
 //     //

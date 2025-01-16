@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {EvmSrcChainData, MessageEventParams} from "../Common/MessageTypes.sol";
+import {EvmSrcChainData} from "../Common/MessageTypes.sol";
 import {SupportedChains} from "./SupportedChains.sol";
 
 library MessageLibConstants {
@@ -43,64 +43,6 @@ library MessageLib {
         InvalidDstChainSelector
     }
 
-    /* BUILD FUNCTIONS */
-    function buildInternalMessageConfig(
-        uint256 clientMessageConfig,
-        uint24 srcChainSelector
-    ) internal pure returns (uint256) {
-        validateClientMessageConfig(clientMessageConfig);
-
-        uint256 config = clientMessageConfig;
-        config |= uint256(MessageLibConstants.VERSION) << MessageLibConstants.OFFSET_VERSION;
-        config |= uint256(srcChainSelector) << MessageLibConstants.OFFSET_SRC_CHAIN;
-        return config;
-    }
-
-    function buildInternalMessage(
-        uint256 config,
-        bytes calldata dstChainData,
-        bytes calldata message,
-        uint24 chainSelector,
-        uint256 nonce
-    ) internal view returns (bytes32, MessageEventParams memory) {
-        validateClientMessageRequest(config, dstChainData, message);
-
-        EvmSrcChainData memory srcChainData = EvmSrcChainData({
-            sender: msg.sender,
-            blockNumber: block.number
-        });
-
-        uint256 internalMessageConfig = buildInternalMessageConfig(config, chainSelector);
-
-        bytes32 messageId = buildMessageId(
-            nonce,
-            srcChainData.blockNumber,
-            srcChainData.sender,
-            chainSelector,
-            internalMessageConfig
-        );
-
-        return (
-            messageId,
-            MessageEventParams({
-                internalMessageConfig: internalMessageConfig,
-                dstChainData: dstChainData
-            })
-        );
-    }
-    function buildMessageId(
-        uint256 nonce,
-        uint256 blockNumber,
-        address sender,
-        uint64 chainSelector,
-        uint256 internalMessageConfig
-    ) private view returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(nonce, blockNumber, sender, chainSelector, internalMessageConfig)
-            );
-    }
-
     /* VALIDATION FUNCTIONS */
     function validateClientMessageRequest(
         uint256 config,
@@ -112,10 +54,13 @@ library MessageLib {
         require(message.length < MessageLibConstants.MAX_MESSAGE_SIZE, MessageTooLarge());
     }
 
-    function validateInternalMessage_(MessageEventParams memory message) internal pure {
-        validateInternalMessageConfig(message.internalMessageConfig);
+    function validateInternalMessage_(
+        uint256 internalMessageConfig,
+        bytes calldata dstChainData
+    ) internal pure {
+        validateInternalMessageConfig(internalMessageConfig);
         //        require(message.srcChainData.length > 0, InvalidSrcChainData());
-        require(message.dstChainData.length > 0, InvalidDstChainData());
+        require(dstChainData.length > 0, InvalidDstChainData());
     }
 
     function validateClientMessageConfig(uint256 clientConfig) internal pure {
@@ -178,6 +123,62 @@ library MessageLib {
             SupportedChains.isChainSupported(dstChainSelector),
             InvalidInternalMessageConfig(ConfigError.InvalidDstChainSelector)
         );
+    }
+
+    /* BUILD FUNCTIONS */
+    function buildInternalMessageConfig(
+        uint256 clientMessageConfig,
+        uint24 srcChainSelector
+    ) internal pure returns (uint256) {
+        validateClientMessageConfig(clientMessageConfig);
+
+        uint256 config = clientMessageConfig;
+        config |= uint256(MessageLibConstants.VERSION) << MessageLibConstants.OFFSET_VERSION;
+        config |= uint256(srcChainSelector) << MessageLibConstants.OFFSET_SRC_CHAIN;
+        return config;
+    }
+
+    function buildInternalMessage(
+        uint256 clientMessageConfig,
+        bytes calldata dstChainData,
+        bytes calldata message,
+        uint24 chainSelector,
+        uint256 nonce
+    ) internal view returns (bytes32 messageId, uint256 internalMessageConfig) {
+        validateClientMessageRequest(clientMessageConfig, dstChainData, message);
+
+        EvmSrcChainData memory srcChainData = EvmSrcChainData({
+            sender: msg.sender,
+            blockNumber: block.number
+        });
+
+        uint256 internalMessageConfig = buildInternalMessageConfig(
+            clientMessageConfig,
+            chainSelector
+        );
+
+        bytes32 messageId = buildMessageId(
+            nonce,
+            srcChainData.blockNumber,
+            srcChainData.sender,
+            chainSelector,
+            internalMessageConfig
+        );
+
+        return (messageId, internalMessageConfig);
+    }
+
+    function buildMessageId(
+        uint256 nonce,
+        uint256 blockNumber,
+        address sender,
+        uint64 chainSelector,
+        uint256 internalMessageConfig
+    ) private view returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked(nonce, blockNumber, sender, chainSelector, internalMessageConfig)
+            );
     }
 
     /* DECODE FUNCTIONS (MAY NOT BE NEEDED)*/

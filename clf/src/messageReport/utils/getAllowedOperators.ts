@@ -3,7 +3,7 @@ import { type Address } from "viem";
 import { PublicClient } from "viem/clients/createPublicClient";
 import { getMessageCohortId, getOperatorCohortId } from "./utils";
 import { Hash } from "viem";
-import { ErrorType } from "../constants/errorTypes";
+import { ErrorType } from "../../common/errorType";
 import { CONCERO_VERIFIER_CONTRACT_ABI } from "../constants/abis";
 import { CONCERO_VERIFIER_CONTRACT_ADDRESS } from "../constants/conceroRouters";
 import { handleError } from "../../common/errorHandler";

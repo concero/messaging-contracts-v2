@@ -1,7 +1,7 @@
 import { EvmSrcChainData } from "../types";
 import { decodeAbiParameters } from "viem";
 import { ClientMessageRequest } from "../constants/abis";
-import { ErrorType } from "../constants/errorTypes";
+import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 
 function decodeConceroMessageLog(conceroMessageLogData: string) {

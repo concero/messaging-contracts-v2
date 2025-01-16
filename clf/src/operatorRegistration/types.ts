@@ -1,8 +1,13 @@
 import { Address } from "viem";
 import { ChainType } from "../common/enums";
 
+enum OperatorRegistrationAction {
+    REGISTER = 0,
+    UNREGISTER = 1,
+}
 interface OperatorRegistrationArgs {
     chainTypes: ChainType[];
+    actions: OperatorRegistrationAction[];
     operatorAddresses: Address[];
     operatorAddress: Address;
 }
@@ -15,4 +20,4 @@ interface OperatorRegistrationResult {
     operatorAddresses: string[];
 }
 
-export { OperatorRegistrationArgs, OperatorRegistrationResult };
+export { OperatorRegistrationArgs, OperatorRegistrationResult, OperatorRegistrationAction };

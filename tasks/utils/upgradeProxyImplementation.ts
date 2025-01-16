@@ -1,9 +1,9 @@
-import { err, formatGas, getEnvAddress, getFallbackClients, log } from "../utils";
-import { conceroNetworks, ProxyEnum, writeContractConfig } from "../constants";
+import { err, formatGas, getEnvAddress, getFallbackClients, log } from "../../utils";
+import { conceroNetworks, ProxyEnum, writeContractConfig } from "../../constants";
 import { task } from "hardhat/config";
-import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
-import { getViemAccount } from "../utils/getViemClients";
-import { getViemReceiptConfig } from "../constants/deploymentVariables";
+import { EnvPrefixes, IProxyType } from "../../types/deploymentVariables";
+import { getViemAccount } from "../../utils/getViemClients";
+import { getViemReceiptConfig } from "../../constants/deploymentVariables";
 
 export async function upgradeProxyImplementation(hre, proxyType: IProxyType, shouldPause: boolean) {
     const { name: chainName } = hre.network;
@@ -23,7 +23,7 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
     }
 
     const { abi: proxyAdminAbi } = await import(
-        "../artifacts/contracts/Proxy/ConceroProxyAdmin.sol/ConceroProxyAdmin.json"
+        "../../artifacts/contracts/Proxy/ConceroProxyAdmin.sol/ConceroProxyAdmin.json"
     );
 
     const viemAccount = getViemAccount(type, "proxyDeployer");
@@ -58,9 +58,6 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
         chainName,
     );
 }
-
-export default {};
-
 task("upgrade-proxy-implementation", "Upgrades the proxy implementation")
     .addFlag("pause", "Pause the proxy before upgrading", false)
     .addParam("proxytype", "The type of the proxy to upgrade", undefined)

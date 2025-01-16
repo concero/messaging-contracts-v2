@@ -13,7 +13,7 @@ import {IConceroClient} from "../Interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {MessageEventParams, EvmDstChainData, FeeToken} from "../Common/MessageTypes.sol";
+import {EvmDstChainData, FeeToken} from "../Common/MessageTypes.sol";
 import {MessageLib, MessageLibConstants} from "../Libraries/MessageLib.sol";
 import {SignerLib} from "../Libraries/SignerLib.sol";
 import {UnsupportedFeeToken, InsufficientFee, MessageAlreadyProcessed, InvalidReceiver} from "./Errors.sol";
@@ -31,10 +31,17 @@ abstract contract MessageModule is BaseModule, IConceroRouter {
     ) external payable returns (bytes32 messageId) {
         _collectMessageFee(config, dstChainData);
 
-        (bytes32 _messageId, MessageEventParams memory messageEventParams) = MessageLib
-            .buildInternalMessage(config, dstChainData, message, i_chainSelector, s.router().nonce);
+        (bytes32 _messageId, uint256 internalMessageConfig) = MessageLib.buildInternalMessage(
+            config,
+            dstChainData,
+            message,
+            i_chainSelector,
+            s.router().nonce
+        );
 
-        emit ConceroMessageSent(_messageId, messageEventParams);
+        s.router().nonce += 1;
+
+        emit ConceroMessageSent(_messageId, internalMessageConfig, dstChainData, message);
         return _messageId;
     }
 

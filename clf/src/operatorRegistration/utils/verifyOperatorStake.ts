@@ -1,5 +1,5 @@
 import { Address } from "viem";
-import { ErrorType } from "../constants/errorTypes";
+import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 
 export async function verifyOperatorStake(operatorAddress: Address): Promise<number> {

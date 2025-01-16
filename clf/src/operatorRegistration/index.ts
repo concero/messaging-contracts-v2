@@ -4,8 +4,7 @@ import { packResult } from "./utils/packResult";
 import { ChainType, ReportType } from "../common/enums";
 import { CONFIG } from "./constants/config";
 import { handleError, CustomErrorHandler } from "../common/errorHandler";
-import { ErrorType } from "./constants/errorTypes";
-import { CommonErrorType } from "../common/errorType";
+import { ErrorType } from "../common/errorType";
 
 export async function main(bytesArgs: string[]) {
     try {
@@ -30,7 +29,7 @@ export async function main(bytesArgs: string[]) {
         if (error instanceof CustomErrorHandler) {
             throw error;
         } else {
-            handleError(CommonErrorType.UNKNOWN_ERROR);
+            handleError(ErrorType.UNKNOWN_ERROR);
         }
     }
 }

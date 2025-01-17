@@ -5,26 +5,27 @@ type EvmSrcChainData = {
     blockNumber: string;
 };
 
-interface MessageArgs {
-    internalMessageConfig: string;
-    messageId: string;
-    messageHashSum: string;
-    srcChainData: string;
-    operatorAddress: string;
-}
-
 interface InternalMessageConfig {
-    version: number; // uint8
-    srcChainSelector: number; // uint24
-    dstChainSelector: number; // uint24
-    minSrcConfirmations: number; // uint16
-    minDstConfirmations: number; // uint16
-    relayerConfig: number; // uint8
+    version: bigint; // uint8
+    srcChainSelector: bigint; // uint24
+    dstChainSelector: bigint; // uint24
+    minSrcConfirmations: bigint; // uint16
+    minDstConfirmations: bigint; // uint16
+    relayerConfig: bigint; // uint8
     isCallbackable: boolean; // bool
 }
 
+interface DecodedArgs {
+    internalMessageConfig: InternalMessageConfig;
+    messageId: Hash;
+    messageHashSum: Hash;
+    srcChainData: string;
+    operatorAddress: Address;
+}
+
 interface MessageReportResult {
-    version: number;
+    version: nu;
+    mber;
     reportType: number;
     operator: Address;
     internalMessageConfig: string;
@@ -34,4 +35,4 @@ interface MessageReportResult {
     allowedOperators: string[];
 }
 
-export { EvmSrcChainData, MessageArgs, InternalMessageConfig, MessageReportResult };
+export { EvmSrcChainData, DecodedArgs, InternalMessageConfig, MessageReportResult };

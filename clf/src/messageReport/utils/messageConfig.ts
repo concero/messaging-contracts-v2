@@ -1,32 +1,31 @@
 import { ErrorType } from "../../common/errorType";
 import { viemChains } from "../constants/viemChains";
-import { INTERNAL_MESSAGE_REPORT_BIT_OFFSETS as offsets } from "../constants/bitOffsets";
+import { INTERNAL_MESSAGE_CONFIG_OFFSETS as OFFSETS } from "../constants/bitOffsets";
+import { MASKS } from "../../common/bitMasks";
 import { InternalMessageConfig } from "../types";
 import { handleError } from "../../common/errorHandler";
-import { MASKS as masks } from "../../common/bitMasks";
 
-function extractBits(config: bigint, offset: number, mask: bigint): number {
-    return Number((config >> BigInt(offset)) & mask);
-}
+function decodeInternalMessageConfig(config: string): InternalMessageConfig {
+    const bigIntConfig = BigInt(config);
 
-function decodeInternalMessageConfig(config: bigint): InternalMessageConfig {
     return {
-        version: extractBits(config, offsets.VERSION, masks.UINT8),
-        srcChainSelector: extractBits(config, offsets.SRC_CHAIN_SELECTOR, masks.UINT24),
-        dstChainSelector: extractBits(config, offsets.DST_CHAIN_SELECTOR, masks.UINT24),
-        minSrcConfirmations: extractBits(config, offsets.MIN_SRC_CONF, masks.UINT16),
-        minDstConfirmations: extractBits(config, offsets.MIN_DST_CONF, masks.UINT16),
-        relayerConfig: extractBits(config, offsets.RELAYER_CONFIG, masks.UINT8),
-        isCallbackable: Boolean(extractBits(config, offsets.IS_CALLBACKABLE, masks.BOOL)),
+        version: (bigIntConfig >> BigInt(OFFSETS.VERSION)) & MASKS.UINT8,
+        srcChainSelector: (bigIntConfig >> BigInt(OFFSETS.SRC_CHAIN)) & MASKS.UINT24,
+        dstChainSelector: (bigIntConfig >> BigInt(OFFSETS.DST_CHAIN)) & MASKS.UINT24,
+        minSrcConfirmations: (bigIntConfig >> BigInt(OFFSETS.MIN_SRC_CONF)) & MASKS.UINT16,
+        minDstConfirmations: (bigIntConfig >> BigInt(OFFSETS.MIN_DST_CONF)) & MASKS.UINT16,
+        relayerConfig: (bigIntConfig >> BigInt(OFFSETS.RELAYER)) & MASKS.UINT8,
+        isCallbackable: Boolean((bigIntConfig >> BigInt(OFFSETS.CALLBACKABLE)) & MASKS.BOOL),
     };
 }
+
 function validateInternalMessageConfig(config: InternalMessageConfig) {
-    if (config.version === 0) handleError(ErrorType.CONFIG_INVALID_VERSION);
-    if (config.relayerConfig > 255) handleError(ErrorType.CONFIG_INVALID_RELAYER_CONFIG);
-    if (config.minSrcConfirmations === 0) handleError(ErrorType.CONFIG_INVALID_MIN_SRC_CONFIRMATIONS);
-    if (config.minDstConfirmations === 0) handleError(ErrorType.CONFIG_INVALID_MIN_DST_CONFIRMATIONS);
-    if (!viemChains[config.srcChainSelector]) handleError(ErrorType.CONFIG_INVALID_SRC_CHAIN_SELECTOR);
-    if (!viemChains[config.dstChainSelector]) handleError(ErrorType.CONFIG_INVALID_DST_CHAIN_SELECTOR);
+    if (config.version === 0n) handleError(ErrorType.CONFIG_INVALID_VERSION);
+    if (config.relayerConfig > 255n) handleError(ErrorType.CONFIG_INVALID_RELAYER_CONFIG);
+    if (config.minSrcConfirmations === 0n) handleError(ErrorType.CONFIG_INVALID_MIN_SRC_CONFIRMATIONS);
+    if (config.minDstConfirmations === 0n) handleError(ErrorType.CONFIG_INVALID_MIN_DST_CONFIRMATIONS);
+    if (!viemChains[Number(config.srcChainSelector)]) handleError(ErrorType.CONFIG_INVALID_SRC_CHAIN_SELECTOR);
+    if (!viemChains[Number(config.dstChainSelector)]) handleError(ErrorType.CONFIG_INVALID_DST_CHAIN_SELECTOR);
 }
 
 export { decodeInternalMessageConfig, validateInternalMessageConfig };

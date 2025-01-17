@@ -37,8 +37,14 @@ export function createFallbackTransport(chainSelector: string): Transport {
     }
 
     const chainIdHex = `0x${parseInt(chainConfig.rpcs[0].chainId, 10).toString(16)}`;
-    const transports = chainConfig.rpcs.map(rpc => createCustomTransport(rpc.url, chainIdHex));
-    return fallback(transports);
+
+    const transportFactories = chainConfig.rpcs.map(
+        rpc =>
+            ({ chain }) =>
+                createCustomTransport(rpc.url, chainIdHex),
+    );
+
+    return fallback(transportFactories);
 }
 
 export function getPublicClient(chainSelector: string) {

@@ -1,44 +1,56 @@
 import { decodeAbiParameters, isAddress } from "viem";
-import { MessageArgs } from "../types";
+import { DecodedArgs } from "../types";
 import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
-import { clf } from "../../../../tasks";
+import { decodeInternalMessageConfig, validateInternalMessageConfig } from "./messageConfig";
+import { Hash } from "viem";
+import { hexToBytes } from "viem";
 
-/**
- * Decodes and validates message report arguments from ethereum contract call
- * @param bytesArgs Array of encoded arguments from ethereum contract
- * @returns Parsed and validated MessageArgs
- * @throws If decoding fails or validation errors occur
- */
-export function validateInputs(bytesArgs: string[]): MessageArgs {
-    console.log("bytesArgs", bytesArgs);
+type EvmSrcChainData = {
+    sender: string;
+    blockNumber: string;
+};
+
+function decodeSrcChainData(srcChainSelector: bigint, srcChainData: string): EvmSrcChainData {
+    const srcChainDataBytes = hexToBytes(srcChainData);
+
+    return decodeAbiParameters(
+        [
+            {
+                type: "tuple",
+                components: [
+                    { name: "sender", type: "address" },
+                    { name: "blockNumber", type: "uint256" },
+                ],
+            },
+        ],
+        srcChainDataBytes,
+    )[0];
+}
+
+function decodeInputs(bytesArgs: string[]): DecodedArgs {
     if (bytesArgs.length < 6) {
         handleError(ErrorType.INVALID_BYTES_ARGS_LENGTH);
     }
 
-    const decodedArgs = decodeInputs(bytesArgs);
-    validateDecodedArgs(decodedArgs);
+    const [_unusedHash, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
 
+    const decodedInternalMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
+    validateInternalMessageConfig(decodedInternalMessageConfig);
+
+    const decodedArgs = {
+        internalMessageConfig: decodedInternalMessageConfig,
+        messageId,
+        messageHashSum,
+        srcChainData: decodeSrcChainData(decodedInternalMessageConfig.srcChainSelector, srcChainData),
+        operatorAddress,
+    };
+
+    validateDecodedArgs(decodedArgs);
     return decodedArgs;
 }
 
-function decodeInputs(bytesArgs: string[]): MessageArgs {
-    const [_unusedHash, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
-
-    try {
-        return {
-            internalMessageConfig: decodeAbiParameters([{ type: "bytes" }], internalMessageConfig)[0],
-            messageId: decodeAbiParameters([{ type: "bytes32" }], messageId)[0],
-            messageHashSum: decodeAbiParameters([{ type: "bytes32" }], messageHashSum)[0],
-            srcChainData: decodeAbiParameters([{ type: "bytes" }], srcChainData)[0],
-            operatorAddress,
-        };
-    } catch (error) {
-        handleError(ErrorType.DECODE_FAILED);
-    }
-}
-
-function validateDecodedArgs(args: MessageArgs): void {
+function validateDecodedArgs(args: DecodedArgs): void {
     validateOperatorAddress(args.operatorAddress);
     validateMessageFields(args);
 }
@@ -49,7 +61,7 @@ function validateOperatorAddress(address: string): void {
     }
 }
 
-function validateMessageFields(args: MessageArgs): void {
+function validateMessageFields(args: DecodedArgs): void {
     const { internalMessageConfig, messageId, messageHashSum, srcChainData } = args;
 
     if (!internalMessageConfig || internalMessageConfig.length === 0) {
@@ -68,3 +80,5 @@ function validateMessageFields(args: MessageArgs): void {
         handleError(ErrorType.INVALID_CHAIN_DATA);
     }
 }
+
+export { decodeInputs, validateInputs, validateDecodedArgs };

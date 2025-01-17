@@ -11,6 +11,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {InsufficientFee} from "../../../contracts/ConceroRouter/Errors.sol";
 import {ConceroTypes} from "../../../contracts/ConceroClient/ConceroTypes.sol";
 import {ConceroUtils} from "../../../contracts/ConceroClient/ConceroUtils.sol";
+import {Vm} from "forge-std/src/Vm.sol";
+import {MessageLib} from "../../../contracts/Libraries/MessageLib.sol";
 
 contract SendMessage is Test {
     DeployConceroRouter internal deployScript;
@@ -49,15 +51,49 @@ contract SendMessage is Test {
 
     function test_conceroSend() public {
         vm.startPrank(user);
+        vm.recordLogs();
+
+        ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
+            dstChainSelector: DST_CHAIN_SELECTOR,
+            minSrcConfirmations: 1,
+            minDstConfirmations: 1,
+            relayerConfig: 0,
+            isCallbackable: false,
+            feeToken: uint8(FeeToken.native)
+        });
+
+        uint256 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
 
         uint256 initialNonce = conceroRouter.getStorage(ROUTER_STORAGE_SLOT, routerSlots.NONCE);
-        uint256 messageFee = conceroRouter.getMessageFeeNative(CLIENT_MESSAGE_CONFIG, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFeeNative(clientMessageConfig, dstChainData);
 
         bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
-            CLIENT_MESSAGE_CONFIG,
+            clientMessageConfig,
             dstChainData,
             message
         );
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bool eventFound = false;
+        for (uint i = 0; i < entries.length; i++) {
+            if (
+                entries[i].topics[0] == keccak256("ConceroMessageSent(bytes32,uint256,bytes,bytes)")
+            ) {
+                eventFound = true;
+                (
+                    uint256 internalMessageConfig,
+                    bytes memory dstChainDataFromEvent,
+                    bytes memory messageFromEvent
+                ) = abi.decode(entries[i].data, (uint256, bytes, bytes));
+
+                MessageLib.validateInternalMessage(internalMessageConfig, dstChainDataFromEvent);
+
+                assertEq(entries[i].topics[1], messageId, "Message ID mismatch");
+                assertEq(dstChainDataFromEvent, dstChainData, "Destination chain data mismatch");
+                assertEq(messageFromEvent, message, "Message mismatch");
+            }
+        }
+        assertTrue(eventFound, "ConceroMessageSent event not found");
 
         uint256 finalNonce = conceroRouter.getStorage(ROUTER_STORAGE_SLOT, routerSlots.NONCE);
         assertEq(finalNonce, initialNonce + 1, "Nonce should be incremented by 1");
@@ -84,38 +120,11 @@ contract SendMessage is Test {
     function test_RevertInvalidMessageConfig() public {
         vm.startPrank(user);
 
-        uint256 invalidConfig = 0; // Invalid configuration with zero values
+        uint256 invalidConfig = 0;
         uint256 messageFee = conceroRouter.getMessageFeeNative(CLIENT_MESSAGE_CONFIG, dstChainData);
 
-        vm.expectRevert(); // Should revert due to invalid config
+        vm.expectRevert();
         conceroRouter.conceroSend{value: messageFee}(invalidConfig, dstChainData, message);
-
-        vm.stopPrank();
-    }
-
-    function test_SendMessageWithPackedConfig() public {
-        vm.startPrank(user);
-
-        ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
-            dstChainSelector: DST_CHAIN_SELECTOR,
-            minSrcConfirmations: 1,
-            minDstConfirmations: 1,
-            relayerConfig: 0,
-            isCallbackable: false,
-            feeToken: uint8(FeeToken.native)
-        });
-
-        uint256 packedConfig = ConceroUtils._packClientMessageConfig(config);
-
-        uint256 messageFee = conceroRouter.getMessageFeeNative(packedConfig, dstChainData);
-
-        bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
-            packedConfig,
-            dstChainData,
-            message
-        );
-
-        // assertTrue(conceroRouter.isMessageSent(messageId), "Message should be marked as sent");
 
         vm.stopPrank();
     }

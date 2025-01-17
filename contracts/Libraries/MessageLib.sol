@@ -54,9 +54,9 @@ library MessageLib {
         require(message.length < MessageLibConstants.MAX_MESSAGE_SIZE, MessageTooLarge());
     }
 
-    function validateInternalMessage_(
+    function validateInternalMessage(
         uint256 internalMessageConfig,
-        bytes calldata dstChainData
+        bytes memory dstChainData
     ) internal pure {
         validateInternalMessageConfig(internalMessageConfig);
         //        require(message.srcChainData.length > 0, InvalidSrcChainData());
@@ -152,12 +152,9 @@ library MessageLib {
             blockNumber: block.number
         });
 
-        uint256 internalMessageConfig = buildInternalMessageConfig(
-            clientMessageConfig,
-            chainSelector
-        );
+        internalMessageConfig = buildInternalMessageConfig(clientMessageConfig, chainSelector);
 
-        bytes32 messageId = buildMessageId(
+        messageId = buildMessageId(
             nonce,
             srcChainData.blockNumber,
             srcChainData.sender,

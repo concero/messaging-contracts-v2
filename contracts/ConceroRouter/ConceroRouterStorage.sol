@@ -9,6 +9,8 @@ pragma solidity 0.8.28;
 import {StorageAccessLib} from "../Libraries/StorageAccessLib.sol";
 
 library ConceroRouterStorageSlotsRouter {
+    bytes32 internal constant NAMESPACE = keccak256("concero.router.storage");
+
     bytes32 internal constant NONCE = bytes32(0);
     bytes32 internal constant OPERATOR_FEES_EARNED_USDC = keccak256("operatorFeesEarnedUSDC");
     bytes32 internal constant OPERATOR_FEES_EARNED_NATIVE = keccak256("operatorFeesEarnedNative");
@@ -20,6 +22,8 @@ library ConceroRouterStorageSlotsRouter {
 }
 
 library ConceroRouterStorageSlotsPriceFeed {
+    bytes32 internal constant NAMESPACE = keccak256("concero.priceFeed.storage");
+
     bytes32 internal constant NATIVE_USDC_RATE = bytes32(0);
     bytes32 internal constant LAST_GAS_PRICES = keccak256("lastGasPrices");
     bytes32 internal constant NATIVE_NATIVE_RATES = keccak256("nativeNativeRates");

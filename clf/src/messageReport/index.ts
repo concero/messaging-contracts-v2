@@ -1,13 +1,12 @@
 import { packResult } from "./utils/packResult";
 import { ChainType, ReportType } from "../common/enums";
 import { getPublicClient } from "../common/viemClient";
-import { decodeInternalMessageConfig, validateInternalMessageConfig } from "./utils/messageConfig";
 import { pick } from "./utils/utils";
 import { getAllowedOperators } from "./utils/getAllowedOperators";
 import { conceroRouters } from "./constants/conceroRouters";
 import { CONFIG } from "./constants/config";
 import { verifyMessageHash } from "./utils/verifyMessageHash";
-import { validateInputs } from "./utils/validateInputs";
+import { decodeInputs, validateDecodedArgs, validateInputs } from "./utils/validateInputs";
 import { decodeConceroMessageLog, decodeEvmSrcChainData } from "./utils/decoders";
 import { fetchConceroMessage } from "./utils/fetchConceroMessage";
 import { CustomErrorHandler, handleError } from "../common/errorHandler";
@@ -15,20 +14,18 @@ import { ErrorType } from "../common/errorType";
 
 export async function main(bytesArgs: string[]) {
     try {
-        const args = validateInputs(bytesArgs);
+        const args = decodeInputs(bytesArgs);
+        validateDecodedArgs(args);
+        const msgConfig = args.internalMessageConfig;
 
-        const decodedInternalMessageConfig = decodeInternalMessageConfig(BigInt(args.internalMessageConfig));
-        validateInternalMessageConfig(decodedInternalMessageConfig);
+        const { srcChainSelector } = msgConfig;
+        const publicClient = getPublicClient(Number(msgConfig.srcChainSelector));
 
-        const { srcChainSelector } = decodedInternalMessageConfig;
-        const publicClient = getPublicClient(srcChainSelector);
-
-        const evmSrcChainData = decodeEvmSrcChainData(args.srcChainData);
         const log = await fetchConceroMessage(
             publicClient,
-            conceroRouters[srcChainSelector],
+            conceroRouters[Number(msgConfig.srcChainSelector)],
             args.messageId,
-            BigInt(evmSrcChainData.blockNumber),
+            BigInt(args.srcChainData.blockNumber),
         );
         const {
             messageConfig: messageConfigFromLog,
@@ -60,6 +57,7 @@ export async function main(bytesArgs: string[]) {
 
         return packResult(messageReportResult);
     } catch (error) {
+        console.log(error);
         if (error instanceof CustomErrorHandler) {
             throw error;
         } else {

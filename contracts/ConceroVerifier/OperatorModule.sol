@@ -10,7 +10,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {CLFModule} from "./CLFModule.sol";
-import {ChainType, MessageReportRequest, OperatorFeeWithdrawn, OperatorDeposited, OperatorRegistered, OperatorDeregistered, FeeTokenType} from "../Interfaces/IConceroVerifier.sol";
+import {ChainType, MessageReportRequest, OperatorRegistrationAction, OperatorFeeWithdrawn, OperatorDeposited, OperatorRegistered, OperatorDeregistered, FeeTokenType} from "../Interfaces/IConceroVerifier.sol";
 import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
 import {CommonConstants} from "../Common/CommonConstants.sol";
 import {LengthMismatch} from "../Common/Errors.sol";
@@ -34,6 +34,7 @@ abstract contract OperatorModule is CLFModule {
      */
     function registerOperator(
         ChainType[] calldata chainTypes,
+        OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) external {
         require(chainTypes.length == operatorAddresses.length, LengthMismatch());
@@ -54,7 +55,7 @@ abstract contract OperatorModule is CLFModule {
             //                emit OperatorRegistered(chainType, operatorAddress);
             //            }
         }
-        s.operator().isAllowed[msg.sender] = true;
+        // s.operator().isAllowed[msg.sender] = true;
         _requestOperatorRegistration();
     }
 
@@ -63,31 +64,31 @@ abstract contract OperatorModule is CLFModule {
      * @param chainTypes The chain types for which the operator is deregistering.
      * @param operatorAddresses The corresponding operator addresses.
      */
-    function deregisterOperator(
-        ChainType[] calldata chainTypes,
-        bytes[] calldata operatorAddresses
-    ) external {
-        require(chainTypes.length == operatorAddresses.length, LengthMismatch());
+    // function deregisterOperator(
+    //     ChainType[] calldata chainTypes,
+    //     bytes[] calldata operatorAddresses
+    // ) external {
+    //     require(chainTypes.length == operatorAddresses.length, LengthMismatch());
 
-        for (uint256 i = 0; i < chainTypes.length; i++) {
-            ChainType chainType = chainTypes[i];
-            bytes memory operatorAddress = operatorAddresses[i];
+    //     for (uint256 i = 0; i < chainTypes.length; i++) {
+    //         ChainType chainType = chainTypes[i];
+    //         bytes memory operatorAddress = operatorAddresses[i];
 
-            if (chainType == ChainType.EVM) {
-                require(operatorAddress.length == 20, InvalidEVMAddress());
-                _removeOperator(chainType, operatorAddress);
-                emit OperatorDeregistered(ChainType.EVM, operatorAddress);
-            }
-            // later:
-            //            else {
-            //                require(operatorAddress.length > 0, InvalidNonEVMAddress());
-            //                _removeOperator(chainType, operatorAddress);
-            //                emit OperatorDeregistered(chainType, operatorAddress);
-            //            }
-        }
-        s.operator().isAllowed[msg.sender] = false;
-        _requestOperatorDeregistration();
-    }
+    //         if (chainType == ChainType.EVM) {
+    //             require(operatorAddress.length == 20, InvalidEVMAddress());
+    //             _removeOperator(chainType, operatorAddress);
+    //             emit OperatorDeregistered(ChainType.EVM, operatorAddress);
+    //         }
+    //         // later:
+    //         //            else {
+    //         //                require(operatorAddress.length > 0, InvalidNonEVMAddress());
+    //         //                _removeOperator(chainType, operatorAddress);
+    //         //                emit OperatorDeregistered(chainType, operatorAddress);
+    //         //            }
+    //     }
+    //     s.operator().isAllowed[msg.sender] = false;
+    //     _requestOperatorDeregistration();
+    // }
 
     /**
      * @dev Internal function to remove an operator from the registered list.

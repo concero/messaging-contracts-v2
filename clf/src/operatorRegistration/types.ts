@@ -3,7 +3,7 @@ import { ChainType } from "../common/enums";
 
 enum OperatorRegistrationAction {
     REGISTER = 0,
-    UNREGISTER = 1,
+    DEREGISTER = 1,
 }
 interface OperatorRegistrationArgs {
     chainTypes: ChainType[];
@@ -17,6 +17,7 @@ interface OperatorRegistrationResult {
     reportType: number;
     operator: Address;
     chainTypes: ChainType[];
+    actions: OperatorRegistrationAction[];
     operatorAddresses: string[];
 }
 

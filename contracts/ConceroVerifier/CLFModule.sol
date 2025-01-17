@@ -12,11 +12,12 @@ import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/l
 import {SignerLib} from "../Libraries/SignerLib.sol";
 import {DecoderLib} from "../Libraries/DecoderLib.sol";
 
-import {IConceroVerifier, CLFRequestError, CLFReportType, ChainType, CLFRequestStatus, MessageReport, MessageReportRequest, MessageReportResult} from "../Interfaces/IConceroVerifier.sol";
+import {IConceroVerifier, CLFRequestError, CLFReportType, ChainType, CLFRequestStatus, MessageReport, MessageReportRequest, MessageReportResult, OperatorRegistrationResult, OperatorRegistrationAction} from "../Interfaces/IConceroVerifier.sol";
 import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
 import {BaseModule} from "./BaseModule.sol";
 import {CommonConstants} from "../Common/CommonConstants.sol";
 import {InsufficientOperatorDeposit} from "./Errors.sol";
+import {LengthMismatch} from "../Common/Errors.sol";
 
 abstract contract CLFModule is FunctionsClient, BaseModule {
     using FunctionsRequest for FunctionsRequest.Request;
@@ -64,9 +65,11 @@ abstract contract CLFModule is FunctionsClient, BaseModule {
             _handleCLFMessageReport(clfRequestId, response, err);
         } else if (reportType == CLFReportType.OperatorRegistration) {
             _handleCLFOperatorRegistrationReport(clfRequestId, response, err);
-        } else if (reportType == CLFReportType.OperatorDeregistration) {
-            _handleCLFOperatorDeregistrationReport(clfRequestId, response, err);
-        } else {
+        }
+        // else if (reportType == CLFReportType.OperatorDeregistration) {
+        //     _handleCLFOperatorDeregistrationReport(clfRequestId, response, err);
+        // }
+        else {
             emit CLFRequestError(err);
         }
         //        else if (reqType == CLFRequestType.OperatorRegistration) {
@@ -102,22 +105,61 @@ abstract contract CLFModule is FunctionsClient, BaseModule {
             emit CLFRequestError(err);
             return;
         }
-        //        _returnCLFRequestDeposit(res.operator);
-        //        SignerLib._decodeCLFOperatorRegistrationReport(response);
+
+        OperatorRegistrationResult memory result = DecoderLib._decodeCLFOperatorRegistrationReport(
+            response
+        );
+
+        require(
+            result.operatorChains.length == result.operatorAddresses.length &&
+                result.operatorChains.length == result.operatorActions.length,
+            LengthMismatch()
+        );
+
+        for (uint256 i = 0; i < result.operatorChains.length; i++) {
+            ChainType chainType = result.operatorChains[i];
+            OperatorRegistrationAction action = result.operatorActions[i];
+
+            if (chainType == ChainType.EVM) {
+                address operatorAddress = address(bytes20(result.operatorAddresses[i]));
+                bytes[] storage registeredOperators = s.operator().registeredOperators[chainType];
+
+                if (action == OperatorRegistrationAction.Register) {
+                    registeredOperators.push(result.operatorAddresses[i]);
+                    s.operator().isAllowed[operatorAddress] = true;
+                } else {
+                    _removeOperatorAddress(registeredOperators, result.operatorAddresses[i]);
+                }
+            }
+        }
+        // emit OperatorRegistered(chainType, operatorAddress);
     }
 
-    function _handleCLFOperatorDeregistrationReport(
-        bytes32 clfRequestId,
-        bytes memory response,
-        bytes memory err
+    function _removeOperatorAddress(
+        bytes[] storage operators,
+        bytes memory addressToRemove
     ) internal {
-        if (err.length != 0) {
-            emit CLFRequestError(err);
-            return;
+        for (uint256 i = 0; i < operators.length; i++) {
+            if (keccak256(operators[i]) == keccak256(addressToRemove)) {
+                operators[i] = operators[operators.length - 1];
+                operators.pop();
+                break;
+            }
         }
-        //        _returnCLFRequestDeposit(res.operator);
-        //        SignerLib._decodeCLFOperatorDeregistrationReport(response);
     }
+
+    // function _handleCLFOperatorDeregistrationReport(
+    //     bytes32 clfRequestId,
+    //     bytes memory response,
+    //     bytes memory err
+    // ) internal {
+    //     if (err.length != 0) {
+    //         emit CLFRequestError(err);
+    //         return;
+    //     }
+    //     //        _returnCLFRequestDeposit(res.operator);
+    //     //        SignerLib._decodeCLFOperatorDeregistrationReport(response);
+    // }
 
     /* CLF REQUEST FORMATION */
     function _requestMessageReport(

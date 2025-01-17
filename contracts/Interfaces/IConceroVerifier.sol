@@ -32,6 +32,10 @@ enum CLFRequestStatus {
     FulFilled
 }
 
+enum OperatorRegistrationAction {
+    Register,
+    Deregister
+}
 struct MessageReportRequest {
     uint256 internalMessageConfig;
     bytes32 messageId;
@@ -53,8 +57,10 @@ struct MessageReportResult {
 
 struct OperatorRegistrationResult {
     uint8 version;
+    uint8 reportType;
     address operator;
     ChainType[] operatorChains;
+    OperatorRegistrationAction[] operatorActions;
     bytes[] operatorAddresses;
 }
 

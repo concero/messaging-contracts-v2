@@ -21,12 +21,12 @@ export function validateInputs(bytesArgs: string[]): OperatorRegistrationArgs {
 }
 
 function decodeInputs(bytesArgs: string[]): OperatorRegistrationArgs {
-    const [_unusedHash, chainTypesHex, actionsHex, operatorAddressesHex, operatorAddress] = bytesArgs;
+    const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, operatorAddress] = bytesArgs;
 
     try {
-        const chainTypes = decodeAbiParameters([{ type: "uint8[]" }], chainTypesHex)[0];
-        const actions = decodeAbiParameters([{ type: "uint8[]" }], actionsHex)[0];
-        const operatorAddresses = decodeAbiParameters([{ type: "address[]" }], operatorAddressesHex)[0];
+        const chainTypes = decodeAbiParameters([{ type: "uint8[]" }], rawChainTypes)[0];
+        const actions = decodeAbiParameters([{ type: "uint8[]" }], rawActions)[0];
+        const operatorAddresses = decodeAbiParameters([{ type: "address[]" }], rawOperatorAddresses)[0];
 
         return {
             chainTypes,

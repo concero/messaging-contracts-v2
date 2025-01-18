@@ -5,7 +5,7 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-import {MessageReportResult, CLFReportType, OperatorRegistrationResult, OperatorRegistrationAction, ChainType} from "../../interfaces/IConceroVerifier.sol";
+import {Types} from "../../ConceroVerifier/libraries/Types.sol";
 
 library MessageConstants {
     uint8 internal constant SIZE_VERSION = 1;
@@ -31,7 +31,7 @@ library OperatorConstants {
 library Decoder {
     function _decodeCLFMessageReportResponse(
         bytes memory response
-    ) internal pure returns (MessageReportResult memory) {
+    ) internal pure returns (Types.MessageReportResult memory) {
         uint256 offset = 0;
         uint8 version;
         uint8 reportType;
@@ -116,9 +116,9 @@ library Decoder {
         }
 
         return
-            MessageReportResult({
+            Types.MessageReportResult({
                 version: version,
-                reportType: CLFReportType(reportType),
+                reportType: Types.CLFReportType(reportType),
                 operator: operator,
                 internalMessageConfig: internalMessageConfig,
                 messageId: messageId,
@@ -130,8 +130,8 @@ library Decoder {
 
     function _decodeCLFOperatorRegistrationReport(
         bytes memory response
-    ) internal pure returns (OperatorRegistrationResult memory) {
-        OperatorRegistrationResult memory result;
+    ) internal pure returns (Types.OperatorRegistrationResult memory) {
+        Types.OperatorRegistrationResult memory result;
         uint256 offset = 0;
         uint32 chainTypesLength;
         uint32 operatorAddressesLength;
@@ -158,9 +158,9 @@ library Decoder {
             offset := add(offset, size_chain_types_length)
         }
 
-        result.operatorChains = new ChainType[](chainTypesLength);
+        result.operatorChains = new Types.ChainType[](chainTypesLength);
         for (uint256 i = 0; i < chainTypesLength; i++) {
-            result.operatorChains[i] = ChainType(uint8(response[offset + i]));
+            result.operatorChains[i] = Types.ChainType(uint8(response[offset + i]));
         }
         offset += chainTypesLength;
 
@@ -169,9 +169,11 @@ library Decoder {
             offset := add(offset, size_operator_actions_length)
         }
 
-        result.operatorActions = new OperatorRegistrationAction[](operatorActionsLength);
+        result.operatorActions = new Types.OperatorRegistrationAction[](operatorActionsLength);
         for (uint256 i = 0; i < operatorActionsLength; i++) {
-            result.operatorActions[i] = OperatorRegistrationAction(uint8(response[offset + i]));
+            result.operatorActions[i] = Types.OperatorRegistrationAction(
+                uint8(response[offset + i])
+            );
         }
         offset += operatorActionsLength;
 

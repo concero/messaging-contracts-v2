@@ -4,7 +4,7 @@ pragma solidity 0.8.28;
 import {Test} from "forge-std/src/Test.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
 
-import {FeeToken, EvmDstChainData, EvmSrcChainData} from "../../../contracts/common/MessageTypes.sol";
+import {Types} from "../../../contracts/ConceroRouter/libraries/Types.sol";
 import {GenericStorage} from "../../../contracts/common/libraries/GenericStorage.sol";
 import {MessageLibConstants} from "../../../contracts/common/libraries/Message.sol";
 

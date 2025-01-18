@@ -7,7 +7,7 @@
 pragma solidity 0.8.28;
 
 import {ConceroOwnable} from "../../common/ConceroOwnable.sol";
-import {OnlyAllowedOperator} from "../../common/Errors.sol";
+import {Errors} from "../libraries/Errors.sol";
 
 import {Storage as s} from "../libraries/Storage.sol";
 
@@ -17,7 +17,7 @@ abstract contract Base is ConceroOwnable {
 
     using s for s.Operator;
     modifier onlyOperator() {
-        require(s.operator().isAllowed[msg.sender], OnlyAllowedOperator());
+        require(s.operator().isAllowed[msg.sender], Errors.UnauthorizedOperator());
         _;
     }
 

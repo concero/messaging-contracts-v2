@@ -10,12 +10,13 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {Constants} from "../../common/Constants.sol";
-import {LengthMismatch} from "../../common/Errors.sol";
+import {CommonErrors} from "../../common/CommonErrors.sol";
 
 import {Storage as s} from "../libraries/Storage.sol";
-import {MessageAlreadyProcessed, InsufficientOperatorDeposit, OperatorNotFound, InvalidEVMAddress} from "../Errors.sol";
+import {Types} from "../libraries/Types.sol";
+import {Errors} from "../libraries/Errors.sol";
 
-import {ChainType, MessageReportRequest, OperatorRegistrationAction, OperatorFeeWithdrawn, OperatorDeposited, OperatorRegistered, OperatorDeregistered, FeeTokenType} from "../../interfaces/IConceroVerifier.sol";
+import {OperatorFeeWithdrawn, OperatorDeposited} from "../../interfaces/IConceroVerifier.sol";
 
 import {CLF} from "./CLF.sol";
 
@@ -24,8 +25,13 @@ abstract contract Operator is CLF {
     using s for s.Verifier;
     using s for s.Operator;
 
-    function requestMessageReport(MessageReportRequest calldata request) external onlyOperator {
-        require(!s.verifier().pendingMessageReports[request.messageId], MessageAlreadyProcessed());
+    function requestMessageReport(
+        Types.MessageReportRequest calldata request
+    ) external onlyOperator {
+        require(
+            !s.verifier().pendingMessageReports[request.messageId],
+            Errors.MessageAlreadyProcessed()
+        );
         s.verifier().pendingMessageReports[request.messageId] = true;
         _requestMessageReport(request);
     }
@@ -35,67 +41,26 @@ abstract contract Operator is CLF {
      * @param chainTypes The chain types for which the operator is registering.
      * @param operatorAddresses The corresponding operator addresses.
      */
-    function registerOperator(
-        ChainType[] calldata chainTypes,
-        OperatorRegistrationAction[] calldata operatorActions,
+    function requestOperatorRegistration(
+        Types.ChainType[] calldata chainTypes,
+        Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) external {
-        require(chainTypes.length == operatorAddresses.length, LengthMismatch());
+        require(
+            chainTypes.length == operatorActions.length &&
+                chainTypes.length == operatorAddresses.length,
+            CommonErrors.LengthMismatch()
+        );
 
-        for (uint256 i = 0; i < chainTypes.length; i++) {
-            ChainType chainType = chainTypes[i];
-            bytes memory operatorAddress = operatorAddresses[i];
-
-            if (chainType == ChainType.EVM) {
-                require(operatorAddress.length == 20, InvalidEVMAddress());
-                s.operator().registeredOperators[ChainType.EVM].push(operatorAddress);
-                emit OperatorRegistered(ChainType.EVM, operatorAddress);
-            }
-            // Later:
-            //            else {
-            //                require(operatorAddress.length > 0, InvalidNonEVMAddress());
-            //                s.operator().registeredOperators[chainType].push(operatorAddress);
-            //                emit OperatorRegistered(chainType, operatorAddress);
-            //            }
-        }
-        // s.operator().isAllowed[msg.sender] = true;
-        _requestOperatorRegistration();
+        _requestOperatorRegistration(chainTypes, operatorActions, operatorAddresses);
     }
 
-    //    /**
-    //     * @dev Deregisters an operator for specific chain types with the provided addresses.
-    //     * @param chainTypes The chain types for which the operator is deregistering.
-    //     * @param operatorAddresses The corresponding operator addresses.
-    //     */
-    // function deregisterOperator(
-    //     ChainType[] calldata chainTypes,
-    //     bytes[] calldata operatorAddresses
-    // ) external {
-    //     require(chainTypes.length == operatorAddresses.length, LengthMismatch());
-
-    //     for (uint256 i = 0; i < chainTypes.length; i++) {
-    //         ChainType chainType = chainTypes[i];
-    //         bytes memory operatorAddress = operatorAddresses[i];
-
-    //         if (chainType == ChainType.EVM) {
-    //             require(operatorAddress.length == 20, InvalidEVMAddress());
-    //             _removeOperator(chainType, operatorAddress);
-    //             emit OperatorDeregistered(ChainType.EVM, operatorAddress);
-    //         }
-    //         // later:
-    //         //            else {
-    //         //                require(operatorAddress.length > 0, InvalidNonEVMAddress());
-    //         //                _removeOperator(chainType, operatorAddress);
-    //         //                emit OperatorDeregistered(chainType, operatorAddress);
-    //         //            }
-    //     }
-    //     s.operator().isAllowed[msg.sender] = false;
-    //     _requestOperatorDeregistration();
-    // }
-
-    function withdrawOperatorFee(FeeTokenType tokenType, uint256 amount) external onlyOperator {
+    function withdrawOperatorFee(
+        Types.FeeTokenType tokenType,
+        uint256 amount
+    ) external onlyOperator {
         //todo: using native only for now
-        if (tokenType == FeeTokenType.native) {
+        if (tokenType == Types.FeeTokenType.native) {
             (bool success, ) = i_owner.call{value: amount}("");
         }
         //        else if (tokenType == FeeTokenType.USDC) {
@@ -113,7 +78,9 @@ abstract contract Operator is CLF {
     /* INTERNAL FUNCTIONS */
 
     /* GETTER FUNCTIONS */
-    function getRegisteredOperators(ChainType chainType) external view returns (bytes[] memory) {
+    function getRegisteredOperators(
+        Types.ChainType chainType
+    ) external view returns (bytes[] memory) {
         return s.operator().registeredOperators[chainType];
     }
 

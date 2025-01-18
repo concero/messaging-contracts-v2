@@ -10,17 +10,16 @@ import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/Fu
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
 import {Constants} from "../../common/Constants.sol";
-import {LengthMismatch} from "../../common/Errors.sol";
+import {CommonErrors} from "../../common/CommonErrors.sol";
 import {Decoder} from "../../common/libraries/Decoder.sol";
-import {Signer} from "../../common/libraries/Signer.sol";
 
 import {Utils} from "../libraries/Utils.sol";
 import {Storage as s} from "../libraries/Storage.sol";
+import {Types} from "../libraries/Types.sol";
 
-import {InsufficientOperatorDeposit, OperatorAlreadyRegistered, OperatorNotRegistered} from "../Errors.sol";
+import {Errors} from "../libraries/Errors.sol";
 
-import {IConceroVerifier, CLFRequestError, CLFReportType, ChainType, CLFRequestStatus, MessageReport, MessageReportRequest, MessageReportResult, OperatorRegistrationResult, OperatorRegistrationAction} from "../../interfaces/IConceroVerifier.sol";
-
+import {CLFRequestError, MessageReport} from "../../interfaces/IConceroVerifier.sol";
 import {Base} from "./Base.sol";
 
 abstract contract CLF is FunctionsClient, Base {
@@ -34,17 +33,20 @@ abstract contract CLF is FunctionsClient, Base {
         uint64 clfSubscriptionId,
         uint64 clfDonHostedSecretsVersion,
         uint8 clfDonHostedSecretsSlotId,
-        bytes32 requestCLFMessageReportJsCodeHash
+        bytes32 requestCLFMessageReportJsCodeHash,
+        bytes32 requestOperatorRegistrationJsCodeHash
     ) FunctionsClient(clfRouter) {
         i_clfDonId = clfDonId;
         i_clfSubscriptionId = clfSubscriptionId;
         i_clfDonHostedSecretsVersion = clfDonHostedSecretsVersion;
         i_clfDonHostedSecretsSlotId = clfDonHostedSecretsSlotId;
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
+        i_requestOperatorRegistrationJsCodeHash = requestOperatorRegistrationJsCodeHash;
     }
 
     /* IMMUTABLE VARIABLES */
     bytes32 internal immutable i_requestCLFMessageReportJsCodeHash;
+    bytes32 internal immutable i_requestOperatorRegistrationJsCodeHash;
     bytes32 internal immutable i_clfDonId;
     uint64 internal immutable i_clfSubscriptionId;
     uint64 internal immutable i_clfDonHostedSecretsVersion;
@@ -59,26 +61,19 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory err
     ) internal override {
         //        CLFRequestVersion reportVersion;
-        CLFReportType reportType;
+        Types.CLFReportType reportType;
         assembly {
             //            reportVersion := byte(1, mload(add(response, 32)))
             reportType := byte(0, mload(add(response, 32)))
         }
 
-        if (reportType == CLFReportType.Message) {
+        if (reportType == Types.CLFReportType.Message) {
             _handleCLFMessageReport(clfRequestId, response, err);
-        } else if (reportType == CLFReportType.OperatorRegistration) {
+        } else if (reportType == Types.CLFReportType.OperatorRegistration) {
             _handleCLFOperatorRegistrationReport(clfRequestId, response, err);
-        }
-        // else if (reportType == CLFReportType.OperatorDeregistration) {
-        //     _handleCLFOperatorDeregistrationReport(clfRequestId, response, err);
-        // }
-        else {
+        } else {
             emit CLFRequestError(err);
         }
-        //        else if (reqType == CLFRequestType.OperatorRegistration) {
-        //            _registerOperator();
-        //        }
 
         delete s.verifier().pendingCLFRequests[clfRequestId];
     }
@@ -94,9 +89,11 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        MessageReportResult memory res = Decoder._decodeCLFMessageReportResponse(response);
+        Types.MessageReportResult memory res = Decoder._decodeCLFMessageReportResponse(response);
+
         s.operator().feesEarnedNative[res.operator] += Constants.CLF_REPORT_OPERATOR_FEE;
         _returnCLFRequestDeposit(res.operator);
+
         emit MessageReport(res.messageId);
     }
 
@@ -110,28 +107,29 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        OperatorRegistrationResult memory result = Decoder._decodeCLFOperatorRegistrationReport(
-            response
-        );
+        Types.OperatorRegistrationResult memory result = Decoder
+            ._decodeCLFOperatorRegistrationReport(response);
 
         require(
             result.operatorChains.length == result.operatorAddresses.length &&
                 result.operatorChains.length == result.operatorActions.length,
-            LengthMismatch()
+            CommonErrors.LengthMismatch()
         );
 
         for (uint256 i = 0; i < result.operatorChains.length; i++) {
-            ChainType chainType = result.operatorChains[i];
-            OperatorRegistrationAction action = result.operatorActions[i];
+            Types.ChainType chainType = result.operatorChains[i];
+            Types.OperatorRegistrationAction action = result.operatorActions[i];
 
-            if (chainType == ChainType.EVM) {
+            if (chainType == Types.ChainType.EVM) {
                 address operatorAddress = address(bytes20(result.operatorAddresses[i]));
-                bytes[] storage registeredOperators = s.operator().registeredOperators[chainType];
+                require(operatorAddress == result.operator, Errors.OperatorAddressMismatch());
 
-                if (action == OperatorRegistrationAction.Register) {
+                if (action == Types.OperatorRegistrationAction.Register) {
                     Utils._addOperator(chainType, result.operatorAddresses[i]);
-                } else if (action == OperatorRegistrationAction.Deregister) {
+                    s.operator().isAllowed[result.operator] = true;
+                } else if (action == Types.OperatorRegistrationAction.Deregister) {
                     Utils._removeOperator(chainType, result.operatorAddresses[i]);
+                    s.operator().isAllowed[result.operator] = false;
                 }
             }
         }
@@ -153,10 +151,12 @@ abstract contract CLF is FunctionsClient, Base {
 
     /* CLF REQUEST FORMATION */
     function _requestMessageReport(
-        MessageReportRequest calldata request
+        Types.MessageReportRequest calldata request
     ) internal returns (bytes32 clfRequestId) {
         _witholdCLFRequestDeposit(msg.sender);
-        bytes[] memory clfReqArgs = new bytes[](4);
+
+        bytes[] memory clfReqArgs = new bytes[](6);
+
         clfReqArgs[0] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
         clfReqArgs[1] = abi.encodePacked(request.internalMessageConfig);
         clfReqArgs[2] = abi.encodePacked(request.messageId);
@@ -169,10 +169,32 @@ abstract contract CLF is FunctionsClient, Base {
         return clfRequestId;
     }
 
-    function _requestOperatorRegistration() internal {
+    /**
+     * @notice Requests operator registration through CLF
+     * @param chainTypes Array of chain types for operator registration
+     * @param operatorActions Array of registration actions for the operator
+     * @param operatorAddresses Array of operator addresses for registration
+     * @return clfRequestId The unique identifier for the CLF request
+     */
+    function _requestOperatorRegistration(
+        Types.ChainType[] calldata chainTypes,
+        Types.OperatorRegistrationAction[] calldata operatorActions,
+        bytes[] calldata operatorAddresses
+    ) internal returns (bytes32 clfRequestId) {
         _witholdCLFRequestDeposit(msg.sender);
-        emit CLFRequestError("Operator registration is not implemented");
-        //        s.verifier().pendingCLFRequests[clfRequestId] = true;
+
+        bytes[] memory clfReqArgs = new bytes[](5);
+
+        clfReqArgs[0] = abi.encodePacked(i_requestOperatorRegistrationJsCodeHash);
+        clfReqArgs[1] = abi.encode(chainTypes);
+        clfReqArgs[2] = abi.encode(operatorActions);
+        clfReqArgs[3] = abi.encode(operatorAddresses);
+        clfReqArgs[4] = abi.encode(msg.sender);
+
+        clfRequestId = _sendCLFRequest(clfReqArgs);
+        s.verifier().pendingCLFRequests[clfRequestId] = true;
+
+        return clfRequestId;
     }
 
     function _requestOperatorDeregistration() internal {
@@ -190,7 +212,7 @@ abstract contract CLF is FunctionsClient, Base {
     function _witholdCLFRequestDeposit(address operator) internal {
         require(
             s.operator().deposit[operator] >= Constants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT,
-            InsufficientOperatorDeposit()
+            Errors.InsufficientOperatorDeposit()
         );
         s.operator().deposit[operator] -= Constants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT;
     }

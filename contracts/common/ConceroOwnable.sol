@@ -6,12 +6,13 @@
  */
 pragma solidity 0.8.28;
 
-error NotOwner();
+import {CommonErrors} from "./CommonErrors.sol";
+
 abstract contract ConceroOwnable {
     address public immutable i_owner;
 
     modifier onlyOwner() {
-        require(msg.sender == i_owner, NotOwner());
+        require(msg.sender == i_owner, CommonErrors.NotOwner());
         _;
     }
 

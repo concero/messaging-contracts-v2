@@ -6,10 +6,10 @@
  */
 pragma solidity 0.8.28;
 
-error NotAContract(address target);
-error DelegateCallFailed(bytes response);
-
 library Utils {
+    error NotAContract(address target);
+    error DelegateCallFailed(bytes response);
+
     function safeDelegateCall(address target, bytes memory args) internal returns (bytes memory) {
         require(isContract(target), NotAContract(target));
 

@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {EvmSrcChainData} from "../MessageTypes.sol";
+import {Types} from "../../ConceroRouter/libraries/Types.sol";
 import {SupportedChains} from "./SupportedChains.sol";
 
 library MessageLibConstants {
@@ -26,12 +26,6 @@ library MessageLibConstants {
 }
 
 library Message {
-    error InvalidDstChainData();
-    error InvalidSrcChainData();
-    error MessageTooLarge();
-    error InvalidClientMessageConfig(ConfigError error);
-    error InvalidInternalMessageConfig(ConfigError error);
-
     enum ConfigError {
         InvalidMinSrcConfirmations,
         InvalidMinDstConfirmations,
@@ -42,6 +36,11 @@ library Message {
         InvalidSrcChainSelector,
         InvalidDstChainSelector
     }
+    error InvalidDstChainData();
+    error InvalidSrcChainData();
+    error MessageTooLarge();
+    error InvalidClientMessageConfig(ConfigError error);
+    error InvalidInternalMessageConfig(ConfigError error);
 
     /* VALIDATION FUNCTIONS */
     function validateClientMessageRequest(
@@ -147,7 +146,7 @@ library Message {
     ) internal view returns (bytes32 messageId, uint256 internalMessageConfig) {
         validateClientMessageRequest(clientMessageConfig, dstChainData, message);
 
-        EvmSrcChainData memory srcChainData = EvmSrcChainData({
+        Types.EvmSrcChainData memory srcChainData = Types.EvmSrcChainData({
             sender: msg.sender,
             blockNumber: block.number
         });
@@ -202,7 +201,7 @@ library Message {
     //        returns (
     //            InternalMessageConfig memory decodedMessageConfig,
     //            bytes32 messageHashSum,
-    //            EvmSrcChainData memory srcData,
+    //            Types.EvmSrcChainData memory srcData,
     //            EvmDstChainData memory dstData
     //        )
     //    {
@@ -210,7 +209,7 @@ library Message {
     //
     //        decodedMessageConfig = decodeInternalMessageConfig(message.internalMessageConfig);
     //        messageHashSum = message.messageHashSum;
-    //        srcData = abi.decode(message.srcChainData, (EvmSrcChainData));
+    //        srcData = abi.decode(message.srcChainData, (Types.EvmSrcChainData));
     //        dstData = abi.decode(message.dstChainData, (EvmDstChainData));
     //    }
 }

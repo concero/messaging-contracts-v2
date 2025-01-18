@@ -5,18 +5,11 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-import {CLFReportType} from "../../interfaces/IConceroVerifier.sol";
-
-error IncorrectNumberOfSignatures();
-error UnauthorizedSigner(address signer);
-error DuplicateSignatureDetected(address signer);
 
 library Signer {
-    /* CLF DON SIGNERS */
-    address internal constant CLF_DON_SIGNER_0 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant CLF_DON_SIGNER_1 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant CLF_DON_SIGNER_2 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant CLF_DON_SIGNER_3 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
+    error IncorrectNumberOfSignatures();
+    error UnauthorizedSigner(address signer);
+    error DuplicateSignatureDetected(address signer);
 
     struct ClfDonReportSubmission {
         bytes32[3] context;
@@ -25,6 +18,12 @@ library Signer {
         bytes32[] ss;
         bytes rawVs;
     }
+
+    /* CLF DON SIGNERS */
+    address internal constant CLF_DON_SIGNER_0 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
+    address internal constant CLF_DON_SIGNER_1 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
+    address internal constant CLF_DON_SIGNER_2 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
+    address internal constant CLF_DON_SIGNER_3 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
 
     function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {
         if (clfDonSigner == address(0)) {

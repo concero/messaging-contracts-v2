@@ -6,43 +6,46 @@
  */
 pragma solidity 0.8.28;
 
-import {ChainType} from "../../interfaces/IConceroVerifier.sol";
-
-import {OperatorAlreadyRegistered, OperatorNotRegistered} from "../Errors.sol";
 import {Storage as s} from "./Storage.sol";
+import {Types} from "./Types.sol";
+
+import {Errors} from "./Errors.sol";
 
 library Utils {
     using s for s.Operator;
 
-    function _addOperator(ChainType chainType, bytes memory operatorAddress) internal {
-        address operator = address(bytes20(operatorAddress));
+    /* OPERATOR UTILS */
+    function _addOperator(Types.ChainType chainType, bytes memory operatorAddress) internal {
         bytes[] storage registeredOperators = s.operator().registeredOperators[chainType];
+        (bool exists, ) = _findBytesIndex(registeredOperators, operatorAddress);
 
-        for (uint256 i = 0; i < registeredOperators.length; i++) {
-            require(
-                keccak256(registeredOperators[i]) != keccak256(operatorAddress),
-                OperatorAlreadyRegistered()
-            );
-        }
-
+        require(!exists, Errors.OperatorAlreadyRegistered());
         registeredOperators.push(operatorAddress);
-        s.operator().isAllowed[operator] = true;
     }
 
-    function _removeOperator(ChainType chainType, bytes memory operatorAddress) internal {
-        address operator = address(bytes20(operatorAddress));
+    function _removeOperator(Types.ChainType chainType, bytes memory operatorAddress) internal {
         bytes[] storage registeredOperators = s.operator().registeredOperators[chainType];
+        (bool exists, uint256 index) = _findBytesIndex(registeredOperators, operatorAddress);
 
-        bool found = false;
-        for (uint256 i = 0; i < registeredOperators.length; i++) {
-            if (keccak256(registeredOperators[i]) == keccak256(operatorAddress)) {
-                registeredOperators[i] = registeredOperators[registeredOperators.length - 1];
-                registeredOperators.pop();
-                found = true;
-                break;
+        require(exists, Errors.OperatorNotRegistered());
+        _removeAtIndex(registeredOperators, index);
+    }
+
+    /* INTERNAL UTILS */
+    function _findBytesIndex(
+        bytes[] storage array,
+        bytes memory element
+    ) private view returns (bool, uint256) {
+        for (uint256 i = 0; i < array.length; i++) {
+            if (keccak256(array[i]) == keccak256(element)) {
+                return (true, i);
             }
         }
-        require(found, OperatorNotRegistered());
-        s.operator().isAllowed[operator] = false;
+        return (false, 0);
+    }
+
+    function _removeAtIndex(bytes[] storage array, uint256 index) private {
+        array[index] = array[array.length - 1];
+        array.pop();
     }
 }

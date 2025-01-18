@@ -9,14 +9,13 @@ pragma solidity 0.8.28;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {EvmDstChainData, FeeToken} from "../../common/MessageTypes.sol";
 import {Message as MessageLib, MessageLibConstants} from "../../common/libraries/Message.sol";
 import {Signer} from "../../common/libraries/Signer.sol";
 import {Utils} from "../../common/libraries/Utils.sol";
 
 import {Storage as s} from "../libraries/Storage.sol";
-
-import {UnsupportedFeeToken, InsufficientFee, MessageAlreadyProcessed, InvalidReceiver} from "../Errors.sol";
+import {Errors} from "../libraries/Errors.sol";
+import {Types} from "../libraries/Types.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
@@ -84,11 +83,11 @@ abstract contract Message is Base, IConceroRouter {
      */
     function deliverMessage(
         bytes32 messageId,
-        EvmDstChainData memory dstData,
+        Types.EvmDstChainData memory dstData,
         bytes memory message
     ) internal {
-        require(dstData.receiver != address(0), InvalidReceiver());
-        require(Utils.isContract(dstData.receiver), InvalidReceiver());
+        require(dstData.receiver != address(0), Errors.InvalidReceiver());
+        require(Utils.isContract(dstData.receiver), Errors.InvalidReceiver());
 
         (bool success, bytes memory reason) = dstData.receiver.call{gas: dstData.gasLimit}(
             abi.encodeWithSelector(IConceroClient.conceroReceive.selector, messageId, message)
@@ -107,18 +106,18 @@ abstract contract Message is Base, IConceroRouter {
 
     /* INTERNAL FUNCTIONS */
     function _collectMessageFee(uint256 clientMessageConfig, bytes memory dstChainData) internal {
-        FeeToken feeToken = FeeToken(
+        Types.FeeToken feeToken = Types.FeeToken(
             uint8(clientMessageConfig >> MessageLibConstants.OFFSET_FEE_TOKEN)
         );
         uint256 messageFee = _calculateMessageFee(clientMessageConfig, dstChainData);
 
-        if (feeToken == FeeToken.native) {
-            require(msg.value >= messageFee, InsufficientFee());
+        if (feeToken == Types.FeeToken.native) {
+            require(msg.value >= messageFee, Errors.InsufficientFee());
             payable(address(this)).transfer(messageFee);
-        } else if (feeToken == FeeToken.usdc) {
+        } else if (feeToken == Types.FeeToken.usdc) {
             IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), messageFee);
         } else {
-            revert UnsupportedFeeToken();
+            revert Errors.UnsupportedFeeToken();
         }
     }
 
@@ -126,9 +125,12 @@ abstract contract Message is Base, IConceroRouter {
         uint256 clientMessageConfig,
         bytes memory dstChainData
     ) internal view returns (uint256) {
-        EvmDstChainData memory evmDstChainData = abi.decode(dstChainData, (EvmDstChainData));
+        Types.EvmDstChainData memory evmDstChainData = abi.decode(
+            dstChainData,
+            (Types.EvmDstChainData)
+        );
 
-        FeeToken feeToken = FeeToken(
+        Types.FeeToken feeToken = Types.FeeToken(
             uint8(clientMessageConfig >> MessageLibConstants.OFFSET_FEE_TOKEN)
         );
         uint24 dstChainSelector = uint24(
@@ -141,12 +143,12 @@ abstract contract Message is Base, IConceroRouter {
             s.priceFeed().nativeNativeRates[dstChainSelector]) / 1 ether;
         uint256 totalFeeNative = baseFee + adjustedGasFeeNative;
 
-        if (feeToken == FeeToken.usdc) {
+        if (feeToken == Types.FeeToken.usdc) {
             return (totalFeeNative * s.priceFeed().nativeUsdcRate) / 1 ether;
-        } else if (feeToken == FeeToken.native) {
+        } else if (feeToken == Types.FeeToken.native) {
             return totalFeeNative;
         } else {
-            revert UnsupportedFeeToken();
+            revert Errors.UnsupportedFeeToken();
         }
     }
 
@@ -154,10 +156,10 @@ abstract contract Message is Base, IConceroRouter {
         uint256 clientMessageConfig,
         bytes memory dstChainData
     ) external view returns (uint256) {
-        FeeToken feeToken = FeeToken(
+        Types.FeeToken feeToken = Types.FeeToken(
             uint8(clientMessageConfig >> MessageLibConstants.OFFSET_FEE_TOKEN)
         );
-        require(feeToken == FeeToken.native, "InvalidFeeToken");
+        require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeToken());
         return _calculateMessageFee(clientMessageConfig, dstChainData);
     }
 
@@ -165,10 +167,10 @@ abstract contract Message is Base, IConceroRouter {
         uint256 clientMessageConfig,
         bytes memory dstChainData
     ) external view returns (uint256) {
-        FeeToken feeToken = FeeToken(
+        Types.FeeToken feeToken = Types.FeeToken(
             uint8(clientMessageConfig >> MessageLibConstants.OFFSET_FEE_TOKEN)
         );
-        require(feeToken == FeeToken.usdc, "InvalidFeeToken");
+        require(feeToken == Types.FeeToken.usdc, Errors.UnsupportedFeeToken());
         return _calculateMessageFee(clientMessageConfig, dstChainData);
     }
 }

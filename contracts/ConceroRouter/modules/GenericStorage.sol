@@ -13,17 +13,16 @@ import {Base} from "./Base.sol";
 
 // @notice External handles for interacting with generic StorageLib
 abstract contract GenericStorage is Base {
-    function _isValidNamespace(bytes32 slot) internal pure returns (bool) {
-        return slot == Namespaces.ROUTER || slot == Namespaces.PRICEFEED;
+    function _validateNamespace(bytes32 slot) internal pure {
+        require(slot == Namespaces.ROUTER || slot == Namespaces.PRICEFEED, gs.InvalidNamespace());
     }
-
     function getStorage(bytes32 slot, bytes32 key) external view returns (uint256) {
-        require(_isValidNamespace(slot), gs.InvalidNamespace());
+        _validateNamespace(slot);
         return gs._getStorage(slot, key);
     }
 
     function setStorage(bytes32 slot, bytes32 key, uint256 value) external onlyOwner {
-        require(_isValidNamespace(slot), gs.InvalidNamespace());
+        _validateNamespace(slot);
         gs._setStorage(slot, key, value);
     }
 
@@ -33,7 +32,7 @@ abstract contract GenericStorage is Base {
         bytes[] memory values
     ) external onlyOwner {
         for (uint256 i = 0; i < slots.length; i++) {
-            require(_isValidNamespace(slots[i]), gs.InvalidNamespace());
+            _validateNamespace(slots[i]);
         }
         gs._setStorageBulk(slots, keys, values);
     }

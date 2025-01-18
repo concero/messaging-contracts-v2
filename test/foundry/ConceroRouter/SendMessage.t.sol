@@ -5,14 +5,15 @@ import {Test} from "forge-std/src/Test.sol";
 import {Vm} from "forge-std/src/Vm.sol";
 
 import {Message, MessageLibConstants} from "../../../contracts/common/libraries/Message.sol";
-import {FeeToken, EvmDstChainData} from "../../../contracts/Common/MessageTypes.sol";
+import {Types} from "../../../contracts/ConceroRouter/libraries/Types.sol";
 
-import {Storage as s, RouterSlots as routerSlots} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
+import {Storage as s} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
+import {RouterSlots as rs} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {ConceroTypes} from "../../../contracts/ConceroClient/ConceroTypes.sol";
 import {ConceroUtils} from "../../../contracts/ConceroClient/ConceroUtils.sol";
 import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {InsufficientFee} from "../../../contracts/ConceroRouter/Errors.sol";
+import {Errors} from "../../../contracts/ConceroRouter/libraries/Errors.sol";
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
 
 contract SendMessage is Test {
@@ -32,7 +33,7 @@ contract SendMessage is Test {
             (1 << MessageLibConstants.OFFSET_MIN_DST_CONF) | // minDstConfirmations
             (0 << MessageLibConstants.OFFSET_RELAYER_CONF) | // relayerConfig
             (0 << MessageLibConstants.OFFSET_CALLBACKABLE) | // isCallbackable
-            (uint256(FeeToken.native) << MessageLibConstants.OFFSET_FEE_TOKEN); // feeToken
+            (uint256(Types.FeeToken.native) << MessageLibConstants.OFFSET_FEE_TOKEN); // feeToken
 
     bytes internal dstChainData;
     bytes internal message;
@@ -44,7 +45,9 @@ contract SendMessage is Test {
         conceroRouterProxy = TransparentUpgradeableProxy(payable(deployedProxy));
         conceroRouter = ConceroRouter(payable(deployScript.getProxy()));
 
-        dstChainData = abi.encode(EvmDstChainData({receiver: address(0x456), gasLimit: 100000}));
+        dstChainData = abi.encode(
+            Types.EvmDstChainData({receiver: address(0x456), gasLimit: 100000})
+        );
         message = "Test message";
 
         vm.deal(user, 100 ether);
@@ -60,12 +63,12 @@ contract SendMessage is Test {
             minDstConfirmations: 1,
             relayerConfig: 0,
             isCallbackable: false,
-            feeToken: uint8(FeeToken.native)
+            feeToken: uint8(Types.FeeToken.native)
         });
 
         uint256 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
 
-        uint256 initialNonce = conceroRouter.getStorage(ROUTER_STORAGE_SLOT, routerSlots.NONCE);
+        uint256 initialNonce = conceroRouter.getStorage(ROUTER_STORAGE_SLOT, rs.NONCE);
         uint256 messageFee = conceroRouter.getMessageFeeNative(clientMessageConfig, dstChainData);
 
         bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
@@ -96,7 +99,7 @@ contract SendMessage is Test {
         }
         assertTrue(eventFound, "ConceroMessageSent event not found");
 
-        uint256 finalNonce = conceroRouter.getStorage(ROUTER_STORAGE_SLOT, routerSlots.NONCE);
+        uint256 finalNonce = conceroRouter.getStorage(ROUTER_STORAGE_SLOT, rs.NONCE);
         assertEq(finalNonce, initialNonce + 1, "Nonce should be incremented by 1");
 
         vm.stopPrank();
@@ -108,7 +111,7 @@ contract SendMessage is Test {
         uint256 messageFee = conceroRouter.getMessageFeeNative(CLIENT_MESSAGE_CONFIG, dstChainData);
         uint256 insufficientFee = messageFee - 1;
 
-        vm.expectRevert(InsufficientFee.selector);
+        vm.expectRevert(Errors.InsufficientFee.selector);
         conceroRouter.conceroSend{value: insufficientFee}(
             CLIENT_MESSAGE_CONFIG,
             dstChainData,

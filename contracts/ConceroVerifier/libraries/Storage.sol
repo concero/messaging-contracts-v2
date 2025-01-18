@@ -8,7 +8,7 @@ pragma solidity 0.8.28;
 
 import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
 
-import {CLFRequestStatus, ChainType} from "../../interfaces/IConceroVerifier.sol";
+import {Types} from "./Types.sol";
 
 library Namespaces {
     bytes32 internal constant VERIFIER = keccak256("concero.verifier.storage");
@@ -20,7 +20,7 @@ library Storage {
         uint256 nonce;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
-        mapping(bytes32 => CLFRequestStatus) clfRequestStatus;
+        mapping(bytes32 => Types.CLFRequestStatus) clfRequestStatus;
         mapping(bytes32 clfRequestId => bool isPending) pendingCLFRequests;
         mapping(bytes32 messageId => bool isPending) pendingMessageReports;
         uint256[50] __mapping_gap;
@@ -29,7 +29,7 @@ library Storage {
     struct Operator {
         mapping(address operator => bool) isAllowed;
         mapping(address operator => uint256 depositUSDC) deposit;
-        mapping(ChainType => bytes[] operators) registeredOperators;
+        mapping(Types.ChainType => bytes[] operators) registeredOperators;
         mapping(address operator => mapping(uint24 chainSelector => bytes walletAddress)) walletAddress;
         mapping(address operator => uint256) feesEarnedNative;
         mapping(address operator => uint256) feesEarnedUSDC;

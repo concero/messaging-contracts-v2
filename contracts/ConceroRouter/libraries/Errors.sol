@@ -6,6 +6,9 @@
  */
 pragma solidity 0.8.28;
 
-error OnlyOwner();
-error OnlyAllowedOperator();
-error LengthMismatch();
+library Errors {
+    error UnsupportedFeeToken();
+    error InsufficientFee();
+    error MessageAlreadyProcessed(bytes32 messageId);
+    error InvalidReceiver();
+}

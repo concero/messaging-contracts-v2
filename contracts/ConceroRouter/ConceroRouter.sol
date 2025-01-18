@@ -6,23 +6,17 @@
  */
 pragma solidity 0.8.28;
 
-import {BaseModule} from "./BaseModule.sol";
-import {OperatorModule} from "./OperatorModule.sol";
-import {MessageModule} from "./MessageModule.sol";
-import {StorageModule} from "./StorageModule.sol";
-import {OwnerModule} from "./OwnerModule.sol";
-import {IConceroRouter} from "../Interfaces/IConceroRouter.sol";
+import {Base} from "./modules/Base.sol";
+import {Operator} from "./modules/Operator.sol";
+import {Message} from "./modules/Message.sol";
+import {GenericStorage} from "./modules/GenericStorage.sol";
+import {Owner} from "./modules/Owner.sol";
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 
-contract ConceroRouter is
-    IConceroRouter,
-    OperatorModule,
-    MessageModule,
-    StorageModule,
-    OwnerModule
-{
-    constructor(uint24 chainSelector, address USDC) BaseModule(chainSelector, USDC) {}
+contract ConceroRouter is IConceroRouter, Operator, Message, GenericStorage, Owner {
+    constructor(uint24 chainSelector, address USDC) Base(chainSelector, USDC) {}
 
-    /* EXTERNAL FUNCTIONS */
     receive() external payable {}
+
     fallback() external payable {}
 }

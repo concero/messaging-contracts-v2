@@ -9,14 +9,17 @@ pragma solidity 0.8.28;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {CLFModule} from "./CLFModule.sol";
-import {ChainType, MessageReportRequest, OperatorRegistrationAction, OperatorFeeWithdrawn, OperatorDeposited, OperatorRegistered, OperatorDeregistered, FeeTokenType} from "../Interfaces/IConceroVerifier.sol";
-import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
-import {CommonConstants} from "../Common/CommonConstants.sol";
-import {LengthMismatch} from "../Common/Errors.sol";
-import {MessageAlreadyProcessed, InsufficientOperatorDeposit, OperatorNotFound, InvalidEVMAddress} from "./Errors.sol";
+import {Constants} from "../../common/Constants.sol";
+import {LengthMismatch} from "../../common/Errors.sol";
 
-abstract contract OperatorModule is CLFModule {
+import {Storage as s} from "../libraries/Storage.sol";
+import {MessageAlreadyProcessed, InsufficientOperatorDeposit, OperatorNotFound, InvalidEVMAddress} from "../Errors.sol";
+
+import {ChainType, MessageReportRequest, OperatorRegistrationAction, OperatorFeeWithdrawn, OperatorDeposited, OperatorRegistered, OperatorDeregistered, FeeTokenType} from "../../interfaces/IConceroVerifier.sol";
+
+import {CLF} from "./CLF.sol";
+
+abstract contract Operator is CLF {
     using SafeERC20 for IERC20;
     using s for s.Verifier;
     using s for s.Operator;
@@ -59,11 +62,11 @@ abstract contract OperatorModule is CLFModule {
         _requestOperatorRegistration();
     }
 
-    /**
-     * @dev Deregisters an operator for specific chain types with the provided addresses.
-     * @param chainTypes The chain types for which the operator is deregistering.
-     * @param operatorAddresses The corresponding operator addresses.
-     */
+    //    /**
+    //     * @dev Deregisters an operator for specific chain types with the provided addresses.
+    //     * @param chainTypes The chain types for which the operator is deregistering.
+    //     * @param operatorAddresses The corresponding operator addresses.
+    //     */
     // function deregisterOperator(
     //     ChainType[] calldata chainTypes,
     //     bytes[] calldata operatorAddresses
@@ -90,26 +93,6 @@ abstract contract OperatorModule is CLFModule {
     //     _requestOperatorDeregistration();
     // }
 
-    /**
-     * @dev Internal function to remove an operator from the registered list.
-     * @param chainType The chain type for the operator.
-     * @param operatorAddress The address of the operator to be removed.
-     */
-    function _removeOperator(ChainType chainType, bytes memory operatorAddress) internal {
-        bytes[] storage operators = s.operator().registeredOperators[chainType];
-        uint256 length = operators.length;
-
-        for (uint256 i = 0; i < length; i++) {
-            if (keccak256(operators[i]) == keccak256(operatorAddress)) {
-                operators[i] = operators[length - 1];
-                operators.pop();
-                return;
-            }
-        }
-
-        revert OperatorNotFound();
-    }
-
     function withdrawOperatorFee(FeeTokenType tokenType, uint256 amount) external onlyOperator {
         //todo: using native only for now
         if (tokenType == FeeTokenType.native) {
@@ -135,7 +118,7 @@ abstract contract OperatorModule is CLFModule {
     }
 
     function getCohortsCount() external pure returns (uint8) {
-        return CommonConstants.COHORTS_COUNT;
+        return Constants.COHORTS_COUNT;
     }
 
     function getOperatorDeposit(address operator) external view returns (uint256) {

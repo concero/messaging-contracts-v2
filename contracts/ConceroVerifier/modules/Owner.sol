@@ -6,12 +6,14 @@
  */
 pragma solidity 0.8.28;
 
-import {BaseModule} from "./BaseModule.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
 
-abstract contract OwnerModule is BaseModule {
+import {Storage as s} from "../libraries/Storage.sol";
+
+import {Base} from "./Base.sol";
+
+abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.Verifier;
 

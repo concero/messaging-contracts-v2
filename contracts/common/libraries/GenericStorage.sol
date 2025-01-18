@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-library StorageAccessLib {
+library GenericStorage {
     error LengthMismatch();
     error InvalidNamespace();
 

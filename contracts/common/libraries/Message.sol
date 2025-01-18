@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {EvmSrcChainData} from "../Common/MessageTypes.sol";
+import {EvmSrcChainData} from "../MessageTypes.sol";
 import {SupportedChains} from "./SupportedChains.sol";
 
 library MessageLibConstants {
@@ -25,7 +25,7 @@ library MessageLibConstants {
     uint8 internal constant OFFSET_FEE_TOKEN = 143;
 }
 
-library MessageLib {
+library Message {
     error InvalidDstChainData();
     error InvalidSrcChainData();
     error MessageTooLarge();

@@ -5,7 +5,7 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-import {MessageReportResult, CLFReportType, OperatorRegistrationResult, OperatorRegistrationAction, ChainType} from "../Interfaces/IConceroVerifier.sol";
+import {MessageReportResult, CLFReportType, OperatorRegistrationResult, OperatorRegistrationAction, ChainType} from "../../interfaces/IConceroVerifier.sol";
 
 library MessageConstants {
     uint8 internal constant SIZE_VERSION = 1;
@@ -28,7 +28,7 @@ library OperatorConstants {
     uint8 internal constant SIZE_OPERATOR_ACTIONS_LENGTH = 4;
 }
 
-library DecoderLib {
+library Decoder {
     function _decodeCLFMessageReportResponse(
         bytes memory response
     ) internal pure returns (MessageReportResult memory) {
@@ -90,12 +90,10 @@ library DecoderLib {
         offset += dstChainDataLength;
 
         assembly {
-            // Read allowedOperators count (2 bytes as uint16)
             allowedOperatorsCount := shr(240, mload(add(response, offset)))
             offset := add(offset, size_operator_count)
         }
 
-        // Initialize and read allowedOperators
         rawAllowedOperators = new bytes32[](allowedOperatorsCount);
         for (uint16 i = 0; i < allowedOperatorsCount; i++) {
             assembly {

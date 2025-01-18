@@ -6,11 +6,12 @@
  */
 pragma solidity 0.8.28;
 
-import {BaseModule} from "./BaseModule.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-abstract contract OwnerModule is BaseModule {
+import {Base} from "./Base.sol";
+
+abstract contract Owner is Base {
     using SafeERC20 for IERC20;
 
     function withdrawConceroFees(address token, uint256 amount) external onlyOwner {

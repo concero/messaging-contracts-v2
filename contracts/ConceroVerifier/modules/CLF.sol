@@ -9,17 +9,21 @@ pragma solidity 0.8.28;
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
-import {SignerLib} from "../Libraries/SignerLib.sol";
-import {DecoderLib} from "../Libraries/DecoderLib.sol";
+import {Constants} from "../../common/Constants.sol";
+import {LengthMismatch} from "../../common/Errors.sol";
+import {Decoder} from "../../common/libraries/Decoder.sol";
+import {Signer} from "../../common/libraries/Signer.sol";
 
-import {IConceroVerifier, CLFRequestError, CLFReportType, ChainType, CLFRequestStatus, MessageReport, MessageReportRequest, MessageReportResult, OperatorRegistrationResult, OperatorRegistrationAction} from "../Interfaces/IConceroVerifier.sol";
-import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
-import {BaseModule} from "./BaseModule.sol";
-import {CommonConstants} from "../Common/CommonConstants.sol";
-import {InsufficientOperatorDeposit} from "./Errors.sol";
-import {LengthMismatch} from "../Common/Errors.sol";
+import {Utils} from "../libraries/Utils.sol";
+import {Storage as s} from "../libraries/Storage.sol";
 
-abstract contract CLFModule is FunctionsClient, BaseModule {
+import {InsufficientOperatorDeposit, OperatorAlreadyRegistered, OperatorNotRegistered} from "../Errors.sol";
+
+import {IConceroVerifier, CLFRequestError, CLFReportType, ChainType, CLFRequestStatus, MessageReport, MessageReportRequest, MessageReportResult, OperatorRegistrationResult, OperatorRegistrationAction} from "../../interfaces/IConceroVerifier.sol";
+
+import {Base} from "./Base.sol";
+
+abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Verifier;
     using s for s.Operator;
@@ -90,8 +94,8 @@ abstract contract CLFModule is FunctionsClient, BaseModule {
             return;
         }
 
-        MessageReportResult memory res = DecoderLib._decodeCLFMessageReportResponse(response);
-        s.operator().feesEarnedNative[res.operator] += CommonConstants.CLF_REPORT_OPERATOR_FEE;
+        MessageReportResult memory res = Decoder._decodeCLFMessageReportResponse(response);
+        s.operator().feesEarnedNative[res.operator] += Constants.CLF_REPORT_OPERATOR_FEE;
         _returnCLFRequestDeposit(res.operator);
         emit MessageReport(res.messageId);
     }
@@ -106,7 +110,7 @@ abstract contract CLFModule is FunctionsClient, BaseModule {
             return;
         }
 
-        OperatorRegistrationResult memory result = DecoderLib._decodeCLFOperatorRegistrationReport(
+        OperatorRegistrationResult memory result = Decoder._decodeCLFOperatorRegistrationReport(
             response
         );
 
@@ -125,27 +129,13 @@ abstract contract CLFModule is FunctionsClient, BaseModule {
                 bytes[] storage registeredOperators = s.operator().registeredOperators[chainType];
 
                 if (action == OperatorRegistrationAction.Register) {
-                    registeredOperators.push(result.operatorAddresses[i]);
-                    s.operator().isAllowed[operatorAddress] = true;
-                } else {
-                    _removeOperatorAddress(registeredOperators, result.operatorAddresses[i]);
+                    Utils._addOperator(chainType, result.operatorAddresses[i]);
+                } else if (action == OperatorRegistrationAction.Deregister) {
+                    Utils._removeOperator(chainType, result.operatorAddresses[i]);
                 }
             }
         }
         // emit OperatorRegistered(chainType, operatorAddress);
-    }
-
-    function _removeOperatorAddress(
-        bytes[] storage operators,
-        bytes memory addressToRemove
-    ) internal {
-        for (uint256 i = 0; i < operators.length; i++) {
-            if (keccak256(operators[i]) == keccak256(addressToRemove)) {
-                operators[i] = operators[operators.length - 1];
-                operators.pop();
-                break;
-            }
-        }
     }
 
     // function _handleCLFOperatorDeregistrationReport(
@@ -158,7 +148,7 @@ abstract contract CLFModule is FunctionsClient, BaseModule {
     //         return;
     //     }
     //     //        _returnCLFRequestDeposit(res.operator);
-    //     //        SignerLib._decodeCLFOperatorDeregistrationReport(response);
+    //     //        Signer.sol._decodeCLFOperatorDeregistrationReport(response);
     // }
 
     /* CLF REQUEST FORMATION */
@@ -199,14 +189,13 @@ abstract contract CLFModule is FunctionsClient, BaseModule {
 
     function _witholdCLFRequestDeposit(address operator) internal {
         require(
-            s.operator().deposit[operator] >=
-                CommonConstants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT,
+            s.operator().deposit[operator] >= Constants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT,
             InsufficientOperatorDeposit()
         );
-        s.operator().deposit[operator] -= CommonConstants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT;
+        s.operator().deposit[operator] -= Constants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT;
     }
 
     function _returnCLFRequestDeposit(address operator) internal {
-        s.operator().deposit[operator] += CommonConstants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT;
+        s.operator().deposit[operator] += Constants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT;
     }
 }

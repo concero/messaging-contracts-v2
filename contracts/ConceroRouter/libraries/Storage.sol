@@ -6,9 +6,14 @@
  */
 pragma solidity 0.8.28;
 
-import {StorageAccessLib} from "../Libraries/StorageAccessLib.sol";
+import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
 
-library ConceroRouterStorageSlotsRouter {
+library Namespaces {
+    bytes32 internal constant ROUTER = keccak256("concero.router.storage");
+    bytes32 internal constant PRICEFEED = keccak256("concero.priceFeed.storage");
+}
+
+library RouterSlots {
     bytes32 internal constant NAMESPACE = keccak256("concero.router.storage");
 
     bytes32 internal constant NONCE = bytes32(0);
@@ -21,15 +26,14 @@ library ConceroRouterStorageSlotsRouter {
         keccak256("messageConfirmationsByProtocol");
 }
 
-library ConceroRouterStorageSlotsPriceFeed {
+library PriceFeedSlots {
     bytes32 internal constant NAMESPACE = keccak256("concero.priceFeed.storage");
-
     bytes32 internal constant NATIVE_USDC_RATE = bytes32(0);
     bytes32 internal constant LAST_GAS_PRICES = keccak256("lastGasPrices");
     bytes32 internal constant NATIVE_NATIVE_RATES = keccak256("nativeNativeRates");
 }
 
-library ConceroRouterStorage {
+library Storage {
     enum StorageSlot {
         Router,
         PriceFeed
@@ -63,23 +67,20 @@ library ConceroRouterStorage {
         mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
     }
 
-    bytes32 internal constant ROUTER_STORAGE_NAMESPACE = keccak256("concero.router.storage");
-    bytes32 internal constant PRICEFEED_STORAGE_NAMESPACE = keccak256("concero.priceFeed.storage");
-
     function _isValidNamespace(bytes32 slot) internal pure returns (bool) {
-        return slot == ROUTER_STORAGE_NAMESPACE || slot == PRICEFEED_STORAGE_NAMESPACE;
+        return slot == Namespaces.ROUTER || slot == Namespaces.PRICEFEED;
     }
 
     /* SLOT-BASED STORAGE ACCESS */
     function router() internal pure returns (Router storage s) {
-        bytes32 slot = ROUTER_STORAGE_NAMESPACE;
+        bytes32 slot = Namespaces.ROUTER;
         assembly {
             s.slot := slot
         }
     }
 
     function priceFeed() internal pure returns (PriceFeed storage s) {
-        bytes32 slot = PRICEFEED_STORAGE_NAMESPACE;
+        bytes32 slot = Namespaces.PRICEFEED;
         assembly {
             s.slot := slot
         }
@@ -87,13 +88,13 @@ library ConceroRouterStorage {
 
     /* GENERIC STORAGE ACCESS */
     function getStorage(bytes32 slot, bytes32 key) internal view returns (uint256) {
-        require(_isValidNamespace(slot), StorageAccessLib.InvalidNamespace());
-        return StorageAccessLib._getStorage(slot, key);
+        require(_isValidNamespace(slot), GenericStorage.InvalidNamespace());
+        return GenericStorage._getStorage(slot, key);
     }
 
     function setStorage(bytes32 slot, bytes32 key, uint256 value) internal {
-        require(_isValidNamespace(slot), StorageAccessLib.InvalidNamespace());
-        StorageAccessLib._setStorage(slot, key, value);
+        require(_isValidNamespace(slot), GenericStorage.InvalidNamespace());
+        GenericStorage._setStorage(slot, key, value);
     }
 
     function setStorageBulk(
@@ -102,12 +103,12 @@ library ConceroRouterStorage {
         bytes[] memory values
     ) internal {
         for (uint256 i = 0; i < slots.length; i++) {
-            require(_isValidNamespace(slots[i]), StorageAccessLib.InvalidNamespace());
+            require(_isValidNamespace(slots[i]), GenericStorage.InvalidNamespace());
         }
-        StorageAccessLib._setStorageBulk(slots, keys, values);
+        GenericStorage._setStorageBulk(slots, keys, values);
     }
 
-    /* PriceFeed Storage Setters */
+    /* PriceFeed GenericStorage.sol Setters */
     // function setLastGasPrices(
     //     uint24[] calldata keys,
     //     uint256[] calldata values

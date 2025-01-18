@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {ConceroRouterStorage as s} from "../../../contracts/ConceroRouter/ConceroRouterStorage.sol";
-import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
-import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
-import {FeeToken, EvmDstChainData, EvmSrcChainData} from "../../../contracts/Common/MessageTypes.sol";
-import {MessageLibConstants} from "../../../contracts/Libraries/MessageLib.sol";
 import {Test} from "forge-std/src/Test.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {StorageAccessLib} from "../../../contracts/Libraries/StorageAccessLib.sol";
+
+import {FeeToken, EvmDstChainData, EvmSrcChainData} from "../../../contracts/common/MessageTypes.sol";
+import {GenericStorage} from "../../../contracts/common/libraries/GenericStorage.sol";
+import {MessageLibConstants} from "../../../contracts/common/libraries/Message.sol";
+
+import {Storage as s} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
+
+import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
+
+import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
 
 contract Storage is Test {
     DeployConceroRouter internal deployScript;
@@ -95,7 +99,7 @@ contract Storage is Test {
     }
 
     function test_RevertInvalidStorageSlot() public {
-        vm.expectRevert(StorageAccessLib.InvalidNamespace.selector);
+        vm.expectRevert(GenericStorage.InvalidNamespace.selector);
 
         bytes32 invalidSlot = keccak256("invalid.slot");
 
@@ -111,7 +115,7 @@ contract Storage is Test {
         slots[0] = PRICEFEED_STORAGE_SLOT;
         slots[1] = ROUTER_STORAGE_SLOT;
 
-        vm.expectRevert(StorageAccessLib.LengthMismatch.selector);
+        vm.expectRevert(GenericStorage.LengthMismatch.selector);
 
         vm.prank(deployer);
         conceroRouter.setStorageBulk(slots, keys, values);

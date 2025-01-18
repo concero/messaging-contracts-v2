@@ -6,11 +6,15 @@
  */
 pragma solidity 0.8.28;
 
-import {BaseModule} from "./BaseModule.sol";
-import {CLFModule} from "./CLFModule.sol";
-import {IConceroVerifier} from "../Interfaces/IConceroVerifier.sol";
+import {IConceroVerifier} from "../interfaces/IConceroVerifier.sol";
 
-contract ConceroVerifier is IConceroVerifier, CLFModule {
+import {Base} from "./modules/Base.sol";
+import {CLF} from "./modules/CLF.sol";
+import {GenericStorage} from "./modules/GenericStorage.sol";
+import {Operator} from "./modules/Operator.sol";
+import {Owner} from "./modules/Owner.sol";
+
+contract ConceroVerifier is IConceroVerifier, CLF, Operator, Owner, GenericStorage {
     constructor(
         uint24 chainSelector,
         address USDC,
@@ -22,8 +26,8 @@ contract ConceroVerifier is IConceroVerifier, CLFModule {
         bytes32 ethersJsCodeHash,
         bytes32 requestCLFMessageReportJsCodeHash
     )
-        BaseModule(chainSelector, USDC)
-        CLFModule(
+        Base(chainSelector, USDC)
+        CLF(
             clfRouter,
             clfDonId,
             clfSubscriptionId,
@@ -32,4 +36,8 @@ contract ConceroVerifier is IConceroVerifier, CLFModule {
             requestCLFMessageReportJsCodeHash
         )
     {}
+
+    receive() external payable {}
+
+    fallback() external payable {}
 }

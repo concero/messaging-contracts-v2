@@ -6,20 +6,24 @@
  */
 pragma solidity 0.8.28;
 
-import {BaseModule} from "./BaseModule.sol";
-import {ConceroRouterStorage as s} from "./ConceroRouterStorage.sol";
-import {FeeToken} from "../Common/MessageTypes.sol";
-import {IConceroClient} from "../Interfaces/IConceroClient.sol";
-import {IConceroRouter} from "../Interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {EvmDstChainData, FeeToken} from "../Common/MessageTypes.sol";
-import {MessageLib, MessageLibConstants} from "../Libraries/MessageLib.sol";
-import {SignerLib} from "../Libraries/SignerLib.sol";
-import {UnsupportedFeeToken, InsufficientFee, MessageAlreadyProcessed, InvalidReceiver} from "./Errors.sol";
-import {Utils} from "../Libraries/Utils.sol";
 
-abstract contract MessageModule is BaseModule, IConceroRouter {
+import {EvmDstChainData, FeeToken} from "../../common/MessageTypes.sol";
+import {Message as MessageLib, MessageLibConstants} from "../../common/libraries/Message.sol";
+import {Signer} from "../../common/libraries/Signer.sol";
+import {Utils} from "../../common/libraries/Utils.sol";
+
+import {Storage as s} from "../libraries/Storage.sol";
+
+import {UnsupportedFeeToken, InsufficientFee, MessageAlreadyProcessed, InvalidReceiver} from "../Errors.sol";
+
+import {IConceroClient} from "../../interfaces/IConceroClient.sol";
+import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
+
+import {Base} from "./Base.sol";
+
+abstract contract Message is Base, IConceroRouter {
     using SafeERC20 for IERC20;
     using s for s.Router;
     using s for s.PriceFeed;
@@ -51,14 +55,14 @@ abstract contract MessageModule is BaseModule, IConceroRouter {
      * @param message the message data.
      */
     function submitMessageReport(
-        SignerLib.ClfDonReportSubmission calldata reportSubmission,
+        Signer.ClfDonReportSubmission calldata reportSubmission,
         bytes calldata message
     ) external {
         // Step 1: Recover and verify the signatures
-        SignerLib._verifyClfReportSignatures(reportSubmission);
+        Signer._verifyClfReportSignatures(reportSubmission);
 
         // Step 2: Decode the report data
-        //        (InternalMessageConfig memory decodedMessageConfig, bytes32 messageId, bytes32 messageHashSum, bytes memory srcData, bytes memory dstData) = SignerLib._extractClfResponse(
+        //        (InternalMessageConfig memory decodedMessageConfig, bytes32 messageId, bytes32 messageHashSum, bytes memory srcData, bytes memory dstData) = Signer.sol._extractClfResponse(
         //            reportSubmission.report
         //        );
         //        require(

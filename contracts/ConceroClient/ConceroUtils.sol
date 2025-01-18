@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {MessageLibConstants as MCC} from "../Libraries/MessageLib.sol";
+import {MessageLibConstants as MCC} from "../common/libraries/Message.sol";
 import {ConceroTypes} from "./ConceroTypes.sol";
 
 library ConceroUtils {

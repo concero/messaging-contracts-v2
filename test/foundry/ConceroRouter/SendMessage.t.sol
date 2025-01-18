@@ -1,18 +1,19 @@
 pragma solidity 0.8.28;
 
-import {ConceroRouterStorage as s, ConceroRouterStorageSlotsRouter as routerSlots} from "../../../contracts/ConceroRouter/ConceroRouterStorage.sol";
-import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
-import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
-import {FeeToken, EvmDstChainData} from "../../../contracts/Common/MessageTypes.sol";
-import {MessageLibConstants} from "../../../contracts/Libraries/MessageLib.sol";
-import {Test} from "forge-std/src/Test.sol";
-import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {InsufficientFee} from "../../../contracts/ConceroRouter/Errors.sol";
+import {Test} from "forge-std/src/Test.sol";
+import {Vm} from "forge-std/src/Vm.sol";
+
+import {Message, MessageLibConstants} from "../../../contracts/common/libraries/Message.sol";
+import {FeeToken, EvmDstChainData} from "../../../contracts/Common/MessageTypes.sol";
+
+import {Storage as s, RouterSlots as routerSlots} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
 import {ConceroTypes} from "../../../contracts/ConceroClient/ConceroTypes.sol";
 import {ConceroUtils} from "../../../contracts/ConceroClient/ConceroUtils.sol";
-import {Vm} from "forge-std/src/Vm.sol";
-import {MessageLib} from "../../../contracts/Libraries/MessageLib.sol";
+import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
+import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
+import {InsufficientFee} from "../../../contracts/ConceroRouter/Errors.sol";
+import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
 
 contract SendMessage is Test {
     DeployConceroRouter internal deployScript;
@@ -86,7 +87,7 @@ contract SendMessage is Test {
                     bytes memory messageFromEvent
                 ) = abi.decode(entries[i].data, (uint256, bytes, bytes));
 
-                MessageLib.validateInternalMessage(internalMessageConfig, dstChainDataFromEvent);
+                Message.validateInternalMessage(internalMessageConfig, dstChainDataFromEvent);
 
                 assertEq(entries[i].topics[1], messageId, "Message ID mismatch");
                 assertEq(dstChainDataFromEvent, dstChainData, "Destination chain data mismatch");

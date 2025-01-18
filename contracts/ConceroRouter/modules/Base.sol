@@ -6,19 +6,11 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroOwnable} from "../Common/ConceroOwnable.sol";
-import {OnlyAllowedOperator} from "../Common/Errors.sol";
-import {ConceroVerifierStorage as s} from "./ConceroVerifierStorage.sol";
+import {ConceroOwnable} from "../../common/ConceroOwnable.sol";
 
-abstract contract BaseModule is ConceroOwnable {
+abstract contract Base is ConceroOwnable {
     uint24 internal immutable i_chainSelector;
     address internal immutable i_USDC;
-
-    using s for s.Operator;
-    modifier onlyOperator() {
-        require(s.operator().isAllowed[msg.sender], OnlyAllowedOperator());
-        _;
-    }
 
     constructor(uint24 chainSelector, address USDC) ConceroOwnable() {
         i_chainSelector = chainSelector;

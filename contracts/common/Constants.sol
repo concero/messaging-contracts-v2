@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-library CommonConstants {
+library Constants {
     uint256 internal constant CLF_REPORT_OPERATOR_FEE = 1e18;
     uint256 internal constant MESSAGE_RELAY_OPERATOR_FEE = 1e18;
     uint256 internal constant CONCERO_MESSAGE_FEE = 1e18;

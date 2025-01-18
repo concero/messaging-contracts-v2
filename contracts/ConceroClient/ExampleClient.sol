@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {IConceroRouter} from "../Interfaces/IConceroRouter.sol";
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {ConceroClient} from "./ConceroClient.sol";
 import {ConceroTypes} from "./ConceroTypes.sol";
 import {ConceroUtils} from "./ConceroUtils.sol";

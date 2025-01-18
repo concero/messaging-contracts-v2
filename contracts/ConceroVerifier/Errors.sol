@@ -10,3 +10,5 @@ error MessageAlreadyProcessed();
 error InsufficientOperatorDeposit();
 error InvalidEVMAddress();
 error OperatorNotFound();
+error OperatorAlreadyRegistered();
+error OperatorNotRegistered();

@@ -7,7 +7,7 @@
     "description": "Concero V2 Contracts. If you discover any security vulnerabilities, report them responsibly to security@concero.io. Thank you!",
     "scripts": {
         "chain": "hardhat node --network hardhat --no-deploy",
-        "fork": "MAINNET_FORKING_ENABLED=true hardhat node --network hardhat --no-deploy",
+        "fork": "ETHEREUM_FORKING_ENABLED=true hardhat node --network hardhat --no-deploy",
         "compile": "hardhat compile",
         "test": "REPORT_GAS=true hardhat test --network hardhat",
         "lint:ts": "eslint --config .eslint.config.mjs",

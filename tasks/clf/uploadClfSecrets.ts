@@ -7,7 +7,7 @@ import { getEnvVar, getEthersSignerAndProvider } from "../../utils";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
 import { networkEnvKeys } from "../../constants";
 import { clfGatewayUrls } from "../../constants/clfGatewayUrls";
-import { CLF_MAINNET_TTL, CLF_TESTNET_TTL } from "../../constants/clfTtl";
+import { CLF_ETHEREUM_TTL, CLF_TESTNET_TTL } from "../../constants/clfTtl";
 
 export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number) {
     const slotId = parseInt(slotid);
@@ -15,7 +15,7 @@ export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number)
     for (const chain of chains) {
         const { url, name } = chain;
         const { signer } = getEthersSignerAndProvider(url);
-        const minutesUntilExpiration = chain.type === "mainnet" ? CLF_MAINNET_TTL : CLF_TESTNET_TTL;
+        const minutesUntilExpiration = chain.type === "mainnet" ? CLF_ETHEREUM_TTL : CLF_TESTNET_TTL;
 
         console.log({
             signer,

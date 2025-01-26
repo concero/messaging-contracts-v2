@@ -90,4 +90,16 @@ library Signer {
             signers[i] = signer;
         }
     }
+
+    function _extractClfReportResult(
+        bytes calldata report
+    ) internal pure returns (bytes memory result) {
+        (, bytes[] memory results, , , ) = abi.decode(
+            report,
+            (bytes32[], bytes[], bytes[], bytes[], bytes[])
+        );
+
+        bytes memory result = results[0];
+        return result;
+    }
 }

@@ -11,7 +11,7 @@ export const rpcUrl: Record<string, string> = {
     baseSepolia: `https://base-sepolia.infura.io/v3/${INFURA_API_KEY}`,
     avalanche: `https://avalanche-mainnet.infura.io/v3/${INFURA_API_KEY}`,
     avalancheFuji: `https://avalanche-fuji.infura.io/v3/${INFURA_API_KEY}`,
-    mainnet: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
+    ethereum: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
     sepolia: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
     optimism: `https://optimism-mainnet.infura.io/v3/${INFURA_API_KEY}`,
     optimismSepolia: `https://optimism-sepolia.infura.io/v3/${INFURA_API_KEY}`,
@@ -23,7 +23,7 @@ export const rpcUrl: Record<string, string> = {
 export const urls: Record<string, string[]> = {
     hardhat: [rpcUrl.hardhat],
     localhost: [rpcUrl.localhost],
-    mainnet: [
+    ethereum: [
         `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
         `https://eth-mainnet.blastapi.io/${BLAST_API_KEY}`,
         "https://rpc.ankr.com/eth",

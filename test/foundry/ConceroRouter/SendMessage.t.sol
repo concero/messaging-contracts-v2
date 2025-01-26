@@ -3,8 +3,9 @@ pragma solidity 0.8.28;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Test} from "forge-std/src/Test.sol";
 import {Vm} from "forge-std/src/Vm.sol";
+import {console} from "forge-std/src/Console.sol";
 
-import {Message, MessageLibConstants} from "../../../contracts/common/libraries/Message.sol";
+import {Message, MessageConstants} from "../../../contracts/common/libraries/Message.sol";
 import {Types} from "../../../contracts/ConceroRouter/libraries/Types.sol";
 
 import {Storage as s} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
@@ -15,6 +16,8 @@ import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol"
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
 import {Errors} from "../../../contracts/ConceroRouter/libraries/Errors.sol";
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
+import {Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
+import {VerifierSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
 
 contract SendMessage is Test {
     DeployConceroRouter internal deployScript;
@@ -28,12 +31,12 @@ contract SendMessage is Test {
     uint24 internal constant DST_CHAIN_SELECTOR = 8453;
 
     uint256 internal constant CLIENT_MESSAGE_CONFIG =
-        (uint256(DST_CHAIN_SELECTOR) << MessageLibConstants.OFFSET_DST_CHAIN) | // dstChainSelector
-            (1 << MessageLibConstants.OFFSET_MIN_SRC_CONF) | // minSrcConfirmations
-            (1 << MessageLibConstants.OFFSET_MIN_DST_CONF) | // minDstConfirmations
-            (0 << MessageLibConstants.OFFSET_RELAYER_CONF) | // relayerConfig
-            (0 << MessageLibConstants.OFFSET_CALLBACKABLE) | // isCallbackable
-            (uint256(Types.FeeToken.native) << MessageLibConstants.OFFSET_FEE_TOKEN); // feeToken
+        (uint256(DST_CHAIN_SELECTOR) << MessageConstants.OFFSET_DST_CHAIN) | // dstChainSelector
+            (1 << MessageConstants.OFFSET_MIN_SRC_CONF) | // minSrcConfirmations
+            (1 << MessageConstants.OFFSET_MIN_DST_CONF) | // minDstConfirmations
+            (0 << MessageConstants.OFFSET_RELAYER_CONF) | // relayerConfig
+            (0 << MessageConstants.OFFSET_CALLBACKABLE) | // isCallbackable
+            (uint256(Types.FeeToken.native) << MessageConstants.OFFSET_FEE_TOKEN); // feeToken
 
     bytes internal dstChainData;
     bytes internal message;
@@ -55,7 +58,6 @@ contract SendMessage is Test {
 
     function test_conceroSend() public {
         vm.startPrank(user);
-        vm.recordLogs();
 
         ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
             dstChainSelector: DST_CHAIN_SELECTOR,
@@ -68,9 +70,10 @@ contract SendMessage is Test {
 
         uint256 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
 
-        uint256 initialNonce = conceroRouter.getStorage(ROUTER_STORAGE_SLOT, rs.NONCE);
+        uint256 initialNonce = conceroRouter.getStorage(Namespaces.ROUTER, rs.nonce, bytes32(0));
         uint256 messageFee = conceroRouter.getMessageFeeNative(clientMessageConfig, dstChainData);
 
+        vm.recordLogs();
         bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
             clientMessageConfig,
             dstChainData,
@@ -78,12 +81,12 @@ contract SendMessage is Test {
         );
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        bool eventFound = false;
+        bool foundEvent = false;
         for (uint i = 0; i < entries.length; i++) {
             if (
                 entries[i].topics[0] == keccak256("ConceroMessageSent(bytes32,uint256,bytes,bytes)")
             ) {
-                eventFound = true;
+                foundEvent = true;
                 (
                     uint256 internalMessageConfig,
                     bytes memory dstChainDataFromEvent,
@@ -97,10 +100,15 @@ contract SendMessage is Test {
                 assertEq(messageFromEvent, message, "Message mismatch");
             }
         }
-        assertTrue(eventFound, "ConceroMessageSent event not found");
+        assertTrue(foundEvent, "ConceroMessageSent event not found");
 
-        uint256 finalNonce = conceroRouter.getStorage(ROUTER_STORAGE_SLOT, rs.NONCE);
+        uint256 finalNonce = conceroRouter.getStorage(Namespaces.ROUTER, rs.nonce, bytes32(0));
         assertEq(finalNonce, initialNonce + 1, "Nonce should be incremented by 1");
+
+        //        assertEq(
+        //            conceroRouter.getStorage(Namespaces.ROUTER, rs.isMessageSent, bytes32(messageId)),
+        //            1
+        //        );
 
         vm.stopPrank();
     }

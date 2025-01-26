@@ -13,6 +13,7 @@ import {Constants} from "../../common/Constants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {Decoder} from "../../common/libraries/Decoder.sol";
 
+import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
@@ -89,12 +90,21 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        Types.MessageReportResult memory res = Decoder._decodeCLFMessageReportResponse(response);
+        Types.MessageReportResult memory result = Decoder._decodeCLFMessageReportResponse(response);
 
-        s.operator().feesEarnedNative[res.operator] += Constants.CLF_REPORT_OPERATOR_FEE;
-        _returnCLFRequestDeposit(res.operator);
+        uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
 
-        emit MessageReport(res.messageId);
+        s.operator().feesEarnedNative[result.operator] += CommonUtils.convertUSDBPSToNative(
+            Constants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
+            nativeUsdRate
+        );
+
+        s.operator().depositNative[result.operator] += CommonUtils.convertUSDBPSToNative(
+            Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
+            nativeUsdRate
+        );
+
+        emit MessageReport(result.messageId);
     }
 
     function _handleCLFOperatorRegistrationReport(
@@ -133,27 +143,26 @@ abstract contract CLF is FunctionsClient, Base {
                 }
             }
         }
+
+        s.operator().depositNative[result.operator] += CommonUtils.convertUSDBPSToNative(
+            Constants.OPERATOR_DEPOSIT_REGISTRATION_REPORT_REQUEST_BPS_USD,
+            s.priceFeed().nativeUsdRate
+        );
+
         // emit OperatorRegistered(chainType, operatorAddress);
     }
-
-    // function _handleCLFOperatorDeregistrationReport(
-    //     bytes32 clfRequestId,
-    //     bytes memory response,
-    //     bytes memory err
-    // ) internal {
-    //     if (err.length != 0) {
-    //         emit CLFRequestError(err);
-    //         return;
-    //     }
-    //     //        _returnCLFRequestDeposit(res.operator);
-    //     //        Signer.sol._decodeCLFOperatorDeregistrationReport(response);
-    // }
 
     /* CLF REQUEST FORMATION */
     function _requestMessageReport(
         Types.MessageReportRequest calldata request
     ) internal returns (bytes32 clfRequestId) {
-        _witholdCLFRequestDeposit(msg.sender);
+        _witholdOperatorDeposit(
+            msg.sender,
+            CommonUtils.convertUSDBPSToNative(
+                Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
+                s.priceFeed().nativeUsdRate
+            )
+        );
 
         bytes[] memory clfReqArgs = new bytes[](6);
 
@@ -181,7 +190,13 @@ abstract contract CLF is FunctionsClient, Base {
         Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) internal returns (bytes32 clfRequestId) {
-        _witholdCLFRequestDeposit(msg.sender);
+        _witholdOperatorDeposit(
+            msg.sender,
+            CommonUtils.convertUSDBPSToNative(
+                Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
+                s.priceFeed().nativeUsdRate
+            )
+        );
 
         bytes[] memory clfReqArgs = new bytes[](5);
 
@@ -198,7 +213,7 @@ abstract contract CLF is FunctionsClient, Base {
     }
 
     function _requestOperatorDeregistration() internal {
-        _witholdCLFRequestDeposit(msg.sender);
+        // _witholdOperatorDeposit(msg.sender,  Utils.convertUSDBPSToNative(Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD, s.priceFeed().nativeUsdRate)
         //        s.verifier().pendingCLFRequests[clfRequestId] = true;
     }
 
@@ -209,15 +224,35 @@ abstract contract CLF is FunctionsClient, Base {
         return _sendRequest(req.encodeCBOR(), i_clfSubscriptionId, CLF_GAS_LIMIT, i_clfDonId);
     }
 
-    function _witholdCLFRequestDeposit(address operator) internal {
+    /**
+     * @notice Withholds the required deposit amount from operator's balance
+     * @param operator The operator's address
+     * @param depositNative The deposit amount in native value
+     */
+    function _witholdOperatorDeposit(
+        address operator,
+        uint256 depositNative
+    ) internal returns (uint256) {
         require(
-            s.operator().deposit[operator] >= Constants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT,
+            s.operator().depositNative[operator] >= depositNative,
             Errors.InsufficientOperatorDeposit()
         );
-        s.operator().deposit[operator] -= Constants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT;
+
+        s.operator().depositNative[operator] -= depositNative;
+        return depositNative;
     }
 
-    function _returnCLFRequestDeposit(address operator) internal {
-        s.operator().deposit[operator] += Constants.OPERATOR_MESSAGE_REPORT_REQUEST_DEPOSIT;
-    }
+    //    /**
+    //     * @notice Returns the operator's deposit amount
+    //     * @param operator The operator's address
+    //     * @param depositNative The deposit amount in native value
+    //     * @return The operator's deposit amount
+    //     */
+    //    function _returnOperatorDeposit(
+    //        address operator,
+    //        uint256 depositNative
+    //    ) internal returns (uint256) {
+    //        s.operator().depositNative[operator] += depositNative;
+    //        return depositNative;
+    //    }
 }

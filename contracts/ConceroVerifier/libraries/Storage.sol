@@ -11,8 +11,22 @@ import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
 import {Types} from "./Types.sol";
 
 library Namespaces {
-    bytes32 internal constant VERIFIER = keccak256("concero.verifier.storage");
-    bytes32 internal constant OPERATOR = keccak256("concero.operator.storage");
+    bytes32 internal constant VERIFIER =
+        keccak256(
+            abi.encode(uint256(keccak256(abi.encodePacked("ConceroVerifier.verifier.storage"))) - 1)
+        ) & ~bytes32(uint256(0xff));
+
+    bytes32 internal constant OPERATOR =
+        keccak256(
+            abi.encode(uint256(keccak256(abi.encodePacked("ConceroVerifier.operator.storage"))) - 1)
+        ) & ~bytes32(uint256(0xff));
+
+    bytes32 internal constant PRICEFEED =
+        keccak256(
+            abi.encode(
+                uint256(keccak256(abi.encodePacked("ConceroVerifier.pricefeed.storage"))) - 1
+            )
+        ) & ~bytes32(uint256(0xff));
 }
 
 library Storage {
@@ -23,16 +37,23 @@ library Storage {
         mapping(bytes32 => Types.CLFRequestStatus) clfRequestStatus;
         mapping(bytes32 clfRequestId => bool isPending) pendingCLFRequests;
         mapping(bytes32 messageId => bool isPending) pendingMessageReports;
-        uint256[50] __mapping_gap;
     }
 
     struct Operator {
-        mapping(address operator => bool) isAllowed;
-        mapping(address operator => uint256 depositUSDC) deposit;
+        uint256[50] __var_gap;
+        uint256[50] __array_gap;
         mapping(Types.ChainType => bytes[] operators) registeredOperators;
+        mapping(address operator => bool) isAllowed;
+        mapping(address operator => uint256 depositAmount) depositNative;
         mapping(address operator => mapping(uint24 chainSelector => bytes walletAddress)) walletAddress;
         mapping(address operator => uint256) feesEarnedNative;
-        mapping(address operator => uint256) feesEarnedUSDC;
+    }
+
+    struct PriceFeed {
+        uint256 nativeUsdRate;
+        uint256[50] __var_gap;
+        mapping(uint24 dstChainSelector => uint256) lastGasPrices;
+        mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
     }
 
     /* SLOT-BASED STORAGE ACCESS */
@@ -45,6 +66,13 @@ library Storage {
 
     function operator() internal pure returns (Operator storage s) {
         bytes32 slot = Namespaces.OPERATOR;
+        assembly {
+            s.slot := slot
+        }
+    }
+
+    function priceFeed() internal pure returns (PriceFeed storage s) {
+        bytes32 slot = Namespaces.PRICEFEED;
         assembly {
             s.slot := slot
         }

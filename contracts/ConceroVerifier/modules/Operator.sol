@@ -11,6 +11,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 
 import {Constants} from "../../common/Constants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
+import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
@@ -69,10 +70,29 @@ abstract contract Operator is CLF {
         emit OperatorFeeWithdrawn(msg.sender, amount);
     }
 
-    function operatorDeposit(uint256 amount) external {
-        IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), amount);
-        s.operator().deposit[msg.sender] += amount;
-        emit OperatorDeposited(msg.sender, amount);
+    function operatorDeposit() external payable // nonReentrant
+    {
+        // Calculate minimum deposit in native currency based on configured USD BPS
+        uint256 minimumDepositNative = CommonUtils.convertUSDBPSToNative(
+            Constants.OPERATOR_DEPOSIT_MINIMUM_BPS_USD,
+            s.priceFeed().nativeUsdRate
+        );
+
+        // Check if deposit meets minimum requirement
+        if (msg.value < minimumDepositNative) {
+            revert Errors.InsufficientOperatorDeposit();
+        }
+
+        // Update operator's deposit balance before transfer
+        s.operator().depositNative[msg.sender] += msg.value;
+
+        // Use call instead of transfer for better gas efficiency and compatibility
+        (bool success, ) = i_owner.call{value: msg.value}("");
+        if (!success) {
+            revert Errors.NativeTransferFailed();
+        }
+
+        emit OperatorDeposited(msg.sender, msg.value);
     }
 
     /* INTERNAL FUNCTIONS */
@@ -89,10 +109,10 @@ abstract contract Operator is CLF {
     }
 
     function getOperatorDeposit(address operator) external view returns (uint256) {
-        return s.operator().deposit[operator];
+        return s.operator().depositNative[operator];
     }
 
-    function getOperatorFeesEarned(address operator) external view returns (uint256, uint256) {
-        return (s.operator().feesEarnedNative[operator], s.operator().feesEarnedUSDC[operator]);
+    function getOperatorFeesEarned(address operator) external view returns (uint256) {
+        return s.operator().feesEarnedNative[operator];
     }
 }

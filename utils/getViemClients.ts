@@ -33,7 +33,7 @@ export function getFallbackClients(
     if (!account) {
         account =
             chain.type === "mainnet"
-                ? privateKeyToAccount(`0x${process.env.MAINNET_DEPLOYER_PRIVATE_KEY}`)
+                ? privateKeyToAccount(`0x${process.env.ETHEREUM_DEPLOYER_PRIVATE_KEY}`)
                 : privateKeyToAccount(`0x${process.env.TESTNET_DEPLOYER_PRIVATE_KEY}`);
     }
 

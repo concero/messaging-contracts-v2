@@ -10,5 +10,7 @@ library Errors {
     error UnsupportedFeeToken();
     error InsufficientFee();
     error MessageAlreadyProcessed(bytes32 messageId);
+    error MessageDeliveryFailed(bytes32 messageId);
     error InvalidReceiver();
+    error InvalidMessageHashSum();
 }

@@ -23,7 +23,6 @@ contract ConceroVerifier is IConceroVerifier, CLF, Operator, Owner, GenericStora
         uint64 clfSubscriptionId,
         uint64 clfDonHostedSecretsVersion,
         uint8 clfDonHostedSecretsSlotId,
-        bytes32 ethersJsCodeHash,
         bytes32 requestCLFMessageReportJsCodeHash,
         bytes32 requestOperatorRegistrationJsCodeHash
     )

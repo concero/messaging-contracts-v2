@@ -16,6 +16,7 @@ import {Base} from "./Base.sol";
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.Verifier;
+    using s for s.PriceFeed;
 
     function withdrawConceroFees(address token, uint256 amount) external onlyOwner {
         if (token == address(0)) {
@@ -23,5 +24,9 @@ abstract contract Owner is Base {
         } else {
             IERC20(token).safeTransfer(i_owner, amount);
         }
+    }
+
+    function setNativeUsdRate(uint256 amount) external onlyOwner {
+        s.priceFeed().nativeUsdRate = amount;
     }
 }

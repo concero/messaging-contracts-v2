@@ -50,4 +50,8 @@ library SupportedChains {
     function isChainSupported(uint24 chainSelector) internal pure returns (bool) {
         return isEVMChain(chainSelector);
     }
+
+    function maxConfirmations(uint64 chainSelector) internal pure returns (uint16) {
+        return uint16(100);
+    }
 }

@@ -9,17 +9,21 @@ pragma solidity 0.8.28;
 // @notice This is not part of ConceroVerifier contract but is used to access its storage slots externally, e.g. from Foundry tests
 
 library VerifierSlots {
-    bytes32 internal constant NONCE = bytes32(0);
-    bytes32 internal constant CLF_REQUEST_STATUS = keccak256("clfRequestStatus");
-    bytes32 internal constant PENDING_CLF_REQUESTS = keccak256("pendingCLFRequests");
-    bytes32 internal constant PENDING_MESSAGE_REPORTS = keccak256("pendingMessageReports");
+    uint256 internal constant nonce = 0;
+    uint256 internal constant __VAR_GAP = 50;
+    uint256 internal constant __ARRAY_GAP = 50;
+    uint256 internal constant clfRequestStatus = __VAR_GAP + __ARRAY_GAP + 1;
+    uint256 internal constant pendingCLFRequests = __VAR_GAP + __ARRAY_GAP + 2;
+    uint256 internal constant pendingMessageReports = __VAR_GAP + __ARRAY_GAP + 3;
 }
 
 library OperatorSlots {
-    bytes32 internal constant IS_ALLOWED = keccak256("isAllowed");
-    bytes32 internal constant DEPOSIT = keccak256("deposit");
-    bytes32 internal constant REGISTERED_OPERATORS = keccak256("registeredOperators");
-    bytes32 internal constant WALLET_ADDRESS = keccak256("walletAddress");
-    bytes32 internal constant FEES_EARNED_NATIVE = keccak256("feesEarnedNative");
-    bytes32 internal constant FEES_EARNED_USDC = keccak256("feesEarnedUSDC");
+    uint256 internal constant __VAR_GAP = 50;
+    uint256 internal constant __ARRAY_GAP = 50;
+    uint256 internal constant isAllowed = __VAR_GAP + __ARRAY_GAP + 1;
+    uint256 internal constant deposit = __VAR_GAP + __ARRAY_GAP + 2;
+    uint256 internal constant registeredOperators = __VAR_GAP + __ARRAY_GAP + 3;
+    uint256 internal constant walletAddress = __VAR_GAP + __ARRAY_GAP + 4;
+    uint256 internal constant feesEarnedNative = __VAR_GAP + __ARRAY_GAP + 5;
+    uint256 internal constant feesEarnedUSDC = __VAR_GAP + __ARRAY_GAP + 6;
 }

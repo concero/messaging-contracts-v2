@@ -61,7 +61,7 @@ const config: HardhatUserConfig = {
     etherscan: {
         apiKey: {
             arbitrum: process.env.ARBISCAN_API_KEY,
-            mainnet: process.env.ETHERSCAN_API_KEY,
+            ethereum: process.env.ETHERSCAN_API_KEY,
             polygon: process.env.POLYGONSCAN_API_KEY,
             optimism: process.env.OPTIMISMSCAN_API_KEY,
             celo: process.env.CELOSCAN_API_KEY,

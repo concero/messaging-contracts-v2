@@ -18,24 +18,34 @@ abstract contract GenericStorage is Base {
         require(slot == Namespaces.VERIFIER || slot == Namespaces.OPERATOR, gs.InvalidNamespace());
     }
 
-    function getStorage(bytes32 slot, bytes32 key) external view returns (uint256) {
-        _validateNamespace(slot);
-        return gs._getStorage(slot, key);
+    function getStorage(
+        bytes32 namespace,
+        uint256 offset,
+        bytes32 mappingKey
+    ) external view returns (uint256) {
+        _validateNamespace(namespace);
+        return gs._getStorage(namespace, offset, mappingKey);
     }
 
-    function setStorage(bytes32 slot, bytes32 key, uint256 value) external onlyOwner {
-        _validateNamespace(slot);
-        gs._setStorage(slot, key, value);
+    function setStorage(
+        bytes32 namespace,
+        uint256 offset,
+        bytes32 mappingKey,
+        uint256 value
+    ) external onlyOwner {
+        _validateNamespace(namespace);
+        gs._setStorage(namespace, offset, mappingKey, value);
     }
 
     function setStorageBulk(
-        bytes32[] memory slots,
-        bytes32[] memory keys,
-        bytes[] memory values
+        bytes32[] memory namespaces,
+        uint256[] memory offsets,
+        bytes32[] memory mappingKeys,
+        uint256[] memory values
     ) external onlyOwner {
-        for (uint256 i = 0; i < slots.length; i++) {
-            _validateNamespace(slots[i]);
+        for (uint256 i = 0; i < namespaces.length; i++) {
+            _validateNamespace(namespaces[i]);
         }
-        gs._setStorageBulk(slots, keys, values);
+        gs._setStorageBulk(namespaces, offsets, mappingKeys, values);
     }
 }

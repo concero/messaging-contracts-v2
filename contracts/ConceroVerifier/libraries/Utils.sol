@@ -6,13 +6,15 @@
  */
 pragma solidity 0.8.28;
 
+import {Constants} from "../../common/Constants.sol";
+
 import {Storage as s} from "./Storage.sol";
 import {Types} from "./Types.sol";
-
 import {Errors} from "./Errors.sol";
 
 library Utils {
     using s for s.Operator;
+    error InvalidNativeUSDRate();
 
     /* OPERATOR UTILS */
     function _addOperator(Types.ChainType chainType, bytes memory operatorAddress) internal {

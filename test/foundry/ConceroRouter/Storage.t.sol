@@ -6,27 +6,22 @@ import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentU
 
 import {Types} from "../../../contracts/ConceroRouter/libraries/Types.sol";
 import {GenericStorage} from "../../../contracts/common/libraries/GenericStorage.sol";
-import {MessageLibConstants} from "../../../contracts/common/libraries/Message.sol";
+import {MessageConstants} from "../../../contracts/common/libraries/Message.sol";
 
-import {Storage as s} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
+import {Storage as s, Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
 
 import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
 
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
+import {RouterSlots, PriceFeedSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
 
 contract Storage is Test {
     DeployConceroRouter internal deployScript;
     TransparentUpgradeableProxy internal conceroRouterProxy;
     ConceroRouter internal conceroRouter;
 
-    using s for s.Router;
-    using s for s.PriceFeed;
-
     address public proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
     address public deployer = vm.envAddress("DEPLOYER_ADDRESS");
-
-    bytes32 internal constant ROUTER_STORAGE_SLOT = keccak256("concero.router.storage");
-    bytes32 internal constant PRICEFEED_STORAGE_SLOT = keccak256("concero.priceFeed.storage");
 
     function setUp() public {
         deployScript = new DeployConceroRouter();
@@ -40,10 +35,10 @@ contract Storage is Test {
         uint256 newNonce = 123;
 
         vm.startPrank(deployer);
-        conceroRouter.setStorage(ROUTER_STORAGE_SLOT, bytes32(0), newNonce);
+        conceroRouter.setStorage(Namespaces.ROUTER, RouterSlots.nonce, bytes32(0), newNonce);
 
         assertEq(
-            conceroRouter.getStorage(ROUTER_STORAGE_SLOT, bytes32(0)),
+            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.nonce, bytes32(0)),
             newNonce,
             "Storage getter failed for nonce"
         );
@@ -54,14 +49,23 @@ contract Storage is Test {
         uint24 chainSelector = 1234;
         uint256 gasPrice = 5000000000;
 
-        bytes32 key = bytes32(uint256(chainSelector));
+        bytes32 mappingKey = bytes32(uint256(chainSelector));
 
         vm.startPrank(deployer);
-        conceroRouter.setStorage(PRICEFEED_STORAGE_SLOT, key, gasPrice);
+        conceroRouter.setStorage(
+            Namespaces.PRICEFEED,
+            PriceFeedSlots.lastGasPrices,
+            mappingKey,
+            gasPrice
+        );
         assertEq(
-            conceroRouter.getStorage(PRICEFEED_STORAGE_SLOT, key),
+            conceroRouter.getStorage(
+                Namespaces.PRICEFEED,
+                PriceFeedSlots.lastGasPrices,
+                mappingKey
+            ),
             gasPrice,
-            "Storage getter failed for lastGasPrice"
+            "Storage getter failed for lastGasPrices"
         );
         vm.stopPrank();
     }
@@ -75,22 +79,28 @@ contract Storage is Test {
         gasPrices[0] = 5000000000;
         gasPrices[1] = 6000000000;
 
-        bytes32[] memory slots = new bytes32[](2);
-        bytes32[] memory keys = new bytes32[](2);
-        bytes[] memory values = new bytes[](2);
+        bytes32[] memory namespaces = new bytes32[](2);
+        uint256[] memory offsets = new uint256[](2);
+        bytes32[] memory mappingKeys = new bytes32[](2);
+        uint256[] memory values = new uint256[](2);
 
         for (uint256 i = 0; i < 2; i++) {
-            slots[i] = PRICEFEED_STORAGE_SLOT;
-            keys[i] = bytes32(uint256(chainSelectors[i]));
-            values[i] = abi.encode(gasPrices[i]);
+            namespaces[i] = Namespaces.PRICEFEED;
+            offsets[i] = PriceFeedSlots.lastGasPrices;
+            mappingKeys[i] = bytes32(uint256(chainSelectors[i]));
+            values[i] = gasPrices[i];
         }
 
         vm.startPrank(deployer);
-        conceroRouter.setStorageBulk(slots, keys, values);
+        conceroRouter.setStorageBulk(namespaces, offsets, mappingKeys, values);
 
         for (uint256 i = 0; i < 2; i++) {
             assertEq(
-                conceroRouter.getStorage(PRICEFEED_STORAGE_SLOT, keys[i]),
+                conceroRouter.getStorage(
+                    Namespaces.PRICEFEED,
+                    PriceFeedSlots.lastGasPrices,
+                    mappingKeys[i]
+                ),
                 gasPrices[i],
                 "Bulk storage update failed"
             );
@@ -101,52 +111,46 @@ contract Storage is Test {
     function test_RevertInvalidStorageSlot() public {
         vm.expectRevert(GenericStorage.InvalidNamespace.selector);
 
-        bytes32 invalidSlot = keccak256("invalid.slot");
+        bytes32 invalidNamespace = keccak256("invalid.namespace");
 
         vm.prank(deployer);
-        conceroRouter.setStorage(invalidSlot, bytes32(0), 1);
+        conceroRouter.setStorage(invalidNamespace, 0, bytes32(0), 1);
     }
 
     function test_RevertLengthMismatch() public {
-        bytes32[] memory slots = new bytes32[](2);
-        bytes32[] memory keys = new bytes32[](1);
-        bytes[] memory values = new bytes[](2);
+        bytes32[] memory namespaces = new bytes32[](2);
+        uint256[] memory offsets = new uint256[](2);
+        bytes32[] memory mappingKeys = new bytes32[](1);
+        uint256[] memory values = new uint256[](2);
 
-        slots[0] = PRICEFEED_STORAGE_SLOT;
-        slots[1] = ROUTER_STORAGE_SLOT;
+        namespaces[0] = Namespaces.PRICEFEED;
+        namespaces[1] = Namespaces.ROUTER;
 
         vm.expectRevert(GenericStorage.LengthMismatch.selector);
 
         vm.prank(deployer);
-        conceroRouter.setStorageBulk(slots, keys, values);
+        conceroRouter.setStorageBulk(namespaces, offsets, mappingKeys, values);
     }
 
-    //    function testGetMessageFeeUSDC() public {
-    //        uint256 clientMessageConfig = (uint256(FeeToken.usdc) <<
-    //            MessageConfigConstants.OFFSET_FEE_TOKEN);
-    //        bytes memory dstChainData = abi.encode(
-    //            EvmDstChainData({receiver: address(0x123), gasLimit: 100000})
-    //        );
-    //
-    //        uint24 dstChainSelector = uint24(
-    //            clientMessageConfig >> MessageConfigConstants.OFFSET_DST_CHAIN
-    //        );
-    //
-    //        vm.startPrank(deployer);
-    //        s.priceFeed().lastGasPrices[dstChainSelector] = 100 gwei;
-    //        s.priceFeed().nativeNativeRates[dstChainSelector] = 1 ether;
-    //        s.priceFeed().nativeUsdcRate = 10 ** 6;
-    //        vm.stopPrank();
-    //
-    //        uint256 feeUSDC = conceroRouter.getMessageFeeUSDC(clientMessageConfig, dstChainData);
-    //
-    //        uint256 baseFee = 0.01 ether;
-    //        uint256 gasPrice = 100 gwei;
-    //        uint256 gasFeeNative = gasPrice * 100000; // gas price * gas limit
-    //        uint256 adjustedGasFeeNative = (gasFeeNative * 1 ether) / 1 ether;
-    //        uint256 totalFeeNative = baseFee + adjustedGasFeeNative;
-    //        uint256 expectedFeeUSDC = (totalFeeNative * 10 ** 6) / 1 ether;
-    //
-    //        assertEq(feeUSDC, expectedFeeUSDC, "Incorrect USDC fee calculation");
-    //    }
+    function test_SetAndGetIsMessageProcessed() public {
+        bytes32 messageId = keccak256("message123");
+        bool isProcessed = true;
+
+        vm.startPrank(deployer);
+
+        conceroRouter.setStorage(
+            Namespaces.ROUTER,
+            RouterSlots.isMessageProcessed,
+            messageId,
+            isProcessed ? 1 : 0
+        );
+
+        assertEq(
+            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.isMessageProcessed, messageId),
+            isProcessed ? 1 : 0,
+            "Message processed status not set"
+        );
+
+        vm.stopPrank();
+    }
 }

@@ -10,6 +10,7 @@ import {ConceroOwnable} from "../../common/ConceroOwnable.sol";
 
 abstract contract Base is ConceroOwnable {
     uint24 internal immutable i_chainSelector;
+    uint256 internal immutable i_ConceroVerifierCLFCallbackGasLimit;
     address internal immutable i_USDC;
 
     constructor(uint24 chainSelector, address USDC) ConceroOwnable() {

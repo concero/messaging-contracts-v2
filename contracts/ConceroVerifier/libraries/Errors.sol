@@ -15,4 +15,5 @@ library Errors {
     error OperatorAlreadyRegistered();
     error OperatorNotRegistered();
     error OperatorAddressMismatch();
+    error NativeTransferFailed();
 }

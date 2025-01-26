@@ -11,7 +11,7 @@ export enum CLFType {
 const getPathToCLFFileByType = (clfType: CLFType): string | undefined => {
     switch (clfType) {
         case CLFType.requestReport:
-            return "./clf/dist/requestReport.min.js";
+            return "./clf/dist/messageReport.min.js";
     }
 };
 

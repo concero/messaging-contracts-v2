@@ -40,7 +40,7 @@ export const networkTypes: Record<NetworkType, NetworkType> = {
 
 export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
     // mainnets
-    mainnet: "MAINNET",
+    ethereum: "ETHEREUM",
     arbitrum: "ARBITRUM",
     optimism: "OPTIMISM",
     polygon: "POLYGON",
@@ -172,12 +172,12 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
     },
 };
 export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork> = {
-    mainnet: {
-        name: "mainnet",
+    ethereum: {
+        name: "ethereum",
         type: networkTypes.mainnet,
         chainId: 1,
-        url: urls.mainnet[0],
-        rpcUrls: urls.mainnet,
+        url: urls.ethereum[0],
+        rpcUrls: urls.ethereum,
         accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
         chainSelector: "1",
         confirmations: DEFAULT_BLOCK_CONFIRMATIONS,

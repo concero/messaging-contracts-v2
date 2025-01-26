@@ -1,7 +1,7 @@
 import { Chain } from "viem";
 
 export type ConceroMainnetNetworkNames =
-    | "mainnet"
+    | "ethereum"
     | "arbitrum"
     | "optimism"
     | "polygon"

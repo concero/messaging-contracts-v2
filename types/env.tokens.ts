@@ -1,6 +1,6 @@
 export interface EnvTokens {
     // env.tokens
-    LINK_MAINNET: string;
+    LINK_ETHEREUM: string;
     LINK_ARBITRUM: string;
     LINK_POLYGON: string;
     LINK_OPTIMISM: string;
@@ -24,7 +24,7 @@ export interface EnvTokens {
     LINK_BNB_TESTNET: string;
     LINK_GNOSIS_CHIADO: string;
     LINK_FANTOM_TESTNET: string;
-    USDC_MAINNET: string;
+    USDC_ETHEREUM: string;
     USDC_ARBITRUM: string;
     USDC_POLYGON: string;
     USDC_AVALANCHE: string;
@@ -44,7 +44,7 @@ export interface EnvTokens {
     CCIPBNM_GNOSIS_CHIADO: string;
     GHO_SEPOLIA: string;
     GHO_ARBITRUM_SEPOLIA: string;
-    LINK_PRICEFEED_MAINNET: string;
+    LINK_PRICEFEED_ETHEREUM: string;
     LINK_PRICEFEED_ARBITRUM: string;
     LINK_PRICEFEED_AVALANCHE: string;
     LINK_PRICEFEED_POLYGON: string;

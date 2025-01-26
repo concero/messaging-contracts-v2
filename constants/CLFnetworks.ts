@@ -8,7 +8,7 @@
 // const npmCommand = process.env.npm_lifecycle_event;
 // const isTestEnvironment = npmCommand == "test" || npmCommand == "test:unit";
 // const isSimulation = process.argv.length === 3 && process.argv[2] === "functions-simulate-script" ? true : false;
-// // console.log(process.env.LINK_MAINNET);
+// // console.log(process.env.LINK_ETHEREUM);
 // // Set EVM private keys (required)
 // const PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 // const SECOND_PRIVATE_KEY = process.env.MESSENGER_PRIVATE_KEY;
@@ -35,10 +35,10 @@
 //     chainId: 1,
 //     confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,
 //     nativeCurrencySymbol: "ETH",
-//     linkToken: process.env.LINK_MAINNET,
-//     linkPriceFeed: process.env.LINK_PRICEFEED_MAINNET, // LINK/ETH
-//     functionsRouter: process.env.CLF_ROUTER_MAINNET,
-//     donId: process.env.CLF_DONID_MAINNET_ALIAS,
+//     linkToken: process.env.LINK_ETHEREUM,
+//     linkPriceFeed: process.env.LINK_PRICEFEED_ETHEREUM, // LINK/ETH
+//     functionsRouter: process.env.CLF_ROUTER_ETHEREUM,
+//     donId: process.env.CLF_DONID_ETHEREUM_ALIAS,
 //     gatewayUrls: ["https://01.functions-gateway.chain.link/", "https://02.functions-gateway.chain.link/"],
 //   },
 //   avalanche: {

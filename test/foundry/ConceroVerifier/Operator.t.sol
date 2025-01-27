@@ -2,7 +2,6 @@
 pragma solidity 0.8.28;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Test} from "forge-std/src/Test.sol";
 import {Vm} from "forge-std/src/Vm.sol";
 import {console} from "forge-std/src/Console.sol";
 
@@ -16,20 +15,14 @@ import {Namespaces} from "../../../contracts/ConceroVerifier/libraries/Storage.s
 import {Types} from "../../../contracts/ConceroVerifier/libraries/Types.sol";
 import {Errors} from "../../../contracts/ConceroVerifier/libraries/Errors.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
+import {ConceroVerifierTest} from "../utils/ConceroVerifierTest.sol";
 
-contract ConceroVerifierTest is Test {
-    DeployConceroVerifier internal deployScript;
-    TransparentUpgradeableProxy internal conceroVerifierProxy;
-    ConceroVerifier internal conceroVerifier;
-
-    address public operator = address(0x1);
-    address public deployer = vm.envAddress("DEPLOYER_ADDRESS");
-    address public nonOperator = address(0x2);
-    address public user = address(0x123);
+contract VerifierOperator is ConceroVerifierTest {
     uint24 public chainSelector = 1;
     uint256 public constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
 
-    function setUp() public {
+    function setUp() public override {
+        super.setUp();
         deployScript = new DeployConceroVerifier();
         address deployedProxy = deployScript.run();
 
@@ -112,7 +105,7 @@ contract ConceroVerifierTest is Test {
     }
 
     function _calculateMinimumDepositNative() internal view returns (uint256) {
-        uint256 minimumDepositNative = CommonUtils.convertUSDBPSToNative(
+        uint256 minimumDepositNative = CommonUtils.convertUsdBpsToNative(
             Constants.OPERATOR_DEPOSIT_MINIMUM_BPS_USD,
             NATIVE_USD_RATE
         );

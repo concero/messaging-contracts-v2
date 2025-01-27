@@ -1,6 +1,7 @@
 pragma solidity 0.8.28;
 
-import {DeployHelper} from "../utils/DeployHelper.sol";
+import {Script} from "forge-std/src/Script.sol";
+import {EnvGetters} from "../utils/EnvGetters.sol";
 
 contract MockCLFRouter {
     event RequestSent(
@@ -28,7 +29,7 @@ contract MockCLFRouter {
     }
 }
 
-contract DeployMockCLFRouter is DeployHelper {
+contract DeployMockCLFRouter is Script {
     MockCLFRouter public mockRouter;
 
     function run() public returns (address) {

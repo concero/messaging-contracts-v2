@@ -18,12 +18,20 @@ library VerifierSlots {
 }
 
 library OperatorSlots {
+    uint256 internal constant totalFeesEarnedNative = 0;
+    uint256 internal constant totalDepositsNative = 1;
     uint256 internal constant __VAR_GAP = 50;
     uint256 internal constant __ARRAY_GAP = 50;
-    uint256 internal constant isAllowed = __VAR_GAP + __ARRAY_GAP + 1;
-    uint256 internal constant deposit = __VAR_GAP + __ARRAY_GAP + 2;
-    uint256 internal constant registeredOperators = __VAR_GAP + __ARRAY_GAP + 3;
+    uint256 internal constant registeredOperators = __VAR_GAP + __ARRAY_GAP + 1;
+    uint256 internal constant isAllowed = __VAR_GAP + __ARRAY_GAP + 2;
+    uint256 internal constant depositsNative = __VAR_GAP + __ARRAY_GAP + 3;
     uint256 internal constant walletAddress = __VAR_GAP + __ARRAY_GAP + 4;
     uint256 internal constant feesEarnedNative = __VAR_GAP + __ARRAY_GAP + 5;
-    uint256 internal constant feesEarnedUSDC = __VAR_GAP + __ARRAY_GAP + 6;
+}
+
+library PriceFeedSlots {
+    uint256 internal constant __VAR_GAP = 50;
+    uint256 internal constant nativeUsdRate = __VAR_GAP + 1;
+    uint256 internal constant lastGasPrices = __VAR_GAP + 2;
+    uint256 internal constant nativeNativeRates = __VAR_GAP + 3;
 }

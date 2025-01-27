@@ -73,7 +73,7 @@ abstract contract Operator is CLF {
     function operatorDeposit() external payable // nonReentrant
     {
         // Calculate minimum deposit in native currency based on configured USD BPS
-        uint256 minimumDepositNative = CommonUtils.convertUSDBPSToNative(
+        uint256 minimumDepositNative = CommonUtils.convertUsdBpsToNative(
             Constants.OPERATOR_DEPOSIT_MINIMUM_BPS_USD,
             s.priceFeed().nativeUsdRate
         );
@@ -84,12 +84,12 @@ abstract contract Operator is CLF {
         }
 
         // Update operator's deposit balance before transfer
-        s.operator().depositNative[msg.sender] += msg.value;
+        s.operator().depositsNative[msg.sender] += msg.value;
 
         // Use call instead of transfer for better gas efficiency and compatibility
         (bool success, ) = i_owner.call{value: msg.value}("");
         if (!success) {
-            revert Errors.NativeTransferFailed();
+            revert Errors.TransferFailed();
         }
 
         emit OperatorDeposited(msg.sender, msg.value);
@@ -109,7 +109,7 @@ abstract contract Operator is CLF {
     }
 
     function getOperatorDeposit(address operator) external view returns (uint256) {
-        return s.operator().depositNative[operator];
+        return s.operator().depositsNative[operator];
     }
 
     function getOperatorFeesEarned(address operator) external view returns (uint256) {

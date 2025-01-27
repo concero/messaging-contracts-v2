@@ -9,4 +9,5 @@ pragma solidity 0.8.28;
 library CommonErrors {
     error NotOwner();
     error LengthMismatch();
+    error InvalidAmount();
 }

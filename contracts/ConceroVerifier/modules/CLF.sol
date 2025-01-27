@@ -94,12 +94,12 @@ abstract contract CLF is FunctionsClient, Base {
 
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
 
-        s.operator().feesEarnedNative[result.operator] += CommonUtils.convertUSDBPSToNative(
+        s.operator().feesEarnedNative[result.operator] += CommonUtils.convertUsdBpsToNative(
             Constants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
 
-        s.operator().depositNative[result.operator] += CommonUtils.convertUSDBPSToNative(
+        s.operator().depositsNative[result.operator] += CommonUtils.convertUsdBpsToNative(
             Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
@@ -144,7 +144,7 @@ abstract contract CLF is FunctionsClient, Base {
             }
         }
 
-        s.operator().depositNative[result.operator] += CommonUtils.convertUSDBPSToNative(
+        s.operator().depositsNative[result.operator] += CommonUtils.convertUsdBpsToNative(
             Constants.OPERATOR_DEPOSIT_REGISTRATION_REPORT_REQUEST_BPS_USD,
             s.priceFeed().nativeUsdRate
         );
@@ -158,7 +158,7 @@ abstract contract CLF is FunctionsClient, Base {
     ) internal returns (bytes32 clfRequestId) {
         _witholdOperatorDeposit(
             msg.sender,
-            CommonUtils.convertUSDBPSToNative(
+            CommonUtils.convertUsdBpsToNative(
                 Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
                 s.priceFeed().nativeUsdRate
             )
@@ -192,7 +192,7 @@ abstract contract CLF is FunctionsClient, Base {
     ) internal returns (bytes32 clfRequestId) {
         _witholdOperatorDeposit(
             msg.sender,
-            CommonUtils.convertUSDBPSToNative(
+            CommonUtils.convertUsdBpsToNative(
                 Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
                 s.priceFeed().nativeUsdRate
             )
@@ -213,7 +213,7 @@ abstract contract CLF is FunctionsClient, Base {
     }
 
     function _requestOperatorDeregistration() internal {
-        // _witholdOperatorDeposit(msg.sender,  Utils.convertUSDBPSToNative(Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD, s.priceFeed().nativeUsdRate)
+        // _witholdOperatorDeposit(msg.sender,  Utils.convertUsdBpsToNative(Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD, s.priceFeed().nativeUsdRate)
         //        s.verifier().pendingCLFRequests[clfRequestId] = true;
     }
 
@@ -234,11 +234,11 @@ abstract contract CLF is FunctionsClient, Base {
         uint256 depositNative
     ) internal returns (uint256) {
         require(
-            s.operator().depositNative[operator] >= depositNative,
+            s.operator().depositsNative[operator] >= depositNative,
             Errors.InsufficientOperatorDeposit()
         );
 
-        s.operator().depositNative[operator] -= depositNative;
+        s.operator().depositsNative[operator] -= depositNative;
         return depositNative;
     }
 

@@ -15,5 +15,6 @@ library Errors {
     error OperatorAlreadyRegistered();
     error OperatorNotRegistered();
     error OperatorAddressMismatch();
-    error NativeTransferFailed();
+    error TransferFailed();
+    error InsufficientFee(uint256 requestedAmount, uint256 availableAmount);
 }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {Test} from "forge-std/src/Test.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
 
 import {Types} from "../../../contracts/ConceroRouter/libraries/Types.sol";
@@ -14,16 +13,11 @@ import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol"
 
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
 import {RouterSlots, PriceFeedSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {ConceroRouterTest} from "../utils/ConceroRouterTest.sol";
 
-contract Storage is Test {
-    DeployConceroRouter internal deployScript;
-    TransparentUpgradeableProxy internal conceroRouterProxy;
-    ConceroRouter internal conceroRouter;
-
-    address public proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
-    address public deployer = vm.envAddress("DEPLOYER_ADDRESS");
-
-    function setUp() public {
+contract Storage is ConceroRouterTest {
+    function setUp() public override {
+        super.setUp();
         deployScript = new DeployConceroRouter();
         address deployedProxy = deployScript.run();
 

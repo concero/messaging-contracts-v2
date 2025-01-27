@@ -23,6 +23,8 @@ import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 
 import {Base} from "./Base.sol";
 
+import {console} from "forge-std/src/console.sol";
+
 abstract contract Message is Base, IConceroRouter {
     using SafeERC20 for IERC20;
     using s for s.Router;
@@ -118,7 +120,7 @@ abstract contract Message is Base, IConceroRouter {
             revert Errors.MessageDeliveryFailed(messageId);
         }
 
-        s.router().operatorFeesEarnedNative[msg.sender] += CommonUtils.convertUSDBPSToNative(
+        s.router().operatorFeesEarnedNative[msg.sender] += CommonUtils.convertUsdBpsToNative(
             Constants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
             s.priceFeed().nativeUsdRate
         );
@@ -148,26 +150,46 @@ abstract contract Message is Base, IConceroRouter {
         bytes memory dstChainData,
         Types.FeeToken feeToken
     ) internal view returns (uint256) {
+        uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
         Types.EvmDstChainData memory evmDstChainData = abi.decode(
             dstChainData,
             (Types.EvmDstChainData)
         );
 
         uint24 dstChainSelector = uint24(clientMessageConfig >> MessageConstants.OFFSET_DST_CHAIN);
-        uint256 baseFee = 0.01 ether;
+
+        uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
+            Constants.CONCERO_MESSAGE_BASE_FEE_BPS_USD,
+            nativeUsdRate
+        );
+
         uint256 gasPrice = s.priceFeed().lastGasPrices[dstChainSelector];
         uint256 gasFeeNative = gasPrice * evmDstChainData.gasLimit;
-        uint256 adjustedGasFeeNative = (gasFeeNative *
-            s.priceFeed().nativeNativeRates[dstChainSelector]) / 1 ether;
-        uint256 totalFeeNative = baseFee + adjustedGasFeeNative;
 
-        if (feeToken == Types.FeeToken.usdc) {
-            return (totalFeeNative * s.priceFeed().nativeUsdRate) / 1 ether;
-        } else if (feeToken == Types.FeeToken.native) {
+        uint256 adjustedGasFeeNative = ((gasFeeNative * 1e18) / 1e18) *
+            s.priceFeed().nativeNativeRates[dstChainSelector];
+
+        uint256 totalFeeNative = baseFeeNative + adjustedGasFeeNative;
+        //        console.logString("Base fee native:");
+        //        console.logUint(baseFeeNative);
+        //
+        //        console.logString("Gas price:");
+        //        console.logUint(gasPrice);
+        //
+        //        console.logString("Gas fee native:");
+        //        console.logUint(gasFeeNative);
+        //
+        //        console.logString("Adjusted gas fee native:");
+        //        console.logUint(adjustedGasFeeNative);
+        //
+        //        console.logString("Total fee native:");
+        //        console.logUint(totalFeeNative);
+
+        if (feeToken == Types.FeeToken.native) {
             return totalFeeNative;
-        } else {
-            revert Errors.UnsupportedFeeToken();
         }
+
+        return (totalFeeNative * nativeUsdRate) / 1 ether;
     }
 
     function getMessageFeeNative(

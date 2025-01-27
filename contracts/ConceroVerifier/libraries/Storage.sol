@@ -40,11 +40,13 @@ library Storage {
     }
 
     struct Operator {
+        uint256 totalFeesEarnedNative;
+        uint256 totalDepositsNative;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
         mapping(Types.ChainType => bytes[] operators) registeredOperators;
         mapping(address operator => bool) isAllowed;
-        mapping(address operator => uint256 depositAmount) depositNative;
+        mapping(address operator => uint256 depositAmount) depositsNative;
         mapping(address operator => mapping(uint24 chainSelector => bytes walletAddress)) walletAddress;
         mapping(address operator => uint256) feesEarnedNative;
     }

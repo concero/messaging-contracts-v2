@@ -1,7 +1,5 @@
 pragma solidity 0.8.28;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Test} from "forge-std/src/Test.sol";
 import {Vm} from "forge-std/src/Vm.sol";
 import {console} from "forge-std/src/Console.sol";
 
@@ -18,17 +16,11 @@ import {Errors} from "../../../contracts/ConceroRouter/libraries/Errors.sol";
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
 import {Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
 import {VerifierSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {ConceroRouterTest} from "../utils/ConceroRouterTest.sol";
 
-contract SendMessage is Test {
-    DeployConceroRouter internal deployScript;
-    TransparentUpgradeableProxy internal conceroRouterProxy;
-    ConceroRouter internal conceroRouter;
-
-    address public proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
-    address public deployer = vm.envAddress("DEPLOYER_ADDRESS");
-    address public user = address(0x123);
-    bytes32 internal constant ROUTER_STORAGE_SLOT = keccak256("concero.router.storage");
+contract SendMessage is ConceroRouterTest {
     uint24 internal constant DST_CHAIN_SELECTOR = 8453;
+    uint256 public constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
 
     uint256 internal constant CLIENT_MESSAGE_CONFIG =
         (uint256(DST_CHAIN_SELECTOR) << MessageConstants.OFFSET_DST_CHAIN) | // dstChainSelector
@@ -41,7 +33,8 @@ contract SendMessage is Test {
     bytes internal dstChainData;
     bytes internal message;
 
-    function setUp() public {
+    function setUp() public override {
+        super.setUp();
         deployScript = new DeployConceroRouter();
         address deployedProxy = deployScript.run();
 
@@ -49,11 +42,28 @@ contract SendMessage is Test {
         conceroRouter = ConceroRouter(payable(deployScript.getProxy()));
 
         dstChainData = abi.encode(
-            Types.EvmDstChainData({receiver: address(0x456), gasLimit: 100000})
+            Types.EvmDstChainData({receiver: address(0x456), gasLimit: 1_000_000})
         );
         message = "Test message";
 
         vm.deal(user, 100 ether);
+
+        vm.prank(deployer);
+        conceroRouter.setNativeUsdRate(NATIVE_USD_RATE);
+        uint24[] memory chainSelectors = new uint24[](1);
+        chainSelectors[0] = DST_CHAIN_SELECTOR;
+
+        uint256[] memory rates = new uint256[](1);
+        rates[0] = 1;
+
+        uint256[] memory gasPrices = new uint256[](1);
+        gasPrices[0] = 100_000_000; // 0.1 gwei
+
+        vm.prank(deployer);
+        conceroRouter.setNativeNativeRates(chainSelectors, rates);
+
+        vm.prank(deployer);
+        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
     }
 
     function test_conceroSend() public {

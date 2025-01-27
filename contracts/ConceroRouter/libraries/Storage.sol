@@ -21,11 +21,6 @@ library Namespaces {
 }
 
 library Storage {
-    enum StorageSlot {
-        Router,
-        PriceFeed
-    }
-
     enum Protocol {
         ProtocolA,
         ProtocolB,

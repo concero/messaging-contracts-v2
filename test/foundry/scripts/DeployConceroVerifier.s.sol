@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
+import {Script} from "forge-std/src/Script.sol";
 
 import {DeployERC20, MockERC20} from "./DeployERC20.s.sol";
 import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
-import {DeployHelper} from "../utils/DeployHelper.sol";
+import {EnvGetters} from "../utils/EnvGetters.sol";
 import {PauseDummy} from "../../../contracts/PauseDummy/PauseDummy.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 import {DeployMockCLFRouter, MockCLFRouter} from "./DeployCLFRouter.s.sol";
 
-contract DeployConceroVerifier is DeployHelper {
+contract DeployConceroVerifier is Script {
     TransparentUpgradeableProxy internal conceroVerifierProxy;
     ConceroVerifier internal conceroVerifier;
 

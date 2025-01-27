@@ -7,6 +7,7 @@
 pragma solidity 0.8.28;
 
 import {Constants} from "../Constants.sol";
+import {console} from "forge-std/src/console.sol";
 
 library Utils {
     error NotAContract(address target);
@@ -80,13 +81,28 @@ library Utils {
      * @param bpsUSD The amount in USD basis points
      * @return The equivalent amount in native currency
      */
-    function convertUSDBPSToNative(
+    function convertUsdBpsToNative(
         uint16 bpsUSD,
         uint256 nativeUSDRate
     ) internal pure returns (uint256) {
         require(nativeUSDRate != 0, InvalidNativeUSDRate());
 
         uint256 usdAmount = (uint256(bpsUSD) * 1e18) / Constants.BPS_DENOMINATOR;
-        return (usdAmount * 1e18) / nativeUSDRate;
+
+        uint256 nativeAmount = (usdAmount * 1e18) / nativeUSDRate;
+
+        //        console.logString("BPS USD:");
+        //        console.logUint(bpsUSD);
+        //
+        //        console.logString("Native USD Rate:");
+        //        console.logUint(nativeUSDRate);
+        //
+        //        console.logString("USD Amount:");
+        //        console.logUint(usdAmount);
+        //
+        //        console.logString("Native Amount:");
+        //        console.logUint(nativeAmount);
+
+        return nativeAmount;
     }
 }

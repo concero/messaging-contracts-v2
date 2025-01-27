@@ -8,9 +8,9 @@ import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contrac
 
 import {PauseDummy} from "../../../contracts/PauseDummy/PauseDummy.sol";
 
-import {DeployHelper} from "../utils/DeployHelper.sol";
+import {EnvGetters} from "../utils/EnvGetters.sol";
 
-contract DeployConceroRouter is DeployHelper {
+contract DeployConceroRouter is Script {
     TransparentUpgradeableProxy internal conceroRouterProxy;
     ConceroRouter internal conceroRouter;
 

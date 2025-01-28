@@ -6,8 +6,7 @@ import {console} from "forge-std/src/Console.sol";
 import {Message, MessageConstants} from "../../../contracts/common/libraries/Message.sol";
 import {Types} from "../../../contracts/ConceroRouter/libraries/Types.sol";
 
-import {Storage as s} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
-import {RouterSlots as rs} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {RouterSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {ConceroTypes} from "../../../contracts/ConceroClient/ConceroTypes.sol";
 import {ConceroUtils} from "../../../contracts/ConceroClient/ConceroUtils.sol";
 import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
@@ -15,7 +14,6 @@ import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentU
 import {Errors} from "../../../contracts/ConceroRouter/libraries/Errors.sol";
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
 import {Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
-import {VerifierSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
 import {ConceroRouterTest} from "../utils/ConceroRouterTest.sol";
 
 contract SendMessage is ConceroRouterTest {
@@ -80,7 +78,11 @@ contract SendMessage is ConceroRouterTest {
 
         uint256 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
 
-        uint256 initialNonce = conceroRouter.getStorage(Namespaces.ROUTER, rs.nonce, bytes32(0));
+        uint256 initialNonce = conceroRouter.getStorage(
+            Namespaces.ROUTER,
+            RouterSlots.nonce,
+            bytes32(0)
+        );
         uint256 messageFee = conceroRouter.getMessageFeeNative(clientMessageConfig, dstChainData);
 
         vm.recordLogs();
@@ -112,11 +114,15 @@ contract SendMessage is ConceroRouterTest {
         }
         assertTrue(foundEvent, "ConceroMessageSent event not found");
 
-        uint256 finalNonce = conceroRouter.getStorage(Namespaces.ROUTER, rs.nonce, bytes32(0));
+        uint256 finalNonce = conceroRouter.getStorage(
+            Namespaces.ROUTER,
+            RouterSlots.nonce,
+            bytes32(0)
+        );
         assertEq(finalNonce, initialNonce + 1, "Nonce should be incremented by 1");
 
         //        assertEq(
-        //            conceroRouter.getStorage(Namespaces.ROUTER, rs.isMessageSent, bytes32(messageId)),
+        //            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.isMessageSent, bytes32(messageId)),
         //            1
         //        );
 

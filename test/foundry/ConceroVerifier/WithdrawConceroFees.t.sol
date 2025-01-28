@@ -1,15 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {console} from "forge-std/src/console.sol";
-
 import {Errors} from "../../../contracts/ConceroVerifier/libraries/Errors.sol";
-import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
-import {ConceroVerifierTest} from "../utils/ConceroVerifierTest.sol";
 import {Namespaces} from "../../../contracts/ConceroVerifier/libraries/Storage.sol";
 import {OperatorSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
+import {ConceroTest, ConceroBaseScript} from "../utils/ConceroTest.sol";
+import {ConceroVerifierTest} from "../utils/ConceroVerifierTest.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+import {CommonBase} from "forge-std/src/Base.sol";
+import {StdAssertions} from "forge-std/src/StdAssertions.sol";
+import {StdChains} from "forge-std/src/StdChains.sol";
+import {StdCheats, StdCheatsSafe} from "forge-std/src/StdCheats.sol";
+import {StdUtils} from "forge-std/src/StdUtils.sol";
 
 contract WithdrawConceroFees is ConceroVerifierTest {
     using SafeERC20 for IERC20;
@@ -20,13 +25,8 @@ contract WithdrawConceroFees is ConceroVerifierTest {
     uint256 public constant TOTAL_OPERATOR_FEES_NATIVE = 2 ether;
     uint256 public constant TOTAL_OPERATOR_DEPOSITS_NATIVE = 3 ether;
 
-    uint256 public constant OPERATOR_1_FEES_NATIVE = 1 ether;
-    uint256 public constant OPERATOR_1_DEPOSIT_NATIVE = 1.5 ether;
-    uint256 public constant OPERATOR_2_FEES_NATIVE = 1 ether;
-    uint256 public constant OPERATOR_2_DEPOSIT_NATIVE = 1.5 ether;
-
-    address public constant OPERATOR_1 = address(0x1111);
-    address public constant OPERATOR_2 = address(0x2222);
+    uint256 public constant OPERATOR_FEES_NATIVE = 1 ether;
+    uint256 public constant OPERATOR_DEPOSIT_NATIVE = 1.5 ether;
 
     function setUp() public override {
         super.setUp();
@@ -57,35 +57,21 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         conceroVerifier.setStorage(
             Namespaces.OPERATOR,
             OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(OPERATOR_1))),
-            OPERATOR_1_FEES_NATIVE
+            bytes32(uint256(uint160(operator))),
+            OPERATOR_FEES_NATIVE
         );
 
         conceroVerifier.setStorage(
             Namespaces.OPERATOR,
             OperatorSlots.depositsNative,
-            bytes32(uint256(uint160(OPERATOR_1))),
-            OPERATOR_1_DEPOSIT_NATIVE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(OPERATOR_2))),
-            OPERATOR_2_FEES_NATIVE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.depositsNative,
-            bytes32(uint256(uint160(OPERATOR_2))),
-            OPERATOR_2_DEPOSIT_NATIVE
+            bytes32(uint256(uint160(operator))),
+            OPERATOR_DEPOSIT_NATIVE
         );
 
         vm.stopPrank();
     }
 
-    function test_WithdrawableNativeBalance() public {
+    function test_withdrawConceroFees() public {
         uint256 withdrawableBalance = TOTAL_NATIVE_BALANCE -
             (TOTAL_OPERATOR_FEES_NATIVE + TOTAL_OPERATOR_DEPOSITS_NATIVE);
 
@@ -108,47 +94,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_VerifyOperatorBalances() public {
-        vm.startPrank(deployer);
-
-        uint256 operator1Fees = conceroVerifier.getStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(OPERATOR_1)))
-        );
-
-        uint256 operator2Fees = conceroVerifier.getStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(OPERATOR_1)))
-        );
-
-        assertEq(operator1Fees, OPERATOR_1_FEES_NATIVE, "Incorrect operator 1 fees");
-        assertEq(operator2Fees, OPERATOR_2_FEES_NATIVE, "Incorrect operator 2 fees");
-        vm.stopPrank();
-    }
-
-    function test_WithdrawNativeToken() public {
-        vm.startPrank(deployer);
-
-        address[] memory tokens = new address[](1);
-        tokens[0] = address(0);
-
-        uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1 ether;
-
-        uint256 ownerBalanceBefore = deployer.balance;
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
-
-        assertEq(
-            deployer.balance - ownerBalanceBefore,
-            1 ether,
-            "Incorrect native token withdrawal amount"
-        );
-        vm.stopPrank();
-    }
-
-    function test_WithdrawUSDC() public {
+    function test_withdrawConceroFees_USDC() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](1);
@@ -168,7 +114,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_WithdrawMultipleTokens() public {
+    function test_withdrawConceroFees_multipleTokens() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](2);
@@ -197,7 +143,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenArrayLengthsMismatch() public {
+    function test_withdrawConceroFees_WhenArrayLengthsMismatch_Reverts() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](2);
@@ -212,7 +158,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenEmptyArrays() public {
+    function test_withdrawConceroFees_WhenArraysEmpty_Reverts() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](0);
@@ -223,7 +169,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenNotOwner() public {
+    function test_withdrawConceroFees_WhenNotOwner_Reverts() public {
         vm.startPrank(address(0x1234));
 
         address[] memory tokens = new address[](1);
@@ -237,14 +183,14 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenInsufficientNativeBalance() public {
+    function test_withdrawConceroFees_WhenInsufficientFee_Reverts() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](1);
         tokens[0] = address(0);
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100 ether;
+        amounts[0] = TOTAL_NATIVE_BALANCE + 1;
 
         uint256 availableFees = TOTAL_NATIVE_BALANCE -
             (TOTAL_OPERATOR_FEES_NATIVE + TOTAL_OPERATOR_DEPOSITS_NATIVE);
@@ -256,7 +202,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenZeroAmount() public {
+    function test_withdrawConceroFees_WhenZeroAmount_Reverts() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](1);

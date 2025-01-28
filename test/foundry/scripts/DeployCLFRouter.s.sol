@@ -1,7 +1,6 @@
 pragma solidity 0.8.28;
 
 import {Script} from "forge-std/src/Script.sol";
-import {EnvGetters} from "../utils/EnvGetters.sol";
 
 contract MockCLFRouter {
     event RequestSent(

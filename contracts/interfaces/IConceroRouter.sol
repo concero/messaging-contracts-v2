@@ -6,16 +6,17 @@
  */
 pragma solidity 0.8.28;
 
-interface IConceroRouter {
-    event ConceroMessageSent(
-        bytes32 indexed messageId,
-        uint256 internalMessageConfig,
-        bytes dstChainData,
-        bytes message
-    );
-    event ConceroMessageReceived(bytes32 indexed id);
-    event ConceroMessageDelivered(bytes32 indexed id);
+event ConceroMessageSent(
+    bytes32 indexed messageId,
+    uint256 internalMessageConfig,
+    bytes dstChainData,
+    bytes message
+);
+event ConceroMessageReceived(bytes32 indexed id);
+event ConceroMessageDelivered(bytes32 indexed id);
+event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
 
+interface IConceroRouter {
     function conceroSend(
         uint256 config,
         bytes calldata dstChainData,

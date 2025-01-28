@@ -23,6 +23,7 @@ import {ConceroVerifierDeploymentVariables} from "../scripts/ConceroVerifierDepl
 contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVariables {
     uint256 public constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
     uint256 public constant LAST_GAS_PRICE = 1_000_000 wei;
+    uint256 public constant OPERATOR_FEE_AMOUNT = 1 ether;
 
     function setUp() public override {
         super.setUp();
@@ -76,20 +77,19 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
             Namespaces.OPERATOR,
             OperatorSlots.feesEarnedNative,
             bytes32(uint256(uint160(operator))),
-            1 ether
+            OPERATOR_FEE_AMOUNT
         );
 
         conceroVerifier.setStorage(
             Namespaces.OPERATOR,
             OperatorSlots.totalFeesEarnedNative,
             bytes32(0),
-            1 ether
+            OPERATOR_FEE_AMOUNT
         );
 
         vm.stopPrank();
     }
     function test_GetCLFDeposit() public {
-        // Calculate expected values
         uint256 expectedGasCost = clfCallbackGasLimit * LAST_GAS_PRICE;
         uint256 expectedPremiumFee = CommonUtils.convertUsdBpsToNative(
             clfPremiumFeeBpsUsd,
@@ -131,7 +131,7 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
         vm.stopPrank();
     }
 
-    function test_OperatorDepositBelowMinimum() public {
+    function test_operatorDeposit_WhenAmountBelowMinimum_Reverts() public {
         uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
         uint256 belowMinimum = minimumDeposit - 1;
 
@@ -146,7 +146,7 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
         conceroVerifier.operatorDeposit{value: belowMinimum}(operator);
     }
 
-    function test_RevertWhenZeroAddress() public {
+    function test_operatorDeposit_WhenRecipientZeroAddress_Reverts() public {
         uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
 
         vm.prank(operator);
@@ -154,7 +154,7 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
         conceroVerifier.operatorDeposit{value: minimumDeposit}(address(0));
     }
 
-    function test_RevertWhenOperatorNotRegistered() public {
+    function test_operatorDeposit_WhenOperatorNotRegistered_Reverts() public {
         address nonRegisteredOperator = address(0x2222);
         uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
 
@@ -165,7 +165,7 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
         conceroVerifier.operatorDeposit{value: minimumDeposit}(nonRegisteredOperator);
     }
 
-    function test_OperatorRegistration() public {
+    function test_requestOperatorRegistration() public {
         uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
         vm.prank(operator);
         conceroVerifier.operatorDeposit{value: minimumDeposit}(operator);
@@ -207,7 +207,7 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
         );
     }
 
-    function test_RestrictedOperatorFunctions() public {
+    function test_requestMessageReport_WhenUnauthorizedCaller_Reverts() public {
         Types.MessageReportRequest memory request;
 
         vm.prank(nonOperator);
@@ -215,44 +215,31 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
         conceroVerifier.requestMessageReport(request);
     }
 
-    function test_WithdrawOperatorFee() public {
-        uint256 feeAmount = 1 ether;
-        vm.deal(address(conceroVerifier), feeAmount);
+    function test_withdrawOperatorFee() public {
         _setOperatorFeesEarned();
 
         uint256 initialBalance = operator.balance;
+        vm.deal(address(conceroVerifier), OPERATOR_FEE_AMOUNT);
 
         vm.prank(operator);
-        bool success = conceroVerifier.withdrawOperatorFee(feeAmount);
+        conceroVerifier.withdrawOperatorFee(OPERATOR_FEE_AMOUNT);
 
-        assertTrue(success, "Withdrawal should succeed");
-        assertEq(
-            conceroVerifier.getOperatorFeesEarned(operator),
-            0,
-            "Fees should be zero after withdrawal"
-        );
-        assertEq(
-            operator.balance,
-            initialBalance + feeAmount,
-            "Operator balance should increase by fee amount"
-        );
+        assertEq(conceroVerifier.getOperatorFeesEarned(operator), 0, "Fees not cleared");
+        assertEq(operator.balance, initialBalance + OPERATOR_FEE_AMOUNT, "Balance mismatch");
     }
 
-    function test_WithdrawOperatorFeeRevertZeroAmount() public {
+    function test_withdrawOperatorFee_WhenAmountZero_Reverts() public {
         vm.prank(operator);
         vm.expectRevert(CommonErrors.InvalidAmount.selector);
         conceroVerifier.withdrawOperatorFee(0);
     }
 
-    function test_WithdrawOperatorFeeRevertInsufficientBalance() public {
-        uint256 feeAmount = 1 ether;
-        uint256 currentFees = 0;
-
+    function test_withdrawOperatorFee_WhenInsufficientBalance_Reverts() public {
         vm.prank(operator);
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.InsufficientFee.selector, feeAmount, currentFees)
+            abi.encodeWithSelector(Errors.InsufficientFee.selector, OPERATOR_FEE_AMOUNT, 0)
         );
-        conceroVerifier.withdrawOperatorFee(feeAmount);
+        conceroVerifier.withdrawOperatorFee(OPERATOR_FEE_AMOUNT);
     }
 
     function test_WithdrawOperatorDeposit() public {
@@ -279,13 +266,13 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
         assertEq(operator.balance, preWithdrawBalance + withdrawAmount, "Balance change mismatch");
     }
 
-    function test_WithdrawOperatorDepositRevertZeroAmount() public {
+    function test_withdrawOperatorDeposit_WhenAmountZero_Reverts() public {
         vm.prank(operator);
         vm.expectRevert(CommonErrors.InvalidAmount.selector);
         conceroVerifier.withdrawOperatorDeposit(0);
     }
 
-    function test_WithdrawOperatorDepositRevertInsufficientBalance() public {
+    function test_withdrawOperatorDeposit_WhenAmountExceedsDeposit_Reverts() public {
         uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
         uint256 depositAmount = minimumDeposit;
         uint256 withdrawAmount = depositAmount + 1 ether;
@@ -304,26 +291,7 @@ contract VerifierOperator is ConceroVerifierTest, ConceroVerifierDeploymentVaria
         conceroVerifier.withdrawOperatorDeposit(withdrawAmount);
     }
 
-    function test_WithdrawOperatorDepositRevertBelowMinimum() public {
-        uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
-        uint256 depositAmount = minimumDeposit;
-        uint256 withdrawableAmount = depositAmount + 1;
-
-        vm.prank(operator);
-        conceroVerifier.operatorDeposit{value: depositAmount}(operator);
-
-        vm.prank(operator);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Errors.InsufficientOperatorDeposit.selector,
-                withdrawableAmount,
-                depositAmount
-            )
-        );
-        conceroVerifier.withdrawOperatorDeposit(withdrawableAmount);
-    }
-
-    function test_WithdrawOperatorDepositRevertExcessAmount() public {
+    function test_withdrawOperatorDeposit_WhenAmountBelowMinimum_Reverts() public {
         uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
         uint256 depositAmount = minimumDeposit;
         uint256 withdrawAmount = depositAmount + 1;

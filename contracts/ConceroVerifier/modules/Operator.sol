@@ -11,7 +11,6 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 
 import {Constants} from "../../common/Constants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
-import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";

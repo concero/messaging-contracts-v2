@@ -7,9 +7,7 @@ import "./ConceroVerifierDeploymentVariables.sol";
 import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
 import {DeployERC20, MockERC20} from "./DeployERC20.s.sol";
 import {DeployMockCLFRouter, MockCLFRouter} from "./DeployCLFRouter.s.sol";
-import {EnvGetters} from "../utils/EnvGetters.sol";
 import {PauseDummy} from "../../../contracts/PauseDummy/PauseDummy.sol";
-import {Script} from "forge-std/src/Script.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 
 contract DeployConceroVerifier is ConceroVerifierDeploymentVariables, ConceroBaseScript {

@@ -19,7 +19,7 @@ import {Types} from "../libraries/Types.sol";
 import {Errors} from "../libraries/Errors.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
-import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
+import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent} from "../../interfaces/IConceroRouter.sol";
 
 import {Base} from "./Base.sol";
 

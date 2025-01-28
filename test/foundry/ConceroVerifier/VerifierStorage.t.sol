@@ -9,7 +9,6 @@ import {ConceroVerifier} from "../../../contracts/ConceroVerifier/ConceroVerifie
 import {DeployConceroVerifier} from "../scripts/DeployConceroVerifier.s.sol";
 import {VerifierSlots, OperatorSlots, PriceFeedSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
 import {ConceroVerifierTest} from "../utils/ConceroVerifierTest.sol";
-import {Types} from "../../../contracts/ConceroVerifier/libraries/Types.sol";
 
 contract VerifierStorage is ConceroVerifierTest {
     function setUp() public override {

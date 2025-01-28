@@ -50,7 +50,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_WithdrawableNativeBalance() public {
+    function test_withdrawConceroFees() public {
         uint256 withdrawableBalance = TOTAL_NATIVE_BALANCE - OPERATOR_FEES_NATIVE;
 
         vm.startPrank(deployer);
@@ -72,7 +72,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_VerifyOperatorFees() public {
+    function test_withdrawConceroFees_VerifyOperatorFees() public {
         vm.startPrank(deployer);
 
         uint256 operatorFees = conceroRouter.getStorage(
@@ -85,7 +85,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_WithdrawNativeToken() public {
+    function test_withdrawConceroFees_Native() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](1);
@@ -105,7 +105,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_WithdrawUSDC() public {
+    function test_withdrawConceroFees_USDC() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](1);
@@ -125,7 +125,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_WithdrawMultipleTokens() public {
+    function test_withdrawConceroFees_multipleTokens() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](2);
@@ -154,7 +154,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenArrayLengthsMismatch() public {
+    function test_withdrawConceroFees_WhenArrayLengthsMismatch_Reverts() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](2);
@@ -169,7 +169,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenEmptyArrays() public {
+    function test_withdrawConceroFees_WhenArraysEmpty_Reverts() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](0);
@@ -180,7 +180,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenNotOwner() public {
+    function test_withdrawConceroFees_WhenNotOwner_Reverts() public {
         vm.startPrank(address(0x1234));
 
         address[] memory tokens = new address[](1);
@@ -194,14 +194,14 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenInsufficientNativeBalance() public {
+    function test_withdrawConceroFees_WhenInsufficientFee_Reverts() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](1);
         tokens[0] = address(0);
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 100 ether;
+        amounts[0] = TOTAL_NATIVE_BALANCE + 1;
 
         uint256 availableFees = TOTAL_NATIVE_BALANCE - TOTAL_OPERATOR_FEES_NATIVE;
 
@@ -212,7 +212,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_RevertWhenZeroAmount() public {
+    function test_withdrawConceroFees_WhenZeroAmount_Reverts() public {
         vm.startPrank(deployer);
 
         address[] memory tokens = new address[](1);

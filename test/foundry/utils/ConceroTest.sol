@@ -6,21 +6,22 @@ import {Test} from "forge-std/src/Test.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-abstract contract ConceroTest is Test {
-    using SafeERC20 for IERC20;
+abstract contract ConceroBaseScript is Script {
+    address public immutable deployer;
+    address public immutable proxyDeployer;
 
-    address public deployer;
-    address public proxyDeployer;
-    address public operator;
-    address public nonOperator;
-    address public user;
-    address public usdc;
+    address public constant operator = address(0x1);
+    address public constant nonOperator = address(0x2);
+    address public constant user = address(0x123);
 
-    function setUp() public virtual {
+    uint24 public constant chainSelector = 8453;
+
+    constructor() {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");
         proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
-        operator = address(0x1);
-        nonOperator = address(0x2);
-        user = address(0x123);
     }
+}
+
+abstract contract ConceroTest is Test, ConceroBaseScript {
+    address public usdc;
 }

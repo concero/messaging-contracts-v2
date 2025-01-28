@@ -12,10 +12,14 @@ import {Namespaces} from "../libraries/Storage.sol";
 import {Base} from "./Base.sol";
 
 // @notice External handles for interacting with generic StorageLib
-
 abstract contract GenericStorage is Base {
     function _validateNamespace(bytes32 slot) internal pure {
-        require(slot == Namespaces.ROUTER || slot == Namespaces.PRICEFEED, gs.InvalidNamespace());
+        require(
+            slot == Namespaces.ROUTER ||
+                slot == Namespaces.OPERATOR ||
+                slot == Namespaces.PRICEFEED,
+            gs.InvalidNamespace()
+        );
     }
 
     function getStorage(

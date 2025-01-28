@@ -17,7 +17,6 @@ import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
-
 import {Errors} from "../libraries/Errors.sol";
 
 import {CLFRequestError, MessageReport} from "../../interfaces/IConceroVerifier.sol";
@@ -34,6 +33,8 @@ abstract contract CLF is FunctionsClient, Base {
         uint64 clfSubscriptionId,
         uint64 clfDonHostedSecretsVersion,
         uint8 clfDonHostedSecretsSlotId,
+        uint16 clfPremiumFeeUsdBps,
+        uint32 clfCallbackGasLimit,
         bytes32 requestCLFMessageReportJsCodeHash,
         bytes32 requestOperatorRegistrationJsCodeHash
     ) FunctionsClient(clfRouter) {
@@ -41,6 +42,8 @@ abstract contract CLF is FunctionsClient, Base {
         i_clfSubscriptionId = clfSubscriptionId;
         i_clfDonHostedSecretsVersion = clfDonHostedSecretsVersion;
         i_clfDonHostedSecretsSlotId = clfDonHostedSecretsSlotId;
+        i_clfPremiumFeeUsdBps = clfPremiumFeeUsdBps;
+        i_clfCallbackGasLimit = clfCallbackGasLimit;
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
         i_requestOperatorRegistrationJsCodeHash = requestOperatorRegistrationJsCodeHash;
     }
@@ -51,6 +54,8 @@ abstract contract CLF is FunctionsClient, Base {
     bytes32 internal immutable i_clfDonId;
     uint64 internal immutable i_clfSubscriptionId;
     uint64 internal immutable i_clfDonHostedSecretsVersion;
+    uint16 internal immutable i_clfPremiumFeeUsdBps;
+    uint32 internal immutable i_clfCallbackGasLimit;
     uint8 internal immutable i_clfDonHostedSecretsSlotId;
     string internal constant CLF_JS_CODE =
         "try { const [t, p] = await Promise.all([ fetch('https://raw.githubusercontent.com/ethers-io/ethers.js/v6.10.0/dist/ethers.umd.min.js'), fetch('https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/requestReport.min.js'), ]); const [e, c] = await Promise.all([t.text(), p.text()]); const g = async s => { return ( '0x' + Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))) .map(v => ('0' + v.toString(16)).slice(-2).toLowerCase()) .join('') ); }; const r = await g(c); const x = await g(e); const b = bytesArgs[0].toLowerCase(); const o = bytesArgs[1].toLowerCase(); if (r === b && x === o) { const ethers = new Function(e + '; return ethers;')(); return await eval(c); } throw new Error(`${r}!=${b}||${x}!=${o}`); } catch (e) { throw new Error(e.message.slice(0, 255));}";
@@ -224,22 +229,36 @@ abstract contract CLF is FunctionsClient, Base {
         return _sendRequest(req.encodeCBOR(), i_clfSubscriptionId, CLF_GAS_LIMIT, i_clfDonId);
     }
 
+    function getCLFDeposit() public view returns (uint256 depositNative) {
+        uint256 lastGasPrice = s.priceFeed().lastGasPrices[i_chainSelector];
+        require(lastGasPrice > 0, Errors.NoGasPriceAvailable());
+
+        uint256 gasCost = i_clfCallbackGasLimit * lastGasPrice;
+
+        uint256 premiumFee = CommonUtils.convertUsdBpsToNative(
+            i_clfPremiumFeeUsdBps,
+            s.priceFeed().nativeUsdRate
+        );
+
+        return gasCost + premiumFee;
+    }
     /**
      * @notice Withholds the required deposit amount from operator's balance
      * @param operator The operator's address
-     * @param depositNative The deposit amount in native value
+     * @param depositWithholdable The deposit amount in native value
      */
     function _witholdOperatorDeposit(
         address operator,
-        uint256 depositNative
+        uint256 depositWithholdable
     ) internal returns (uint256) {
+        uint256 currentDeposit = s.operator().depositsNative[operator];
         require(
-            s.operator().depositsNative[operator] >= depositNative,
-            Errors.InsufficientOperatorDeposit()
+            s.operator().depositsNative[operator] >= depositWithholdable,
+            Errors.InsufficientOperatorDeposit(currentDeposit, depositWithholdable)
         );
 
-        s.operator().depositsNative[operator] -= depositNative;
-        return depositNative;
+        s.operator().depositsNative[operator] -= depositWithholdable;
+        return depositWithholdable;
     }
 
     //    /**

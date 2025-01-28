@@ -5,20 +5,21 @@ import {Script} from "forge-std/src/Script.sol";
 import {console} from "forge-std/src/console.sol";
 import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
-
 import {PauseDummy} from "../../../contracts/PauseDummy/PauseDummy.sol";
-
 import {EnvGetters} from "../utils/EnvGetters.sol";
+import {DeployERC20, MockERC20} from "./DeployERC20.s.sol";
+import {ConceroBaseScript} from "../utils/ConceroTest.sol";
 
-contract DeployConceroRouter is Script {
+contract DeployConceroRouter is ConceroBaseScript {
     TransparentUpgradeableProxy internal conceroRouterProxy;
     ConceroRouter internal conceroRouter;
 
-    address public proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
-    address public deployer = vm.envAddress("DEPLOYER_ADDRESS");
-    uint24 public chainSelector = uint24(1);
+    address public USDC;
 
     function run() public returns (address) {
+        DeployERC20 tokenDeployer = new DeployERC20();
+        USDC = address(tokenDeployer.deployERC20("USD Coin", "USDC", 6));
+
         _deployConceroRouter();
         return address(conceroRouterProxy);
     }
@@ -58,7 +59,7 @@ contract DeployConceroRouter is Script {
 
     function _deployAndSetImplementation() internal {
         vm.startPrank(deployer);
-        conceroRouter = new ConceroRouter(chainSelector, address(0));
+        conceroRouter = new ConceroRouter(chainSelector, USDC);
         vm.stopPrank();
 
         setProxyImplementation(address(conceroRouter));

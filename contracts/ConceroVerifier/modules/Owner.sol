@@ -22,6 +22,16 @@ abstract contract Owner is Base {
     using s for s.PriceFeed;
 
     /**
+     * @notice Calculates the amount of native token fees available for withdrawal
+     * @return availableFees Amount of native token fees that can be withdrawn
+     */
+    function getWithdrawableConceroFee() public view returns (uint256 availableFees) {
+        return
+            address(this).balance -
+            (s.operator().totalFeesEarnedNative + s.operator().totalDepositsNative);
+    }
+
+    /**
      * @notice Withdraws accumulated fees to the owner for multiple tokens
      * @param tokens Array of token addresses (address(0) for native token)
      * @param amounts Array of amounts to withdraw for each token
@@ -37,10 +47,7 @@ abstract contract Owner is Base {
         );
 
         uint256 totalNativeAmount;
-        uint256 contractBalance = address(this).balance;
-        uint256 operatorFees = s.operator().totalFeesEarnedNative;
-        uint256 operatorDeposits = s.operator().totalDepositsNative;
-        uint256 availableFees = contractBalance - (operatorFees + operatorDeposits);
+        uint256 availableFees = getWithdrawableConceroFee();
 
         for (uint256 i = 0; i < tokens.length; ) {
             address token = tokens[i];
@@ -52,7 +59,7 @@ abstract contract Owner is Base {
                 totalNativeAmount += amount;
                 require(
                     totalNativeAmount <= availableFees,
-                    Errors.InsufficientFee(totalNativeAmount, availableFees)
+                    CommonErrors.InsufficientFee(totalNativeAmount, availableFees)
                 );
 
                 (bool success, ) = i_owner.call{value: amount}("");

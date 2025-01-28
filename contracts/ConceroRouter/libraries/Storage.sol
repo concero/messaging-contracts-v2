@@ -14,6 +14,11 @@ library Namespaces {
             abi.encode(uint256(keccak256(abi.encodePacked("ConceroRouter.router.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
+    bytes32 internal constant OPERATOR =
+        keccak256(
+            abi.encode(uint256(keccak256(abi.encodePacked("ConceroRouter.operator.storage"))) - 1)
+        ) & ~bytes32(uint256(0xff));
+
     bytes32 internal constant PRICEFEED =
         keccak256(
             abi.encode(uint256(keccak256(abi.encodePacked("ConceroRouter.priceFeed.storage"))) - 1)
@@ -29,18 +34,22 @@ library Storage {
         ProtocolE
     }
 
-    /* STORAGE STRUCTS */
     struct Router {
         uint256 nonce;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
         mapping(bytes32 messageId => bool isSent) isMessageSent;
-        mapping(address operator => uint256) operatorFeesEarnedNative;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;
         mapping(bytes32 messageId => mapping(Protocol => bool)) messageConfirmationsByProtocol;
     }
 
+    struct Operator {
+        uint256 totalFeesEarnedNative;
+        uint256[50] __var_gap;
+        uint256[50] __array_gap;
+        mapping(address operator => uint256 feesEarned) feesEarnedNative;
+    }
     struct PriceFeed {
         uint256 nativeUsdRate;
         uint256[50] __var_gap;
@@ -56,39 +65,17 @@ library Storage {
         }
     }
 
+    function operator() internal pure returns (Operator storage s) {
+        bytes32 slot = Namespaces.OPERATOR;
+        assembly {
+            s.slot := slot
+        }
+    }
+
     function priceFeed() internal pure returns (PriceFeed storage s) {
         bytes32 slot = Namespaces.PRICEFEED;
         assembly {
             s.slot := slot
         }
     }
-
-    /* PriceFeed GenericStorage.sol Setters */
-    // function setLastGasPrices(
-    //     uint24[] calldata keys,
-    //     uint256[] calldata values
-    // ) internal  {
-    //     require(keys.length == values.length, LengthMismatch());
-    //     PriceFeed storage s = priceFeed();
-
-    //     for (uint256 i = 0; i < keys.length; i++) {
-    //         s.lastGasPrices[keys[i]] = values[i];
-    //     }
-    // }
-
-    // function setNativeNativeRates(
-    //     uint24[] calldata keys,
-    //     uint256[] calldata values
-    // ) internal {
-    //     require(keys.length == values.length, LengthMismatch());
-    //     PriceFeed storage s = priceFeed();
-
-    //     for (uint256 i = 0; i < keys.length; i++) {
-    //         s.nativeNativeRates[keys[i]] = values[i];
-    //     }
-    // }
-
-    // function setNativeUsdcRate(uint256 rate) internal {
-    //     priceFeed().nativeUsdcRate = rate;
-    // }
 }

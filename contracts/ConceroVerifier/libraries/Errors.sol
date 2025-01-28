@@ -9,12 +9,15 @@ pragma solidity 0.8.28;
 library Errors {
     error MessageAlreadyProcessed();
     error InvalidEVMAddress();
-    error InsufficientOperatorDeposit();
     error UnauthorizedOperator();
     error OperatorNotFound();
+    error InsufficientOperatorDeposit(uint256 requiredAmount, uint256 availableAmount);
     error OperatorAlreadyRegistered();
     error OperatorNotRegistered();
     error OperatorAddressMismatch();
     error TransferFailed();
-    error InsufficientFee(uint256 requestedAmount, uint256 availableAmount);
+    error InsufficientFee(uint256 requiredAmount, uint256 availableAmount);
+
+    error NoNativeRateAvailable();
+    error NoGasPriceAvailable();
 }

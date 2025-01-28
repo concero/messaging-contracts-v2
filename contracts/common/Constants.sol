@@ -14,9 +14,10 @@ library Constants {
     uint16 internal constant CONCERO_MESSAGE_BASE_FEE_BPS_USD = 100;
     uint256 internal constant STAKER_FEE = 1e18;
 
+    /* Operator fees & deposits */
     uint16 internal constant OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD = 100;
     uint16 internal constant OPERATOR_FEE_MESSAGE_RELAY_BPS_USD = 100;
     uint16 internal constant OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD = 100;
     uint16 internal constant OPERATOR_DEPOSIT_REGISTRATION_REPORT_REQUEST_BPS_USD = 200;
-    uint16 internal constant OPERATOR_DEPOSIT_MINIMUM_BPS_USD = 1000;
+    uint256 internal constant OPERATOR_DEPOSIT_MINIMUM_NATIVE = 1_000_000 wei; // 0.001 ETH
 }

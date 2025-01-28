@@ -10,4 +10,8 @@ library CommonErrors {
     error NotOwner();
     error LengthMismatch();
     error InvalidAmount();
+    error InvalidRequest();
+    error InvalidAddress();
+    error TransferFailed();
+    error InsufficientFee(uint256 requestedAmount, uint256 availableAmount);
 }

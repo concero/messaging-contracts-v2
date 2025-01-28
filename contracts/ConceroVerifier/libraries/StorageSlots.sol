@@ -1,37 +1,69 @@
 // SPDX-License-Identifier: UNLICENSED
 /**
- * @title Security Reporting
- * @notice If you discover any security vulnerabilities, please report them responsibly.
- * @contact email: security@concero.io
+ * @title Storage Slots for Concero Protocol Contracts
+ * @notice External storage slot definitions for protocol contracts
+ * @dev Used to access contract storage slots externally, primarily in tests
+ * @author Concero Team
  */
+
 pragma solidity 0.8.28;
 
-// @notice This is not part of ConceroVerifier contract but is used to access its storage slots externally, e.g. from Foundry tests
-
+/**
+ * @title VerifierSlots
+ * @notice Storage slot definitions for ConceroVerifier contract
+ * @dev All slots are calculated using standard Solidity storage layout rules
+ */
 library VerifierSlots {
+    uint256 private constant RESERVED_VARIABLE_GAP = 50;
+    uint256 private constant RESERVED_ARRAY_GAP = 50;
+    uint256 private constant UINTS_COUNT = 1;
+
     uint256 internal constant nonce = 0;
-    uint256 internal constant __VAR_GAP = 50;
-    uint256 internal constant __ARRAY_GAP = 50;
-    uint256 internal constant clfRequestStatus = __VAR_GAP + __ARRAY_GAP + 1;
-    uint256 internal constant pendingCLFRequests = __VAR_GAP + __ARRAY_GAP + 2;
-    uint256 internal constant pendingMessageReports = __VAR_GAP + __ARRAY_GAP + 3;
+
+    uint256 internal constant clfRequestStatus =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
+    uint256 internal constant pendingCLFRequests =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
+    uint256 internal constant pendingMessageReports =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2;
 }
 
+/**
+ * @title OperatorSlots
+ * @notice Storage slot definitions for ConceroOperator contract
+ * @dev All slots are calculated using standard Solidity storage layout rules
+ */
 library OperatorSlots {
+    uint256 private constant RESERVED_VARIABLE_GAP = 50;
+    uint256 private constant RESERVED_ARRAY_GAP = 50;
+    uint256 private constant UINTS_COUNT = 2;
+
     uint256 internal constant totalFeesEarnedNative = 0;
     uint256 internal constant totalDepositsNative = 1;
-    uint256 internal constant __VAR_GAP = 50;
-    uint256 internal constant __ARRAY_GAP = 50;
-    uint256 internal constant registeredOperators = __VAR_GAP + __ARRAY_GAP + 1;
-    uint256 internal constant isAllowed = __VAR_GAP + __ARRAY_GAP + 2;
-    uint256 internal constant depositsNative = __VAR_GAP + __ARRAY_GAP + 3;
-    uint256 internal constant walletAddress = __VAR_GAP + __ARRAY_GAP + 4;
-    uint256 internal constant feesEarnedNative = __VAR_GAP + __ARRAY_GAP + 5;
+
+    uint256 internal constant registeredOperators =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
+    uint256 internal constant isAllowed =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
+    uint256 internal constant depositsNative =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2;
+    uint256 internal constant walletAddress =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 3;
+    uint256 internal constant feesEarnedNative =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 4;
 }
 
+/**
+ * @title PriceFeedSlots
+ * @notice Storage slot definitions for ConceroPriceFeed contract
+ * @dev All slots are calculated using standard Solidity storage layout rules
+ */
 library PriceFeedSlots {
-    uint256 internal constant __VAR_GAP = 50;
-    uint256 internal constant nativeUsdRate = __VAR_GAP + 1;
-    uint256 internal constant lastGasPrices = __VAR_GAP + 2;
-    uint256 internal constant nativeNativeRates = __VAR_GAP + 3;
+    uint256 private constant RESERVED_VARIABLE_GAP = 50;
+    uint256 internal constant UINTS_COUNT = 1;
+
+    uint256 internal constant nativeUsdRate = 0;
+
+    uint256 internal constant lastGasPrices = RESERVED_VARIABLE_GAP + UINTS_COUNT + 0;
+    uint256 internal constant nativeNativeRates = RESERVED_VARIABLE_GAP + UINTS_COUNT + 1;
 }

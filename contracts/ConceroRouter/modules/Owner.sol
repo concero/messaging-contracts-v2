@@ -6,22 +6,67 @@
  */
 pragma solidity 0.8.28;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {CommonErrors} from "../../common/CommonErrors.sol";
-import {Storage as s} from "../libraries/Storage.sol";
-
+import "forge-std/src/console.sol";
 import {Base} from "./Base.sol";
+import {CommonErrors} from "../../common/CommonErrors.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Storage as s} from "../libraries/Storage.sol";
 
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.PriceFeed;
+    using s for s.Operator;
 
-    function withdrawConceroFees(address token, uint256 amount) external onlyOwner {
-        if (token == address(0)) {
-            (bool success, ) = i_owner.call{value: amount}("");
-        } else {
-            IERC20(token).safeTransfer(i_owner, amount);
+    /**
+     * @notice Calculates the amount of native token fees available for withdrawal
+     * @return availableFees Amount of native token fees that can be withdrawn
+     */
+    function getWithdrawableConceroFee() public view returns (uint256) {
+        return address(this).balance - (s.operator().totalFeesEarnedNative);
+    }
+
+    /**
+     * @notice Withdraws accumulated fees to the owner for multiple tokens
+     * @param tokens Array of token addresses (address(0) for native token)
+     * @param amounts Array of amounts to withdraw for each token
+     * @dev Only callable by contract owner
+     */
+    function withdrawConceroFees(
+        address[] calldata tokens,
+        uint256[] calldata amounts
+    ) external onlyOwner {
+        require(
+            tokens.length == amounts.length && tokens.length > 0,
+            CommonErrors.LengthMismatch()
+        );
+
+        uint256 totalNativeAmount;
+        uint256 availableFees = getWithdrawableConceroFee();
+
+        for (uint256 i = 0; i < tokens.length; ) {
+            address token = tokens[i];
+            uint256 amount = amounts[i];
+
+            require(amount > 0, CommonErrors.InvalidAmount());
+
+            if (token == address(0)) {
+                totalNativeAmount += amount;
+                require(
+                    totalNativeAmount <= availableFees,
+                    CommonErrors.InsufficientFee(totalNativeAmount, availableFees)
+                );
+
+                (bool success, ) = i_owner.call{value: amount}("");
+                require(success, CommonErrors.TransferFailed());
+            } else {
+                IERC20(token).safeTransfer(i_owner, amount);
+            }
+
+            unchecked {
+                ++i;
+            }
         }
     }
 

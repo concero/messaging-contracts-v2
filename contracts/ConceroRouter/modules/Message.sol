@@ -120,7 +120,7 @@ abstract contract Message is Base, IConceroRouter {
             revert Errors.MessageDeliveryFailed(messageId);
         }
 
-        s.router().operatorFeesEarnedNative[msg.sender] += CommonUtils.convertUsdBpsToNative(
+        s.operator().feesEarnedNative[msg.sender] += CommonUtils.convertUsdBpsToNative(
             Constants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
             s.priceFeed().nativeUsdRate
         );

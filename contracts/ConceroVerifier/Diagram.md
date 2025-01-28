@@ -1,13 +1,15 @@
+View diagram with [Mermaid Live Editor](https://mermaid.live/edit)
 
-Colors: 
-    - Core Contracts and Interfaces: #e6f3ff
-    - Internal Libraries: #ffe6e6
-    - Common Libraries: #fff0e6
-    - Third-Party Dependencies: #f0ffe6
-    - Main Class: #fafafa
+Colors:
+ - Core Contracts and Interfaces: Blue
+ - Internal Libraries: Red
+ - Common Libraries: Orange
+ - Third-Party Dependencies: Green
+ - Main Class: Light Gray
+
 Lines:
-    - Inheritance Relationships: solid
-    - Usage Relationships: dotted
+ - Inheritance Relationships: Solid Line
+ - Usage Relationships: Dotted Line
 
 ```mermaid
 classDiagram

@@ -8,8 +8,7 @@ abstract contract ConceroVerifierTest is ConceroTest {
     TransparentUpgradeableProxy internal conceroVerifierProxy;
     ConceroVerifier internal conceroVerifier;
 
-    function setUp() public virtual override {
-        super.setUp();
+    function setUp() public virtual {
         deployScript = new DeployConceroVerifier();
         address deployedProxy = deployScript.run();
 

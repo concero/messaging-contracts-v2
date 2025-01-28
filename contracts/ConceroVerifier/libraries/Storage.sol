@@ -47,7 +47,7 @@ library Storage {
         mapping(Types.ChainType => bytes[] operators) registeredOperators;
         mapping(address operator => bool) isAllowed;
         mapping(address operator => uint256 depositAmount) depositsNative;
-        mapping(address operator => mapping(uint24 chainSelector => bytes walletAddress)) walletAddress;
+        mapping(address operator => mapping(Types.ChainType => bytes walletAddress)) walletAddress;
         mapping(address operator => uint256) feesEarnedNative;
     }
 

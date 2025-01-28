@@ -10,8 +10,7 @@ abstract contract ConceroRouterTest is ConceroTest {
     TransparentUpgradeableProxy internal conceroRouterProxy;
     ConceroRouter internal conceroRouter;
 
-    function setUp() public virtual override {
-        super.setUp();
+    function setUp() public virtual {
         deployScript = new DeployConceroRouter();
         address deployedProxy = deployScript.run();
 

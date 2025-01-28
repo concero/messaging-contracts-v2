@@ -5,89 +5,53 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {console} from "forge-std/src/console.sol";
 
-import {Errors} from "../../../contracts/ConceroVerifier/libraries/Errors.sol";
 import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
-import {ConceroVerifierTest} from "../utils/ConceroVerifierTest.sol";
-import {Namespaces} from "../../../contracts/ConceroVerifier/libraries/Storage.sol";
-import {OperatorSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {ConceroRouterTest} from "../utils/ConceroRouterTest.sol";
+import {Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
+import {OperatorSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
 
-contract WithdrawConceroFees is ConceroVerifierTest {
+contract WithdrawConceroFees is ConceroRouterTest {
     using SafeERC20 for IERC20;
 
     uint256 public constant TOTAL_NATIVE_BALANCE = 10 ether;
     uint256 public constant TOTAL_USDC_BALANCE = 10000e6;
 
     uint256 public constant TOTAL_OPERATOR_FEES_NATIVE = 2 ether;
-    uint256 public constant TOTAL_OPERATOR_DEPOSITS_NATIVE = 3 ether;
-
-    uint256 public constant OPERATOR_1_FEES_NATIVE = 1 ether;
-    uint256 public constant OPERATOR_1_DEPOSIT_NATIVE = 1.5 ether;
-    uint256 public constant OPERATOR_2_FEES_NATIVE = 1 ether;
-    uint256 public constant OPERATOR_2_DEPOSIT_NATIVE = 1.5 ether;
-
-    address public constant OPERATOR_1 = address(0x1111);
-    address public constant OPERATOR_2 = address(0x2222);
+    uint256 public constant OPERATOR_FEES_NATIVE = 2 ether;
 
     function setUp() public override {
         super.setUp();
         usdc = deployScript.USDC();
 
-        vm.deal(address(conceroVerifier), TOTAL_NATIVE_BALANCE);
-        deal(usdc, address(conceroVerifier), TOTAL_USDC_BALANCE);
+        vm.deal(address(conceroRouter), TOTAL_NATIVE_BALANCE);
+        deal(usdc, address(conceroRouter), TOTAL_USDC_BALANCE);
         _setOperatorBalances();
     }
 
     function _setOperatorBalances() internal {
         vm.startPrank(deployer);
 
-        conceroVerifier.setStorage(
+        // Set total operator fees
+        conceroRouter.setStorage(
             Namespaces.OPERATOR,
             OperatorSlots.totalFeesEarnedNative,
             bytes32(0),
             TOTAL_OPERATOR_FEES_NATIVE
         );
 
-        conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.totalDepositsNative,
-            bytes32(0),
-            TOTAL_OPERATOR_DEPOSITS_NATIVE
-        );
-
-        conceroVerifier.setStorage(
+        // Set individual operator fees
+        conceroRouter.setStorage(
             Namespaces.OPERATOR,
             OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(OPERATOR_1))),
-            OPERATOR_1_FEES_NATIVE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.depositsNative,
-            bytes32(uint256(uint160(OPERATOR_1))),
-            OPERATOR_1_DEPOSIT_NATIVE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(OPERATOR_2))),
-            OPERATOR_2_FEES_NATIVE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.depositsNative,
-            bytes32(uint256(uint160(OPERATOR_2))),
-            OPERATOR_2_DEPOSIT_NATIVE
+            bytes32(uint256(uint160(operator))),
+            OPERATOR_FEES_NATIVE
         );
 
         vm.stopPrank();
     }
 
     function test_WithdrawableNativeBalance() public {
-        uint256 withdrawableBalance = TOTAL_NATIVE_BALANCE -
-            (TOTAL_OPERATOR_FEES_NATIVE + TOTAL_OPERATOR_DEPOSITS_NATIVE);
+        uint256 withdrawableBalance = TOTAL_NATIVE_BALANCE - OPERATOR_FEES_NATIVE;
 
         vm.startPrank(deployer);
 
@@ -98,7 +62,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         amounts[0] = withdrawableBalance;
 
         uint256 ownerBalanceBefore = deployer.balance;
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
 
         assertEq(
             deployer.balance - ownerBalanceBefore,
@@ -108,23 +72,16 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_VerifyOperatorBalances() public {
+    function test_VerifyOperatorFees() public {
         vm.startPrank(deployer);
 
-        uint256 operator1Fees = conceroVerifier.getStorage(
+        uint256 operatorFees = conceroRouter.getStorage(
             Namespaces.OPERATOR,
             OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(OPERATOR_1)))
+            bytes32(uint256(uint160(operator)))
         );
 
-        uint256 operator2Fees = conceroVerifier.getStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(OPERATOR_1)))
-        );
-
-        assertEq(operator1Fees, OPERATOR_1_FEES_NATIVE, "Incorrect operator 1 fees");
-        assertEq(operator2Fees, OPERATOR_2_FEES_NATIVE, "Incorrect operator 2 fees");
+        assertEq(operatorFees, OPERATOR_FEES_NATIVE, "Incorrect operator fees");
         vm.stopPrank();
     }
 
@@ -138,7 +95,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         amounts[0] = 1 ether;
 
         uint256 ownerBalanceBefore = deployer.balance;
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
 
         assertEq(
             deployer.balance - ownerBalanceBefore,
@@ -158,7 +115,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         amounts[0] = 1000e6;
 
         uint256 ownerBalanceBefore = IERC20(usdc).balanceOf(deployer);
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
 
         assertEq(
             IERC20(usdc).balanceOf(deployer) - ownerBalanceBefore,
@@ -182,7 +139,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         uint256 ownerNativeBalanceBefore = deployer.balance;
         uint256 ownerUsdcBalanceBefore = IERC20(usdc).balanceOf(deployer);
 
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
 
         assertEq(
             deployer.balance - ownerNativeBalanceBefore,
@@ -208,7 +165,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         amounts[0] = 1 ether;
 
         vm.expectRevert(CommonErrors.LengthMismatch.selector);
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
         vm.stopPrank();
     }
 
@@ -219,7 +176,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         uint256[] memory amounts = new uint256[](0);
 
         vm.expectRevert(CommonErrors.LengthMismatch.selector);
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
         vm.stopPrank();
     }
 
@@ -233,7 +190,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         amounts[0] = 1 ether;
 
         vm.expectRevert(CommonErrors.NotOwner.selector);
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
         vm.stopPrank();
     }
 
@@ -246,13 +203,12 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 100 ether;
 
-        uint256 availableFees = TOTAL_NATIVE_BALANCE -
-            (TOTAL_OPERATOR_FEES_NATIVE + TOTAL_OPERATOR_DEPOSITS_NATIVE);
+        uint256 availableFees = TOTAL_NATIVE_BALANCE - TOTAL_OPERATOR_FEES_NATIVE;
 
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.InsufficientFee.selector, amounts[0], availableFees)
+            abi.encodeWithSelector(CommonErrors.InsufficientFee.selector, amounts[0], availableFees)
         );
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
         vm.stopPrank();
     }
 
@@ -266,7 +222,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
         amounts[0] = 0;
 
         vm.expectRevert(CommonErrors.InvalidAmount.selector);
-        conceroVerifier.withdrawConceroFees(tokens, amounts);
+        conceroRouter.withdrawConceroFees(tokens, amounts);
         vm.stopPrank();
     }
 }

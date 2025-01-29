@@ -6,10 +6,24 @@
  */
 pragma solidity 0.8.28;
 
-library Signer {
+import {Base} from "./Base.sol";
+
+abstract contract ClfSigner is Base {
     error IncorrectNumberOfSignatures();
     error UnauthorizedSigner(address signer);
     error DuplicateSignatureDetected(address signer);
+
+    address internal immutable i_clfSigner0;
+    address internal immutable i_clfSigner1;
+    address internal immutable i_clfSigner2;
+    address internal immutable i_clfSigner3;
+
+    constructor(address[4] memory clfSigners) {
+        i_clfSigner0 = clfSigners[0];
+        i_clfSigner1 = clfSigners[1];
+        i_clfSigner2 = clfSigners[2];
+        i_clfSigner3 = clfSigners[3];
+    }
 
     struct ClfDonReportSubmission {
         bytes32[3] context;
@@ -19,21 +33,15 @@ library Signer {
         bytes rawVs;
     }
 
-    /* CLF DON SIGNERS */
-    address internal constant CLF_DON_SIGNER_0 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant CLF_DON_SIGNER_1 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant CLF_DON_SIGNER_2 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-    address internal constant CLF_DON_SIGNER_3 = 0xCCCcAC597660Eebf71b424415f874ee4c6b13D22;
-
-    function _isAuthorizedClfDonSigner(address clfDonSigner) internal view returns (bool) {
-        if (clfDonSigner == address(0)) {
+    function _isAuthorizedClfSigner(address clfSigner) internal view returns (bool) {
+        if (clfSigner == address(0)) {
             return false;
         }
 
-        return (clfDonSigner == CLF_DON_SIGNER_0 ||
-            clfDonSigner == CLF_DON_SIGNER_1 ||
-            clfDonSigner == CLF_DON_SIGNER_2 ||
-            clfDonSigner == CLF_DON_SIGNER_3);
+        return (clfSigner == i_clfSigner0 ||
+            clfSigner == i_clfSigner1 ||
+            clfSigner == i_clfSigner2 ||
+            clfSigner == i_clfSigner3);
     }
 
     /**
@@ -81,7 +89,7 @@ library Signer {
             bytes32 s = ss[i];
 
             address signer = ecrecover(clfReportHash, v, r, s);
-            require(_isAuthorizedClfDonSigner(signer), UnauthorizedSigner(signer));
+            require(_isAuthorizedClfSigner(signer), UnauthorizedSigner(signer));
 
             for (uint256 j = 0; j < i; j++) {
                 require(signers[j] != signer, DuplicateSignatureDetected(signer));

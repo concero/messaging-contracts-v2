@@ -11,7 +11,19 @@ contract DeployConceroRouter is ConceroBaseScript {
     TransparentUpgradeableProxy internal conceroRouterProxy;
     ConceroRouter internal conceroRouter;
 
+    address internal immutable i_clfSigner0;
+    address internal immutable i_clfSigner1;
+    address internal immutable i_clfSigner2;
+    address internal immutable i_clfSigner3;
+
     address public USDC;
+
+    constructor() {
+        i_clfSigner0 = vm.envAddress("CLF_DON_SIGNING_KEY_0_LOCALHOST");
+        i_clfSigner1 = vm.envAddress("CLF_DON_SIGNING_KEY_1_LOCALHOST");
+        i_clfSigner2 = vm.envAddress("CLF_DON_SIGNING_KEY_2_LOCALHOST");
+        i_clfSigner3 = vm.envAddress("CLF_DON_SIGNING_KEY_3_LOCALHOST");
+    }
 
     function run() public returns (address) {
         DeployERC20 tokenDeployer = new DeployERC20();
@@ -56,7 +68,11 @@ contract DeployConceroRouter is ConceroBaseScript {
 
     function _deployAndSetImplementation() internal {
         vm.startPrank(deployer);
-        conceroRouter = new ConceroRouter(chainSelector, USDC);
+        conceroRouter = new ConceroRouter(
+            chainSelector,
+            USDC,
+            [i_clfSigner0, i_clfSigner1, i_clfSigner2, i_clfSigner3]
+        );
         vm.stopPrank();
 
         setProxyImplementation(address(conceroRouter));

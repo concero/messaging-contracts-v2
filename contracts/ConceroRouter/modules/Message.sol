@@ -11,7 +11,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {Message as MessageLib, MessageConstants} from "../../common/libraries/Message.sol";
 import {Constants} from "../../common/Constants.sol";
-import {Signer} from "../../common/libraries/Signer.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 
 import {Storage as s} from "../libraries/Storage.sol";
@@ -21,14 +20,17 @@ import {Errors} from "../libraries/Errors.sol";
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
 import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent} from "../../interfaces/IConceroRouter.sol";
 
+import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
 
 import {console} from "forge-std/src/console.sol";
 
-abstract contract Message is Base, IConceroRouter {
+abstract contract Message is ClfSigner, IConceroRouter {
     using SafeERC20 for IERC20;
     using s for s.Router;
     using s for s.PriceFeed;
+
+    constructor(address[4] memory clfSigners) ClfSigner(clfSigners) {}
 
     function conceroSend(
         uint256 config,
@@ -58,14 +60,12 @@ abstract contract Message is Base, IConceroRouter {
      * @param message the message data.
      */
     function submitMessageReport(
-        Signer.ClfDonReportSubmission calldata reportSubmission,
+        ClfDonReportSubmission calldata reportSubmission,
         bytes calldata message
     ) external {
-        Signer._verifyClfReportSignatures(reportSubmission);
+        _verifyClfReportSignatures(reportSubmission);
 
-        bytes memory messageReportResponse = Signer._extractClfReportResult(
-            reportSubmission.report
-        );
+        bytes memory messageReportResponse = _extractClfReportResult(reportSubmission.report);
 
         (
             Types.InternalMessageConfig memory decodedMessageConfig,
@@ -138,9 +138,11 @@ abstract contract Message is Base, IConceroRouter {
         if (feeToken == Types.FeeToken.native) {
             require(msg.value >= messageFee, Errors.InsufficientFee());
             payable(address(this)).transfer(messageFee);
-        } else if (feeToken == Types.FeeToken.usdc) {
-            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), messageFee);
-        } else {
+        }
+        //        else if (feeToken == Types.FeeToken.usdc) {
+        //            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), messageFee);
+        //        }
+        else {
             revert Errors.UnsupportedFeeToken();
         }
     }

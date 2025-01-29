@@ -45,17 +45,15 @@ const deployRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = as
 
     const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
 
-    // log("Deploying...", "deployRouter", name);
-
     const args = {
+        chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
-        chainSelector: getEnvVar(`CL_CCIP_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
-        owner: deployer,
+        clfSigners: getCLFDonSigners(networkType),
     };
 
     const deployment = (await deploy("ConceroRouter", {
         from: deployer,
-        args: [args.usdc, args.chainSelector, args.owner, ...getCLFDonSigners(networkType)],
+        args: [args.chainSelector, args.usdc, args.clfSigners],
         log: true,
         autoMine: true,
         maxFeePerGas,

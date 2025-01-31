@@ -16,10 +16,12 @@ library SupportedChains {
     uint24 internal constant CHAIN_SELECTOR_AVALANCHE = 43114;
 
     /* TESTNET CHAIN SELECTORS */
-    uint24 internal constant CHAIN_SELECTOR_ARBITRUM_SEPOLIA = 42162;
-    uint24 internal constant CHAIN_SELECTOR_BASE_SEPOLIA = 8454;
-    uint24 internal constant CHAIN_SELECTOR_OPTIMISM_SEPOLIA = 11;
-    uint24 internal constant CHAIN_SELECTOR_POLYGON_AMOY = 138;
+    uint24 internal constant CHAIN_SELECTOR_ETHEREUM_SEPOLIA = 11155111;
+    uint24 internal constant CHAIN_SELECTOR_OPTIMISM_SEPOLIA = 11155420;
+    uint24 internal constant CHAIN_SELECTOR_POLYGON_AMOY = 80002;
+    uint24 internal constant CHAIN_SELECTOR_BASE_SEPOLIA = 84532;
+    uint24 internal constant CHAIN_SELECTOR_ARBITRUM_SEPOLIA = 421614;
+    uint24 internal constant CHAIN_SELECTOR_AVALANCHE_FUJI = 43113;
 
     function isEVMChain(uint24 chainSelector) internal pure returns (bool) {
         /* MAINNET */
@@ -36,10 +38,12 @@ library SupportedChains {
 
         /* TESTNET */
         if (
-            chainSelector == CHAIN_SELECTOR_ARBITRUM_SEPOLIA ||
-            chainSelector == CHAIN_SELECTOR_BASE_SEPOLIA ||
+            chainSelector == CHAIN_SELECTOR_ETHEREUM_SEPOLIA ||
             chainSelector == CHAIN_SELECTOR_OPTIMISM_SEPOLIA ||
-            chainSelector == CHAIN_SELECTOR_POLYGON_AMOY
+            chainSelector == CHAIN_SELECTOR_POLYGON_AMOY ||
+            chainSelector == CHAIN_SELECTOR_BASE_SEPOLIA ||
+            chainSelector == CHAIN_SELECTOR_ARBITRUM_SEPOLIA ||
+            chainSelector == CHAIN_SELECTOR_AVALANCHE_FUJI
         ) {
             return true;
         }

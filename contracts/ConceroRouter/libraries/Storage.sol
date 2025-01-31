@@ -50,6 +50,7 @@ library Storage {
         uint256[50] __array_gap;
         mapping(address operator => uint256 feesEarned) feesEarnedNative;
     }
+
     struct PriceFeed {
         uint256 nativeUsdRate;
         uint256[50] __var_gap;

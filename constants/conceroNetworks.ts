@@ -22,7 +22,7 @@ import {
 } from "viem/chains";
 import { rpcUrl, urls } from "./rpcUrls";
 import { hardhatViemChain, localhostViemChain } from "../utils/localhostViemChain";
-import { getWallet } from "../utils";
+import { getEnvVar, getWallet } from "../utils";
 
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
 const mainnetProxyDeployerPK = getWallet("mainnet", "proxyDeployer", "privateKey");
@@ -76,13 +76,17 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
                 privateKey: localhostDeployerPK,
                 balance: "10000000000000000000000",
             },
+            {
+                privateKey: getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
+                balance: "10000000000000000000000",
+            },
         ],
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         confirmations: 1,
         viemChain: hardhatViemChain,
         forking: {
             url: `https://base-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-            enabled: true,
+            enabled: false,
             blockNumber: Number(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
         },
         saveDeployments: false,

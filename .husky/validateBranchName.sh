@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+set -eu
+
 VALID_BRANCH_REGEX='^(master|release|feature\/.+|fix\/.+|hotfix\/.+)$'
 
 ERROR_MESSAGE="🚫 Error: Invalid branch name.

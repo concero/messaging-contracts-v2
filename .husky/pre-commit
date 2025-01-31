@@ -1,8 +1,7 @@
-#!/usr/bin/env sh
-set -euo pipefail
+#!/bin/bash
 
 # Branch name validation
-./$(dirname "$0")/validateBranchName.sh
+./validateBranchName.sh
 
 # Pre-commit checks
 yarn hardhat compile

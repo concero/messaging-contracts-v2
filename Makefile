@@ -44,5 +44,10 @@ run_avalanche_fork:
 test:
 	forge test $(args)
 
+setup_operator_anvil:
+	forge script test/foundry/scripts/SetupOperatorAnvil.s.sol:SetupOperatorAnvil --rpc-url http://localhost:8545
+
+
+
 .PHONY: all test
 

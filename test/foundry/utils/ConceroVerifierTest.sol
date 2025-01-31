@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
+
 import {ConceroTest} from "./ConceroTest.sol";
 import {DeployConceroVerifier} from "../scripts/DeployConceroVerifier.s.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";

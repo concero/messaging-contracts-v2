@@ -5,7 +5,7 @@ import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 import {PauseDummy} from "../../../contracts/PauseDummy/PauseDummy.sol";
 import {DeployERC20, MockERC20} from "./DeployERC20.s.sol";
-import {ConceroBaseScript} from "../utils/ConceroTest.sol";
+import {ConceroBaseScript} from "./ConceroBaseScript.s.sol";
 
 contract DeployConceroRouter is ConceroBaseScript {
     TransparentUpgradeableProxy internal conceroRouterProxy;

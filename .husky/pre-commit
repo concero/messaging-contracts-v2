@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Branch name validation
-./validateBranchName.sh
+./$(dirname "$0")/validateBranchName.sh
 
 # Pre-commit checks
 yarn hardhat compile

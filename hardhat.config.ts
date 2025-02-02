@@ -11,6 +11,7 @@ import "hardhat-contract-sizer";
 import "@tenderly/hardhat-tenderly";
 import "solidity-coverage";
 import "@chainlink/hardhat-chainlink";
+import "@nomicfoundation/hardhat-network-helpers";
 import { conceroNetworks } from "./constants";
 import { HardhatUserConfig } from "hardhat/config";
 import "./tasks";

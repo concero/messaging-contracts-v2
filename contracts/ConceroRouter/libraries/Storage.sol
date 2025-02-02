@@ -11,17 +11,17 @@ import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
 library Namespaces {
     bytes32 internal constant ROUTER =
         keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("ConceroRouter.router.storage"))) - 1)
+            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.router.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
     bytes32 internal constant OPERATOR =
         keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("ConceroRouter.operator.storage"))) - 1)
+            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.operator.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
     bytes32 internal constant PRICEFEED =
         keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("ConceroRouter.priceFeed.storage"))) - 1)
+            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.pricefeed.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 }
 

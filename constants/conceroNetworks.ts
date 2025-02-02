@@ -94,14 +94,14 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
     localhost: {
         name: "localhost",
         type: networkTypes.localhost,
-        chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
+        chainId: 1,
         viemChain: localhostViemChain,
         // saveDeployments: false,
         url: rpcUrl.localhost,
         rpcUrls: [rpcUrl.localhost],
         confirmations: 1,
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
-        accounts: [localhostDeployerPK, localhostProxyDeployerPK],
+        accounts: [localhostDeployerPK, localhostProxyDeployerPK, getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY")],
         saveDeployments: false,
     },
 };

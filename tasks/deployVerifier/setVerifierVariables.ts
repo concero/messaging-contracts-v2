@@ -1,7 +1,6 @@
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
-import { getEnvAddress, getFallbackClients, getWallet, log } from "../../utils";
 import { conceroNetworks } from "../../constants";
-import { ConceroNetwork, ConceroNetworkNames } from "../../types/ConceroNetwork";
+import { ConceroNetworkNames } from "../../types/ConceroNetwork";
 
 async function setVerifierVariables(hre: HardhatRuntimeEnvironment) {
     const { live, name } = hre.network;

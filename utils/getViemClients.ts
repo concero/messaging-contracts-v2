@@ -31,10 +31,19 @@ export function getFallbackClients(
     account: PrivateKeyAccount;
 } {
     if (!account) {
-        account =
-            chain.type === "mainnet"
-                ? privateKeyToAccount(`0x${process.env.ETHEREUM_DEPLOYER_PRIVATE_KEY}`)
-                : privateKeyToAccount(`0x${process.env.TESTNET_DEPLOYER_PRIVATE_KEY}`);
+        switch (chain.type) {
+            case "mainnet":
+                account = privateKeyToAccount(`0x${process.env.MAINNET_DEPLOYER_PRIVATE_KEY}`);
+                break;
+            case "testnet":
+                account = privateKeyToAccount(`0x${process.env.TESTNET_DEPLOYER_PRIVATE_KEY}`);
+                break;
+            case "localhost":
+                account = privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`);
+                break;
+            default:
+                throw new Error(`Unsupported chain type: ${chain.type}`);
+        }
     }
 
     const { viemChain, name } = chain;

@@ -13,18 +13,18 @@ import {Types} from "./Types.sol";
 library Namespaces {
     bytes32 internal constant VERIFIER =
         keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("ConceroVerifier.verifier.storage"))) - 1)
+            abi.encode(uint256(keccak256(abi.encodePacked("conceroverifier.verifier.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
     bytes32 internal constant OPERATOR =
         keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("ConceroVerifier.operator.storage"))) - 1)
+            abi.encode(uint256(keccak256(abi.encodePacked("conceroverifier.operator.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
     bytes32 internal constant PRICEFEED =
         keccak256(
             abi.encode(
-                uint256(keccak256(abi.encodePacked("ConceroVerifier.pricefeed.storage"))) - 1
+                uint256(keccak256(abi.encodePacked("conceroverifier.pricefeed.storage"))) - 1
             )
         ) & ~bytes32(uint256(0xff));
 }

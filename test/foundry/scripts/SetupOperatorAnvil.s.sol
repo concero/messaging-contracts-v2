@@ -7,12 +7,12 @@ import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
 import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 import {ConceroBaseScript} from "./ConceroBaseScript.s.sol";
 import {VmSafe, Vm} from "forge-std/src/Vm.sol";
-
 import {Namespaces as RouterNamespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
 import {Namespaces as VerifierNamespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 import {PriceFeedSlots as routerPFSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {PriceFeedSlots as verifierPFSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
 import {Test} from "forge-std/src/Test.sol";
+import {console} from "forge-std/src/Console.sol";
 
 /**
  * @title SetupOperatorAnvil
@@ -32,7 +32,12 @@ contract SetupOperatorAnvil is ConceroBaseScript {
         address conceroRouterAddress = routerDeployer.run();
         ConceroRouter conceroRouter = ConceroRouter(payable(conceroRouterAddress));
 
-        setStorageValues(verifierDeployer, conceroVerifier, conceroRouter);
+        vm.stopBroadcast();
+        //        setStorageValues(verifierDeployer, conceroVerifier, conceroRouter);
+        //        dealBalances();
+
+        console.logString("ConceroVerifier address:");
+        console.logAddress(conceroVerifierAddress);
     }
 
     function setStorageValues(
@@ -40,7 +45,6 @@ contract SetupOperatorAnvil is ConceroBaseScript {
         ConceroVerifier conceroVerifier,
         ConceroRouter conceroRouter
     ) internal {
-        vm.startPrank(deployer);
         conceroVerifier.setStorage(
             VerifierNamespaces.PRICEFEED,
             verifierPFSlots.nativeUsdRate,
@@ -66,6 +70,10 @@ contract SetupOperatorAnvil is ConceroBaseScript {
             bytes32(CHAIN_SELECTOR),
             LAST_GAS_PRICE
         );
-        vm.stopPrank();
+    }
+
+    function dealBalances() internal {
+        address operator = vm.envAddress("TESTNET_OPERATOR_ADDRESS");
+        vm.deal(operator, 1000e18);
     }
 }

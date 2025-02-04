@@ -5,6 +5,7 @@ import updateEnvVariable from "../utils/updateEnvVariable";
 import log from "../utils/log";
 import { getEnvVar } from "../utils";
 import { ConceroNetworkNames, NetworkType } from "../types/ConceroNetwork";
+import { getGasParameters } from "../utils/getGasPrice";
 
 function getCLFDonSigners(networkType: NetworkType) {
     let networkName: ConceroNetworkNames;
@@ -32,7 +33,7 @@ function getCLFDonSigners(networkType: NetworkType) {
     return clfDonSigners;
 }
 
-const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
+const deployRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
     hre: HardhatRuntimeEnvironment,
 ) {
     const { deployer } = await hre.getNamedAccounts();
@@ -42,32 +43,28 @@ const deployConceroRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
     const chain = conceroNetworks[name as ConceroNetworkNames];
     const { type: networkType } = chain;
 
-    const gasPrice = await hre.ethers.provider.getGasPrice();
-    const maxFeePerGas = gasPrice.mul(2);
-    const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei");
-
-    // log("Deploying...", "deployConceroRouter", name);
+    const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
 
     const args = {
+        chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
-        chainSelector: getEnvVar(`CL_CCIP_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
-        owner: deployer,
+        clfSigners: getCLFDonSigners(networkType),
     };
 
     const deployment = (await deploy("ConceroRouter", {
         from: deployer,
-        args: [args.usdc, args.chainSelector, args.owner, ...getCLFDonSigners(networkType)],
+        args: [args.chainSelector, args.usdc, args.clfSigners],
         log: true,
         autoMine: true,
-        // maxFeePerGas,
-        // maxPriorityFeePerGas,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
     })) as Deployment;
 
-    log(`Deployed at: ${deployment.address}`, "deployConceroRouter", name);
+    log(`Deployed at: ${deployment.address}`, "deployRouter", name);
     updateEnvVariable(`CONCERO_ROUTER_${networkEnvKeys[name]}`, deployment.address, `deployments.${networkType}`);
 
     return deployment;
 };
 
-export default deployConceroRouter;
-deployConceroRouter.tags = ["ConceroRouter"];
+export default deployRouter;
+deployRouter.tags = ["ConceroRouter"];

@@ -11,6 +11,7 @@ import "hardhat-contract-sizer";
 import "@tenderly/hardhat-tenderly";
 import "solidity-coverage";
 import "@chainlink/hardhat-chainlink";
+import "@nomicfoundation/hardhat-network-helpers";
 import { conceroNetworks } from "./constants";
 import { HardhatUserConfig } from "hardhat/config";
 import "./tasks";
@@ -18,6 +19,12 @@ import "./tasks";
 const enableGasReport = process.env.REPORT_GAS !== "false";
 
 const config: HardhatUserConfig = {
+    contractSizer: {
+        alphaSort: true,
+        runOnCompile: false,
+        strict: true,
+        disambiguatePaths: false,
+    },
     tenderly: {
         username: "olegkron",
         project: "own",
@@ -33,6 +40,7 @@ const config: HardhatUserConfig = {
             {
                 version: "0.8.28",
                 settings: {
+                    viaIR: true,
                     optimizer: {
                         enabled: true,
                         runs: 200,
@@ -54,7 +62,7 @@ const config: HardhatUserConfig = {
     etherscan: {
         apiKey: {
             arbitrum: process.env.ARBISCAN_API_KEY,
-            mainnet: process.env.ETHERSCAN_API_KEY,
+            ethereum: process.env.ETHERSCAN_API_KEY,
             polygon: process.env.POLYGONSCAN_API_KEY,
             optimism: process.env.OPTIMISMSCAN_API_KEY,
             celo: process.env.CELOSCAN_API_KEY,

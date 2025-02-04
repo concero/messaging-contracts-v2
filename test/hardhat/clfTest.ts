@@ -34,7 +34,7 @@
 //             },
 //         ]);
 //
-//         const results = await runCLFSimulation(CLFType.requestReport, ["0x0", "0x0", message.id, encodedMessage], {
+//         const results = await runCLFSimulation(CLFType.messageReport, ["0x0", "0x0", message.id, encodedMessage], {
 //             print: false,
 //             rebuild: true,
 //         });

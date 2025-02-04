@@ -1,15 +1,15 @@
-#!/usr/bin/env sh
-set -euo pipefail
+#!/bin/bash
 
 # Branch name validation
-./$(dirname "$0")/validateBranchName.sh "$(git rev-parse --abbrev-ref HEAD)"
+./$(dirname "$0")/validateBranchName.sh
 
 # Pre-commit checks
 yarn hardhat compile
 yarn format:ts
 yarn format:sol
 #yarn lint:ts
-#forge test
+#yarn lint:sol
+make test
 
 echo "✅ Pre-commit checks passed successfully."
 exit 0

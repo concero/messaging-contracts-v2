@@ -22,7 +22,7 @@ import {
 } from "viem/chains";
 import { rpcUrl, urls } from "./rpcUrls";
 import { hardhatViemChain, localhostViemChain } from "../utils/localhostViemChain";
-import { getWallet } from "../utils";
+import { getEnvVar, getWallet } from "../utils";
 
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
 const mainnetProxyDeployerPK = getWallet("mainnet", "proxyDeployer", "privateKey");
@@ -40,7 +40,7 @@ export const networkTypes: Record<NetworkType, NetworkType> = {
 
 export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
     // mainnets
-    mainnet: "MAINNET",
+    ethereum: "ETHEREUM",
     arbitrum: "ARBITRUM",
     optimism: "OPTIMISM",
     polygon: "POLYGON",
@@ -76,13 +76,17 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
                 privateKey: localhostDeployerPK,
                 balance: "10000000000000000000000",
             },
+            {
+                privateKey: getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
+                balance: "10000000000000000000000",
+            },
         ],
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         confirmations: 1,
         viemChain: hardhatViemChain,
         forking: {
             url: `https://base-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-            enabled: true,
+            enabled: false,
             blockNumber: Number(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
         },
         saveDeployments: false,
@@ -90,14 +94,14 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
     localhost: {
         name: "localhost",
         type: networkTypes.localhost,
-        chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
+        chainId: 1,
         viemChain: localhostViemChain,
         // saveDeployments: false,
         url: rpcUrl.localhost,
         rpcUrls: [rpcUrl.localhost],
         confirmations: 1,
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
-        accounts: [localhostDeployerPK, localhostProxyDeployerPK],
+        accounts: [localhostDeployerPK, localhostProxyDeployerPK, getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY")],
         saveDeployments: false,
     },
 };
@@ -172,12 +176,12 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
     },
 };
 export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork> = {
-    mainnet: {
-        name: "mainnet",
+    ethereum: {
+        name: "ethereum",
         type: networkTypes.mainnet,
         chainId: 1,
-        url: urls.mainnet[0],
-        rpcUrls: urls.mainnet,
+        url: urls.ethereum[0],
+        rpcUrls: urls.ethereum,
         accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
         chainSelector: "1",
         confirmations: DEFAULT_BLOCK_CONFIRMATIONS,

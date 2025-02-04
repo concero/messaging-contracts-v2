@@ -26,7 +26,7 @@ export interface env extends EnvCLA, EnvCLF, EnvCLCCIP, EnvTokens {
     MESSENGER_2_PRIVATE_KEY: string;
 
     // .env
-    MAINNET_FORKING_ENABLED: string;
+    ETHEREUM_FORKING_ENABLED: string;
     TENDERLY_AUTOMATIC_VERIFICATION: string;
     INFURA_API_KEY: string;
     ALCHEMY_API_KEY: string;

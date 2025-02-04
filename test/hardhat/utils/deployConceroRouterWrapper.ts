@@ -1,7 +1,7 @@
-import deployConceroRouter from "../../../deploy/ConceroRouter";
+import deployRouter from "../../../deploy/ConceroRouter";
 
 export const deployConceroRouterWrapper = async (): Promise<string> => {
     const hre = require("hardhat");
-    const deployment = await deployConceroRouter(hre);
+    const deployment = await deployRouter(hre);
     return deployment.address;
 };

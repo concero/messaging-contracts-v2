@@ -160,9 +160,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
         Types.FeeToken feeToken
     ) internal view returns (uint256) {
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
-        console.logString("Native USD rate:");
-        console.logUint(nativeUsdRate);
-        console.logUint(s.priceFeed().nativeNativeRates[1]);
         Types.EvmDstChainData memory evmDstChainData = abi.decode(
             dstChainData,
             (Types.EvmDstChainData)

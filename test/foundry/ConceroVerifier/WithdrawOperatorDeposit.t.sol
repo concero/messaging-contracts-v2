@@ -67,7 +67,6 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest, ConceroVerifierDeployme
             1e18
         );
 
-        console.logBytes32(Namespaces.PRICEFEED);
         vm.stopPrank();
     }
 

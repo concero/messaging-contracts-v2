@@ -7,8 +7,6 @@
 pragma solidity 0.8.28;
 
 library Errors {
-    error UnsupportedFeeToken();
-    error InsufficientFee();
     error MessageAlreadyProcessed(bytes32 messageId);
     error MessageDeliveryFailed(bytes32 messageId);
     error InvalidReceiver();

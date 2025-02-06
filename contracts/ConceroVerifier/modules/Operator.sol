@@ -91,7 +91,7 @@ abstract contract Operator is CLF {
         require(amount > 0, CommonErrors.InvalidAmount());
         require(
             amount <= currentDeposit,
-            Errors.InsufficientOperatorDeposit(amount, currentDeposit)
+            Errors.InsufficientOperatorDeposit(currentDeposit, amount)
         );
 
         s.operator().depositsNative[msg.sender] = currentDeposit - amount;
@@ -116,7 +116,6 @@ abstract contract Operator is CLF {
             Errors.InsufficientOperatorDeposit(msg.value, minimumDeposit)
         );
         require(operator != address(0), CommonErrors.InvalidAddress());
-        require(s.operator().isAllowed[operator], Errors.OperatorNotRegistered());
 
         s.operator().depositsNative[operator] += msg.value;
         s.operator().totalDepositsNative += msg.value;

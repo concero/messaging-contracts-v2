@@ -12,10 +12,9 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Message as MessageLib, MessageConstants} from "../../common/libraries/Message.sol";
 import {Constants} from "../../common/Constants.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
-
+import {CommonErrors} from "../../common/CommonErrors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
-import {Errors} from "../libraries/Errors.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
 import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent} from "../../interfaces/IConceroRouter.sol";
@@ -23,8 +22,15 @@ import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, Concero
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
 
-import {console} from "forge-std/src/console.sol";
+import {console} from "hardhat/console.sol";
 
+library Errors {
+    error UnsupportedFeeTokenType();
+    error MessageAlreadyProcessed(bytes32 messageId);
+    error MessageDeliveryFailed(bytes32 messageId);
+    error InvalidReceiver();
+    error InvalidMessageHashSum();
+}
 abstract contract Message is ClfSigner, IConceroRouter {
     using SafeERC20 for IERC20;
     using s for s.Router;
@@ -133,17 +139,18 @@ abstract contract Message is ClfSigner, IConceroRouter {
         Types.FeeToken feeToken = Types.FeeToken(
             uint8(clientMessageConfig >> MessageConstants.OFFSET_FEE_TOKEN)
         );
+
         uint256 messageFee = _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
 
         if (feeToken == Types.FeeToken.native) {
-            require(msg.value >= messageFee, Errors.InsufficientFee());
+            require(msg.value >= messageFee, CommonErrors.InsufficientFee(msg.value, messageFee));
             payable(address(this)).transfer(messageFee);
         }
         //        else if (feeToken == Types.FeeToken.usdc) {
         //            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), messageFee);
         //        }
         else {
-            revert Errors.UnsupportedFeeToken();
+            revert Errors.UnsupportedFeeTokenType();
         }
     }
 
@@ -153,6 +160,9 @@ abstract contract Message is ClfSigner, IConceroRouter {
         Types.FeeToken feeToken
     ) internal view returns (uint256) {
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
+        console.logString("Native USD rate:");
+        console.logUint(nativeUsdRate);
+        console.logUint(s.priceFeed().nativeNativeRates[1]);
         Types.EvmDstChainData memory evmDstChainData = abi.decode(
             dstChainData,
             (Types.EvmDstChainData)
@@ -177,7 +187,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         //
         //        console.logString("Gas price:");
         //        console.logUint(gasPrice);
-        //
+        //        //
         //        console.logString("Gas fee native:");
         //        console.logUint(gasFeeNative);
         //
@@ -201,7 +211,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         Types.FeeToken feeToken = Types.FeeToken(
             uint8(clientMessageConfig >> MessageConstants.OFFSET_FEE_TOKEN)
         );
-        require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeToken());
+        require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
     }
 
@@ -212,7 +222,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         Types.FeeToken feeToken = Types.FeeToken(
             uint8(clientMessageConfig >> MessageConstants.OFFSET_FEE_TOKEN)
         );
-        require(feeToken == Types.FeeToken.usdc, Errors.UnsupportedFeeToken());
+        require(feeToken == Types.FeeToken.usdc, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
     }
 }

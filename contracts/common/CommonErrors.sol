@@ -7,11 +7,16 @@
 pragma solidity 0.8.28;
 
 library CommonErrors {
+    enum RequiredVariableUnsetType {
+        NativeUSDRate
+    }
+
     error NotOwner();
     error LengthMismatch();
     error InvalidAmount();
     error InvalidRequest();
     error InvalidAddress();
     error TransferFailed();
-    error InsufficientFee(uint256 requestedAmount, uint256 availableAmount);
+    error InsufficientFee(uint256 provided, uint256 required);
+    error RequiredVariableUnset(RequiredVariableUnsetType variableType);
 }

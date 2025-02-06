@@ -10,6 +10,7 @@ import {IConceroClient} from "../interfaces/IConceroClient.sol";
 
 abstract contract ConceroClient is IConceroClient {
     error InvalidRouter(address router);
+
     uint8 internal constant VERSION = 1;
     address internal immutable i_conceroRouter;
     uint24 internal immutable i_chainSelector;

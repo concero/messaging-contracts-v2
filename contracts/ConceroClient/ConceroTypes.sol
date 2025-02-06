@@ -23,6 +23,6 @@ library ConceroTypes {
         uint8 minDstConfirmations;
         uint8 relayerConfig;
         bool isCallbackable;
-        uint8 feeToken;
+        FeeToken feeToken;
     }
 }

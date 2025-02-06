@@ -60,10 +60,13 @@ library OperatorSlots {
  */
 library PriceFeedSlots {
     uint256 private constant RESERVED_VARIABLE_GAP = 50;
+    uint256 private constant RESERVED_ARRAY_GAP = 50;
     uint256 internal constant UINTS_COUNT = 1;
 
     uint256 internal constant nativeUsdRate = 0;
 
-    uint256 internal constant lastGasPrices = RESERVED_VARIABLE_GAP + UINTS_COUNT + 0;
-    uint256 internal constant nativeNativeRates = RESERVED_VARIABLE_GAP + UINTS_COUNT + 1;
+    uint256 internal constant lastGasPrices =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
+    uint256 internal constant nativeNativeRates =
+        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
 }

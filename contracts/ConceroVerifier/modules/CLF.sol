@@ -21,6 +21,7 @@ import {Errors} from "../libraries/Errors.sol";
 
 import {CLFRequestError, MessageReport} from "../../interfaces/IConceroVerifier.sol";
 import {Base} from "./Base.sol";
+import {console} from "hardhat/console.sol";
 
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;

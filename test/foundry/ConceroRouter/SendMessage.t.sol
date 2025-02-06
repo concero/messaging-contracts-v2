@@ -11,6 +11,7 @@ import {ConceroTypes} from "../../../contracts/ConceroClient/ConceroTypes.sol";
 import {ConceroUtils} from "../../../contracts/ConceroClient/ConceroUtils.sol";
 import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
 import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
+import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
 import {Errors} from "../../../contracts/ConceroRouter/libraries/Errors.sol";
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
 import {Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
@@ -73,7 +74,7 @@ contract SendMessage is ConceroRouterTest {
             minDstConfirmations: 1,
             relayerConfig: 0,
             isCallbackable: false,
-            feeToken: uint8(Types.FeeToken.native)
+            feeToken: ConceroTypes.FeeToken.native
         });
 
         uint256 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
@@ -92,6 +93,10 @@ contract SendMessage is ConceroRouterTest {
             message
         );
 
+        bytes memory srcChainData = abi.encode(
+            Types.EvmSrcChainData({sender: user, blockNumber: block.number})
+        );
+
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bool foundEvent = false;
         for (uint i = 0; i < entries.length; i++) {
@@ -105,7 +110,11 @@ contract SendMessage is ConceroRouterTest {
                     bytes memory messageFromEvent
                 ) = abi.decode(entries[i].data, (uint256, bytes, bytes));
 
-                Message.validateInternalMessage(internalMessageConfig, dstChainDataFromEvent);
+                Message.validateInternalMessage(
+                    internalMessageConfig,
+                    srcChainData,
+                    dstChainDataFromEvent
+                );
 
                 assertEq(entries[i].topics[1], messageId, "Message ID mismatch");
                 assertEq(dstChainDataFromEvent, dstChainData, "Destination chain data mismatch");
@@ -135,7 +144,13 @@ contract SendMessage is ConceroRouterTest {
         uint256 messageFee = conceroRouter.getMessageFeeNative(CLIENT_MESSAGE_CONFIG, dstChainData);
         uint256 insufficientFee = messageFee - 1;
 
-        vm.expectRevert(Errors.InsufficientFee.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CommonErrors.InsufficientFee.selector,
+                insufficientFee,
+                messageFee
+            )
+        );
         conceroRouter.conceroSend{value: insufficientFee}(
             CLIENT_MESSAGE_CONFIG,
             dstChainData,

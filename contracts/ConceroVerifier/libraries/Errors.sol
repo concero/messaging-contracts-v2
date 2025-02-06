@@ -11,7 +11,7 @@ library Errors {
     error InvalidEVMAddress();
     error UnauthorizedOperator();
     error OperatorNotFound();
-    error InsufficientOperatorDeposit(uint256 requiredAmount, uint256 availableAmount);
+    error InsufficientOperatorDeposit(uint256 provided, uint256 required);
     error OperatorAlreadyRegistered();
     error OperatorNotRegistered();
     error OperatorAddressMismatch();

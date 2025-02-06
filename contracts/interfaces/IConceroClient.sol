@@ -6,6 +6,8 @@
  */
 pragma solidity 0.8.28;
 
-interface IConceroClient {
+import {IConceroClientErrors} from "./IConceroClientErrors.sol";
+
+interface IConceroClient is IConceroClientErrors {
     function conceroReceive(bytes32 messageId, bytes calldata message) external;
 }

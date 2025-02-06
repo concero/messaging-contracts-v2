@@ -5,7 +5,7 @@ import { conceroNetworks, networkEnvKeys } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import log from "../utils/log";
 
-const deployConceroClient: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
+const deployConceroClientExample: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
     hre: HardhatRuntimeEnvironment,
 ) {
     const { deployer } = await hre.getNamedAccounts();
@@ -15,23 +15,27 @@ const deployConceroClient: (hre: HardhatRuntimeEnvironment) => Promise<Deploymen
     const { type: networkType } = chain;
 
     const args = {
-        conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[name]}`),
+        conceroRouter: getEnvVar(`CONCERO_ROUTER_${networkEnvKeys[name]}`),
         chainSelector: 1n,
     };
 
-    // Changed from "ConceroClient" to "ExampleClient"
-    const deployment = await deploy("ExampleClient", {
+    // Changed from "ConceroClient" to "ConceroClientExample.sol"
+    const deployment = await deploy("ConceroClientExample", {
         from: deployer,
         args: [args.conceroRouter, args.chainSelector],
         log: true,
         autoMine: true,
     });
 
-    log(`Deployed at: ${deployment.address}`, "deployDemoClient", name);
-    updateEnvVariable(`CONCERO_DEMO_CLIENT_${networkEnvKeys[name]}`, deployment.address, `deployments.${networkType}`);
+    log(`Deployed at: ${deployment.address}`, "ConceroClientExample", name);
+    updateEnvVariable(
+        `CONCERO_CLIENT_EXAMPLE_${networkEnvKeys[name]}`,
+        deployment.address,
+        `deployments.${networkType}`,
+    );
 
     return deployment;
 };
 
-export default deployConceroClient;
-deployConceroClient.tags = ["ConceroClient"];
+export default deployConceroClientExample;
+deployConceroClientExample.tags = ["ConceroClientExample"];

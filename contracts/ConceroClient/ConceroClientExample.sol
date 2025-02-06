@@ -11,7 +11,7 @@ import {ConceroClient} from "./ConceroClient.sol";
 import {ConceroTypes} from "./ConceroTypes.sol";
 import {ConceroUtils} from "./ConceroUtils.sol";
 
-contract ExampleClient is ConceroClient {
+contract ConceroClientExample is ConceroClient {
     event MessageReceived(bytes32 messageId, bytes message);
 
     constructor(address router, uint24 chainSelector) ConceroClient(router, chainSelector) {}
@@ -20,7 +20,7 @@ contract ExampleClient is ConceroClient {
         emit MessageReceived(messageId, message);
     }
 
-    function sendConceroMessage() internal returns (bytes32 messageId) {
+    function sendConceroMessage() external payable returns (bytes32 messageId) {
         // Build a message config on-chain (optional), or provide packedConfig directly
         ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
             dstChainSelector: 1,
@@ -28,7 +28,7 @@ contract ExampleClient is ConceroClient {
             minDstConfirmations: 2,
             relayerConfig: 1,
             isCallbackable: true,
-            feeToken: 0
+            feeToken: ConceroTypes.FeeToken.native
         });
 
         uint256 packedConfig = ConceroUtils._packClientMessageConfig(config);
@@ -39,7 +39,7 @@ contract ExampleClient is ConceroClient {
         );
 
         // Send a message to the router
-        messageId = IConceroRouter(i_conceroRouter).conceroSend(
+        messageId = IConceroRouter(i_conceroRouter).conceroSend{value: msg.value}(
             packedConfig,
             dstChainData,
             "Hello, World!"

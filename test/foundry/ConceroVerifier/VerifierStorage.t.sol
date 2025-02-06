@@ -5,6 +5,7 @@ import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentU
 import {GenericStorage} from "../../../contracts/common/libraries/GenericStorage.sol";
 import {Storage as s, Namespaces} from "../../../contracts/ConceroVerifier/libraries/Storage.sol";
 import {ConceroVerifier} from "../../../contracts/ConceroVerifier/ConceroVerifier.sol";
+import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
 
 import {DeployConceroVerifier} from "../scripts/DeployConceroVerifier.s.sol";
 import {VerifierSlots, OperatorSlots, PriceFeedSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
@@ -137,7 +138,7 @@ contract VerifierStorage is ConceroVerifierTest {
         namespaces[0] = Namespaces.OPERATOR;
         namespaces[1] = Namespaces.VERIFIER;
 
-        vm.expectRevert(GenericStorage.LengthMismatch.selector);
+        vm.expectRevert(CommonErrors.LengthMismatch.selector);
 
         vm.prank(deployer);
         conceroVerifier.setStorageBulk(namespaces, offsets, mappingKeys, values);

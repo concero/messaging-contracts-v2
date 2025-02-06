@@ -33,7 +33,7 @@ library MessageConstants {
 }
 
 library Message {
-    enum ConfigError {
+    enum MessageConfigErrorType {
         InvalidMinSrcConfirmations,
         InvalidMinDstConfirmations,
         InvalidAdditionalRelayers,
@@ -41,14 +41,15 @@ library Message {
         InvalidConfigVersion,
         InvalidRelayerConfig,
         InvalidSrcChainSelector,
-        InvalidDstChainSelector
+        InvalidDstChainSelector,
+        InvalidOperatorLength
     }
+
+    error MessageTooLarge();
+    error InvalidClientMessageConfig(MessageConfigErrorType error);
     error InvalidDstChainData();
     error InvalidSrcChainData();
-    error MessageTooLarge();
-    error InvalidClientMessageConfig(ConfigError error);
-    error InvalidInternalMessageConfig(ConfigError error);
-    error InvalidOperatorLength();
+    error InvalidInternalMessageConfig(MessageConfigErrorType error);
 
     /* VALIDATION FUNCTIONS */
     function validateClientMessageRequest(
@@ -64,10 +65,11 @@ library Message {
 
     function validateInternalMessage(
         uint256 internalMessageConfig,
+        bytes memory srcChainData,
         bytes memory dstChainData
     ) internal pure {
         validateInternalMessageConfig(internalMessageConfig);
-        //        require(message.srcChainData.length > 0, InvalidSrcChainData());
+        require(srcChainData.length > 0, InvalidSrcChainData());
         require(dstChainData.length > 0, InvalidDstChainData());
     }
 
@@ -81,23 +83,26 @@ library Message {
 
         require(
             SupportedChains.isChainSupported(dstChainSelector),
-            InvalidClientMessageConfig(ConfigError.InvalidDstChainSelector)
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
         );
         require(
             minSrcConfirmations > 0 &&
                 minSrcConfirmations <= SupportedChains.maxConfirmations(chainSelector),
-            InvalidClientMessageConfig(ConfigError.InvalidMinSrcConfirmations)
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
         );
         require(
             minDstConfirmations > 0 &&
                 minDstConfirmations <= SupportedChains.maxConfirmations(dstChainSelector),
-            InvalidClientMessageConfig(ConfigError.InvalidMinDstConfirmations)
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
         );
         require(
             additionalRelayers <= 255,
-            InvalidClientMessageConfig(ConfigError.InvalidAdditionalRelayers)
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidAdditionalRelayers)
         );
-        require(feeToken <= 255, InvalidClientMessageConfig(ConfigError.InvalidFeeToken));
+        require(
+            feeToken <= 255,
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidFeeToken)
+        );
     }
 
     function validateInternalMessageConfig(uint256 config) private pure {
@@ -108,26 +113,29 @@ library Message {
         uint24 srcChainSelector = uint24(config >> MessageConstants.OFFSET_SRC_CHAIN);
         uint24 dstChainSelector = uint24(config >> MessageConstants.OFFSET_DST_CHAIN);
 
-        require(version > 0, InvalidInternalMessageConfig(ConfigError.InvalidConfigVersion));
+        require(
+            version > 0,
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidConfigVersion)
+        );
         require(
             relayerConfig <= 255,
-            InvalidInternalMessageConfig(ConfigError.InvalidRelayerConfig)
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidRelayerConfig)
         );
         require(
             minSrcConfirmations > 0,
-            InvalidInternalMessageConfig(ConfigError.InvalidMinSrcConfirmations)
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
         );
         require(
             minDstConfirmations > 0,
-            InvalidInternalMessageConfig(ConfigError.InvalidMinDstConfirmations)
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
         );
         require(
             SupportedChains.isChainSupported(srcChainSelector),
-            InvalidInternalMessageConfig(ConfigError.InvalidSrcChainSelector)
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidSrcChainSelector)
         );
         require(
             SupportedChains.isChainSupported(dstChainSelector),
-            InvalidInternalMessageConfig(ConfigError.InvalidDstChainSelector)
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
         );
     }
 
@@ -239,7 +247,10 @@ library Message {
 
         // Decode operator address
         uint8 operatorLength = uint8(packedResult[offset++]);
-        require(operatorLength == MessageConstants.ADDRESS_LENGTH, InvalidOperatorLength());
+        require(
+            operatorLength == MessageConstants.ADDRESS_LENGTH,
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidOperatorLength)
+        );
 
         bytes32 operatorBytes;
         assembly {

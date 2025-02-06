@@ -54,6 +54,7 @@ library Storage {
     struct PriceFeed {
         uint256 nativeUsdRate;
         uint256[50] __var_gap;
+        uint256[50] __array_gap;
         mapping(uint24 dstChainSelector => uint256) lastGasPrices;
         mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
     }

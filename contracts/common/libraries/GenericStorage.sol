@@ -6,9 +6,10 @@
  */
 pragma solidity 0.8.28;
 
+import {CommonErrors} from "../CommonErrors.sol";
+
 // Warning: This library does NOT recognise packed storage variables. Be extra cautious when using this contract.
 library GenericStorage {
-    error LengthMismatch();
     error InvalidNamespace();
 
     function _setStorage(
@@ -47,7 +48,7 @@ library GenericStorage {
             namespaces.length == offsets.length &&
                 offsets.length == mappingKeys.length &&
                 mappingKeys.length == values.length,
-            LengthMismatch()
+            CommonErrors.LengthMismatch()
         );
 
         for (uint256 i = 0; i < namespaces.length; i++) {

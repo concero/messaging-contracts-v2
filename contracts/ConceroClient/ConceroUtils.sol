@@ -10,7 +10,7 @@ import {MessageConstants as MCC} from "../common/libraries/Message.sol";
 import {ConceroTypes} from "./ConceroTypes.sol";
 
 library ConceroUtils {
-    /// @notice Builds the client message config as a uint256
+    /// @notice Builds the client message config, and packs it as a uint256
     /// @param clientConfig The client message configuration
     /// @return The encoded message configuration
     function _packClientMessageConfig(

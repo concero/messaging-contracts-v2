@@ -42,8 +42,8 @@ library Types {
         uint256 internalMessageConfig;
         bytes32 messageId;
         bytes32 messageHashSum;
-        bytes dstChainData;
         bytes srcChainData;
+        bytes dstChainData;
     }
 
     struct MessageReportResult {

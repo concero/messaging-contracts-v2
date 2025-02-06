@@ -20,16 +20,11 @@ const VerifierSlots = (() => {
     const RESERVED_ARRAY_GAP = 50;
     const UINTS_COUNT = 1;
 
-    const nonce = 0;
-    const clfRequestStatus = RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
-    const pendingCLFRequests = RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
-    const pendingMessageReports = RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2;
-
     return Object.freeze({
-        nonce,
-        clfRequestStatus,
-        pendingCLFRequests,
-        pendingMessageReports,
+        nonce: 0,
+        clfRequestStatus: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
+        pendingCLFRequests: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
+        pendingMessageReports: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2,
     });
 })();
 
@@ -43,22 +38,14 @@ const OperatorSlots = (() => {
     const RESERVED_ARRAY_GAP = 50;
     const UINTS_COUNT = 2;
 
-    const totalFeesEarnedNative = 0;
-    const totalDepositsNative = 1;
-    const registeredOperators = RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
-    const isAllowed = RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
-    const depositsNative = RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2;
-    const walletAddress = RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 3;
-    const feesEarnedNative = RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 4;
-
     return Object.freeze({
-        totalFeesEarnedNative,
-        totalDepositsNative,
-        registeredOperators,
-        isAllowed,
-        depositsNative,
-        walletAddress,
-        feesEarnedNative,
+        totalFeesEarnedNative: 0,
+        totalDepositsNative: 1,
+        registeredOperators: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
+        isAllowed: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
+        depositsNative: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2,
+        walletAddress: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 3,
+        feesEarnedNative: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 4,
     });
 })();
 
@@ -69,16 +56,13 @@ const OperatorSlots = (() => {
  */
 const PriceFeedSlots = (() => {
     const RESERVED_VARIABLE_GAP = 50;
+    const RESERVED_ARRAY_GAP = 50;
     const UINTS_COUNT = 1;
 
-    const nativeUsdRate = 0;
-    const lastGasPrices = RESERVED_VARIABLE_GAP + UINTS_COUNT + 0;
-    const nativeNativeRates = RESERVED_VARIABLE_GAP + UINTS_COUNT + 1;
-
     return Object.freeze({
-        nativeUsdRate,
-        lastGasPrices,
-        nativeNativeRates,
+        nativeUsdRate: 0,
+        lastGasPrices: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
+        nativeNativeRates: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
     });
 })();
 

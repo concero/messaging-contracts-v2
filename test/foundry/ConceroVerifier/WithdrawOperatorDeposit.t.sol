@@ -67,6 +67,7 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest, ConceroVerifierDeployme
             1e18
         );
 
+        console.logBytes32(Namespaces.PRICEFEED);
         vm.stopPrank();
     }
 
@@ -139,8 +140,8 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest, ConceroVerifierDeployme
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.InsufficientOperatorDeposit.selector,
-                withdrawAmount,
-                depositAmount
+                depositAmount,
+                withdrawAmount
             )
         );
         conceroVerifier.withdrawOperatorDeposit(withdrawAmount);
@@ -158,8 +159,8 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest, ConceroVerifierDeployme
         vm.expectRevert(
             abi.encodeWithSelector(
                 Errors.InsufficientOperatorDeposit.selector,
-                withdrawAmount,
-                depositAmount
+                depositAmount,
+                withdrawAmount
             )
         );
         conceroVerifier.withdrawOperatorDeposit(withdrawAmount);

@@ -5,6 +5,7 @@ import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentU
 import {GenericStorage} from "../../../contracts/common/libraries/GenericStorage.sol";
 import {Storage as s, Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
 import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
+import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
 
 import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
 import {RouterSlots, PriceFeedSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
@@ -115,7 +116,7 @@ contract RouterStorage is ConceroRouterTest {
         namespaces[0] = Namespaces.PRICEFEED;
         namespaces[1] = Namespaces.ROUTER;
 
-        vm.expectRevert(GenericStorage.LengthMismatch.selector);
+        vm.expectRevert(CommonErrors.LengthMismatch.selector);
 
         vm.prank(deployer);
         conceroRouter.setStorageBulk(namespaces, offsets, mappingKeys, values);

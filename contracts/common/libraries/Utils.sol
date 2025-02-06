@@ -7,12 +7,12 @@
 pragma solidity 0.8.28;
 
 import {Constants} from "../Constants.sol";
+import {CommonErrors} from "../CommonErrors.sol";
 import {console} from "forge-std/src/console.sol";
 
 library Utils {
     error NotAContract(address target);
     error DelegateCallFailed(bytes response);
-    error InvalidNativeUSDRate();
 
     function safeDelegateCall(address target, bytes memory args) internal returns (bytes memory) {
         require(isContract(target), NotAContract(target));
@@ -85,7 +85,10 @@ library Utils {
         uint16 bpsUSD,
         uint256 nativeUSDRate
     ) internal pure returns (uint256) {
-        require(nativeUSDRate != 0, InvalidNativeUSDRate());
+        require(
+            nativeUSDRate != 0,
+            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
+        );
 
         uint256 usdAmount = (uint256(bpsUSD) * 1e18) / Constants.BPS_DENOMINATOR;
 

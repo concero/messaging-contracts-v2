@@ -44,10 +44,17 @@ run_avalanche_fork:
 test:
 	forge test $(args)
 
+script:
+	forge script $(args)
+
 setup_operator_anvil:
 	forge script test/foundry/scripts/SetupOperatorAnvil.s.sol:SetupOperatorAnvil --rpc-url http://localhost:8545 --broadcast
 
+coverage:
+	forge coverage --report lcov
+	genhtml --ignore-errors inconsistent --ignore-errors corrupt --ignore-errors category -o ./coverage_report ./lcov.info
+	open ./coverage_report/index.html
+	rm -rf lcov.info
 
 
 .PHONY: all test
-

@@ -5,10 +5,10 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {console} from "forge-std/src/console.sol";
 
-import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
-import {ConceroRouterTest} from "../utils/ConceroRouterTest.sol";
-import {Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
-import {OperatorSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
+import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
+import {OperatorSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 
 contract WithdrawConceroFees is ConceroRouterTest {
     using SafeERC20 for IERC20;
@@ -16,12 +16,9 @@ contract WithdrawConceroFees is ConceroRouterTest {
     uint256 public constant TOTAL_NATIVE_BALANCE = 10 ether;
     uint256 public constant TOTAL_USDC_BALANCE = 10000e6;
 
-    uint256 public constant TOTAL_OPERATOR_FEES_NATIVE = 2 ether;
-    uint256 public constant OPERATOR_FEES_NATIVE = 2 ether;
-
     function setUp() public override {
         super.setUp();
-        usdc = deployScript.USDC();
+        usdc = deployScript.usdc();
 
         vm.deal(address(conceroRouter), TOTAL_NATIVE_BALANCE);
         deal(usdc, address(conceroRouter), TOTAL_USDC_BALANCE);
@@ -36,7 +33,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
             Namespaces.OPERATOR,
             OperatorSlots.totalFeesEarnedNative,
             bytes32(0),
-            TOTAL_OPERATOR_FEES_NATIVE
+            OPERATOR_FEES_NATIVE
         );
 
         // Set individual operator fees
@@ -203,7 +200,7 @@ contract WithdrawConceroFees is ConceroRouterTest {
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = TOTAL_NATIVE_BALANCE + 1;
 
-        uint256 availableFees = TOTAL_NATIVE_BALANCE - TOTAL_OPERATOR_FEES_NATIVE;
+        uint256 availableFees = TOTAL_NATIVE_BALANCE - OPERATOR_FEES_NATIVE;
 
         vm.expectRevert(
             abi.encodeWithSelector(CommonErrors.InsufficientFee.selector, amounts[0], availableFees)

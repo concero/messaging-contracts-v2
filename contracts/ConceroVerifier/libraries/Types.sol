@@ -7,10 +7,11 @@
 pragma solidity 0.8.28;
 
 library Types {
-    enum FeeTokenType {
+    enum FeeToken {
         native,
-        USDC
+        usdc
     }
+
     enum ChainType {
         EVM,
         NON_EVM

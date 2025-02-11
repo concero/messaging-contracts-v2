@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {Script} from "forge-std/src/Script.sol";
+import {ConceroBaseScript} from "../../scripts/ConceroBaseScript.s.sol";
 
-abstract contract ConceroVerifierDeploymentVariables is Script {
-    // Deployment variables
-    address public USDC;
+contract ConceroVerifierBase is ConceroBaseScript {
+    //deployment vars
     address public clfRouter;
     bytes32 public clfDonId;
     uint64 public clfSubscriptionId;

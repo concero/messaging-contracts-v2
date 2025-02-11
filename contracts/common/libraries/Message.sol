@@ -34,15 +34,15 @@ library MessageConstants {
 
 library Message {
     enum MessageConfigErrorType {
-        InvalidMinSrcConfirmations,
-        InvalidMinDstConfirmations,
-        InvalidAdditionalRelayers,
-        InvalidFeeToken,
-        InvalidConfigVersion,
-        InvalidRelayerConfig,
-        InvalidSrcChainSelector,
-        InvalidDstChainSelector,
-        InvalidOperatorLength
+        InvalidMinSrcConfirmations, // 0
+        InvalidMinDstConfirmations, // 1
+        InvalidAdditionalRelayers, // 2
+        InvalidFeeToken, // 3
+        InvalidConfigVersion, // 4
+        InvalidRelayerConfig, // 5
+        InvalidSrcChainSelector, // 6
+        InvalidDstChainSelector, // 7
+        InvalidOperatorLength // 8
     }
 
     error MessageTooLarge();

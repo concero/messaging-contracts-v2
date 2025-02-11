@@ -1,8 +1,8 @@
 pragma solidity 0.8.28;
 
 import "forge-std/src/Script.sol";
-import {Namespaces as ConceroRouterNamespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
-import {Namespaces as ConceroVerifierNamespaces} from "../../../contracts/ConceroVerifier/libraries/Storage.sol";
+import {Namespaces as ConceroRouterNamespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
+import {Namespaces as ConceroVerifierNamespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 
 contract DisplayNamespaceValues is Script {
     function run() public {

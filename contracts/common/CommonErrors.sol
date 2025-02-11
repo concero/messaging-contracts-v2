@@ -8,7 +8,8 @@ pragma solidity 0.8.28;
 
 library CommonErrors {
     enum RequiredVariableUnsetType {
-        NativeUSDRate
+        NativeUSDRate,
+        lastGasPrice
     }
 
     error NotOwner();

@@ -1,24 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {GenericStorage} from "../../../contracts/common/libraries/GenericStorage.sol";
-import {Storage as s, Namespaces} from "../../../contracts/ConceroVerifier/libraries/Storage.sol";
-import {ConceroVerifier} from "../../../contracts/ConceroVerifier/ConceroVerifier.sol";
-import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
+import {GenericStorage} from "contracts/common/libraries/GenericStorage.sol";
+import {Storage as s, Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
 
-import {DeployConceroVerifier} from "../scripts/DeployConceroVerifier.s.sol";
-import {VerifierSlots, OperatorSlots, PriceFeedSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
-import {ConceroVerifierTest} from "../utils/ConceroVerifierTest.sol";
+import {VerifierSlots, OperatorSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
 
 contract VerifierStorage is ConceroVerifierTest {
     function setUp() public override {
         super.setUp();
-        deployScript = new DeployConceroVerifier();
-        address deployedProxy = deployScript.run();
-
-        conceroVerifierProxy = TransparentUpgradeableProxy(payable(deployedProxy));
-        conceroVerifier = ConceroVerifier(payable(deployScript.getProxy()));
     }
 
     function test_SetAndGetNonce() public {

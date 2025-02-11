@@ -3,45 +3,33 @@ pragma solidity 0.8.28;
 import {Vm} from "forge-std/src/Vm.sol";
 import {console} from "forge-std/src/Console.sol";
 
-import {Message, MessageConstants} from "../../../contracts/common/libraries/Message.sol";
-import {Types} from "../../../contracts/ConceroRouter/libraries/Types.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
-import {RouterSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
-import {ConceroTypes} from "../../../contracts/ConceroClient/ConceroTypes.sol";
-import {ConceroUtils} from "../../../contracts/ConceroClient/ConceroUtils.sol";
-import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
-import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
-import {Errors} from "../../../contracts/ConceroRouter/libraries/Errors.sol";
-import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
-import {Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
-import {ConceroRouterTest} from "../utils/ConceroRouterTest.sol";
+import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
+import {ConceroUtils} from "contracts/ConceroClient/ConceroUtils.sol";
+import {Message, MessageConstants} from "contracts/common/libraries/Message.sol";
+import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
+import {RouterSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
 contract SendMessage is ConceroRouterTest {
-    uint24 internal constant DST_CHAIN_SELECTOR = 8453;
-    uint256 public constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
-
     uint256 internal constant CLIENT_MESSAGE_CONFIG =
         (uint256(DST_CHAIN_SELECTOR) << MessageConstants.OFFSET_DST_CHAIN) | // dstChainSelector
             (1 << MessageConstants.OFFSET_MIN_SRC_CONF) | // minSrcConfirmations
             (1 << MessageConstants.OFFSET_MIN_DST_CONF) | // minDstConfirmations
             (0 << MessageConstants.OFFSET_RELAYER_CONF) | // relayerConfig
             (0 << MessageConstants.OFFSET_CALLBACKABLE) | // isCallbackable
-            (uint256(Types.FeeToken.native) << MessageConstants.OFFSET_FEE_TOKEN); // feeToken
+            (uint256(RouterTypes.FeeToken.native) << MessageConstants.OFFSET_FEE_TOKEN); // feeToken
 
     bytes internal dstChainData;
     bytes internal message;
 
     function setUp() public override {
         super.setUp();
-        deployScript = new DeployConceroRouter();
-        address deployedProxy = deployScript.run();
-
-        conceroRouterProxy = TransparentUpgradeableProxy(payable(deployedProxy));
-        conceroRouter = ConceroRouter(payable(deployScript.getProxy()));
 
         dstChainData = abi.encode(
-            Types.EvmDstChainData({receiver: address(0x456), gasLimit: 1_000_000})
+            RouterTypes.EvmDstChainData({receiver: address(0x456), gasLimit: 1_000_000})
         );
         message = "Test message";
 
@@ -94,7 +82,7 @@ contract SendMessage is ConceroRouterTest {
         );
 
         bytes memory srcChainData = abi.encode(
-            Types.EvmSrcChainData({sender: user, blockNumber: block.number})
+            RouterTypes.EvmSrcChainData({sender: user, blockNumber: block.number})
         );
 
         Vm.Log[] memory entries = vm.getRecordedLogs();

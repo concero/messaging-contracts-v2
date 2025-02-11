@@ -27,13 +27,13 @@ abstract contract Operator is CLF {
 
     function requestMessageReport(
         Types.MessageReportRequest calldata request
-    ) external onlyOperator {
+    ) external onlyOperator returns (bytes32) {
         require(
             !s.verifier().pendingMessageReports[request.messageId],
             Errors.MessageAlreadyProcessed()
         );
         s.verifier().pendingMessageReports[request.messageId] = true;
-        _requestMessageReport(request);
+        return _requestMessageReport(request);
     }
 
     /**

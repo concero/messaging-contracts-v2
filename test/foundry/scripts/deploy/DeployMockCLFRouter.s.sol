@@ -1,6 +1,6 @@
 pragma solidity 0.8.28;
 
-import "../../../contracts/mocks/MockCLFRouter.sol";
+import {MockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 import {Script} from "forge-std/src/Script.sol";
 
 contract DeployMockCLFRouter is Script {

@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
+import {console} from "forge-std/src/console.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {console} from "forge-std/src/console.sol";
 
-import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
-import {ConceroRouterTest} from "../utils/ConceroRouterTest.sol";
-import {Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
-import {OperatorSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
+import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
+import {OperatorSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 
 contract WithdrawOperatorFees is ConceroRouterTest {
     using SafeERC20 for IERC20;
-
-    uint256 public constant OPERATOR_FEES_NATIVE = 1 ether;
-    uint256 public constant TOTAL_FEES_NATIVE = 1 ether;
 
     function setUp() public override {
         super.setUp();
@@ -34,7 +31,7 @@ contract WithdrawOperatorFees is ConceroRouterTest {
             Namespaces.OPERATOR,
             OperatorSlots.totalFeesEarnedNative,
             bytes32(0),
-            TOTAL_FEES_NATIVE
+            OPERATOR_FEES_NATIVE
         );
         vm.stopPrank();
     }

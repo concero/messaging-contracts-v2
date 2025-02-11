@@ -1,9 +1,9 @@
 pragma solidity 0.8.28;
 
-import {Types} from "../../../contracts/ConceroVerifier/libraries/Types.sol";
-import {ConceroBaseScript} from "./ConceroBaseScript.s.sol";
+import {Types} from "contracts/ConceroVerifier/libraries/Types.sol";
+import {ConceroVerifierTest} from "../ConceroVerifier/base/ConceroVerifierTest.sol";
 
-contract ClfReportGenerator is ConceroBaseScript {
+contract MockCLFReport is ConceroVerifierTest {
     error IncorrectNumberOfSignatures();
     error UnauthorizedSigner(address signer);
     error DuplicateSignatureDetected(address signer);
@@ -83,7 +83,7 @@ contract ClfReportGenerator is ConceroBaseScript {
         Types.MessageReportResult memory result;
         result.version = 1;
         result.reportType = Types.CLFReportType.Message;
-        result.operator = 0x1111111111111111111111111111111111111111;
+        result.operator = operator;
         result.internalMessageConfig = bytes32("internalMessageConfig");
         result.messageId = bytes32("messageId");
         result.messageHashSum = bytes32("messageHashSum");

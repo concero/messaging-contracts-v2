@@ -7,10 +7,11 @@ abstract contract ConceroBaseScript is Script {
     address public immutable proxyDeployer;
 
     address public constant operator = address(0x1);
-    address public constant nonOperator = address(0x2);
     address public constant user = address(0x123);
+    address public usdc;
 
-    uint24 public constant chainSelector = 8453;
+    uint24 public constant SRC_CHAIN_SELECTOR = 8453;
+    uint24 public constant DST_CHAIN_SELECTOR = 8453;
 
     address public constant MOCK_DON_SIGNER_ADDRESS_0 = 0x0004C7EdCF9283D3bc3C1309939b3E887bb9d98b;
     address public constant MOCK_DON_SIGNER_ADDRESS_1 = 0x000437D9bE1C11B748e8B4C349b818eE82682E9f;
@@ -25,6 +26,11 @@ abstract contract ConceroBaseScript is Script {
         0x36c5485ba3a564b7753ea1f3ba81d8b574b8b31e97abd9053c8eee938a8abce8;
     uint256 public constant MOCK_DON_SIGNER_PRIVATE_KEY_3 =
         0x31ec7a7d750fd8fdb2f80d6ba2a426afab415a2000092bcf529e6002697b2e31;
+
+    uint256 internal constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
+    uint256 internal constant LAST_GAS_PRICE = 1e9;
+    uint256 public constant OPERATOR_FEES_NATIVE = 2 ether;
+    uint256 public constant OPERATOR_DEPOSIT_NATIVE = 3 ether;
 
     constructor() {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");

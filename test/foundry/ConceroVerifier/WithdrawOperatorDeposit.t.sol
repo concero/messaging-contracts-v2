@@ -1,73 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Vm} from "forge-std/src/Vm.sol";
 import {console} from "forge-std/src/Console.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
+import {Errors} from "contracts/ConceroVerifier/libraries/Errors.sol";
+import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
+import {OperatorSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
 
-import {ConceroVerifier} from "../../../contracts/ConceroVerifier/ConceroVerifier.sol";
-import {VerifierSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
-import {DeployConceroVerifier} from "../scripts/DeployConceroVerifier.s.sol";
-
-import {Constants} from "../../../contracts/common/Constants.sol";
-import {Utils as CommonUtils} from "../../../contracts/common/libraries/Utils.sol";
-import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
-import {Namespaces} from "../../../contracts/ConceroVerifier/libraries/Storage.sol";
-import {Types} from "../../../contracts/ConceroVerifier/libraries/Types.sol";
-import {Errors} from "../../../contracts/ConceroVerifier/libraries/Errors.sol";
-import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {ConceroVerifierTest} from "../utils/ConceroVerifierTest.sol";
-import {OperatorSlots, PriceFeedSlots} from "../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
-import {ConceroVerifierDeploymentVariables} from "../scripts/ConceroVerifierDeploymentVariables.sol";
-
-contract WithdrawOperatorDeposit is ConceroVerifierTest, ConceroVerifierDeploymentVariables {
-    uint256 public constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
-    uint256 public constant LAST_GAS_PRICE = 1_000_000 wei;
-    uint256 public constant OPERATOR_FEE_AMOUNT = 1 ether;
-
+contract WithdrawOperatorDeposit is ConceroVerifierTest {
     function setUp() public override {
         super.setUp();
-        deployScript = new DeployConceroVerifier();
-        address deployedProxy = deployScript.run();
-
-        conceroVerifierProxy = TransparentUpgradeableProxy(payable(deployedProxy));
-        conceroVerifier = ConceroVerifier(payable(deployScript.getProxy()));
 
         vm.deal(operator, 100 ether);
-
         bytes32 operatorKey = bytes32(uint256(uint160(operator)));
-
         vm.prank(deployer);
         conceroVerifier.setStorage(Namespaces.OPERATOR, OperatorSlots.isAllowed, operatorKey, 1);
-
         _setPriceFeeds();
-    }
-
-    function _setPriceFeeds() internal {
-        vm.startPrank(deployer);
-
-        conceroVerifier.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.nativeUsdRate,
-            bytes32(0),
-            NATIVE_USD_RATE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(chainSelector)),
-            LAST_GAS_PRICE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.nativeNativeRates,
-            bytes32(uint256(chainSelector)),
-            1e18
-        );
-
-        vm.stopPrank();
     }
 
     function test_OperatorDeposit() public {

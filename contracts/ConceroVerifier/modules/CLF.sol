@@ -6,21 +6,21 @@
  */
 pragma solidity 0.8.28;
 
-import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
-import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
-
-import {Constants} from "../../common/Constants.sol";
-import {CommonErrors} from "../../common/CommonErrors.sol";
-import {Decoder} from "../../common/libraries/Decoder.sol";
-
-import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
-import {Utils} from "../libraries/Utils.sol";
-import {Storage as s} from "../libraries/Storage.sol";
-import {Types} from "../libraries/Types.sol";
-import {Errors} from "../libraries/Errors.sol";
+import {Base} from "./Base.sol";
 
 import {CLFRequestError, MessageReport} from "../../interfaces/IConceroVerifier.sol";
-import {Base} from "./Base.sol";
+import {CommonErrors} from "../../common/CommonErrors.sol";
+import {Constants} from "../../common/Constants.sol";
+
+import {Decoder} from "../../common/libraries/Decoder.sol";
+import {Errors} from "../libraries/Errors.sol";
+import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
+import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
+import {Storage as s} from "../libraries/Storage.sol";
+
+import {Types} from "../libraries/Types.sol";
+import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
+import {Utils} from "../libraries/Utils.sol";
 import {console} from "hardhat/console.sol";
 
 abstract contract CLF is FunctionsClient, Base {
@@ -232,7 +232,10 @@ abstract contract CLF is FunctionsClient, Base {
 
     function getCLFDeposit() public view returns (uint256 depositNative) {
         uint256 lastGasPrice = s.priceFeed().lastGasPrices[i_chainSelector];
-        require(lastGasPrice > 0, Errors.NoGasPriceAvailable());
+        require(
+            lastGasPrice > 0,
+            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.lastGasPrice)
+        );
 
         uint256 gasCost = i_clfCallbackGasLimit * lastGasPrice;
 

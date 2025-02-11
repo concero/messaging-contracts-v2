@@ -1,24 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {GenericStorage} from "../../../contracts/common/libraries/GenericStorage.sol";
-import {Storage as s, Namespaces} from "../../../contracts/ConceroRouter/libraries/Storage.sol";
-import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
-import {CommonErrors} from "../../../contracts/common/CommonErrors.sol";
+import {GenericStorage} from "contracts/common/libraries/GenericStorage.sol";
+import {Storage as s, Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
 
-import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
-import {RouterSlots, PriceFeedSlots} from "../../../contracts/ConceroRouter/libraries/StorageSlots.sol";
-import {ConceroRouterTest} from "../utils/ConceroRouterTest.sol";
+import {RouterSlots, PriceFeedSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
 contract RouterStorage is ConceroRouterTest {
     function setUp() public override {
         super.setUp();
-        deployScript = new DeployConceroRouter();
-        address deployedProxy = deployScript.run();
-
-        conceroRouterProxy = TransparentUpgradeableProxy(payable(deployedProxy));
-        conceroRouter = ConceroRouter(payable(deployScript.getProxy()));
     }
 
     function test_SetAndGetNonce() public {

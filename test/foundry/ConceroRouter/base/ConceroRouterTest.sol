@@ -1,9 +1,9 @@
 pragma solidity 0.8.28;
 
-import {ConceroTest} from "./ConceroTest.sol";
-import {DeployConceroRouter} from "../scripts/DeployConceroRouter.s.sol";
-import {TransparentUpgradeableProxy} from "../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {ConceroRouter} from "../../../contracts/ConceroRouter/ConceroRouter.sol";
+import {ConceroTest} from "../../utils/ConceroTest.sol";
+import {DeployConceroRouter} from "../../scripts/deploy/DeployConceroRouter.s.sol";
+import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
+import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 
 abstract contract ConceroRouterTest is ConceroTest {
     DeployConceroRouter internal deployScript;
@@ -16,5 +16,6 @@ abstract contract ConceroRouterTest is ConceroTest {
 
         conceroRouterProxy = TransparentUpgradeableProxy(payable(deployedProxy));
         conceroRouter = ConceroRouter(payable(deployScript.getProxy()));
+        usdc = deployScript.usdc();
     }
 }

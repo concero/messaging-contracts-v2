@@ -1,7 +1,7 @@
 import { MessageReportResult } from "../types";
-import { MESSAGE_REPORT_RESULT_SIZES as SIZES } from "../constants/bitOffsets";
-import { MASKS } from "../../common/bitMasks";
-import { encodeUint256 } from "../../common/encoders";
+import { REPORT_BYTE_SIZES as SIZES } from "../constants/reportBytes";
+import { COMMON_REPORT_BYTE_SIZES as COMMON_SIZES } from "../../common/reportBytes";
+import { encodeUint256, packResponseConfig, hexToBytes, packUint16, packUint32 } from "../../common/encoders";
 
 /**
  * Packs the message report result into a binary format
@@ -9,50 +9,49 @@ import { encodeUint256 } from "../../common/encoders";
  * @returns Packed binary data as Uint8Array
  */
 export function packResult(result: MessageReportResult): Uint8Array {
-    const dstChainDataBytes = new Uint8Array(Buffer.from(result.dstChainData.replace(/^0x/, ""), "hex"));
-    const dstChainDataLength = dstChainDataBytes.length;
-    const operatorsLength = result.allowedOperators.length;
+    const dstChainDataBytes = hexToBytes(result.dstChainData);
+    const allowedOperatorsBytes = result.allowedOperators.map(hexToBytes);
 
-    const operatorBytes = new Uint8Array(Buffer.from(result.operator.replace(/^0x/, ""), "hex"));
-    const operatorLength = operatorBytes.length;
+    const bufferSize =
+        COMMON_SIZES.WORD + // reportResponseConfig
+        COMMON_SIZES.WORD + // internalMessageConfig
+        COMMON_SIZES.WORD + // messageId
+        COMMON_SIZES.WORD + // messageHashSum
+        COMMON_SIZES.ARRAY_LENGTH + // dstChainDataLength (uint32)
+        dstChainDataBytes.length +
+        SIZES.ALLOWED_OPERATORS_LENGTH + // allowedOperatorsLength (uint16)
+        allowedOperatorsBytes.length * SIZES.ALLOWED_OPERATORS;
 
+    const res = new Uint8Array(bufferSize);
     let offset = 0;
-    const res = new Uint8Array(
-        SIZES.DST_CHAIN_DATA_LENGTH +
-            dstChainDataLength +
-            SIZES.OPERATOR_LENGTH +
-            operatorLength +
-            SIZES.OPERATORS_COUNT +
-            operatorsLength * SIZES.OPERATOR_BYTES,
-    );
 
-    res[offset++] = result.version;
-    res[offset++] = result.reportType;
+    const fixedFields = [
+        packResponseConfig(result.reportType, result.version, result.requester),
+        BigInt(result.internalMessageConfig),
+        BigInt(result.messageId),
+        BigInt(result.messageHashSum),
+    ];
 
-    res.set(new Uint8Array([operatorLength]), offset);
-    offset += SIZES.OPERATOR_LENGTH;
-    res.set(operatorBytes, offset);
-    offset += operatorLength;
+    for (const field of fixedFields) {
+        res.set(encodeUint256(field), offset);
+        offset += COMMON_SIZES.WORD;
+    }
 
-    res.set(encodeUint256(BigInt(result.internalMessageConfig)), offset);
-    offset += 32;
-    res.set(encodeUint256(BigInt(result.messageId)), offset);
-    offset += 32;
-    res.set(encodeUint256(BigInt(result.messageHashSum)), offset);
-    offset += 32;
+    res.set(packUint32(dstChainDataBytes.length), offset);
+    offset += COMMON_SIZES.ARRAY_LENGTH;
 
-    res.set(new Uint8Array(new Uint32Array([dstChainDataLength]).buffer), offset);
-    offset += SIZES.DST_CHAIN_DATA_LENGTH;
     res.set(dstChainDataBytes, offset);
-    offset += dstChainDataLength;
+    offset += dstChainDataBytes.length;
 
-    res[offset++] = (operatorsLength & MASKS.UPPER_BYTE) >> MASKS.UPPER_BYTE_SHIFT;
-    res[offset++] = operatorsLength & MASKS.LOWER_BYTE;
+    res.set(packUint16(allowedOperatorsBytes.length), offset);
+    offset += SIZES.ALLOWED_OPERATORS_LENGTH;
 
-    for (const operator of result.allowedOperators) {
-        const operatorBytes = new Uint8Array(Buffer.from(operator.replace(/^0x/, ""), "hex"));
-        res.set(operatorBytes, offset);
-        offset += operatorBytes.length;
+    for (const operator of allowedOperatorsBytes) {
+        if (operator.length !== SIZES.ALLOWED_OPERATORS) {
+            throw new Error(`Invalid operator address length: ${operator.length}`);
+        }
+        res.set(operator, offset);
+        offset += SIZES.ALLOWED_OPERATORS;
     }
 
     return res;

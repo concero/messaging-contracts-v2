@@ -7,6 +7,7 @@
 pragma solidity 0.8.28;
 
 import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
+import {CommonTypes} from "../../common/CommonTypes.sol";
 
 import {Types} from "./Types.sol";
 
@@ -44,10 +45,10 @@ library Storage {
         uint256 totalDepositsNative;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
-        mapping(Types.ChainType => bytes[] operators) registeredOperators;
+        mapping(CommonTypes.ChainType => bytes[] operators) registeredOperators;
         mapping(address operator => bool) isAllowed;
         mapping(address operator => uint256 depositAmount) depositsNative;
-        mapping(address operator => mapping(Types.ChainType => bytes walletAddress)) walletAddress;
+        mapping(address operator => mapping(CommonTypes.ChainType => bytes walletAddress)) walletAddress;
         mapping(address operator => uint256) feesEarnedNative;
     }
 

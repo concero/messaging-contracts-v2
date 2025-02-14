@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {Constants} from "../Constants.sol";
+import {CommonConstants} from "../CommonConstants.sol";
 import {CommonErrors} from "../CommonErrors.sol";
 import {console} from "forge-std/src/console.sol";
 
@@ -90,7 +90,7 @@ library Utils {
             CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
         );
 
-        uint256 usdAmount = (uint256(bpsUSD) * 1e18) / Constants.BPS_DENOMINATOR;
+        uint256 usdAmount = (uint256(bpsUSD) * 1e18) / CommonConstants.BPS_DENOMINATOR;
 
         uint256 nativeAmount = (usdAmount * 1e18) / nativeUSDRate;
 

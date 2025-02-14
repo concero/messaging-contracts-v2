@@ -1,6 +1,10 @@
 pragma solidity 0.8.28;
 
+import {CommonTypes} from "contracts/common/CommonTypes.sol";
+import {ReportConfigBitOffsets} from "contracts/common/CommonConstants.sol";
+
 import {Types} from "contracts/ConceroVerifier/libraries/Types.sol";
+import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 import {ConceroVerifierTest} from "../ConceroVerifier/base/ConceroVerifierTest.sol";
 
 contract MockCLFReport is ConceroVerifierTest {
@@ -8,16 +12,8 @@ contract MockCLFReport is ConceroVerifierTest {
     error UnauthorizedSigner(address signer);
     error DuplicateSignatureDetected(address signer);
 
-    struct ClfDonReportSubmission {
-        bytes32[3] context;
-        bytes report;
-        bytes32[] rs;
-        bytes32[] ss;
-        bytes rawVs;
-    }
-
     function run() external {
-        ClfDonReportSubmission memory reportSubmission = createMessageReport();
+        RouterTypes.ClfDonReportSubmission memory reportSubmission = createMessageReport();
         _verifyClfReportSignatures(reportSubmission);
     }
 
@@ -27,7 +23,7 @@ contract MockCLFReport is ConceroVerifierTest {
      */
     function createMockClfReport(
         bytes memory _response
-    ) public pure returns (ClfDonReportSubmission memory reportSubmission) {
+    ) public pure returns (RouterTypes.ClfDonReportSubmission memory reportSubmission) {
         bytes32[3] memory context = [bytes32("context0"), bytes32("context1"), bytes32("context2")];
 
         bytes32[] memory requestIds = new bytes32[](1);
@@ -66,7 +62,7 @@ contract MockCLFReport is ConceroVerifierTest {
             rawVs[i] = bytes1(v - 27);
         }
 
-        reportSubmission = ClfDonReportSubmission({
+        reportSubmission = RouterTypes.ClfDonReportSubmission({
             context: context,
             report: reportBody,
             rs: rs,
@@ -80,32 +76,48 @@ contract MockCLFReport is ConceroVerifierTest {
      * @return response The encoded message report response.
      */
     function getMockMessageReportResponse() internal pure returns (bytes memory response) {
-        Types.MessageReportResult memory result;
-        result.version = 1;
-        result.reportType = Types.CLFReportType.Message;
-        result.operator = operator;
-        result.internalMessageConfig = bytes32("internalMessageConfig");
+        CommonTypes.MessageReportResult memory result;
+
+        address requester = address(0x1234567890123456789012345678901234567890);
+
+        result.reportConfig =
+            (uint256(uint8(CommonTypes.CLFReportType.Message)) <<
+                (ReportConfigBitOffsets.OFFSET_REPORT_TYPE)) |
+            (uint256(1) << (ReportConfigBitOffsets.OFFSET_VERSION)) |
+            (uint256(uint160(requester))); // last 20 bytes
+
+        result.internalMessageConfig = INTERNAL_MESSAGE_CONFIG;
         result.messageId = bytes32("messageId");
         result.messageHashSum = bytes32("messageHashSum");
-        result.dstChainData = "dstChain"; // Example dynamic data.
+        result.dstChainData = "dstChain";
         result.allowedOperators = new bytes[](1);
-        result.allowedOperators[0] = abi.encodePacked(operator);
+        result.allowedOperators[0] = abi.encodePacked(
+            address(0x3333333333333333333333333333333333333333)
+        );
 
         response = abi.encode(result);
     }
 
     /**
      * @notice Returns a mock operator registration response using the OperatorRegistrationResult struct.
+     * @param operator The address of the operator
      * @return response The encoded operator registration report response.
      */
-    function getMockOperatorRegistrationResponse() internal pure returns (bytes memory response) {
+    function getMockOperatorRegistrationResponse(
+        address operator
+    ) internal pure returns (bytes memory response) {
         Types.OperatorRegistrationResult memory result;
-        result.version = 1;
-        // reportType is stored as a uint8; here we encode CLFReportType.OperatorRegistration.
-        result.reportType = uint8(Types.CLFReportType.OperatorRegistration);
-        result.operator = 0x3333333333333333333333333333333333333333;
-        result.operatorChains = new Types.ChainType[](1);
-        result.operatorChains[0] = Types.ChainType.EVM;
+
+        address requester = address(0x1234567890123456789012345678901234567890);
+
+        result.reportConfig =
+            (uint256(uint8(CommonTypes.CLFReportType.OperatorRegistration)) <<
+                (ReportConfigBitOffsets.OFFSET_REPORT_TYPE)) |
+            (uint256(1) << (ReportConfigBitOffsets.OFFSET_VERSION)) |
+            (uint256(uint160(requester))); // last 20 bytes
+
+        result.operatorChains = new CommonTypes.ChainType[](1);
+        result.operatorChains[0] = CommonTypes.ChainType.EVM;
         result.operatorActions = new Types.OperatorRegistrationAction[](1);
         result.operatorActions[0] = Types.OperatorRegistrationAction.Register;
         result.operatorAddresses = new bytes[](1);
@@ -120,7 +132,10 @@ contract MockCLFReport is ConceroVerifierTest {
      * @notice Creates a mock CLF report for a message report.
      * @return reportSubmission The constructed CLF report submission with a message report response.
      */
-    function createMessageReport() public returns (ClfDonReportSubmission memory reportSubmission) {
+    function createMessageReport()
+        public
+        returns (RouterTypes.ClfDonReportSubmission memory reportSubmission)
+    {
         bytes memory response = getMockMessageReportResponse();
         reportSubmission = createMockClfReport(response);
     }
@@ -131,9 +146,9 @@ contract MockCLFReport is ConceroVerifierTest {
      */
     function createOperatorRegistrationReport()
         public
-        returns (ClfDonReportSubmission memory reportSubmission)
+        returns (RouterTypes.ClfDonReportSubmission memory reportSubmission)
     {
-        bytes memory response = getMockOperatorRegistrationResponse();
+        bytes memory response = getMockOperatorRegistrationResponse(operator);
         reportSubmission = createMockClfReport(response);
     }
 
@@ -159,7 +174,7 @@ contract MockCLFReport is ConceroVerifierTest {
      * @param reportSubmission The report submission data.
      */
     function _verifyClfReportSignatures(
-        ClfDonReportSubmission memory reportSubmission
+        RouterTypes.ClfDonReportSubmission memory reportSubmission
     ) internal view {
         bytes32 clfReportHash = _computeCLFReportHash(
             reportSubmission.context,

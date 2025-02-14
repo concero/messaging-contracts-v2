@@ -9,10 +9,14 @@ pragma solidity 0.8.28;
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {Message as MessageLib, MessageConstants} from "../../common/libraries/Message.sol";
-import {Constants} from "../../common/Constants.sol";
+import {Message as MessageLib, MessageConfigBitOffsets} from "../../common/libraries/Message.sol";
+import {Decoder as DecoderLib} from "../../common/libraries/Decoder.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
+
+import {CommonConstants} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
+import {CommonTypes} from "../../common/CommonTypes.sol";
+
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 
@@ -31,6 +35,7 @@ library Errors {
     error InvalidReceiver();
     error InvalidMessageHashSum();
 }
+
 abstract contract Message is ClfSigner, IConceroRouter {
     using SafeERC20 for IERC20;
     using s for s.Router;
@@ -66,24 +71,28 @@ abstract contract Message is ClfSigner, IConceroRouter {
      * @param message the message data.
      */
     function submitMessageReport(
-        ClfDonReportSubmission calldata reportSubmission,
+        Types.ClfDonReportSubmission calldata reportSubmission,
         bytes calldata message
     ) external {
+        //todo: only allowlisted operator may fulfill
         _verifyClfReportSignatures(reportSubmission);
 
-        bytes memory messageReportResponse = _extractClfReportResult(reportSubmission.report);
+        bytes memory clfReportResult = _extractClfReportResult(reportSubmission.report); //raw message bytes
 
-        (
-            Types.InternalMessageConfig memory decodedMessageConfig,
-            bytes32 messageId,
-            bytes32 messageHashSum,
-            bytes memory dstChainData
-        ) = MessageLib._decodeMessage(messageReportResponse);
+        CommonTypes.MessageReportResult memory decodedMessageReportResult = DecoderLib
+            ._decodeCLFMessageReportResponse(clfReportResult);
 
-        require(messageHashSum == keccak256(message), Errors.InvalidMessageHashSum());
+        require(
+            decodedMessageReportResult.messageHashSum == keccak256(message),
+            Errors.InvalidMessageHashSum()
+        );
 
-        emit ConceroMessageReceived(messageId);
-        deliverMessage(messageId, dstChainData, message);
+        emit ConceroMessageReceived(decodedMessageReportResult.messageId);
+        deliverMessage(
+            decodedMessageReportResult.messageId,
+            decodedMessageReportResult.dstChainData,
+            message
+        );
     }
 
     /**
@@ -127,7 +136,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         }
 
         s.operator().feesEarnedNative[msg.sender] += CommonUtils.convertUsdBpsToNative(
-            Constants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
+            CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
             s.priceFeed().nativeUsdRate
         );
 
@@ -137,7 +146,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
     /* INTERNAL FUNCTIONS */
     function _collectMessageFee(uint256 clientMessageConfig, bytes memory dstChainData) internal {
         Types.FeeToken feeToken = Types.FeeToken(
-            uint8(clientMessageConfig >> MessageConstants.OFFSET_FEE_TOKEN)
+            uint8(clientMessageConfig >> MessageConfigBitOffsets.OFFSET_FEE_TOKEN)
         );
 
         uint256 messageFee = _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
@@ -165,10 +174,12 @@ abstract contract Message is ClfSigner, IConceroRouter {
             (Types.EvmDstChainData)
         );
 
-        uint24 dstChainSelector = uint24(clientMessageConfig >> MessageConstants.OFFSET_DST_CHAIN);
+        uint24 dstChainSelector = uint24(
+            clientMessageConfig >> MessageConfigBitOffsets.OFFSET_DST_CHAIN
+        );
 
         uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
-            Constants.CONCERO_MESSAGE_BASE_FEE_BPS_USD,
+            CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD,
             nativeUsdRate
         );
 
@@ -206,7 +217,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         bytes memory dstChainData
     ) external view returns (uint256) {
         Types.FeeToken feeToken = Types.FeeToken(
-            uint8(clientMessageConfig >> MessageConstants.OFFSET_FEE_TOKEN)
+            uint8(clientMessageConfig >> MessageConfigBitOffsets.OFFSET_FEE_TOKEN)
         );
         require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
@@ -217,7 +228,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         bytes memory dstChainData
     ) external view returns (uint256) {
         Types.FeeToken feeToken = Types.FeeToken(
-            uint8(clientMessageConfig >> MessageConstants.OFFSET_FEE_TOKEN)
+            uint8(clientMessageConfig >> MessageConfigBitOffsets.OFFSET_FEE_TOKEN)
         );
         require(feeToken == Types.FeeToken.usdc, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);

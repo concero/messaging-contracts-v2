@@ -1,6 +1,6 @@
 import { encodeAbiParameters } from "viem";
 import { main } from "./index";
-import { INTERNAL_MESSAGE_CONFIG_OFFSETS as OFFSETS } from "./constants/bitOffsets";
+import { INTERNAL_MESSAGE_CONFIG_OFFSETS as OFFSETS } from "./constants/internalMessageConfig";
 const INTERNAL_MESSAGE_CONFIG = 452312875543266115865028960902504686384011240534399916070534913969327439872n;
 
 async function test() {

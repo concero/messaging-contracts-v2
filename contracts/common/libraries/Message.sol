@@ -7,30 +7,11 @@
 pragma solidity 0.8.28;
 
 import {Types} from "../../ConceroRouter/libraries/Types.sol";
+import {CommonTypes} from "../../common/CommonTypes.sol";
+import {CommonConstants, MessageConfigBitOffsets, ReportByteSizes} from "../../common/CommonConstants.sol";
 import {SupportedChains} from "./SupportedChains.sol";
 
-library MessageConstants {
-    uint8 internal constant VERSION = 1;
-    uint256 internal constant MESSAGE_BASE_FEE_USD = 1e18 / 100; // 0.01 USD
-    uint256 internal constant MAX_MESSAGE_SIZE = 1e6; // 1 MB
-
-    /* MESSAGE CONFIG OFFSETS */
-    uint8 internal constant OFFSET_VERSION = 248;
-    uint8 internal constant OFFSET_SRC_CHAIN = 224;
-    uint8 internal constant OFFSET_DST_CHAIN = 192;
-    uint8 internal constant OFFSET_MIN_SRC_CONF = 176;
-    uint8 internal constant OFFSET_MIN_DST_CONF = 160;
-    uint8 internal constant OFFSET_RELAYER_CONF = 152;
-    uint8 internal constant OFFSET_CALLBACKABLE = 151;
-    uint8 internal constant OFFSET_FEE_TOKEN = 143;
-
-    /* MESSAGE REPORT SIZES */
-    uint8 internal constant ADDRESS_LENGTH = 20;
-    uint8 internal constant WORD_SIZE = 32;
-    uint8 internal constant UINT32_SIZE = 4;
-    uint8 internal constant UINT16_SIZE = 2;
-    uint8 internal constant BYTES_ARRAY_LENGTH_SLOT = 32;
-}
+import {console} from "forge-std/src/console.sol";
 
 library Message {
     enum MessageConfigErrorType {
@@ -60,7 +41,7 @@ library Message {
     ) internal pure {
         validateClientMessageConfig(config, chainSelector);
         require(dstChainData.length > 0, InvalidDstChainData());
-        require(message.length < MessageConstants.MAX_MESSAGE_SIZE, MessageTooLarge());
+        require(message.length < CommonConstants.MESSAGE_MAX_SIZE, MessageTooLarge());
     }
 
     function validateInternalMessage(
@@ -74,12 +55,19 @@ library Message {
     }
 
     function validateClientMessageConfig(uint256 clientConfig, uint24 chainSelector) internal pure {
-        uint24 dstChainSelector = uint24(clientConfig >> MessageConstants.OFFSET_DST_CHAIN);
-        uint16 minSrcConfirmations = uint16(clientConfig >> MessageConstants.OFFSET_MIN_SRC_CONF);
-        uint16 minDstConfirmations = uint16(clientConfig >> MessageConstants.OFFSET_MIN_DST_CONF);
-        uint8 additionalRelayers = uint8(clientConfig >> MessageConstants.OFFSET_RELAYER_CONF);
-        bool isCallbackable = ((clientConfig >> MessageConstants.OFFSET_CALLBACKABLE) & 1) != 0;
-        uint8 feeToken = uint8(clientConfig >> MessageConstants.OFFSET_FEE_TOKEN);
+        uint24 dstChainSelector = uint24(clientConfig >> MessageConfigBitOffsets.OFFSET_DST_CHAIN);
+        uint16 minSrcConfirmations = uint16(
+            clientConfig >> MessageConfigBitOffsets.OFFSET_MIN_SRC_CONF
+        );
+        uint16 minDstConfirmations = uint16(
+            clientConfig >> MessageConfigBitOffsets.OFFSET_MIN_DST_CONF
+        );
+        uint8 additionalRelayers = uint8(
+            clientConfig >> MessageConfigBitOffsets.OFFSET_RELAYER_CONF
+        );
+        bool isCallbackable = ((clientConfig >> MessageConfigBitOffsets.OFFSET_CALLBACKABLE) & 1) !=
+            0;
+        uint8 feeToken = uint8(clientConfig >> MessageConfigBitOffsets.OFFSET_FEE_TOKEN);
 
         require(
             SupportedChains.isChainSupported(dstChainSelector),
@@ -106,12 +94,12 @@ library Message {
     }
 
     function validateInternalMessageConfig(uint256 config) private pure {
-        uint8 version = uint8(config >> MessageConstants.OFFSET_VERSION);
-        uint8 relayerConfig = uint8(config >> MessageConstants.OFFSET_RELAYER_CONF);
-        uint16 minSrcConfirmations = uint16(config >> MessageConstants.OFFSET_MIN_SRC_CONF);
-        uint16 minDstConfirmations = uint16(config >> MessageConstants.OFFSET_MIN_DST_CONF);
-        uint24 srcChainSelector = uint24(config >> MessageConstants.OFFSET_SRC_CHAIN);
-        uint24 dstChainSelector = uint24(config >> MessageConstants.OFFSET_DST_CHAIN);
+        uint8 version = uint8(config >> MessageConfigBitOffsets.OFFSET_VERSION);
+        uint8 relayerConfig = uint8(config >> MessageConfigBitOffsets.OFFSET_RELAYER_CONF);
+        uint16 minSrcConfirmations = uint16(config >> MessageConfigBitOffsets.OFFSET_MIN_SRC_CONF);
+        uint16 minDstConfirmations = uint16(config >> MessageConfigBitOffsets.OFFSET_MIN_DST_CONF);
+        uint24 srcChainSelector = uint24(config >> MessageConfigBitOffsets.OFFSET_SRC_CHAIN);
+        uint24 dstChainSelector = uint24(config >> MessageConfigBitOffsets.OFFSET_DST_CHAIN);
 
         require(
             version > 0,
@@ -147,8 +135,10 @@ library Message {
         validateClientMessageConfig(clientMessageConfig, srcChainSelector);
 
         uint256 config = clientMessageConfig;
-        config |= uint256(MessageConstants.VERSION) << MessageConstants.OFFSET_VERSION;
-        config |= uint256(srcChainSelector) << MessageConstants.OFFSET_SRC_CHAIN;
+        config |=
+            uint256(CommonConstants.MESSAGE_VERSION) <<
+            MessageConfigBitOffsets.OFFSET_VERSION;
+        config |= uint256(srcChainSelector) << MessageConfigBitOffsets.OFFSET_SRC_CHAIN;
         return config;
     }
 
@@ -190,153 +180,5 @@ library Message {
             keccak256(
                 abi.encodePacked(nonce, blockNumber, sender, chainSelector, internalMessageConfig)
             );
-    }
-
-    /* DECODE FUNCTIONS (MAY NOT BE NEEDED)*/
-    function decodeInternalMessageConfig(
-        uint256 config
-    ) private pure returns (Types.InternalMessageConfig memory) {
-        return
-            Types.InternalMessageConfig({
-                version: uint8(config >> MessageConstants.OFFSET_VERSION),
-                srcChainSelector: uint24(config >> MessageConstants.OFFSET_SRC_CHAIN),
-                dstChainSelector: uint24(config >> MessageConstants.OFFSET_DST_CHAIN),
-                minSrcConfirmations: uint16(config >> MessageConstants.OFFSET_MIN_SRC_CONF),
-                minDstConfirmations: uint16(config >> MessageConstants.OFFSET_MIN_DST_CONF),
-                relayerConfig: uint8(config >> MessageConstants.OFFSET_RELAYER_CONF),
-                isCallbackable: (config & (1 << MessageConstants.OFFSET_CALLBACKABLE)) != 0
-            });
-    }
-
-    /**
-     * @notice Decodes a packed message report result
-     * @param packedResult The packed binary data
-     * @return version The version number
-     * @return reportType The type of report
-     * @return operator The operator address
-     * @return internalMessageConfig The internal message configuration
-     * @return messageId The message ID
-     * @return messageHashSum The message hash sum
-     * @return dstChainData The destination chain data
-     * @return allowedOperators Array of allowed operator addresses
-     */
-    function decodeResult(
-        bytes memory packedResult
-    )
-        public
-        pure
-        returns (
-            uint8 version,
-            uint8 reportType,
-            address operator,
-            uint256 internalMessageConfig,
-            bytes32 messageId,
-            uint256 messageHashSum,
-            bytes memory dstChainData,
-            address[] memory allowedOperators
-        )
-    {
-        // Cache constants in local variables for assembly access
-        uint256 bytesArrayLengthSlot = uint256(MessageConstants.BYTES_ARRAY_LENGTH_SLOT);
-        uint256 addressLength = uint256(MessageConstants.ADDRESS_LENGTH);
-        uint256 wordSize = uint256(MessageConstants.WORD_SIZE);
-        uint256 uint32Size = uint256(MessageConstants.UINT32_SIZE);
-        uint256 uint16Size = uint256(MessageConstants.UINT16_SIZE);
-
-        uint256 offset = 0;
-
-        // Decode operator address
-        uint8 operatorLength = uint8(packedResult[offset++]);
-        require(
-            operatorLength == MessageConstants.ADDRESS_LENGTH,
-            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidOperatorLength)
-        );
-
-        bytes32 operatorBytes;
-        assembly {
-            operatorBytes := mload(add(add(packedResult, bytesArrayLengthSlot), offset))
-        }
-        offset += addressLength;
-
-        // Decode 32-byte values using wordSize
-        assembly {
-            internalMessageConfig := mload(add(add(packedResult, bytesArrayLengthSlot), offset))
-        }
-        offset += wordSize;
-
-        // Decode dstChainData length
-        uint32 dstChainDataLength;
-        assembly {
-            let lengthPtr := add(add(packedResult, bytesArrayLengthSlot), offset)
-            dstChainDataLength := and(mload(lengthPtr), 0xffffffff)
-        }
-        offset += uint32Size;
-
-        // Decode operators count
-        uint16 operatorsCount;
-        assembly {
-            let countPtr := add(add(packedResult, bytesArrayLengthSlot), offset)
-            operatorsCount := and(mload(countPtr), 0xffff)
-        }
-        offset += uint16Size;
-
-        // Decode allowed operators
-        allowedOperators = new address[](operatorsCount);
-        for (uint i = 0; i < operatorsCount; i++) {
-            bytes32 addrBytes;
-            assembly {
-                addrBytes := mload(add(add(packedResult, bytesArrayLengthSlot), offset))
-            }
-            allowedOperators[i] = address(uint160(uint256(addrBytes)));
-            offset += addressLength;
-        }
-
-        return (
-            version,
-            reportType,
-            operator,
-            internalMessageConfig,
-            bytes32(messageId),
-            messageHashSum,
-            dstChainData,
-            allowedOperators
-        );
-    }
-
-    /**
-     * @notice Decodes the complete message including internal config
-     * @param packedResult The packed binary data
-     * @return decodedMessageConfig The decoded internal message configuration
-     * @return messageId The id of the message
-     * @return messageHashSum The message hash sum
-     * @return dstChainData The destination chain data
-     */
-    function _decodeMessage(
-        bytes memory packedResult
-    )
-        internal
-        pure
-        returns (
-            Types.InternalMessageConfig memory decodedMessageConfig,
-            bytes32 messageId,
-            bytes32 messageHashSum,
-            bytes memory dstChainData
-        )
-    {
-        (
-            ,
-            ,
-            ,
-            uint256 internalMessageConfig,
-            bytes32 messageId,
-            uint256 hashSum,
-            bytes memory dstChainData,
-
-        ) = decodeResult(packedResult);
-
-        decodedMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
-        messageHashSum = bytes32(hashSum);
-
-        //        dstData = Types.EvmDstChainData({receiver: address(0), gasLimit: 0});
     }
 }

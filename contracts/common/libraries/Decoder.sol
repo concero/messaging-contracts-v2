@@ -5,81 +5,82 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-import {Types} from "../../ConceroVerifier/libraries/Types.sol";
 
-library MessageConstants {
-    uint8 internal constant SIZE_VERSION = 1;
-    uint8 internal constant SIZE_REPORT_TYPE = 1;
-    uint8 internal constant SIZE_OPERATOR = 32;
-    uint8 internal constant SIZE_INTERNAL_MESSAGE_CONFIG = 32;
-    uint8 internal constant SIZE_MESSAGE_ID = 32;
-    uint8 internal constant SIZE_MESSAGE_HASH_SUM = 32;
-    uint8 internal constant SIZE_DST_CHAIN_DATA_LENGTH = 4;
-    uint8 internal constant SIZE_OPERATOR_COUNT = 2;
-    uint8 internal constant SIZE_OPERATOR_ENTRY = 32;
-}
+import {CommonTypes} from "../CommonTypes.sol";
+import {MessageConfigBitOffsets, ReportConfigBitOffsets, ReportByteSizes} from "../CommonConstants.sol";
+import {ReportByteSizes} from "contracts/common/CommonConstants.sol";
 
-library OperatorConstants {
-    uint8 internal constant SIZE_VERSION = 1;
-    uint8 internal constant SIZE_REPORT_TYPE = 1;
-    uint8 internal constant SIZE_OPERATOR = 32;
-    uint8 internal constant SIZE_CHAIN_TYPES_LENGTH = 4;
-    uint8 internal constant SIZE_OPERATOR_ADDRESSES_LENGTH = 4;
-    uint8 internal constant SIZE_OPERATOR_ACTIONS_LENGTH = 4;
-}
+import {Types as RouterTypes} from "../../ConceroRouter/libraries/Types.sol";
+import {Types as VerifierTypes} from "../../ConceroVerifier/libraries/Types.sol";
 
 library Decoder {
+    //TODO: use offsets consts
+    function _decodeCLFReportConfig(
+        uint256 reportConfig
+    ) internal pure returns (uint8 reportType, uint8 version, address requester) {
+        uint256 BYTE_MASK = 0xFF;
+
+        reportType = uint8((reportConfig >> ReportConfigBitOffsets.OFFSET_REPORT_TYPE) & BYTE_MASK);
+        version = uint8((reportConfig >> ReportConfigBitOffsets.OFFSET_VERSION) & BYTE_MASK);
+        requester = address(uint160(reportConfig));
+    }
+
+    function decodeInternalMessageConfig(
+        uint256 config
+    ) private pure returns (RouterTypes.InternalMessageConfig memory) {
+        return
+            RouterTypes.InternalMessageConfig({
+                version: uint8(config >> MessageConfigBitOffsets.OFFSET_VERSION),
+                srcChainSelector: uint24(config >> MessageConfigBitOffsets.OFFSET_SRC_CHAIN),
+                dstChainSelector: uint24(config >> MessageConfigBitOffsets.OFFSET_DST_CHAIN),
+                minSrcConfirmations: uint16(config >> MessageConfigBitOffsets.OFFSET_MIN_SRC_CONF),
+                minDstConfirmations: uint16(config >> MessageConfigBitOffsets.OFFSET_MIN_DST_CONF),
+                relayerConfig: uint8(config >> MessageConfigBitOffsets.OFFSET_RELAYER_CONF),
+                isCallbackable: (config & (1 << MessageConfigBitOffsets.OFFSET_CALLBACKABLE)) != 0
+            });
+    }
+
     function _decodeCLFMessageReportResponse(
         bytes memory response
-    ) internal pure returns (Types.MessageReportResult memory) {
+    ) internal pure returns (CommonTypes.MessageReportResult memory) {
         uint256 offset = 0;
-        uint8 version;
-        uint8 reportType;
-        address operator;
+        uint256 reportConfig;
         bytes32 internalMessageConfig;
         bytes32 messageId;
         bytes32 messageHashSum;
         uint32 dstChainDataLength;
         bytes memory dstChainData;
-        uint16 allowedOperatorsCount;
+        uint16 allowedOperatorsLength;
         bytes32[] memory rawAllowedOperators;
         bytes[] memory allowedOperators;
 
-        uint8 size_version = MessageConstants.SIZE_VERSION;
-        uint8 size_report_type = MessageConstants.SIZE_REPORT_TYPE;
-        uint8 size_operator = MessageConstants.SIZE_OPERATOR;
-        uint8 size_internal_message_config = MessageConstants.SIZE_INTERNAL_MESSAGE_CONFIG;
-        uint8 size_message_id = MessageConstants.SIZE_MESSAGE_ID;
-        uint8 size_message_hash_sum = MessageConstants.SIZE_MESSAGE_HASH_SUM;
-        uint8 size_dst_chain_data_length = MessageConstants.SIZE_DST_CHAIN_DATA_LENGTH;
-        uint8 size_operator_count = MessageConstants.SIZE_OPERATOR_COUNT;
-        uint8 size_operator_entry = MessageConstants.SIZE_OPERATOR_ENTRY;
+        uint8 size_report_config = ReportByteSizes.SIZE_WORD;
+        uint8 size_internal_message_config = ReportByteSizes.SIZE_INTERNAL_MESSAGE_CONFIG;
+        uint8 size_message_id = ReportByteSizes.SIZE_MESSAGE_ID;
+        uint8 size_message_hash_sum = ReportByteSizes.SIZE_MESSAGE_HASH_SUM;
+        uint8 size_dst_chain_data_length = ReportByteSizes.SIZE_DST_CHAIN_DATA_LENGTH;
+        uint8 size_allowed_operators_length = ReportByteSizes.SIZE_ALLOWED_OPERATORS_LENGTH;
+        uint8 size_allowed_operator = ReportByteSizes.SIZE_ALLOWED_OPERATOR;
 
         assembly {
-            // Read version (1 byte) and reportType (1 byte)
-            version := byte(0, mload(add(response, offset)))
-            reportType := byte(1, mload(add(response, offset)))
-            offset := add(offset, size_version)
-            offset := add(offset, size_report_type)
-
-            // Read operator (20 bytes padded to 32 bytes)
-            operator := shr(96, mload(add(response, offset)))
-            offset := add(offset, size_operator)
+            // Read reportConfig (32 bytes for uint256)
+            reportConfig := mload(add(response, add(offset, 32)))
+            offset := add(offset, size_report_config)
 
             // Read internalMessageConfig (32 bytes)
-            internalMessageConfig := mload(add(response, offset))
+            internalMessageConfig := mload(add(response, add(offset, 32)))
             offset := add(offset, size_internal_message_config)
 
             // Read messageId (32 bytes)
-            messageId := mload(add(response, offset))
+            messageId := mload(add(response, add(offset, 32)))
             offset := add(offset, size_message_id)
 
             // Read messageHashSum (32 bytes)
-            messageHashSum := mload(add(response, offset))
+            messageHashSum := mload(add(response, add(offset, 32)))
             offset := add(offset, size_message_hash_sum)
 
             // Read dstChainData length (4 bytes as uint32)
-            dstChainDataLength := shr(224, mload(add(response, offset)))
+            dstChainDataLength := shr(224, mload(add(response, add(offset, 32))))
             offset := add(offset, size_dst_chain_data_length)
         }
 
@@ -90,21 +91,21 @@ library Decoder {
         offset += dstChainDataLength;
 
         assembly {
-            allowedOperatorsCount := shr(240, mload(add(response, offset)))
-            offset := add(offset, size_operator_count)
+            allowedOperatorsLength := shr(240, mload(add(response, add(0x20, offset))))
+            offset := add(offset, size_allowed_operators_length)
         }
 
-        rawAllowedOperators = new bytes32[](allowedOperatorsCount);
-        for (uint16 i = 0; i < allowedOperatorsCount; i++) {
+        rawAllowedOperators = new bytes32[](allowedOperatorsLength);
+        for (uint16 i = 0; i < allowedOperatorsLength; i++) {
             assembly {
-                let operatorValue := mload(add(response, offset))
+                let operatorValue := mload(add(response, add(offset, 32)))
                 mstore(add(add(rawAllowedOperators, 0x20), mul(i, 0x20)), operatorValue)
             }
-            offset += size_operator_entry;
+            offset += size_allowed_operator;
         }
 
-        allowedOperators = new bytes[](allowedOperatorsCount);
-        for (uint16 i = 0; i < allowedOperatorsCount; i++) {
+        allowedOperators = new bytes[](allowedOperatorsLength);
+        for (uint16 i = 0; i < allowedOperatorsLength; i++) {
             bytes memory operatorBytes = new bytes(32);
             assembly {
                 mstore(
@@ -116,11 +117,9 @@ library Decoder {
         }
 
         return
-            Types.MessageReportResult({
-                version: version,
-                reportType: Types.CLFReportType(reportType),
-                operator: operator,
-                internalMessageConfig: internalMessageConfig,
+            CommonTypes.MessageReportResult({
+                reportConfig: reportConfig,
+                internalMessageConfig: uint256(internalMessageConfig),
                 messageId: messageId,
                 messageHashSum: messageHashSum,
                 dstChainData: dstChainData,
@@ -130,19 +129,19 @@ library Decoder {
 
     function _decodeCLFOperatorRegistrationReport(
         bytes memory response
-    ) internal pure returns (Types.OperatorRegistrationResult memory) {
-        Types.OperatorRegistrationResult memory result;
+    ) internal pure returns (VerifierTypes.OperatorRegistrationResult memory) {
+        VerifierTypes.OperatorRegistrationResult memory result;
         uint256 offset = 0;
         uint32 chainTypesLength;
         uint32 operatorAddressesLength;
         uint32 operatorActionsLength;
 
-        uint8 size_version = OperatorConstants.SIZE_VERSION;
-        uint8 size_report_type = OperatorConstants.SIZE_REPORT_TYPE;
-        uint8 size_operator = OperatorConstants.SIZE_OPERATOR;
-        uint8 size_chain_types_length = OperatorConstants.SIZE_CHAIN_TYPES_LENGTH;
-        uint8 size_operator_actions_length = OperatorConstants.SIZE_OPERATOR_ACTIONS_LENGTH;
-        uint8 size_operator_addresses_length = OperatorConstants.SIZE_OPERATOR_ADDRESSES_LENGTH;
+        uint8 size_version = ReportByteSizes.SIZE_VERSION;
+        uint8 size_report_type = ReportByteSizes.SIZE_REPORT_TYPE;
+        uint8 size_operator = ReportByteSizes.SIZE_OPERATOR;
+        uint8 size_chain_types_length = ReportByteSizes.SIZE_ARRAY_LENGTH;
+        uint8 size_operator_actions_length = ReportByteSizes.SIZE_ARRAY_LENGTH;
+        uint8 size_operator_addresses_length = ReportByteSizes.SIZE_ARRAY_LENGTH;
 
         assembly {
             let dataWord := mload(add(response, add(32, offset)))
@@ -158,10 +157,11 @@ library Decoder {
             offset := add(offset, size_chain_types_length)
         }
 
-        result.operatorChains = new Types.ChainType[](chainTypesLength);
+        result.operatorChains = new CommonTypes.ChainType[](chainTypesLength);
         for (uint256 i = 0; i < chainTypesLength; i++) {
-            result.operatorChains[i] = Types.ChainType(uint8(response[offset + i]));
+            result.operatorChains[i] = CommonTypes.ChainType(uint8(response[offset + i]));
         }
+
         offset += chainTypesLength;
 
         assembly {
@@ -169,9 +169,11 @@ library Decoder {
             offset := add(offset, size_operator_actions_length)
         }
 
-        result.operatorActions = new Types.OperatorRegistrationAction[](operatorActionsLength);
+        result.operatorActions = new VerifierTypes.OperatorRegistrationAction[](
+            operatorActionsLength
+        );
         for (uint256 i = 0; i < operatorActionsLength; i++) {
-            result.operatorActions[i] = Types.OperatorRegistrationAction(
+            result.operatorActions[i] = VerifierTypes.OperatorRegistrationAction(
                 uint8(response[offset + i])
             );
         }

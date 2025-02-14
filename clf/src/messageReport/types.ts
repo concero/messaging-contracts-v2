@@ -24,14 +24,17 @@ interface DecodedArgs {
 }
 
 interface MessageReportResult {
-    version: nu;
-    mber;
-    reportType: number;
-    operator: Address;
+    reportType: number; //                ─╮
+    version: number; //                    │ Report Response Config
+    // 10 bytes reserved for future use    │ Packed as a uint256
+    requester: Address; //                ─╯
+
     internalMessageConfig: string;
     messageId: Hash;
     messageHashSum: Hash;
+    dstChainDataLength: number;
     dstChainData: string;
+    allowedOperatorsLength: number;
     allowedOperators: string[];
 }
 

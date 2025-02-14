@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {MessageConstants as MCC} from "../common/libraries/Message.sol";
+import {MessageConfigBitOffsets as MCC} from "../common/libraries/Message.sol";
 import {ConceroTypes} from "./ConceroTypes.sol";
 
 library ConceroUtils {

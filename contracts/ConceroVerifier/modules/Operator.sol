@@ -9,8 +9,9 @@ import {console} from "forge-std/src/console.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {Constants} from "../../common/Constants.sol";
+import {CommonConstants} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
+import {CommonTypes} from "../../common/CommonTypes.sol";
 
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
@@ -42,7 +43,7 @@ abstract contract Operator is CLF {
      * @param operatorAddresses The corresponding operator addresses.
      */
     function requestOperatorRegistration(
-        Types.ChainType[] calldata chainTypes,
+        CommonTypes.ChainType[] calldata chainTypes,
         Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) external {
@@ -127,13 +128,13 @@ abstract contract Operator is CLF {
 
     /* GETTER FUNCTIONS */
     function getRegisteredOperators(
-        Types.ChainType chainType
+        CommonTypes.ChainType chainType
     ) external view returns (bytes[] memory) {
         return s.operator().registeredOperators[chainType];
     }
 
     function getCohortsCount() external pure returns (uint8) {
-        return Constants.COHORTS_COUNT;
+        return CommonConstants.COHORTS_COUNT;
     }
 
     function getOperatorDeposit(address operator) external view returns (uint256) {

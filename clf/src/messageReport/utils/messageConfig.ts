@@ -1,6 +1,6 @@
 import { ErrorType } from "../../common/errorType";
 import { viemChains } from "../constants/viemChains";
-import { INTERNAL_MESSAGE_CONFIG_OFFSETS as OFFSETS } from "../constants/bitOffsets";
+import { INTERNAL_MESSAGE_CONFIG_OFFSETS as OFFSETS } from "../constants/internalMessageConfig";
 import { MASKS } from "../../common/bitMasks";
 import { InternalMessageConfig } from "../types";
 import { handleError } from "../../common/errorHandler";

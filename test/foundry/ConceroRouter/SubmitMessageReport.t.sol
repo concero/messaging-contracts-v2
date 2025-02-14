@@ -1,0 +1,180 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
+
+import {console} from "forge-std/src/Console.sol";
+import {Vm} from "forge-std/src/Vm.sol";
+import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
+import {MockCLFReport} from "../scripts/MockCLFReport.s.sol";
+import {CommonTypes} from "contracts/common/CommonTypes.sol";
+import {Types} from "contracts/ConceroRouter/libraries/Types.sol";
+import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
+import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
+import {IConceroClient} from "contracts/interfaces/IConceroClient.sol";
+import {CommonConstants} from "contracts/common/CommonConstants.sol";
+import {ReportByteSizes} from "contracts/common/CommonConstants.sol";
+import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
+import {RouterSlots, OperatorSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {Utils as CommonUtils} from "contracts/common/libraries/Utils.sol";
+
+contract SubmitMessageReport is ConceroRouterTest {
+    MockCLFReport internal mockClfReport;
+    address internal mockReceiver;
+    bytes32 internal constant TEST_MESSAGE_ID = bytes32(uint256(1));
+    bytes internal constant TEST_MESSAGE = "Test message";
+    uint256 internal constant GAS_LIMIT = 1_000_000;
+
+    event ConceroMessageReceived(bytes32 indexed messageId);
+    event ConceroMessageDelivered(bytes32 indexed messageId);
+
+    function setUp() public override {
+        super.setUp();
+        mockClfReport = new MockCLFReport();
+
+        _setPriceFeeds();
+    }
+
+    function test_SubmitMessageReport() public {
+        bytes memory dstChainDataRaw = abi.encode(address(conceroClient), GAS_LIMIT);
+
+        uint256 reportConfig = (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
+            (uint256(1) << 240) |
+            (uint256(uint160(operator)));
+
+        bytes[] memory operators = new bytes[](1);
+        operators[0] = abi.encodePacked(operator);
+
+        bytes memory encodedDstChainData = abi.encodePacked(
+            uint32(dstChainDataRaw.length),
+            dstChainDataRaw
+        );
+
+        bytes[] memory allowedOperators = new bytes[](1);
+        allowedOperators[0] = abi.encode(operator); //needs to be padded to 32 bytes
+
+        bytes memory encodedResult = abi.encodePacked(
+            reportConfig,
+            MessageLib.buildInternalMessageConfig(CLIENT_MESSAGE_CONFIG, SRC_CHAIN_SELECTOR),
+            TEST_MESSAGE_ID,
+            keccak256(TEST_MESSAGE),
+            uint32(dstChainDataRaw.length),
+            dstChainDataRaw,
+            uint16(operators.length),
+            allowedOperators[0]
+        );
+
+        Types.ClfDonReportSubmission memory reportSubmission = mockClfReport.createMockClfReport(
+            encodedResult
+        );
+
+        vm.recordLogs();
+
+        vm.prank(operator);
+        conceroRouter.submitMessageReport(reportSubmission, TEST_MESSAGE);
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        bool foundReceivedEvent = false;
+        bool foundDeliveredEvent = false;
+
+        for (uint256 i = 0; i < entries.length; i++) {
+            if (entries[i].topics[0] == keccak256("ConceroMessageReceived(bytes32)")) {
+                foundReceivedEvent = true;
+                assertEq(
+                    entries[i].topics[1],
+                    TEST_MESSAGE_ID,
+                    "ConceroMessageReceived event has incorrect messageId"
+                );
+            }
+            if (entries[i].topics[0] == keccak256("ConceroMessageDelivered(bytes32)")) {
+                foundDeliveredEvent = true;
+                assertEq(
+                    entries[i].topics[1],
+                    TEST_MESSAGE_ID,
+                    "ConceroMessageDelivered event has incorrect messageId"
+                );
+            }
+        }
+
+        assertTrue(foundReceivedEvent, "ConceroMessageReceived event not emitted");
+        assertTrue(foundDeliveredEvent, "ConceroMessageDelivered event not emitted");
+
+        assertTrue(
+            conceroRouter.getStorage(
+                Namespaces.ROUTER,
+                RouterSlots.isMessageProcessed,
+                TEST_MESSAGE_ID
+            ) == 1,
+            "Message should be marked as processed"
+        );
+
+        uint256 expectedFees = CommonUtils.convertUsdBpsToNative(
+            CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
+            NATIVE_USD_RATE
+        );
+        assertEq(
+            conceroRouter.getStorage(
+                Namespaces.OPERATOR,
+                OperatorSlots.feesEarnedNative,
+                bytes32(uint256(uint160(operator)))
+            ),
+            expectedFees,
+            "Operator should earn correct fees"
+        );
+    }
+
+    // function testRevert_MessageAlreadyProcessed() public {
+
+    //     VerifierTypes.MessageReportResult memory result = VerifierTypes.MessageReportResult({
+    //         version: 1,
+    //         reportType: VerifierTypes.CLFReportType.Message,
+    //         operator: operator,
+    //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
+    //             CLIENT_MESSAGE_CONFIG,
+    //             SRC_CHAIN_SELECTOR
+    //         ),
+    //         messageId: TEST_MESSAGE_ID,
+    //         messageHashSum: keccak256(TEST_MESSAGE),
+    //         dstChainData: abi.encode(
+    //             Types.EvmDstChainData({receiver: mockReceiver, gasLimit: GAS_LIMIT})
+    //         ),
+    //         allowedOperators: new bytes[](0)
+    //     });
+
+    //     bytes memory response = abi.encode(result);
+    //     MockCLFReport.ClfDonReportSubmission memory reportSubmission = mockClfReport
+    //         .createMockClfReport(response);
+
+    //     vm.expectRevert(
+    //         abi.encodeWithSelector(Errors.MessageAlreadyProcessed.selector, TEST_MESSAGE_ID)
+    //     );
+    //     conceroRouter.submitMessageReport(reportSubmission, TEST_MESSAGE);
+    // }
+
+    // function testRevert_InvalidMessageHashSum() public {
+    //     // Set received message with different hash
+    //     _setReceivedMessage(TEST_MESSAGE_ID, bytes32(uint256(1)));
+
+    //     CommonTypes.MessageReportResult memory result = CommonTypes.MessageReportResult({
+    //         version: 1,
+    //         reportType: CommonTypes.CLFReportType.Message,
+    //         operator: operator,
+    //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
+    //             CLIENT_MESSAGE_CONFIG,
+    //             SRC_CHAIN_SELECTOR
+    //         ),
+    //         messageId: TEST_MESSAGE_ID,
+    //         messageHashSum: bytes32(0), // Invalid hash
+    //         dstChainData: abi.encode(
+    //             Types.EvmDstChainData({receiver: mockReceiver, gasLimit: GAS_LIMIT})
+    //         ),
+    //         allowedOperators: new bytes[](0)
+    //     });
+
+    //     bytes memory response = abi.encode(result);
+    //     MockCLFReport.ClfDonReportSubmission memory reportSubmission = mockClfReport
+    //         .createMockClfReport(response);
+
+    //     vm.expectRevert(Errors.InvalidMessageHashSum.selector);
+    //     conceroRouter.submitMessageReport(reportSubmission, TEST_MESSAGE);
+    // }
+}

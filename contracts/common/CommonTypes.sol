@@ -6,9 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {CommonTypes} from "../../common/CommonTypes.sol";
-
-library Types {
+library CommonTypes {
     enum FeeToken {
         native,
         usdc
@@ -25,29 +23,20 @@ library Types {
         OperatorDeregistration
     }
 
-    enum CLFRequestStatus {
-        NotStarted,
-        Pending,
-        FulFilled
-    }
-
-    enum OperatorRegistrationAction {
-        Register,
-        Deregister
-    }
-
-    struct MessageReportRequest {
+    struct MessageReportResult {
+        uint256 reportConfig;
         uint256 internalMessageConfig;
         bytes32 messageId;
         bytes32 messageHashSum;
-        bytes srcChainData;
         bytes dstChainData;
+        bytes[] allowedOperators;
     }
 
-    struct OperatorRegistrationResult {
-        uint256 reportConfig;
-        CommonTypes.ChainType[] operatorChains;
-        OperatorRegistrationAction[] operatorActions;
-        bytes[] operatorAddresses;
+    // @dev clfReportResponseConfig is a bitmasked uint256
+    struct ClfReportResponseConfig {
+        uint8 reportType; //               1 byte, (0-255)
+        uint8 version; //                  1 byte, (0-255)
+        //                                 10 bytes reserved for future use
+        address requester; //              20 bytes
     }
 }

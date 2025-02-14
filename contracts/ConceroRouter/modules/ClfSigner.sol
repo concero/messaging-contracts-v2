@@ -7,6 +7,7 @@
 pragma solidity 0.8.28;
 
 import {Base} from "./Base.sol";
+import {Types} from "../libraries/Types.sol";
 
 abstract contract ClfSigner is Base {
     error IncorrectNumberOfSignatures();
@@ -23,14 +24,6 @@ abstract contract ClfSigner is Base {
         i_clfSigner1 = clfSigners[1];
         i_clfSigner2 = clfSigners[2];
         i_clfSigner3 = clfSigners[3];
-    }
-
-    struct ClfDonReportSubmission {
-        bytes32[3] context;
-        bytes report;
-        bytes32[] rs;
-        bytes32[] ss;
-        bytes rawVs;
     }
 
     function _isAuthorizedClfSigner(address clfSigner) internal view returns (bool) {
@@ -64,7 +57,7 @@ abstract contract ClfSigner is Base {
      * @param reportSubmission The report submission data.
      */
     function _verifyClfReportSignatures(
-        ClfDonReportSubmission calldata reportSubmission
+        Types.ClfDonReportSubmission calldata reportSubmission
     ) internal view {
         bytes32 clfReportHash = _computeCLFReportHash(
             reportSubmission.context,

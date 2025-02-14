@@ -2,24 +2,19 @@
 pragma solidity 0.8.28;
 
 import {console} from "forge-std/src/Console.sol";
+
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
 import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
-import {Constants} from "contracts/common/Constants.sol";
+import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
+import {CommonTypes} from "contracts/common/CommonTypes.sol";
+import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {MockCLFReport} from "../scripts/MockCLFReport.s.sol";
 import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 import {VerifierSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
-import {Message as MessageLib, MessageConstants} from "contracts/common/libraries/Message.sol";
+import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
 
 contract MessageReport is ConceroVerifierTest {
     bytes32 internal clfRequestId;
-
-    uint256 internal constant CLIENT_MESSAGE_CONFIG =
-        (uint256(DST_CHAIN_SELECTOR) << MessageConstants.OFFSET_DST_CHAIN) |
-            (1 << MessageConstants.OFFSET_MIN_SRC_CONF) |
-            (1 << MessageConstants.OFFSET_MIN_DST_CONF) |
-            (0 << MessageConstants.OFFSET_RELAYER_CONF) |
-            (0 << MessageConstants.OFFSET_CALLBACKABLE) |
-            (uint256(VerifierTypes.FeeToken.native) << MessageConstants.OFFSET_FEE_TOKEN);
 
     function setUp() public override {
         super.setUp();
@@ -61,31 +56,26 @@ contract MessageReport is ConceroVerifierTest {
     function test_handleOracleFulfillment_messageReport() public {
         bytes32 clfRequestId = test_requestMessageReport();
 
-        VerifierTypes.MessageReportResult memory result;
-        result.version = 1;
-        result.reportType = VerifierTypes.CLFReportType.Message;
-        result.operator = operator;
-        result.internalMessageConfig = bytes32("internalMessageConfig");
+        uint256 reportConfig = (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
+            (uint256(1) << 240) |
+            (uint256(uint160(operator)));
+
+        CommonTypes.MessageReportResult memory result;
+        result.reportConfig = reportConfig;
+        result.internalMessageConfig = INTERNAL_MESSAGE_CONFIG;
         result.messageId = bytes32("messageId");
         result.messageHashSum = bytes32("messageHashSum");
-        result.dstChainData = "dstChain"; // Example dynamic data.
+        result.dstChainData = "dstChain";
         result.allowedOperators = new bytes[](1);
         result.allowedOperators[0] = abi.encodePacked(operator);
 
         bytes memory response = abi.encode(result);
 
         MockCLFReport mockClf = new MockCLFReport();
-        MockCLFReport.ClfDonReportSubmission memory clfSubmission = mockClf.createMessageReport();
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = mockClf.createMessageReport();
 
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "");
-        //
-        //    // Verify request is no longer pending
-        //    assertFalse(conceroVerifier.isPendingCLFRequest(clfRequestId));
-        //
-        //    // Verify operator earned fees
-        //    uint256 expectedFees = Constants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD;
-        //    assertEq(conceroVerifier.getOperatorFeesNative(operator), expectedFees);
     }
 }
 //

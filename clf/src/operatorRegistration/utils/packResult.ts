@@ -1,5 +1,6 @@
-import { OPERATOR_REGISTRATION_RESULT_SIZES as SIZES } from "../constants/bitOffsets";
 import { OperatorRegistrationResult } from "../types";
+import { COMMON_REPORT_BYTE_SIZES as COMMON_SIZES } from "../../common/reportBytes";
+import { encodeUint256, packResponseConfig, hexToBytes, packUint32 } from "../../common/encoders";
 
 /**
  * Packs the operator registration result into a binary format
@@ -7,36 +8,33 @@ import { OperatorRegistrationResult } from "../types";
  * @returns Packed binary data as Uint8Array
  */
 export function packResult(result: OperatorRegistrationResult): Uint8Array {
-    const chainTypesBytes = new Uint8Array(Buffer.from(JSON.stringify(result.chainTypes)));
-    const operatorAddressesBytes = new Uint8Array(Buffer.from(JSON.stringify(result.operatorAddresses)));
+    const chainTypesBytes = new TextEncoder().encode(JSON.stringify(result.chainTypes));
+    const operatorAddressesBytes = new TextEncoder().encode(JSON.stringify(result.operatorAddresses));
 
+    const bufferSize =
+        COMMON_SIZES.WORD + // reportResponseConfig
+        COMMON_SIZES.ARRAY_LENGTH + // chainTypesLength (uint32)
+        chainTypesBytes.length +
+        COMMON_SIZES.ARRAY_LENGTH + // operatorAddressesLength (uint32)
+        operatorAddressesBytes.length;
+
+    const res = new Uint8Array(bufferSize);
     let offset = 0;
-    const res = new Uint8Array(
-        SIZES.VERSION +
-            SIZES.REPORT_TYPE +
-            SIZES.OPERATOR +
-            SIZES.CHAIN_TYPES_LENGTH +
-            chainTypesBytes.length +
-            SIZES.OPERATORS_COUNT +
-            operatorAddressesBytes.length,
-    );
 
-    res[offset] = result.version;
-    offset += SIZES.VERSION;
+    res.set(encodeUint256(packResponseConfig(result.reportType, result.version, result.requester)), offset);
+    offset += COMMON_SIZES.WORD;
 
-    res[offset] = result.reportType;
-    offset += SIZES.REPORT_TYPE;
+    // Pack chain types data
+    res.set(packUint32(chainTypesBytes.length), offset);
+    offset += COMMON_SIZES.ARRAY_LENGTH;
 
-    res.set(new Uint8Array(Buffer.from(result.operator.replace(/^0x/, ""), "hex")), offset);
-    offset += SIZES.OPERATOR;
-
-    res.set(new Uint8Array(new Uint32Array([chainTypesBytes.length]).buffer), offset);
-    offset += SIZES.CHAIN_TYPES_LENGTH;
     res.set(chainTypesBytes, offset);
     offset += chainTypesBytes.length;
 
-    res.set(new Uint8Array(new Uint32Array([operatorAddressesBytes.length]).buffer), offset);
-    offset += SIZES.OPERATORS_COUNT;
+    // Pack operator addresses data
+    res.set(packUint32(operatorAddressesBytes.length), offset);
+    offset += COMMON_SIZES.ARRAY_LENGTH;
+
     res.set(operatorAddressesBytes, offset);
 
     return res;

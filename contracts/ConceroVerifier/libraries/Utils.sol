@@ -6,10 +6,10 @@
  */
 pragma solidity 0.8.28;
 
-import {Constants} from "../../common/Constants.sol";
+import {CommonConstants} from "../../common/CommonConstants.sol";
+import {CommonTypes} from "../../common/CommonTypes.sol";
 
 import {Storage as s} from "./Storage.sol";
-import {Types} from "./Types.sol";
 import {Errors} from "./Errors.sol";
 
 library Utils {
@@ -17,7 +17,7 @@ library Utils {
     error InvalidNativeUSDRate();
 
     /* OPERATOR UTILS */
-    function _addOperator(Types.ChainType chainType, bytes memory operatorAddress) internal {
+    function _addOperator(CommonTypes.ChainType chainType, bytes memory operatorAddress) internal {
         bytes[] storage registeredOperators = s.operator().registeredOperators[chainType];
         (bool exists, ) = _findBytesIndex(registeredOperators, operatorAddress);
 
@@ -25,7 +25,10 @@ library Utils {
         registeredOperators.push(operatorAddress);
     }
 
-    function _removeOperator(Types.ChainType chainType, bytes memory operatorAddress) internal {
+    function _removeOperator(
+        CommonTypes.ChainType chainType,
+        bytes memory operatorAddress
+    ) internal {
         bytes[] storage registeredOperators = s.operator().registeredOperators[chainType];
         (bool exists, uint256 index) = _findBytesIndex(registeredOperators, operatorAddress);
 

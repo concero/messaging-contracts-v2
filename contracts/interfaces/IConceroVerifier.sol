@@ -9,7 +9,7 @@ pragma solidity 0.8.28;
 import {Types} from "../ConceroVerifier/libraries/Types.sol";
 
 event CLFRequestError(bytes err);
-event MessageReport(bytes32 indexed conceroId);
+event MessageReport(bytes32 indexed messageId);
 event OperatorRegistered(Types.ChainType chainType, bytes operatorAddress);
 event OperatorDeregistered(Types.ChainType chainType, bytes operatorAddress);
 event OperatorDeposited(address indexed operator, uint256 amount);

@@ -9,7 +9,7 @@ pragma solidity 0.8.28;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import {Constants} from "../../common/Constants.sol";
+import {CommonConstants} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {SupportedChains} from "../../common/libraries/SupportedChains.sol";
 import {Storage as s} from "../libraries/Storage.sol";
@@ -42,6 +42,6 @@ abstract contract Operator is Base {
     }
 
     function getCohort(address operator) external view returns (uint8) {
-        return uint8(uint160(operator) % Constants.COHORTS_COUNT);
+        return uint8(uint160(operator) % CommonConstants.COHORTS_COUNT);
     }
 }

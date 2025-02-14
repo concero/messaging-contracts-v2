@@ -10,7 +10,8 @@ import {Base} from "./Base.sol";
 
 import {CLFRequestError, MessageReport} from "../../interfaces/IConceroVerifier.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
-import {Constants} from "../../common/Constants.sol";
+import {CommonTypes} from "../../common/CommonTypes.sol";
+import {CommonConstants} from "../../common/CommonConstants.sol";
 
 import {Decoder} from "../../common/libraries/Decoder.sol";
 import {Errors} from "../libraries/Errors.sol";
@@ -68,15 +69,15 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory err
     ) internal override {
         //        CLFRequestVersion reportVersion;
-        Types.CLFReportType reportType;
+        CommonTypes.CLFReportType reportType;
         assembly {
             //            reportVersion := byte(1, mload(add(response, 32)))
             reportType := byte(0, mload(add(response, 32)))
         }
 
-        if (reportType == Types.CLFReportType.Message) {
+        if (reportType == CommonTypes.CLFReportType.Message) {
             _handleCLFMessageReport(clfRequestId, response, err);
-        } else if (reportType == Types.CLFReportType.OperatorRegistration) {
+        } else if (reportType == CommonTypes.CLFReportType.OperatorRegistration) {
             _handleCLFOperatorRegistrationReport(clfRequestId, response, err);
         } else {
             emit CLFRequestError(err);
@@ -96,17 +97,21 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        Types.MessageReportResult memory result = Decoder._decodeCLFMessageReportResponse(response);
+        CommonTypes.MessageReportResult memory result = Decoder._decodeCLFMessageReportResponse(
+            response
+        );
+
+        (, , address requester) = Decoder._decodeCLFReportConfig(result.reportConfig);
 
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
 
-        s.operator().feesEarnedNative[result.operator] += CommonUtils.convertUsdBpsToNative(
-            Constants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
+        s.operator().feesEarnedNative[requester] += CommonUtils.convertUsdBpsToNative(
+            CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
 
-        s.operator().depositsNative[result.operator] += CommonUtils.convertUsdBpsToNative(
-            Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
+        s.operator().depositsNative[requester] += CommonUtils.convertUsdBpsToNative(
+            CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
 
@@ -126,6 +131,8 @@ abstract contract CLF is FunctionsClient, Base {
         Types.OperatorRegistrationResult memory result = Decoder
             ._decodeCLFOperatorRegistrationReport(response);
 
+        (, , address requester) = Decoder._decodeCLFReportConfig(result.reportConfig);
+
         require(
             result.operatorChains.length == result.operatorAddresses.length &&
                 result.operatorChains.length == result.operatorActions.length,
@@ -133,25 +140,25 @@ abstract contract CLF is FunctionsClient, Base {
         );
 
         for (uint256 i = 0; i < result.operatorChains.length; i++) {
-            Types.ChainType chainType = result.operatorChains[i];
+            CommonTypes.ChainType chainType = result.operatorChains[i];
             Types.OperatorRegistrationAction action = result.operatorActions[i];
 
-            if (chainType == Types.ChainType.EVM) {
+            if (chainType == CommonTypes.ChainType.EVM) {
                 address operatorAddress = address(bytes20(result.operatorAddresses[i]));
-                require(operatorAddress == result.operator, Errors.OperatorAddressMismatch());
+                require(operatorAddress == requester, Errors.OperatorAddressMismatch());
 
                 if (action == Types.OperatorRegistrationAction.Register) {
                     Utils._addOperator(chainType, result.operatorAddresses[i]);
-                    s.operator().isAllowed[result.operator] = true;
+                    s.operator().isAllowed[requester] = true;
                 } else if (action == Types.OperatorRegistrationAction.Deregister) {
                     Utils._removeOperator(chainType, result.operatorAddresses[i]);
-                    s.operator().isAllowed[result.operator] = false;
+                    s.operator().isAllowed[requester] = false;
                 }
             }
         }
 
-        s.operator().depositsNative[result.operator] += CommonUtils.convertUsdBpsToNative(
-            Constants.OPERATOR_DEPOSIT_REGISTRATION_REPORT_REQUEST_BPS_USD,
+        s.operator().depositsNative[requester] += CommonUtils.convertUsdBpsToNative(
+            CommonConstants.OPERATOR_DEPOSIT_REGISTRATION_REPORT_REQUEST_BPS_USD,
             s.priceFeed().nativeUsdRate
         );
 
@@ -165,7 +172,7 @@ abstract contract CLF is FunctionsClient, Base {
         _witholdOperatorDeposit(
             msg.sender,
             CommonUtils.convertUsdBpsToNative(
-                Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
+                CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
                 s.priceFeed().nativeUsdRate
             )
         );
@@ -192,14 +199,14 @@ abstract contract CLF is FunctionsClient, Base {
      * @return clfRequestId The unique identifier for the CLF request
      */
     function _requestOperatorRegistration(
-        Types.ChainType[] calldata chainTypes,
+        CommonTypes.ChainType[] calldata chainTypes,
         Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) internal returns (bytes32 clfRequestId) {
         _witholdOperatorDeposit(
             msg.sender,
             CommonUtils.convertUsdBpsToNative(
-                Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
+                CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
                 s.priceFeed().nativeUsdRate
             )
         );
@@ -219,7 +226,7 @@ abstract contract CLF is FunctionsClient, Base {
     }
 
     function _requestOperatorDeregistration() internal {
-        // _witholdOperatorDeposit(msg.sender,  Utils.convertUsdBpsToNative(Constants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD, s.priceFeed().nativeUsdRate)
+        // _witholdOperatorDeposit(msg.sender,  Utils.convertUsdBpsToNative(CommonConstants.sol.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD, s.priceFeed().nativeUsdRate)
         //        s.verifier().pendingCLFRequests[clfRequestId] = true;
     }
 
@@ -246,6 +253,7 @@ abstract contract CLF is FunctionsClient, Base {
 
         return gasCost + premiumFee;
     }
+
     /**
      * @notice Withholds the required deposit amount from operator's balance
      * @param operator The operator's address

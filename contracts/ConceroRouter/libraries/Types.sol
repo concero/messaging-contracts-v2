@@ -5,8 +5,9 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
+
 /*
-| MESSAGE CONFIG         | Bits | Description                           |
+| INTERNAL MESSAGE CONFIG| Bits | Description                           |
 |------------------------|------|---------------------------------------|
 | version                | 8    | Config version (0-255)                |
 | srcChainSelector       | 24   | Source chain ID                       |
@@ -34,7 +35,7 @@ library Types {
         address receiver;
         uint256 gasLimit;
     }
-
+    // @dev InternalMessageConfig is a bitmasked uint256
     struct InternalMessageConfig {
         uint8 version; //                  ─╮ Internal
         uint24 srcChainSelector; //         │ ConceroRouter config
@@ -47,6 +48,7 @@ library Types {
         //                                    Remaining: 174 bits
     }
 
+    // @dev ClientMessageConfig is a bitmasked uint256
     struct ClientMessageConfig {
         uint24 dstChainSelector; //        ─╮
         uint16 minSrcConfirmations; //      │ Base config
@@ -55,5 +57,13 @@ library Types {
         bool isCallbackable; //            ─╯
         //
         FeeToken feeToken; //              ─  Not included in InternalMessageConfig
+    }
+
+    struct ClfDonReportSubmission {
+        bytes32[3] context;
+        bytes report;
+        bytes32[] rs;
+        bytes32[] ss;
+        bytes rawVs;
     }
 }

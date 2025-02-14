@@ -1,12 +1,14 @@
 pragma solidity 0.8.28;
 
 import {Script} from "forge-std/src/Script.sol";
+import {MessageConfigBitOffsets} from "contracts/common/libraries/Message.sol";
+import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
 
 abstract contract ConceroBaseScript is Script {
     address public immutable deployer;
     address public immutable proxyDeployer;
 
-    address public constant operator = address(0x1);
+    address public constant operator = address(0x09354705);
     address public constant user = address(0x123);
     address public usdc;
 
@@ -31,6 +33,23 @@ abstract contract ConceroBaseScript is Script {
     uint256 internal constant LAST_GAS_PRICE = 1e9;
     uint256 public constant OPERATOR_FEES_NATIVE = 2 ether;
     uint256 public constant OPERATOR_DEPOSIT_NATIVE = 3 ether;
+
+    uint256 internal constant CLIENT_MESSAGE_CONFIG =
+        (uint256(DST_CHAIN_SELECTOR) << MessageConfigBitOffsets.OFFSET_DST_CHAIN) |
+            (1 << MessageConfigBitOffsets.OFFSET_MIN_SRC_CONF) |
+            (1 << MessageConfigBitOffsets.OFFSET_MIN_DST_CONF) |
+            (0 << MessageConfigBitOffsets.OFFSET_RELAYER_CONF) |
+            (0 << MessageConfigBitOffsets.OFFSET_CALLBACKABLE) |
+            (uint256(VerifierTypes.FeeToken.native) << MessageConfigBitOffsets.OFFSET_FEE_TOKEN);
+
+    uint256 internal constant INTERNAL_MESSAGE_CONFIG =
+        (uint256(1) << MessageConfigBitOffsets.OFFSET_VERSION) | // version, assuming version is 1
+            (uint256(SRC_CHAIN_SELECTOR) << MessageConfigBitOffsets.OFFSET_SRC_CHAIN) | // srcChainSelector
+            (uint256(DST_CHAIN_SELECTOR) << MessageConfigBitOffsets.OFFSET_DST_CHAIN) | // dstChainSelector
+            (uint256(1) << MessageConfigBitOffsets.OFFSET_MIN_SRC_CONF) | // minSrcConfirmations, assuming 1
+            (uint256(1) << MessageConfigBitOffsets.OFFSET_MIN_DST_CONF) | // minDstConfirmations, assuming 1
+            (uint256(0) << MessageConfigBitOffsets.OFFSET_RELAYER_CONF) | // relayerConfig, assuming 0
+            (uint256(0) << MessageConfigBitOffsets.OFFSET_CALLBACKABLE); // isCallbackable, assuming false
 
     constructor() {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");

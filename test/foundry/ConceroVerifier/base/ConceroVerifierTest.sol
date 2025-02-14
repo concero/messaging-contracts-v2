@@ -1,14 +1,23 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
+/**
+ * @title Security Reporting
+ * @notice If you discover any security vulnerabilities, please report them responsibly.
+ * @contact email: security@concero.io
+ */
 pragma solidity 0.8.28;
 
-import {OperatorSlots, VerifierSlots, PriceFeedSlots} from "../../../../contracts/ConceroVerifier/libraries/StorageSlots.sol";
-import {Namespaces} from "../../../../contracts/ConceroVerifier/libraries/Storage.sol";
-import {ConceroTest} from "../../utils/ConceroTest.sol";
-import {ConceroVerifier} from "../../../../contracts/ConceroVerifier/ConceroVerifier.sol";
-import {DeployConceroVerifier} from "../../scripts/deploy/DeployConceroVerifier.s.sol";
-import {TransparentUpgradeableProxy} from "../../../../contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {ConceroVerifierBase} from "./ConceroVerifierBase.sol";
 import {console} from "forge-std/src/Console.sol";
+
+import {OperatorSlots, VerifierSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
+import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
+import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
+
+import {ConceroTest} from "../../utils/ConceroTest.sol";
+import {DeployConceroVerifier} from "../../scripts/deploy/DeployConceroVerifier.s.sol";
+
+import {ConceroVerifierBase} from "./ConceroVerifierBase.sol";
+
 abstract contract ConceroVerifierTest is ConceroVerifierBase, ConceroTest {
     DeployConceroVerifier internal deployScript;
     TransparentUpgradeableProxy internal conceroVerifierProxy;

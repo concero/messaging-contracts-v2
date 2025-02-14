@@ -1,11 +1,17 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
+/**
+ * @title Security Reporting
+ * @notice If you discover any security vulnerabilities, please report them responsibly.
+ * @contact email: security@concero.io
+ */
 pragma solidity 0.8.28;
 
-import {GenericStorage} from "contracts/common/libraries/GenericStorage.sol";
-import {Storage as s, Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {GenericStorage} from "contracts/common/libraries/GenericStorage.sol";
 
 import {VerifierSlots, OperatorSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {Storage as s, Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
+
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
 
 contract VerifierStorage is ConceroVerifierTest {

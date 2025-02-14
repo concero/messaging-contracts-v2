@@ -1,6 +1,14 @@
+// SPDX-License-Identifier: UNLICENSED
+/**
+ * @title Security Reporting
+ * @notice If you discover any security vulnerabilities, please report them responsibly.
+ * @contact email: security@concero.io
+ */
 pragma solidity 0.8.28;
 
-import "forge-std/src/Script.sol";
+import {console} from "forge-std/src/console.sol";
+import {Script} from "forge-std/src/Script.sol";
+
 import {Namespaces as ConceroRouterNamespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
 import {Namespaces as ConceroVerifierNamespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 

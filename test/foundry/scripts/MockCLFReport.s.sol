@@ -1,11 +1,18 @@
+// SPDX-License-Identifier: UNLICENSED
+/**
+ * @title Security Reporting
+ * @notice If you discover any security vulnerabilities, please report them responsibly.
+ * @contact email: security@concero.io
+ */
 pragma solidity 0.8.28;
+
+import {ConceroVerifierTest} from "../ConceroVerifier/base/ConceroVerifierTest.sol";
 
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {ReportConfigBitOffsets} from "contracts/common/CommonConstants.sol";
 
 import {Types} from "contracts/ConceroVerifier/libraries/Types.sol";
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
-import {ConceroVerifierTest} from "../ConceroVerifier/base/ConceroVerifierTest.sol";
 
 contract MockCLFReport is ConceroVerifierTest {
     error IncorrectNumberOfSignatures();

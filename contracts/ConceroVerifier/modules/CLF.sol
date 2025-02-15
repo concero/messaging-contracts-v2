@@ -149,10 +149,10 @@ abstract contract CLF is FunctionsClient, Base {
 
                 if (action == Types.OperatorRegistrationAction.Register) {
                     Utils._addOperator(chainType, result.operatorAddresses[i]);
-                    s.operator().isAllowed[requester] = true;
+                    s.operator().isRegistered[requester] = true;
                 } else if (action == Types.OperatorRegistrationAction.Deregister) {
                     Utils._removeOperator(chainType, result.operatorAddresses[i]);
-                    s.operator().isAllowed[requester] = false;
+                    s.operator().isRegistered[requester] = false;
                 }
             }
         }
@@ -167,7 +167,10 @@ abstract contract CLF is FunctionsClient, Base {
 
     /* CLF REQUEST FORMATION */
     function _requestMessageReport(
-        Types.MessageReportRequest calldata request
+        uint256 internalMessageConfig,
+        bytes32 messageId,
+        bytes32 messageHashSum,
+        bytes memory srcChainData
     ) internal returns (bytes32 clfRequestId) {
         _witholdOperatorDeposit(
             msg.sender,
@@ -180,10 +183,10 @@ abstract contract CLF is FunctionsClient, Base {
         bytes[] memory clfReqArgs = new bytes[](6);
 
         clfReqArgs[0] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
-        clfReqArgs[1] = abi.encodePacked(request.internalMessageConfig);
-        clfReqArgs[2] = abi.encodePacked(request.messageId);
-        clfReqArgs[3] = abi.encode(request.messageHashSum);
-        clfReqArgs[4] = abi.encode(request.srcChainData);
+        clfReqArgs[1] = abi.encodePacked(internalMessageConfig);
+        clfReqArgs[2] = abi.encodePacked(messageId);
+        clfReqArgs[3] = abi.encode(messageHashSum);
+        clfReqArgs[4] = abi.encode(srcChainData);
         clfReqArgs[5] = abi.encode(msg.sender);
 
         clfRequestId = _sendCLFRequest(clfReqArgs);

@@ -100,12 +100,12 @@ abstract contract ConceroVerifierTest is ConceroVerifierBase, ConceroTest {
         vm.stopPrank();
     }
 
-    function _setOperatorIsAllowed() internal {
+    function _setOperatorIsRegistered() internal {
         vm.startPrank(deployer);
 
         conceroVerifier.setStorage(
             Namespaces.OPERATOR,
-            OperatorSlots.isAllowed,
+            OperatorSlots.isRegistered,
             bytes32(uint256(uint160(operator))),
             1
         );

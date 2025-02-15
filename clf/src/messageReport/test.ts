@@ -52,14 +52,3 @@ async function test() {
 }
 
 test();
-
-function logInternalMessageConfig(config: bigint) {
-    console.log("Version:", Number(config >> 248n));
-    console.log("Source Chain:", Number((config >> 224n) & 0xffffffn));
-    console.log("Dest Chain:", Number((config >> 192n) & 0xffffffn));
-    console.log("Min Src Conf:", Number((config >> 176n) & 0xffffn));
-    console.log("Min Dst Conf:", Number((config >> 160n) & 0xffffn));
-    console.log("Relayer Config:", Number((config >> 152n) & 0xffn));
-    console.log("Callbackable:", Number((config >> 151n) & 1n));
-    console.log("Fee Token:", Number((config >> 143n) & 0xffn));
-}

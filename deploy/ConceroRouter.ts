@@ -1,11 +1,8 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { conceroNetworks, networkEnvKeys } from "../constants";
-import updateEnvVariable from "../utils/updateEnvVariable";
-import log from "../utils/log";
-import { getEnvVar } from "../utils";
 import { ConceroNetworkNames, NetworkType } from "../types/ConceroNetwork";
-import { getGasParameters } from "../utils/getGasPrice";
+import { getGasParameters, updateEnvVariable, getEnvVar, log } from "../utils/";
 
 function getCLFDonSigners(networkType: NetworkType) {
     let networkName: ConceroNetworkNames;
@@ -33,32 +30,46 @@ function getCLFDonSigners(networkType: NetworkType) {
     return clfDonSigners;
 }
 
-const deployRouter: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
+type DeployArgs = {
+    chainSelector: string;
+    usdc: string;
+    clfSigners: string[];
+};
+
+type DeploymentFunction = (hre: HardhatRuntimeEnvironment, overrideArgs?: Partial<DeployArgs>) => Promise<Deployment>;
+
+const deployRouter: DeploymentFunction = async function (
     hre: HardhatRuntimeEnvironment,
-) {
+    overrideArgs?: Partial<DeployArgs>,
+): Promise<Deployment> {
     const { deployer } = await hre.getNamedAccounts();
     const { deploy } = hre.deployments;
-    const { name, live } = hre.network;
+    const { name } = hre.network;
 
     const chain = conceroNetworks[name as ConceroNetworkNames];
     const { type: networkType } = chain;
 
     const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
 
-    const args = {
+    const defaultArgs: DeployArgs = {
         chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
         clfSigners: getCLFDonSigners(networkType),
     };
 
-    const deployment = (await deploy("ConceroRouter", {
+    const args: DeployArgs = {
+        ...defaultArgs,
+        ...overrideArgs,
+    };
+
+    const deployment = await deploy("ConceroRouter", {
         from: deployer,
         args: [args.chainSelector, args.usdc, args.clfSigners],
         log: true,
         autoMine: true,
         maxFeePerGas,
         maxPriorityFeePerGas,
-    })) as Deployment;
+    });
 
     log(`Deployed at: ${deployment.address}`, "deployRouter", name);
     updateEnvVariable(`CONCERO_ROUTER_${networkEnvKeys[name]}`, deployment.address, `deployments.${networkType}`);

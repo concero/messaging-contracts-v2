@@ -19,45 +19,13 @@ import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol"
 
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
 import {MockCLFReport} from "../scripts/MockCLFReport.s.sol";
+import {RequestMessageReport} from "./RequestMessageReport.t.sol";
 
-contract MessageReport is ConceroVerifierTest {
-    bytes32 internal clfRequestId;
-
+contract HandleCLFMessageReport is RequestMessageReport {
     function setUp() public override {
         super.setUp();
 
-        _setPriceFeeds();
-        _setOperatorFeesEarned();
-        _setOperatorDeposits();
-        _setOperatorIsAllowed();
-    }
-
-    function test_requestMessageReport() public returns (bytes32) {
-        uint256 internalMessageConfig = MessageLib.buildInternalMessageConfig(
-            CLIENT_MESSAGE_CONFIG,
-            SRC_CHAIN_SELECTOR
-        );
-
-        VerifierTypes.MessageReportRequest memory request = VerifierTypes.MessageReportRequest({
-            messageId: bytes32(uint256(1)),
-            messageHashSum: bytes32(uint256(2)),
-            internalMessageConfig: internalMessageConfig,
-            srcChainData: new bytes(0),
-            dstChainData: new bytes(0)
-        });
-
-        vm.prank(operator);
-        clfRequestId = conceroVerifier.requestMessageReport(request);
-
-        bool isCLFRequestPending = conceroVerifier.getStorage(
-            Namespaces.VERIFIER,
-            VerifierSlots.pendingCLFRequests,
-            clfRequestId
-        ) == 1;
-
-        assertTrue(isCLFRequestPending);
-
-        return clfRequestId;
+        _setOperatorIsRegistered();
     }
 
     function test_handleOracleFulfillment_messageReport() public {
@@ -84,8 +52,27 @@ contract MessageReport is ConceroVerifierTest {
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "");
     }
+
+    function test_handleOracleFulfillment_WithError_messageReport() public {
+        bytes32 clfRequestId = test_requestMessageReport();
+
+        MockCLFReport mockClf = new MockCLFReport();
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = mockClf.createMessageReport();
+
+        vm.prank(address(clfRouter));
+        conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "error");
+
+        assertFalse(
+            conceroVerifier.getStorage(
+                Namespaces.VERIFIER,
+                VerifierSlots.pendingCLFRequests,
+                clfRequestId
+            ) == 1
+        );
+        assertEq(conceroVerifier.getOperatorFeesEarned(operator), 0);
+    }
 }
-//
+
 //    function test_handleOracleFulfillment_WithError_messageReport() public {
 //        // First request a message report
 //        test_requestMessageReport();

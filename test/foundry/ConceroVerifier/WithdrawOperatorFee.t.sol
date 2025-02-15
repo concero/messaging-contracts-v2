@@ -23,7 +23,7 @@ contract WithdrawOperatorFee is ConceroVerifierTest {
         vm.deal(operator, 100 ether);
         bytes32 operatorKey = bytes32(uint256(uint160(operator)));
         vm.prank(deployer);
-        conceroVerifier.setStorage(Namespaces.OPERATOR, OperatorSlots.isAllowed, operatorKey, 1);
+        conceroVerifier.setStorage(Namespaces.OPERATOR, OperatorSlots.isRegistered, operatorKey, 1);
         _setPriceFeeds();
     }
 

@@ -46,7 +46,7 @@ library Storage {
         uint256[50] __var_gap;
         uint256[50] __array_gap;
         mapping(CommonTypes.ChainType => bytes[] operators) registeredOperators;
-        mapping(address operator => bool) isAllowed;
+        mapping(address operator => bool) isRegistered;
         mapping(address operator => uint256 depositAmount) depositsNative;
         mapping(address operator => mapping(CommonTypes.ChainType => bytes walletAddress)) walletAddress;
         mapping(address operator => uint256) feesEarnedNative;

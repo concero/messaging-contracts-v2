@@ -13,6 +13,7 @@ import { err, log, warn } from "./log";
 import { getEnvAddress, getEnvVar } from "./getEnvVar";
 import { getWallet } from "./getWallet";
 import { updateEnvAddress, updateEnvVariable } from "./updateEnvVariable";
+import { getGasParameters } from "./getGasParameters";
 
 export {
     compileContracts,
@@ -34,4 +35,5 @@ export {
     updateEnvVariable,
     updateEnvAddress,
     getWallet,
+    getGasParameters,
 };

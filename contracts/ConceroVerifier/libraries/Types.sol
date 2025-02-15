@@ -32,8 +32,8 @@ library Types {
     }
 
     enum OperatorRegistrationAction {
-        Register,
-        Deregister
+        Deregister, // 0
+        Register // 1
     }
 
     struct MessageReportRequest {

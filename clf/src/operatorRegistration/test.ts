@@ -1,11 +1,12 @@
 import { main } from "./index";
 
 async function test() {
-    const chainTypes = JSON.stringify([0, 1]);
-    const operatorAddresses = JSON.stringify(["0x123", "0x456"]);
-    const operatorAddress = "0x123";
+    const chainTypes = [0, 1];
+    const operatorAddresses = ["0x123", "0x456"];
+    const actions = [0, 1];
+    const requester = "0x123";
 
-    const inputArgs = ["", chainTypes, operatorAddresses, operatorAddress];
+    const inputArgs = ["", chainTypes, actions, operatorAddresses, requester];
 
     try {
         const result = await main(inputArgs);

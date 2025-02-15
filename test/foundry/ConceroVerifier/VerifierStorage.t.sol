@@ -56,26 +56,26 @@ contract VerifierStorage is ConceroVerifierTest {
         vm.stopPrank();
     }
 
-    function test_SetAndGetOperatorIsAllowed() public {
+    function test_SetAndGetOperatorIsRegistered() public {
         address operator = address(0x123);
-        bool isAllowed = true;
+        bool isRegistered = true;
 
         vm.startPrank(deployer);
         conceroVerifier.setStorage(
             Namespaces.OPERATOR,
-            OperatorSlots.isAllowed,
+            OperatorSlots.isRegistered,
             bytes32(uint256(uint160(operator))),
-            isAllowed ? 1 : 0
+            isRegistered ? 1 : 0
         );
 
         assertEq(
             conceroVerifier.getStorage(
                 Namespaces.OPERATOR,
-                OperatorSlots.isAllowed,
+                OperatorSlots.isRegistered,
                 bytes32(uint256(uint160(operator)))
             ),
-            isAllowed ? 1 : 0,
-            "Storage getter failed for isAllowed"
+            isRegistered ? 1 : 0,
+            "Storage getter failed for isRegistered"
         );
         vm.stopPrank();
     }

@@ -21,7 +21,7 @@ export function validateInputs(bytesArgs: string[]): OperatorRegistrationArgs {
 }
 
 function decodeInputs(bytesArgs: string[]): OperatorRegistrationArgs {
-    const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, operatorAddress] = bytesArgs;
+    const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, requester] = bytesArgs;
 
     try {
         const chainTypes = decodeAbiParameters([{ type: "uint8[]" }], rawChainTypes)[0];
@@ -32,7 +32,7 @@ function decodeInputs(bytesArgs: string[]): OperatorRegistrationArgs {
             chainTypes,
             actions,
             operatorAddresses,
-            operatorAddress,
+            requester,
         };
     } catch (error) {
         handleError(ErrorType.DECODE_FAILED);
@@ -43,7 +43,7 @@ function validateDecodedArgs(args: OperatorRegistrationArgs): void {
     validateChainTypes(args.chainTypes);
     validateActions(args.actions);
     validateAddresses(args.operatorAddresses);
-    validateOperatorAddress(args.operatorAddress);
+    validateOperatorAddress(args.requester);
     validateArrayLengths(args);
 }
 
@@ -59,7 +59,7 @@ function validateChainTypes(chainTypes: number[]): void {
  * Validates registration actions are valid enum values
  */
 function validateActions(actions: number[]): void {
-    const validActions = new Set([OperatorRegistrationAction.REGISTER, OperatorRegistrationAction.UNREGISTER]);
+    const validActions = new Set([OperatorRegistrationAction.REGISTER, OperatorRegistrationAction.DEREGISTER]);
 
     if (!actions.every(action => validActions.has(action))) {
         handleError(ErrorType.INVALID_ACTION);

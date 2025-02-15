@@ -1,4 +1,4 @@
-import { CNetwork } from "../types/CNetwork";
+import { ConceroNetwork } from "../types/ConceroNetwork";
 import { getFallbackClients } from "./getViemClients";
 import { type PublicClient } from "viem";
 
@@ -24,7 +24,7 @@ const NETWORK_MINIMUMS = {
  * @returns GasParameters object containing maxFeePerGas and maxPriorityFeePerGas
  */
 export async function getGasParameters(
-    chain: CNetwork,
+    chain: ConceroNetwork,
     priorityMultiplier = 2,
     maxFeeMultiplier = 2,
 ): Promise<GasParameters> {
@@ -74,7 +74,7 @@ export async function getGasParameters(
 /**
  * Gets network-specific minimum gas parameters
  */
-function getNetworkMinimums(chain: CNetwork) {
+function getNetworkMinimums(chain: ConceroNetwork) {
     // Check if chain is Polygon (you'll need to implement this check based on your CNetwork type)
     const isPolygon = chain.chainId === 137 || chain.name.toLowerCase().includes("polygon");
 
@@ -92,7 +92,7 @@ function getNetworkMinimums(chain: CNetwork) {
 /**
  * Gets the suggested priority fee from recent blocks
  */
-async function getSuggestedPriorityFee(publicClient: PublicClient, chain: CNetwork): Promise<bigint> {
+async function getSuggestedPriorityFee(publicClient: PublicClient, chain: ConceroNetwork): Promise<bigint> {
     try {
         // For Polygon, we want to be more aggressive with priority fees
         const isPolygon = chain.chainId === 137 || chain.name.toLowerCase().includes("polygon");

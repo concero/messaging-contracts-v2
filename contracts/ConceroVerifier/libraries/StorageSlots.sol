@@ -43,7 +43,7 @@ library OperatorSlots {
 
     uint256 internal constant registeredOperators =
         RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
-    uint256 internal constant isAllowed =
+    uint256 internal constant isRegistered =
         RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
     uint256 internal constant depositsNative =
         RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2;

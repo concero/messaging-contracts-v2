@@ -4,16 +4,32 @@ import { getEnvVar, getHashSum, updateEnvVariable } from "../utils";
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import log from "../utils/log";
-import { getGasParameters } from "../utils/getGasPrice";
+import { getGasParameters } from "../utils/getGasParameters";
+import { resolve } from "path";
 
-const requestReportJsUrl =
-    "https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/requestReport.min.js";
-const requestOperatorRegistrationJsUrl =
-    "https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/requestOperatorRegistration.min.js";
+const requestReportJsCode = resolve(__dirname, "../../clf/dist/requestReport.min.js");
+const requestOperatorRegistrationJsCode = resolve(__dirname, "../../clf/dist/requestOperatorRegistration.min.js");
 
-const deployVerifier: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = async function (
+type DeployArgs = {
+    chainSelector: string;
+    usdc: string;
+    clfRouter: string;
+    clfDonId: string;
+    clfSubscriptionId: string;
+    clfDonHostedSecretsVersion: string;
+    clfDonHostedSecretsSlotId: string;
+    clfPremiumFeeUsdBps: string;
+    clfCallbackGasLimit: bigint;
+    requestCLFMessageReportJsCodeHash: string;
+    requestOperatorRegistrationJsCodeHash: string;
+};
+
+type DeploymentFunction = (hre: HardhatRuntimeEnvironment, overrideArgs?: Partial<DeployArgs>) => Promise<Deployment>;
+
+const deployVerifier: DeploymentFunction = async function (
     hre: HardhatRuntimeEnvironment,
-) {
+    overrideArgs?: Partial<DeployArgs>,
+): Promise<Deployment> {
     const { deployer } = await hre.getNamedAccounts();
     const { deploy } = hre.deployments;
     const { name } = hre.network;
@@ -23,10 +39,7 @@ const deployVerifier: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = 
 
     const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
 
-    const requestCLFMessageReportJsCode = await fetch(requestReportJsUrl).then(res => res.text());
-    const requestOperatorRegistrationJsCode = await fetch(requestOperatorRegistrationJsUrl).then(res => res.text());
-
-    const args = {
+    const defaultArgs: DeployArgs = {
         chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
         clfRouter: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
@@ -36,11 +49,16 @@ const deployVerifier: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = 
         clfDonHostedSecretsSlotId: "0",
         clfPremiumFeeUsdBps: getEnvVar(`CLF_PREMIUM_FEE_USD_BPS_${networkEnvKeys[name]}`),
         clfCallbackGasLimit: 100_000n,
-        requestCLFMessageReportJsCodeHash: getHashSum(requestCLFMessageReportJsCode),
+        requestCLFMessageReportJsCodeHash: getHashSum(requestReportJsCode),
         requestOperatorRegistrationJsCodeHash: getHashSum(requestOperatorRegistrationJsCode),
     };
 
-    const deployment = (await deploy("ConceroVerifier", {
+    const args: DeployArgs = {
+        ...defaultArgs,
+        ...overrideArgs,
+    };
+
+    const deployment = await deploy("ConceroVerifier", {
         from: deployer,
         args: [
             args.chainSelector,
@@ -59,7 +77,7 @@ const deployVerifier: (hre: HardhatRuntimeEnvironment) => Promise<Deployment> = 
         autoMine: true,
         maxFeePerGas,
         maxPriorityFeePerGas,
-    })) as Deployment;
+    });
 
     log(`Deployed at: ${deployment.address}`, "deployVerifier", name);
     updateEnvVariable(`CONCERO_VERIFIER_${networkEnvKeys[name]}`, deployment.address, `deployments.${networkType}`);

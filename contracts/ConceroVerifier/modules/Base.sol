@@ -17,7 +17,7 @@ abstract contract Base is ConceroOwnable {
 
     using s for s.Operator;
     modifier onlyOperator() {
-        require(s.operator().isAllowed[msg.sender], Errors.UnauthorizedOperator());
+        require(s.operator().isRegistered[msg.sender], Errors.UnauthorizedOperator());
         _;
     }
 

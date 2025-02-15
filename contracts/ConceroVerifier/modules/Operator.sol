@@ -28,14 +28,15 @@ abstract contract Operator is CLF {
     using s for s.Operator;
 
     function requestMessageReport(
-        Types.MessageReportRequest calldata request
+        uint256 internalMessageConfig,
+        bytes32 messageId,
+        bytes32 messageHashSum,
+        bytes memory srcChainData
     ) external onlyOperator returns (bytes32) {
-        require(
-            !s.verifier().pendingMessageReports[request.messageId],
-            Errors.MessageAlreadyProcessed()
-        );
-        s.verifier().pendingMessageReports[request.messageId] = true;
-        return _requestMessageReport(request);
+        require(!s.verifier().pendingMessageReports[messageId], Errors.MessageAlreadyProcessed());
+        s.verifier().pendingMessageReports[messageId] = true;
+        return
+            _requestMessageReport(internalMessageConfig, messageId, messageHashSum, srcChainData);
     }
 
     /**
@@ -47,14 +48,17 @@ abstract contract Operator is CLF {
         CommonTypes.ChainType[] calldata chainTypes,
         Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
-    ) external {
+    ) external returns (bytes32 clfRequestId) {
+        console.logUint(uint8(chainTypes[0]));
+        console.logUint(uint8(operatorActions[0]));
+        console.logBytes(operatorAddresses[0]);
         require(
             chainTypes.length == operatorActions.length &&
                 chainTypes.length == operatorAddresses.length,
             CommonErrors.LengthMismatch()
         );
 
-        _requestOperatorRegistration(chainTypes, operatorActions, operatorAddresses);
+        clfRequestId = _requestOperatorRegistration(chainTypes, operatorActions, operatorAddresses);
     }
 
     /// @notice Allows an operator to withdraw their earned fees
@@ -144,5 +148,9 @@ abstract contract Operator is CLF {
 
     function getOperatorFeesEarned(address operator) external view returns (uint256) {
         return s.operator().feesEarnedNative[operator];
+    }
+
+    function isOperatorRegistered(address operator) external view returns (bool) {
+        return s.operator().isRegistered[operator];
     }
 }

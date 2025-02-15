@@ -17,20 +17,29 @@ import { parseUnits, zeroHash } from "viem";
 import deployMockCLFRouter from "../deploy/MockCLFRouter";
 import deployConceroClientExample from "../deploy/ConceroClientExample";
 
+/*
+Testing pipeline:
+1. in v2-contracts, run: bun run chain (to start hardhat node)
+2. in v2-contracts, run: bun run operator-setup (to deploy contracts and set price feeds)
+3. in v2-operators, run: bun ./src/relayer/a/index.ts (to start relayer)
+*/
 async function operatorSetup() {
     const hre: HardhatRuntimeEnvironment = require("hardhat");
     await compileContracts({ quiet: true });
+
     const operatorAddress = getEnvVar("TESTNET_OPERATOR_ADDRESS");
     const userAddress = getEnvVar("TESTNET_USER_ADDRESS");
 
-    const conceroVerifier = await deployVerifier(hre);
+    const mockCLFRouter = await deployMockCLFRouter(hre);
+
+    const conceroVerifier = await deployVerifier(hre, { clfRouter: mockCLFRouter.address });
     const conceroRouter = await deployRouter(hre);
+
+    const conceroClientExample = await deployConceroClientExample(hre, { conceroRouter: conceroRouter.address });
+
     // await setVerifierVariables(hre);
     await setVerifierPriceFeeds(conceroVerifier.address, conceroNetworks.localhost);
     await setRouterPriceFeeds(conceroRouter.address, conceroNetworks.localhost);
-
-    const conceroClientExample = await deployConceroClientExample(hre);
-    const mockCLFRouter = await deployMockCLFRouter(hre);
 
     await sendConceroMessage(conceroClientExample.address, conceroNetworks.localhost);
 }

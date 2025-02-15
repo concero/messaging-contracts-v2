@@ -4,7 +4,7 @@ import { conceroNetworks, writeContractConfig } from "../constants";
 import log from "../utils/log";
 import { getEnvAddress, updateEnvAddress } from "../utils";
 import { IProxyType } from "../types/deploymentVariables";
-import { getGasParameters } from "../utils/getGasPrice";
+import { getGasParameters } from "../utils/getGasParameters";
 
 const deployTransparentProxy: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) => Promise<void> =
     async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {

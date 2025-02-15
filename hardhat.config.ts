@@ -1,6 +1,7 @@
 import "./utils/dotenvConfig";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-ignition-viem";
 import "@nomicfoundation/hardhat-viem";
 import "@nomicfoundation/hardhat-verify";
 import "@typechain/hardhat";
@@ -8,7 +9,7 @@ import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 import "hardhat-gas-reporter";
 import "hardhat-contract-sizer";
-import "@tenderly/hardhat-tenderly";
+// import "@tenderly/hardhat-tenderly";
 import "solidity-coverage";
 import "@chainlink/hardhat-chainlink";
 import "@nomicfoundation/hardhat-network-helpers";

@@ -1,6 +1,6 @@
 import { handleError } from "./errorHandler";
 import { ErrorType } from "./errorType";
-import { REPORT_BYTE_OFFSETS } from "./reportByteConstants";
+import { COMMON_REPORT_BYTE_OFFSETS } from "./reportBytes";
 
 /**
  * Converts a BigInt to a 32-byte (Uint256) buffer
@@ -45,8 +45,8 @@ export function packUint16(value: number): Uint8Array {
  */
 export function packResponseConfig(reportType: number, version: number, requester: string): bigint {
     return (
-        (BigInt(reportType) << BigInt(REPORT_BYTE_OFFSETS.REPORT_TYPE)) |
-        (BigInt(version) << BigInt(REPORT_BYTE_OFFSETS.VERSION)) |
-        (BigInt(`0x${requester.replace(/^0x/, "")}`) & REPORT_BYTE_OFFSETS.REQUESTER_MASK)
+        (BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE)) |
+        (BigInt(version) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION)) |
+        (BigInt(`0x${requester.replace(/^0x/, "")}`) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK)
     );
 }

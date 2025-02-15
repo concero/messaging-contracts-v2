@@ -5,21 +5,23 @@ import { ChainType, ReportType } from "../common/enums";
 import { CONFIG } from "./constants/config";
 import { handleError, CustomErrorHandler } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
+import { OperatorRegistrationResult } from "./types";
 
 export async function main(bytesArgs: string[]) {
     try {
         const args = validateInputs(bytesArgs);
 
-        if (args.chainTypes.includes(ChainType.EVM) && args.operatorAddresses[0] !== args.operatorAddress) {
+        if (args.chainTypes.includes(ChainType.EVM) && args.operatorAddresses[0] !== args.requester) {
             handleError(ErrorType.INVALID_OPERATOR_ADDRESS);
         }
 
-        await verifyOperatorStake(args.operatorAddress);
+        await verifyOperatorStake(args.requester);
 
-        const registrationReportResult = {
+        const registrationReportResult: OperatorRegistrationResult = {
             version: CONFIG.REPORT_VERSION,
             reportType: ReportType.OPERATOR_REGISTRATION,
-            operator: args.operatorAddress,
+            requester: args.requester,
+            actions: args.actions,
             chainTypes: args.chainTypes,
             operatorAddresses: args.operatorAddresses,
         };

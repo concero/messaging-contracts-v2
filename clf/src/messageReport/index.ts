@@ -11,6 +11,7 @@ import { decodeConceroMessageLog, decodeEvmSrcChainData } from "./utils/decoders
 import { fetchConceroMessage } from "./utils/fetchConceroMessage";
 import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
+import { MessageReportResult } from "./types";
 
 export async function main(bytesArgs: string[]) {
     try {
@@ -35,7 +36,7 @@ export async function main(bytesArgs: string[]) {
 
         const recomputedMessageHashSum = await verifyMessageHash(
             args.messageId,
-            messageConfigFromLog,
+            messageConfigFromLog.toString(),
             dstChainDataFromLog,
             messageFromLog,
             args.messageHashSum,
@@ -44,11 +45,11 @@ export async function main(bytesArgs: string[]) {
         const operators = await getAllowedOperators(publicClient, ChainType.EVM, args.messageId);
         const allowedOperators = pick(operators, 3);
 
-        const messageReportResult = {
+        const messageReportResult: MessageReportResult = {
             version: CONFIG.REPORT_VERSION,
             reportType: ReportType.MESSAGE,
             operator: args.operatorAddress,
-            internalMessageConfig: messageConfigFromLog,
+            internalMessageConfig: messageConfigFromLog.toString(),
             messageId: args.messageId,
             messageHashSum: recomputedMessageHashSum,
             dstChainData: dstChainDataFromLog,

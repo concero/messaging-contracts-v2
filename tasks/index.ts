@@ -2,5 +2,5 @@ export * as deployRouter from "./deployRouter";
 export * as deployVerifier from "./deployVerifier";
 export * as clf from "./clf";
 export * as utils from "./utils";
-import operatorSetup from "./operatorSetup";
-export { operatorSetup };
+export { setupOperatorContracts } from "./setupOperatorContracts";
+// export { testOperator } from "../test/operator/testOperator";

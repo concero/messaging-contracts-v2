@@ -32,6 +32,7 @@ interface IConceroClientErrors {
     error InvalidDstChainData();
 
     //utils lib
+    //todo: check all errors if they need to be here.
     error NotAContract(address target);
     error DelegateCallFailed(bytes response);
 

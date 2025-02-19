@@ -46,6 +46,7 @@ export async function main(bytesArgs: string[]) {
         const allowedOperators = pick(operators, 3);
 
         const messageReportResult: MessageReportResult = {
+            //todo: add reportconfig instead
             version: CONFIG.REPORT_VERSION,
             reportType: ReportType.MESSAGE,
             operator: args.operatorAddress,

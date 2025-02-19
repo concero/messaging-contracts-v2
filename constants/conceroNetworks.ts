@@ -106,7 +106,7 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
         confirmations: 1,
         chainSelector: process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST as string,
         accounts: [localhostDeployerPK, localhostProxyDeployerPK, getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY")],
-        saveDeployments: false,
+        saveDeployments: true,
     },
 };
 

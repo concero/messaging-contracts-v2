@@ -23,7 +23,7 @@ Testing pipeline:
 2. in v2-contracts, run: bun run operator-setup (to deploy contracts and set price feeds)
 3. in v2-operators, run: bun ./src/relayer/a/index.ts (to start relayer)
 */
-async function operatorSetup() {
+async function setupOperatorContracts() {
     const hre: HardhatRuntimeEnvironment = require("hardhat");
     await compileContracts({ quiet: true });
 
@@ -31,7 +31,6 @@ async function operatorSetup() {
     const userAddress = getEnvVar("TESTNET_USER_ADDRESS");
 
     const mockCLFRouter = await deployMockCLFRouter(hre);
-
     const conceroVerifier = await deployVerifier(hre, { clfRouter: mockCLFRouter.address });
     const conceroRouter = await deployRouter(hre);
 
@@ -172,7 +171,7 @@ async function setRouterPriceFeeds(conceroRouterAddress: string, chain: ConceroN
 }
 
 task("operator-setup", "Setup the operator").setAction(async () => {
-    await operatorSetup();
+    await setupOperatorContracts();
 });
 
-export default operatorSetup;
+export { setupOperatorContracts };

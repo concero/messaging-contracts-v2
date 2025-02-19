@@ -65,6 +65,8 @@ contract DeployConceroRouter is ConceroRouterBase {
         conceroRouter = new ConceroRouter(
             SRC_CHAIN_SELECTOR,
             usdc,
+            CONCERO_VERIFIER_ADDRESS,
+            CONCERO_VERIFIER_SUB_ID,
             [
                 MOCK_DON_SIGNER_ADDRESS_0,
                 MOCK_DON_SIGNER_ADDRESS_1,

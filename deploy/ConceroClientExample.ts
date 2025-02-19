@@ -1,9 +1,8 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployment } from "hardhat-deploy/types";
-import { getEnvVar, updateEnvVariable } from "../utils";
+import { getEnvVar, updateEnvVariable, getGasParameters, log } from "../utils";
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
-import log from "../utils/log";
 
 type DeployArgs = {
     conceroRouter: string;

@@ -42,6 +42,7 @@ contract SubmitMessageReport is ConceroRouterTest {
     }
 
     function test_SubmitMessageReport() public {
+        vm.pauseGasMetering();
         bytes memory dstChainDataRaw = abi.encode(address(conceroClient), GAS_LIMIT);
 
         uint256 reportConfig = (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
@@ -57,7 +58,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         );
 
         bytes[] memory allowedOperators = new bytes[](1);
-        allowedOperators[0] = abi.encode(operator); //needs to be padded to 32 bytes
+        allowedOperators[0] = abi.encodePacked(operator);
 
         bytes memory encodedResult = abi.encodePacked(
             reportConfig,
@@ -75,10 +76,12 @@ contract SubmitMessageReport is ConceroRouterTest {
         );
 
         vm.recordLogs();
+        vm.resumeGasMetering();
 
         vm.prank(operator);
         conceroRouter.submitMessageReport(reportSubmission, TEST_MESSAGE);
 
+        vm.pauseGasMetering();
         Vm.Log[] memory entries = vm.getRecordedLogs();
 
         bool foundReceivedEvent = false;

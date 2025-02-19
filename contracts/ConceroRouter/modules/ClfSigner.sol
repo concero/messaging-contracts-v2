@@ -10,20 +10,28 @@ import {Base} from "./Base.sol";
 import {Types} from "../libraries/Types.sol";
 
 abstract contract ClfSigner is Base {
+
     error IncorrectNumberOfSignatures();
     error UnauthorizedSigner(address signer);
     error DuplicateSignatureDetected(address signer);
+    error InvalidClfReportClient();
+    error InvalidClfReportSubscriptionId();
 
     address internal immutable i_clfSigner0;
     address internal immutable i_clfSigner1;
     address internal immutable i_clfSigner2;
     address internal immutable i_clfSigner3;
 
-    constructor(address[4] memory clfSigners) {
+    address internal immutable i_conceroVerifier;
+    uint64 internal immutable i_conceroVerifierSubId;
+
+    constructor(address conceroVerifier, uint64 conceroVerifierSubId, address[4] memory clfSigners) {
         i_clfSigner0 = clfSigners[0];
         i_clfSigner1 = clfSigners[1];
         i_clfSigner2 = clfSigners[2];
         i_clfSigner3 = clfSigners[3];
+        i_conceroVerifier = conceroVerifier;
+        i_conceroVerifierSubId = conceroVerifierSubId;
     }
 
     function _isAuthorizedClfSigner(address clfSigner) internal view returns (bool) {
@@ -52,6 +60,10 @@ abstract contract ClfSigner is Base {
         return keccak256(messageToHash);
     }
 
+    function _verifyClfReportOnChainMetadata(Types.ClfReportOnchainMetadata memory onchainMetadata) internal view {
+        require(onchainMetadata.client == i_conceroVerifier, InvalidClfReportClient());
+        require(onchainMetadata.subscriptionId == i_conceroVerifierSubId, InvalidClfReportSubscriptionId());
+    }
     /**
      * @notice Verifies the signatures of the report.
      * @param reportSubmission The report submission data.
@@ -76,6 +88,12 @@ abstract contract ClfSigner is Base {
 
         address[] memory signers = new address[](rs.length);
 
+        //todo:
+        // 1 decode onchain metadata as:
+          //
+          // 2. verify that client = CONCERO_VERIFIER_ADDRESS
+          // 3. verify that subscriptionId = CONCERO_VERIFIER_SUBSCRIPTION_ID
+          //
         for (uint256 i; i < rs.length; i++) {
             uint8 v = uint8(rawVs[i]) + 27;
             bytes32 r = rs[i];
@@ -90,17 +108,5 @@ abstract contract ClfSigner is Base {
 
             signers[i] = signer;
         }
-    }
-
-    function _extractClfReportResult(
-        bytes calldata report
-    ) internal pure returns (bytes memory result) {
-        (, bytes[] memory results, , , ) = abi.decode(
-            report,
-            (bytes32[], bytes[], bytes[], bytes[], bytes[])
-        );
-
-        bytes memory result = results[0];
-        return result;
     }
 }

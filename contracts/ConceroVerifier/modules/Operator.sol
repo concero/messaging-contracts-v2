@@ -18,7 +18,7 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 import {Errors} from "../libraries/Errors.sol";
 
-import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn} from "../../interfaces/IConceroVerifier.sol";
+import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn, OperatorRegistrationRequested} from "../../interfaces/IConceroVerifier.sol";
 
 import {CLF} from "./CLF.sol";
 
@@ -49,9 +49,6 @@ abstract contract Operator is CLF {
         Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) external returns (bytes32 clfRequestId) {
-        console.logUint(uint8(chainTypes[0]));
-        console.logUint(uint8(operatorActions[0]));
-        console.logBytes(operatorAddresses[0]);
         require(
             chainTypes.length == operatorActions.length &&
                 chainTypes.length == operatorAddresses.length,
@@ -59,6 +56,12 @@ abstract contract Operator is CLF {
         );
 
         clfRequestId = _requestOperatorRegistration(chainTypes, operatorActions, operatorAddresses);
+        emit OperatorRegistrationRequested(
+            msg.sender,
+            chainTypes,
+            operatorActions,
+            operatorAddresses
+        );
     }
 
     /// @notice Allows an operator to withdraw their earned fees

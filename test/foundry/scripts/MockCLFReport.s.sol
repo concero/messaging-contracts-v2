@@ -19,9 +19,10 @@ contract MockCLFReport is ConceroVerifierTest {
     error UnauthorizedSigner(address signer);
     error DuplicateSignatureDetected(address signer);
 
-    function run() external {
+    function run() external returns (bytes memory) {
         RouterTypes.ClfDonReportSubmission memory reportSubmission = createMessageReport();
         _verifyClfReportSignatures(reportSubmission);
+        return abi.encode(reportSubmission);
     }
 
     /**
@@ -38,6 +39,21 @@ contract MockCLFReport is ConceroVerifierTest {
         results[0] = _response;
         bytes[] memory errors = new bytes[](1);
         bytes[] memory onchainMetadata = new bytes[](1);
+
+        onchainMetadata[0] = abi.encode(RouterTypes.ClfReportOnchainMetadata({
+            requestId: bytes32("requestId"),
+            coordinator: address(0x1234567890123456789012345678901234567890),
+            estimatedTotalCostJuels: 1000000000000000000,
+            client: CONCERO_VERIFIER_ADDRESS,
+            subscriptionId: CONCERO_VERIFIER_SUB_ID,
+            callbackGasLimit: 100000,
+            adminFee: 1000000000000000000,
+            donFee: 1000000000000000000,
+            gasOverheadBeforeCallback: 100000,
+            gasOverheadAfterCallback: 100000,
+            timeoutTimestamp: 100000
+        }));
+
         bytes[] memory offchainMetadata = new bytes[](1);
         bytes memory reportBody = abi.encode(
             requestIds,

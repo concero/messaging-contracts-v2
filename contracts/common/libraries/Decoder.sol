@@ -14,6 +14,29 @@ import {Types as RouterTypes} from "../../ConceroRouter/libraries/Types.sol";
 import {Types as VerifierTypes} from "../../ConceroVerifier/libraries/Types.sol";
 
 library Decoder {
+
+    /**
+     * @notice Decodes the raw CLF report into its constituent parts
+     * @param report The raw report to decode
+     * @return decodedReport The decoded report components
+     */
+    function _decodeCLFReport(
+        bytes calldata report
+    ) internal pure returns (RouterTypes.ClfReport memory decodedReport) {
+        (
+            decodedReport.requestIds,
+            decodedReport.results,
+            decodedReport.errors,
+            decodedReport.onchainMetadata,
+            decodedReport.offchainMetadata
+        ) = abi.decode(
+            report,
+            (bytes32[], bytes[], bytes[], bytes[], bytes[])
+        );
+
+        return decodedReport;
+    }
+
     //TODO: use offsets consts
     function _decodeCLFReportConfig(
         uint256 reportConfig

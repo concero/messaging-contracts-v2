@@ -58,6 +58,10 @@ abstract contract ConceroBaseScript is Script {
             (uint256(0) << MessageConfigBitOffsets.OFFSET_RELAYER_CONF) | // relayerConfig, assuming 0
             (uint256(0) << MessageConfigBitOffsets.OFFSET_CALLBACKABLE); // isCallbackable, assuming false
 
+
+
+    address constant CONCERO_VERIFIER_ADDRESS = address(0x123);
+    uint64 constant CONCERO_VERIFIER_SUB_ID = 0;
     constructor() {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");
         proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");

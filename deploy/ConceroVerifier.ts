@@ -1,10 +1,8 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Deployment } from "hardhat-deploy/types";
-import { getEnvVar, getHashSum, updateEnvVariable } from "../utils";
+import { getEnvVar, getHashSum, updateEnvVariable, getGasParameters, log } from "../utils";
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
-import log from "../utils/log";
-import { getGasParameters } from "../utils/getGasParameters";
 import { resolve } from "path";
 
 const requestReportJsCode = resolve(__dirname, "../../clf/dist/requestReport.min.js");
@@ -75,6 +73,7 @@ const deployVerifier: DeploymentFunction = async function (
         ],
         log: true,
         autoMine: true,
+        skipIfAlreadyDeployed: true,
         maxFeePerGas,
         maxPriorityFeePerGas,
     });

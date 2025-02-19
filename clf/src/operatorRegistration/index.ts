@@ -9,13 +9,14 @@ import { OperatorRegistrationResult } from "./types";
 
 export async function main(bytesArgs: string[]) {
     try {
+        //todo: decode and validate separately here
         const args = validateInputs(bytesArgs);
 
         if (args.chainTypes.includes(ChainType.EVM) && args.operatorAddresses[0] !== args.requester) {
             handleError(ErrorType.INVALID_OPERATOR_ADDRESS);
         }
 
-        await verifyOperatorStake(args.requester);
+        // await verifyOperatorStake(args.requester);
 
         const registrationReportResult: OperatorRegistrationResult = {
             version: CONFIG.REPORT_VERSION,

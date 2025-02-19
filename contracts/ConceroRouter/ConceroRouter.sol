@@ -17,8 +17,10 @@ contract ConceroRouter is IConceroRouter, Operator, Message, GenericStorage, Own
     constructor(
         uint24 chainSelector,
         address USDC,
+        address conceroVerifier,
+        uint64 conceroVerifierSubId,
         address[4] memory clfSigners
-    ) Message(clfSigners) Base(chainSelector, USDC) {}
+    ) Message(conceroVerifier, conceroVerifierSubId, clfSigners) Base(chainSelector, USDC) {}
 
     receive() external payable {}
 

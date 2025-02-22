@@ -33,6 +33,8 @@ function getCLFDonSigners(networkType: NetworkType) {
 type DeployArgs = {
     chainSelector: string;
     usdc: string;
+    conceroVerifier: string;
+    conceroVerifierSubId: string;
     clfSigners: string[];
 };
 
@@ -54,6 +56,8 @@ const deployRouter: DeploymentFunction = async function (
     const defaultArgs: DeployArgs = {
         chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
         usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
+        conceroVerifier: getEnvVar(`CONCERO_VERIFIER_PROXY_${networkEnvKeys[name]}`),
+        conceroVerifierSubId: getEnvVar("CONCERO_VERIFIER_SUB_ID"),
         clfSigners: getCLFDonSigners(networkType),
     };
 
@@ -64,7 +68,7 @@ const deployRouter: DeploymentFunction = async function (
 
     const deployment = await deploy("ConceroRouter", {
         from: deployer,
-        args: [args.chainSelector, args.usdc, args.clfSigners],
+        args: [args.chainSelector, args.usdc, args.conceroVerifier, args.conceroVerifierSubId, args.clfSigners],
         log: true,
         autoMine: true,
         maxFeePerGas,

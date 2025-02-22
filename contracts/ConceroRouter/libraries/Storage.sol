@@ -7,6 +7,7 @@
 pragma solidity 0.8.28;
 
 import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
+import {SupportedChains} from "../../common/libraries/SupportedChains.sol";
 
 library Namespaces {
     bytes32 internal constant ROUTER =
@@ -80,4 +81,18 @@ library Storage {
             s.slot := slot
         }
     }
+
+    // @notice wrapper for gas savings
+    function getNativeNativeRate(uint24 chainSelector) internal view returns (uint256) {
+        if (
+                chainSelector == SupportedChains.CHAIN_SELECTOR_POLYGON ||
+                chainSelector == SupportedChains.CHAIN_SELECTOR_POLYGON_AMOY
+            ) {
+                return priceFeed().nativeNativeRates[chainSelector];
+        }
+
+        else {
+                return 1e18;
+        }
+}
 }

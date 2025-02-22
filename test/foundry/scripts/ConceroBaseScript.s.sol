@@ -14,12 +14,11 @@ import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.
 abstract contract ConceroBaseScript is Script {
     address public immutable deployer;
     address public immutable proxyDeployer;
-
-    address public constant operator = address(0x09354705);
-    address public constant user = address(0x123);
+    address public constant operator = address(0x4242424242424242424242424242424242424242);
+    address public constant user = address(0x0101010101010101010101010101010101010101);
     address public usdc;
 
-    uint24 public constant SRC_CHAIN_SELECTOR = 8453;
+    uint24 public constant SRC_CHAIN_SELECTOR = 1;
     uint24 public constant DST_CHAIN_SELECTOR = 8453;
 
     address public constant MOCK_DON_SIGNER_ADDRESS_0 = 0x0004C7EdCF9283D3bc3C1309939b3E887bb9d98b;
@@ -57,8 +56,6 @@ abstract contract ConceroBaseScript is Script {
             (uint256(1) << MessageConfigBitOffsets.OFFSET_MIN_DST_CONF) | // minDstConfirmations, assuming 1
             (uint256(0) << MessageConfigBitOffsets.OFFSET_RELAYER_CONF) | // relayerConfig, assuming 0
             (uint256(0) << MessageConfigBitOffsets.OFFSET_CALLBACKABLE); // isCallbackable, assuming false
-
-
 
     address constant CONCERO_VERIFIER_ADDRESS = address(0x123);
     uint64 constant CONCERO_VERIFIER_SUB_ID = 0;

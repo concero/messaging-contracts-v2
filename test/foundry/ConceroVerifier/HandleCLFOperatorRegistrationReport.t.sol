@@ -17,7 +17,7 @@ import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
-import {MockCLFReport} from "../scripts/MockCLFReport.s.sol";
+import {OperatorRegistrationReport} from "../scripts/MockCLFReport/OperatorRegistrationReport.sol";
 import {RequestOperatorRegistration} from "./RequestOperatorRegistration.t.sol";
 
 contract HandleCLFOperatorRegistrationReport is RequestOperatorRegistration {
@@ -50,9 +50,8 @@ contract HandleCLFOperatorRegistrationReport is RequestOperatorRegistration {
 
         bytes memory response = abi.encode(result);
 
-        MockCLFReport mockClf = new MockCLFReport();
-        RouterTypes.ClfDonReportSubmission memory clfSubmission = mockClf
-            .createOperatorRegistrationReport();
+        OperatorRegistrationReport mockClf = new OperatorRegistrationReport();
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = mockClf.getReport();
 
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "");
@@ -80,9 +79,9 @@ contract HandleCLFOperatorRegistrationReport is RequestOperatorRegistration {
 
         bytes memory response = abi.encode(result);
 
-        MockCLFReport mockClf = new MockCLFReport();
-        RouterTypes.ClfDonReportSubmission memory clfSubmission = mockClf
-            .createOperatorRegistrationReport();
+        OperatorRegistrationReport operatorRegistrationReport = new OperatorRegistrationReport();
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = operatorRegistrationReport
+            .getReport();
 
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "");
@@ -93,9 +92,9 @@ contract HandleCLFOperatorRegistrationReport is RequestOperatorRegistration {
     function test_handleOracleFulfillment_WithError_operatorRegistration() public {
         bytes32 clfRequestId = test_requestOperatorRegistration();
 
-        MockCLFReport mockClf = new MockCLFReport();
-        RouterTypes.ClfDonReportSubmission memory clfSubmission = mockClf
-            .createOperatorRegistrationReport();
+        OperatorRegistrationReport operatorRegistrationReport = new OperatorRegistrationReport();
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = operatorRegistrationReport
+            .getReport();
 
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "error");

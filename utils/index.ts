@@ -8,7 +8,7 @@ import {
     getEthersV6SignerAndProvider,
 } from "./getEthersSignerAndProvider";
 import getHashSum from "./getHashSum";
-import { getClients, getFallbackClients } from "./getViemClients";
+import { getClients, getFallbackClients, getTestClient } from "./getViemClients";
 import { err, log, warn } from "./log";
 import { getEnvAddress, getEnvVar } from "./getEnvVar";
 import { getWallet } from "./getWallet";
@@ -29,6 +29,7 @@ export {
     getHashSum,
     getClients,
     getFallbackClients,
+    getTestClient,
     log,
     warn,
     err,

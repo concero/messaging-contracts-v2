@@ -1,7 +1,7 @@
 import { Log, getAbiItem } from "viem";
 import { setupEventListener } from "@concero/v2-operators/src/relayer/common/eventListener/setupEventListener";
 import { decodeLogs } from "@concero/v2-operators/src/relayer/common/eventListener/decodeLogs";
-import { getMockCLFReportBytes } from "../mockOperatorRegistrationCLFReport";
+import { getCLFReport, getOperatorRegistrationCLFResponse } from "../getOperatorRegistrationCLFResponse";
 import { globalConfig, networkEnvKeys } from "@concero/v2-operators/src/constants";
 import { config } from "@concero/v2-operators/src/relayer/a/constants";
 import { getEnvVar } from "../../../utils";
@@ -21,10 +21,8 @@ async function onOperatorRegistryLogs(logs: Log[]) {
 
     for (const log of decodedLogs) {
         if (log.eventName === OPERATOR_REGISTRY_EVENT) {
-            console.log("Operator registration requested");
-            console.log(log);
-
-            // await getMockCLFReportBytes();
+            const operatorRegistrationCLFResponseBytes = await getOperatorRegistrationCLFResponse();
+            const clfReport = await getCLFReport(operatorRegistrationCLFResponseBytes);
         }
     }
 }

@@ -1,5 +1,15 @@
 import { privateKeyToAccount } from "viem/accounts";
-import { Chain, createPublicClient, createWalletClient, fallback, http } from "viem";
+import {
+    Chain,
+    createPublicClient,
+    createTestClient,
+    createWalletClient,
+    fallback,
+    http,
+    publicActions,
+    type TestClient,
+    walletActions,
+} from "viem";
 import type { PrivateKeyAccount } from "viem/accounts/types";
 import { WalletClient } from "viem/clients/createWalletClient";
 import { PublicClient } from "viem/clients/createPublicClient";
@@ -20,6 +30,19 @@ export function getClients(
     const walletClient = createWalletClient({ transport: http(url), chain: viemChain, account });
 
     return { walletClient, publicClient, account };
+}
+
+export function getTestClient(viemChain: Chain, account: PrivateKeyAccount): TestClient {
+    const testClient = createTestClient({
+        chain: viemChain,
+        mode: "hardhat",
+        transport: http(),
+        account,
+    })
+        .extend(publicActions)
+        .extend(walletActions);
+
+    return testClient;
 }
 
 export function getFallbackClients(
@@ -47,8 +70,8 @@ export function getFallbackClients(
     }
 
     const { viemChain, name } = chain;
-    const transport = fallback(urls[name].map(url => http(url)));
 
+    const transport = fallback(urls[name].map(url => http(url)));
     const publicClient = createPublicClient({ transport, chain: viemChain });
     const walletClient = createWalletClient({ transport, chain: viemChain, account });
 

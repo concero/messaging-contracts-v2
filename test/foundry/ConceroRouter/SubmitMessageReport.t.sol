@@ -20,12 +20,12 @@ import {RouterSlots, OperatorSlots} from "contracts/ConceroRouter/libraries/Stor
 import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
 
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
-import {MockCLFReport} from "../scripts/MockCLFReport.s.sol";
+import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
 
 import {IConceroClient} from "contracts/interfaces/IConceroClient.sol";
 
 contract SubmitMessageReport is ConceroRouterTest {
-    MockCLFReport internal mockClfReport;
+    MessageReport internal messageReport;
     address internal mockReceiver;
     bytes32 internal constant TEST_MESSAGE_ID = bytes32(uint256(1));
     bytes internal constant TEST_MESSAGE = "Test message";
@@ -36,13 +36,12 @@ contract SubmitMessageReport is ConceroRouterTest {
 
     function setUp() public override {
         super.setUp();
-        mockClfReport = new MockCLFReport();
+        messageReport = new MessageReport();
 
         _setPriceFeeds();
     }
 
     function test_SubmitMessageReport() public {
-        vm.pauseGasMetering();
         bytes memory dstChainDataRaw = abi.encode(address(conceroClient), GAS_LIMIT);
 
         uint256 reportConfig = (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
@@ -71,16 +70,15 @@ contract SubmitMessageReport is ConceroRouterTest {
             allowedOperators[0]
         );
 
-        Types.ClfDonReportSubmission memory reportSubmission = mockClfReport.createMockClfReport(
+        Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
             encodedResult
         );
 
         vm.recordLogs();
-        vm.resumeGasMetering();
 
         vm.prank(operator);
+        vm.resetGasMetering();
         conceroRouter.submitMessageReport(reportSubmission, TEST_MESSAGE);
-
         vm.pauseGasMetering();
         Vm.Log[] memory entries = vm.getRecordedLogs();
 

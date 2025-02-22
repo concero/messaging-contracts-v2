@@ -18,7 +18,7 @@ import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
-import {MockCLFReport} from "../scripts/MockCLFReport.s.sol";
+import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
 import {RequestMessageReport} from "./RequestMessageReport.t.sol";
 
 contract HandleCLFMessageReport is RequestMessageReport {
@@ -46,8 +46,8 @@ contract HandleCLFMessageReport is RequestMessageReport {
 
         bytes memory response = abi.encode(result);
 
-        MockCLFReport mockClf = new MockCLFReport();
-        RouterTypes.ClfDonReportSubmission memory clfSubmission = mockClf.createMessageReport();
+        MessageReport messageReport = new MessageReport();
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = messageReport.getReport();
 
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "");
@@ -56,8 +56,8 @@ contract HandleCLFMessageReport is RequestMessageReport {
     function test_handleOracleFulfillment_WithError_messageReport() public {
         bytes32 clfRequestId = test_requestMessageReport();
 
-        MockCLFReport mockClf = new MockCLFReport();
-        RouterTypes.ClfDonReportSubmission memory clfSubmission = mockClf.createMessageReport();
+        MessageReport messageReport = new MessageReport();
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = messageReport.getReport();
 
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "error");

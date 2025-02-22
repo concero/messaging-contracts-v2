@@ -1,4 +1,4 @@
-import { validateInputs } from "./utils/validateInputs";
+import { decodeInputs, validateDecodedArgs } from "./utils/validateInputs";
 import { verifyOperatorStake } from "./utils/verifyOperatorStake";
 import { packResult } from "./utils/packResult";
 import { ChainType, ReportType } from "../common/enums";
@@ -9,8 +9,8 @@ import { OperatorRegistrationResult } from "./types";
 
 export async function main(bytesArgs: string[]) {
     try {
-        //todo: decode and validate separately here
-        const args = validateInputs(bytesArgs);
+        const decodedArgs = decodeInputs(bytesArgs);
+        const validatedArgs = validateDecodedArgs(decodedArgs);
 
         if (args.chainTypes.includes(ChainType.EVM) && args.operatorAddresses[0] !== args.requester) {
             handleError(ErrorType.INVALID_OPERATOR_ADDRESS);

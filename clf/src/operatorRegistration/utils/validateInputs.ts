@@ -20,7 +20,7 @@ export function validateInputs(bytesArgs: string[]): OperatorRegistrationArgs {
     return decodedArgs;
 }
 
-function decodeInputs(bytesArgs: string[]): OperatorRegistrationArgs {
+export function decodeInputs(bytesArgs: string[]): OperatorRegistrationArgs {
     const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, requester] = bytesArgs;
 
     try {
@@ -39,7 +39,7 @@ function decodeInputs(bytesArgs: string[]): OperatorRegistrationArgs {
     }
 }
 
-function validateDecodedArgs(args: OperatorRegistrationArgs): void {
+export function validateDecodedArgs(args: OperatorRegistrationArgs): void {
     validateChainTypes(args.chainTypes);
     validateActions(args.actions);
     validateAddresses(args.operatorAddresses);

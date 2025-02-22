@@ -17,7 +17,6 @@ import {RouterSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
-
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
 contract SendMessage is ConceroRouterTest {
@@ -43,7 +42,7 @@ contract SendMessage is ConceroRouterTest {
         rates[0] = 1;
 
         uint256[] memory gasPrices = new uint256[](1);
-        gasPrices[0] = 100_000_000; // 0.1 gwei
+        gasPrices[0] = 100_000; // 0.1 gwei
 
         vm.prank(deployer);
         conceroRouter.setNativeNativeRates(chainSelectors, rates);
@@ -138,6 +137,7 @@ contract SendMessage is ConceroRouterTest {
                 messageFee
             )
         );
+
         conceroRouter.conceroSend{value: insufficientFee}(
             CLIENT_MESSAGE_CONFIG,
             dstChainData,

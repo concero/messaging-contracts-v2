@@ -88,12 +88,6 @@ abstract contract ClfSigner is Base {
 
         address[] memory signers = new address[](rs.length);
 
-        //todo:
-        // 1 decode onchain metadata as:
-          //
-          // 2. verify that client = CONCERO_VERIFIER_ADDRESS
-          // 3. verify that subscriptionId = CONCERO_VERIFIER_SUBSCRIPTION_ID
-          //
         for (uint256 i; i < rs.length; i++) {
             uint8 v = uint8(rawVs[i]) + 27;
             bytes32 r = rs[i];

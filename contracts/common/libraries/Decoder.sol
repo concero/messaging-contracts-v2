@@ -37,7 +37,6 @@ library Decoder {
         return decodedReport;
     }
 
-    //TODO: use offsets consts
     function _decodeCLFReportConfig(
         uint256 reportConfig
     ) internal pure returns (uint8 reportType, uint8 version, address requester) {

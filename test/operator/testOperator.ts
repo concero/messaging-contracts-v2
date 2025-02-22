@@ -1,11 +1,21 @@
 import "./utils/configureOperatorEnv";
-import { setupOperatorContracts } from "../../tasks/setupOperatorContracts";
+import { deployContracts } from "../../tasks";
 import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureOperatorIsRegistered";
 import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureDeposit";
 import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
-import { checkGas } from "@concero/v2-operators/src/relayer/common/utils";
+import { checkGas, getFallbackClients } from "@concero/v2-operators/src/relayer/common/utils";
 import { setupOperatorRegistrationEventListener } from "./utils/setupEventListeners";
+import { parseUnits } from "ethers";
+import { conceroNetworks } from "../../constants";
+import deployConceroClientExample from "../../deploy/ConceroClientExample";
+import deployMockCLFRouter from "../../deploy/MockCLFRouter";
 
+/*
+Testing pipeline:
+1. in v2-contracts, run: bun run chain (to start hardhat node)
+2. in v2-contracts, run: bun run operator-setup (to deploy contracts and set price feeds)
+3. in v2-operators, run: bun ./src/relayer/a/index.ts (to start relayer)
+*/
 //@notice Run 'bun chain' in a separate window, before running this script
 async function operator() {
     void (await checkGas());
@@ -16,8 +26,47 @@ async function operator() {
 
 async function testOperator() {
     await setupOperatorRegistrationEventListener();
-    await setupOperatorContracts();
+    const mockCLFRouter = await deployMockRouter();
+    const { conceroRouter } = await deployContracts(mockCLFRouter.address);
     await operator();
+    const client = await deployClient(conceroRouter.address);
+    await sendConceroMessage(client.address);
+}
+
+async function deployMockRouter() {
+    const hre = require("hardhat");
+    const mockCLFRouter = await deployMockCLFRouter(hre);
+    console.log(`Deployed MockCLFRouter at ${mockCLFRouter.address}`);
+    return mockCLFRouter;
+}
+
+async function deployClient(conceroRouterAddress: string) {
+    const hre = require("hardhat");
+    const conceroClientExample = await deployConceroClientExample(hre, { conceroRouter: conceroRouterAddress });
+    console.log(`Deployed ConceroClientExample at ${conceroClientExample.address}`);
+    return conceroClientExample;
+}
+
+async function sendConceroMessage(clientAddress: string) {
+    const hre = require("hardhat");
+    const conceroNetwork = conceroNetworks[hre.network.name];
+    const { walletClient } = await getFallbackClients(conceroNetwork);
+
+    const { abi: exampleClientAbi } = await import(
+        "../../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
+    );
+
+    const txHash = await walletClient.writeContract({
+        address: clientAddress,
+        abi: exampleClientAbi,
+        functionName: "sendConceroMessage",
+        args: [],
+        account: walletClient.account,
+        value: parseUnits("0.001", 18),
+    });
+
+    console.log(`Sent concero message with txHash ${txHash}`);
+    return txHash;
 }
 
 testOperator();

@@ -41,6 +41,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
     using SafeERC20 for IERC20;
     using s for s.Router;
     using s for s.PriceFeed;
+    using s for s.Operator;
 
     constructor(address conceroVerifier, uint64 conceroVerifierSubId, address[4] memory clfSigners) ClfSigner(conceroVerifier,  conceroVerifierSubId, clfSigners) {}
 
@@ -66,7 +67,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
         return _messageId;
     }
 
-    //todo: move to operator
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
      * @param reportSubmission the serialized report data.
@@ -204,30 +204,16 @@ abstract contract Message is ClfSigner, IConceroRouter {
         uint256 gasPrice = s.priceFeed().lastGasPrices[dstChainSelector];
         uint256 gasFeeNative = gasPrice * evmDstChainData.gasLimit;
 
-        uint256 adjustedGasFeeNative = ((gasFeeNative * 1e18) / 1e18) *
-            s.priceFeed().nativeNativeRates[dstChainSelector];
+        uint256 nativeNativeRate = s.getNativeNativeRate(dstChainSelector);
+        uint256 adjustedGasFeeNative = (gasFeeNative * nativeNativeRate) / 1e18;
 
         uint256 totalFeeNative = baseFeeNative + adjustedGasFeeNative;
-        //        console.logString("Base fee native:");
-        //        console.logUint(baseFeeNative);
-        //
-        //        console.logString("Gas price:");
-        //        console.logUint(gasPrice);
-        //        //
-        //        console.logString("Gas fee native:");
-        //        console.logUint(gasFeeNative);
-        //
-        //        console.logString("Adjusted gas fee native:");
-        //        console.logUint(adjustedGasFeeNative);
-        //
-        //        console.logString("Total fee native:");
-        //        console.logUint(totalFeeNative);
 
         if (feeToken == Types.FeeToken.native) {
             return totalFeeNative;
         }
 
-        return (totalFeeNative * nativeUsdRate) / 1 ether;
+        return (totalFeeNative * nativeUsdRate) / 1e18;
     }
 
     function getMessageFeeNative(

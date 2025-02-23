@@ -1,11 +1,12 @@
-import { Address, decodeEventLog, TransactionReceipt, parseEther } from "viem";
+import { Address, decodeEventLog, TransactionReceipt, parseEther, parseUnits } from "viem";
 import { decodeLogs } from "@concero/v2-operators/src/relayer/common/eventListener/decodeLogs";
 import { getCLFReport, getOperatorRegistrationCLFResponse } from "../getOperatorRegistrationCLFResponse";
-import { globalConfig, networkEnvKeys } from "@concero/v2-operators/src/constants";
+import { conceroNetworks, globalConfig, networkEnvKeys } from "@concero/v2-operators/src/constants";
 import { config } from "@concero/v2-operators/src/relayer/a/constants";
-import { getEnvVar } from "../../../utils";
+import { getEnvVar, getFallbackClients } from "../../../utils";
 import { getTestClient } from "../../../utils";
 import { privateKeyToAccount } from "viem/accounts";
+import { WalletClient } from "viem";
 
 const OPERATOR_REGISTRY_EVENT = "OperatorRegistrationRequested";
 
@@ -62,7 +63,32 @@ async function handleOperatorRegistration(receipt: TransactionReceipt, mockCLFRo
     }
 }
 
-async function setupOperatorRegistrationEventListener({ mockCLFRouter }) {
+async function sendConceroMessage(walletClient: WalletClient, clientAddress: string) {
+    console.log("Sending concero message");
+    const { abi: exampleClientAbi } = await import(
+        "../../../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
+    );
+
+    const txHash = await walletClient.writeContract({
+        address: clientAddress,
+        abi: exampleClientAbi,
+        functionName: "sendConceroMessage",
+        args: [],
+        account: privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
+        value: parseUnits("0.001", 18),
+    });
+
+    console.log(`Sent concero message with txHash ${txHash}`);
+    return txHash;
+}
+
+async function setupOperatorRegistrationEventListener({
+    mockCLFRouter,
+    conceroClientExample,
+}: {
+    mockCLFRouter: string;
+    conceroClientExample: string;
+}) {
     const network = config.networks.conceroVerifier;
     const conceroVerifier = getEnvVar(`CONCERO_VERIFIER_${networkEnvKeys[network.name]}`);
     const testClient = getTestClient();
@@ -70,6 +96,10 @@ async function setupOperatorRegistrationEventListener({ mockCLFRouter }) {
     config.eventEmitter.on("requestOperatorRegistration", async ({ txHash }) => {
         const receipt = await testClient.getTransactionReceipt({ hash: txHash });
         await handleOperatorRegistration(receipt, mockCLFRouter);
+    });
+
+    config.eventEmitter.on("operatorRegistered", async ({ txHash }) => {
+        await sendConceroMessage(testClient, conceroClientExample);
     });
 }
 

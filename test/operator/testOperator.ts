@@ -29,11 +29,13 @@ async function testOperator() {
     await compileContracts({ quiet: true });
 
     const mockCLFRouter = await deployMockRouter();
-    await setupOperatorRegistrationEventListener({ mockCLFRouter: mockCLFRouter.address });
     const { conceroRouter } = await deployContracts(mockCLFRouter.address);
+    const conceroClientExample = await deployClient(conceroRouter.address);
+    await setupOperatorRegistrationEventListener({
+        mockCLFRouter: mockCLFRouter.address,
+        conceroClientExample: conceroClientExample.address,
+    });
     await operator();
-    const client = await deployClient(conceroRouter.address);
-    await sendConceroMessage(client.address);
 }
 
 ///
@@ -49,28 +51,6 @@ async function deployClient(conceroRouterAddress: string) {
     const conceroClientExample = await deployConceroClientExample(hre, { conceroRouter: conceroRouterAddress });
     console.log(`Deployed ConceroClientExample at ${conceroClientExample.address}`);
     return conceroClientExample;
-}
-
-async function sendConceroMessage(clientAddress: string) {
-    const hre = require("hardhat");
-    const conceroNetwork = conceroNetworks[hre.network.name];
-    const { walletClient } = await getFallbackClients(conceroNetwork);
-
-    const { abi: exampleClientAbi } = await import(
-        "../../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
-    );
-
-    const txHash = await walletClient.writeContract({
-        address: clientAddress,
-        abi: exampleClientAbi,
-        functionName: "sendConceroMessage",
-        args: [],
-        account: walletClient.account,
-        value: parseUnits("0.001", 18),
-    });
-
-    console.log(`Sent concero message with txHash ${txHash}`);
-    return txHash;
 }
 
 testOperator();

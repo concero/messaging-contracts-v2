@@ -44,11 +44,12 @@ contract OperatorRegistrationReport is BaseMockCLFReport {
         result.operatorAddresses = new bytes[](1);
         result.operatorAddresses[0] = abi.encode(operator);
 
-        return abi.encode(
-            result.reportConfig,
-            result.operatorChains,
-            result.operatorActions,
-            result.operatorAddresses
-        );
+        return
+            abi.encode(
+                result.reportConfig,
+                result.operatorChains,
+                result.operatorActions,
+                result.operatorAddresses
+            );
     }
 }

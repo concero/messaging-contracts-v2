@@ -13,7 +13,6 @@ async function getOperatorRegistrationCLFResponse() {
         const result = JSON.parse(jsonStr);
         const rawBytes = result.returns["0"].value;
 
-        console.log(rawBytes);
         return rawBytes;
     } catch (error) {
         console.error("Error running MockCLFReport script:", error);

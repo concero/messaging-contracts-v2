@@ -25,14 +25,15 @@ async function operator() {
 }
 
 async function testOperator() {
-    await setupOperatorRegistrationEventListener();
     const mockCLFRouter = await deployMockRouter();
+    await setupOperatorRegistrationEventListener({ mockCLFRouter: mockCLFRouter.address });
     const { conceroRouter } = await deployContracts(mockCLFRouter.address);
     await operator();
     const client = await deployClient(conceroRouter.address);
     await sendConceroMessage(client.address);
 }
 
+///
 async function deployMockRouter() {
     const hre = require("hardhat");
     const mockCLFRouter = await deployMockCLFRouter(hre);

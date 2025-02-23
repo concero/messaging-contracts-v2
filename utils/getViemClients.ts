@@ -16,6 +16,7 @@ import { PublicClient } from "viem/clients/createPublicClient";
 import { urls } from "../constants";
 import { ConceroNetwork, ConceroNetworkType } from "../types/ConceroNetwork";
 import { getWallet } from "./getWallet";
+import { localhostViemChain } from "./localhostViemChain";
 
 export function getClients(
     viemChain: Chain,
@@ -32,9 +33,9 @@ export function getClients(
     return { walletClient, publicClient, account };
 }
 
-export function getTestClient(viemChain: Chain, account: PrivateKeyAccount): TestClient {
+export function getTestClient(account: PrivateKeyAccount): TestClient & WalletClient & PublicClient {
     const testClient = createTestClient({
-        chain: viemChain,
+        chain: localhostViemChain,
         mode: "hardhat",
         transport: http(),
         account,

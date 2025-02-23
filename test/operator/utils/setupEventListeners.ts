@@ -3,9 +3,8 @@ import { decodeLogs } from "@concero/v2-operators/src/relayer/common/eventListen
 import { getCLFReport, getOperatorRegistrationCLFResponse } from "../getOperatorRegistrationCLFResponse";
 import { globalConfig, networkEnvKeys } from "@concero/v2-operators/src/constants";
 import { config } from "@concero/v2-operators/src/relayer/a/constants";
-import { getEnvVar, getFallbackClients } from "../../../utils";
+import { getEnvVar } from "../../../utils";
 import { getTestClient } from "../../../utils";
-
 import { privateKeyToAccount } from "viem/accounts";
 
 const OPERATOR_REGISTRY_EVENT = "OperatorRegistrationRequested";
@@ -35,7 +34,7 @@ async function handleOperatorRegistration(receipt: TransactionReceipt, mockCLFRo
     }
 
     const operatorRegistrationCLFResponseBytes = await getOperatorRegistrationCLFResponse();
-    const clfReport = await getCLFReport(operatorRegistrationCLFResponseBytes);
+    // const clfReport = await getCLFReport(operatorRegistrationCLFResponseBytes);
 
     const conceroVerifierAddress = getEnvVar(
         `CONCERO_VERIFIER_${networkEnvKeys[config.networks.conceroVerifier.name]}`,
@@ -53,7 +52,7 @@ async function handleOperatorRegistration(receipt: TransactionReceipt, mockCLFRo
             address: conceroVerifierAddress,
             abi: globalConfig.ABI.CONCERO_VERIFIER,
             functionName: "handleOracleFulfillment",
-            args: [requestSentLog.topics[1], clfReport, "0x"],
+            args: [requestSentLog.topics[1], operatorRegistrationCLFResponseBytes, "0x"],
             account: mockCLFRouter,
         });
     } finally {
@@ -69,8 +68,6 @@ async function setupOperatorRegistrationEventListener({ mockCLFRouter }) {
     const testClient = getTestClient();
 
     config.eventEmitter.on("requestOperatorRegistration", async ({ txHash }) => {
-        console.log("Requesting operator registration", txHash);
-
         const receipt = await testClient.getTransactionReceipt({ hash: txHash });
         await handleOperatorRegistration(receipt, mockCLFRouter);
     });

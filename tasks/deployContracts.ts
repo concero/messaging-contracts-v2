@@ -18,7 +18,6 @@ async function deployContracts(
     clfRouterAddress: Address,
 ): Promise<{ mockCLFRouter: any; conceroVerifier: any; conceroRouter: any }> {
     const hre: HardhatRuntimeEnvironment = require("hardhat");
-    await compileContracts({ quiet: true });
 
     const conceroNetwork = conceroNetworks[hre.network.name];
     const { publicClient, walletClient } = getFallbackClients(conceroNetwork);

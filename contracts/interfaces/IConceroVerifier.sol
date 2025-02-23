@@ -11,15 +11,21 @@ import {CommonTypes} from "../common/CommonTypes.sol";
 
 event CLFRequestError(bytes err);
 event MessageReport(bytes32 indexed messageId);
-event OperatorRegistered(Types.ChainType chainType, bytes operatorAddress);
 event OperatorDeregistered(Types.ChainType chainType, bytes operatorAddress);
 event OperatorDeposited(address indexed operator, uint256 amount);
 event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
 event OperatorDepositWithdrawn(address indexed operator, uint256 amount);
+
+event OperatorRegistered(
+    address indexed operator,
+    CommonTypes.ChainType[] chainTypes,
+    Types.OperatorRegistrationAction[] operatorActions
+);
 event OperatorRegistrationRequested(
     address indexed requester,
     CommonTypes.ChainType[] chainTypes,
     Types.OperatorRegistrationAction[] operatorActions,
     bytes[] operatorAddresses
 );
+
 interface IConceroVerifier {}

@@ -5,10 +5,11 @@ import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCalle
 import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
 import { checkGas, getFallbackClients } from "@concero/v2-operators/src/relayer/common/utils";
 import { setupOperatorRegistrationEventListener } from "./utils/setupEventListeners";
-import { parseUnits } from "ethers";
 import { conceroNetworks } from "../../constants";
 import deployConceroClientExample from "../../deploy/ConceroClientExample";
 import deployMockCLFRouter from "../../deploy/MockCLFRouter";
+import { compileContracts } from "../../utils";
+import { parseUnits } from "viem";
 
 /*
 Testing pipeline:
@@ -16,7 +17,7 @@ Testing pipeline:
 2. in v2-contracts, run: bun run operator-setup (to deploy contracts and set price feeds)
 3. in v2-operators, run: bun ./src/relayer/a/index.ts (to start relayer)
 */
-//@notice Run 'bun chain' in a separate window, before running this script
+
 async function operator() {
     void (await checkGas());
     void (await ensureDeposit());
@@ -25,6 +26,8 @@ async function operator() {
 }
 
 async function testOperator() {
+    await compileContracts({ quiet: true });
+
     const mockCLFRouter = await deployMockRouter();
     await setupOperatorRegistrationEventListener({ mockCLFRouter: mockCLFRouter.address });
     const { conceroRouter } = await deployContracts(mockCLFRouter.address);

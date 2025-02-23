@@ -18,9 +18,8 @@ library CommonTypes {
     }
 
     enum CLFReportType {
-        Message,
-        OperatorRegistration,
-        OperatorDeregistration
+        Message, // 0
+        OperatorRegistration // 1
     }
 
     struct MessageReportResult {

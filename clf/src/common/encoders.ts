@@ -36,6 +36,10 @@ export function packUint16(value: number): Uint8Array {
     return new Uint8Array(new Uint16Array([value]).buffer);
 }
 
+export function packUint8(value: number): Uint8Array {
+    return new Uint8Array([value]);
+}
+
 /**
  * Packs CLF report response configuration into a single uint256
  * @param reportType - Report type (8 bits)

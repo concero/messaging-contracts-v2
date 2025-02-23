@@ -8,7 +8,7 @@ pragma solidity 0.8.28;
 
 import {Base} from "./Base.sol";
 
-import {CLFRequestError, MessageReport} from "../../interfaces/IConceroVerifier.sol";
+import {CLFRequestError, MessageReport, OperatorRegistered} from "../../interfaces/IConceroVerifier.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 import {CommonConstants} from "../../common/CommonConstants.sol";
@@ -68,10 +68,8 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory response,
         bytes memory err
     ) internal override {
-        //        CLFRequestVersion reportVersion;
         CommonTypes.CLFReportType reportType;
         assembly {
-            //            reportVersion := byte(1, mload(add(response, 32)))
             reportType := byte(0, mload(add(response, 32)))
         }
 
@@ -144,25 +142,22 @@ abstract contract CLF is FunctionsClient, Base {
             Types.OperatorRegistrationAction action = result.operatorActions[i];
 
             if (chainType == CommonTypes.ChainType.EVM) {
-                address operatorAddress = address(bytes20(result.operatorAddresses[i]));
+                bytes memory addressBytes = result.operatorAddresses[i];
+
+                address operatorAddress = abi.decode(addressBytes, (address));
                 require(operatorAddress == requester, Errors.OperatorAddressMismatch());
 
                 if (action == Types.OperatorRegistrationAction.Register) {
-                    Utils._addOperator(chainType, result.operatorAddresses[i]);
+                    Utils._addOperator(chainType, abi.encodePacked(operatorAddress));
                     s.operator().isRegistered[requester] = true;
                 } else if (action == Types.OperatorRegistrationAction.Deregister) {
-                    Utils._removeOperator(chainType, result.operatorAddresses[i]);
+                    Utils._removeOperator(chainType, abi.encodePacked(operatorAddress));
                     s.operator().isRegistered[requester] = false;
                 }
             }
         }
 
-        s.operator().depositsNative[requester] += CommonUtils.convertUsdBpsToNative(
-            CommonConstants.OPERATOR_DEPOSIT_REGISTRATION_REPORT_REQUEST_BPS_USD,
-            s.priceFeed().nativeUsdRate
-        );
-
-        // emit OperatorRegistered(chainType, operatorAddress);
+        emit OperatorRegistered(requester, result.operatorChains, result.operatorActions);
     }
 
     /* CLF REQUEST FORMATION */

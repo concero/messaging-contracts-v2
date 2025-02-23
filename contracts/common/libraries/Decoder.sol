@@ -5,7 +5,7 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-
+import {console} from "forge-std/src/console.sol";
 import {CommonTypes} from "../CommonTypes.sol";
 import {MessageConfigBitOffsets, ReportConfigBitOffsets, ReportByteSizes} from "../CommonConstants.sol";
 import {ReportByteSizes} from "contracts/common/CommonConstants.sol";
@@ -153,76 +153,18 @@ library Decoder {
         bytes memory response
     ) internal pure returns (VerifierTypes.OperatorRegistrationResult memory) {
         VerifierTypes.OperatorRegistrationResult memory result;
-        uint256 offset = 0;
-        uint32 chainTypesLength;
-        uint32 operatorAddressesLength;
-        uint32 operatorActionsLength;
 
-        uint8 size_version = ReportByteSizes.SIZE_VERSION;
-        uint8 size_report_type = ReportByteSizes.SIZE_REPORT_TYPE;
-        uint8 size_operator = ReportByteSizes.SIZE_OPERATOR;
-        uint8 size_chain_types_length = ReportByteSizes.SIZE_ARRAY_LENGTH;
-        uint8 size_operator_actions_length = ReportByteSizes.SIZE_ARRAY_LENGTH;
-        uint8 size_operator_addresses_length = ReportByteSizes.SIZE_ARRAY_LENGTH;
-
-        assembly {
-            let dataWord := mload(add(response, add(32, offset)))
-            result := mload(0x40)
-            mstore8(result, byte(0, dataWord))
-            mstore8(add(result, 1), byte(1, dataWord))
-            offset := add(offset, add(size_version, size_report_type))
-
-            mstore(add(result, 32), shr(96, mload(add(response, add(32, offset)))))
-            offset := add(offset, size_operator)
-
-            chainTypesLength := shr(224, mload(add(response, add(32, offset))))
-            offset := add(offset, size_chain_types_length)
-        }
-
-        result.operatorChains = new CommonTypes.ChainType[](chainTypesLength);
-        for (uint256 i = 0; i < chainTypesLength; i++) {
-            result.operatorChains[i] = CommonTypes.ChainType(uint8(response[offset + i]));
-        }
-
-        offset += chainTypesLength;
-
-        assembly {
-            operatorActionsLength := shr(224, mload(add(response, add(32, offset))))
-            offset := add(offset, size_operator_actions_length)
-        }
-
-        result.operatorActions = new VerifierTypes.OperatorRegistrationAction[](
-            operatorActionsLength
-        );
-        for (uint256 i = 0; i < operatorActionsLength; i++) {
-            result.operatorActions[i] = VerifierTypes.OperatorRegistrationAction(
-                uint8(response[offset + i])
-            );
-        }
-        offset += operatorActionsLength;
-
-        assembly {
-            operatorAddressesLength := shr(224, mload(add(response, add(32, offset))))
-            offset := add(offset, size_operator_addresses_length)
-        }
-
-        result.operatorAddresses = new bytes[](operatorAddressesLength);
-        uint256 currentOffset = offset;
-        for (uint256 i = 0; i < operatorAddressesLength; i++) {
-            uint16 addressLength;
-            assembly {
-                addressLength := shr(240, mload(add(response, currentOffset)))
-            }
-            currentOffset += 2;
-
-            bytes memory addressBytes = new bytes(addressLength);
-            for (uint256 j = 0; j < addressLength; j++) {
-                addressBytes[j] = response[currentOffset + j];
-            }
-            result.operatorAddresses[i] = addressBytes;
-            currentOffset += addressLength;
-        }
-        offset = currentOffset;
+        (
+            result.reportConfig,
+            result.operatorChains,
+            result.operatorActions,
+            result.operatorAddresses
+        ) = abi.decode(response, (
+            uint256,
+            CommonTypes.ChainType[],
+            VerifierTypes.OperatorRegistrationAction[],
+            bytes[]
+        ));
 
         return result;
     }

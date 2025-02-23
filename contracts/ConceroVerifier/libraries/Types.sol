@@ -21,8 +21,7 @@ library Types {
 
     enum CLFReportType {
         Message,
-        OperatorRegistration,
-        OperatorDeregistration
+        OperatorRegistration
     }
 
     enum CLFRequestStatus {

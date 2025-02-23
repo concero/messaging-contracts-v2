@@ -1,5 +1,6 @@
 pragma solidity 0.8.28;
 
+import {console} from "forge-std/src/console.sol";
 import {BaseMockCLFReport} from "./BaseMockCLFReport.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {ReportConfigBitOffsets} from "contracts/common/CommonConstants.sol";
@@ -23,21 +24,31 @@ contract OperatorRegistrationReport is BaseMockCLFReport {
 
     function getResponse(address operator) public pure returns (bytes memory) {
         VerifierTypes.OperatorRegistrationResult memory result;
-        address requester = address(0x1234567890123456789012345678901234567890);
+        address requester = operator;
+
+        // Ensure report type fits in its designated bits
+        uint8 reportType = uint8(CommonTypes.CLFReportType.OperatorRegistration);
+        require(reportType <= type(uint8).max, "Report type overflow");
 
         result.reportConfig =
-            (uint256(uint8(CommonTypes.CLFReportType.OperatorRegistration)) <<
-                ReportConfigBitOffsets.OFFSET_REPORT_TYPE) |
+            (uint256(reportType) << ReportConfigBitOffsets.OFFSET_REPORT_TYPE) |
             (uint256(1) << ReportConfigBitOffsets.OFFSET_VERSION) |
             (uint256(uint160(requester)));
 
         result.operatorChains = new CommonTypes.ChainType[](1);
         result.operatorChains[0] = CommonTypes.ChainType.EVM;
+
         result.operatorActions = new VerifierTypes.OperatorRegistrationAction[](1);
         result.operatorActions[0] = VerifierTypes.OperatorRegistrationAction.Register;
-        result.operatorAddresses = new bytes[](1);
-        result.operatorAddresses[0] = abi.encodePacked(bytes20(operator));
 
-        return abi.encode(result);
+        result.operatorAddresses = new bytes[](1);
+        result.operatorAddresses[0] = abi.encode(operator);
+
+        return abi.encode(
+            result.reportConfig,
+            result.operatorChains,
+            result.operatorActions,
+            result.operatorAddresses
+        );
     }
 }

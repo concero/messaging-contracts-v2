@@ -14,7 +14,10 @@ import {ConceroUtils} from "./ConceroUtils.sol";
 contract ConceroClientExample is ConceroClient {
     event MessageReceived(bytes32 messageId, bytes message);
 
-    constructor(address conceroRouter, uint24 chainSelector) ConceroClient(conceroRouter, chainSelector) {}
+    constructor(
+        address conceroRouter,
+        uint24 chainSelector
+    ) ConceroClient(conceroRouter, chainSelector) {}
 
     function _conceroReceive(bytes32 messageId, bytes calldata message) internal override {
         emit MessageReceived(messageId, message);

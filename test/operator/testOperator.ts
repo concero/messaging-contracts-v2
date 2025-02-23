@@ -3,13 +3,11 @@ import { deployContracts } from "../../tasks";
 import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureOperatorIsRegistered";
 import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureDeposit";
 import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
-import { checkGas, getFallbackClients } from "@concero/v2-operators/src/relayer/common/utils";
+import { checkGas } from "@concero/v2-operators/src/relayer/common/utils";
 import { setupOperatorRegistrationEventListener } from "./utils/setupEventListeners";
-import { conceroNetworks } from "../../constants";
 import deployConceroClientExample from "../../deploy/ConceroClientExample";
 import deployMockCLFRouter from "../../deploy/MockCLFRouter";
 import { compileContracts } from "../../utils";
-import { parseUnits } from "viem";
 
 /*
 Testing pipeline:

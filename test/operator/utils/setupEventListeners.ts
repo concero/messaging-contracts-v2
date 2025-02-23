@@ -73,7 +73,7 @@ async function sendConceroMessage(walletClient: WalletClient, clientAddress: str
         address: clientAddress,
         abi: exampleClientAbi,
         functionName: "sendConceroMessage",
-        args: [],
+        args: [clientAddress],
         account: privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
         value: parseUnits("0.001", 18),
     });

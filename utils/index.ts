@@ -1,5 +1,5 @@
 import { compileContracts } from "./compileContracts";
-import configureDotEnv from "./dotenvConfig";
+import { configureDotEnv } from "./configureDotEnv";
 import { formatGas, shorten } from "./formatting";
 import {
     getEthersSignerAndProvider,

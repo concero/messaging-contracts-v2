@@ -1,29 +1,23 @@
 import * as dotenv from "dotenv";
 import fs from "fs";
+import path from "path";
 
-const ENV_FILES = [
-    ".env",
-    ".env.clf",
-    ".env.clccip",
-    ".env.tokens",
-    ".env.deployments.mainnet",
-    ".env.deployments.testnet",
-    ".env.deployments.localhost",
-    ".env.wallets",
-];
+const ENV_FILES = [".env", ".env.deployments.mainnet", ".env.deployments.testnet", ".env.test"];
 
 /**
  * Configures the dotenv with paths relative to a base directory.
  * @param {string} [basePath='../../../'] - The base path where .env files are located. Defaults to '../../'.
  */
 function configureDotEnv(basePath = "./") {
-    const normalizedBasePath = basePath.endsWith("/") ? basePath : `${basePath}/`;
+    const absoluteBasePath = path.resolve(process.cwd(), basePath);
 
     ENV_FILES.forEach(file => {
-        dotenv.config({ path: `${normalizedBasePath}${file}` });
+        const envPath = path.join(absoluteBasePath, file);
+        if (fs.existsSync(envPath)) {
+            dotenv.config({ path: envPath, override: true });
+        }
     });
 }
-configureDotEnv();
 
 function reloadDotEnv(basePath = "../../") {
     const normalizedBasePath = basePath.endsWith("/") ? basePath : `${basePath}/`;
@@ -40,4 +34,4 @@ function reloadDotEnv(basePath = "../../") {
     });
 }
 
-export default configureDotEnv;
+export { configureDotEnv, reloadDotEnv };

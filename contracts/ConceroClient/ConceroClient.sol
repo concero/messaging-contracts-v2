@@ -9,20 +9,20 @@ pragma solidity 0.8.28;
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 
 abstract contract ConceroClient is IConceroClient {
-    error InvalidRouter(address router);
+    error InvalidConceroRouter(address router);
 
     uint8 internal constant VERSION = 1;
     address internal immutable i_conceroRouter;
     uint24 internal immutable i_chainSelector;
 
-    constructor(address router, uint24 chainSelector) {
-        require(router != address(0), InvalidRouter(router));
-        i_conceroRouter = router;
+    constructor(address conceroRouter, uint24 chainSelector) {
+        require(conceroRouter != address(0), InvalidConceroRouter(conceroRouter));
+        i_conceroRouter = conceroRouter;
         i_chainSelector = chainSelector;
     }
 
     function conceroReceive(bytes32 messageId, bytes calldata message) external {
-        require(msg.sender == i_conceroRouter, InvalidRouter(msg.sender));
+        require(msg.sender == i_conceroRouter, InvalidConceroRouter(msg.sender));
         _conceroReceive(messageId, message);
     }
 

@@ -14,20 +14,20 @@ import {ConceroUtils} from "./ConceroUtils.sol";
 contract ConceroClientExample is ConceroClient {
     event MessageReceived(bytes32 messageId, bytes message);
 
-    constructor(address router, uint24 chainSelector) ConceroClient(router, chainSelector) {}
+    constructor(address conceroRouter, uint24 chainSelector) ConceroClient(conceroRouter, chainSelector) {}
 
     function _conceroReceive(bytes32 messageId, bytes calldata message) internal override {
         emit MessageReceived(messageId, message);
     }
 
-    function sendConceroMessage() external payable returns (bytes32 messageId) {
+    function sendConceroMessage(address receiver) external payable returns (bytes32 messageId) {
         // Build a message config on-chain (optional), or provide packedConfig directly
         ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
             dstChainSelector: 1,
-            minSrcConfirmations: 2,
-            minDstConfirmations: 2,
-            relayerConfig: 1,
-            isCallbackable: true,
+            minSrcConfirmations: 1,
+            minDstConfirmations: 1,
+            relayerConfig: 0,
+            isCallbackable: false,
             feeToken: ConceroTypes.FeeToken.native
         });
 
@@ -35,7 +35,7 @@ contract ConceroClientExample is ConceroClient {
 
         // Build the destination chain data
         bytes memory dstChainData = abi.encode(
-            ConceroTypes.EvmDstChainData({receiver: address(0), gasLimit: 0})
+            ConceroTypes.EvmDstChainData({receiver: receiver, gasLimit: 100_000})
         );
 
         // Send a message to the router

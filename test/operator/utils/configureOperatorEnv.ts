@@ -1,5 +1,4 @@
-import { configureDotEnv } from "../../../utils";
+import { configureDotEnv } from "./configureDotEnv";
 
 configureDotEnv("./test/operator");
-process.env.HARDHAT_NETWORK = "localhost";
 const hre = require("hardhat");

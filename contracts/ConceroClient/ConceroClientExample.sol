@@ -34,7 +34,7 @@ contract ConceroClientExample is ConceroClient {
             feeToken: ConceroTypes.FeeToken.native
         });
 
-        uint256 packedConfig = ConceroUtils._packClientMessageConfig(config);
+        bytes32 packedConfig = ConceroUtils._packClientMessageConfig(config);
 
         // Build the destination chain data
         bytes memory dstChainData = abi.encode(

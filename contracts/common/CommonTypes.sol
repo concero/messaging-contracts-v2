@@ -23,8 +23,8 @@ library CommonTypes {
     }
 
     struct MessageReportResult {
-        uint256 reportConfig;
-        uint256 internalMessageConfig;
+        bytes32 reportConfig;
+        bytes32 internalMessageConfig;
         bytes32 messageId;
         bytes32 messageHashSum;
         bytes dstChainData;

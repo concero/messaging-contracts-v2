@@ -9,7 +9,6 @@ pragma solidity 0.8.28;
 library CommonConstants {
     uint8 internal constant USDC_DECIMALS = 6;
     uint16 internal constant BPS_DENOMINATOR = 10000;
-
     uint8 internal constant COHORTS_COUNT = 1;
     uint16 internal constant CONCERO_MESSAGE_BASE_FEE_BPS_USD = 100;
     uint256 internal constant STAKER_FEE = 1e18;
@@ -27,21 +26,62 @@ library CommonConstants {
     uint256 internal constant MESSAGE_MAX_SIZE = 1e6; // 1 MB
 }
 
+library BitMasks {
+    // Generic masks for different bit sizes
+    uint256 internal constant MASK_1 = (1 << 1) - 1; //   0x1
+    uint256 internal constant MASK_8 = (1 << 8) - 1; //   0xFF
+    uint256 internal constant MASK_16 = (1 << 16) - 1; // 0xFFFF
+    uint256 internal constant MASK_24 = (1 << 24) - 1; // 0xFFFFFF
+    uint256 internal constant MASK_32 = (1 << 32) - 1; // 0xFFFFFFFF
+}
+
+library MessageConfigBitSizes {
+    uint256 internal constant VERSION = 8;
+    uint256 internal constant CHAIN_SELECTOR = 24;
+    uint256 internal constant RESERVED = 32;
+    uint256 internal constant MIN_CONFIRMATIONS = 16;
+    uint256 internal constant RELAYER_CONF = 8;
+    uint256 internal constant CALLBACKABLE = 1;
+    uint256 internal constant UNUSED = 127;
+}
+
 library MessageConfigBitOffsets {
+    // big-endian bit ordering
+    // most significant bits first, where bit 255 is the leftmost bit and bit 0 is the rightmost bit)
+
     /* MESSAGE CONFIG BIT OFFSETS */
-    uint8 internal constant OFFSET_VERSION = 248;
-    uint8 internal constant OFFSET_SRC_CHAIN = 224;
-    uint8 internal constant OFFSET_DST_CHAIN = 192;
-    uint8 internal constant OFFSET_MIN_SRC_CONF = 176;
-    uint8 internal constant OFFSET_MIN_DST_CONF = 160;
-    uint8 internal constant OFFSET_RELAYER_CONF = 152;
-    uint8 internal constant OFFSET_CALLBACKABLE = 151;
-    uint8 internal constant OFFSET_FEE_TOKEN = 143;
+    uint256 internal constant OFFSET_VERSION = 256 - MessageConfigBitSizes.VERSION; //                 248
+    uint256 internal constant OFFSET_SRC_CHAIN =
+        OFFSET_VERSION - MessageConfigBitSizes.CHAIN_SELECTOR; //                                      224
+    uint256 internal constant OFFSET_DST_CHAIN =
+        OFFSET_SRC_CHAIN - (MessageConfigBitSizes.RESERVED + MessageConfigBitSizes.CHAIN_SELECTOR); // 168
+    uint256 internal constant OFFSET_MIN_SRC_CONF =
+        OFFSET_DST_CHAIN - MessageConfigBitSizes.MIN_CONFIRMATIONS; //                                 152
+    uint256 internal constant OFFSET_MIN_DST_CONF =
+        OFFSET_MIN_SRC_CONF - MessageConfigBitSizes.MIN_CONFIRMATIONS; //                              136
+    uint256 internal constant OFFSET_RELAYER_CONF =
+        OFFSET_MIN_DST_CONF - MessageConfigBitSizes.RELAYER_CONF; //                                   128
+    uint256 internal constant OFFSET_CALLBACKABLE =
+        OFFSET_RELAYER_CONF - MessageConfigBitSizes.CALLBACKABLE; //                                   127
+    uint256 internal constant OFFSET_FEE_TOKEN = 127 - 8; //                                           119
+}
+
+library ReportConfigBitSizes {
+    uint256 internal constant REPORT_TYPE = 8;
+    uint256 internal constant VERSION = 8;
+    uint256 internal constant RESERVED = 80;
+    uint256 internal constant REQUESTER = 160;
 }
 
 library ReportConfigBitOffsets {
-    uint8 internal constant OFFSET_REPORT_TYPE = 248; // (31 * 8)
-    uint8 internal constant OFFSET_VERSION = 240; // (30 * 8)
+    // big-endian bit ordering
+    // most significant bits first, where bit 255 is the leftmost bit and bit 0 is the rightmost bit)
+
+    /* REPORT CONFIG BIT OFFSETS */
+    uint256 internal constant OFFSET_REPORT_TYPE = 256 - ReportConfigBitSizes.REPORT_TYPE; //          248
+    uint256 internal constant OFFSET_VERSION = OFFSET_REPORT_TYPE - ReportConfigBitSizes.VERSION; //   240
+    uint256 internal constant OFFSET_RESERVED = OFFSET_VERSION - ReportConfigBitSizes.RESERVED; //     160
+    uint256 internal constant OFFSET_REQUESTER = OFFSET_RESERVED - ReportConfigBitSizes.REQUESTER; //  0
     /// @dev 10 bytes reserved (80 bits)
     /// @dev requester occupies the last 20 bytes
 }

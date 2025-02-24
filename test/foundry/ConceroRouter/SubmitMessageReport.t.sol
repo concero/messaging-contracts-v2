@@ -44,30 +44,35 @@ contract SubmitMessageReport is ConceroRouterTest {
     function test_SubmitMessageReport() public {
         bytes memory dstChainDataRaw = abi.encode(address(conceroClient), GAS_LIMIT);
 
-        uint256 reportConfig = (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
-            (uint256(1) << 240) |
-            (uint256(uint160(operator)));
+        bytes32 reportConfig = bytes32(
+            (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
+                (uint256(1) << 240) |
+                (uint256(uint160(operator)))
+        );
 
         bytes[] memory operators = new bytes[](1);
-        operators[0] = abi.encodePacked(operator);
+        operators[0] = abi.encode(operator);
 
-        bytes memory encodedDstChainData = abi.encodePacked(
+        bytes memory encodedDstChainData = abi.encode(
             uint32(dstChainDataRaw.length),
             dstChainDataRaw
         );
 
-        bytes[] memory allowedOperators = new bytes[](1);
-        allowedOperators[0] = abi.encodePacked(operator);
+        bytes32 internalMessageConfig = MessageLib.buildInternalMessageConfig(
+            CLIENT_MESSAGE_CONFIG,
+            SRC_CHAIN_SELECTOR
+        );
 
-        bytes memory encodedResult = abi.encodePacked(
+        bytes[] memory allowedOperators = new bytes[](1);
+        allowedOperators[0] = abi.encode(operator);
+
+        bytes memory encodedResult = abi.encode(
             reportConfig,
-            MessageLib.buildInternalMessageConfig(CLIENT_MESSAGE_CONFIG, SRC_CHAIN_SELECTOR),
+            internalMessageConfig,
             TEST_MESSAGE_ID,
             keccak256(TEST_MESSAGE),
-            uint32(dstChainDataRaw.length),
             dstChainDataRaw,
-            uint16(operators.length),
-            allowedOperators[0]
+            allowedOperators
         );
 
         Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(

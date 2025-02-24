@@ -10,7 +10,15 @@ import {Types} from "../ConceroVerifier/libraries/Types.sol";
 import {CommonTypes} from "../common/CommonTypes.sol";
 
 event CLFRequestError(bytes err);
+
 event MessageReport(bytes32 indexed messageId);
+event MessageReportRequested(
+    bytes32 indexed internalMessageConfig,
+    bytes32 indexed messageId,
+    bytes32 messageHashSum,
+    bytes srcChainData
+);
+
 event OperatorDeregistered(Types.ChainType chainType, bytes operatorAddress);
 event OperatorDeposited(address indexed operator, uint256 amount);
 event OperatorFeeWithdrawn(address indexed operator, uint256 amount);

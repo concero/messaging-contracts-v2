@@ -18,7 +18,7 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 import {Errors} from "../libraries/Errors.sol";
 
-import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn, OperatorRegistrationRequested} from "../../interfaces/IConceroVerifier.sol";
+import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn, OperatorRegistrationRequested, MessageReportRequested} from "../../interfaces/IConceroVerifier.sol";
 
 import {CLF} from "./CLF.sol";
 
@@ -28,13 +28,14 @@ abstract contract Operator is CLF {
     using s for s.Operator;
 
     function requestMessageReport(
-        uint256 internalMessageConfig,
+        bytes32 internalMessageConfig,
         bytes32 messageId,
         bytes32 messageHashSum,
         bytes memory srcChainData
     ) external onlyOperator returns (bytes32) {
         require(!s.verifier().pendingMessageReports[messageId], Errors.MessageAlreadyProcessed());
         s.verifier().pendingMessageReports[messageId] = true;
+        emit MessageReportRequested(internalMessageConfig, messageId, messageHashSum, srcChainData);
         return
             _requestMessageReport(internalMessageConfig, messageId, messageHashSum, srcChainData);
     }

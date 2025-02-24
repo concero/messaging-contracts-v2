@@ -9,11 +9,11 @@ pragma solidity 0.8.28;
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {Message as MessageLib, MessageConfigBitOffsets} from "../../common/libraries/Message.sol";
+import {Message as MessageLib} from "../../common/libraries/Message.sol";
 import {Decoder as DecoderLib} from "../../common/libraries/Decoder.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 
-import {CommonConstants} from "../../common/CommonConstants.sol";
+import {BitMasks, CommonConstants, MessageConfigBitOffsets as offsets} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 
@@ -43,16 +43,20 @@ abstract contract Message is ClfSigner, IConceroRouter {
     using s for s.PriceFeed;
     using s for s.Operator;
 
-    constructor(address conceroVerifier, uint64 conceroVerifierSubId, address[4] memory clfSigners) ClfSigner(conceroVerifier,  conceroVerifierSubId, clfSigners) {}
+    constructor(
+        address conceroVerifier,
+        uint64 conceroVerifierSubId,
+        address[4] memory clfSigners
+    ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {}
 
     function conceroSend(
-        uint256 config,
+        bytes32 config,
         bytes calldata dstChainData,
         bytes calldata message
     ) external payable returns (bytes32) {
         _collectMessageFee(config, dstChainData);
 
-        (bytes32 _messageId, uint256 internalMessageConfig) = MessageLib.buildInternalMessage(
+        (bytes32 _messageId, bytes32 internalMessageConfig) = MessageLib.buildInternalMessage(
             config,
             dstChainData,
             message,
@@ -63,7 +67,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         s.router().nonce += 1;
         //        s.router().isMessageSent[_messageId] = true;
 
-        emit ConceroMessageSent(_messageId, internalMessageConfig, dstChainData, message);
+        emit ConceroMessageSent(internalMessageConfig, _messageId, dstChainData, message);
         return _messageId;
     }
 
@@ -99,15 +103,17 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         bool isAllowedOperator = false;
-            for (uint256 i = 0; i < decodedMessageReportResult.allowedOperators.length; i++) {
-                bytes memory operatorBytes = decodedMessageReportResult.allowedOperators[i];
-                address allowedOperator = address(bytes20(operatorBytes));
-                if (allowedOperator == msg.sender) {
-                    isAllowedOperator = true;
-                    break;
-                }
+        for (uint256 i = 0; i < decodedMessageReportResult.allowedOperators.length; i++) {
+            address allowedOperator = abi.decode(
+                decodedMessageReportResult.allowedOperators[i],
+                (address)
+            );
+            if (allowedOperator == msg.sender) {
+                isAllowedOperator = true;
+                break;
             }
-            require(isAllowedOperator, Errors.UnauthorizedOperator());
+        }
+        require(isAllowedOperator, Errors.UnauthorizedOperator());
 
         emit ConceroMessageReceived(decodedMessageReportResult.messageId);
         deliverMessage(
@@ -162,9 +168,9 @@ abstract contract Message is ClfSigner, IConceroRouter {
     }
 
     /* INTERNAL FUNCTIONS */
-    function _collectMessageFee(uint256 clientMessageConfig, bytes memory dstChainData) internal {
+    function _collectMessageFee(bytes32 clientMessageConfig, bytes memory dstChainData) internal {
         Types.FeeToken feeToken = Types.FeeToken(
-            uint8(clientMessageConfig >> MessageConfigBitOffsets.OFFSET_FEE_TOKEN)
+            uint8(uint256(clientMessageConfig >> offsets.OFFSET_FEE_TOKEN) & BitMasks.MASK_8)
         );
 
         uint256 messageFee = _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
@@ -181,8 +187,9 @@ abstract contract Message is ClfSigner, IConceroRouter {
         }
     }
 
+    //todo: adhere to SOLID. it shouldnt extract values from client config, do it on the level above
     function _calculateMessageFee(
-        uint256 clientMessageConfig,
+        bytes32 clientMessageConfig,
         bytes memory dstChainData,
         Types.FeeToken feeToken
     ) internal view returns (uint256) {
@@ -193,7 +200,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         uint24 dstChainSelector = uint24(
-            clientMessageConfig >> MessageConfigBitOffsets.OFFSET_DST_CHAIN
+            uint256(clientMessageConfig >> offsets.OFFSET_DST_CHAIN) & BitMasks.MASK_24
         );
 
         uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
@@ -217,22 +224,22 @@ abstract contract Message is ClfSigner, IConceroRouter {
     }
 
     function getMessageFeeNative(
-        uint256 clientMessageConfig,
+        bytes32 clientMessageConfig,
         bytes memory dstChainData
     ) external view returns (uint256) {
         Types.FeeToken feeToken = Types.FeeToken(
-            uint8(clientMessageConfig >> MessageConfigBitOffsets.OFFSET_FEE_TOKEN)
+            uint8(uint256(clientMessageConfig >> offsets.OFFSET_FEE_TOKEN) & BitMasks.MASK_8)
         );
         require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
     }
 
     function getMessageFeeUSDC(
-        uint256 clientMessageConfig,
+        bytes32 clientMessageConfig,
         bytes memory dstChainData
     ) external view returns (uint256) {
         Types.FeeToken feeToken = Types.FeeToken(
-            uint8(clientMessageConfig >> MessageConfigBitOffsets.OFFSET_FEE_TOKEN)
+            uint8(uint256(clientMessageConfig >> offsets.OFFSET_FEE_TOKEN) & BitMasks.MASK_8)
         );
         require(feeToken == Types.FeeToken.usdc, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);

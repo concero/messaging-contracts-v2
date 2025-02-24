@@ -6,6 +6,8 @@
  */
 pragma solidity 0.8.28;
 
+import {console} from "forge-std/src/console.sol";
+
 import {Base} from "./Base.sol";
 
 import {CLFRequestError, MessageReport, OperatorRegistered} from "../../interfaces/IConceroVerifier.sol";
@@ -22,7 +24,6 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
-import {console} from "hardhat/console.sol";
 
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
@@ -162,7 +163,7 @@ abstract contract CLF is FunctionsClient, Base {
 
     /* CLF REQUEST FORMATION */
     function _requestMessageReport(
-        uint256 internalMessageConfig,
+        bytes32 internalMessageConfig,
         bytes32 messageId,
         bytes32 messageHashSum,
         bytes memory srcChainData

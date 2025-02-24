@@ -31,26 +31,11 @@ contract HandleCLFMessageReport is RequestMessageReport {
     function test_handleOracleFulfillment_messageReport() public {
         bytes32 clfRequestId = test_requestMessageReport();
 
-        uint256 reportConfig = (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
-            (uint256(1) << 240) |
-            (uint256(uint160(operator)));
-
-        CommonTypes.MessageReportResult memory result;
-        result.reportConfig = reportConfig;
-        result.internalMessageConfig = INTERNAL_MESSAGE_CONFIG;
-        result.messageId = bytes32("messageId");
-        result.messageHashSum = bytes32("messageHashSum");
-        result.dstChainData = "dstChain";
-        result.allowedOperators = new bytes[](1);
-        result.allowedOperators[0] = abi.encodePacked(operator);
-
-        bytes memory response = abi.encode(result);
-
         MessageReport messageReport = new MessageReport();
-        RouterTypes.ClfDonReportSubmission memory clfSubmission = messageReport.getReport();
+        bytes memory clfResponse = messageReport.getResponse();
 
         vm.prank(address(clfRouter));
-        conceroVerifier.handleOracleFulfillment(clfRequestId, clfSubmission.report, "");
+        conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "");
     }
 
     function test_handleOracleFulfillment_WithError_messageReport() public {

@@ -24,16 +24,13 @@ contract OperatorRegistrationReport is BaseMockCLFReport {
 
     function getResponse(address operator) public pure returns (bytes memory) {
         VerifierTypes.OperatorRegistrationResult memory result;
-        address requester = operator;
 
-        // Ensure report type fits in its designated bits
-        uint8 reportType = uint8(CommonTypes.CLFReportType.OperatorRegistration);
-        require(reportType <= type(uint8).max, "Report type overflow");
-
-        result.reportConfig =
-            (uint256(reportType) << ReportConfigBitOffsets.OFFSET_REPORT_TYPE) |
-            (uint256(1) << ReportConfigBitOffsets.OFFSET_VERSION) |
-            (uint256(uint160(requester)));
+        result.reportConfig = bytes32(
+            (uint256(uint8(CommonTypes.CLFReportType.OperatorRegistration)) <<
+                ReportConfigBitOffsets.OFFSET_REPORT_TYPE) |
+                (uint256(1) << ReportConfigBitOffsets.OFFSET_VERSION) |
+                uint256(uint160(operator))
+        );
 
         result.operatorChains = new CommonTypes.ChainType[](1);
         result.operatorChains[0] = CommonTypes.ChainType.EVM;
@@ -42,8 +39,9 @@ contract OperatorRegistrationReport is BaseMockCLFReport {
         result.operatorActions[0] = VerifierTypes.OperatorRegistrationAction.Register;
 
         result.operatorAddresses = new bytes[](1);
-        result.operatorAddresses[0] = abi.encode(operator);
+        result.operatorAddresses[0] = abi.encode(operator); // Changed from encodePacked to encode
 
+        // We need to create a proper ABI encoding of the entire struct
         return
             abi.encode(
                 result.reportConfig,

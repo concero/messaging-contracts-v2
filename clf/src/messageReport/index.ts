@@ -28,11 +28,17 @@ export async function main(bytesArgs: string[]) {
             args.messageId,
             BigInt(args.srcChainData.blockNumber),
         );
+
         const {
-            messageConfig: messageConfigFromLog,
+            messageId: messageIdFromLog,
+            internalMessageConfig: messageConfigFromLog,
             dstChainData: dstChainDataFromLog,
             message: messageFromLog,
         } = decodeConceroMessageLog(log.data);
+
+        if (messageIdFromLog !== args.messageId) {
+            handleError(ErrorType.INVALID_MESSAGE_ID);
+        }
 
         const recomputedMessageHashSum = await verifyMessageHash(
             args.messageId,

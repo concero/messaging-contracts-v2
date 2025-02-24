@@ -27,7 +27,7 @@ contract RequestMessageReport is ConceroVerifierTest {
     function test_requestMessageReport() public returns (bytes32) {
         bytes32 messageId = bytes32(uint256(1));
         bytes32 messageHashSum = bytes32(uint256(2));
-        uint256 internalMessageConfig = MessageLib.buildInternalMessageConfig(
+        bytes32 internalMessageConfig = MessageLib.buildInternalMessageConfig(
             CLIENT_MESSAGE_CONFIG,
             SRC_CHAIN_SELECTOR
         );

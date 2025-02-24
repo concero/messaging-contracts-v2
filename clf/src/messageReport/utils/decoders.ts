@@ -1,27 +1,43 @@
 import { EvmSrcChainData } from "../types";
 import { decodeAbiParameters } from "viem";
-import { ClientMessageRequest } from "../constants/abis";
+import { NonIndexedConceroMessageParams, EvmSrcChainDataParams } from "../constants/abis";
 import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 
-function decodeConceroMessageLog(conceroMessageLogData: string) {
-    const [messageConfig, dstChainData, message] = decodeAbiParameters([ClientMessageRequest], conceroMessageLogData);
+type Log = {
+    topics: string[];
+    data: string;
+};
 
-    return {
-        messageConfig: BigInt(messageConfig), // uint256
-        dstChainData, // bytes
-        message, // bytes
-    };
+function decodeConceroMessageLog(log: Log): {
+    messageId: string;
+    internalMessageConfig: BigInt;
+    dstChainData: string;
+    message: string;
+} {
+    try {
+        const messageId = log.topics[1];
+        const internalMessageConfig = BigInt(log.topics[2]);
+        const [dstChainData, message] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
+
+        return {
+            messageId,
+            internalMessageConfig,
+            dstChainData,
+            message,
+        };
+    } catch (error) {
+        handleError(ErrorType.INVALID_DATA);
+    }
 }
 
-function decodeEvmSrcChainData(encodedData): EvmSrcChainData {
+function decodeEvmSrcChainData(encodedData: string): EvmSrcChainData {
     if (!encodedData || typeof encodedData !== "string") {
         handleError(ErrorType.INVALID_DATA);
     }
 
     try {
-        const abi = ["address", "uint256"];
-        const [sender, blockNumber] = decodeAbiParameters(abi, encodedData);
+        const [sender, blockNumber] = decodeAbiParameters(EvmSrcChainDataParams, encodedData);
 
         return {
             sender,

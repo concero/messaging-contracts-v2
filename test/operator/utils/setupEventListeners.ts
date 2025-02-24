@@ -7,8 +7,80 @@ import { getEnvVar, getFallbackClients } from "../../../utils";
 import { getTestClient } from "../../../utils";
 import { privateKeyToAccount } from "viem/accounts";
 import { WalletClient } from "viem";
+import { Hash } from "viem";
+import { getMessageCLFReportResponse } from "../getMessageCLFReportResponse";
+import { encodeAbiParameters } from "viem";
 
 const OPERATOR_REGISTRY_EVENT = "OperatorRegistrationRequested";
+
+async function handleMessageReportRequest(txHash: Hash, mockCLFRouter: Address) {
+    const testClient = getTestClient(privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`));
+    const receipt = await testClient.getTransactionReceipt({ hash: txHash });
+
+    let messageReportLog;
+    let requestSentLog;
+
+    for (const log of receipt.logs) {
+        try {
+            const decoded = decodeEventLog({
+                abi: globalConfig.ABI.CONCERO_VERIFIER,
+                data: log.data,
+                topics: log.topics,
+            });
+
+            if (decoded.eventName === "MessageReportRequested") {
+                messageReportLog = { log, decoded };
+            } else if (decoded.eventName === "RequestSent") {
+                requestSentLog = { log, decoded };
+            }
+        } catch {
+            continue;
+        }
+    }
+
+    if (!messageReportLog) {
+        throw new Error("MessageReportRequested event not found");
+    }
+
+    if (!requestSentLog) {
+        throw new Error("RequestSent event not found");
+    }
+
+    const messageResponseBytes = await getMessageCLFReportResponse({
+        requester: getEnvVar("OPERATOR_ADDRESS"),
+        requestId: requestSentLog.log.topics[1],
+        internalMessageConfig: messageReportLog.decoded.args.internalMessageConfig.toString(),
+        messageHashSum: messageReportLog.decoded.args.messageHashSum,
+        srcChainData: messageReportLog.decoded.args.srcChainData,
+        allowedOperators: [getEnvVar("OPERATOR_ADDRESS")],
+    });
+
+    const conceroVerifierAddress = getEnvVar(
+        `CONCERO_VERIFIER_${networkEnvKeys[config.networks.conceroVerifier.name]}`,
+    );
+
+    await testClient.setBalance({
+        address: mockCLFRouter,
+        value: parseEther("10000"),
+    });
+
+    await testClient.impersonateAccount({ address: mockCLFRouter });
+
+    try {
+        await testClient.writeContract({
+            address: conceroVerifierAddress,
+            abi: globalConfig.ABI.CONCERO_VERIFIER,
+            functionName: "handleOracleFulfillment",
+            args: [requestSentLog.log.topics[1], messageResponseBytes, "0x"],
+            account: mockCLFRouter,
+            gasLimit: 1_000_000,
+        });
+    } finally {
+        await testClient.stopImpersonatingAccount({
+            address: mockCLFRouter,
+        });
+    }
+}
 
 async function handleOperatorRegistration(receipt: TransactionReceipt, mockCLFRouter: Address) {
     const testClient = getTestClient(privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`));
@@ -62,9 +134,7 @@ async function handleOperatorRegistration(receipt: TransactionReceipt, mockCLFRo
         });
     }
 }
-
 async function sendConceroMessage(walletClient: WalletClient, clientAddress: string) {
-    console.log("Sending concero message");
     const { abi: exampleClientAbi } = await import(
         "../../../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
     );
@@ -79,7 +149,40 @@ async function sendConceroMessage(walletClient: WalletClient, clientAddress: str
     });
 
     console.log(`Sent concero message with txHash ${txHash}`);
-    return txHash;
+    const txReceipt = await walletClient.getTransactionReceipt({ hash: txHash });
+
+    const foundMessageSentLog = txReceipt.logs.find(log => {
+        try {
+            const decoded = decodeEventLog({
+                abi: globalConfig.ABI.CONCERO_ROUTER,
+                data: log.data,
+                topics: log.topics,
+                strict: true,
+            });
+            return decoded.eventName === "ConceroMessageSent";
+        } catch {
+            return false;
+        }
+    });
+
+    if (!foundMessageSentLog) {
+        throw new Error("ConceroMessageSent event not found in logs");
+    }
+
+    const decodedEvent = decodeEventLog({
+        abi: globalConfig.ABI.CONCERO_ROUTER,
+        data: foundMessageSentLog.data,
+        topics: foundMessageSentLog.topics,
+    });
+
+    return {
+        txHash,
+        blockNumber: txReceipt.blockNumber,
+        messageId: foundMessageSentLog.topics[1],
+        internalMessageConfig: foundMessageSentLog.topics[2],
+        dstChainData: decodedEvent.args.dstChainData,
+        message: decodedEvent.args.message,
+    };
 }
 
 async function setupOperatorRegistrationEventListener({
@@ -100,6 +203,10 @@ async function setupOperatorRegistrationEventListener({
 
     config.eventEmitter.on("operatorRegistered", async ({ txHash }) => {
         await sendConceroMessage(testClient, conceroClientExample);
+    });
+
+    config.eventEmitter.on("requestMessageReport", async ({ txHash }) => {
+        await handleMessageReportRequest(txHash, mockCLFRouter);
     });
 }
 

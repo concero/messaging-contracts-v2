@@ -7,28 +7,50 @@ import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol"
 
 contract MessageReport is BaseMockCLFReport {
     function getReport() public pure returns (RouterTypes.ClfDonReportSubmission memory) {
-        return createMockClfReport(getResponse());
+        return getReport(getResponse());
     }
 
-    function getResponse() internal pure returns (bytes memory) {
-        CommonTypes.MessageReportResult memory result;
-        address requester = address(operator);
+    function getReport(
+        bytes memory expectedResponse
+    ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+        return createMockClfReport(expectedResponse);
+    }
 
-        result.reportConfig =
+    function getResponse() public pure returns (bytes memory) {
+        return
+            getResponse(
+                address(operator),
+                INTERNAL_MESSAGE_CONFIG,
+                bytes32("messageId"),
+                bytes32("messageHashSum"),
+                "dstChain",
+                new bytes[](0)
+            );
+    }
+
+    function getResponse(
+        address requester,
+        bytes32 internalMessageConfig,
+        bytes32 messageId,
+        bytes32 messageHashSum,
+        bytes memory dstChainData,
+        bytes[] memory allowedOperators
+    ) public pure returns (bytes memory) {
+        bytes32 reportConfig = bytes32(
             (uint256(uint8(CommonTypes.CLFReportType.Message)) <<
                 ReportConfigBitOffsets.OFFSET_REPORT_TYPE) |
-            (uint256(1) << ReportConfigBitOffsets.OFFSET_VERSION) |
-            (uint256(uint160(requester)));
-
-        result.internalMessageConfig = INTERNAL_MESSAGE_CONFIG;
-        result.messageId = bytes32("messageId");
-        result.messageHashSum = bytes32("messageHashSum");
-        result.dstChainData = "dstChain";
-        result.allowedOperators = new bytes[](1);
-        result.allowedOperators[0] = abi.encodePacked(
-            address(0x3333333333333333333333333333333333333333)
+                (uint256(1) << ReportConfigBitOffsets.OFFSET_VERSION) |
+                (uint256(uint160(requester)))
         );
 
-        return abi.encode(result);
+        return
+            abi.encode(
+                reportConfig,
+                internalMessageConfig,
+                messageId,
+                messageHashSum,
+                dstChainData,
+                allowedOperators
+            );
     }
 }

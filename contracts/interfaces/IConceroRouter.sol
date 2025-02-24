@@ -7,8 +7,8 @@
 pragma solidity 0.8.28;
 
 event ConceroMessageSent(
+    bytes32 indexed internalMessageConfig,
     bytes32 indexed messageId,
-    uint256 internalMessageConfig,
     bytes dstChainData,
     bytes message
 );
@@ -18,7 +18,7 @@ event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
 
 interface IConceroRouter {
     function conceroSend(
-        uint256 config,
+        bytes32 config,
         bytes calldata dstChainData,
         bytes calldata message
     ) external payable returns (bytes32 messageId);

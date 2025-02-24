@@ -36,7 +36,7 @@ library Types {
     }
 
     struct MessageReportRequest {
-        uint256 internalMessageConfig;
+        bytes32 internalMessageConfig;
         bytes32 messageId;
         bytes32 messageHashSum;
         bytes srcChainData;
@@ -44,7 +44,7 @@ library Types {
     }
 
     struct OperatorRegistrationResult {
-        uint256 reportConfig;
+        bytes32 reportConfig;
         CommonTypes.ChainType[] operatorChains;
         OperatorRegistrationAction[] operatorActions;
         bytes[] operatorAddresses;

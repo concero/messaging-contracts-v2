@@ -23,6 +23,7 @@ function configureDotEnv(basePath = "./") {
         dotenv.config({ path: `${normalizedBasePath}${file}` });
     });
 }
+
 configureDotEnv();
 
 function reloadDotEnv(basePath = "../../") {

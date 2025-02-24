@@ -11,7 +11,7 @@ import {console} from "forge-std/src/Console.sol";
 
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
 import {ConceroUtils} from "contracts/ConceroClient/ConceroUtils.sol";
-import {Message, MessageConfigBitOffsets} from "contracts/common/libraries/Message.sol";
+import {Message} from "contracts/common/libraries/Message.sol";
 import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
 import {RouterSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
@@ -63,7 +63,7 @@ contract SendMessage is ConceroRouterTest {
             feeToken: ConceroTypes.FeeToken.native
         });
 
-        uint256 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
+        bytes32 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
 
         uint256 initialNonce = conceroRouter.getStorage(
             Namespaces.ROUTER,
@@ -86,23 +86,25 @@ contract SendMessage is ConceroRouterTest {
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bool foundEvent = false;
         for (uint i = 0; i < entries.length; i++) {
-            if (
-                entries[i].topics[0] == keccak256("ConceroMessageSent(bytes32,uint256,bytes,bytes)")
-            ) {
-                foundEvent = true;
-                (
-                    uint256 internalMessageConfig,
-                    bytes memory dstChainDataFromEvent,
-                    bytes memory messageFromEvent
-                ) = abi.decode(entries[i].data, (uint256, bytes, bytes));
+                if (entries[i].topics[0] == keccak256("ConceroMessageSent(bytes32,bytes32,bytes,bytes)")) {
+                    foundEvent = true;
 
-                Message.validateInternalMessage(
-                    internalMessageConfig,
-                    srcChainData,
-                    dstChainDataFromEvent
-                );
+                    bytes32 internalMessageConfig = bytes32(entries[i].topics[1]);
+                    bytes32 emittedMessageId = bytes32(entries[i].topics[2]);
 
-                assertEq(entries[i].topics[1], messageId, "Message ID mismatch");
+                    console.logBytes32(clientMessageConfig);
+                    console.logBytes32(emittedMessageId);
+
+                    (bytes memory dstChainDataFromEvent, bytes memory messageFromEvent) =
+                        abi.decode(entries[i].data, (bytes, bytes));
+
+                    Message.validateInternalMessage(
+                        internalMessageConfig,
+                        srcChainData,
+                        dstChainDataFromEvent
+                    );
+
+                assertEq(emittedMessageId, messageId, "Message ID mismatch");
                 assertEq(dstChainDataFromEvent, dstChainData, "Destination chain data mismatch");
                 assertEq(messageFromEvent, message, "Message mismatch");
             }
@@ -150,7 +152,7 @@ contract SendMessage is ConceroRouterTest {
     function test_RevertInvalidMessageConfig() public {
         vm.startPrank(user);
 
-        uint256 invalidConfig = 0;
+        bytes32 invalidConfig = bytes32(0);
         uint256 messageFee = conceroRouter.getMessageFeeNative(CLIENT_MESSAGE_CONFIG, dstChainData);
 
         vm.expectRevert();

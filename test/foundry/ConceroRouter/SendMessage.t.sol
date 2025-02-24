@@ -86,23 +86,27 @@ contract SendMessage is ConceroRouterTest {
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bool foundEvent = false;
         for (uint i = 0; i < entries.length; i++) {
-                if (entries[i].topics[0] == keccak256("ConceroMessageSent(bytes32,bytes32,bytes,bytes)")) {
-                    foundEvent = true;
+            if (
+                entries[i].topics[0] == keccak256("ConceroMessageSent(bytes32,bytes32,bytes,bytes)")
+            ) {
+                foundEvent = true;
 
-                    bytes32 internalMessageConfig = bytes32(entries[i].topics[1]);
-                    bytes32 emittedMessageId = bytes32(entries[i].topics[2]);
+                bytes32 internalMessageConfig = bytes32(entries[i].topics[1]);
+                bytes32 emittedMessageId = bytes32(entries[i].topics[2]);
 
-                    console.logBytes32(clientMessageConfig);
-                    console.logBytes32(emittedMessageId);
+                console.logBytes32(clientMessageConfig);
+                console.logBytes32(emittedMessageId);
 
-                    (bytes memory dstChainDataFromEvent, bytes memory messageFromEvent) =
-                        abi.decode(entries[i].data, (bytes, bytes));
+                (bytes memory dstChainDataFromEvent, bytes memory messageFromEvent) = abi.decode(
+                    entries[i].data,
+                    (bytes, bytes)
+                );
 
-                    Message.validateInternalMessage(
-                        internalMessageConfig,
-                        srcChainData,
-                        dstChainDataFromEvent
-                    );
+                Message.validateInternalMessage(
+                    internalMessageConfig,
+                    srcChainData,
+                    dstChainDataFromEvent
+                );
 
                 assertEq(emittedMessageId, messageId, "Message ID mismatch");
                 assertEq(dstChainDataFromEvent, dstChainData, "Destination chain data mismatch");

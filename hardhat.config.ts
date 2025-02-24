@@ -3,7 +3,7 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-ignition-viem";
 import "@nomicfoundation/hardhat-viem";
-import "@nomicfoundation/hardhat-verify";
+// import "@nomicfoundation/hardhat-verify";
 import "@typechain/hardhat";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
@@ -60,51 +60,51 @@ const config: HardhatUserConfig = {
         },
     },
     networks: conceroNetworks,
-    etherscan: {
-        apiKey: {
-            arbitrum: process.env.ARBISCAN_API_KEY,
-            ethereum: process.env.ETHERSCAN_API_KEY,
-            polygon: process.env.POLYGONSCAN_API_KEY,
-            optimism: process.env.OPTIMISMSCAN_API_KEY,
-            celo: process.env.CELOSCAN_API_KEY,
-            avalanche: "snowtrace",
-            avalancheFuji: "snowtrace",
-        },
-        customChains: [
-            {
-                network: "celo",
-                chainId: 42220,
-                urls: {
-                    apiURL: "https://api.celoscan.io/api",
-                    browserURL: "https://celoscan.io/",
-                },
-            },
-            {
-                network: "optimism",
-                chainId: 10,
-                urls: {
-                    apiURL: "https://api-optimistic.etherscan.io/api",
-                    browserURL: "https://optimistic.etherscan.io/",
-                },
-            },
-            {
-                network: "arbitrum",
-                chainId: conceroNetworks.arbitrum.id,
-                urls: {
-                    apiURL: "https://api.arbiscan.io/api",
-                    browserURL: "https://arbiscan.io/",
-                },
-            },
-            {
-                network: "avalancheFuji",
-                chainId: conceroNetworks.avalancheFuji.id,
-                urls: {
-                    apiURL: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
-                    browserURL: "https://snowtrace.io",
-                },
-            },
-        ],
-    },
+    // etherscan: {
+    //     apiKey: {
+    //         arbitrum: process.env.ARBISCAN_API_KEY,
+    //         ethereum: process.env.ETHERSCAN_API_KEY,
+    //         polygon: process.env.POLYGONSCAN_API_KEY,
+    //         optimism: process.env.OPTIMISMSCAN_API_KEY,
+    //         celo: process.env.CELOSCAN_API_KEY,
+    //         avalanche: "snowtrace",
+    //         avalancheFuji: "snowtrace",
+    //     },
+    //     customChains: [
+    //         {
+    //             network: "celo",
+    //             chainId: 42220,
+    //             urls: {
+    //                 apiURL: "https://api.celoscan.io/api",
+    //                 browserURL: "https://celoscan.io/",
+    //             },
+    //         },
+    //         {
+    //             network: "optimism",
+    //             chainId: 10,
+    //             urls: {
+    //                 apiURL: "https://api-optimistic.etherscan.io/api",
+    //                 browserURL: "https://optimistic.etherscan.io/",
+    //             },
+    //         },
+    //         {
+    //             network: "arbitrum",
+    //             chainId: conceroNetworks.arbitrum.id,
+    //             urls: {
+    //                 apiURL: "https://api.arbiscan.io/api",
+    //                 browserURL: "https://arbiscan.io/",
+    //             },
+    //         },
+    //         {
+    //             network: "avalancheFuji",
+    //             chainId: conceroNetworks.avalancheFuji.id,
+    //             urls: {
+    //                 apiURL: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
+    //                 browserURL: "https://snowtrace.io",
+    //             },
+    //         },
+    //     ],
+    // },
     // verify: {
     //   etherscan: {
     //     apiKey: `${etherscanApiKey}`,

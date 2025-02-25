@@ -75,7 +75,6 @@ library Decoder {
         bytes memory response
     ) internal pure returns (CommonTypes.MessageReportResult memory) {
         CommonTypes.MessageReportResult memory result;
-
         (
             result.reportConfig,
             result.internalMessageConfig,

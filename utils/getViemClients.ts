@@ -33,7 +33,9 @@ export function getClients(
     return { walletClient, publicClient, account };
 }
 
-export function getTestClient(account: PrivateKeyAccount): TestClient & WalletClient & PublicClient {
+export type ExtendedTestClient = TestClient & WalletClient & PublicClient;
+
+export function getTestClient(account: PrivateKeyAccount): ExtendedTestClient {
     const testClient = createTestClient({
         chain: localhostViemChain,
         mode: "hardhat",

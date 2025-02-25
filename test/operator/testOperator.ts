@@ -17,10 +17,10 @@ Testing pipeline:
 */
 
 async function operator() {
-    void (await checkGas());
-    void (await ensureDeposit());
-    void (await ensureOperatorIsRegistered());
-    void (await setupEventListeners());
+    await checkGas();
+    await ensureDeposit();
+    await ensureOperatorIsRegistered();
+    await setupEventListeners();
 }
 
 async function testOperator() {

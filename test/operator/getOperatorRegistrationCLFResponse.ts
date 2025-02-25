@@ -22,15 +22,14 @@ async function getOperatorRegistrationCLFResponse() {
 
 async function getCLFReport(expectedResponseBytes: string) {
     try {
-        const responseJson = execSync(
-            `make script "args=test/foundry/scripts/MockCLFReport/OperatorRegistrationReport.sol --sig 'getReport(bytes)' ${expectedResponseBytes} --json"`,
-        ).toString();
+        const command = `make script "args=test/foundry/scripts/MockCLFReport/OperatorRegistrationReport.sol --sig 'getReport(bytes)' ${expectedResponseBytes} --json"`;
+        const responseJson = execSync(command).toString();
 
         const jsonStart = responseJson.indexOf("{");
         const jsonStr = responseJson.slice(jsonStart);
 
         const result = JSON.parse(jsonStr);
-        const rawBytes = result.returned;
+        const rawBytes = result.returns["0"].value;
 
         return rawBytes;
     } catch (error) {

@@ -21,21 +21,19 @@ function getMessageCLFReportResponse({
             ? `[${allowedOperators.map(op => `"${op}"`).join(",")}]`
             : "[]";
 
-        const messageReportResponseBytes = execSync(
-            `make script "args=test/foundry/scripts/MockCLFReport/MessageReport.sol --sig 'getResponse(address,bytes32,bytes32,bytes32,bytes,bytes[])' ${
-                requester
-            } ${internalMessageConfig} ${requestId} ${messageHashSum} ${`"${srcChainData}"`} ${
-                formattedAllowedOperators
-            } --json"`,
-        ).toString();
+        const command = `make script "args=test/foundry/scripts/MockCLFReport/MessageReport.sol --sig 'getResponse(address,bytes32,bytes32,bytes32,bytes,bytes[])' ${
+            requester
+        } ${internalMessageConfig} ${requestId} ${messageHashSum} ${`"${srcChainData}"`} ${
+            formattedAllowedOperators
+        } --json"`;
+
+        const messageReportResponseBytes = execSync(command).toString();
 
         const jsonStart = messageReportResponseBytes.indexOf("{");
         const jsonStr = messageReportResponseBytes.slice(jsonStart);
         const result = JSON.parse(jsonStr);
 
-        console.log(result.returned);
-
-        const rawBytes = result.returned;
+        const rawBytes = result.returns[0].value;
 
         return rawBytes;
     } catch (error) {

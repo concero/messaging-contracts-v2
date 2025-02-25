@@ -34,6 +34,7 @@ contract HandleCLFMessageReport is RequestMessageReport {
         MessageReport messageReport = new MessageReport();
         bytes memory clfResponse = messageReport.getResponse();
 
+        console.logBytes(clfResponse);
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "");
     }
@@ -55,6 +56,33 @@ contract HandleCLFMessageReport is RequestMessageReport {
             ) == 1
         );
         assertEq(conceroVerifier.getOperatorFeesEarned(operator), 0);
+    }
+
+
+function test_handleOracleFulfillment_specificBytes_messageReport() public {
+        // Known request ID from the transaction
+        bytes32 clfRequestId = test_requestMessageReport();
+
+        // Setup the necessary state to match the request
+        address expectedOperator = address(0x4242424242424242424242424242424242424242);
+
+
+        // Specific response bytes from the transaction
+        bytes memory specificResponse = hex"000100000000000000000000424242424242424242424242424242424242424201000001000000000000010001000100000000000000000000000000000000001879c09c5539b8bbe4b454b9df0d2bbffa66ab2316ca38b9997de987f9b1b0b5acaf3289d7b601cbd114fb36c4d29c85bbfd5e133f14cb355c3fd8d99367964f00000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000ccccac597660eebf71b424415f874ee4c6b13d22000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000014eee38505c47acba0c866df7265bd3e25da596b27000000000000000000000000";
+
+
+        // Execute the fulfillment
+        vm.prank(address(clfRouter));
+        conceroVerifier.handleOracleFulfillment(clfRequestId, specificResponse, "");
+
+        // Verify the request was processed
+        assertFalse(
+            conceroVerifier.getStorage(
+                Namespaces.VERIFIER,
+                VerifierSlots.pendingCLFRequests,
+                clfRequestId
+            ) == 1
+        );
     }
 }
 

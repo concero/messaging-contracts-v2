@@ -1,6 +1,6 @@
 set -eu
 
-VALID_BRANCH_REGEX='^(master|release|feature|test\/.+|fix\/.+|hotfix\/.+)$'
+VALID_BRANCH_REGEX='^(master|release|feature(\/.+)?|test(\/.+)?|docs\/.+|fix\/.+|hotfix\/.+)$'
 
 ERROR_MESSAGE="🚫 Error: Invalid branch name.
 Branch names must match:
@@ -10,6 +10,7 @@ Branch names must match:
   - fix/*
   - hotfix/*
   - test/*
+  - docs/*
 Current branch: '%s'
 Please rename your branch and try again."
 

@@ -17,6 +17,7 @@ import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroVerifier} from "../../scripts/deploy/DeployConceroVerifier.s.sol";
 
 import {ConceroVerifierBase} from "./ConceroVerifierBase.sol";
+import {MockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 
 abstract contract ConceroVerifierTest is ConceroVerifierBase, ConceroTest {
     DeployConceroVerifier internal deployScript;
@@ -32,6 +33,7 @@ abstract contract ConceroVerifierTest is ConceroVerifierBase, ConceroTest {
 
         usdc = deployScript.usdc();
         clfRouter = deployScript.clfRouter();
+        MockCLFRouter(clfRouter).setConsumer(address(conceroVerifier));
     }
 
     function _setPriceFeeds() internal {

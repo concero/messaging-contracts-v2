@@ -68,7 +68,7 @@ abstract contract ClfSigner is Base {
      * @notice Verifies the signatures of the report.
      * @param reportSubmission The report submission data.
      */
-    function _verifyClfReportSignatures(
+function _verifyClfReportSignatures(
         Types.ClfDonReportSubmission calldata reportSubmission
     ) internal view {
         bytes32 clfReportHash = _computeCLFReportHash(
@@ -77,7 +77,7 @@ abstract contract ClfSigner is Base {
         );
         bytes32[] memory rs = reportSubmission.rs;
         bytes32[] memory ss = reportSubmission.ss;
-        bytes memory rawVs = reportSubmission.rawVs;
+        bytes32 rawVs = reportSubmission.rawVs;
 
         uint256 expectedNumSignatures = 3;
 
@@ -89,7 +89,11 @@ abstract contract ClfSigner is Base {
         address[] memory signers = new address[](rs.length);
 
         for (uint256 i; i < rs.length; i++) {
-            uint8 v = uint8(rawVs[i]) + 27;
+            // Extract the v value from the appropriate byte in the bytes32
+            // Each v value is 8 bits, stored at byte position i
+            uint8 v = uint8(uint256(rawVs) >> (i * 8)) & 0xFF;
+            v = v + 27;  // Add 27 to get the correct v value
+            
             bytes32 r = rs[i];
             bytes32 s = ss[i];
 

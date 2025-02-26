@@ -6,7 +6,7 @@ import { handleOperatorRegistration } from "./handleOperatorRegistration";
 import { sendConceroMessage } from "./sendConceroMessage";
 import { privateKeyToAccount } from "viem/accounts";
 
-async function setupOperatorRegistrationEventListener({
+async function setupOperatorTestListeners({
     mockCLFRouter,
     conceroClientExample,
 }: {
@@ -30,4 +30,4 @@ async function setupOperatorRegistrationEventListener({
     });
 }
 
-export { setupOperatorRegistrationEventListener };
+export { setupOperatorTestListeners };

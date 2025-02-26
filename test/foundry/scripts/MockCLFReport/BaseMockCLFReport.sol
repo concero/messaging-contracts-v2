@@ -55,6 +55,7 @@ abstract contract BaseMockCLFReport is ConceroVerifierTest {
                 new bytes[](1)
             );
     }
+    
     function _createReportSubmission(
         bytes32[3] memory context,
         bytes32[] memory requestIds,
@@ -75,7 +76,7 @@ abstract contract BaseMockCLFReport is ConceroVerifierTest {
         bytes memory message = abi.encodePacked(reportHash, context[0], context[1], context[2]);
         bytes32 h = keccak256(message);
 
-        (bytes32[] memory rs, bytes32[] memory ss, bytes memory rawVs) = _generateSignatures(h);
+        (bytes32[] memory rs, bytes32[] memory ss, bytes32 rawVs) = _generateSignatures(h);
 
         return
             RouterTypes.ClfDonReportSubmission({
@@ -89,11 +90,13 @@ abstract contract BaseMockCLFReport is ConceroVerifierTest {
 
     function _generateSignatures(
         bytes32 hash
-    ) internal pure returns (bytes32[] memory rs, bytes32[] memory ss, bytes memory rawVs) {
+    ) internal pure returns (bytes32[] memory rs, bytes32[] memory ss, bytes32 rawVs) {
         uint256 numSignatures = 3;
         rs = new bytes32[](numSignatures);
         ss = new bytes32[](numSignatures);
-        rawVs = new bytes(numSignatures);
+        
+        // Initialize rawVs as bytes32(0)
+        rawVs = bytes32(0);
 
         uint256[3] memory mockDonPrivateKeys = [
             MOCK_DON_SIGNER_PRIVATE_KEY_0,
@@ -105,7 +108,11 @@ abstract contract BaseMockCLFReport is ConceroVerifierTest {
             (uint8 v, bytes32 r, bytes32 s) = vm.sign(mockDonPrivateKeys[i], hash);
             rs[i] = r;
             ss[i] = s;
-            rawVs[i] = bytes1(v - 27);
+            
+            // Pack the v values into bytes32
+            // Each v value occupies 8 bits (1 byte) in the bytes32
+            // We're storing them in the least significant bytes
+            rawVs = bytes32(uint256(rawVs) | ((uint256(v - 27) & 0xFF) << (i * 8)));
         }
     }
 }

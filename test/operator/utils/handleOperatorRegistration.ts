@@ -33,8 +33,6 @@ export async function handleOperatorRegistration(testClient: ExtendedTestClient,
     }
 
     const operatorRegistrationCLFResponseBytes = await getOperatorRegistrationCLFResponse();
-    console.log(operatorRegistrationCLFResponseBytes);
-    // const clfReport = await getCLFReport(operatorRegistrationCLFResponseBytes);
 
     const conceroVerifierAddress = getEnvVar(
         `CONCERO_VERIFIER_${networkEnvKeys[config.networks.conceroVerifier.name]}`,

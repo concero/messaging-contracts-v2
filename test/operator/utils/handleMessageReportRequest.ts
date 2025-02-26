@@ -1,12 +1,13 @@
-import { Address, decodeEventLog, Hash, parseEther, PublicClient, TestClient } from "viem";
-import { getEnvVar, getTestClient } from "../../../utils";
-import { privateKeyToAccount } from "viem/accounts";
-import { globalConfig, networkEnvKeys } from "@concero/v2-operators/src/constants";
-import { getMessageCLFReportResponse } from "../getMessageCLFReportResponse";
-import { config } from "@concero/v2-operators/src/relayer/a/constants";
+import { globalConfig } from "@concero/v2-operators/src/constants";
+import { Address, decodeAbiParameters, decodeEventLog, Hash } from "viem";
+import { getEnvVar } from "../../../utils";
 import { ExtendedTestClient } from "../../../utils/getViemClients";
+import { getCLFReport } from "../getCLFReport";
+import { getMessageCLFReportResponse } from "../getMessageCLFReportResponse";
 
 export async function handleMessageReportRequest(testClient: ExtendedTestClient, txHash: Hash, mockCLFRouter: Address) {
+    const {abi: mockCLFRouterAbi} = await import("../../../artifacts/contracts/mocks/MockCLFRouter.sol/MockCLFRouter.json");
+    
     const receipt = await testClient.getTransactionReceipt({ hash: txHash });
 
     let messageReportLog;
@@ -47,23 +48,37 @@ export async function handleMessageReportRequest(testClient: ExtendedTestClient,
         allowedOperators: [getEnvVar("OPERATOR_ADDRESS")],
     });
 
-    const conceroVerifierAddress = getEnvVar(
-        `CONCERO_VERIFIER_${networkEnvKeys[config.networks.conceroVerifier.name]}`,
-    );
-
-    await testClient.setBalance({
-        address: mockCLFRouter,
-        value: parseEther("10000"),
-    });
-
-    await testClient.impersonateAccount({ address: mockCLFRouter });
-
+    const clfReportBytes = await getCLFReport(messageResponseBytes);
+    const decoded = decodeAbiParameters(
+        [
+          {
+            type: "tuple",
+            components: [
+              { name: "context", type: "bytes32[3]" },
+              { name: "report", type: "bytes" },
+              { name: "rs", type: "bytes32[]" },
+              { name: "ss", type: "bytes32[]" },
+              { name: "rawVs", type: "bytes32" },
+            ],
+          }
+        ], 
+        clfReportBytes
+      );
+      
+      const clfDonReportSubmission = decoded[0];
+      
     try {
         await testClient.writeContract({
-            address: conceroVerifierAddress,
-            abi: globalConfig.ABI.CONCERO_VERIFIER,
-            functionName: "handleOracleFulfillment",
-            args: [requestSentLog.log.topics[1], messageResponseBytes, "0x"],
+            address: mockCLFRouter,
+            abi: mockCLFRouterAbi,
+            functionName: "transmit",
+            args: [
+                clfDonReportSubmission.context,
+                clfDonReportSubmission.report,
+                clfDonReportSubmission.rs,
+                clfDonReportSubmission.ss,
+                clfDonReportSubmission.rawVs,
+            ],
             account: mockCLFRouter,
             gasLimit: 1_000_000,
         });

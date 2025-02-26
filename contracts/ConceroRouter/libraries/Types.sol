@@ -64,15 +64,15 @@ library Types {
 
     struct ClfDonReportSubmission {
         bytes32[3] context;
-        bytes report; // struct ClfReport
+        bytes report; // ClfReport
         bytes32[] rs;
         bytes32[] ss;
-        bytes rawVs;
+        bytes32 rawVs;
     }
 
     struct ClfReport {
         bytes32[] requestIds;
-        bytes[] results;
+        bytes[] results; // ConceroVerifier:fulfillRequest() gets results[0] as response
         bytes[] errors;
         bytes[] onchainMetadata;
         bytes[] offchainMetadata;

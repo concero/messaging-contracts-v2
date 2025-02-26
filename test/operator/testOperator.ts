@@ -4,7 +4,7 @@ import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer/a/
 import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureDeposit";
 import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
 import { checkGas } from "@concero/v2-operators/src/relayer/common/utils";
-import { setupOperatorRegistrationEventListener } from "./utils/setupEventListeners";
+import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 import deployConceroClientExample from "../../deploy/ConceroClientExample";
 import deployMockCLFRouter from "../../deploy/MockCLFRouter";
 import { compileContracts } from "../../utils";
@@ -29,7 +29,7 @@ async function testOperator() {
     const mockCLFRouter = await deployMockRouter();
     const { conceroRouter } = await deployContracts(mockCLFRouter.address);
     const conceroClientExample = await deployClient(conceroRouter.address);
-    await setupOperatorRegistrationEventListener({
+    await setupOperatorTestListeners({
         mockCLFRouter: mockCLFRouter.address,
         conceroClientExample: conceroClientExample.address,
     });

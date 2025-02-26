@@ -20,22 +20,4 @@ async function getOperatorRegistrationCLFResponse() {
     }
 }
 
-async function getCLFReport(expectedResponseBytes: string) {
-    try {
-        const command = `make script "args=test/foundry/scripts/MockCLFReport/OperatorRegistrationReport.sol --sig 'getReport(bytes)' ${expectedResponseBytes} --json"`;
-        const responseJson = execSync(command).toString();
-
-        const jsonStart = responseJson.indexOf("{");
-        const jsonStr = responseJson.slice(jsonStart);
-
-        const result = JSON.parse(jsonStr);
-        const rawBytes = result.returns["0"].value;
-
-        return rawBytes;
-    } catch (error) {
-        console.error("Error running MockCLFReport script:", error);
-        throw error;
-    }
-}
-
-export { getOperatorRegistrationCLFResponse, getCLFReport };
+export { getOperatorRegistrationCLFResponse };

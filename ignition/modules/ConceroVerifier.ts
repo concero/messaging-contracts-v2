@@ -35,8 +35,6 @@ export default buildModule("ConceroVerifier", m => {
         from: deployer,
     });
 
-    console.log(verifier);
-
     updateEnvVariable(`CONCERO_VERIFIER_${networkEnvKeys[name]}`, verifier.address, `deployments.${type}`);
 
     return {

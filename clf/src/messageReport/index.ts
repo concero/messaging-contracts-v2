@@ -20,7 +20,7 @@ export async function main(bytesArgs: string[]) {
         const msgConfig = args.internalMessageConfig;
 
         const { srcChainSelector } = msgConfig;
-        const publicClient = getPublicClient(Number(msgConfig.srcChainSelector));
+        const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
 
         const log = await fetchConceroMessage(
             publicClient,
@@ -34,13 +34,13 @@ export async function main(bytesArgs: string[]) {
             internalMessageConfig: messageConfigFromLog,
             dstChainData: dstChainDataFromLog,
             message: messageFromLog,
-        } = decodeConceroMessageLog(log.data);
+        } = decodeConceroMessageLog(log);
 
         if (messageIdFromLog !== args.messageId) {
             handleError(ErrorType.INVALID_MESSAGE_ID);
         }
 
-        const recomputedMessageHashSum = await verifyMessageHash(
+        verifyMessageHash(
             args.messageId,
             messageConfigFromLog.toString(),
             dstChainDataFromLog,
@@ -57,7 +57,7 @@ export async function main(bytesArgs: string[]) {
             requester: args.operatorAddress,
             internalMessageConfig: messageConfigFromLog.toString(),
             messageId: args.messageId,
-            messageHashSum: recomputedMessageHashSum,
+            messageHashSum: args.messageHashSum,
             dstChainData: dstChainDataFromLog,
             allowedOperators,
         };

@@ -1,9 +1,9 @@
 import { type Address, type Hash } from "viem";
 
-type EvmSrcChainData = {
+interface EvmSrcChainData {
     sender: Address;
     blockNumber: string;
-};
+}
 
 interface InternalMessageConfig {
     version: bigint; // uint8
@@ -19,7 +19,7 @@ interface DecodedArgs {
     internalMessageConfig: InternalMessageConfig;
     messageId: Hash;
     messageHashSum: Hash;
-    srcChainData: string;
+    srcChainData: EvmSrcChainData;
     operatorAddress: Address;
 }
 

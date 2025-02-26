@@ -3,7 +3,7 @@ import { ClientMessageRequest } from "../constants/abis";
 import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 
-export async function verifyMessageHash(
+export function verifyMessageHash(
     messageId: string,
     messageConfig: string,
     dstChainData: string,

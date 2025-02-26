@@ -3,6 +3,8 @@ import healthyRpcs from "./healthy-rpcs.json";
 import { CONFIG } from "../messageReport/constants/config";
 import { ErrorType } from "./errorType";
 import { handleError } from "./errorHandler";
+import { config } from "./config";
+import { developmentRpcs } from "./developmentRpcs";
 
 function createCustomTransport(url: string, chainIdHex: string): Transport {
     return createTransport({
@@ -27,7 +29,7 @@ function createCustomTransport(url: string, chainIdHex: string): Transport {
 }
 
 export function createFallbackTransport(chainSelector: string): Transport {
-    const chainConfig = healthyRpcs[chainSelector];
+    const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRpcs[chainSelector];
     if (!chainConfig) {
         handleError(ErrorType.INVALID_CHAIN);
     }
@@ -48,7 +50,7 @@ export function createFallbackTransport(chainSelector: string): Transport {
 }
 
 export function getPublicClient(chainSelector: string) {
-    const chainConfig = healthyRpcs[chainSelector];
+    const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRpcs[chainSelector];
     if (!chainConfig || !chainConfig.rpcs.length) {
         handleError(ErrorType.NO_RPC_PROVIDERS);
     }

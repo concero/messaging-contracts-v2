@@ -14269,6 +14269,25 @@ var CONFIG = {
   }
 };
 
+// ../common/config.ts
+var config = {
+  isDevelopment: process?.env?.CONCERO_CLF_DEVELOPMENT === "true",
+  localhostRpcUrl: process?.env?.LOCALHOST_RPC_URL
+};
+
+// ../common/developmentRpcs.ts
+var developmentRpcs = {
+  "1": {
+    rpcs: [
+      {
+        chainId: "1",
+        url: config.localhostRpcUrl,
+        responseTime: 160
+      }
+    ]
+  }
+};
+
 // ../common/viemClient.ts
 function createCustomTransport(url, chainIdHex) {
   return createTransport({
@@ -14292,7 +14311,7 @@ function createCustomTransport(url, chainIdHex) {
   });
 }
 function createFallbackTransport(chainSelector) {
-  const chainConfig = healthy_rpcs_default[chainSelector];
+  const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthy_rpcs_default[chainSelector];
   if (!chainConfig) {
     handleError(25 /* INVALID_CHAIN */);
   }
@@ -14304,7 +14323,7 @@ function createFallbackTransport(chainSelector) {
   return fallback(transportFactories);
 }
 function getPublicClient(chainSelector) {
-  const chainConfig = healthy_rpcs_default[chainSelector];
+  const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthy_rpcs_default[chainSelector];
   if (!chainConfig || !chainConfig.rpcs.length) {
     handleError(22 /* NO_RPC_PROVIDERS */);
   }
@@ -14402,7 +14421,7 @@ async function getRegisteredOperators(client, chainType) {
 }
 
 // utils/verifyMessageHash.ts
-async function verifyMessageHash(messageId, messageConfig, dstChainData, message, expectedHashSum) {
+function verifyMessageHash(messageId, messageConfig, dstChainData, message, expectedHashSum) {
   const messageBytes = encodeAbiParameters(["bytes32", ClientMessageRequest], [
     messageId,
     {
@@ -14641,8 +14660,8 @@ var MASKS = {
 };
 
 // utils/messageConfig.ts
-function decodeInternalMessageConfig(config) {
-  const bigIntConfig = BigInt(config);
+function decodeInternalMessageConfig(config2) {
+  const bigIntConfig = BigInt(config2);
   return {
     version: bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.VERSION) & MASKS.UINT8,
     srcChainSelector: bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.SRC_CHAIN) & MASKS.UINT24,
@@ -14653,18 +14672,18 @@ function decodeInternalMessageConfig(config) {
     isCallbackable: Boolean(bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.CALLBACKABLE) & MASKS.BOOL)
   };
 }
-function validateInternalMessageConfig(config) {
-  if (config.version === 0n)
+function validateInternalMessageConfig(config2) {
+  if (config2.version === 0n)
     handleError(10 /* CONFIG_INVALID_VERSION */);
-  if (config.relayerConfig > 255n)
+  if (config2.relayerConfig > 255n)
     handleError(11 /* CONFIG_INVALID_RELAYER_CONFIG */);
-  if (config.minSrcConfirmations === 0n)
+  if (config2.minSrcConfirmations === 0n)
     handleError(12 /* CONFIG_INVALID_MIN_SRC_CONFIRMATIONS */);
-  if (config.minDstConfirmations === 0n)
+  if (config2.minDstConfirmations === 0n)
     handleError(13 /* CONFIG_INVALID_MIN_DST_CONFIRMATIONS */);
-  if (!viemChains[Number(config.srcChainSelector)])
+  if (!viemChains[Number(config2.srcChainSelector)])
     handleError(14 /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
-  if (!viemChains[Number(config.dstChainSelector)])
+  if (!viemChains[Number(config2.dstChainSelector)])
     handleError(15 /* CONFIG_INVALID_DST_CHAIN_SELECTOR */);
 }
 
@@ -14760,18 +14779,18 @@ async function main(bytesArgs) {
     validateDecodedArgs(args);
     const msgConfig = args.internalMessageConfig;
     const { srcChainSelector } = msgConfig;
-    const publicClient = getPublicClient(Number(msgConfig.srcChainSelector));
+    const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
     const log = await fetchConceroMessage(publicClient, conceroRouters[Number(msgConfig.srcChainSelector)], args.messageId, BigInt(args.srcChainData.blockNumber));
     const {
       messageId: messageIdFromLog,
       internalMessageConfig: messageConfigFromLog,
       dstChainData: dstChainDataFromLog,
       message: messageFromLog
-    } = decodeConceroMessageLog(log.data);
+    } = decodeConceroMessageLog(log);
     if (messageIdFromLog !== args.messageId) {
       handleError(32 /* INVALID_MESSAGE_ID */);
     }
-    const recomputedMessageHashSum = await verifyMessageHash(args.messageId, messageConfigFromLog.toString(), dstChainDataFromLog, messageFromLog, args.messageHashSum);
+    verifyMessageHash(args.messageId, messageConfigFromLog.toString(), dstChainDataFromLog, messageFromLog, args.messageHashSum);
     const operators = await getAllowedOperators(publicClient, 0 /* EVM */, args.messageId);
     const allowedOperators = pick(operators, 3);
     const messageReportResult = {
@@ -14780,7 +14799,7 @@ async function main(bytesArgs) {
       requester: args.operatorAddress,
       internalMessageConfig: messageConfigFromLog.toString(),
       messageId: args.messageId,
-      messageHashSum: recomputedMessageHashSum,
+      messageHashSum: args.messageHashSum,
       dstChainData: dstChainDataFromLog,
       allowedOperators
     };

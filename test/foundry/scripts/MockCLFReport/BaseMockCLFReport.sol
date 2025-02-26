@@ -55,7 +55,7 @@ abstract contract BaseMockCLFReport is ConceroVerifierTest {
                 new bytes[](1)
             );
     }
-    
+
     function _createReportSubmission(
         bytes32[3] memory context,
         bytes32[] memory requestIds,
@@ -94,7 +94,7 @@ abstract contract BaseMockCLFReport is ConceroVerifierTest {
         uint256 numSignatures = 3;
         rs = new bytes32[](numSignatures);
         ss = new bytes32[](numSignatures);
-        
+
         // Initialize rawVs as bytes32(0)
         rawVs = bytes32(0);
 
@@ -108,7 +108,7 @@ abstract contract BaseMockCLFReport is ConceroVerifierTest {
             (uint8 v, bytes32 r, bytes32 s) = vm.sign(mockDonPrivateKeys[i], hash);
             rs[i] = r;
             ss[i] = s;
-            
+
             // Pack the v values into bytes32
             // Each v value occupies 8 bits (1 byte) in the bytes32
             // We're storing them in the least significant bytes

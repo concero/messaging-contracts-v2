@@ -1,23 +1,24 @@
-import "@nomicfoundation/hardhat-chai-matchers";
-import "@nomicfoundation/hardhat-ethers";
-import "@nomicfoundation/hardhat-ignition-viem";
-import "@nomicfoundation/hardhat-viem";
-import "./utils/configureDotEnv";
-// import "@nomicfoundation/hardhat-verify";
-import "@typechain/hardhat";
-import "hardhat-contract-sizer";
-import "hardhat-deploy";
-import "hardhat-deploy-ethers";
-import "hardhat-gas-reporter";
 // import "@tenderly/hardhat-tenderly";
-import "@chainlink/hardhat-chainlink";
-import "@nomicfoundation/hardhat-network-helpers";
-import { HardhatUserConfig } from "hardhat/config";
-import "solidity-coverage";
-import { conceroNetworks } from "./constants";
-import "./tasks";
+import '@chainlink/hardhat-chainlink';
+import '@nomicfoundation/hardhat-chai-matchers';
+import '@nomicfoundation/hardhat-ethers';
+import '@nomicfoundation/hardhat-ignition-viem';
+import '@nomicfoundation/hardhat-network-helpers';
+import '@nomicfoundation/hardhat-viem';
+// import "@nomicfoundation/hardhat-verify";
+import '@typechain/hardhat';
+import 'hardhat-contract-sizer';
+import 'hardhat-deploy';
+import 'hardhat-deploy-ethers';
+import 'hardhat-gas-reporter';
+import {HardhatUserConfig} from 'hardhat/config';
+import 'solidity-coverage';
 
-const enableGasReport = process.env.REPORT_GAS !== "false";
+import {conceroNetworks} from './constants';
+import './tasks';
+import './utils/configureDotEnv';
+
+const enableGasReport = process.env.REPORT_GAS !== 'false';
 
 const config: HardhatUserConfig = {
     contractSizer: {
@@ -27,19 +28,19 @@ const config: HardhatUserConfig = {
         disambiguatePaths: false,
     },
     tenderly: {
-        username: "olegkron",
-        project: "own",
+        username: 'olegkron',
+        project: 'own',
     },
     paths: {
-        artifacts: "artifacts",
-        cache: "cache",
-        sources: "contracts",
-        tests: "test",
+        artifacts: 'artifacts',
+        cache: 'cache',
+        sources: 'contracts',
+        tests: 'test',
     },
     solidity: {
         compilers: [
             {
-                version: "0.8.28",
+                version: '0.8.28',
                 settings: {
                     viaIR: false,
                     optimizer: {
@@ -50,7 +51,7 @@ const config: HardhatUserConfig = {
             },
         ],
     },
-    defaultNetwork: "localhost",
+    defaultNetwork: 'localhost',
     namedAccounts: {
         deployer: {
             default: 0,

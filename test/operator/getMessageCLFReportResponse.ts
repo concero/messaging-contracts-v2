@@ -2,44 +2,44 @@ import { execSync } from "child_process";
 import { Address, Hash } from "viem";
 
 function getMessageCLFReportResponse({
-    requester,
-    requestId,
-    internalMessageConfig,
-    messageHashSum,
-    srcChainData,
-    allowedOperators,
+	requester,
+	requestId,
+	internalMessageConfig,
+	messageHashSum,
+	srcChainData,
+	allowedOperators,
 }: {
-    requester: Address;
-    requestId: Hash;
-    internalMessageConfig: string;
-    messageHashSum: string;
-    srcChainData: string;
-    allowedOperators: string[];
+	requester: Address;
+	requestId: Hash;
+	internalMessageConfig: string;
+	messageHashSum: string;
+	srcChainData: string;
+	allowedOperators: string[];
 }) {
-    try {
-        const formattedAllowedOperators = allowedOperators.length
-            ? `[${allowedOperators.map(op => `"${op}"`).join(",")}]`
-            : "[]";
+	try {
+		const formattedAllowedOperators = allowedOperators.length
+			? `[${allowedOperators.map(op => `"${op}"`).join(",")}]`
+			: "[]";
 
-        const command = `make script "args=test/foundry/scripts/MockCLFReport/MessageReport.sol --sig 'getResponse(address,bytes32,bytes32,bytes32,bytes,bytes[])' ${
-            requester
-        } ${internalMessageConfig} ${requestId} ${messageHashSum} ${`"${srcChainData}"`} ${
-            formattedAllowedOperators
-        } --json"`;
+		const command = `make script "args=test/foundry/scripts/MockCLFReport/MessageReport.sol --sig 'getResponse(address,bytes32,bytes32,bytes32,bytes,bytes[])' ${
+			requester
+		} ${internalMessageConfig} ${requestId} ${messageHashSum} ${`"${srcChainData}"`} ${
+			formattedAllowedOperators
+		} --json"`;
 
-        const messageReportResponseBytes = execSync(command).toString();
+		const messageReportResponseBytes = execSync(command).toString();
 
-        const jsonStart = messageReportResponseBytes.indexOf("{");
-        const jsonStr = messageReportResponseBytes.slice(jsonStart);
-        const result = JSON.parse(jsonStr);
+		const jsonStart = messageReportResponseBytes.indexOf("{");
+		const jsonStr = messageReportResponseBytes.slice(jsonStart);
+		const result = JSON.parse(jsonStr);
 
-        const rawBytes = result.returns[0].value;
+		const rawBytes = result.returns[0].value;
 
-        return rawBytes;
-    } catch (error) {
-        console.error("Error running MessageReport script:", error);
-        throw error;
-    }
+		return rawBytes;
+	} catch (error) {
+		console.error("Error running MessageReport script:", error);
+		throw error;
+	}
 }
 
 export { getMessageCLFReportResponse };

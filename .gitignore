@@ -35,5 +35,10 @@ temp
 packages/foundry/out
 packages/foundry/node_modules
 packages/foundry/cache
+foundry-artifacts/
+logs/
+
 
 .idea
+.vscode
+.DS_Store

@@ -6,10 +6,10 @@ import { COMMON_REPORT_BYTE_OFFSETS } from "./reportBytes";
  * Converts a BigInt to a 32-byte (Uint256) buffer
  */
 export function encodeUint256(value: bigint) {
-    if (value < 0n || value > (1n << 256n) - 1n) {
-        handleError(ErrorType.INVALID_UINT256);
-    }
-    return new Uint8Array(Buffer.from(value.toString(16).padStart(64, "0"), "hex"));
+	if (value < 0n || value > (1n << 256n) - 1n) {
+		handleError(ErrorType.INVALID_UINT256);
+	}
+	return new Uint8Array(Buffer.from(value.toString(16).padStart(64, "0"), "hex"));
 }
 
 /**
@@ -17,7 +17,7 @@ export function encodeUint256(value: bigint) {
  * @param hex - Hex string with optional 0x prefix
  */
 export function hexToBytes(hex: string): Uint8Array {
-    return new Uint8Array(Buffer.from(hex.replace(/^0x/, ""), "hex"));
+	return new Uint8Array(Buffer.from(hex.replace(/^0x/, ""), "hex"));
 }
 
 /**
@@ -25,7 +25,7 @@ export function hexToBytes(hex: string): Uint8Array {
  * @param value - Number to pack
  */
 export function packUint32(value: number): Uint8Array {
-    return new Uint8Array(new Uint32Array([value]).buffer);
+	return new Uint8Array(new Uint32Array([value]).buffer);
 }
 
 /**
@@ -33,11 +33,11 @@ export function packUint32(value: number): Uint8Array {
  * @param value - Number to pack
  */
 export function packUint16(value: number): Uint8Array {
-    return new Uint8Array(new Uint16Array([value]).buffer);
+	return new Uint8Array(new Uint16Array([value]).buffer);
 }
 
 export function packUint8(value: number): Uint8Array {
-    return new Uint8Array([value]);
+	return new Uint8Array([value]);
 }
 
 /**
@@ -48,9 +48,9 @@ export function packUint8(value: number): Uint8Array {
  * @returns Packed configuration as BigInt
  */
 export function packResponseConfig(reportType: number, version: number, requester: string): bigint {
-    return (
-        (BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE)) |
-        (BigInt(version) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION)) |
-        (BigInt(`0x${requester.replace(/^0x/, "")}`) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK)
-    );
+	return (
+		(BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE)) |
+		(BigInt(version) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION)) |
+		(BigInt(`0x${requester.replace(/^0x/, "")}`) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK)
+	);
 }

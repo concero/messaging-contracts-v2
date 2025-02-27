@@ -9,13 +9,14 @@
             "files": "*.ts",
             "options": {
                 "parser": "typescript",
-                "printWidth": 120,
+                "arrowParens": "avoid",
+                "printWidth": 100,
                 "tabWidth": 4,
                 "trailingComma": "all",
-                "singleQuote": true,
-                "bracketSpacing": false,
+                "singleQuote": false,
+                "bracketSpacing": true,
                 "semi": true,
-                "useTabs": false,
+                "useTabs": true,
                 "importOrderSeparation": true,
                 "importOrderSortSpecifiers": true,
                 "importOrder": ["./utils/configureOperatorEnv", "^@concero/(.*)$", "^contracts/(.*)$", "^utils/(.*)$", "^[./]"]
@@ -39,8 +40,8 @@
                 "printWidth": 120,
                 "tabWidth": 1,
                 "trailingComma": "all",
-                "singleQuote": true,
-                "bracketSpacing": false,
+                "singleQuote": false,
+                "bracketSpacing": true,
                 "semi": true,
                 "useTabs": true
             }

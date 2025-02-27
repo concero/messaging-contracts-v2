@@ -8,4 +8,8 @@ pragma solidity 0.8.28;
 
 import {ConceroBaseScript} from "../../scripts/ConceroBaseScript.s.sol";
 
-contract ConceroRouterBase is ConceroBaseScript {}
+contract ConceroRouterBase is ConceroBaseScript {
+    function setUp() public virtual override {
+        super.setUp();
+    }
+}

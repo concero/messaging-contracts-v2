@@ -9,5 +9,10 @@ pragma solidity 0.8.28;
 import {Test} from "forge-std/src/Test.sol";
 
 import {ConceroBaseScript} from "../scripts/ConceroBaseScript.s.sol";
+import {DeployMockERC20} from "../scripts/deploy/DeployMockERC20.s.sol";
 
-abstract contract ConceroTest is Test, ConceroBaseScript {}
+abstract contract ConceroTest is ConceroBaseScript, Test {
+    function setUp() public virtual override {
+        super.setUp();
+    }
+}

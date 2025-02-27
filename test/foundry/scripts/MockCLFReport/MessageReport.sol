@@ -7,13 +7,18 @@ import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol"
 
 contract MessageReport is BaseMockCLFReport {
     function getReport() public pure returns (RouterTypes.ClfDonReportSubmission memory) {
-        return getReport(getResponse());
+        return getReport(getResponse(), bytes32("requestId"));
+    }
+
+    function getReport(bytes32 clfRequestId) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+        return getReport(getResponse(), clfRequestId);
     }
 
     function getReport(
-        bytes memory expectedResponse
+        bytes memory expectedResponse,
+        bytes32 clfRequestId
     ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
-        return createMockClfReport(expectedResponse);
+        return createMockClfReport(expectedResponse, clfRequestId);
     }
 
     function getResponse() public pure returns (bytes memory) {

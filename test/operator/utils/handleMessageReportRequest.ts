@@ -79,7 +79,6 @@ export async function handleMessageReportRequest(testClient: ExtendedTestClient,
                 clfDonReportSubmission.ss,
                 clfDonReportSubmission.rawVs,
             ],
-            account: mockCLFRouter,
             gasLimit: 1_000_000,
         });
     } finally {

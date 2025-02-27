@@ -15,24 +15,17 @@ import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeabl
 
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroVerifier} from "../../scripts/deploy/DeployConceroVerifier.s.sol";
+import {DeployMockCLFRouter} from "../../scripts/deploy/DeployMockCLFRouter.s.sol";
 
 import {ConceroVerifierBase} from "./ConceroVerifierBase.sol";
 import {MockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 
-abstract contract ConceroVerifierTest is ConceroVerifierBase, ConceroTest {
-    DeployConceroVerifier internal deployScript;
-    TransparentUpgradeableProxy internal conceroVerifierProxy;
-    ConceroVerifier internal conceroVerifier;
+abstract contract ConceroVerifierTest is DeployConceroVerifier, ConceroTest {
+    function setUp() public virtual override(DeployConceroVerifier, ConceroTest) {
+        super.setUp();
 
-    function setUp() public virtual {
-        deployScript = new DeployConceroVerifier();
-        address deployedProxy = deployScript.run();
+        conceroVerifier = ConceroVerifier(payable(deploy()));
 
-        conceroVerifierProxy = TransparentUpgradeableProxy(payable(deployedProxy));
-        conceroVerifier = ConceroVerifier(payable(deployScript.getProxy()));
-
-        usdc = deployScript.usdc();
-        clfRouter = deployScript.clfRouter();
         MockCLFRouter(clfRouter).setConsumer(address(conceroVerifier));
     }
 

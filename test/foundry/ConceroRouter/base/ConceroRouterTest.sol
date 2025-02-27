@@ -16,21 +16,14 @@ import {ConceroClientExample} from "contracts/ConceroClient/ConceroClientExample
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroRouter} from "../../scripts/deploy/DeployConceroRouter.s.sol";
 
-abstract contract ConceroRouterTest is ConceroTest {
-    DeployConceroRouter internal deployScript;
-    TransparentUpgradeableProxy internal conceroRouterProxy;
-    ConceroRouter internal conceroRouter;
+abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
     ConceroClientExample internal conceroClient;
 
-    function setUp() public virtual {
-        deployScript = new DeployConceroRouter();
-        address deployedProxy = deployScript.run();
+    function setUp() public virtual override(DeployConceroRouter, ConceroTest) {
+        super.setUp();
 
-        conceroRouterProxy = TransparentUpgradeableProxy(payable(deployedProxy));
-        conceroRouter = ConceroRouter(payable(deployScript.getProxy()));
+        conceroRouter = ConceroRouter(payable(deploy()));
         conceroClient = new ConceroClientExample(payable(conceroRouter), SRC_CHAIN_SELECTOR);
-
-        usdc = deployScript.usdc();
     }
 
     function _setPriceFeeds() internal {

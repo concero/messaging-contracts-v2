@@ -7,7 +7,7 @@
 pragma solidity 0.8.28;
 
 import {ConceroBaseScript} from "../../scripts/ConceroBaseScript.s.sol";
-
+import {DeployMockCLFRouter} from "../../scripts/deploy/DeployMockCLFRouter.s.sol";
 contract ConceroVerifierBase is ConceroBaseScript {
     //deployment vars
     address public clfRouter;
@@ -20,7 +20,10 @@ contract ConceroVerifierBase is ConceroBaseScript {
     uint16 public clfPremiumFeeBpsUsd;
     uint32 public clfCallbackGasLimit;
 
-    constructor() {
+    function setUp() public virtual override {
+        super.setUp();
+        clfRouter = new DeployMockCLFRouter().run();
+
         clfDonId = vm.envBytes32("CLF_DONID_ARBITRUM");
         clfSubscriptionId = uint64(vm.envUint("CLF_SUBID_ARBITRUM"));
         clfSecretsVersion = uint64(vm.envUint("CLF_DON_SECRETS_VERSION_ARBITRUM"));

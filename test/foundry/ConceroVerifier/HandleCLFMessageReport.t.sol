@@ -20,6 +20,7 @@ import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol"
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
 import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
 import {RequestMessageReport} from "./RequestMessageReport.t.sol";
+import {IMockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 
 contract HandleCLFMessageReport is RequestMessageReport {
     function setUp() public override {
@@ -34,7 +35,6 @@ contract HandleCLFMessageReport is RequestMessageReport {
         MessageReport messageReport = new MessageReport();
         bytes memory clfResponse = messageReport.getResponse();
 
-        console.logBytes(clfResponse);
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "");
     }
@@ -74,6 +74,31 @@ contract HandleCLFMessageReport is RequestMessageReport {
         conceroVerifier.handleOracleFulfillment(clfRequestId, specificResponse, "");
 
         // Verify the request was processed
+        assertFalse(
+            conceroVerifier.getStorage(
+                Namespaces.VERIFIER,
+                VerifierSlots.pendingCLFRequests,
+                clfRequestId
+            ) == 1
+        );
+    }
+
+    function test_clfRouter_transmit_messageReport() public {
+        // First, request a message report to set up the necessary state
+        bytes32 clfRequestId = test_requestMessageReport();
+
+        // Create a message report
+        MessageReport messageReport = new MessageReport();
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = messageReport.getReport(clfRequestId);
+
+        IMockCLFRouter(clfRouter).transmit(
+            clfSubmission.context,
+            clfSubmission.report,
+            clfSubmission.rs,
+            clfSubmission.ss,
+            clfSubmission.rawVs
+        );
+
         assertFalse(
             conceroVerifier.getStorage(
                 Namespaces.VERIFIER,

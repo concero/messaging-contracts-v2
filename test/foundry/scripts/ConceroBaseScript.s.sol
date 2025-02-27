@@ -10,6 +10,8 @@ import {Script} from "forge-std/src/Script.sol";
 
 import {MessageConfigBitOffsets as offsets} from "contracts/common/CommonConstants.sol";
 import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
+import {DeployMockERC20} from "./deploy/DeployMockERC20.s.sol";
+import {console} from "forge-std/src/Console.sol";
 
 abstract contract ConceroBaseScript is Script {
     address public immutable deployer;
@@ -62,8 +64,13 @@ abstract contract ConceroBaseScript is Script {
         );
     address constant CONCERO_VERIFIER_ADDRESS = address(0x123);
     uint64 constant CONCERO_VERIFIER_SUB_ID = 0;
+
     constructor() {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");
         proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
+    }
+
+    function setUp() public virtual {
+        usdc = address(new DeployMockERC20().deployERC20("USD Coin", "USDC", 6));
     }
 }

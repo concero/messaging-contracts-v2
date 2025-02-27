@@ -13,32 +13,25 @@ import {CLF} from "./modules/CLF.sol";
 import {GenericStorage} from "./modules/GenericStorage.sol";
 import {Operator} from "./modules/Operator.sol";
 import {Owner} from "./modules/Owner.sol";
+import {CLFParams} from "./libraries/Types.sol";
 
 contract ConceroVerifier is IConceroVerifier, CLF, Operator, Owner, GenericStorage {
     constructor(
         uint24 chainSelector,
         address USDC,
-        address clfRouter,
-        bytes32 clfDonId,
-        uint64 clfSubscriptionId,
-        uint64 clfDonHostedSecretsVersion,
-        uint8 clfDonHostedSecretsSlotId,
-        uint16 clfPremiumFeeUsdBps,
-        uint32 clfCallbackGasLimit,
-        bytes32 requestCLFMessageReportJsCodeHash,
-        bytes32 requestOperatorRegistrationJsCodeHash
+        CLFParams memory clfParams
     )
         Base(chainSelector, USDC)
         CLF(
-            clfRouter,
-            clfDonId,
-            clfSubscriptionId,
-            clfDonHostedSecretsVersion,
-            clfDonHostedSecretsSlotId,
-            clfPremiumFeeUsdBps,
-            clfCallbackGasLimit,
-            requestCLFMessageReportJsCodeHash,
-            requestOperatorRegistrationJsCodeHash
+            clfParams.router,
+            clfParams.donId,
+            clfParams.subscriptionId,
+            clfParams.donHostedSecretsVersion,
+            clfParams.donHostedSecretsSlotId,
+            clfParams.premiumFeeUsdBps,
+            clfParams.callbackGasLimit,
+            clfParams.requestCLFMessageReportJsCodeHash,
+            clfParams.requestOperatorRegistrationJsCodeHash
         )
     {}
 

@@ -10,7 +10,9 @@ contract MessageReport is BaseMockCLFReport {
         return getReport(getResponse(), bytes32("requestId"));
     }
 
-    function getReport(bytes32 clfRequestId) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+    function getReport(
+        bytes32 clfRequestId
+    ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
         return getReport(getResponse(), clfRequestId);
     }
 

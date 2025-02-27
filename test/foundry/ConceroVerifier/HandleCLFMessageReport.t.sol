@@ -89,7 +89,9 @@ contract HandleCLFMessageReport is RequestMessageReport {
 
         // Create a message report
         MessageReport messageReport = new MessageReport();
-        RouterTypes.ClfDonReportSubmission memory clfSubmission = messageReport.getReport(clfRequestId);
+        RouterTypes.ClfDonReportSubmission memory clfSubmission = messageReport.getReport(
+            clfRequestId
+        );
 
         IMockCLFRouter(clfRouter).transmit(
             clfSubmission.context,

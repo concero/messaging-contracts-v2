@@ -59,37 +59,37 @@ contract MockCLFRouter {
 
     // @notice mocking responses from CLF to ConceroVerifier via HandleOracleFulfillment
     function transmit(
-    bytes32[3] calldata reportContext,
-    bytes calldata report,
-    bytes32[] calldata rs,
-    bytes32[] calldata ss,
-    bytes32 rawVs
-) external {
-    console.logString("MockCLFRouter.transmit()");
-    
-    (
-        bytes32[] memory requestIds,
-        bytes[] memory results,
-        bytes[] memory errors,
-        bytes[] memory onchainMetadata,
-        bytes[] memory offchainMetadata
-    ) = abi.decode(report, (bytes32[], bytes[], bytes[], bytes[], bytes[]));
-    
-    console.logString("MockCLFRouter.transmit() after decode");
-    
-    bytes32 requestId = requestIds[0];
-    bytes memory result = results[0];
-    bytes memory err = errors[0];
+        bytes32[3] calldata reportContext,
+        bytes calldata report,
+        bytes32[] calldata rs,
+        bytes32[] calldata ss,
+        bytes32 rawVs
+    ) external {
+        console.logString("MockCLFRouter.transmit()");
 
-    (bool success, ) = s_consumer.call(
-        abi.encodeWithSignature(
-            "handleOracleFulfillment(bytes32,bytes,bytes)",
-            requestId,
-            result,
-            err
-        )
-    );
+        (
+            bytes32[] memory requestIds,
+            bytes[] memory results,
+            bytes[] memory errors,
+            bytes[] memory onchainMetadata,
+            bytes[] memory offchainMetadata
+        ) = abi.decode(report, (bytes32[], bytes[], bytes[], bytes[], bytes[]));
 
-    require(success, CallFailed());
-}
+        console.logString("MockCLFRouter.transmit() after decode");
+
+        bytes32 requestId = requestIds[0];
+        bytes memory result = results[0];
+        bytes memory err = errors[0];
+
+        (bool success, ) = s_consumer.call(
+            abi.encodeWithSignature(
+                "handleOracleFulfillment(bytes32,bytes,bytes)",
+                requestId,
+                result,
+                err
+            )
+        );
+
+        require(success, CallFailed());
+    }
 }

@@ -1,20 +1,20 @@
-import "./utils/configureDotEnv";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-ignition-viem";
 import "@nomicfoundation/hardhat-viem";
+import "./utils/configureDotEnv";
 // import "@nomicfoundation/hardhat-verify";
 import "@typechain/hardhat";
+import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 import "hardhat-gas-reporter";
-import "hardhat-contract-sizer";
 // import "@tenderly/hardhat-tenderly";
-import "solidity-coverage";
 import "@chainlink/hardhat-chainlink";
 import "@nomicfoundation/hardhat-network-helpers";
-import { conceroNetworks } from "./constants";
 import { HardhatUserConfig } from "hardhat/config";
+import "solidity-coverage";
+import { conceroNetworks } from "./constants";
 import "./tasks";
 
 const enableGasReport = process.env.REPORT_GAS !== "false";
@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
             {
                 version: "0.8.28",
                 settings: {
-                    viaIR: true,
+                    viaIR: false,
                     optimizer: {
                         enabled: true,
                         runs: 200,

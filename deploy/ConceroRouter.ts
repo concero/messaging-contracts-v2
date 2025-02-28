@@ -17,7 +17,7 @@ function getCLFDonSigners(networkType: NetworkType) {
 			break;
 
 		case "localhost":
-			networkName = "base";
+			networkName = "localhost";
 			break;
 
 		default:

@@ -9,7 +9,7 @@ pragma solidity 0.8.28;
 import {ConceroVerifierTest} from "../../ConceroVerifier/base/ConceroVerifierTest.sol";
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
-abstract contract BaseMockCLFReport is ConceroVerifierTest {
+contract BaseMockCLFReport is ConceroVerifierTest {
     function createMockClfReport(
         bytes memory _response
     ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {

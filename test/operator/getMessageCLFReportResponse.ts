@@ -3,8 +3,8 @@ import { Address, Hash } from "viem";
 
 function getMessageCLFReportResponse({
 	requester,
-	requestId,
 	internalMessageConfig,
+	messageId,
 	messageHashSum,
 	srcChainData,
 	allowedOperators,
@@ -12,6 +12,7 @@ function getMessageCLFReportResponse({
 	requester: Address;
 	requestId: Hash;
 	internalMessageConfig: string;
+	messageId: Hash;
 	messageHashSum: string;
 	srcChainData: string;
 	allowedOperators: string[];
@@ -23,7 +24,7 @@ function getMessageCLFReportResponse({
 
 		const command = `make script "args=test/foundry/scripts/MockCLFReport/MessageReport.sol --sig 'getResponse(address,bytes32,bytes32,bytes32,bytes,bytes[])' ${
 			requester
-		} ${internalMessageConfig} ${requestId} ${messageHashSum} ${`"${srcChainData}"`} ${
+		} ${internalMessageConfig} ${messageId} ${messageHashSum} ${`"${srcChainData}"`} ${
 			formattedAllowedOperators
 		} --json"`;
 

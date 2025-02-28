@@ -1,3 +1,5 @@
+import { privateKeyToAccount } from "viem/accounts";
+
 import "./utils/configureOperatorEnv";
 
 import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureDeposit";
@@ -8,7 +10,7 @@ import { checkGas } from "@concero/v2-operators/src/relayer/common/utils";
 import deployConceroClientExample from "../../deploy/ConceroClientExample";
 import deployMockCLFRouter from "../../deploy/MockCLFRouter";
 import { deployContracts } from "../../tasks";
-import { compileContracts } from "../../utils";
+import { compileContracts, getTestClient } from "../../utils";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
 /*
@@ -29,15 +31,23 @@ async function testOperator() {
 	const hre = require("hardhat");
 	await compileContracts({ quiet: true });
 
+	const testClient = getTestClient(
+		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
+	);
+
+	testClient.mine({ blocks: 1000 });
+
 	const mockCLFRouter = await deployMockCLFRouter(hre);
 
-	const { conceroRouter } = await deployContracts(mockCLFRouter.address);
+	const { conceroRouter, conceroVerifier } = await deployContracts(mockCLFRouter.address);
 	const conceroClientExample = await deployConceroClientExample(hre, {
 		conceroRouter: conceroRouter.address,
 	});
 	await setupOperatorTestListeners({
+		testClient,
 		mockCLFRouter: mockCLFRouter.address,
 		conceroClientExample: conceroClientExample.address,
+		conceroVerifier: conceroVerifier.address,
 	});
 	await operator();
 }

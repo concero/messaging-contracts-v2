@@ -13,21 +13,30 @@ import {
 } from "../constants/storage/ConceroVerifierStorage";
 import deployRouter from "../deploy/ConceroRouter";
 import deployVerifier from "../deploy/ConceroVerifier";
-import { compileContracts, getFallbackClients } from "../utils";
+import { getFallbackClients } from "../utils";
 
 async function deployContracts(
-	clfRouterAddress: Address,
+	mockCLFRouter: Address,
 ): Promise<{ mockCLFRouter: any; conceroVerifier: any; conceroRouter: any }> {
 	const hre: HardhatRuntimeEnvironment = require("hardhat");
-
+	const { abi: mockCLFRouterAbi } = await import(
+		"../artifacts/contracts/mocks/MockCLFRouter.sol/MockCLFRouter.json"
+	);
 	const conceroNetwork = conceroNetworks[hre.network.name];
 	const { publicClient, walletClient } = getFallbackClients(conceroNetwork);
 
-	const conceroVerifier = await deployVerifier(hre, { clfRouter: clfRouterAddress });
+	const conceroVerifier = await deployVerifier(hre, { clfParams: { router: mockCLFRouter } });
 	const conceroRouter = await deployRouter(hre, { conceroVerifier: conceroVerifier.address });
 
 	await setVerifierPriceFeeds(conceroVerifier.address, walletClient);
 	await setRouterPriceFeeds(conceroRouter.address, walletClient);
+	await walletClient.writeContract({
+		address: mockCLFRouter,
+		abi: mockCLFRouterAbi,
+		functionName: "setConsumer",
+		args: [conceroVerifier.address],
+		account: walletClient.account,
+	});
 
 	return { conceroVerifier, conceroRouter };
 }

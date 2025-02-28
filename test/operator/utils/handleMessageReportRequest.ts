@@ -11,6 +11,7 @@ export async function handleMessageReportRequest(
 	testClient: ExtendedTestClient,
 	txHash: Hash,
 	mockCLFRouter: Address,
+	conceroVerifier: Address,
 ) {
 	const { abi: mockCLFRouterAbi } = await import(
 		"../../../artifacts/contracts/mocks/MockCLFRouter.sol/MockCLFRouter.json"
@@ -27,6 +28,7 @@ export async function handleMessageReportRequest(
 				abi: globalConfig.ABI.CONCERO_VERIFIER,
 				data: log.data,
 				topics: log.topics,
+				strict: true,
 			});
 
 			if (decoded.eventName === "MessageReportRequested") {
@@ -47,16 +49,18 @@ export async function handleMessageReportRequest(
 		throw new Error("RequestSent event not found");
 	}
 
+	const clfRequestId = requestSentLog.log.topics[1];
+
 	const messageResponseBytes = await getMessageCLFReportResponse({
 		requester: getEnvVar("OPERATOR_ADDRESS"),
-		requestId: requestSentLog.log.topics[1],
 		internalMessageConfig: messageReportLog.decoded.args.internalMessageConfig.toString(),
+		messageId: messageReportLog.decoded.args.messageId,
 		messageHashSum: messageReportLog.decoded.args.messageHashSum,
 		srcChainData: messageReportLog.decoded.args.srcChainData,
 		allowedOperators: [getEnvVar("OPERATOR_ADDRESS")],
 	});
 
-	const clfReportBytes = await getCLFReport(messageResponseBytes);
+	const clfReportBytes = getCLFReport(messageResponseBytes, clfRequestId, conceroVerifier);
 	const decoded = decodeAbiParameters(
 		[
 			{

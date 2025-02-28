@@ -21,7 +21,6 @@ export async function sendConceroMessage(
 		value: parseUnits("0.001", 18),
 	});
 
-	console.log(`Sent concero message with txHash ${txHash}`);
 	const txReceipt = await publicClient.getTransactionReceipt({ hash: txHash });
 
 	const foundMessageSentLog = txReceipt.logs.find(log => {
@@ -48,11 +47,19 @@ export async function sendConceroMessage(
 		topics: foundMessageSentLog.topics,
 	});
 
+	console.log("sent Concero message", {
+		txHash,
+		blockNumber: txReceipt.blockNumber,
+		internalMessageConfig: foundMessageSentLog.topics[1],
+		messageId: foundMessageSentLog.topics[2],
+		eventArgs: decodedEvent.args,
+	});
+
 	return {
 		txHash,
 		blockNumber: txReceipt.blockNumber,
-		messageId: foundMessageSentLog.topics[1],
-		internalMessageConfig: foundMessageSentLog.topics[2],
+		internalMessageConfig: foundMessageSentLog.topics[1],
+		messageId: foundMessageSentLog.topics[2],
 		dstChainData: decodedEvent.args.dstChainData,
 		message: decodedEvent.args.message,
 	};

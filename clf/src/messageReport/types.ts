@@ -28,6 +28,7 @@ interface MessageReportResult {
 	version: number; //                    │ Report Response Config
 	// 10 bytes reserved for future use    │ Packed as a uint256
 	requester: Address; //                ─╯
+	//
 	internalMessageConfig: string;
 	messageId: Hash;
 	messageHashSum: Hash;

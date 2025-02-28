@@ -1,8 +1,10 @@
 import { execSync } from "child_process";
 
-function getCLFReport(response: string) {
+function getCLFReport(response: string, requestId: string, client: string): string {
 	try {
-		const command = `make script "args=test/foundry/scripts/MockCLFReport/MessageReport.sol --sig 'getReport(bytes)' ${response} --json"`;
+		const subscriptionId = 0;
+		const command = `make script "args=test/foundry/scripts/MockCLFReport/BaseMockCLFReport.sol --sig 'createMockClfReport(bytes, bytes32, address, uint64)' ${response} ${requestId} ${client} ${subscriptionId} --json"`;
+
 		const reportBytes = execSync(command).toString();
 		const jsonStart = reportBytes.indexOf("{");
 		const jsonStr = reportBytes.slice(jsonStart);

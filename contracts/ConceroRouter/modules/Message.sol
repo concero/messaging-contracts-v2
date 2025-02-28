@@ -68,6 +68,8 @@ abstract contract Message is ClfSigner, IConceroRouter {
         //        s.router().isMessageSent[_messageId] = true;
 
         emit ConceroMessageSent(internalMessageConfig, _messageId, dstChainData, message);
+        console.logString("Sent concero message with id:");
+        console.logBytes32(_messageId);
         return _messageId;
     }
 

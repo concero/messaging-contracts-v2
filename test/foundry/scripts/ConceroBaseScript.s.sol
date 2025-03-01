@@ -62,7 +62,7 @@ abstract contract ConceroBaseScript is Script {
                 (uint256(0) << offsets.OFFSET_RELAYER_CONF) | // relayerConfig, assuming 0
                 (uint256(0) << offsets.OFFSET_CALLBACKABLE) // isCallbackable, assuming false
         );
-    address constant CONCERO_VERIFIER_ADDRESS = address(0x123);
+    address constant CONCERO_VERIFIER_ADDRESS = address(0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4);
     uint64 constant CONCERO_VERIFIER_SUB_ID = 0;
 
     constructor() {

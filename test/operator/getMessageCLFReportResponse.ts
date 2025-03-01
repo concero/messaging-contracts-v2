@@ -6,7 +6,7 @@ function getMessageCLFReportResponse({
 	internalMessageConfig,
 	messageId,
 	messageHashSum,
-	srcChainData,
+	dstChainData,
 	allowedOperators,
 }: {
 	requester: Address;
@@ -14,19 +14,26 @@ function getMessageCLFReportResponse({
 	internalMessageConfig: string;
 	messageId: Hash;
 	messageHashSum: string;
-	srcChainData: string;
-	allowedOperators: string[];
+	dstChainData: string;
+	allowedOperators: Address[];
 }) {
 	try {
-		const formattedAllowedOperators = allowedOperators.length
-			? `[${allowedOperators.map(op => `"${op}"`).join(",")}]`
+		const encodedOperators = allowedOperators.map(addr => {
+			// Remove 0x, pad to 64 chars (32 bytes), add 0x back
+			return `0x000000000000000000000000${addr.slice(2)}`;
+		});
+
+		const formattedAllowedOperators = encodedOperators.length
+			? `[${encodedOperators.join(",")}]`
 			: "[]";
 
 		const command = `make script "args=test/foundry/scripts/MockCLFReport/MessageReport.sol --sig 'getResponse(address,bytes32,bytes32,bytes32,bytes,bytes[])' ${
 			requester
-		} ${internalMessageConfig} ${messageId} ${messageHashSum} ${`"${srcChainData}"`} ${
+		} ${internalMessageConfig} ${messageId} ${messageHashSum} ${dstChainData} ${
 			formattedAllowedOperators
 		} --json"`;
+
+		console.log("Running command:", command);
 
 		const messageReportResponseBytes = execSync(command).toString();
 

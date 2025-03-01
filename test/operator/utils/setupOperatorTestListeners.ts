@@ -25,7 +25,13 @@ async function setupOperatorTestListeners({
 	});
 
 	config.eventEmitter.on("requestMessageReport", async ({ txHash }) => {
-		await handleMessageReportRequest(testClient, txHash, mockCLFRouter, conceroVerifier);
+		await handleMessageReportRequest(
+			testClient,
+			txHash,
+			mockCLFRouter,
+			conceroVerifier,
+			conceroClientExample,
+		);
 	});
 }
 

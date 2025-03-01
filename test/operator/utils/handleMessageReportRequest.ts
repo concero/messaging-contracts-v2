@@ -1,4 +1,4 @@
-import { Address, Hash, decodeAbiParameters, decodeEventLog } from "viem";
+import { Address, Hash, decodeAbiParameters, decodeEventLog, encodeAbiParameters } from "viem";
 
 import { globalConfig } from "@concero/v2-operators/src/constants";
 
@@ -7,11 +7,21 @@ import { ExtendedTestClient } from "../../../utils/getViemClients";
 import { getCLFReport } from "../getCLFReport";
 import { getMessageCLFReportResponse } from "../getMessageCLFReportResponse";
 
+export function createDstChainData(reciever: Address, gasLimit: bigint): string {
+	const dstChainData = encodeAbiParameters(
+		[{ type: "address" }, { type: "uint256" }],
+		[reciever, gasLimit],
+	);
+
+	return dstChainData;
+}
+
 export async function handleMessageReportRequest(
 	testClient: ExtendedTestClient,
 	txHash: Hash,
 	mockCLFRouter: Address,
 	conceroVerifier: Address,
+	conceroClientExample: Address,
 ) {
 	const { abi: mockCLFRouterAbi } = await import(
 		"../../../artifacts/contracts/mocks/MockCLFRouter.sol/MockCLFRouter.json"
@@ -41,22 +51,20 @@ export async function handleMessageReportRequest(
 		}
 	}
 
-	if (!messageReportLog) {
-		throw new Error("MessageReportRequested event not found");
-	}
+	if (!messageReportLog) throw new Error("MessageReportRequested event not found");
 
-	if (!requestSentLog) {
-		throw new Error("RequestSent event not found");
-	}
+	if (!requestSentLog) throw new Error("RequestSent event not found");
 
 	const clfRequestId = requestSentLog.log.topics[1];
+	const gasLimit = 100_000n;
 
 	const messageResponseBytes = await getMessageCLFReportResponse({
+		conceroClientExample,
 		requester: getEnvVar("OPERATOR_ADDRESS"),
 		internalMessageConfig: messageReportLog.decoded.args.internalMessageConfig.toString(),
 		messageId: messageReportLog.decoded.args.messageId,
 		messageHashSum: messageReportLog.decoded.args.messageHashSum,
-		srcChainData: messageReportLog.decoded.args.srcChainData,
+		dstChainData: createDstChainData(conceroClientExample, gasLimit),
 		allowedOperators: [getEnvVar("OPERATOR_ADDRESS")],
 	});
 

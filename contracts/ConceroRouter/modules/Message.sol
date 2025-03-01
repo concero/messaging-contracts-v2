@@ -5,7 +5,7 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-
+import {console} from "forge-std/src/console.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -26,7 +26,7 @@ import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, Concero
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
 
-import {console} from "hardhat/console.sol";
+import {console} from "forge-std/src/console.sol";
 
 library Errors {
     error UnsupportedFeeTokenType();
@@ -89,6 +89,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
             clfReport.onchainMetadata[0],
             (Types.ClfReportOnchainMetadata)
         );
+
         _verifyClfReportOnChainMetadata(onchainMetadata);
 
         CommonTypes.MessageReportResult memory decodedMessageReportResult = DecoderLib
@@ -105,16 +106,19 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         bool isAllowedOperator = false;
+
         for (uint256 i = 0; i < decodedMessageReportResult.allowedOperators.length; i++) {
             address allowedOperator = abi.decode(
                 decodedMessageReportResult.allowedOperators[i],
                 (address)
             );
+
             if (allowedOperator == msg.sender) {
                 isAllowedOperator = true;
                 break;
             }
         }
+
         require(isAllowedOperator, Errors.UnauthorizedOperator());
 
         emit ConceroMessageReceived(decodedMessageReportResult.messageId);

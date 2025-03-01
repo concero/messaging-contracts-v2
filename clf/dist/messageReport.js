@@ -7658,6 +7658,7 @@ var ErrorType;
   ErrorType2[ErrorType2["CONFIG_INVALID_SRC_CHAIN_SELECTOR"] = 14] = "CONFIG_INVALID_SRC_CHAIN_SELECTOR";
   ErrorType2[ErrorType2["CONFIG_INVALID_DST_CHAIN_SELECTOR"] = 15] = "CONFIG_INVALID_DST_CHAIN_SELECTOR";
   ErrorType2[ErrorType2["INVALID_MESSAGE_CONFIG"] = 16] = "INVALID_MESSAGE_CONFIG";
+  ErrorType2[ErrorType2["CONFIG_SAME_CHAINS"] = 17] = "CONFIG_SAME_CHAINS";
   ErrorType2[ErrorType2["NO_CHAIN_DATA"] = 20] = "NO_CHAIN_DATA";
   ErrorType2[ErrorType2["NO_RPC_DATA"] = 21] = "NO_RPC_DATA";
   ErrorType2[ErrorType2["NO_RPC_PROVIDERS"] = 22] = "NO_RPC_PROVIDERS";
@@ -14270,9 +14271,23 @@ var CONFIG = {
 };
 
 // ../common/config.ts
+function isDevelopment() {
+  try {
+    return secrets?.CONCERO_CLF_DEVELOPMENT === "true";
+  } catch {
+    return false;
+  }
+}
+function getLocalhostRpcUrl() {
+  try {
+    return secrets?.LOCALHOST_RPC_URL;
+  } catch {
+    return;
+  }
+}
 var config = {
-  isDevelopment: process?.env?.CONCERO_CLF_DEVELOPMENT === "true",
-  localhostRpcUrl: process?.env?.LOCALHOST_RPC_URL
+  isDevelopment: isDevelopment(),
+  localhostRpcUrl: getLocalhostRpcUrl()
 };
 
 // ../common/developmentRpcs.ts
@@ -14281,8 +14296,15 @@ var developmentRpcs = {
     rpcs: [
       {
         chainId: "1",
-        url: config.localhostRpcUrl,
-        responseTime: 160
+        url: config.localhostRpcUrl
+      }
+    ]
+  },
+  "2": {
+    rpcs: [
+      {
+        chainId: "2",
+        url: config.localhostRpcUrl
       }
     ]
   }
@@ -14632,10 +14654,29 @@ var mainnet = /* @__PURE__ */ defineChain({
   }
 });
 // constants/viemChains.ts
-var viemChains = {
+var localhostChain = defineChain({
+  id: 1,
+  name: "localhost",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Ether",
+    symbol: "ETH"
+  },
+  rpcUrls: {
+    default: {
+      http: config.localhostRpcUrl
+    }
+  }
+});
+var localhostChains = {
+  1: localhostChain,
+  2: localhostChain
+};
+var mainnetChains = {
   1: mainnet,
   8453: base
 };
+var viemChains = config.isDevelopment ? localhostChains : mainnetChains;
 
 // constants/internalMessageConfig.ts
 var INTERNAL_MESSAGE_CONFIG_OFFSETS = {
@@ -14685,6 +14726,8 @@ function validateInternalMessageConfig(config2) {
     handleError(14 /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
   if (!viemChains[Number(config2.dstChainSelector)])
     handleError(15 /* CONFIG_INVALID_DST_CHAIN_SELECTOR */);
+  if (config2.srcChainSelector === config2.dstChainSelector)
+    handleError(17 /* CONFIG_SAME_CHAINS */);
 }
 
 // utils/validateInputs.ts
@@ -14700,11 +14743,11 @@ function decodeSrcChainData(srcChainSelector, srcChainData) {
     }
   ], srcChainDataBytes)[0];
 }
-function decodeInputs(bytesArgs) {
-  if (bytesArgs.length < 6) {
+function decodeInputs(bytesArgs2) {
+  if (bytesArgs2.length < 6) {
     handleError(1 /* INVALID_BYTES_ARGS_LENGTH */);
   }
-  const [_unusedHash, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
+  const [, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs2;
   const decodedInternalMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
   validateInternalMessageConfig(decodedInternalMessageConfig);
   const decodedArgs = {
@@ -14773,12 +14816,11 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
 }
 
 // index.ts
-async function main(bytesArgs) {
+(async function main() {
   try {
     const args = decodeInputs(bytesArgs);
     validateDecodedArgs(args);
     const msgConfig = args.internalMessageConfig;
-    const { srcChainSelector } = msgConfig;
     const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
     const log = await fetchConceroMessage(publicClient, conceroRouters[Number(msgConfig.srcChainSelector)], args.messageId, BigInt(args.srcChainData.blockNumber));
     const {
@@ -14812,7 +14854,4 @@ async function main(bytesArgs) {
       handleError(0 /* UNKNOWN_ERROR */);
     }
   }
-}
-export {
-  main
-};
+})();

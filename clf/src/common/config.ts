@@ -1,4 +1,22 @@
+import { isDevelopment } from "./isDevelopment";
+
+function isDevelopment() {
+    try {
+        return secrets?.CONCERO_CLF_DEVELOPMENT === "true";
+    } catch {
+        return false;
+    }
+}
+
+function getLocalhostRpcUrl() {
+    try {
+        return secrets?.LOCALHOST_RPC_URL;
+    } catch {
+        return undefined;
+    }
+}
+
 export const config = {
-    isDevelopment: process?.env?.CONCERO_CLF_DEVELOPMENT === "true",
-    localhostRpcUrl: process?.env?.LOCALHOST_RPC_URL,
+    isDevelopment: isDevelopment(),
+    localhostRpcUrl: getLocalhostRpcUrl(),
 };

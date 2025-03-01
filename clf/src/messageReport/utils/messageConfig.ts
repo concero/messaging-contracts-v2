@@ -26,6 +26,7 @@ function validateInternalMessageConfig(config: InternalMessageConfig) {
     if (config.minDstConfirmations === 0n) handleError(ErrorType.CONFIG_INVALID_MIN_DST_CONFIRMATIONS);
     if (!viemChains[Number(config.srcChainSelector)]) handleError(ErrorType.CONFIG_INVALID_SRC_CHAIN_SELECTOR);
     if (!viemChains[Number(config.dstChainSelector)]) handleError(ErrorType.CONFIG_INVALID_DST_CHAIN_SELECTOR);
+    if (config.srcChainSelector === config.dstChainSelector) handleError(ErrorType.CONFIG_SAME_CHAINS);
 }
 
 export { decodeInternalMessageConfig, validateInternalMessageConfig };

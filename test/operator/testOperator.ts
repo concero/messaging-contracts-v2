@@ -24,7 +24,7 @@ async function operator() {
 }
 
 async function testOperator() {
-    await compileContracts({ quiet: true });
+    compileContracts({ quiet: true });
 
     const mockCLFRouter = await deployMockRouter();
     const { conceroRouter } = await deployContracts(mockCLFRouter.address);
@@ -36,7 +36,6 @@ async function testOperator() {
     await operator();
 }
 
-///
 async function deployMockRouter() {
     const hre = require("hardhat");
     const mockCLFRouter = await deployMockCLFRouter(hre);
@@ -52,5 +51,3 @@ async function deployClient(conceroRouterAddress: string) {
 }
 
 testOperator();
-
-// export { testOperator };

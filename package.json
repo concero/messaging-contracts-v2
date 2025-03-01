@@ -9,7 +9,7 @@
         "chain": "hardhat node --network hardhat --no-deploy",
         "fork": "ETHEREUM_FORKING_ENABLED=true hardhat node --network hardhat --no-deploy",
         "compile": "hardhat compile",
-        "test": "REPORT_GAS=true hardhat test --network hardhat",
+        "test": "REPORT_GAS=true hardhat test --network localhost",
         "format": "npm run format:ts && npm run format:sol",
         "lint": "npm run lint:ts && npm run lint:sol",
         "lint:ts": "eslint --config .eslint.config.mjs",

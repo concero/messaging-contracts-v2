@@ -6,7 +6,14 @@ export const developmentRpcs: Record<string, any> = {
             {
                 chainId: "1",
                 url: config.localhostRpcUrl,
-                responseTime: 160,
+            },
+        ],
+    },
+    "2": {
+        rpcs: [
+            {
+                chainId: "2",
+                url: config.localhostRpcUrl,
             },
         ],
     },

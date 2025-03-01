@@ -13,13 +13,12 @@ import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
 import { MessageReportResult } from "./types";
 
-export async function main(bytesArgs: string[]) {
+(async function main() {
     try {
         const args = decodeInputs(bytesArgs);
         validateDecodedArgs(args);
         const msgConfig = args.internalMessageConfig;
 
-        const { srcChainSelector } = msgConfig;
         const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
 
         const log = await fetchConceroMessage(
@@ -36,6 +35,7 @@ export async function main(bytesArgs: string[]) {
             message: messageFromLog,
         } = decodeConceroMessageLog(log);
 
+        // @dev TODO: lets remove this check cuz we check it in verifyMessageHash
         if (messageIdFromLog !== args.messageId) {
             handleError(ErrorType.INVALID_MESSAGE_ID);
         }
@@ -71,4 +71,4 @@ export async function main(bytesArgs: string[]) {
             handleError(ErrorType.UNKNOWN_ERROR);
         }
     }
-}
+})();

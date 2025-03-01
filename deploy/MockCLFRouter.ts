@@ -1,12 +1,12 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getGasParameters, log } from "../utils";
+import { log } from "../utils";
 /**
  * @notice Deploys the MockCLFRouter contract using Hardhat Deploy.
  * @param hre The Hardhat runtime environment.
  * @return The deployment object for the MockCLFRouter contract.
  */
-async function deployMockCLFRouter(hre: HardhatRuntimeEnvironment): Promise<Deployment> {
+async function deployMockCLFRouter(hre: HardhatRuntimeEnvironment = require("hardhat")): Promise<Deployment> {
     const { deployer } = await hre.getNamedAccounts();
     const { deploy } = hre.deployments;
 

@@ -3,7 +3,6 @@ import { DecodedArgs } from "../types";
 import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 import { decodeInternalMessageConfig, validateInternalMessageConfig } from "./messageConfig";
-import { Hash } from "viem";
 import { hexToBytes } from "viem";
 
 type EvmSrcChainData = {
@@ -28,12 +27,12 @@ function decodeSrcChainData(srcChainSelector: bigint, srcChainData: string): Evm
     )[0];
 }
 
-function decodeInputs(bytesArgs: string[]): DecodedArgs {
+export function decodeInputs(bytesArgs: string[]): DecodedArgs {
     if (bytesArgs.length < 6) {
         handleError(ErrorType.INVALID_BYTES_ARGS_LENGTH);
     }
 
-    const [_unusedHash, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
+    const [, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
 
     const decodedInternalMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
     validateInternalMessageConfig(decodedInternalMessageConfig);
@@ -80,5 +79,3 @@ function validateMessageFields(args: DecodedArgs): void {
         handleError(ErrorType.INVALID_CHAIN_DATA);
     }
 }
-
-export { decodeInputs, validateInputs, validateDecodedArgs };

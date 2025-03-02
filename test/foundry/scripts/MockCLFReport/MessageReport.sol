@@ -6,28 +6,28 @@ import {ReportConfigBitOffsets} from "contracts/common/CommonConstants.sol";
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
 contract MessageReport is BaseMockCLFReport {
-    function getReport() public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+    function getReport() public view returns (RouterTypes.ClfDonReportSubmission memory) {
         return getReport(getResponse(), bytes32("requestId"));
     }
 
     function getReport(
         bytes32 clfRequestId
-    ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+    ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
         return getReport(getResponse(), clfRequestId);
     }
 
     function getReport(
         bytes memory expectedResponse,
         bytes32 clfRequestId
-    ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+    ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
         return createMockClfReport(expectedResponse, clfRequestId);
     }
 
-    function getResponse() public pure returns (bytes memory) {
+    function getResponse() public view returns (bytes memory) {
         return
             getResponse(
                 address(operator),
-                INTERNAL_MESSAGE_CONFIG,
+                i_internalMessageConfig,
                 bytes32("messageId"),
                 bytes32("messageHashSum"),
                 "dstChain",
@@ -42,7 +42,7 @@ contract MessageReport is BaseMockCLFReport {
         bytes32 messageHashSum,
         bytes memory dstChainData,
         bytes[] memory allowedOperators
-    ) public pure returns (bytes memory) {
+    ) public view returns (bytes memory) {
         bytes32 reportConfig = bytes32(
             (uint256(uint8(CommonTypes.CLFReportType.Message)) <<
                 ReportConfigBitOffsets.OFFSET_REPORT_TYPE) |

@@ -59,7 +59,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         );
 
         bytes32 internalMessageConfig = MessageLib.buildInternalMessageConfig(
-            CLIENT_MESSAGE_CONFIG,
+            i_clientMessageConfig,
             SRC_CHAIN_SELECTOR
         );
 
@@ -204,7 +204,7 @@ contract SubmitMessageReport is ConceroRouterTest {
     //         reportType: VerifierTypes.CLFReportType.Message,
     //         operator: operator,
     //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
-    //             CLIENT_MESSAGE_CONFIG,
+    //             i_clientMessageConfig,
     //             SRC_CHAIN_SELECTOR
     //         ),
     //         messageId: TEST_MESSAGE_ID,
@@ -234,7 +234,7 @@ contract SubmitMessageReport is ConceroRouterTest {
     //         reportType: CommonTypes.CLFReportType.Message,
     //         operator: operator,
     //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
-    //             CLIENT_MESSAGE_CONFIG,
+    //             i_clientMessageConfig,
     //             SRC_CHAIN_SELECTOR
     //         ),
     //         messageId: TEST_MESSAGE_ID,

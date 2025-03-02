@@ -33,7 +33,7 @@ contract DeployConceroRouter is ConceroRouterBase {
     function deploy() public returns (address) {
         address implementation = _deployImplementation(
             CONCERO_VERIFIER_ADDRESS,
-            CONCERO_VERIFIER_SUB_ID,
+            i_conceroVerifierSubscriptionId,
             [
                 MOCK_DON_SIGNER_ADDRESS_0,
                 MOCK_DON_SIGNER_ADDRESS_1,

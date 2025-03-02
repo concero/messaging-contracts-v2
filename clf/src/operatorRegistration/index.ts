@@ -1,11 +1,11 @@
 import { ChainType, ReportType } from "../common/enums";
 import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
+import { packReportConfig } from "../common/packReportConfig";
 import { CONFIG } from "./constants/config";
 import { OperatorRegistrationResult } from "./types";
 import { packResult } from "./utils/packResult";
 import { decodeInputs, validateDecodedArgs } from "./utils/validateInputs";
-import { verifyOperatorStake } from "./utils/verifyOperatorStake";
 
 export async function main(bytesArgs: string[]) {
 	try {
@@ -30,7 +30,12 @@ export async function main(bytesArgs: string[]) {
 			operatorAddresses: args.operatorAddresses,
 		};
 
-		return packResult(registrationReportResult);
+		const reportConfig = packReportConfig(
+			ReportType.OPERATOR_REGISTRATION,
+			CONFIG.REPORT_VERSION,
+			args.operatorAddresses,
+		);
+		return packResult(registrationReportResult, reportConfig);
 	} catch (error) {
 		if (error instanceof CustomErrorHandler) {
 			throw error;

@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
-import { getEnvVar } from "../../utils";
 import type { Address } from "viem";
+
+import { getEnvVar } from "../../utils";
 
 function getCLFReport(response: string, requestId: string, client: Address): string {
 	try {

@@ -3,21 +3,27 @@
     "printWidth": 120,
     "tabWidth": 4,
     "trailingComma": "all",
-    "plugins": ["prettier-plugin-solidity"],
+    "plugins": ["prettier-plugin-solidity", "@trivago/prettier-plugin-sort-imports"],
     "overrides": [
         {
-            "files": "*.sol",
+            "files": "*.ts",
             "options": {
-                "parser": "solidity-parse",
+                "parser": "typescript",
+                "arrowParens": "avoid",
                 "printWidth": 100,
                 "tabWidth": 4,
-                "useTabs": false,
+                "trailingComma": "all",
                 "singleQuote": false,
-                "bracketSpacing": false
+                "bracketSpacing": true,
+                "semi": true,
+                "useTabs": true,
+                "importOrderSeparation": true,
+                "importOrderSortSpecifiers": true,
+                "importOrder": ["./utils/configureOperatorEnv", "^@concero/(.*)$", "^contracts/(.*)$", "^utils/(.*)$", "^[./]"]
             }
         },
         {
-            "files": "I*.sol",
+            "files": "*.sol",
             "options": {
                 "parser": "solidity-parse",
                 "printWidth": 100,
@@ -34,24 +40,10 @@
                 "printWidth": 120,
                 "tabWidth": 1,
                 "trailingComma": "all",
-                "singleQuote": true,
-                "bracketSpacing": false,
+                "singleQuote": false,
+                "bracketSpacing": true,
                 "semi": true,
-                "useTabs": true,
-                "overrides": [
-                    {
-                        "files": "*.sol",
-                        "options": {
-                            "printWidth": 120,
-                            "tabWidth": 4,
-                            "useTabs": true,
-                            "singleQuote": true,
-                            "semi": true,
-                            "bracketSpacing": true,
-                            "explicitTypes": "always"
-                        }
-                    }
-                ]
+                "useTabs": true
             }
         }
     ]

@@ -1,0 +1,20 @@
+[profile.default]
+solc = "0.8.28"
+optimizer = true
+optimizer_runs = 200
+src = "contracts"
+out = "foundry-artifacts"
+cache_path = "cache/foundry"
+test = "test/foundry"
+via_ir = false
+
+libs = ["node_modules", "./contracts/"]
+allow_paths = ["node_modules", "./contracts/"]
+
+remappings = [
+    "@chainlink/=node_modules/@chainlink/",
+    "@uniswap/=node_modules/@uniswap/",
+    "sushiswap-v3-periphery/contracts/=node_modules/sushiswap-v3-periphery/contracts/",
+    "forge-std/=node_modules/forge-std/",
+    "contracts/=contracts/",
+]

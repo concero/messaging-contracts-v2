@@ -260,23 +260,9 @@ var init_abiItem = __esm(() => {
 });
 
 // ../../../node_modules/abitype/dist/esm/human-readable/errors/abiParameter.js
-var InvalidAbiParametersError, InvalidParameterError, SolidityProtectedKeywordError, InvalidModifierError, InvalidFunctionModifierError, InvalidAbiTypeParameterError;
+var InvalidParameterError, SolidityProtectedKeywordError, InvalidModifierError, InvalidFunctionModifierError, InvalidAbiTypeParameterError;
 var init_abiParameter = __esm(() => {
   init_errors();
-  InvalidAbiParametersError = class InvalidAbiParametersError extends BaseError {
-    constructor({ params }) {
-      super("Failed to parse ABI parameters.", {
-        details: `parseAbiParameters(${JSON.stringify(params, null, 2)})`,
-        docsPath: "/api/human#parseabiparameters-1"
-      });
-      Object.defineProperty(this, "name", {
-        enumerable: true,
-        configurable: true,
-        writable: true,
-        value: "InvalidAbiParametersError"
-      });
-    }
-  };
   InvalidParameterError = class InvalidParameterError extends BaseError {
     constructor({ param }) {
       super("Invalid ABI parameter.", {
@@ -847,47 +833,11 @@ var init_parseAbiItem = __esm(() => {
   init_utils();
 });
 
-// ../../../node_modules/abitype/dist/esm/human-readable/parseAbiParameters.js
-function parseAbiParameters(params) {
-  const abiParameters = [];
-  if (typeof params === "string") {
-    const parameters = splitParameters(params);
-    const length = parameters.length;
-    for (let i = 0;i < length; i++) {
-      abiParameters.push(parseAbiParameter(parameters[i], { modifiers }));
-    }
-  } else {
-    const structs = parseStructs(params);
-    const length = params.length;
-    for (let i = 0;i < length; i++) {
-      const signature = params[i];
-      if (isStructSignature(signature))
-        continue;
-      const parameters = splitParameters(signature);
-      const length2 = parameters.length;
-      for (let k = 0;k < length2; k++) {
-        abiParameters.push(parseAbiParameter(parameters[k], { modifiers, structs }));
-      }
-    }
-  }
-  if (abiParameters.length === 0)
-    throw new InvalidAbiParametersError({ params });
-  return abiParameters;
-}
-var init_parseAbiParameters = __esm(() => {
-  init_abiParameter();
-  init_signatures();
-  init_structs();
-  init_utils();
-  init_utils();
-});
-
 // ../../../node_modules/abitype/dist/esm/exports/index.js
 var init_exports = __esm(() => {
   init_formatAbiItem();
   init_parseAbi();
   init_parseAbiItem();
-  init_parseAbiParameters();
 });
 
 // ../../../node_modules/viem/_esm/utils/abi/formatAbiItem.js
@@ -7819,9 +7769,6 @@ function packResult(result) {
   return res;
 }
 
-// ../../../node_modules/viem/_esm/index.js
-init_exports();
-
 // ../../../node_modules/viem/_esm/utils/getAction.js
 function getAction(client, actionFn, name) {
   const action_implicit = client[actionFn.name];
@@ -14274,7 +14221,6 @@ function createPublicClient(parameters) {
 }
 // ../../../node_modules/viem/_esm/index.js
 init_decodeAbiParameters();
-init_encodeAbiParameters();
 init_toBytes();
 init_isAddress();
 init_keccak256();
@@ -14551,10 +14497,10 @@ var developmentRpcs = {
       }
     ]
   },
-  "2": {
+  "10": {
     rpcs: [
       {
-        chainId: "2",
+        chainId: "10",
         url: config.localhostRpcUrl
       }
     ]
@@ -14772,7 +14718,7 @@ var localhostChain = defineChain({
 });
 var localhostChains = {
   1: localhostChain,
-  2: localhostChain
+  10: localhostChain
 };
 var mainnetChains = {
   1: mainnet,
@@ -14838,7 +14784,7 @@ var NonIndexedConceroMessageParams = [
 // constants/conceroRouters.ts
 var CONCERO_VERIFIER_CONTRACT_ADDRESS = "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
 var conceroRouters = {
-  "1": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6"
+  "1": "0xaF8C1270cfECeAf68733F99Aca9B10B29B1E63aA"
 };
 
 // utils/getAllowedOperators.ts
@@ -14891,24 +14837,23 @@ var CONFIG = {
 };
 
 // utils/verifyMessageHash.ts
-function verifyMessageHash(messageId, messageConfig, dstChainData, message, expectedHashSum) {
-  const messageBytes = encodeAbiParameters([{ name: "messageId", type: "bytes32" }, ...parseAbiParameters(ClientMessageRequestBase)], [messageId, messageConfig, dstChainData, keccak256(message)]);
-  const recomputedMessageHashSum = keccak256(messageBytes);
-  if (recomputedMessageHashSum !== expectedHashSum) {
+function verifyMessageHash(message, expectedHashSum) {
+  console.log(keccak256(message).toLowerCase());
+  console.log(expectedHashSum.toLowerCase());
+  if (keccak256(message).toLowerCase() !== expectedHashSum.toLowerCase()) {
     handleError(31 /* INVALID_HASHSUM */);
   }
-  return recomputedMessageHashSum;
 }
 
 // constants/internalMessageConfig.ts
 var INTERNAL_MESSAGE_CONFIG_OFFSETS = {
-  VERSION: 248,
+  VERSION: 224,
   SRC_CHAIN: 224,
-  DST_CHAIN: 192,
-  MIN_SRC_CONF: 176,
-  MIN_DST_CONF: 160,
-  RELAYER: 152,
-  CALLBACKABLE: 151
+  DST_CHAIN: 168,
+  MIN_SRC_CONF: 152,
+  MIN_DST_CONF: 136,
+  RELAYER: 128,
+  CALLBACKABLE: 127
 };
 
 // ../common/bitMasks.ts
@@ -15028,7 +14973,7 @@ function decodeConceroMessageLog(log) {
 async function fetchConceroMessage(client, routerAddress, messageId, blockNumber) {
   const logs = await client.getLogs({
     address: routerAddress,
-    topics: [null, messageId],
+    topics: [null, null, messageId],
     fromBlock: blockNumber - 10n,
     toBlock: blockNumber
   });
@@ -15050,7 +14995,7 @@ return async function main() {
       dstChainData: dstChainDataFromLog,
       message: messageFromLog
     } = decodeConceroMessageLog(log);
-    verifyMessageHash(args.messageId, messageConfigFromLog.toString(), dstChainDataFromLog, messageFromLog, args.messageHashSum);
+    verifyMessageHash(messageFromLog, args.messageHashSum);
     const operators = await getAllowedOperators(publicClient, 0 /* EVM */, args.messageId);
     const allowedOperators = pick(operators, 3);
     const messageReportResult = {

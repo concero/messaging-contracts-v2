@@ -61,6 +61,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
             dstChainData,
             message,
             i_chainSelector,
+            // @dev TODO: we can use ++s.router().nonce
             s.router().nonce
         );
 

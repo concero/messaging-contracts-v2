@@ -44,6 +44,6 @@ export class ConceroMessageConfig {
     }
 
     get hexConfig(): HexString {
-        return `0x${this.config.toString(16).padStart(32, "0")}` as HexString;
+        return `0x${this.config.toString(16).padStart(64, "0")}` as HexString;
     }
 }

@@ -19,7 +19,7 @@ const localhostChain = defineChain({
 
 const localhostChains: Record<number, Chain> = {
     1: localhostChain,
-    2: localhostChain,
+    10: localhostChain,
 };
 
 const mainnetChains: Record<number, Chain> = {

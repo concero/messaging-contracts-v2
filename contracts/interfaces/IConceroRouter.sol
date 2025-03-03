@@ -7,6 +7,7 @@
 pragma solidity 0.8.28;
 
 event ConceroMessageSent(
+    // @dev TODO: check if it needed
     bytes32 indexed internalMessageConfig,
     bytes32 indexed messageId,
     bytes dstChainData,

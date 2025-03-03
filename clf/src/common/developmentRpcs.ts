@@ -9,10 +9,10 @@ export const developmentRpcs: Record<string, any> = {
             },
         ],
     },
-    "2": {
+    "10": {
         rpcs: [
             {
-                chainId: "2",
+                chainId: "10",
                 url: config.localhostRpcUrl,
             },
         ],

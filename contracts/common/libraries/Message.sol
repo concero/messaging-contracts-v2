@@ -55,7 +55,6 @@ library Message {
     }
 
     function validateClientMessageConfig(bytes32 clientConfig, uint24 chainSelector) internal pure {
-
         uint256 configValue = uint256(clientConfig);
 
         uint24 dstChainSelector = uint24(configValue >> offsets.OFFSET_DST_CHAIN);
@@ -63,7 +62,9 @@ library Message {
         uint16 minDstConfirmations = uint16(configValue >> offsets.OFFSET_MIN_DST_CONF);
         // uint8 additionalRelayers = uint8(configValue >> offsets.OFFSET_RELAYER_CONF);
         // bool isCallbackable = (configValue >> offsets.OFFSET_CALLBACKABLE & 1) != 0;
-        CommonTypes.FeeToken feeToken = CommonTypes.FeeToken(uint8(configValue >> offsets.OFFSET_FEE_TOKEN));
+        CommonTypes.FeeToken feeToken = CommonTypes.FeeToken(
+            uint8(configValue >> offsets.OFFSET_FEE_TOKEN)
+        );
 
         require(
             feeToken == CommonTypes.FeeToken.native,
@@ -122,12 +123,13 @@ library Message {
         bytes32 clientMessageConfig,
         uint24 srcChainSelector
     ) internal pure returns (bytes32) {
-        return bytes32(
+        return
+            bytes32(
                 uint256(clientMessageConfig) |
-                (uint256(CommonConstants.MESSAGE_VERSION) << offsets.OFFSET_VERSION) |
-                (uint256(srcChainSelector) << offsets.OFFSET_SRC_CHAIN)
+                    (uint256(CommonConstants.MESSAGE_VERSION) << offsets.OFFSET_VERSION) |
+                    (uint256(srcChainSelector) << offsets.OFFSET_SRC_CHAIN)
             );
-        }
+    }
 
     function buildInternalMessage(
         bytes32 clientMessageConfig,

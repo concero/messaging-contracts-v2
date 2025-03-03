@@ -33,13 +33,7 @@ return (async function main() {
             message: messageFromLog,
         } = decodeConceroMessageLog(log);
 
-        verifyMessageHash(
-            args.messageId,
-            messageConfigFromLog.toString(),
-            dstChainDataFromLog,
-            messageFromLog,
-            args.messageHashSum,
-        );
+        verifyMessageHash(messageFromLog, args.messageHashSum);
 
         const operators = await getAllowedOperators(publicClient, ChainType.EVM, args.messageId);
         const allowedOperators = pick(operators, 3);

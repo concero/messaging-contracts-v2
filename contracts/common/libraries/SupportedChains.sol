@@ -53,7 +53,9 @@ library SupportedChains {
         return false;
     }
 
-    function getSupportedChainSelectors(uint24 chainSelector) internal pure returns (uint24[] memory) {
+    function getSupportedChainSelectors(
+        uint24 chainSelector
+    ) internal pure returns (uint24[] memory) {
         uint24[] memory chainSelectors = new uint24[](6);
 
         if (isMainnet(chainSelector)) {
@@ -76,7 +78,13 @@ library SupportedChains {
     }
 
     function isMainnet(uint24 chainSelector) internal pure returns (bool) {
-        return chainSelector == CHAIN_SELECTOR_ETHEREUM || chainSelector == CHAIN_SELECTOR_OPTIMISM || chainSelector == CHAIN_SELECTOR_POLYGON || chainSelector == CHAIN_SELECTOR_BASE || chainSelector == CHAIN_SELECTOR_ARBITRUM || chainSelector == CHAIN_SELECTOR_AVALANCHE;
+        return
+            chainSelector == CHAIN_SELECTOR_ETHEREUM ||
+            chainSelector == CHAIN_SELECTOR_OPTIMISM ||
+            chainSelector == CHAIN_SELECTOR_POLYGON ||
+            chainSelector == CHAIN_SELECTOR_BASE ||
+            chainSelector == CHAIN_SELECTOR_ARBITRUM ||
+            chainSelector == CHAIN_SELECTOR_AVALANCHE;
     }
 
     function isChainSupported(uint24 chainSelector) internal pure returns (bool) {

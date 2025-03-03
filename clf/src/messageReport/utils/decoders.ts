@@ -3,21 +3,22 @@ import { decodeAbiParameters } from "viem";
 import { NonIndexedConceroMessageParams, EvmSrcChainDataParams } from "../constants/abis";
 import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
+import { HexString } from "ethers/lib.commonjs/utils/data";
 
 type Log = {
     topics: string[];
     data: string;
 };
 
-function decodeConceroMessageLog(log: Log): {
-    messageId: string;
-    internalMessageConfig: BigInt;
-    dstChainData: string;
-    message: string;
+export function decodeConceroMessageLog(log: Log): {
+    messageId: HexString;
+    internalMessageConfig: HexString;
+    dstChainData: HexString;
+    message: HexString;
 } {
     try {
         const messageId = log.topics[1];
-        const internalMessageConfig = BigInt(log.topics[2]);
+        const internalMessageConfig = log.topics[2];
         const [dstChainData, message] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
 
         return {
@@ -31,7 +32,7 @@ function decodeConceroMessageLog(log: Log): {
     }
 }
 
-function decodeEvmSrcChainData(encodedData: string): EvmSrcChainData {
+export function decodeEvmSrcChainData(encodedData: string): EvmSrcChainData {
     if (!encodedData || typeof encodedData !== "string") {
         handleError(ErrorType.INVALID_DATA);
     }
@@ -47,5 +48,3 @@ function decodeEvmSrcChainData(encodedData: string): EvmSrcChainData {
         handleError(ErrorType.INVALID_DATA);
     }
 }
-
-export { decodeEvmSrcChainData, decodeConceroMessageLog };

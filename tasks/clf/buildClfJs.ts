@@ -1,7 +1,11 @@
 import { execSync } from "child_process";
 import { task } from "hardhat/config";
+import { getEnvVar } from "../../utils";
+import { networkEnvKeys } from "../../constants";
 
 export function buildClfJs() {
+    const hre = require("hardhat");
+
     try {
         const dirs = execSync("ls -d */", { cwd: "clf/src" }).toString();
         const dirsArray = dirs
@@ -15,8 +19,15 @@ export function buildClfJs() {
 
             if (!dirLs.toString().includes("index.ts")) return;
 
-            execSync(`bun build index.ts --outfile=../../dist/${dir}.js`, { cwd: `clf/src/${dir}` });
-            execSync(`bun build index.ts --minify --outfile=../../dist/${dir}.min.js`, { cwd: `clf/src/${dir}` });
+            const networkName = hre.network.name;
+            const conceroVerifier = getEnvVar(`CONCERO_VERIFIER_${networkEnvKeys[networkName]}`);
+            const conceroRouter = getEnvVar(`CONCERO_ROUTER_${networkEnvKeys[networkName]}`);
+            const cmdBase = `bun build index.ts --define CONCERO_VERIFIER='"${conceroVerifier}"' --define CONCERO_ROUTER='"${conceroRouter}"' `;
+
+            execSync(cmdBase + `--outfile=../../dist/${dir}.js`, {
+                cwd: `clf/src/${dir}`,
+            });
+            execSync(cmdBase + `--minify --outfile=../../dist/${dir}.min.js`, { cwd: `clf/src/${dir}` });
         });
     } catch (e) {
         console.error(e?.toString());

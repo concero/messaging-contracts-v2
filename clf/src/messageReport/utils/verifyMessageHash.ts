@@ -1,25 +1,19 @@
-import { encodeAbiParameters, keccak256 } from "viem";
-import { ClientMessageRequest } from "../constants/abis";
+import { encodeAbiParameters, keccak256, parseAbiParameters } from "viem";
 import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
+import { HexString } from "ethers/lib.commonjs/utils/data";
+import { ClientMessageRequestBase } from "../constants/abis";
 
 export function verifyMessageHash(
-    messageId: string,
-    messageConfig: string,
-    dstChainData: string,
-    message: string,
-    expectedHashSum: string,
+    messageId: HexString,
+    messageConfig: HexString,
+    dstChainData: HexString,
+    message: HexString,
+    expectedHashSum: HexString,
 ) {
     const messageBytes = encodeAbiParameters(
-        ["bytes32", ClientMessageRequest],
-        [
-            messageId,
-            {
-                messageConfig: BigInt(messageConfig),
-                dstChainData,
-                message: keccak256(message),
-            },
-        ],
+        [{ name: "messageId", type: "bytes32" }, ...parseAbiParameters(ClientMessageRequestBase)],
+        [messageId, messageConfig, dstChainData, keccak256(message)],
     );
 
     const recomputedMessageHashSum = keccak256(messageBytes);

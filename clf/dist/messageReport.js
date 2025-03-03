@@ -260,9 +260,23 @@ var init_abiItem = __esm(() => {
 });
 
 // ../../../node_modules/abitype/dist/esm/human-readable/errors/abiParameter.js
-var InvalidParameterError, SolidityProtectedKeywordError, InvalidModifierError, InvalidFunctionModifierError, InvalidAbiTypeParameterError;
+var InvalidAbiParametersError, InvalidParameterError, SolidityProtectedKeywordError, InvalidModifierError, InvalidFunctionModifierError, InvalidAbiTypeParameterError;
 var init_abiParameter = __esm(() => {
   init_errors();
+  InvalidAbiParametersError = class InvalidAbiParametersError extends BaseError {
+    constructor({ params }) {
+      super("Failed to parse ABI parameters.", {
+        details: `parseAbiParameters(${JSON.stringify(params, null, 2)})`,
+        docsPath: "/api/human#parseabiparameters-1"
+      });
+      Object.defineProperty(this, "name", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: "InvalidAbiParametersError"
+      });
+    }
+  };
   InvalidParameterError = class InvalidParameterError extends BaseError {
     constructor({ param }) {
       super("Invalid ABI parameter.", {
@@ -833,11 +847,47 @@ var init_parseAbiItem = __esm(() => {
   init_utils();
 });
 
+// ../../../node_modules/abitype/dist/esm/human-readable/parseAbiParameters.js
+function parseAbiParameters(params) {
+  const abiParameters = [];
+  if (typeof params === "string") {
+    const parameters = splitParameters(params);
+    const length = parameters.length;
+    for (let i = 0;i < length; i++) {
+      abiParameters.push(parseAbiParameter(parameters[i], { modifiers }));
+    }
+  } else {
+    const structs = parseStructs(params);
+    const length = params.length;
+    for (let i = 0;i < length; i++) {
+      const signature = params[i];
+      if (isStructSignature(signature))
+        continue;
+      const parameters = splitParameters(signature);
+      const length2 = parameters.length;
+      for (let k = 0;k < length2; k++) {
+        abiParameters.push(parseAbiParameter(parameters[k], { modifiers, structs }));
+      }
+    }
+  }
+  if (abiParameters.length === 0)
+    throw new InvalidAbiParametersError({ params });
+  return abiParameters;
+}
+var init_parseAbiParameters = __esm(() => {
+  init_abiParameter();
+  init_signatures();
+  init_structs();
+  init_utils();
+  init_utils();
+});
+
 // ../../../node_modules/abitype/dist/esm/exports/index.js
 var init_exports = __esm(() => {
   init_formatAbiItem();
   init_parseAbi();
   init_parseAbiItem();
+  init_parseAbiParameters();
 });
 
 // ../../../node_modules/viem/_esm/utils/abi/formatAbiItem.js
@@ -3529,7 +3579,7 @@ ${prettyStateOverride(stateOverride)}`;
 });
 
 // ../../../node_modules/viem/_esm/errors/request.js
-var HttpRequestError, RpcRequestError;
+var HttpRequestError, RpcRequestError, TimeoutError;
 var init_request = __esm(() => {
   init_base();
   HttpRequestError = class HttpRequestError extends BaseError2 {
@@ -3596,6 +3646,15 @@ var init_request = __esm(() => {
       });
       this.code = error.code;
       this.data = error.data;
+    }
+  };
+  TimeoutError = class TimeoutError extends BaseError2 {
+    constructor({ body, url }) {
+      super("The request took too long to respond.", {
+        details: "The request timed out.",
+        metaMessages: [`URL: ${getUrl(url)}`, `Request body: ${stringify(body)}`],
+        name: "TimeoutError"
+      });
     }
   };
 });
@@ -7760,6 +7819,9 @@ function packResult(result) {
   return res;
 }
 
+// ../../../node_modules/viem/_esm/index.js
+init_exports();
+
 // ../../../node_modules/viem/_esm/utils/getAction.js
 function getAction(client, actionFn, name) {
   const action_implicit = client[actionFn.name];
@@ -9964,6 +10026,204 @@ function rankTransports({ chain, interval = 4000, onTransports, ping, sampleCoun
     rankTransports_();
   };
   rankTransports_();
+}
+// ../../../node_modules/viem/_esm/clients/transports/http.js
+init_request();
+
+// ../../../node_modules/viem/_esm/errors/transport.js
+init_base();
+
+class UrlRequiredError extends BaseError2 {
+  constructor() {
+    super("No URL was provided to the Transport. Please provide a valid RPC URL to the Transport.", {
+      docsPath: "/docs/clients/intro",
+      name: "UrlRequiredError"
+    });
+  }
+}
+
+// ../../../node_modules/viem/_esm/clients/transports/http.js
+init_createBatchScheduler();
+
+// ../../../node_modules/viem/_esm/utils/rpc/http.js
+init_request();
+
+// ../../../node_modules/viem/_esm/utils/promise/withTimeout.js
+function withTimeout(fn, { errorInstance = new Error("timed out"), timeout, signal }) {
+  return new Promise((resolve, reject) => {
+    (async () => {
+      let timeoutId;
+      try {
+        const controller = new AbortController;
+        if (timeout > 0) {
+          timeoutId = setTimeout(() => {
+            if (signal) {
+              controller.abort();
+            } else {
+              reject(errorInstance);
+            }
+          }, timeout);
+        }
+        resolve(await fn({ signal: controller?.signal || null }));
+      } catch (err) {
+        if (err?.name === "AbortError")
+          reject(errorInstance);
+        reject(err);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    })();
+  });
+}
+// ../../../node_modules/viem/_esm/utils/rpc/id.js
+function createIdStore() {
+  return {
+    current: 0,
+    take() {
+      return this.current++;
+    },
+    reset() {
+      this.current = 0;
+    }
+  };
+}
+var idCache = /* @__PURE__ */ createIdStore();
+
+// ../../../node_modules/viem/_esm/utils/rpc/http.js
+function getHttpRpcClient(url, options = {}) {
+  return {
+    async request(params) {
+      const { body, onRequest = options.onRequest, onResponse = options.onResponse, timeout = options.timeout ?? 1e4 } = params;
+      const fetchOptions = {
+        ...options.fetchOptions ?? {},
+        ...params.fetchOptions ?? {}
+      };
+      const { headers, method, signal: signal_ } = fetchOptions;
+      try {
+        const response = await withTimeout(async ({ signal }) => {
+          const init = {
+            ...fetchOptions,
+            body: Array.isArray(body) ? stringify(body.map((body2) => ({
+              jsonrpc: "2.0",
+              id: body2.id ?? idCache.take(),
+              ...body2
+            }))) : stringify({
+              jsonrpc: "2.0",
+              id: body.id ?? idCache.take(),
+              ...body
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              ...headers
+            },
+            method: method || "POST",
+            signal: signal_ || (timeout > 0 ? signal : null)
+          };
+          const request = new Request(url, init);
+          const args = await onRequest?.(request, init) ?? { ...init, url };
+          const response2 = await fetch(args.url ?? url, args);
+          return response2;
+        }, {
+          errorInstance: new TimeoutError({ body, url }),
+          timeout,
+          signal: true
+        });
+        if (onResponse)
+          await onResponse(response);
+        let data;
+        if (response.headers.get("Content-Type")?.startsWith("application/json"))
+          data = await response.json();
+        else {
+          data = await response.text();
+          try {
+            data = JSON.parse(data || "{}");
+          } catch (err) {
+            if (response.ok)
+              throw err;
+            data = { error: data };
+          }
+        }
+        if (!response.ok) {
+          throw new HttpRequestError({
+            body,
+            details: stringify(data.error) || response.statusText,
+            headers: response.headers,
+            status: response.status,
+            url
+          });
+        }
+        return data;
+      } catch (err) {
+        if (err instanceof HttpRequestError)
+          throw err;
+        if (err instanceof TimeoutError)
+          throw err;
+        throw new HttpRequestError({
+          body,
+          cause: err,
+          url
+        });
+      }
+    }
+  };
+}
+
+// ../../../node_modules/viem/_esm/clients/transports/http.js
+function http(url, config = {}) {
+  const { batch, fetchOptions, key = "http", methods, name = "HTTP JSON-RPC", onFetchRequest, onFetchResponse, retryDelay } = config;
+  return ({ chain, retryCount: retryCount_, timeout: timeout_ }) => {
+    const { batchSize = 1000, wait: wait2 = 0 } = typeof batch === "object" ? batch : {};
+    const retryCount = config.retryCount ?? retryCount_;
+    const timeout = timeout_ ?? config.timeout ?? 1e4;
+    const url_ = url || chain?.rpcUrls.default.http[0];
+    if (!url_)
+      throw new UrlRequiredError;
+    const rpcClient = getHttpRpcClient(url_, {
+      fetchOptions,
+      onRequest: onFetchRequest,
+      onResponse: onFetchResponse,
+      timeout
+    });
+    return createTransport({
+      key,
+      methods,
+      name,
+      async request({ method, params }) {
+        const body = { method, params };
+        const { schedule } = createBatchScheduler({
+          id: url_,
+          wait: wait2,
+          shouldSplitBatch(requests) {
+            return requests.length > batchSize;
+          },
+          fn: (body2) => rpcClient.request({
+            body: body2
+          }),
+          sort: (a, b) => a.id - b.id
+        });
+        const fn = async (body2) => batch ? schedule(body2) : [
+          await rpcClient.request({
+            body: body2
+          })
+        ];
+        const [{ error, result }] = await fn(body);
+        if (error)
+          throw new RpcRequestError({
+            body,
+            error,
+            url: url_
+          });
+        return result;
+      },
+      retryCount,
+      retryDelay,
+      timeout,
+      type: "http"
+    }, {
+      fetchOptions,
+      url: url_
+    });
+  };
 }
 // ../../../node_modules/viem/_esm/actions/ens/getEnsAddress.js
 init_abis();
@@ -14261,15 +14521,6 @@ var healthy_rpcs_default = {
   }
 };
 
-// constants/config.ts
-var CONFIG = {
-  REPORT_VERSION: 1,
-  VIEM: {
-    RETRY_COUNT: 5,
-    RETRY_DELAY: 2000
-  }
-};
-
 // ../common/config.ts
 function isDevelopment() {
   try {
@@ -14309,155 +14560,6 @@ var developmentRpcs = {
     ]
   }
 };
-
-// ../common/viemClient.ts
-function createCustomTransport(url, chainIdHex) {
-  return createTransport({
-    name: "customTransport",
-    key: "custom",
-    type: "http",
-    retryCount: CONFIG.VIEM.RETRY_COUNT,
-    retryDelay: CONFIG.VIEM.RETRY_DELAY,
-    request: async ({ method, params }) => {
-      if (method === "eth_chainId") {
-        return { jsonrpc: "2.0", id: 1, result: chainIdHex };
-      }
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params })
-      });
-      const result = await response.json();
-      return result;
-    }
-  });
-}
-function createFallbackTransport(chainSelector) {
-  const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthy_rpcs_default[chainSelector];
-  if (!chainConfig) {
-    handleError(25 /* INVALID_CHAIN */);
-  }
-  if (!chainConfig.rpcs[0]) {
-    handleError(26 /* INVALID_RPC */);
-  }
-  const chainIdHex = `0x${parseInt(chainConfig.rpcs[0].chainId, 10).toString(16)}`;
-  const transportFactories = chainConfig.rpcs.map((rpc) => ({ chain }) => createCustomTransport(rpc.url, chainIdHex));
-  return fallback(transportFactories);
-}
-function getPublicClient(chainSelector) {
-  const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthy_rpcs_default[chainSelector];
-  if (!chainConfig || !chainConfig.rpcs.length) {
-    handleError(22 /* NO_RPC_PROVIDERS */);
-  }
-  const chainIdHex = `0x${parseInt(chainConfig.rpcs[0].chainId, 10).toString(16)}`;
-  const defaultRpcUrl = chainConfig.rpcs[0].url;
-  return createPublicClient({
-    transport: createFallbackTransport(chainSelector),
-    chain: {
-      id: parseInt(chainIdHex, 16),
-      name: chainSelector,
-      network: chainSelector,
-      nativeCurrency: {
-        name: "Ether",
-        symbol: "ETH",
-        decimals: 18
-      },
-      rpcUrls: {
-        default: defaultRpcUrl
-      }
-    }
-  });
-}
-
-// utils/utils.ts
-function getOperatorCohortId(operator, cohortsCount) {
-  return parseInt(operator.slice(2), 16) % cohortsCount;
-}
-function getMessageCohortId(messageId, cohortsCount) {
-  return parseInt(messageId.slice(2), 16) % cohortsCount;
-}
-function pick(array, n) {
-  if (n > array.length) {
-    handleError(51 /* INVALID_OPERATOR_COUNT */);
-  }
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1;i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled.slice(0, n);
-}
-
-// constants/abis.ts
-var ClientMessageRequest = "tuple(bytes32 internalMessageConfig, bytes dstChainData, bytes message)";
-var CONCERO_VERIFIER_CONTRACT_ABI = ["abi"];
-var NonIndexedConceroMessageParams = [
-  { type: "bytes", name: "dstChainData" },
-  { type: "bytes", name: "message" }
-];
-
-// constants/conceroRouters.ts
-var CONCERO_VERIFIER_CONTRACT_ADDRESS = "0x123";
-var conceroRouters = {
-  "1": "0x123"
-};
-
-// utils/getAllowedOperators.ts
-async function getAllowedOperators(client, chainType, messageId) {
-  try {
-    const cohortsCount = await getCohortsCount(client, chainType);
-    const messageCohort = getMessageCohortId(messageId, cohortsCount);
-    const registeredOperators = await getRegisteredOperators(client, chainType);
-    const allowedOperators = registeredOperators.filter((operator) => getOperatorCohortId(operator, cohortsCount) === messageCohort);
-    if (!allowedOperators.length) {
-      handleError(53 /* NO_ALLOWED_OPERATORS */);
-    }
-    return allowedOperators;
-  } catch (error) {
-    handleError(54 /* OPERATOR_SELECTION_FAILED */);
-  }
-}
-async function getCohortsCount(client, chainType) {
-  const cohortsCount = await client.readContract({
-    abi: CONCERO_VERIFIER_CONTRACT_ABI,
-    address: CONCERO_VERIFIER_CONTRACT_ADDRESS,
-    functionName: "getCohortsCount",
-    args: [chainType]
-  });
-  if (cohortsCount <= 0) {
-    handleError(55 /* INVALID_COHORTS_COUNT */);
-  }
-  return cohortsCount;
-}
-async function getRegisteredOperators(client, chainType) {
-  const registeredOperators = await client.readContract({
-    abi: CONCERO_VERIFIER_CONTRACT_ABI,
-    address: CONCERO_VERIFIER_CONTRACT_ADDRESS,
-    functionName: "getRegisteredOperators",
-    args: [chainType]
-  });
-  if (!registeredOperators.length) {
-    handleError(52 /* NO_REGISTERED_OPERATORS */);
-  }
-  return registeredOperators;
-}
-
-// utils/verifyMessageHash.ts
-function verifyMessageHash(messageId, messageConfig, dstChainData, message, expectedHashSum) {
-  const messageBytes = encodeAbiParameters(["bytes32", ClientMessageRequest], [
-    messageId,
-    {
-      messageConfig: BigInt(messageConfig),
-      dstChainData,
-      message: keccak256(message)
-    }
-  ]);
-  const recomputedMessageHashSum = keccak256(messageBytes);
-  if (recomputedMessageHashSum !== expectedHashSum) {
-    handleError(31 /* INVALID_HASHSUM */);
-  }
-  return recomputedMessageHashSum;
-}
 
 // ../../../node_modules/viem/_esm/op-stack/contracts.js
 var contracts = {
@@ -14678,6 +14780,126 @@ var mainnetChains = {
 };
 var viemChains = config.isDevelopment ? localhostChains : mainnetChains;
 
+// ../common/viemClient.ts
+function createCustomTransport(url, chainIdHex) {
+  return http(url, { batch: true });
+}
+function createFallbackTransport(chainSelector) {
+  const chainConfig2 = config.isDevelopment ? developmentRpcs[chainSelector] : healthy_rpcs_default[chainSelector];
+  if (!chainConfig2) {
+    handleError(25 /* INVALID_CHAIN */);
+  }
+  if (!chainConfig2.rpcs[0]) {
+    handleError(26 /* INVALID_RPC */);
+  }
+  const chainIdHex = `0x${parseInt(chainConfig2.rpcs[0].chainId, 10).toString(16)}`;
+  const transportFactories = chainConfig2.rpcs.map((rpc) => createCustomTransport(rpc.url, chainIdHex));
+  return fallback(transportFactories);
+}
+function getPublicClient(chainSelector) {
+  const chainConfig2 = config.isDevelopment ? developmentRpcs[chainSelector] : healthy_rpcs_default[chainSelector];
+  if (!chainConfig2 || !chainConfig2.rpcs.length) {
+    handleError(22 /* NO_RPC_PROVIDERS */);
+  }
+  return createPublicClient({
+    transport: createFallbackTransport(chainSelector),
+    chain: viemChains[chainSelector]
+  });
+}
+
+// utils/utils.ts
+function getOperatorCohortId(operator, cohortsCount) {
+  return parseInt(operator.slice(2), 16) % cohortsCount;
+}
+function getMessageCohortId(messageId, cohortsCount) {
+  return parseInt(messageId.slice(2), 16) % cohortsCount;
+}
+function pick(array, n) {
+  if (n > array.length) {
+    handleError(51 /* INVALID_OPERATOR_COUNT */);
+  }
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1;i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, n);
+}
+
+// constants/abis.ts
+var ClientMessageRequestBase = "bytes32 internalMessageConfig, bytes dstChainData, bytes message";
+var ClientMessageRequest = `tuple(${ClientMessageRequestBase})`;
+var CONCERO_VERIFIER_CONTRACT_ABI = ["abi"];
+var NonIndexedConceroMessageParams = [
+  { type: "bytes", name: "dstChainData" },
+  { type: "bytes", name: "message" }
+];
+
+// constants/conceroRouters.ts
+var CONCERO_VERIFIER_CONTRACT_ADDRESS = "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
+var conceroRouters = {
+  "1": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6"
+};
+
+// utils/getAllowedOperators.ts
+async function getAllowedOperators(client, chainType, messageId) {
+  try {
+    const cohortsCount = await getCohortsCount(client, chainType);
+    const messageCohort = getMessageCohortId(messageId, cohortsCount);
+    const registeredOperators = await getRegisteredOperators(client, chainType);
+    const allowedOperators = registeredOperators.filter((operator) => getOperatorCohortId(operator, cohortsCount) === messageCohort);
+    if (!allowedOperators.length) {
+      handleError(53 /* NO_ALLOWED_OPERATORS */);
+    }
+    return allowedOperators;
+  } catch (error) {
+    handleError(54 /* OPERATOR_SELECTION_FAILED */);
+  }
+}
+async function getCohortsCount(client, chainType) {
+  const cohortsCount = await client.readContract({
+    abi: CONCERO_VERIFIER_CONTRACT_ABI,
+    address: CONCERO_VERIFIER_CONTRACT_ADDRESS,
+    functionName: "getCohortsCount",
+    args: [chainType]
+  });
+  if (cohortsCount <= 0) {
+    handleError(55 /* INVALID_COHORTS_COUNT */);
+  }
+  return cohortsCount;
+}
+async function getRegisteredOperators(client, chainType) {
+  const registeredOperators = await client.readContract({
+    abi: CONCERO_VERIFIER_CONTRACT_ABI,
+    address: CONCERO_VERIFIER_CONTRACT_ADDRESS,
+    functionName: "getRegisteredOperators",
+    args: [chainType]
+  });
+  if (!registeredOperators.length) {
+    handleError(52 /* NO_REGISTERED_OPERATORS */);
+  }
+  return registeredOperators;
+}
+
+// constants/config.ts
+var CONFIG = {
+  REPORT_VERSION: 1,
+  VIEM: {
+    RETRY_COUNT: 5,
+    RETRY_DELAY: 2000
+  }
+};
+
+// utils/verifyMessageHash.ts
+function verifyMessageHash(messageId, messageConfig, dstChainData, message, expectedHashSum) {
+  const messageBytes = encodeAbiParameters([{ name: "messageId", type: "bytes32" }, ...parseAbiParameters(ClientMessageRequestBase)], [messageId, messageConfig, dstChainData, keccak256(message)]);
+  const recomputedMessageHashSum = keccak256(messageBytes);
+  if (recomputedMessageHashSum !== expectedHashSum) {
+    handleError(31 /* INVALID_HASHSUM */);
+  }
+  return recomputedMessageHashSum;
+}
+
 // constants/internalMessageConfig.ts
 var INTERNAL_MESSAGE_CONFIG_OFFSETS = {
   VERSION: 248,
@@ -14789,7 +15011,7 @@ function validateMessageFields(args) {
 function decodeConceroMessageLog(log) {
   try {
     const messageId = log.topics[1];
-    const internalMessageConfig = BigInt(log.topics[2]);
+    const internalMessageConfig = log.topics[2];
     const [dstChainData, message] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
     return {
       messageId,
@@ -14816,10 +15038,9 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
 }
 
 // index.ts
-(async function main() {
+return async function main() {
   try {
     const args = decodeInputs(bytesArgs);
-    validateDecodedArgs(args);
     const msgConfig = args.internalMessageConfig;
     const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
     const log = await fetchConceroMessage(publicClient, conceroRouters[Number(msgConfig.srcChainSelector)], args.messageId, BigInt(args.srcChainData.blockNumber));
@@ -14829,9 +15050,6 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
       dstChainData: dstChainDataFromLog,
       message: messageFromLog
     } = decodeConceroMessageLog(log);
-    if (messageIdFromLog !== args.messageId) {
-      handleError(32 /* INVALID_MESSAGE_ID */);
-    }
     verifyMessageHash(args.messageId, messageConfigFromLog.toString(), dstChainDataFromLog, messageFromLog, args.messageHashSum);
     const operators = await getAllowedOperators(publicClient, 0 /* EVM */, args.messageId);
     const allowedOperators = pick(operators, 3);
@@ -14854,4 +15072,4 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
       handleError(0 /* UNKNOWN_ERROR */);
     }
   }
-})();
+}();

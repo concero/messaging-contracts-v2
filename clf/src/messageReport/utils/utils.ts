@@ -22,6 +22,8 @@ function pick<T>(array: T[], n: number): T[] {
     if (n > array.length) {
         handleError(ErrorType.INVALID_OPERATOR_COUNT);
     }
+
+    // @dev TODO: is it correct?
     const shuffled = [...array];
 
     for (let i = shuffled.length - 1; i > 0; i--) {

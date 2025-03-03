@@ -1,5 +1,3 @@
-import { isDevelopment } from "./isDevelopment";
-
 function isDevelopment() {
     try {
         return secrets?.CONCERO_CLF_DEVELOPMENT === "true";

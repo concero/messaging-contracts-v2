@@ -6,19 +6,17 @@ import { getAllowedOperators } from "./utils/getAllowedOperators";
 import { conceroRouters } from "./constants/conceroRouters";
 import { CONFIG } from "./constants/config";
 import { verifyMessageHash } from "./utils/verifyMessageHash";
-import { decodeInputs, validateDecodedArgs } from "./utils/validateInputs";
+import { decodeInputs } from "./utils/validateInputs";
 import { decodeConceroMessageLog } from "./utils/decoders";
 import { fetchConceroMessage } from "./utils/fetchConceroMessage";
 import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
 import { MessageReportResult } from "./types";
 
-(async function main() {
+return (async function main() {
     try {
         const args = decodeInputs(bytesArgs);
-        validateDecodedArgs(args);
         const msgConfig = args.internalMessageConfig;
-
         const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
 
         const log = await fetchConceroMessage(
@@ -34,11 +32,6 @@ import { MessageReportResult } from "./types";
             dstChainData: dstChainDataFromLog,
             message: messageFromLog,
         } = decodeConceroMessageLog(log);
-
-        // @dev TODO: lets remove this check cuz we check it in verifyMessageHash
-        if (messageIdFromLog !== args.messageId) {
-            handleError(ErrorType.INVALID_MESSAGE_ID);
-        }
 
         verifyMessageHash(
             args.messageId,

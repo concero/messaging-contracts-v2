@@ -1,22 +1,21 @@
-import { createPublicClient } from "viem";
+import { Address, createPublicClient } from "viem";
 import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 
-async function fetchConceroMessage(
+export async function fetchConceroMessage(
     client: ReturnType<typeof createPublicClient>,
-    routerAddress: string,
+    routerAddress: Address,
     messageId: string,
     blockNumber: bigint,
 ) {
     const logs = await client.getLogs({
         address: routerAddress,
-        // @dev specify first topic to filter logs by event signature
+        // @dev TODO: specify first topic to filter logs by event signature
         topics: [null, messageId],
         fromBlock: blockNumber - 10n,
         toBlock: blockNumber,
     });
     if (!logs.length) handleError(ErrorType.EVENT_NOT_FOUND);
+
     return logs[0];
 }
-
-export { fetchConceroMessage };

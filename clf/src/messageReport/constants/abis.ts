@@ -1,6 +1,11 @@
+import { parseAbi } from "viem";
+
 export const ClientMessageRequestBase = "bytes32 internalMessageConfig, bytes dstChainData, bytes message";
 export const ClientMessageRequest = `tuple(${ClientMessageRequestBase})`;
-export const CONCERO_VERIFIER_CONTRACT_ABI = ["abi"];
+export const CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
+    "function getCohortsCount() external returns (uint8)",
+    "function getRegisteredOperators(uint8 chainType) external view returns (bytes[] memory)",
+]);
 
 export const ConceroMessageLogParams = [
     { type: "bytes32", name: "messageId", indexed: true },

@@ -18,6 +18,7 @@ export async function simulateCLFScript(
     scriptPath: string,
     scriptName: string,
     args: string[],
+    secretsOverride?: any,
 ): Promise<string | undefined> {
     if (!fs.existsSync(scriptPath)) {
         console.error(`File not found: ${scriptPath}`);
@@ -31,7 +32,11 @@ export async function simulateCLFScript(
             bytesArgs: args,
             secrets: {
                 ...secrets,
-                ...{ CONCERO_CLF_DEVELOPMENT: "true", LOCALHOST_RPC_URL: process.env.LOCALHOST_RPC_URL },
+                ...{
+                    CONCERO_CLF_DEVELOPMENT: "true",
+                    LOCALHOST_RPC_URL: process.env.LOCALHOST_RPC_URL,
+                    CONCERO_VERIFIER_LOCALHOST: secretsOverride?.CONCERO_VERIFIER_LOCALHOST,
+                },
             },
             ...CLFSimulationConfig,
         });

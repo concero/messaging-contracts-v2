@@ -1,7 +1,16 @@
 import type { Address } from "viem";
+import { config } from "../../common/config";
 
-const CONCERO_VERIFIER_CONTRACT_ADDRESS = CONCERO_VERIFIER;
-const conceroRouters: Record<number, Address> = {
+function getConceroVerifier() {
+    try {
+        if (config.isDevelopment) return secrets.CONCERO_VERIFIER_LOCALHOST;
+        return CONCERO_VERIFIER;
+    } catch {
+        return CONCERO_VERIFIER;
+    }
+}
+
+export const CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
+export const conceroRouters: Record<number, Address> = {
     "1": CONCERO_ROUTER,
 };
-export { conceroRouters, CONCERO_VERIFIER_CONTRACT_ADDRESS };

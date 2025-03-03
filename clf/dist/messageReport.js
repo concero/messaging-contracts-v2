@@ -7769,6 +7769,9 @@ function packResult(result) {
   return res;
 }
 
+// ../../../node_modules/viem/_esm/index.js
+init_exports();
+
 // ../../../node_modules/viem/_esm/utils/getAction.js
 function getAction(client, actionFn, name) {
   const action_implicit = client[actionFn.name];
@@ -14775,14 +14778,26 @@ function pick(array, n) {
 // constants/abis.ts
 var ClientMessageRequestBase = "bytes32 internalMessageConfig, bytes dstChainData, bytes message";
 var ClientMessageRequest = `tuple(${ClientMessageRequestBase})`;
-var CONCERO_VERIFIER_CONTRACT_ABI = ["abi"];
+var CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
+  "function getCohortsCount() external returns (uint8)",
+  "function getRegisteredOperators(uint8 chainType) external view returns (bytes[] memory)"
+]);
 var NonIndexedConceroMessageParams = [
   { type: "bytes", name: "dstChainData" },
   { type: "bytes", name: "message" }
 ];
 
 // constants/conceroRouters.ts
-var CONCERO_VERIFIER_CONTRACT_ADDRESS = "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
+function getConceroVerifier() {
+  try {
+    if (config.isDevelopment)
+      return secrets.CONCERO_VERIFIER_LOCALHOST;
+    return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
+  } catch {
+    return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
+  }
+}
+var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 var conceroRouters = {
   "1": "0xaF8C1270cfECeAf68733F99Aca9B10B29B1E63aA"
 };
@@ -14790,7 +14805,7 @@ var conceroRouters = {
 // utils/getAllowedOperators.ts
 async function getAllowedOperators(client, chainType, messageId) {
   try {
-    const cohortsCount = await getCohortsCount(client, chainType);
+    const cohortsCount = await getCohortsCount(client);
     const messageCohort = getMessageCohortId(messageId, cohortsCount);
     const registeredOperators = await getRegisteredOperators(client, chainType);
     const allowedOperators = registeredOperators.filter((operator) => getOperatorCohortId(operator, cohortsCount) === messageCohort);
@@ -14799,15 +14814,16 @@ async function getAllowedOperators(client, chainType, messageId) {
     }
     return allowedOperators;
   } catch (error) {
+    console.log(error);
     handleError(54 /* OPERATOR_SELECTION_FAILED */);
   }
 }
-async function getCohortsCount(client, chainType) {
+async function getCohortsCount(client) {
   const cohortsCount = await client.readContract({
     abi: CONCERO_VERIFIER_CONTRACT_ABI,
     address: CONCERO_VERIFIER_CONTRACT_ADDRESS,
     functionName: "getCohortsCount",
-    args: [chainType]
+    args: []
   });
   if (cohortsCount <= 0) {
     handleError(55 /* INVALID_COHORTS_COUNT */);
@@ -14838,8 +14854,6 @@ var CONFIG = {
 
 // utils/verifyMessageHash.ts
 function verifyMessageHash(message, expectedHashSum) {
-  console.log(keccak256(message).toLowerCase());
-  console.log(expectedHashSum.toLowerCase());
   if (keccak256(message).toLowerCase() !== expectedHashSum.toLowerCase()) {
     handleError(31 /* INVALID_HASHSUM */);
   }

@@ -9,6 +9,7 @@ import { simulateCLFScript } from "../../tasks/clf";
 import { zeroHash, Address, encodeAbiParameters } from "viem";
 import { ConceroMessageConfig } from "../../utils/ConceroMessageConfig";
 import { encodedSrcChainData } from "./utils/encodeSrcChainData";
+import deployVerifier from "../../deploy/ConceroVerifier";
 
 describe("sendMessage\n", async () => {
     it("should send and receiveMessage in test concero client", async () => {
@@ -16,6 +17,7 @@ describe("sendMessage\n", async () => {
 
         // @dev deploy
         const mockClfRouter = await deployMockCLFRouter();
+        const { address: conceroVerifierAddress } = await deployVerifier(hre);
         const { conceroRouter } = await deployContracts(mockClfRouter.address as Address);
         const conceroRouterAddress = conceroRouter.address;
         const conceroClientExample = await deployConceroClientExample(hre, { conceroRouter: conceroRouterAddress });
@@ -57,13 +59,13 @@ describe("sendMessage\n", async () => {
 
         if (sendMessageStatus !== "success") throw new Error(`sendMessage failed with status: ${sendMessageStatus}`);
 
-        await simulateCLFScript(__dirname + "/../../clf/dist/messageReport.js", "messageReport", [
-            zeroHash,
-            messageConfig.hexConfig,
-            messageId,
-            messageHashSum,
-            srcChainData,
-            operatorAddress,
-        ]);
+        await simulateCLFScript(
+            __dirname + "/../../clf/dist/messageReport.js",
+            "messageReport",
+            [zeroHash, messageConfig.hexConfig, messageId, messageHashSum, srcChainData, operatorAddress],
+            {
+                CONCERO_VERIFIER_LOCALHOST: conceroVerifierAddress,
+            },
+        );
     }).timeout(0);
 });

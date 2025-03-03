@@ -21,7 +21,7 @@ export async function getAllowedOperators(
     messageId: Hash,
 ): Promise<Address[]> {
     try {
-        const cohortsCount = await getCohortsCount(client, chainType);
+        const cohortsCount = await getCohortsCount(client);
         const messageCohort = getMessageCohortId(messageId, cohortsCount);
 
         const registeredOperators = await getRegisteredOperators(client, chainType);
@@ -37,16 +37,17 @@ export async function getAllowedOperators(
 
         return allowedOperators;
     } catch (error) {
+        console.log(error);
         handleError(ErrorType.OPERATOR_SELECTION_FAILED);
     }
 }
 
-async function getCohortsCount(client: PublicClient, chainType: ChainType): Promise<number> {
+async function getCohortsCount(client: PublicClient): Promise<number> {
     const cohortsCount = (await client.readContract({
         abi: CONCERO_VERIFIER_CONTRACT_ABI,
         address: CONCERO_VERIFIER_CONTRACT_ADDRESS,
         functionName: "getCohortsCount",
-        args: [chainType],
+        args: [],
     })) as number;
 
     if (cohortsCount <= 0) {

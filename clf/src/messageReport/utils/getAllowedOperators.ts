@@ -1,5 +1,5 @@
 import { ChainType } from "../../common/enums";
-import { type Address } from "viem";
+import { zeroAddress, type Address } from "viem";
 import { PublicClient } from "viem/clients/createPublicClient";
 import { getMessageCohortId, getOperatorCohortId } from "./utils";
 import { Hash } from "viem";
@@ -7,6 +7,7 @@ import { ErrorType } from "../../common/errorType";
 import { CONCERO_VERIFIER_CONTRACT_ABI } from "../constants/abis";
 import { CONCERO_VERIFIER_CONTRACT_ADDRESS } from "../constants/conceroRouters";
 import { handleError } from "../../common/errorHandler";
+import { config } from "../../common/config";
 
 /**
  * Gets all allowed operators for a given message ID based on cohort assignment
@@ -58,6 +59,11 @@ async function getCohortsCount(client: PublicClient): Promise<number> {
 }
 
 async function getRegisteredOperators(client: PublicClient, chainType: ChainType): Promise<Address[]> {
+    //@dev TODO: remove it!
+    if (config.isDevelopment) {
+        return [zeroAddress];
+    }
+
     const registeredOperators = (await client.readContract({
         abi: CONCERO_VERIFIER_CONTRACT_ABI,
         address: CONCERO_VERIFIER_CONTRACT_ADDRESS,

@@ -2,23 +2,23 @@ import { type Address } from "../../../../typechain-types";
 import { ErrorType } from "../../common/errorType";
 import { handleError } from "../../common/errorHandler";
 
-function getRandomRpc(rpcs: { url: string; chainId: string }[]) {
+export function getRandomRpc(rpcs: { url: string; chainId: string }[]) {
     return rpcs[Math.floor(Math.random() * rpcs.length)];
 }
 
-function sleep(ms: number) {
+export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function getOperatorCohortId(operator: Address, cohortsCount: number): number {
+export function getOperatorCohortId(operator: Address, cohortsCount: number): number {
     return parseInt(operator.slice(2), 16) % cohortsCount;
 }
 
-function getMessageCohortId(messageId: string, cohortsCount: number): number {
+export function getMessageCohortId(messageId: string, cohortsCount: number): number {
     return parseInt(messageId.slice(2), 16) % cohortsCount;
 }
 
-function pick<T>(array: T[], n: number): T[] {
+export function pick<T>(array: T[], n: number): T[] {
     if (n > array.length) {
         handleError(ErrorType.INVALID_OPERATOR_COUNT);
     }
@@ -33,5 +33,3 @@ function pick<T>(array: T[], n: number): T[] {
 
     return shuffled.slice(0, n);
 }
-
-export { getRandomRpc, sleep, getMessageCohortId, getOperatorCohortId, pick };

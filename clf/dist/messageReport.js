@@ -7717,20 +7717,17 @@ function handleError(type) {
 }
 
 // ../common/encoders.ts
-function encodeUint256(value) {
-  if (value < 0n || value > (1n << 256n) - 1n) {
-    handleError(62 /* INVALID_UINT256 */);
-  }
-  return new Uint8Array(Buffer.from(value.toString(16).padStart(64, "0"), "hex"));
-}
 function hexToBytes(hex) {
-  return new Uint8Array(Buffer.from(hex.replace(/^0x/, ""), "hex"));
+  hex = hex.replace(/^0x/, "");
+  const length = hex.length / 2;
+  const res = new Uint8Array(length);
+  for (let i = 0;i < res.length; i++) {
+    res[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return res;
 }
 function packUint32(value) {
   return new Uint8Array(new Uint32Array([value]).buffer);
-}
-function packUint16(value) {
-  return new Uint8Array(new Uint16Array([value]).buffer);
 }
 function packResponseConfig(reportType, version, requester) {
   return BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE) | BigInt(version) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION) | BigInt(`0x${requester.replace(/^0x/, "")}`) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK;
@@ -7750,22 +7747,15 @@ function packResult(result) {
     BigInt(result.messageHashSum)
   ];
   for (const field of fixedFields) {
-    res.set(encodeUint256(field), offset);
+    res.set(hexToBytes(field.toString()), offset);
     offset += COMMON_REPORT_BYTE_SIZES.WORD;
   }
   res.set(packUint32(dstChainDataBytes.length), offset);
   offset += COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH;
   res.set(dstChainDataBytes, offset);
   offset += dstChainDataBytes.length;
-  res.set(packUint16(allowedOperatorsBytes.length), offset);
+  res.set(hexToBytes(allowedOperatorsBytes.length.toString().padStart(64, "0")), offset);
   offset += REPORT_BYTE_SIZES.ALLOWED_OPERATORS_LENGTH;
-  for (const operator of allowedOperatorsBytes) {
-    if (operator.length !== REPORT_BYTE_SIZES.ALLOWED_OPERATORS) {
-      throw new Error(`Invalid operator address length: ${operator.length}`);
-    }
-    res.set(operator, offset);
-    offset += REPORT_BYTE_SIZES.ALLOWED_OPERATORS;
-  }
   return res;
 }
 
@@ -14799,7 +14789,7 @@ function getConceroVerifier() {
 }
 var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 var conceroRouters = {
-  "1": "0xaF8C1270cfECeAf68733F99Aca9B10B29B1E63aA"
+  "1": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6"
 };
 
 // utils/getAllowedOperators.ts
@@ -14831,6 +14821,9 @@ async function getCohortsCount(client) {
   return cohortsCount;
 }
 async function getRegisteredOperators(client, chainType) {
+  if (config.isDevelopment) {
+    return [zeroAddress];
+  }
   const registeredOperators = await client.readContract({
     abi: CONCERO_VERIFIER_CONTRACT_ABI,
     address: CONCERO_VERIFIER_CONTRACT_ADDRESS,
@@ -15011,7 +15004,7 @@ return async function main() {
     } = decodeConceroMessageLog(log);
     verifyMessageHash(messageFromLog, args.messageHashSum);
     const operators = await getAllowedOperators(publicClient, 0 /* EVM */, args.messageId);
-    const allowedOperators = pick(operators, 3);
+    const allowedOperators = pick(operators, 1);
     const messageReportResult = {
       version: CONFIG.REPORT_VERSION,
       reportType: 1 /* MESSAGE */,

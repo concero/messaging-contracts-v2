@@ -36,7 +36,7 @@ return (async function main() {
         verifyMessageHash(messageFromLog, args.messageHashSum);
 
         const operators = await getAllowedOperators(publicClient, ChainType.EVM, args.messageId);
-        const allowedOperators = pick(operators, 3);
+        const allowedOperators = pick(operators, 1);
 
         const messageReportResult: MessageReportResult = {
             version: CONFIG.REPORT_VERSION,

@@ -1459,7 +1459,13 @@ function encodeUint256(value) {
   return new Uint8Array(Buffer.from(value.toString(16).padStart(64, "0"), "hex"));
 }
 function hexToBytes2(hex) {
-  return new Uint8Array(Buffer.from(hex.replace(/^0x/, ""), "hex"));
+  hex = hex.replace(/^0x/, "");
+  const length = hex.length / 2;
+  const res = new Uint8Array(length);
+  for (let i = 0;i < res.length; i++) {
+    res[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return res;
 }
 function packUint32(value) {
   return new Uint8Array(new Uint32Array([value]).buffer);

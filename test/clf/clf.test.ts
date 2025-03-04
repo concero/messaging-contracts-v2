@@ -25,7 +25,6 @@ describe("sendMessage\n", async () => {
 
         // @dev send message
         const testClient = getTestClient(privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`));
-        const srcChainData = encodedSrcChainData(testClient.account.address, await testClient.getBlockNumber());
         const dstChainData = encodeAbiParameters(
             [
                 { name: "receiver", type: "address" },
@@ -54,10 +53,11 @@ describe("sendMessage\n", async () => {
         const { status: sendMessageStatus, logs: sendMessageLogs } = await testClient.waitForTransactionReceipt({
             hash: sendMessageHash,
         });
+        if (sendMessageStatus !== "success") throw new Error(`sendMessage failed with status: ${sendMessageStatus}`);
+
         const messageId = sendMessageLogs[0].topics[2];
         const messageHashSum = keccak256(message);
-
-        if (sendMessageStatus !== "success") throw new Error(`sendMessage failed with status: ${sendMessageStatus}`);
+        const srcChainData = encodedSrcChainData(testClient.account.address, await testClient.getBlockNumber());
 
         await simulateCLFScript(
             __dirname + "/../../clf/dist/messageReport.js",

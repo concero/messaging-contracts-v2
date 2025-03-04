@@ -6,7 +6,6 @@ import { log } from "../../utils";
 import secrets from "../../constants/CLFSecrets";
 import CLFSimulationConfig from "../../constants/CLFSimulationConfig";
 import getSimulationArgs from "./simulationArgs";
-import { decodeCLFResponse } from "./decodeCLFResponse";
 
 /**
  * Simulates the execution of a script with the given arguments.
@@ -53,10 +52,10 @@ export async function simulateCLFScript(
 
         if (responseBytesHexstring) {
             log(responseBytesHexstring, "simulateCLFScript – Response Bytes:");
-            const decodedResponse = decodeCLFResponse(scriptName, responseBytesHexstring);
-            if (decodedResponse) {
-                log(decodedResponse, "simulateCLFScript – Decoded Response:");
-            }
+            // const decodedResponse = decodeCLFResponse(scriptName, responseBytesHexstring);
+            // if (decodedResponse) {
+            //     log(decodedResponse, "simulateCLFScript – Decoded Response:");
+            // }
             return responseBytesHexstring;
         }
     } catch (error) {

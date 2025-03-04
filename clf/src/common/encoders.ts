@@ -17,7 +17,15 @@ export function encodeUint256(value: bigint) {
  * @param hex - Hex string with optional 0x prefix
  */
 export function hexToBytes(hex: string): Uint8Array {
-    return new Uint8Array(Buffer.from(hex.replace(/^0x/, ""), "hex"));
+    // return new Uint8Array(Buffer.from(hex.replace(/^0x/, ""), "hex"));
+
+    hex = hex.replace(/^0x/, "");
+    const length = hex.length / 2;
+    const res = new Uint8Array(length);
+    for (let i = 0; i < res.length; i++) {
+        res[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    }
+    return res;
 }
 
 /**

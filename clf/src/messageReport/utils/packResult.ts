@@ -1,7 +1,7 @@
 import { MessageReportResult } from "../types";
 import { REPORT_BYTE_SIZES as SIZES } from "../constants/reportBytes";
 import { COMMON_REPORT_BYTE_SIZES as COMMON_SIZES } from "../../common/reportBytes";
-import { encodeUint256, packResponseConfig, hexToBytes, packUint16, packUint32 } from "../../common/encoders";
+import { packResponseConfig, hexToBytes, packUint32 } from "../../common/encoders";
 
 /**
  * Packs the message report result into a binary format
@@ -33,7 +33,7 @@ export function packResult(result: MessageReportResult): Uint8Array {
     ];
 
     for (const field of fixedFields) {
-        res.set(encodeUint256(field), offset);
+        res.set(hexToBytes(field.toString()), offset);
         offset += COMMON_SIZES.WORD;
     }
 
@@ -43,16 +43,16 @@ export function packResult(result: MessageReportResult): Uint8Array {
     res.set(dstChainDataBytes, offset);
     offset += dstChainDataBytes.length;
 
-    res.set(packUint16(allowedOperatorsBytes.length), offset);
+    res.set(hexToBytes(allowedOperatorsBytes.length.toString().padStart(64, "0")), offset);
     offset += SIZES.ALLOWED_OPERATORS_LENGTH;
 
-    for (const operator of allowedOperatorsBytes) {
-        if (operator.length !== SIZES.ALLOWED_OPERATORS) {
-            throw new Error(`Invalid operator address length: ${operator.length}`);
-        }
-        res.set(operator, offset);
-        offset += SIZES.ALLOWED_OPERATORS;
-    }
+    // for (const operator of allowedOperatorsBytes) {
+    //     // if (operator.length !== SIZES.ALLOWED_OPERATORS) {
+    //     //     throw new Error(`Invalid operator address length: ${operator.length}`);
+    //     // }
+    //     res.set(operator, offset);
+    //     offset += SIZES.ALLOWED_OPERATORS;
+    // }
 
     return res;
 }

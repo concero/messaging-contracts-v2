@@ -9,29 +9,52 @@ pragma solidity 0.8.28;
 import {ConceroVerifierTest} from "../../ConceroVerifier/base/ConceroVerifierTest.sol";
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
-abstract contract BaseMockCLFReport is ConceroVerifierTest {
+contract BaseMockCLFReport is ConceroVerifierTest {
     function createMockClfReport(
         bytes memory _response
-    ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
-        return createMockClfReport(_response, CONCERO_VERIFIER_ADDRESS, CONCERO_VERIFIER_SUB_ID);
+    ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
+        return
+            createMockClfReport(
+                _response,
+                bytes32("requestId"),
+                CONCERO_VERIFIER_ADDRESS,
+                i_conceroVerifierSubscriptionId
+            );
     }
 
     function createMockClfReport(
         bytes memory _response,
+        bytes32 requestId
+    ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
+        return
+            createMockClfReport(
+                _response,
+                requestId,
+                CONCERO_VERIFIER_ADDRESS,
+                i_conceroVerifierSubscriptionId
+            );
+    }
+
+    function createMockClfReport(
+        bytes memory _response,
+        bytes32 requestId,
         address client,
         uint64 subscriptionId
     ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
         bytes32[3] memory context = [bytes32("context0"), bytes32("context1"), bytes32("context2")];
 
         bytes32[] memory requestIds = new bytes32[](1);
+        requestIds[0] = requestId;
+
         bytes[] memory results = new bytes[](1);
         results[0] = _response;
+
         bytes[] memory errors = new bytes[](1);
         bytes[] memory onchainMetadata = new bytes[](1);
 
         onchainMetadata[0] = abi.encode(
             RouterTypes.ClfReportOnchainMetadata({
-                requestId: bytes32("requestId"),
+                requestId: requestId, // Use the provided request ID
                 coordinator: address(0x1234567890123456789012345678901234567890),
                 estimatedTotalCostJuels: 1000000000000000000,
                 client: client,

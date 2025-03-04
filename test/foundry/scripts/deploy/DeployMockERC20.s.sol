@@ -25,7 +25,7 @@ contract MockERC20 is ERC20 {
     }
 }
 
-contract DeployERC20 is Script {
+contract DeployMockERC20 is Script {
     address public initialHolder = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
     uint256 public initialSupply = 1_000_000;
 

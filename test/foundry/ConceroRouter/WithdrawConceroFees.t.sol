@@ -26,7 +26,6 @@ contract WithdrawConceroFees is ConceroRouterTest {
 
     function setUp() public override {
         super.setUp();
-        usdc = deployScript.usdc();
 
         vm.deal(address(conceroRouter), TOTAL_NATIVE_BALANCE);
         deal(usdc, address(conceroRouter), TOTAL_USDC_BALANCE);

@@ -1,57 +1,63 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
-import secrets from "../../constants/CLFSecrets";
-import updateEnvVariable from "../../utils/updateEnvVariable";
-import log from "../../utils/log";
-import { listSecrets } from "./listClfSecrets";
-import { getEnvVar, getEthersSignerAndProvider } from "../../utils";
-import { ConceroNetwork } from "../../types/ConceroNetwork";
+
 import { networkEnvKeys } from "../../constants";
+import secrets from "../../constants/CLFSecrets";
 import { clfGatewayUrls } from "../../constants/clfGatewayUrls";
 import { CLF_ETHEREUM_TTL, CLF_TESTNET_TTL } from "../../constants/clfTtl";
+import { ConceroNetwork } from "../../types/ConceroNetwork";
+import { getEnvVar, getEthersSignerAndProvider } from "../../utils";
+import log from "../../utils/log";
+import updateEnvVariable from "../../utils/updateEnvVariable";
+import { listSecrets } from "./listClfSecrets";
 
 export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number) {
-    const slotId = parseInt(slotid);
+	const slotId = parseInt(slotid);
 
-    for (const chain of chains) {
-        const { url, name } = chain;
-        const { signer } = getEthersSignerAndProvider(url);
-        const minutesUntilExpiration = chain.type === "mainnet" ? CLF_ETHEREUM_TTL : CLF_TESTNET_TTL;
+	for (const chain of chains) {
+		const { url, name } = chain;
+		const { signer } = getEthersSignerAndProvider(url);
+		const minutesUntilExpiration =
+			chain.type === "mainnet" ? CLF_ETHEREUM_TTL : CLF_TESTNET_TTL;
 
-        console.log({
-            signer,
-            functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
-            donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
-        });
+		console.log({
+			signer,
+			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
+			donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
+		});
 
-        const secretsManager = new SecretsManager({
-            signer,
-            functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
-            donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}_ALIAS`),
-        });
-        await secretsManager.initialize();
+		const secretsManager = new SecretsManager({
+			signer,
+			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
+			donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}_ALIAS`),
+		});
+		await secretsManager.initialize();
 
-        if (!secrets) {
-            console.error("No secrets to upload.");
-            return;
-        }
+		if (!secrets) {
+			console.error("No secrets to upload.");
+			return;
+		}
 
-        console.log("Uploading secrets to DON for network:", name);
-        const encryptedSecretsObj = await secretsManager.encryptSecrets(secrets);
+		console.log("Uploading secrets to DON for network:", name);
+		const encryptedSecretsObj = await secretsManager.encryptSecrets(secrets);
 
-        const { version } = await secretsManager.uploadEncryptedSecretsToDON({
-            encryptedSecretsHexstring: encryptedSecretsObj.encryptedSecrets,
-            gatewayUrls: clfGatewayUrls[chain.type],
-            slotId,
-            minutesUntilExpiration,
-        });
+		const { version } = await secretsManager.uploadEncryptedSecretsToDON({
+			encryptedSecretsHexstring: encryptedSecretsObj.encryptedSecrets,
+			gatewayUrls: clfGatewayUrls[chain.type],
+			slotId,
+			minutesUntilExpiration,
+		});
 
-        log(
-            `DONSecrets uploaded to ${name}. slot_id: ${slotId}, version: ${version}, ttl: ${minutesUntilExpiration}`,
-            "donSecrets/upload",
-        );
+		log(
+			`DONSecrets uploaded to ${name}. slot_id: ${slotId}, version: ${version}, ttl: ${minutesUntilExpiration}`,
+			"donSecrets/upload",
+		);
 
-        await listSecrets(chain);
+		await listSecrets(chain);
 
-        updateEnvVariable(`CLF_DON_SECRETS_VERSION_${networkEnvKeys[name]}`, version, "../../../.env.clf");
-    }
+		updateEnvVariable(
+			`CLF_DON_SECRETS_VERSION_${networkEnvKeys[name]}`,
+			version,
+			"../../../.env.clf",
+		);
+	}
 }

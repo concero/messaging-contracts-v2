@@ -13,23 +13,12 @@ import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contrac
 import {ConceroRouterBase} from "../../ConceroRouter/base/ConceroRouterBase.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 
-import {DeployERC20, MockERC20} from "./DeployERC20.s.sol";
-
 contract DeployConceroRouter is ConceroRouterBase {
     TransparentUpgradeableProxy internal conceroRouterProxy;
     ConceroRouter internal conceroRouter;
 
-    function run() public returns (address) {
-        DeployERC20 tokenDeployer = new DeployERC20();
-        usdc = address(tokenDeployer.deployERC20("USD Coin", "USDC", 6));
-
-        _deployConceroRouter();
-        return address(conceroRouterProxy);
-    }
-
-    function run(uint256 forkId) public returns (address) {
-        vm.selectFork(forkId);
-        return run();
+    function setUp() public virtual override {
+        super.setUp();
     }
 
     function setProxyImplementation(address implementation) public {
@@ -41,32 +30,10 @@ contract DeployConceroRouter is ConceroRouterBase {
         vm.stopPrank();
     }
 
-    function getProxy() public view returns (address) {
-        return address(conceroRouterProxy);
-    }
-
-    function _deployConceroRouter() internal {
-        _deployConceroRouterProxy();
-        _deployAndSetImplementation();
-    }
-
-    function _deployConceroRouterProxy() internal {
-        vm.startPrank(proxyDeployer);
-        conceroRouterProxy = new TransparentUpgradeableProxy(
-            address(new PauseDummy()),
-            proxyDeployer,
-            ""
-        );
-        vm.stopPrank();
-    }
-
-    function _deployAndSetImplementation() internal {
-        vm.startPrank(deployer);
-        conceroRouter = new ConceroRouter(
-            SRC_CHAIN_SELECTOR,
-            usdc,
+    function deploy() public returns (address) {
+        address implementation = _deployImplementation(
             CONCERO_VERIFIER_ADDRESS,
-            CONCERO_VERIFIER_SUB_ID,
+            i_conceroVerifierSubscriptionId,
             [
                 MOCK_DON_SIGNER_ADDRESS_0,
                 MOCK_DON_SIGNER_ADDRESS_1,
@@ -74,8 +41,43 @@ contract DeployConceroRouter is ConceroRouterBase {
                 MOCK_DON_SIGNER_ADDRESS_3
             ]
         );
+        _deployProxy(implementation);
+
+        return address(conceroRouterProxy);
+    }
+
+    function deploy(
+        address verifier,
+        uint64 verifierSubId,
+        address[4] memory clfSigners
+    ) public returns (address) {
+        address implementation = _deployImplementation(verifier, verifierSubId, clfSigners);
+        _deployProxy(implementation);
+        return address(conceroRouterProxy);
+    }
+
+    function _deployProxy(address implementation) internal {
+        vm.startPrank(proxyDeployer);
+        conceroRouterProxy = new TransparentUpgradeableProxy(implementation, proxyDeployer, "");
+        vm.stopPrank();
+    }
+
+    function _deployImplementation(
+        address verifier,
+        uint64 verifierSubId,
+        address[4] memory clfSigners
+    ) internal returns (address) {
+        vm.startPrank(deployer);
+
+        conceroRouter = new ConceroRouter(
+            SRC_CHAIN_SELECTOR,
+            usdc,
+            verifier,
+            verifierSubId,
+            clfSigners
+        );
         vm.stopPrank();
 
-        setProxyImplementation(address(conceroRouter));
+        return address(conceroRouter);
     }
 }

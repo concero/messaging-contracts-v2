@@ -10,16 +10,32 @@ import {Script} from "forge-std/src/Script.sol";
 
 import {MessageConfigBitOffsets as offsets} from "contracts/common/CommonConstants.sol";
 import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
+import {DeployMockERC20} from "./deploy/DeployMockERC20.s.sol";
+import {ConceroUtils} from "contracts/ConceroClient/ConceroUtils.sol";
+import {CommonTypes} from "contracts/common/CommonTypes.sol";
+import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
+import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
+import {console} from "forge-std/src/Console.sol";
 
 abstract contract ConceroBaseScript is Script {
     address public immutable deployer;
     address public immutable proxyDeployer;
+    uint64 immutable i_conceroVerifierSubscriptionId;
+    bytes32 internal immutable i_clientMessageConfig;
+    bytes32 internal immutable i_internalMessageConfig;
+
     address public constant operator = address(0x4242424242424242424242424242424242424242);
     address public constant user = address(0x0101010101010101010101010101010101010101);
+    address constant CONCERO_VERIFIER_ADDRESS = address(0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4);
+
     address public usdc;
 
     uint24 public constant SRC_CHAIN_SELECTOR = 1;
     uint24 public constant DST_CHAIN_SELECTOR = 8453;
+    uint256 internal constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
+    uint256 internal constant LAST_GAS_PRICE = 1e9;
+    uint256 public constant OPERATOR_FEES_NATIVE = 2 ether;
+    uint256 public constant OPERATOR_DEPOSIT_NATIVE = 3 ether;
 
     address public constant MOCK_DON_SIGNER_ADDRESS_0 = 0x0004C7EdCF9283D3bc3C1309939b3E887bb9d98b;
     address public constant MOCK_DON_SIGNER_ADDRESS_1 = 0x000437D9bE1C11B748e8B4C349b818eE82682E9f;
@@ -35,35 +51,29 @@ abstract contract ConceroBaseScript is Script {
     uint256 public constant MOCK_DON_SIGNER_PRIVATE_KEY_3 =
         0x31ec7a7d750fd8fdb2f80d6ba2a426afab415a2000092bcf529e6002697b2e31;
 
-    uint256 internal constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
-    uint256 internal constant LAST_GAS_PRICE = 1e9;
-    uint256 public constant OPERATOR_FEES_NATIVE = 2 ether;
-    uint256 public constant OPERATOR_DEPOSIT_NATIVE = 3 ether;
-
-    bytes32 internal constant CLIENT_MESSAGE_CONFIG =
-        bytes32(
-            (uint256(DST_CHAIN_SELECTOR) << offsets.OFFSET_DST_CHAIN) |
-                (1 << offsets.OFFSET_MIN_SRC_CONF) |
-                (1 << offsets.OFFSET_MIN_DST_CONF) |
-                (0 << offsets.OFFSET_RELAYER_CONF) |
-                (0 << offsets.OFFSET_CALLBACKABLE) |
-                (uint256(VerifierTypes.FeeToken.native) << offsets.OFFSET_FEE_TOKEN)
-        );
-
-    bytes32 internal constant INTERNAL_MESSAGE_CONFIG =
-        bytes32(
-            (uint256(1) << offsets.OFFSET_VERSION) | // version, assuming version is 1
-                (uint256(SRC_CHAIN_SELECTOR) << offsets.OFFSET_SRC_CHAIN) | // srcChainSelector
-                (uint256(DST_CHAIN_SELECTOR) << offsets.OFFSET_DST_CHAIN) | // dstChainSelector
-                (uint256(1) << offsets.OFFSET_MIN_SRC_CONF) | // minSrcConfirmations, assuming 1
-                (uint256(1) << offsets.OFFSET_MIN_DST_CONF) | // minDstConfirmations, assuming 1
-                (uint256(0) << offsets.OFFSET_RELAYER_CONF) | // relayerConfig, assuming 0
-                (uint256(0) << offsets.OFFSET_CALLBACKABLE) // isCallbackable, assuming false
-        );
-    address constant CONCERO_VERIFIER_ADDRESS = address(0x123);
-    uint64 constant CONCERO_VERIFIER_SUB_ID = 0;
     constructor() {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");
         proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
+        i_conceroVerifierSubscriptionId = uint64(vm.envUint("CLF_SUBID_LOCALHOST"));
+
+        i_clientMessageConfig = ConceroUtils._packClientMessageConfig(
+            ConceroTypes.ClientMessageConfig({
+                dstChainSelector: DST_CHAIN_SELECTOR,
+                minSrcConfirmations: 1,
+                minDstConfirmations: 1,
+                relayerConfig: 0,
+                isCallbackable: false,
+                feeToken: ConceroTypes.FeeToken.native
+            })
+        );
+
+        i_internalMessageConfig = MessageLib.buildInternalMessageConfig(
+            i_clientMessageConfig,
+            SRC_CHAIN_SELECTOR
+        );
+    }
+
+    function setUp() public virtual {
+        usdc = address(new DeployMockERC20().deployERC20("USD Coin", "USDC", 6));
     }
 }

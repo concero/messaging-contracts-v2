@@ -21,9 +21,15 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
         super.setUp();
 
         vm.deal(operator, 100 ether);
-        bytes32 operatorKey = bytes32(uint256(uint160(operator)));
+
         vm.prank(deployer);
-        conceroVerifier.setStorage(Namespaces.OPERATOR, OperatorSlots.isRegistered, operatorKey, 1);
+        conceroVerifier.setStorage(
+            Namespaces.OPERATOR,
+            OperatorSlots.isRegistered,
+            bytes32(uint256(uint160(operator))),
+            1
+        );
+
         _setPriceFeeds();
     }
 
@@ -59,13 +65,11 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
         uint256 depositAmount = conceroVerifier.getCLFDeposit();
         uint256 withdrawAmount = depositAmount;
 
-        vm.prank(operator);
+        vm.startPrank(operator);
         conceroVerifier.operatorDeposit{value: depositAmount}(operator);
-
         uint256 preWithdrawBalance = operator.balance;
-
-        vm.prank(operator);
         bool success = conceroVerifier.withdrawOperatorDeposit(withdrawAmount);
+        vm.stopPrank();
 
         assertTrue(success, "Withdrawal should succeed");
 

@@ -14,27 +14,15 @@ import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
 
 import {ConceroVerifierBase} from "../../ConceroVerifier/base/ConceroVerifierBase.sol";
 
-import {DeployERC20, MockERC20} from "./DeployERC20.s.sol";
 import {DeployMockCLFRouter, MockCLFRouter} from "./DeployMockCLFRouter.s.sol";
+import {CLFParams} from "contracts/ConceroVerifier/libraries/Types.sol";
 
 contract DeployConceroVerifier is ConceroVerifierBase {
     TransparentUpgradeableProxy internal conceroVerifierProxy;
     ConceroVerifier internal conceroVerifier;
 
-    function run() public returns (address) {
-        DeployERC20 tokenDeployer = new DeployERC20();
-        usdc = address(tokenDeployer.deployERC20("USD Coin", "USDC", 6));
-
-        DeployMockCLFRouter routerDeployer = new DeployMockCLFRouter();
-        clfRouter = routerDeployer.run();
-
-        _deployConceroVerifier();
-        return address(conceroVerifier);
-    }
-
-    function run(uint256 forkId) public returns (address) {
-        vm.selectFork(forkId);
-        return run();
+    function setUp() public virtual override {
+        super.setUp();
     }
 
     function setProxyImplementation(address implementation) public {
@@ -46,42 +34,36 @@ contract DeployConceroVerifier is ConceroVerifierBase {
         vm.stopPrank();
     }
 
-    function getProxy() public view returns (address) {
+    function deploy() public returns (address) {
+        address implementation = _deployImplementation();
+        _deployProxy(implementation);
         return address(conceroVerifierProxy);
     }
 
-    function _deployConceroVerifier() internal {
-        _deployConceroVerifierProxy();
-        _deployAndSetImplementation();
-    }
-
-    function _deployConceroVerifierProxy() internal {
+    function _deployProxy(address implementation) internal {
         vm.startPrank(proxyDeployer);
-        conceroVerifierProxy = new TransparentUpgradeableProxy(
-            address(new PauseDummy()),
-            proxyDeployer,
-            ""
-        );
+        conceroVerifierProxy = new TransparentUpgradeableProxy(implementation, proxyDeployer, "");
         vm.stopPrank();
     }
 
-    function _deployAndSetImplementation() internal {
+    function _deployImplementation() internal returns (address) {
         vm.startPrank(deployer);
-        conceroVerifier = new ConceroVerifier(
-            SRC_CHAIN_SELECTOR,
-            usdc,
-            clfRouter,
-            clfDonId,
-            clfSubscriptionId,
-            clfSecretsVersion,
-            clfSecretsSlotId,
-            clfPremiumFeeBpsUsd,
-            clfCallbackGasLimit,
-            clfMessageReportRequestJsHashSum,
-            clfOperatorRegistrationJsHashSum
-        );
+
+        CLFParams memory clfParams = CLFParams({
+            router: clfRouter,
+            donId: clfDonId,
+            subscriptionId: clfSubscriptionId,
+            donHostedSecretsVersion: clfSecretsVersion,
+            donHostedSecretsSlotId: clfSecretsSlotId,
+            premiumFeeUsdBps: clfPremiumFeeBpsUsd,
+            callbackGasLimit: clfCallbackGasLimit,
+            requestCLFMessageReportJsCodeHash: clfMessageReportRequestJsHashSum,
+            requestOperatorRegistrationJsCodeHash: clfOperatorRegistrationJsHashSum
+        });
+
+        conceroVerifier = new ConceroVerifier(SRC_CHAIN_SELECTOR, usdc, clfParams);
         vm.stopPrank();
 
-        setProxyImplementation(address(conceroVerifier));
+        return address(conceroVerifier);
     }
 }

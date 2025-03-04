@@ -5,7 +5,7 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-
+import {console} from "hardhat/console.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {ConceroClient} from "./ConceroClient.sol";
 import {ConceroTypes} from "./ConceroTypes.sol";
@@ -47,5 +47,7 @@ contract ConceroClientExample is ConceroClient {
             dstChainData,
             "Hello, World!"
         );
+        console.logString("ConceroClientExample: Message sent");
+        console.logBytes32(messageId);
     }
 }

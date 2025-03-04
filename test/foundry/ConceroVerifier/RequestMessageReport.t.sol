@@ -28,7 +28,7 @@ contract RequestMessageReport is ConceroVerifierTest {
         bytes32 messageId = bytes32(uint256(1));
         bytes32 messageHashSum = bytes32(uint256(2));
         bytes32 internalMessageConfig = MessageLib.buildInternalMessageConfig(
-            CLIENT_MESSAGE_CONFIG,
+            i_clientMessageConfig,
             SRC_CHAIN_SELECTOR
         );
         bytes memory srcChainData = new bytes(0);

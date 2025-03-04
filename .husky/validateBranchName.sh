@@ -6,11 +6,11 @@ ERROR_MESSAGE="🚫 Error: Invalid branch name.
 Branch names must match:
   - master
   - release
-  - feature/*
-  - fix/*
-  - hotfix/*
-  - test/*
-  - docs/*
+  - feature
+  - fix
+  - hotfix
+  - test
+  - docs
 Current branch: '%s'
 Please rename your branch and try again."
 

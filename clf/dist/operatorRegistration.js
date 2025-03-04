@@ -1458,7 +1458,7 @@ function encodeUint256(value) {
   }
   return new Uint8Array(Buffer.from(value.toString(16).padStart(64, "0"), "hex"));
 }
-function hexToBytes2(hex) {
+function hexStringToUint8Array(hex) {
   hex = hex.replace(/^0x/, "");
   const length = hex.length / 2;
   const res = new Uint8Array(length);
@@ -1481,7 +1481,7 @@ function packResponseConfig(reportType, version2, requester) {
 function packResult(result) {
   const chainTypesBytes = result.chainTypes.map((type) => packUint8(type));
   const actionsBytes = result.actions.map((action) => packUint8(action));
-  const operatorAddressesBytes = result.operatorAddresses.map((addr) => hexToBytes2(addr.padStart(40, "0")));
+  const operatorAddressesBytes = result.operatorAddresses.map((addr) => hexStringToUint8Array(addr.padStart(40, "0")));
   const bufferSize = COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH + chainTypesBytes.length + COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH + actionsBytes.length + COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH + operatorAddressesBytes.length * COMMON_REPORT_BYTE_SIZES.ADDRESS;
   const res = new Uint8Array(bufferSize);
   let offset = 0;

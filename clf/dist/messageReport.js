@@ -1484,7 +1484,7 @@ function toBytes(value, opts = {}) {
   if (typeof value === "boolean")
     return boolToBytes(value, opts);
   if (isHex(value))
-    return hexToBytes2(value, opts);
+    return hexToBytes(value, opts);
   return stringToBytes(value, opts);
 }
 function boolToBytes(value, opts = {}) {
@@ -1505,7 +1505,7 @@ function charCodeToBase16(char) {
     return char - (charCodeMap.a - 10);
   return;
 }
-function hexToBytes2(hex_, opts = {}) {
+function hexToBytes(hex_, opts = {}) {
   let hex = hex_;
   if (opts.size) {
     assertSize(hex, { size: opts.size });
@@ -1528,7 +1528,7 @@ function hexToBytes2(hex_, opts = {}) {
 }
 function numberToBytes(value, opts) {
   const hex = numberToHex(value, opts);
-  return hexToBytes2(hex);
+  return hexToBytes(hex);
 }
 function stringToBytes(value, opts = {}) {
   const bytes = encoder2.encode(value);
@@ -2848,7 +2848,7 @@ var init_fromBytes = __esm(() => {
 
 // ../../../node_modules/viem/_esm/utils/abi/decodeAbiParameters.js
 function decodeAbiParameters(params, data) {
-  const bytes = typeof data === "string" ? hexToBytes2(data) : data;
+  const bytes = typeof data === "string" ? hexToBytes(data) : data;
   const cursor = createCursor(bytes);
   if (size(bytes) === 0 && params.length > 0)
     throw new AbiDecodingZeroDataError;
@@ -4286,7 +4286,7 @@ __export(exports_utils, {
   isBytes: () => isBytes2,
   inRange: () => inRange,
   hexToNumber: () => hexToNumber2,
-  hexToBytes: () => hexToBytes3,
+  hexToBytes: () => hexToBytes2,
   equalBytes: () => equalBytes,
   ensureBytes: () => ensureBytes,
   createHmacDrbg: () => createHmacDrbg,
@@ -4339,7 +4339,7 @@ function asciiToBase16(ch) {
     return ch - (asciis.a - 10);
   return;
 }
-function hexToBytes3(hex) {
+function hexToBytes2(hex) {
   if (typeof hex !== "string")
     throw new Error("hex string expected, got " + typeof hex);
   const hl = hex.length;
@@ -4366,19 +4366,19 @@ function bytesToNumberLE(bytes) {
   return hexToNumber2(bytesToHex2(Uint8Array.from(bytes).reverse()));
 }
 function numberToBytesBE(n, len) {
-  return hexToBytes3(n.toString(16).padStart(len * 2, "0"));
+  return hexToBytes2(n.toString(16).padStart(len * 2, "0"));
 }
 function numberToBytesLE(n, len) {
   return numberToBytesBE(n, len).reverse();
 }
 function numberToVarBytesBE(n) {
-  return hexToBytes3(numberToHexUnpadded(n));
+  return hexToBytes2(numberToHexUnpadded(n));
 }
 function ensureBytes(title, hex, expectedLength) {
   let res;
   if (typeof hex === "string") {
     try {
-      res = hexToBytes3(hex);
+      res = hexToBytes2(hex);
     } catch (e) {
       throw new Error(title + " must be hex string or Uint8Array, cause: " + e);
     }
@@ -5523,13 +5523,13 @@ function weierstrass(curveDef) {
       return this.hasHighS() ? new Signature(this.r, modN(-this.s), this.recovery) : this;
     }
     toDERRawBytes() {
-      return hexToBytes3(this.toDERHex());
+      return hexToBytes2(this.toDERHex());
     }
     toDERHex() {
       return DER.hexFromSig({ r: this.r, s: this.s });
     }
     toCompactRawBytes() {
-      return hexToBytes3(this.toCompactHex());
+      return hexToBytes2(this.toCompactHex());
     }
     toCompactHex() {
       return numToNByteStr(this.r) + numToNByteStr(this.s);
@@ -7717,7 +7717,7 @@ function handleError(type) {
 }
 
 // ../common/encoders.ts
-function hexToBytes(hex) {
+function hexStringToUint8Array(hex) {
   hex = hex.replace(/^0x/, "");
   const length = hex.length / 2;
   const res = new Uint8Array(length);
@@ -7735,8 +7735,8 @@ function packResponseConfig(reportType, version, requester) {
 
 // utils/packResult.ts
 function packResult(result) {
-  const dstChainDataBytes = hexToBytes(result.dstChainData);
-  const allowedOperatorsBytes = result.allowedOperators.map(hexToBytes);
+  const dstChainDataBytes = hexStringToUint8Array(result.dstChainData);
+  const allowedOperatorsBytes = result.allowedOperators.map(hexStringToUint8Array);
   const bufferSize = COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH + dstChainDataBytes.length + REPORT_BYTE_SIZES.ALLOWED_OPERATORS_LENGTH + allowedOperatorsBytes.length * REPORT_BYTE_SIZES.ALLOWED_OPERATORS;
   const res = new Uint8Array(bufferSize);
   let offset = 0;
@@ -7747,15 +7747,19 @@ function packResult(result) {
     BigInt(result.messageHashSum)
   ];
   for (const field of fixedFields) {
-    res.set(hexToBytes(field.toString()), offset);
+    res.set(hexStringToUint8Array(field.toString()), offset);
     offset += COMMON_REPORT_BYTE_SIZES.WORD;
   }
   res.set(packUint32(dstChainDataBytes.length), offset);
   offset += COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH;
   res.set(dstChainDataBytes, offset);
   offset += dstChainDataBytes.length;
-  res.set(hexToBytes(allowedOperatorsBytes.length.toString().padStart(64, "0")), offset);
+  res.set(hexStringToUint8Array(allowedOperatorsBytes.length.toString().padStart(64, "0")), offset);
   offset += REPORT_BYTE_SIZES.ALLOWED_OPERATORS_LENGTH;
+  for (const operator of allowedOperatorsBytes) {
+    res.set(operator, offset);
+    offset += REPORT_BYTE_SIZES.ALLOWED_OPERATORS;
+  }
   return res;
 }
 
@@ -8013,7 +8017,7 @@ function getEncodableList(list) {
   };
 }
 function getEncodableBytes(bytesOrHex) {
-  const bytes = typeof bytesOrHex === "string" ? hexToBytes2(bytesOrHex) : bytesOrHex;
+  const bytes = typeof bytesOrHex === "string" ? hexToBytes(bytesOrHex) : bytesOrHex;
   const sizeOfBytesLength = getSizeOfLength(bytes.length);
   const length = (() => {
     if (bytes.length === 1 && bytes[0] < 128)
@@ -8070,7 +8074,7 @@ function hashAuthorization(parameters) {
     ])
   ]));
   if (to === "bytes")
-    return hexToBytes2(hash2);
+    return hexToBytes(hash2);
   return hash2;
 }
 
@@ -8429,7 +8433,7 @@ init_toHex();
 function blobsToCommitments(parameters) {
   const { kzg } = parameters;
   const to = parameters.to ?? (typeof parameters.blobs[0] === "string" ? "hex" : "bytes");
-  const blobs = typeof parameters.blobs[0] === "string" ? parameters.blobs.map((x) => hexToBytes2(x)) : parameters.blobs;
+  const blobs = typeof parameters.blobs[0] === "string" ? parameters.blobs.map((x) => hexToBytes(x)) : parameters.blobs;
   const commitments = [];
   for (const blob of blobs)
     commitments.push(Uint8Array.from(kzg.blobToKzgCommitment(blob)));
@@ -8442,8 +8446,8 @@ init_toHex();
 function blobsToProofs(parameters) {
   const { kzg } = parameters;
   const to = parameters.to ?? (typeof parameters.blobs[0] === "string" ? "hex" : "bytes");
-  const blobs = typeof parameters.blobs[0] === "string" ? parameters.blobs.map((x) => hexToBytes2(x)) : parameters.blobs;
-  const commitments = typeof parameters.commitments[0] === "string" ? parameters.commitments.map((x) => hexToBytes2(x)) : parameters.commitments;
+  const blobs = typeof parameters.blobs[0] === "string" ? parameters.blobs.map((x) => hexToBytes(x)) : parameters.blobs;
+  const commitments = typeof parameters.commitments[0] === "string" ? parameters.commitments.map((x) => hexToBytes(x)) : parameters.commitments;
   const proofs = [];
   for (let i = 0;i < blobs.length; i++) {
     const blob = blobs[i];
@@ -8548,7 +8552,7 @@ init_toBytes();
 init_toHex();
 function toBlobs(parameters) {
   const to = parameters.to ?? (typeof parameters.data === "string" ? "hex" : "bytes");
-  const data = typeof parameters.data === "string" ? hexToBytes2(parameters.data) : parameters.data;
+  const data = typeof parameters.data === "string" ? hexToBytes(parameters.data) : parameters.data;
   const size_ = size(data);
   if (!size_)
     throw new EmptyBlobError;
@@ -11219,7 +11223,7 @@ function serializeErc6492Signature(parameters) {
   ]);
   if (to === "hex")
     return signature_;
-  return hexToBytes2(signature_);
+  return hexToBytes(signature_);
 }
 
 // ../../../node_modules/viem/_esm/utils/transaction/assertTransaction.js
@@ -13427,7 +13431,7 @@ function serializeSignature({ r, s, to = "hex", v, yParity }) {
   const signature = `0x${new secp256k1.Signature(hexToBigInt(r), hexToBigInt(s)).toCompactHex()}${yParity_ === 0 ? "1b" : "1c"}`;
   if (to === "hex")
     return signature;
-  return hexToBytes2(signature);
+  return hexToBytes(signature);
 }
 
 // ../../../node_modules/viem/_esm/actions/public/verifyHash.js
@@ -14906,7 +14910,7 @@ function validateInternalMessageConfig(config2) {
 
 // utils/validateInputs.ts
 function decodeSrcChainData(srcChainSelector, srcChainData) {
-  const srcChainDataBytes = hexToBytes2(srcChainData);
+  const srcChainDataBytes = hexToBytes(srcChainData);
   return decodeAbiParameters([
     {
       type: "tuple",

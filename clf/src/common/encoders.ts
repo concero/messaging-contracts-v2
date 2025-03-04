@@ -16,9 +16,7 @@ export function encodeUint256(value: bigint) {
  * Converts a hex string to Uint8Array
  * @param hex - Hex string with optional 0x prefix
  */
-export function hexToBytes(hex: string): Uint8Array {
-    // return new Uint8Array(Buffer.from(hex.replace(/^0x/, ""), "hex"));
-
+export function hexStringToUint8Array(hex: string): Uint8Array {
     hex = hex.replace(/^0x/, "");
     const length = hex.length / 2;
     const res = new Uint8Array(length);

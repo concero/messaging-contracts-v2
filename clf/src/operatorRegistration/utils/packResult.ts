@@ -1,6 +1,6 @@
 import { OperatorRegistrationResult } from "../types";
 import { COMMON_REPORT_BYTE_SIZES as COMMON_SIZES } from "../../common/reportBytes";
-import { encodeUint256, packResponseConfig, hexToBytes, packUint32, packUint8 } from "../../common/encoders";
+import { encodeUint256, packResponseConfig, hexStringToUint8Array, packUint32, packUint8 } from "../../common/encoders";
 
 /**
  * Packs the operator registration result into a binary format
@@ -10,7 +10,7 @@ import { encodeUint256, packResponseConfig, hexToBytes, packUint32, packUint8 } 
 export function packResult(result: OperatorRegistrationResult): Uint8Array {
     const chainTypesBytes = result.chainTypes.map(type => packUint8(type));
     const actionsBytes = result.actions.map(action => packUint8(action));
-    const operatorAddressesBytes = result.operatorAddresses.map(addr => hexToBytes(addr.padStart(40, "0")));
+    const operatorAddressesBytes = result.operatorAddresses.map(addr => hexStringToUint8Array(addr.padStart(40, "0")));
 
     const bufferSize =
         COMMON_SIZES.WORD + // reportResponseConfig

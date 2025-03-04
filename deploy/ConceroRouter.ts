@@ -61,7 +61,7 @@ const deployRouter: DeploymentFunction = async function (
 		chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
 		usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
 		conceroVerifier: getEnvVar(`CONCERO_VERIFIER_PROXY_${networkEnvKeys[name]}`),
-		conceroVerifierSubId: getEnvVar("CONCERO_VERIFIER_SUB_ID"),
+		conceroVerifierSubId: getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`),
 		clfSigners: getCLFDonSigners(networkType),
 	};
 

@@ -12,26 +12,26 @@ import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol"
 contract BaseMockCLFReport is ConceroVerifierTest {
     function createMockClfReport(
         bytes memory _response
-    ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+    ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
         return
             createMockClfReport(
                 _response,
                 bytes32("requestId"),
                 CONCERO_VERIFIER_ADDRESS,
-                CONCERO_VERIFIER_SUB_ID
+                i_conceroVerifierSubscriptionId
             );
     }
 
     function createMockClfReport(
         bytes memory _response,
         bytes32 requestId
-    ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+    ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
         return
             createMockClfReport(
                 _response,
                 requestId,
                 CONCERO_VERIFIER_ADDRESS,
-                CONCERO_VERIFIER_SUB_ID
+                i_conceroVerifierSubscriptionId
             );
     }
 

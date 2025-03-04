@@ -1,16 +1,17 @@
 import { ChainType, ReportType } from "../common/enums";
 import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
+import { packReportConfig } from "../common/packReportConfig";
 import { getPublicClient } from "../common/viemClient";
 import { conceroRouters } from "./constants/conceroRouters";
 import { CONFIG } from "./constants/config";
 import { MessageReportResult } from "./types";
-import { decodeConceroMessageLog, decodeEvmSrcChainData } from "./utils/decoders";
+import { decodeConceroMessageLog } from "./utils/decoders";
 import { fetchConceroMessage } from "./utils/fetchConceroMessage";
 import { getAllowedOperators } from "./utils/getAllowedOperators";
 import { packResult } from "./utils/packResult";
 import { pick } from "./utils/utils";
-import { decodeInputs, validateDecodedArgs, validateInputs } from "./utils/validateInputs";
+import { decodeInputs, validateDecodedArgs } from "./utils/validateInputs";
 import { verifyMessageHash } from "./utils/verifyMessageHash";
 
 export async function main(bytesArgs: string[]) {
@@ -62,7 +63,13 @@ export async function main(bytesArgs: string[]) {
 			allowedOperators,
 		};
 
-		return packResult(messageReportResult);
+		const packedReportConfig = packReportConfig(
+			ReportType.MESSAGE,
+			CONFIG.REPORT_VERSION,
+			args.operatorAddress,
+		);
+
+		return packResult(messageReportResult, packedReportConfig);
 	} catch (error) {
 		console.log(error);
 		if (error instanceof CustomErrorHandler) {

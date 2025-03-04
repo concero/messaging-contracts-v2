@@ -8,14 +8,14 @@ import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
 contract OperatorRegistrationReport is BaseMockCLFReport {
-    function getReport() public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+    function getReport() public view returns (RouterTypes.ClfDonReportSubmission memory) {
         return getReport(getResponse(), bytes32("requestId"));
     }
 
     function getReport(
         bytes memory expectedResponse,
         bytes32 clfRequestId
-    ) public pure returns (RouterTypes.ClfDonReportSubmission memory) {
+    ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
         return createMockClfReport(expectedResponse, clfRequestId);
     }
 

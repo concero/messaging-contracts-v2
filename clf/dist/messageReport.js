@@ -14994,7 +14994,7 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
 }
 
 // index.ts
-return async function main() {
+(async function main() {
   try {
     const args = decodeInputs(bytesArgs);
     const msgConfig = args.internalMessageConfig;
@@ -15028,4 +15028,4 @@ return async function main() {
       handleError(0 /* UNKNOWN_ERROR */);
     }
   }
-}();
+})();

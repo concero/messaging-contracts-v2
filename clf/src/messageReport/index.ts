@@ -13,7 +13,7 @@ import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
 import { MessageReportResult } from "./types";
 
-return (async function main() {
+(async function main() {
     try {
         const args = decodeInputs(bytesArgs);
         const msgConfig = args.internalMessageConfig;

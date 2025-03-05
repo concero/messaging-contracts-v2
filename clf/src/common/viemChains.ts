@@ -1,5 +1,5 @@
 import { type Chain, defineChain } from "viem";
-import { arbitrumSepolia, base, baseSepolia, mainnet } from "viem/chains";
+import { arbitrumSepolia, base, baseSepolia, mainnet, optimism } from "viem/chains";
 
 import { config } from "./config";
 import { ChainSelector } from "./types";
@@ -26,6 +26,7 @@ const localhostChains: Partial<Record<ChainSelector, Chain>> = {
 
 const liveChains: Partial<Record<ChainSelector, Chain>> = {
 	"1": mainnet,
+	"10": optimism,
 	"8453": base,
 
 	// @dev testnets

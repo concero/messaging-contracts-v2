@@ -1,6 +1,8 @@
-export * as deployRouter from "./deployRouter";
-export * as deployVerifier from "./deployVerifier";
-export * as clf from "./clf";
-export * as utils from "./utils";
-export { deployContracts } from "./deployContracts";
-export * from "./clf/buildClfJs";
+import * as deployRouter from "./deployRouter";
+import * as deployVerifier from "./deployVerifier";
+import * as clf from "./clf";
+import * as utils from "./utils";
+import { deployContracts } from "./deployContracts";
+import { buildClfJs } from "./clf/buildClfJs";
+
+export { deployRouter, deployVerifier, clf, utils, deployContracts, buildClfJs };

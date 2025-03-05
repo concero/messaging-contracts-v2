@@ -1,5 +1,6 @@
 import type { Address } from "viem";
 import { config } from "../../common/config";
+import { secrets } from "../../../../constants";
 
 function getConceroVerifier() {
     try {
@@ -11,6 +12,8 @@ function getConceroVerifier() {
 }
 
 export const CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
+
 export const conceroRouters: Record<number, Address> = {
-    "1": CONCERO_ROUTER,
+    "1": CONCERO_ROUTER_ETHEREUM,
+    "10": CONCERO_ROUTER_OPTIMISM,
 };

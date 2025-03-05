@@ -1,17 +1,11 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { resolve } from "path";
 
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import { CLF_DON_HOSTED_SECRETS_SLOT } from "../constants/CLFSecretsConfig";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { getEnvVar, getGasParameters, getHashSum, log, updateEnvVariable } from "../utils";
-
-const requestReportJsCode = resolve(__dirname, "../../clf/dist/requestReport.min.js");
-const requestOperatorRegistrationJsCode = resolve(
-	__dirname,
-	"../../clf/dist/requestOperatorRegistration.min.js",
-);
+import { ClfJsCodeType, getClfJsCode } from "../utils/getClfJsCode";
 
 type DeployArgs = {
 	chainSelector: string;
@@ -58,8 +52,12 @@ const deployVerifier: DeploymentFunction = async function (
 			donHostedSecretsSlotId: CLF_DON_HOSTED_SECRETS_SLOT,
 			premiumFeeUsdBps: getEnvVar(`CLF_PREMIUM_FEE_USD_BPS_${networkEnvKeys[name]}`),
 			callbackGasLimit: 100_000n,
-			requestCLFMessageReportJsCodeHash: getHashSum(requestReportJsCode),
-			requestOperatorRegistrationJsCodeHash: getHashSum(requestOperatorRegistrationJsCode),
+			requestCLFMessageReportJsCodeHash: getHashSum(
+				await getClfJsCode(ClfJsCodeType.MessageReport),
+			),
+			requestOperatorRegistrationJsCodeHash: getHashSum(
+				await getClfJsCode(ClfJsCodeType.OperatorRegistration),
+			),
 		},
 	};
 

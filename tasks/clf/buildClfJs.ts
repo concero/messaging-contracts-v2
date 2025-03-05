@@ -19,9 +19,9 @@ export function buildClfJs() {
 			// Remove trailing slash from each directory name
 			.map(dir => dir.replace(/\/$/, ""));
 
-		execSync("bun build eval.js --minify --outfile=../dist/eval.js", {
-			cwd: `clf/src/`,
-		});
+		// execSync("bun build eval.js --minify --outfile=../dist/eval.js", {
+		// 	cwd: `clf/src/`,
+		// });
 
 		dirsArray.forEach(dir => {
 			const dirLs = execSync("ls", { cwd: `clf/src/${dir}` });

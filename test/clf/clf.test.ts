@@ -1,21 +1,20 @@
-
+import "@nomicfoundation/hardhat-chai-matchers";
 import { keccak256, parseUnits } from "ethers";
-import { Address, encodeAbiParameters } from "viem";
+import { Address, encodeAbiParameters, zeroHash } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 import deployConceroClientExample from "../../deploy/ConceroClientExample";
 import deployVerifier from "../../deploy/ConceroVerifier";
 import deployMockCLFRouter from "../../deploy/MockCLFRouter";
+import { simulateCLFScript } from "../../tasks/clf";
 import { deployContracts } from "../../tasks/deployContracts";
 import { getTestClient } from "../../utils";
 import { ConceroMessageConfig } from "../../utils/ConceroMessageConfig";
 import { encodedSrcChainData } from "./utils/encodeSrcChainData";
 
-
-
-export async function testCLF() {
-
-	const hre = require("hardhat");
+describe("sendMessage\n", async () => {
+	it("should send and receiveMessage in test concero client", async () => {
+		const hre = require("hardhat");
 
 		// @dev deploy
 		const mockClfRouter = await deployMockCLFRouter();
@@ -73,37 +72,20 @@ export async function testCLF() {
 			await testClient.getBlockNumber(),
 		);
 
-		// await simulateCLFScript(
-		// 	__dirname + "/../../clf/dist/messageReport.js",
-		// 	"messageReport",
-		// 	[
-		// 		zeroHash,
-		// 		messageConfig.hexConfig,
-		// 		messageId,
-		// 		messageHashSum,
-		// 		srcChainData,
-		// 		operatorAddress,
-		// 	],
-		// 	{
-		// 		CONCERO_VERIFIER_LOCALHOST: conceroVerifierAddress,
-		// 	},
-		// );
-
-		// await runClfScript(
-        //     [
-        //         zeroHash,
-        //         messageConfig.hexConfig,
-        //         messageId,
-        //         messageHashSum,
-        //         srcChainData,
-        //         operatorAddress,
-        //     ],
-        //     {
-        //         CONCERO_VERIFIER_LOCALHOST: conceroVerifierAddress,
-		// 		CONCERO_ROUTER_LOCALHOST: conceroRouterAddress,
-        //     }
-        // );
-	}
-
-
-testCLF();
+		await simulateCLFScript(
+			__dirname + "/../../clf/dist/messageReport.js",
+			"messageReport",
+			[
+				zeroHash,
+				messageConfig.hexConfig,
+				messageId,
+				messageHashSum,
+				srcChainData,
+				operatorAddress,
+			],
+			{
+				CONCERO_VERIFIER_LOCALHOST: conceroVerifierAddress,
+			},
+		);
+	});
+});

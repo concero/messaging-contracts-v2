@@ -1,7 +1,7 @@
 import { ChainType, ReportType } from "../common/enums";
-import { packReportConfig } from "../common/packReportConfig";
 import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
+import { packReportConfig } from "../common/packReportConfig";
 import { getPublicClient } from "../common/viemClient";
 import { conceroRouters } from "./constants/conceroRouters";
 import { CONFIG } from "./constants/config";
@@ -14,7 +14,7 @@ import { pick } from "./utils/utils";
 import { decodeInputs } from "./utils/validateInputs";
 import { verifyMessageHash } from "./utils/verifyMessageHash";
 
-export async function main() {
+(async function main() {
 	try {
 		const args = decodeInputs(bytesArgs);
 		const msgConfig = args.internalMessageConfig;
@@ -61,4 +61,4 @@ export async function main() {
 			handleError(ErrorType.UNKNOWN_ERROR);
 		}
 	}
-}
+})();

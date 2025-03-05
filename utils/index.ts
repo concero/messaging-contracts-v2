@@ -16,7 +16,7 @@ import { err, log, warn } from "./log";
 import { updateEnvAddress, updateEnvVariable } from "./updateEnvVariable";
 
 export {
-	compileContracts,
+	// compileContracts,
 	configureDotEnv,
 	shorten,
 	formatGas,

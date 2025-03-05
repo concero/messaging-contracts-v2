@@ -498,7 +498,7 @@ var init_toBytes = __esm(() => {
   };
 });
 
-// ../../../node_modules/@noble/hashes/esm/_assert.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/_assert.js
 function anumber(n) {
   if (!Number.isSafeInteger(n) || n < 0)
     throw new Error("positive integer expected, got " + n);
@@ -528,7 +528,7 @@ function aoutput(out, instance) {
 var init__assert = () => {
 };
 
-// ../../../node_modules/@noble/hashes/esm/_u64.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/_u64.js
 function fromBig(n, le = false) {
   if (le)
     return { h: Number(n & U32_MASK64), l: Number(n >> _32n & U32_MASK64) };
@@ -549,7 +549,7 @@ var init__u64 = __esm(() => {
   _32n = /* @__PURE__ */ BigInt(32);
 });
 
-// ../../../node_modules/@noble/hashes/esm/utils.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/utils.js
 function u32(arr) {
   return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
 }
@@ -601,7 +601,7 @@ var init_utils = __esm(() => {
   isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
 });
 
-// ../../../node_modules/@noble/hashes/esm/sha3.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/sha3.js
 function keccakP(s, rounds = 24) {
   const B = new Uint32Array(5 * 2);
   for (let round = 24 - rounds;round < 24; round++) {

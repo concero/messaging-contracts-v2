@@ -1555,7 +1555,7 @@ var init_toBytes = __esm(() => {
   };
 });
 
-// ../../../node_modules/@noble/hashes/esm/_assert.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/_assert.js
 function anumber(n) {
   if (!Number.isSafeInteger(n) || n < 0)
     throw new Error("positive integer expected, got " + n);
@@ -1591,7 +1591,7 @@ function aoutput(out, instance) {
 var init__assert = () => {
 };
 
-// ../../../node_modules/@noble/hashes/esm/_u64.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/_u64.js
 function fromBig(n, le = false) {
   if (le)
     return { h: Number(n & U32_MASK64), l: Number(n >> _32n & U32_MASK64) };
@@ -1612,13 +1612,13 @@ var init__u64 = __esm(() => {
   _32n = /* @__PURE__ */ BigInt(32);
 });
 
-// ../../../node_modules/@noble/hashes/esm/crypto.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/crypto.js
 var crypto2;
 var init_crypto = __esm(() => {
   crypto2 = typeof globalThis === "object" && "crypto" in globalThis ? globalThis.crypto : undefined;
 });
 
-// ../../../node_modules/@noble/hashes/esm/utils.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/utils.js
 function u32(arr) {
   return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
 }
@@ -1701,7 +1701,7 @@ var init_utils2 = __esm(() => {
   isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
 });
 
-// ../../../node_modules/@noble/hashes/esm/sha3.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/sha3.js
 function keccakP(s, rounds = 24) {
   const B = new Uint32Array(5 * 2);
   for (let round = 24 - rounds;round < 24; round++) {
@@ -3938,7 +3938,7 @@ var init_rpc = __esm(() => {
   };
 });
 
-// ../../../node_modules/@noble/hashes/esm/_md.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/_md.js
 function setBigUint64(view, byteOffset, value, isLE2) {
   if (typeof view.setBigUint64 === "function")
     return view.setBigUint64(byteOffset, value, isLE2);
@@ -4049,7 +4049,7 @@ var init__md = __esm(() => {
   };
 });
 
-// ../../../node_modules/@noble/hashes/esm/sha256.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/sha256.js
 var SHA256_K, SHA256_IV, SHA256_W, SHA256, sha256;
 var init_sha256 = __esm(() => {
   init__md();
@@ -4203,7 +4203,7 @@ var init_sha256 = __esm(() => {
   sha256 = /* @__PURE__ */ wrapConstructor(() => new SHA256);
 });
 
-// ../../../node_modules/@noble/hashes/esm/hmac.js
+// ../../../node_modules/viem/node_modules/@noble/hashes/esm/hmac.js
 var HMAC, hmac = (hash2, key, message) => new HMAC(hash2, key).update(message).digest();
 var init_hmac = __esm(() => {
   init__assert();
@@ -7626,68 +7626,6 @@ var init_call = __esm(() => {
   init_stateOverride2();
   init_assertRequest();
 });
-
-// ../common/errorType.ts
-var ErrorType;
-((ErrorType2) => {
-  ErrorType2[ErrorType2["UNKNOWN_ERROR"] = 0] = "UNKNOWN_ERROR";
-  ErrorType2[ErrorType2["INVALID_BYTES_ARGS_LENGTH"] = 1] = "INVALID_BYTES_ARGS_LENGTH";
-  ErrorType2[ErrorType2["ARRAY_LENGTH_MISMATCH"] = 2] = "ARRAY_LENGTH_MISMATCH";
-  ErrorType2[ErrorType2["CONFIG_INVALID_VERSION"] = 10] = "CONFIG_INVALID_VERSION";
-  ErrorType2[ErrorType2["CONFIG_INVALID_RELAYER_CONFIG"] = 11] = "CONFIG_INVALID_RELAYER_CONFIG";
-  ErrorType2[ErrorType2["CONFIG_INVALID_MIN_SRC_CONFIRMATIONS"] = 12] = "CONFIG_INVALID_MIN_SRC_CONFIRMATIONS";
-  ErrorType2[ErrorType2["CONFIG_INVALID_MIN_DST_CONFIRMATIONS"] = 13] = "CONFIG_INVALID_MIN_DST_CONFIRMATIONS";
-  ErrorType2[ErrorType2["CONFIG_INVALID_SRC_CHAIN_SELECTOR"] = 14] = "CONFIG_INVALID_SRC_CHAIN_SELECTOR";
-  ErrorType2[ErrorType2["CONFIG_INVALID_DST_CHAIN_SELECTOR"] = 15] = "CONFIG_INVALID_DST_CHAIN_SELECTOR";
-  ErrorType2[ErrorType2["INVALID_MESSAGE_CONFIG"] = 16] = "INVALID_MESSAGE_CONFIG";
-  ErrorType2[ErrorType2["CONFIG_SAME_CHAINS"] = 17] = "CONFIG_SAME_CHAINS";
-  ErrorType2[ErrorType2["NO_CHAIN_DATA"] = 20] = "NO_CHAIN_DATA";
-  ErrorType2[ErrorType2["NO_RPC_DATA"] = 21] = "NO_RPC_DATA";
-  ErrorType2[ErrorType2["NO_RPC_PROVIDERS"] = 22] = "NO_RPC_PROVIDERS";
-  ErrorType2[ErrorType2["INVALID_SOURCE_CHAIN"] = 23] = "INVALID_SOURCE_CHAIN";
-  ErrorType2[ErrorType2["INVALID_DESTINATION_CHAIN"] = 24] = "INVALID_DESTINATION_CHAIN";
-  ErrorType2[ErrorType2["INVALID_CHAIN"] = 25] = "INVALID_CHAIN";
-  ErrorType2[ErrorType2["INVALID_RPC"] = 26] = "INVALID_RPC";
-  ErrorType2[ErrorType2["EVENT_NOT_FOUND"] = 30] = "EVENT_NOT_FOUND";
-  ErrorType2[ErrorType2["INVALID_HASHSUM"] = 31] = "INVALID_HASHSUM";
-  ErrorType2[ErrorType2["INVALID_MESSAGE_ID"] = 32] = "INVALID_MESSAGE_ID";
-  ErrorType2[ErrorType2["INVALID_DATA"] = 33] = "INVALID_DATA";
-  ErrorType2[ErrorType2["INVALID_EXTRA_ARGS"] = 34] = "INVALID_EXTRA_ARGS";
-  ErrorType2[ErrorType2["INVALID_INPUT"] = 35] = "INVALID_INPUT";
-  ErrorType2[ErrorType2["INVALID_HASH_SUM"] = 36] = "INVALID_HASH_SUM";
-  ErrorType2[ErrorType2["INVALID_CHAIN_DATA"] = 37] = "INVALID_CHAIN_DATA";
-  ErrorType2[ErrorType2["INVALID_CHAIN_TYPE"] = 38] = "INVALID_CHAIN_TYPE";
-  ErrorType2[ErrorType2["INVALID_TOKEN_TYPE"] = 40] = "INVALID_TOKEN_TYPE";
-  ErrorType2[ErrorType2["INVALID_TOKEN_AMOUNT"] = 41] = "INVALID_TOKEN_AMOUNT";
-  ErrorType2[ErrorType2["INVALID_RELAYER"] = 50] = "INVALID_RELAYER";
-  ErrorType2[ErrorType2["INVALID_OPERATOR_COUNT"] = 51] = "INVALID_OPERATOR_COUNT";
-  ErrorType2[ErrorType2["NO_REGISTERED_OPERATORS"] = 52] = "NO_REGISTERED_OPERATORS";
-  ErrorType2[ErrorType2["NO_ALLOWED_OPERATORS"] = 53] = "NO_ALLOWED_OPERATORS";
-  ErrorType2[ErrorType2["OPERATOR_SELECTION_FAILED"] = 54] = "OPERATOR_SELECTION_FAILED";
-  ErrorType2[ErrorType2["INVALID_COHORTS_COUNT"] = 55] = "INVALID_COHORTS_COUNT";
-  ErrorType2[ErrorType2["INVALID_OPERATOR_ADDRESS"] = 56] = "INVALID_OPERATOR_ADDRESS";
-  ErrorType2[ErrorType2["INVALID_ACTION"] = 57] = "INVALID_ACTION";
-  ErrorType2[ErrorType2["INVALID_OPERATOR_STAKE"] = 58] = "INVALID_OPERATOR_STAKE";
-  ErrorType2[ErrorType2["INVALID_RECEIVER"] = 60] = "INVALID_RECEIVER";
-  ErrorType2[ErrorType2["INVALID_SENDER"] = 61] = "INVALID_SENDER";
-  ErrorType2[ErrorType2["INVALID_UINT256"] = 62] = "INVALID_UINT256";
-  ErrorType2[ErrorType2["INVALID_ETHEREUM_ADDRESS"] = 63] = "INVALID_ETHEREUM_ADDRESS";
-  ErrorType2[ErrorType2["DECODE_FAILED"] = 70] = "DECODE_FAILED";
-})(ErrorType ||= {});
-
-// ../common/errorHandler.ts
-class CustomErrorHandler extends Error {
-  type;
-  data;
-  constructor(type, data = null) {
-    super(ErrorType[type]);
-    this.type = type;
-    this.data = data;
-  }
-}
-function handleError(type) {
-  throw new CustomErrorHandler(type);
-}
 
 // ../../../node_modules/viem/_esm/index.js
 init_exports();
@@ -12268,11 +12206,293 @@ async function simulateBlocks(client, parameters) {
 // ../../../node_modules/ox/_esm/core/AbiItem.js
 init_exports();
 
+// ../../../node_modules/ox/node_modules/@noble/hashes/esm/_assert.js
+function anumber2(n) {
+  if (!Number.isSafeInteger(n) || n < 0)
+    throw new Error("positive integer expected, got " + n);
+}
+function isBytes3(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
+}
+function abytes3(b, ...lengths) {
+  if (!isBytes3(b))
+    throw new Error("Uint8Array expected");
+  if (lengths.length > 0 && !lengths.includes(b.length))
+    throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
+}
+function aexists2(instance, checkFinished = true) {
+  if (instance.destroyed)
+    throw new Error("Hash instance has been destroyed");
+  if (checkFinished && instance.finished)
+    throw new Error("Hash#digest() has already been called");
+}
+function aoutput2(out, instance) {
+  abytes3(out);
+  const min = instance.outputLen;
+  if (out.length < min) {
+    throw new Error("digestInto() expects output buffer of length at least " + min);
+  }
+}
+
+// ../../../node_modules/ox/node_modules/@noble/hashes/esm/utils.js
+/*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
+function u322(arr) {
+  return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
+}
+var isLE2 = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
+function byteSwap2(word) {
+  return word << 24 & 4278190080 | word << 8 & 16711680 | word >>> 8 & 65280 | word >>> 24 & 255;
+}
+function byteSwap322(arr) {
+  for (let i = 0;i < arr.length; i++) {
+    arr[i] = byteSwap2(arr[i]);
+  }
+}
+function utf8ToBytes3(str) {
+  if (typeof str !== "string")
+    throw new Error("utf8ToBytes expected string, got " + typeof str);
+  return new Uint8Array(new TextEncoder().encode(str));
+}
+function toBytes3(data) {
+  if (typeof data === "string")
+    data = utf8ToBytes3(data);
+  abytes3(data);
+  return data;
+}
+class Hash2 {
+  clone() {
+    return this._cloneInto();
+  }
+}
+function wrapConstructor2(hashCons) {
+  const hashC = (msg) => hashCons().update(toBytes3(msg)).digest();
+  const tmp = hashCons();
+  hashC.outputLen = tmp.outputLen;
+  hashC.blockLen = tmp.blockLen;
+  hashC.create = () => hashCons();
+  return hashC;
+}
+function wrapXOFConstructorWithOpts2(hashCons) {
+  const hashC = (msg, opts) => hashCons(opts).update(toBytes3(msg)).digest();
+  const tmp = hashCons({});
+  hashC.outputLen = tmp.outputLen;
+  hashC.blockLen = tmp.blockLen;
+  hashC.create = (opts) => hashCons(opts);
+  return hashC;
+}
+
+// ../../../node_modules/ox/node_modules/@noble/hashes/esm/_u64.js
+var U32_MASK642 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
+var _32n2 = /* @__PURE__ */ BigInt(32);
+function fromBig2(n, le = false) {
+  if (le)
+    return { h: Number(n & U32_MASK642), l: Number(n >> _32n2 & U32_MASK642) };
+  return { h: Number(n >> _32n2 & U32_MASK642) | 0, l: Number(n & U32_MASK642) | 0 };
+}
+function split2(lst, le = false) {
+  let Ah = new Uint32Array(lst.length);
+  let Al = new Uint32Array(lst.length);
+  for (let i = 0;i < lst.length; i++) {
+    const { h, l } = fromBig2(lst[i], le);
+    [Ah[i], Al[i]] = [h, l];
+  }
+  return [Ah, Al];
+}
+var rotlSH2 = (h, l, s) => h << s | l >>> 32 - s;
+var rotlSL2 = (h, l, s) => l << s | h >>> 32 - s;
+var rotlBH2 = (h, l, s) => l << s - 32 | h >>> 64 - s;
+var rotlBL2 = (h, l, s) => h << s - 32 | l >>> 64 - s;
+
+// ../../../node_modules/ox/node_modules/@noble/hashes/esm/sha3.js
+var SHA3_PI2 = [];
+var SHA3_ROTL2 = [];
+var _SHA3_IOTA2 = [];
+var _0n7 = /* @__PURE__ */ BigInt(0);
+var _1n7 = /* @__PURE__ */ BigInt(1);
+var _2n6 = /* @__PURE__ */ BigInt(2);
+var _7n2 = /* @__PURE__ */ BigInt(7);
+var _256n2 = /* @__PURE__ */ BigInt(256);
+var _0x71n2 = /* @__PURE__ */ BigInt(113);
+for (let round = 0, R = _1n7, x = 1, y = 0;round < 24; round++) {
+  [x, y] = [y, (2 * x + 3 * y) % 5];
+  SHA3_PI2.push(2 * (5 * y + x));
+  SHA3_ROTL2.push((round + 1) * (round + 2) / 2 % 64);
+  let t = _0n7;
+  for (let j = 0;j < 7; j++) {
+    R = (R << _1n7 ^ (R >> _7n2) * _0x71n2) % _256n2;
+    if (R & _2n6)
+      t ^= _1n7 << (_1n7 << /* @__PURE__ */ BigInt(j)) - _1n7;
+  }
+  _SHA3_IOTA2.push(t);
+}
+var [SHA3_IOTA_H2, SHA3_IOTA_L2] = /* @__PURE__ */ split2(_SHA3_IOTA2, true);
+var rotlH2 = (h, l, s) => s > 32 ? rotlBH2(h, l, s) : rotlSH2(h, l, s);
+var rotlL2 = (h, l, s) => s > 32 ? rotlBL2(h, l, s) : rotlSL2(h, l, s);
+function keccakP2(s, rounds = 24) {
+  const B = new Uint32Array(5 * 2);
+  for (let round = 24 - rounds;round < 24; round++) {
+    for (let x = 0;x < 10; x++)
+      B[x] = s[x] ^ s[x + 10] ^ s[x + 20] ^ s[x + 30] ^ s[x + 40];
+    for (let x = 0;x < 10; x += 2) {
+      const idx1 = (x + 8) % 10;
+      const idx0 = (x + 2) % 10;
+      const B0 = B[idx0];
+      const B1 = B[idx0 + 1];
+      const Th = rotlH2(B0, B1, 1) ^ B[idx1];
+      const Tl = rotlL2(B0, B1, 1) ^ B[idx1 + 1];
+      for (let y = 0;y < 50; y += 10) {
+        s[x + y] ^= Th;
+        s[x + y + 1] ^= Tl;
+      }
+    }
+    let curH = s[2];
+    let curL = s[3];
+    for (let t = 0;t < 24; t++) {
+      const shift = SHA3_ROTL2[t];
+      const Th = rotlH2(curH, curL, shift);
+      const Tl = rotlL2(curH, curL, shift);
+      const PI = SHA3_PI2[t];
+      curH = s[PI];
+      curL = s[PI + 1];
+      s[PI] = Th;
+      s[PI + 1] = Tl;
+    }
+    for (let y = 0;y < 50; y += 10) {
+      for (let x = 0;x < 10; x++)
+        B[x] = s[y + x];
+      for (let x = 0;x < 10; x++)
+        s[y + x] ^= ~B[(x + 2) % 10] & B[(x + 4) % 10];
+    }
+    s[0] ^= SHA3_IOTA_H2[round];
+    s[1] ^= SHA3_IOTA_L2[round];
+  }
+  B.fill(0);
+}
+
+class Keccak2 extends Hash2 {
+  constructor(blockLen, suffix, outputLen, enableXOF = false, rounds = 24) {
+    super();
+    this.blockLen = blockLen;
+    this.suffix = suffix;
+    this.outputLen = outputLen;
+    this.enableXOF = enableXOF;
+    this.rounds = rounds;
+    this.pos = 0;
+    this.posOut = 0;
+    this.finished = false;
+    this.destroyed = false;
+    anumber2(outputLen);
+    if (0 >= this.blockLen || this.blockLen >= 200)
+      throw new Error("Sha3 supports only keccak-f1600 function");
+    this.state = new Uint8Array(200);
+    this.state32 = u322(this.state);
+  }
+  keccak() {
+    if (!isLE2)
+      byteSwap322(this.state32);
+    keccakP2(this.state32, this.rounds);
+    if (!isLE2)
+      byteSwap322(this.state32);
+    this.posOut = 0;
+    this.pos = 0;
+  }
+  update(data) {
+    aexists2(this);
+    const { blockLen, state } = this;
+    data = toBytes3(data);
+    const len = data.length;
+    for (let pos = 0;pos < len; ) {
+      const take = Math.min(blockLen - this.pos, len - pos);
+      for (let i = 0;i < take; i++)
+        state[this.pos++] ^= data[pos++];
+      if (this.pos === blockLen)
+        this.keccak();
+    }
+    return this;
+  }
+  finish() {
+    if (this.finished)
+      return;
+    this.finished = true;
+    const { state, suffix, pos, blockLen } = this;
+    state[pos] ^= suffix;
+    if ((suffix & 128) !== 0 && pos === blockLen - 1)
+      this.keccak();
+    state[blockLen - 1] ^= 128;
+    this.keccak();
+  }
+  writeInto(out) {
+    aexists2(this, false);
+    abytes3(out);
+    this.finish();
+    const bufferOut = this.state;
+    const { blockLen } = this;
+    for (let pos = 0, len = out.length;pos < len; ) {
+      if (this.posOut >= blockLen)
+        this.keccak();
+      const take = Math.min(blockLen - this.posOut, len - pos);
+      out.set(bufferOut.subarray(this.posOut, this.posOut + take), pos);
+      this.posOut += take;
+      pos += take;
+    }
+    return out;
+  }
+  xofInto(out) {
+    if (!this.enableXOF)
+      throw new Error("XOF is not possible for this instance");
+    return this.writeInto(out);
+  }
+  xof(bytes) {
+    anumber2(bytes);
+    return this.xofInto(new Uint8Array(bytes));
+  }
+  digestInto(out) {
+    aoutput2(out, this);
+    if (this.finished)
+      throw new Error("digest() was already called");
+    this.writeInto(out);
+    this.destroy();
+    return out;
+  }
+  digest() {
+    return this.digestInto(new Uint8Array(this.outputLen));
+  }
+  destroy() {
+    this.destroyed = true;
+    this.state.fill(0);
+  }
+  _cloneInto(to) {
+    const { blockLen, suffix, outputLen, rounds, enableXOF } = this;
+    to || (to = new Keccak2(blockLen, suffix, outputLen, enableXOF, rounds));
+    to.state32.set(this.state32);
+    to.pos = this.pos;
+    to.posOut = this.posOut;
+    to.finished = this.finished;
+    to.rounds = rounds;
+    to.suffix = suffix;
+    to.outputLen = outputLen;
+    to.enableXOF = enableXOF;
+    to.destroyed = this.destroyed;
+    return to;
+  }
+}
+var gen2 = (suffix, blockLen, outputLen) => wrapConstructor2(() => new Keccak2(blockLen, suffix, outputLen));
+var sha3_2242 = /* @__PURE__ */ gen2(6, 144, 224 / 8);
+var sha3_2562 = /* @__PURE__ */ gen2(6, 136, 256 / 8);
+var sha3_3842 = /* @__PURE__ */ gen2(6, 104, 384 / 8);
+var sha3_5122 = /* @__PURE__ */ gen2(6, 72, 512 / 8);
+var keccak_2242 = /* @__PURE__ */ gen2(1, 144, 224 / 8);
+var keccak_2562 = /* @__PURE__ */ gen2(1, 136, 256 / 8);
+var keccak_3842 = /* @__PURE__ */ gen2(1, 104, 384 / 8);
+var keccak_5122 = /* @__PURE__ */ gen2(1, 72, 512 / 8);
+var genShake2 = (suffix, blockLen, outputLen) => wrapXOFConstructorWithOpts2((opts = {}) => new Keccak2(blockLen, suffix, opts.dkLen === undefined ? outputLen : opts.dkLen, true));
+var shake1282 = /* @__PURE__ */ genShake2(31, 168, 128 / 8);
+var shake2562 = /* @__PURE__ */ genShake2(31, 136, 256 / 8);
+
 // ../../../node_modules/ox/_esm/core/Hash.js
-init_sha3();
 function keccak2562(value, options = {}) {
   const { as = typeof value === "string" ? "Hex" : "Bytes" } = options;
-  const bytes = keccak_256(from(value));
+  const bytes = keccak_2562(from(value));
   if (as === "Bytes")
     return bytes;
   return fromBytes(bytes);
@@ -14148,8 +14368,342 @@ function createPublicClient(parameters) {
 init_decodeAbiParameters();
 init_encodeAbiParameters();
 init_toBytes();
+init_fromHex();
 init_isAddress();
 init_keccak256();
+
+// ../common/reportBytes.ts
+var COMMON_REPORT_BYTE_OFFSETS = {
+  REPORT_TYPE: 248,
+  VERSION: 240,
+  REQUESTER: 0,
+  REQUESTER_MASK: (1n << 160n) - 1n
+};
+
+// ../common/packReportConfig.ts
+function packReportConfig(reportType, version4, requester) {
+  if (reportType < 0 || reportType > 255)
+    throw new Error("reportType must be a uint8 (0-255)");
+  if (version4 < 0 || version4 > 255)
+    throw new Error("version must be a uint8 (0-255)");
+  const reportTypeBits = BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE);
+  const versionBits = BigInt(version4) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION);
+  const requesterBits = hexToBigInt(requester) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK;
+  const packedValue = reportTypeBits | versionBits | requesterBits;
+  return `0x${packedValue.toString(16).padStart(64, "0")}`;
+}
+
+// ../common/errorType.ts
+var ErrorType;
+((ErrorType2) => {
+  ErrorType2[ErrorType2["UNKNOWN_ERROR"] = 0] = "UNKNOWN_ERROR";
+  ErrorType2[ErrorType2["INVALID_BYTES_ARGS_LENGTH"] = 1] = "INVALID_BYTES_ARGS_LENGTH";
+  ErrorType2[ErrorType2["ARRAY_LENGTH_MISMATCH"] = 2] = "ARRAY_LENGTH_MISMATCH";
+  ErrorType2[ErrorType2["CONFIG_INVALID_VERSION"] = 10] = "CONFIG_INVALID_VERSION";
+  ErrorType2[ErrorType2["CONFIG_INVALID_RELAYER_CONFIG"] = 11] = "CONFIG_INVALID_RELAYER_CONFIG";
+  ErrorType2[ErrorType2["CONFIG_INVALID_MIN_SRC_CONFIRMATIONS"] = 12] = "CONFIG_INVALID_MIN_SRC_CONFIRMATIONS";
+  ErrorType2[ErrorType2["CONFIG_INVALID_MIN_DST_CONFIRMATIONS"] = 13] = "CONFIG_INVALID_MIN_DST_CONFIRMATIONS";
+  ErrorType2[ErrorType2["CONFIG_INVALID_SRC_CHAIN_SELECTOR"] = 14] = "CONFIG_INVALID_SRC_CHAIN_SELECTOR";
+  ErrorType2[ErrorType2["CONFIG_INVALID_DST_CHAIN_SELECTOR"] = 15] = "CONFIG_INVALID_DST_CHAIN_SELECTOR";
+  ErrorType2[ErrorType2["INVALID_MESSAGE_CONFIG"] = 16] = "INVALID_MESSAGE_CONFIG";
+  ErrorType2[ErrorType2["CONFIG_SAME_CHAINS"] = 17] = "CONFIG_SAME_CHAINS";
+  ErrorType2[ErrorType2["NO_CHAIN_DATA"] = 20] = "NO_CHAIN_DATA";
+  ErrorType2[ErrorType2["NO_RPC_DATA"] = 21] = "NO_RPC_DATA";
+  ErrorType2[ErrorType2["NO_RPC_PROVIDERS"] = 22] = "NO_RPC_PROVIDERS";
+  ErrorType2[ErrorType2["INVALID_SOURCE_CHAIN"] = 23] = "INVALID_SOURCE_CHAIN";
+  ErrorType2[ErrorType2["INVALID_DESTINATION_CHAIN"] = 24] = "INVALID_DESTINATION_CHAIN";
+  ErrorType2[ErrorType2["INVALID_CHAIN"] = 25] = "INVALID_CHAIN";
+  ErrorType2[ErrorType2["INVALID_RPC"] = 26] = "INVALID_RPC";
+  ErrorType2[ErrorType2["EVENT_NOT_FOUND"] = 30] = "EVENT_NOT_FOUND";
+  ErrorType2[ErrorType2["INVALID_HASHSUM"] = 31] = "INVALID_HASHSUM";
+  ErrorType2[ErrorType2["INVALID_MESSAGE_ID"] = 32] = "INVALID_MESSAGE_ID";
+  ErrorType2[ErrorType2["INVALID_DATA"] = 33] = "INVALID_DATA";
+  ErrorType2[ErrorType2["INVALID_EXTRA_ARGS"] = 34] = "INVALID_EXTRA_ARGS";
+  ErrorType2[ErrorType2["INVALID_INPUT"] = 35] = "INVALID_INPUT";
+  ErrorType2[ErrorType2["INVALID_HASH_SUM"] = 36] = "INVALID_HASH_SUM";
+  ErrorType2[ErrorType2["INVALID_CHAIN_DATA"] = 37] = "INVALID_CHAIN_DATA";
+  ErrorType2[ErrorType2["INVALID_CHAIN_TYPE"] = 38] = "INVALID_CHAIN_TYPE";
+  ErrorType2[ErrorType2["INVALID_TOKEN_TYPE"] = 40] = "INVALID_TOKEN_TYPE";
+  ErrorType2[ErrorType2["INVALID_TOKEN_AMOUNT"] = 41] = "INVALID_TOKEN_AMOUNT";
+  ErrorType2[ErrorType2["INVALID_RELAYER"] = 50] = "INVALID_RELAYER";
+  ErrorType2[ErrorType2["INVALID_OPERATOR_COUNT"] = 51] = "INVALID_OPERATOR_COUNT";
+  ErrorType2[ErrorType2["NO_REGISTERED_OPERATORS"] = 52] = "NO_REGISTERED_OPERATORS";
+  ErrorType2[ErrorType2["NO_ALLOWED_OPERATORS"] = 53] = "NO_ALLOWED_OPERATORS";
+  ErrorType2[ErrorType2["OPERATOR_SELECTION_FAILED"] = 54] = "OPERATOR_SELECTION_FAILED";
+  ErrorType2[ErrorType2["INVALID_COHORTS_COUNT"] = 55] = "INVALID_COHORTS_COUNT";
+  ErrorType2[ErrorType2["INVALID_OPERATOR_ADDRESS"] = 56] = "INVALID_OPERATOR_ADDRESS";
+  ErrorType2[ErrorType2["INVALID_ACTION"] = 57] = "INVALID_ACTION";
+  ErrorType2[ErrorType2["INVALID_OPERATOR_STAKE"] = 58] = "INVALID_OPERATOR_STAKE";
+  ErrorType2[ErrorType2["INVALID_RECEIVER"] = 60] = "INVALID_RECEIVER";
+  ErrorType2[ErrorType2["INVALID_SENDER"] = 61] = "INVALID_SENDER";
+  ErrorType2[ErrorType2["INVALID_UINT256"] = 62] = "INVALID_UINT256";
+  ErrorType2[ErrorType2["INVALID_ETHEREUM_ADDRESS"] = 63] = "INVALID_ETHEREUM_ADDRESS";
+  ErrorType2[ErrorType2["DECODE_FAILED"] = 70] = "DECODE_FAILED";
+})(ErrorType ||= {});
+
+// ../common/errorHandler.ts
+class CustomErrorHandler extends Error {
+  type;
+  data;
+  constructor(type, data = null) {
+    super(ErrorType[type]);
+    this.type = type;
+    this.data = data;
+  }
+}
+function handleError(type) {
+  throw new CustomErrorHandler(type);
+}
+
+// ../common/config.ts
+function isDevelopment() {
+  try {
+    return secrets?.CONCERO_CLF_DEVELOPMENT === "true";
+  } catch {
+    return false;
+  }
+}
+function getLocalhostRpcUrl() {
+  try {
+    return secrets?.LOCALHOST_RPC_URL;
+  } catch {
+    return;
+  }
+}
+var config = {
+  isDevelopment: isDevelopment(),
+  localhostRpcUrl: getLocalhostRpcUrl()
+};
+// ../common/rpcs/1.json
+var _1_default = {
+  id: "1",
+  urls: [
+    "virginia.rpc.blxrbdn.com/",
+    "uk.rpc.blxrbdn.com/",
+    "eth.rpc.blxrbdn.com/",
+    "singapore.rpc.blxrbdn.com/",
+    "mainnet.gateway.tenderly.co",
+    "rpc.ankr.com/eth",
+    "eth-mainnet.public.blastapi.io",
+    "eth.drpc.org",
+    "gateway.tenderly.co/public/mainnet",
+    "ethereum-rpc.publicnode.com",
+    "rpc.mevblocker.io",
+    "rpc.eth.gateway.fm",
+    "ethereum.blockpi.network/v1/rpc/public",
+    "eth.merkle.io",
+    "rpc.flashbots.net/",
+    "core.gashawk.io/rpc",
+    "rpc.graffiti.farm",
+    "eth.blockrazor.xyz",
+    "1rpc.io/eth",
+    "api.securerpc.com/v1",
+    "0xrpc.io/eth",
+    "eth.nodeconnect.org/",
+    "eth-mainnet.4everland.org/v1/37fa9972c1b1cd5fab542c7bdd4cde2f",
+    "rpc.payload.de",
+    "endpoints.omniatech.io/v1/eth/mainnet/public",
+    "eth-pokt.nodies.app",
+    "eth.meowrpc.com",
+    "openapi.bitstack.com/v1/wNFxbiJyQsSeLrX8RRCHi7NpRxrlErZk/DjShIqLishPCTB9HiMkPHXjUM9CNM9Na/ETH/mainnet",
+    "api.zan.top/eth-mainnet"
+  ],
+  chainSelector: 1
+};
+// ../common/rpcs/10.json
+var _10_default = {
+  id: "10",
+  urls: [
+    "rpc.ankr.com/optimism",
+    "gateway.tenderly.co/public/optimism",
+    "go.getblock.io/e8a75f8dcf614861becfbcb185be6eb4",
+    "opt-mainnet.4everland.org/v1/37fa9972c1b1cd5fab542c7bdd4cde2f",
+    "op-pokt.nodies.app",
+    "optimism-mainnet.public.blastapi.io",
+    "optimism.blockpi.network/v1/rpc/public",
+    "optimism-rpc.publicnode.com",
+    "optimism.meowrpc.com",
+    "optimism.api.onfinality.io/public",
+    "0xrpc.io/op",
+    "optimism.gateway.tenderly.co",
+    "1rpc.io/op",
+    "endpoints.omniatech.io/v1/op/mainnet/public",
+    "optimism.lava.build",
+    "optimism.drpc.org",
+    "api.zan.top/opt-mainnet"
+  ],
+  chainSelector: 10
+};
+// ../common/rpcs/137.json
+var _137_default = {
+  id: "137",
+  urls: [
+    "gateway.tenderly.co/public/polygon",
+    "go.getblock.io/02667b699f05444ab2c64f9bff28f027",
+    "endpoints.omniatech.io/v1/matic/mainnet/public",
+    "rpc.ankr.com/polygon",
+    "polygon-bor-rpc.publicnode.com",
+    "polygon.gateway.tenderly.co",
+    "polygon.meowrpc.com",
+    "polygon.drpc.org",
+    "polygon-mainnet.4everland.org/v1/37fa9972c1b1cd5fab542c7bdd4cde2f",
+    "1rpc.io/matic",
+    "api.zan.top/polygon-mainnet",
+    "polygon-mainnet.public.blastapi.io",
+    "polygon-pokt.nodies.app",
+    "polygon.lava.build",
+    "polygon.api.onfinality.io/public",
+    "rpc-mainnet.matic.quiknode.pro"
+  ],
+  chainSelector: 137
+};
+// ../common/rpcs/8453.json
+var _8453_default = {
+  id: "8453",
+  urls: [
+    "gateway.tenderly.co/public/base",
+    "endpoints.omniatech.io/v1/base/mainnet/public",
+    "base-mainnet.public.blastapi.io",
+    "base.gateway.tenderly.co",
+    "base-rpc.publicnode.com",
+    "base.meowrpc.com",
+    "base.lava.build",
+    "base.blockpi.network/v1/rpc/public",
+    "base.drpc.org",
+    "1rpc.io/base",
+    "base-pokt.nodies.app",
+    "0xrpc.io/base",
+    "api.zan.top/base-mainnet",
+    "base.api.onfinality.io/public"
+  ],
+  chainSelector: 8453
+};
+// ../common/rpcs/42161.json
+var _42161_default = {
+  id: "42161",
+  urls: [
+    "rpc.ankr.com/arbitrum",
+    "arbitrum-one.public.blastapi.io",
+    "arbitrum.meowrpc.com",
+    "arbitrum.blockpi.network/v1/rpc/public",
+    "arbitrum.drpc.org",
+    "arbitrum.gateway.tenderly.co",
+    "arb1.lava.build",
+    "1rpc.io/arb",
+    "arbitrum-one-rpc.publicnode.com",
+    "arb-pokt.nodies.app",
+    "api.zan.top/arb-one",
+    "endpoints.omniatech.io/v1/arbitrum/one/public"
+  ],
+  chainSelector: 42161
+};
+// ../common/rpcs/43113.json
+var _43113_default = {
+  id: "43113",
+  urls: [
+    "rpc.ankr.com/avalanche_fuji",
+    "endpoints.omniatech.io/v1/avax/fuji/public",
+    "avalanche-fuji-c-chain-rpc.publicnode.com",
+    "avalanche-fuji.drpc.org",
+    "ava-testnet.public.blastapi.io/ext/bc/C/rpc",
+    "api.zan.top/avax-fuji/ext/bc/C/rpc"
+  ],
+  chainSelector: 43113
+};
+// ../common/rpcs/43114.json
+var _43114_default = {
+  id: "43114",
+  urls: [
+    "rpc.ankr.com/avalanche",
+    "endpoints.omniatech.io/v1/avax/mainnet/public",
+    "1rpc.io/avax/c",
+    "avalanche-mainnet.gateway.tenderly.co",
+    "avax.meowrpc.com",
+    "avalanche.drpc.org",
+    "ava-mainnet.public.blastapi.io/ext/bc/C/rpc",
+    "avalanche-c-chain-rpc.publicnode.com",
+    "avax-pokt.nodies.app/ext/bc/C/rpc",
+    "api.zan.top/avax-mainnet/ext/bc/C/rpc",
+    "0xrpc.io/avax",
+    "avalanche.api.onfinality.io/public/ext/bc/C/rpc"
+  ],
+  chainSelector: 43114
+};
+// ../common/rpcs/80002.json
+var _80002_default = {
+  id: "80002",
+  urls: [
+    "rpc.ankr.com/polygon_amoy",
+    "polygon-amoy.gateway.tenderly.co",
+    "polygon-amoy.drpc.org",
+    "api.zan.top/polygon-amoy"
+  ],
+  chainSelector: 80002
+};
+// ../common/rpcs/84532.json
+var _84532_default = {
+  id: "84532",
+  urls: [
+    "base-sepolia.gateway.tenderly.co",
+    "base-sepolia.drpc.org"
+  ],
+  chainSelector: 84532
+};
+// ../common/rpcs/421614.json
+var _421614_default = {
+  id: "421614",
+  urls: [
+    "endpoints.omniatech.io/v1/arbitrum/sepolia/public",
+    "arbitrum-sepolia.gateway.tenderly.co",
+    "arbitrum-sepolia.drpc.org",
+    "api.zan.top/arb-sepolia"
+  ],
+  chainSelector: 421614
+};
+// ../common/rpcs/11155111.json
+var _11155111_default = {
+  id: "11155111",
+  urls: [
+    "gateway.tenderly.co/public/sepolia",
+    "eth-sepolia.public.blastapi.io",
+    "ethereum-sepolia-rpc.publicnode.com",
+    "sepolia.gateway.tenderly.co",
+    "eth-sepolia.api.onfinality.io/public",
+    "1rpc.io/sepolia",
+    "eth-testnet.4everland.org/v1/37fa9972c1b1cd5fab542c7bdd4cde2f",
+    "api.zan.top/eth-sepolia",
+    "0xrpc.io/sep",
+    "endpoints.omniatech.io/v1/eth/sepolia/public"
+  ],
+  chainSelector: 11155111
+};
+// ../common/rpcs/11155420.json
+var _11155420_default = {
+  id: "11155420",
+  urls: [
+    "endpoints.omniatech.io/v1/op/sepolia/public",
+    "optimism-sepolia.gateway.tenderly.co",
+    "optimism-sepolia.api.onfinality.io/public",
+    "api.zan.top/opt-sepolia"
+  ],
+  chainSelector: 11155420
+};
+
+// ../common/rpcLoader.ts
+var rpcConfigs = {
+  "1": _1_default,
+  "10": _10_default,
+  "11155111": _11155111_default,
+  "11155420": _11155420_default,
+  "137": _137_default,
+  "42161": _42161_default,
+  "421614": _421614_default,
+  "43113": _43113_default,
+  "43114": _43114_default,
+  "80002": _80002_default,
+  "8453": _8453_default,
+  "84532": _84532_default
+};
 
 // ../../../node_modules/viem/_esm/op-stack/contracts.js
 var contracts = {
@@ -14426,27 +14980,7 @@ var mainnet = /* @__PURE__ */ defineChain({
     }
   }
 });
-// ../common/config.ts
-function isDevelopment() {
-  try {
-    return secrets?.CONCERO_CLF_DEVELOPMENT === "true";
-  } catch {
-    return false;
-  }
-}
-function getLocalhostRpcUrl() {
-  try {
-    return secrets?.LOCALHOST_RPC_URL;
-  } catch {
-    return;
-  }
-}
-var config = {
-  isDevelopment: isDevelopment(),
-  localhostRpcUrl: getLocalhostRpcUrl()
-};
-
-// constants/viemChains.ts
+// ../common/viemChains.ts
 var localhostChain = defineChain({
   id: 1,
   name: "localhost",
@@ -14462,123 +14996,36 @@ var localhostChain = defineChain({
   }
 });
 var localhostChains = {
-  1: localhostChain,
-  10: localhostChain
+  "1": localhostChain,
+  "10": localhostChain
 };
 var liveChains = {
-  1: mainnet,
-  8453: base,
-  421614: arbitrumSepolia,
-  84532: baseSepolia
+  "1": mainnet,
+  "8453": base,
+  "421614": arbitrumSepolia,
+  "84532": baseSepolia
 };
 var viemChains = config.isDevelopment ? localhostChains : liveChains;
 
-// ../common/developmentRpcs.ts
-var developmentRpcs = {
-  "1": {
-    rpcs: [
-      {
-        chainId: "1",
-        url: config.localhostRpcUrl
-      }
-    ]
-  },
-  "10": {
-    rpcs: [
-      {
-        chainId: "10",
-        url: config.localhostRpcUrl
-      }
-    ]
-  }
-};
-
-// ../common/healthyRPCs.ts
-var healthyRPCs = {
-  "1": {
-    rpcs: [
-      {
-        chainId: "1",
-        url: "https://rpc.ankr.com/eth"
-      },
-      {
-        chainId: "1",
-        url: "https://go.getblock.io/aefd01aa907c4805ba3c00a9e5b48c6b"
-      },
-      {
-        chainId: "1",
-        url: "https://ethereum-rpc.publicnode.com"
-      },
-      {
-        chainId: "1",
-        url: "https://1rpc.io/eth"
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.mevblocker.io"
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.flashbots.net/"
-      },
-      {
-        chainId: "1",
-        url: "https://virginia.rpc.blxrbdn.com/"
-      },
-      {
-        chainId: "1",
-        url: "https://uk.rpc.blxrbdn.com/"
-      },
-      {
-        chainId: "1",
-        url: "https://singapore.rpc.blxrbdn.com/"
-      },
-      {
-        chainId: "1",
-        url: "https://eth.rpc.blxrbdn.com/"
-      },
-      {
-        chainId: "1",
-        url: "https://eth-mainnet.public.blastapi.io"
-      }
-    ]
-  },
-  "84532": {
-    rpcs: [
-      { chainId: "84532", url: "https://base-sepolia.drpc.org" },
-      { chainId: "84532", url: "https://base-sepolia-rpc.publicnode.com" }
-    ]
-  },
-  "421614": {
-    rpcs: [
-      { chainId: "421614", url: "https://arbitrum-sepolia-rpc.publicnode.com" },
-      { chainId: "421614", url: "https://arbitrum-sepolia.drpc.org" },
-      { chainId: "421614", url: "https://sepolia-rollup.arbitrum.io/rpc" }
-    ]
-  }
-};
-
 // ../common/viemClient.ts
-function createCustomTransport(url, chainIdHex) {
-  return http(url, { batch: true });
+function getRpcConfigForChain(chainSelector) {
+  if (config.isDevelopment) {
+    return {
+      id: chainSelector,
+      urls: [config.localhostRpcUrl]
+    };
+  }
+  return rpcConfigs[chainSelector];
 }
 function createFallbackTransport(chainSelector) {
-  const chainConfig2 = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRPCs[chainSelector];
-  if (!chainConfig2) {
-    handleError(25 /* INVALID_CHAIN */);
+  const rpcConfig = getRpcConfigForChain(chainSelector);
+  if (!rpcConfig || !rpcConfig.urls || rpcConfig.urls.length === 0) {
+    handleError(22 /* NO_RPC_PROVIDERS */);
   }
-  if (!chainConfig2.rpcs[0]) {
-    handleError(26 /* INVALID_RPC */);
-  }
-  const chainIdHex = `0x${parseInt(chainConfig2.rpcs[0].chainId, 10).toString(16)}`;
-  const transportFactories = chainConfig2.rpcs.map((rpc) => createCustomTransport(rpc.url, chainIdHex));
+  const transportFactories = rpcConfig.urls.map((url) => http(url.startsWith("http") ? url : `https://${url}`, { batch: true }));
   return fallback(transportFactories);
 }
 function getPublicClient(chainSelector) {
-  const chainConfig2 = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRPCs[chainSelector];
-  if (!chainConfig2 || !chainConfig2.rpcs.length) {
-    handleError(22 /* NO_RPC_PROVIDERS */);
-  }
   return createPublicClient({
     transport: createFallbackTransport(chainSelector),
     chain: viemChains[chainSelector]
@@ -14714,14 +15161,6 @@ async function getRegisteredOperators(client, chainType) {
   return registeredOperators;
 }
 
-// ../common/reportBytes.ts
-var COMMON_REPORT_BYTE_OFFSETS = {
-  REPORT_TYPE: 248,
-  VERSION: 240,
-  REQUESTER: 0,
-  REQUESTER_MASK: (1n << 160n) - 1n
-};
-
 // ../common/encoders.ts
 function hexStringToUint8Array(hex) {
   hex = hex.replace(/^0x/, "");
@@ -14753,17 +15192,6 @@ function packResult(result, packedReportConfig) {
   return hexStringToUint8Array(encoded);
 }
 
-// constants/internalMessageConfig.ts
-var INTERNAL_MESSAGE_CONFIG_OFFSETS = {
-  VERSION: 224,
-  SRC_CHAIN: 224,
-  DST_CHAIN: 168,
-  MIN_SRC_CONF: 152,
-  MIN_DST_CONF: 136,
-  RELAYER: 128,
-  CALLBACKABLE: 127
-};
-
 // ../common/bitMasks.ts
 var MASKS = {
   UINT24: 0xffffffn,
@@ -14773,6 +15201,17 @@ var MASKS = {
   UPPER_BYTE: 65280,
   LOWER_BYTE: 255,
   UPPER_BYTE_SHIFT: 8
+};
+
+// constants/internalMessageConfig.ts
+var INTERNAL_MESSAGE_CONFIG_OFFSETS = {
+  VERSION: 224,
+  SRC_CHAIN: 224,
+  DST_CHAIN: 168,
+  MIN_SRC_CONF: 152,
+  MIN_DST_CONF: 136,
+  RELAYER: 128,
+  CALLBACKABLE: 127
 };
 
 // utils/messageConfig.ts
@@ -14797,9 +15236,9 @@ function validateInternalMessageConfig(config2) {
     handleError(12 /* CONFIG_INVALID_MIN_SRC_CONFIRMATIONS */);
   if (config2.minDstConfirmations === 0n)
     handleError(13 /* CONFIG_INVALID_MIN_DST_CONFIRMATIONS */);
-  if (!viemChains[Number(config2.srcChainSelector)])
+  if (!viemChains[config2.srcChainSelector.toString()])
     handleError(14 /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
-  if (!viemChains[Number(config2.dstChainSelector)])
+  if (!viemChains[config2.dstChainSelector.toString()])
     handleError(15 /* CONFIG_INVALID_DST_CHAIN_SELECTOR */);
   if (config2.srcChainSelector === config2.dstChainSelector)
     handleError(17 /* CONFIG_SAME_CHAINS */);
@@ -14868,7 +15307,7 @@ function verifyMessageHash(message, expectedHashSum) {
 }
 
 // index.ts
-(async function main() {
+async function main() {
   try {
     const args = decodeInputs(bytesArgs);
     const msgConfig = args.internalMessageConfig;
@@ -14903,4 +15342,7 @@ function verifyMessageHash(message, expectedHashSum) {
       handleError(0 /* UNKNOWN_ERROR */);
     }
   }
-})();
+}
+export {
+  main
+};

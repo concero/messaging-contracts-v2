@@ -1,7 +1,8 @@
 import { type Chain, defineChain } from "viem";
 import { arbitrumSepolia, base, baseSepolia, mainnet } from "viem/chains";
 
-import { config } from "../../common/config";
+import { config } from "./config";
+import { ChainSelector } from "./types";
 
 const localhostChain = defineChain({
 	id: 1,
@@ -18,18 +19,18 @@ const localhostChain = defineChain({
 	},
 });
 
-const localhostChains: Record<number, Chain> = {
-	1: localhostChain,
-	10: localhostChain,
+const localhostChains: Partial<Record<ChainSelector, Chain>> = {
+	"1": localhostChain,
+	"10": localhostChain,
 };
 
-const liveChains: Record<number, Chain> = {
-	1: mainnet,
-	8453: base,
+const liveChains: Partial<Record<ChainSelector, Chain>> = {
+	"1": mainnet,
+	"8453": base,
 
 	// @dev testnets
-	421614: arbitrumSepolia,
-	84532: baseSepolia,
+	"421614": arbitrumSepolia,
+	"84532": baseSepolia,
 };
 
 export const viemChains = config.isDevelopment ? localhostChains : liveChains;

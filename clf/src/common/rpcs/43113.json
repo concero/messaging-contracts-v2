@@ -1,0 +1,12 @@
+{
+  "id": "43113",
+  "urls": [
+    "rpc.ankr.com/avalanche_fuji",
+    "endpoints.omniatech.io/v1/avax/fuji/public",
+    "avalanche-fuji-c-chain-rpc.publicnode.com",
+    "avalanche-fuji.drpc.org",
+    "ava-testnet.public.blastapi.io/ext/bc/C/rpc",
+    "api.zan.top/avax-fuji/ext/bc/C/rpc"
+  ],
+  "chainSelector": 43113
+}

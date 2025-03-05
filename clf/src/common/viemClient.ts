@@ -1,78 +1,37 @@
 import { Transport, createPublicClient, fallback, http } from "viem";
 
-import { viemChains } from "../messageReport/constants/viemChains";
 import { config } from "./config";
-import { developmentRpcs } from "./developmentRpcs";
 import { handleError } from "./errorHandler";
 import { ErrorType } from "./errorType";
-import { healthyRPCs } from "./healthyRPCs";
+import { rpcConfigs } from "./rpcLoader";
+import { ChainSelector } from "./types";
+import { viemChains } from "./viemChains";
 
-function createCustomTransport(url: string, chainIdHex: string): Transport {
-	// return createTransport({
-	//     name: "customTransport",
-	//     key: "custom",
-	//     type: "http",
-	//     retryCount: CONFIG.VIEM.RETRY_COUNT,
-	//     retryDelay: CONFIG.VIEM.RETRY_DELAY,
-	//     request: async ({ method, params }) => {
-	//         if (method === "eth_chainId") return { jsonrpc: "2.0", id: 1, result: chainIdHex };
-	//         const response = await fetch(url, {
-	//             method: "POST",
-	//             headers: { "Content-Type": "application/json" },
-	//             body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-	//         });
-	//         const result = await response.json();
-	//         if (Array.isArray(result)) {
-	//             return [result];
-	//         }
-	//         return result;
-	//     },
-	// });
-	// return custom({
-	//     retryCount: CONFIG.VIEM.RETRY_COUNT,
-	//     retryDelay: CONFIG.VIEM.RETRY_DELAY,
-	//     async request({ method, params }) {
-	//         if (method === "eth_chainId") return { jsonrpc: "2.0", id: 1, result: chainIdHex };
-	//         const response = await fetch(url, {
-	//             method: "POST",
-	//             headers: { "Content-Type": "application/json" },
-	//             body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-	//         });
-	//         const result = await response.json();
-	//         // if (Array.isArray(result)) {
-	//         //     return [result];
-	//         // }
-	//         return [result];
-	//     },
-	// });
-
-	return http(url, { batch: true });
-}
-
-export function createFallbackTransport(chainSelector: string): Transport {
-	const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRPCs[chainSelector];
-	if (!chainConfig) {
-		handleError(ErrorType.INVALID_CHAIN);
+function getRpcConfigForChain(chainSelector: ChainSelector) {
+	if (config.isDevelopment) {
+		return {
+			id: chainSelector,
+			urls: [config.localhostRpcUrl],
+		};
 	}
 
-	if (!chainConfig.rpcs[0]) {
-		handleError(ErrorType.INVALID_RPC);
-	}
-
-	const chainIdHex = `0x${parseInt(chainConfig.rpcs[0].chainId, 10).toString(16)}`;
-
-	const transportFactories = chainConfig.rpcs.map(rpc => createCustomTransport(rpc.url, chainIdHex));
-
-	return fallback(transportFactories);
+	return rpcConfigs[chainSelector];
 }
 
-export function getPublicClient(chainSelector: string) {
-	const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRPCs[chainSelector];
+export function createFallbackTransport(chainSelector: ChainSelector): Transport {
+	const rpcConfig = getRpcConfigForChain(chainSelector);
 
-	if (!chainConfig || !chainConfig.rpcs.length) {
+	if (!rpcConfig || !rpcConfig.urls || rpcConfig.urls.length === 0) {
 		handleError(ErrorType.NO_RPC_PROVIDERS);
 	}
 
+	const transportFactories = rpcConfig.urls.map(url =>
+		http(url.startsWith("http") ? url : `https://${url}`, { batch: true }),
+	);
+	return fallback(transportFactories);
+}
+
+export function getPublicClient(chainSelector: ChainSelector) {
 	return createPublicClient({
 		transport: createFallbackTransport(chainSelector),
 		chain: viemChains[chainSelector],

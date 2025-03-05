@@ -11,7 +11,7 @@ export function buildClfJs() {
 		const networkName = hre.network.name;
 		const conceroVerifier = getEnvVar(`CONCERO_VERIFIER_${networkEnvKeys[networkName]}`);
 		const conceroRouter = getEnvVar(`CONCERO_ROUTER_${networkEnvKeys[networkName]}`);
-		const cmdBase = `bun build index.ts --define CONCERO_VERIFIER='"${conceroVerifier}"' --define CONCERO_ROUTER='"${conceroRouter}"' `;
+		const cmdBase = `bun build index.ts --target browser --define CONCERO_VERIFIER='"${conceroVerifier}"' --define CONCERO_ROUTER='"${conceroRouter}"' `;
 		const dirs = execSync("ls -d */", { cwd: "clf/src" }).toString();
 		const dirsArray = dirs
 			.split("\n")

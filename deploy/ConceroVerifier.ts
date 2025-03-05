@@ -2,6 +2,7 @@ import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks, networkEnvKeys } from "../constants";
+import { addCLFConsumer } from "../tasks/clf";
 import { CLF_DON_HOSTED_SECRETS_SLOT } from "../constants/CLFSecretsConfig";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { getEnvVar, getGasParameters, getHashSum, log, updateEnvVariable } from "../utils";
@@ -34,7 +35,7 @@ const deployVerifier: DeploymentFunction = async function (
 ): Promise<Deployment> {
 	const { deployer } = await hre.getNamedAccounts();
 	const { deploy } = hre.deployments;
-	const { name } = hre.network;
+	const { name, live } = hre.network;
 
 	const chain = conceroNetworks[name as ConceroNetworkNames];
 	const { type: networkType } = chain;
@@ -100,6 +101,14 @@ const deployVerifier: DeploymentFunction = async function (
 		deployment.address,
 		`deployments.${networkType}`,
 	);
+
+	if (live) {
+		await addCLFConsumer(
+			conceroNetworks[name],
+			[deployment.address],
+			args.clfParams.subscriptionId,
+		);
+	}
 
 	return deployment;
 };

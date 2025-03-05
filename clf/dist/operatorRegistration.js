@@ -34,7 +34,7 @@ var init_size = () => {
 };
 
 // ../../../node_modules/viem/_esm/errors/version.js
-var version = "2.23.5";
+var version = "2.23.6";
 
 // ../../../node_modules/viem/_esm/errors/base.js
 function walk(err, fn) {
@@ -125,9 +125,10 @@ var init_base = __esm(() => {
 });
 
 // ../../../node_modules/viem/_esm/errors/abi.js
-var AbiDecodingDataSizeTooSmallError, AbiDecodingZeroDataError, InvalidAbiDecodingTypeError;
+var AbiDecodingDataSizeTooSmallError, AbiDecodingZeroDataError, AbiEncodingArrayLengthMismatchError, AbiEncodingBytesSizeMismatchError, AbiEncodingLengthMismatchError, InvalidAbiEncodingTypeError, InvalidAbiDecodingTypeError, InvalidArrayError;
 var init_abi = __esm(() => {
   init_formatAbiItem();
+  init_size();
   init_base();
   AbiDecodingDataSizeTooSmallError = class AbiDecodingDataSizeTooSmallError extends BaseError {
     constructor({ data, params, size: size2 }) {
@@ -169,6 +170,40 @@ var init_abi = __esm(() => {
       });
     }
   };
+  AbiEncodingArrayLengthMismatchError = class AbiEncodingArrayLengthMismatchError extends BaseError {
+    constructor({ expectedLength, givenLength, type }) {
+      super([
+        `ABI encoding array length mismatch for type ${type}.`,
+        `Expected length: ${expectedLength}`,
+        `Given length: ${givenLength}`
+      ].join(`
+`), { name: "AbiEncodingArrayLengthMismatchError" });
+    }
+  };
+  AbiEncodingBytesSizeMismatchError = class AbiEncodingBytesSizeMismatchError extends BaseError {
+    constructor({ expectedSize, value }) {
+      super(`Size of bytes "${value}" (bytes${size(value)}) does not match expected size (bytes${expectedSize}).`, { name: "AbiEncodingBytesSizeMismatchError" });
+    }
+  };
+  AbiEncodingLengthMismatchError = class AbiEncodingLengthMismatchError extends BaseError {
+    constructor({ expectedLength, givenLength }) {
+      super([
+        "ABI encoding params/values length mismatch.",
+        `Expected length (params): ${expectedLength}`,
+        `Given length (values): ${givenLength}`
+      ].join(`
+`), { name: "AbiEncodingLengthMismatchError" });
+    }
+  };
+  InvalidAbiEncodingTypeError = class InvalidAbiEncodingTypeError extends BaseError {
+    constructor(type, { docsPath }) {
+      super([
+        `Type "${type}" is not a valid encoding type.`,
+        "Please provide a valid ABI type."
+      ].join(`
+`), { docsPath, name: "InvalidAbiEncodingType" });
+    }
+  };
   InvalidAbiDecodingTypeError = class InvalidAbiDecodingTypeError extends BaseError {
     constructor(type, { docsPath }) {
       super([
@@ -176,6 +211,14 @@ var init_abi = __esm(() => {
         "Please provide a valid ABI type."
       ].join(`
 `), { docsPath, name: "InvalidAbiDecodingType" });
+    }
+  };
+  InvalidArrayError = class InvalidArrayError extends BaseError {
+    constructor(value) {
+      super([`Value "${value}" is not a valid array.`].join(`
+`), {
+        name: "InvalidArrayError"
+      });
     }
   };
 });
@@ -759,6 +802,23 @@ var init_keccak256 = __esm(() => {
   init_toHex();
 });
 
+// ../../../node_modules/viem/_esm/errors/address.js
+var InvalidAddressError;
+var init_address = __esm(() => {
+  init_base();
+  InvalidAddressError = class InvalidAddressError extends BaseError {
+    constructor({ address }) {
+      super(`Address "${address}" is invalid.`, {
+        metaMessages: [
+          "- Address must be a hex value of 20 bytes (40 hex characters).",
+          "- Address must match its checksum counterpart."
+        ],
+        name: "InvalidAddressError"
+      });
+    }
+  };
+});
+
 // ../../../node_modules/viem/_esm/utils/lru.js
 var LruMap;
 var init_lru = __esm(() => {
@@ -846,7 +906,39 @@ var init_isAddress = __esm(() => {
   isAddressCache = /* @__PURE__ */ new LruMap(8192);
 });
 
+// ../../../node_modules/viem/_esm/utils/data/concat.js
+function concat(values) {
+  if (typeof values[0] === "string")
+    return concatHex(values);
+  return concatBytes(values);
+}
+function concatBytes(values) {
+  let length = 0;
+  for (const arr of values) {
+    length += arr.length;
+  }
+  const result = new Uint8Array(length);
+  let offset = 0;
+  for (const arr of values) {
+    result.set(arr, offset);
+    offset += arr.length;
+  }
+  return result;
+}
+function concatHex(values) {
+  return `0x${values.reduce((acc, x) => acc + x.replace("0x", ""), "")}`;
+}
+
 // ../../../node_modules/viem/_esm/utils/data/slice.js
+function slice(value, start, end, { strict } = {}) {
+  if (isHex(value, { strict: false }))
+    return sliceHex(value, start, end, {
+      strict
+    });
+  return sliceBytes(value, start, end, {
+    strict
+  });
+}
 function assertStartOffset(value, start) {
   if (typeof start === "number" && start > 0 && start > size(value) - 1)
     throw new SliceOffsetOutOfBoundsError({
@@ -871,18 +963,246 @@ function sliceBytes(value_, start, end, { strict } = {}) {
     assertEndOffset(value, start, end);
   return value;
 }
+function sliceHex(value_, start, end, { strict } = {}) {
+  assertStartOffset(value_, start);
+  const value = `0x${value_.replace("0x", "").slice((start ?? 0) * 2, (end ?? value_.length) * 2)}`;
+  if (strict)
+    assertEndOffset(value, start, end);
+  return value;
+}
 var init_slice = __esm(() => {
   init_data();
   init_size();
 });
 
+// ../../../node_modules/viem/_esm/utils/regex.js
+var integerRegex;
+var init_regex = __esm(() => {
+  integerRegex = /^(u?int)(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144|152|160|168|176|184|192|200|208|216|224|232|240|248|256)?$/;
+});
+
 // ../../../node_modules/viem/_esm/utils/abi/encodeAbiParameters.js
+function encodeAbiParameters(params, values) {
+  if (params.length !== values.length)
+    throw new AbiEncodingLengthMismatchError({
+      expectedLength: params.length,
+      givenLength: values.length
+    });
+  const preparedParams = prepareParams({
+    params,
+    values
+  });
+  const data = encodeParams(preparedParams);
+  if (data.length === 0)
+    return "0x";
+  return data;
+}
+function prepareParams({ params, values }) {
+  const preparedParams = [];
+  for (let i = 0;i < params.length; i++) {
+    preparedParams.push(prepareParam({ param: params[i], value: values[i] }));
+  }
+  return preparedParams;
+}
+function prepareParam({ param, value }) {
+  const arrayComponents = getArrayComponents(param.type);
+  if (arrayComponents) {
+    const [length, type] = arrayComponents;
+    return encodeArray(value, { length, param: { ...param, type } });
+  }
+  if (param.type === "tuple") {
+    return encodeTuple(value, {
+      param
+    });
+  }
+  if (param.type === "address") {
+    return encodeAddress(value);
+  }
+  if (param.type === "bool") {
+    return encodeBool(value);
+  }
+  if (param.type.startsWith("uint") || param.type.startsWith("int")) {
+    const signed = param.type.startsWith("int");
+    const [, , size2 = "256"] = integerRegex.exec(param.type) ?? [];
+    return encodeNumber(value, {
+      signed,
+      size: Number(size2)
+    });
+  }
+  if (param.type.startsWith("bytes")) {
+    return encodeBytes(value, { param });
+  }
+  if (param.type === "string") {
+    return encodeString(value);
+  }
+  throw new InvalidAbiEncodingTypeError(param.type, {
+    docsPath: "/docs/contract/encodeAbiParameters"
+  });
+}
+function encodeParams(preparedParams) {
+  let staticSize = 0;
+  for (let i = 0;i < preparedParams.length; i++) {
+    const { dynamic, encoded } = preparedParams[i];
+    if (dynamic)
+      staticSize += 32;
+    else
+      staticSize += size(encoded);
+  }
+  const staticParams = [];
+  const dynamicParams = [];
+  let dynamicSize = 0;
+  for (let i = 0;i < preparedParams.length; i++) {
+    const { dynamic, encoded } = preparedParams[i];
+    if (dynamic) {
+      staticParams.push(numberToHex(staticSize + dynamicSize, { size: 32 }));
+      dynamicParams.push(encoded);
+      dynamicSize += size(encoded);
+    } else {
+      staticParams.push(encoded);
+    }
+  }
+  return concat([...staticParams, ...dynamicParams]);
+}
+function encodeAddress(value) {
+  if (!isAddress(value))
+    throw new InvalidAddressError({ address: value });
+  return { dynamic: false, encoded: padHex(value.toLowerCase()) };
+}
+function encodeArray(value, { length, param }) {
+  const dynamic = length === null;
+  if (!Array.isArray(value))
+    throw new InvalidArrayError(value);
+  if (!dynamic && value.length !== length)
+    throw new AbiEncodingArrayLengthMismatchError({
+      expectedLength: length,
+      givenLength: value.length,
+      type: `${param.type}[${length}]`
+    });
+  let dynamicChild = false;
+  const preparedParams = [];
+  for (let i = 0;i < value.length; i++) {
+    const preparedParam = prepareParam({ param, value: value[i] });
+    if (preparedParam.dynamic)
+      dynamicChild = true;
+    preparedParams.push(preparedParam);
+  }
+  if (dynamic || dynamicChild) {
+    const data = encodeParams(preparedParams);
+    if (dynamic) {
+      const length2 = numberToHex(preparedParams.length, { size: 32 });
+      return {
+        dynamic: true,
+        encoded: preparedParams.length > 0 ? concat([length2, data]) : length2
+      };
+    }
+    if (dynamicChild)
+      return { dynamic: true, encoded: data };
+  }
+  return {
+    dynamic: false,
+    encoded: concat(preparedParams.map(({ encoded }) => encoded))
+  };
+}
+function encodeBytes(value, { param }) {
+  const [, paramSize] = param.type.split("bytes");
+  const bytesSize = size(value);
+  if (!paramSize) {
+    let value_ = value;
+    if (bytesSize % 32 !== 0)
+      value_ = padHex(value_, {
+        dir: "right",
+        size: Math.ceil((value.length - 2) / 2 / 32) * 32
+      });
+    return {
+      dynamic: true,
+      encoded: concat([padHex(numberToHex(bytesSize, { size: 32 })), value_])
+    };
+  }
+  if (bytesSize !== Number.parseInt(paramSize))
+    throw new AbiEncodingBytesSizeMismatchError({
+      expectedSize: Number.parseInt(paramSize),
+      value
+    });
+  return { dynamic: false, encoded: padHex(value, { dir: "right" }) };
+}
+function encodeBool(value) {
+  if (typeof value !== "boolean")
+    throw new BaseError(`Invalid boolean value: "${value}" (type: ${typeof value}). Expected: \`true\` or \`false\`.`);
+  return { dynamic: false, encoded: padHex(boolToHex(value)) };
+}
+function encodeNumber(value, { signed, size: size2 = 256 }) {
+  if (typeof size2 === "number") {
+    const max = 2n ** (BigInt(size2) - (signed ? 1n : 0n)) - 1n;
+    const min = signed ? -max - 1n : 0n;
+    if (value > max || value < min)
+      throw new IntegerOutOfRangeError({
+        max: max.toString(),
+        min: min.toString(),
+        signed,
+        size: size2 / 8,
+        value: value.toString()
+      });
+  }
+  return {
+    dynamic: false,
+    encoded: numberToHex(value, {
+      size: 32,
+      signed
+    })
+  };
+}
+function encodeString(value) {
+  const hexValue = stringToHex(value);
+  const partsLength = Math.ceil(size(hexValue) / 32);
+  const parts = [];
+  for (let i = 0;i < partsLength; i++) {
+    parts.push(padHex(slice(hexValue, i * 32, (i + 1) * 32), {
+      dir: "right"
+    }));
+  }
+  return {
+    dynamic: true,
+    encoded: concat([
+      padHex(numberToHex(size(hexValue), { size: 32 })),
+      ...parts
+    ])
+  };
+}
+function encodeTuple(value, { param }) {
+  let dynamic = false;
+  const preparedParams = [];
+  for (let i = 0;i < param.components.length; i++) {
+    const param_ = param.components[i];
+    const index = Array.isArray(value) ? i : param_.name;
+    const preparedParam = prepareParam({
+      param: param_,
+      value: value[index]
+    });
+    preparedParams.push(preparedParam);
+    if (preparedParam.dynamic)
+      dynamic = true;
+  }
+  return {
+    dynamic,
+    encoded: dynamic ? encodeParams(preparedParams) : concat(preparedParams.map(({ encoded }) => encoded))
+  };
+}
 function getArrayComponents(type) {
   const matches = type.match(/^(.*)\[(\d+)?\]$/);
   return matches ? [matches[2] ? Number(matches[2]) : null, matches[1]] : undefined;
 }
-var init_encodeAbiParameters = () => {
-};
+var init_encodeAbiParameters = __esm(() => {
+  init_abi();
+  init_address();
+  init_base();
+  init_encoding();
+  init_isAddress();
+  init_pad();
+  init_size();
+  init_slice();
+  init_toHex();
+  init_regex();
+});
 
 // ../../../node_modules/viem/_esm/errors/cursor.js
 var NegativeOffsetError, PositionOutOfBoundsError, RecursiveReadLimitExceededError;
@@ -1314,10 +1634,6 @@ var init_decodeAbiParameters = __esm(() => {
   init_encodeAbiParameters();
 });
 
-// ../../../node_modules/viem/_esm/index.js
-init_decodeAbiParameters();
-init_isAddress();
-
 // ../common/errorType.ts
 var ErrorType;
 ((ErrorType2) => {
@@ -1380,6 +1696,60 @@ function handleError(type) {
   throw new CustomErrorHandler(type);
 }
 
+// ../../../node_modules/viem/_esm/index.js
+init_decodeAbiParameters();
+init_encodeAbiParameters();
+init_fromHex();
+init_isAddress();
+
+// ../common/reportBytes.ts
+var COMMON_REPORT_BYTE_OFFSETS = {
+  REPORT_TYPE: 248,
+  VERSION: 240,
+  REQUESTER: 0,
+  REQUESTER_MASK: (1n << 160n) - 1n
+};
+
+// ../common/packReportConfig.ts
+function packReportConfig(reportType, version2, requester) {
+  if (reportType < 0 || reportType > 255)
+    throw new Error("reportType must be a uint8 (0-255)");
+  if (version2 < 0 || version2 > 255)
+    throw new Error("version must be a uint8 (0-255)");
+  const reportTypeBits = BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE);
+  const versionBits = BigInt(version2) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION);
+  const requesterBits = hexToBigInt(requester) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK;
+  const packedValue = reportTypeBits | versionBits | requesterBits;
+  return `0x${packedValue.toString(16).padStart(64, "0")}`;
+}
+
+// constants/config.ts
+var CONFIG = {
+  REPORT_VERSION: 1
+};
+
+// ../common/encoders.ts
+function hexStringToUint8Array(hex) {
+  hex = hex.replace(/^0x/, "");
+  const length = hex.length / 2;
+  const res = new Uint8Array(length);
+  for (let i = 0;i < res.length; i++) {
+    res[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return res;
+}
+
+// utils/packResult.ts
+function packResult(result, reportConfig) {
+  const encoded = encodeAbiParameters([
+    { type: "bytes32" },
+    { type: "uint8[]" },
+    { type: "uint8[]" },
+    { type: "address[]" }
+  ], [reportConfig, result.chainTypes, result.actions, result.operatorAddresses]);
+  return hexStringToUint8Array(encoded);
+}
+
 // utils/validateInputs.ts
 function decodeInputs(bytesArgs) {
   const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, requester] = bytesArgs;
@@ -1433,86 +1803,6 @@ function validateArrayLengths(args2) {
   }
 }
 
-// ../common/reportBytes.ts
-var COMMON_REPORT_BYTE_SIZES = {
-  ADDRESS: 20,
-  WORD: 32,
-  UINT32: 4,
-  UINT16: 2,
-  VERSION: 1,
-  REPORT_TYPE: 1,
-  OPERATOR: 32,
-  ARRAY_LENGTH: 4
-};
-var COMMON_REPORT_BYTE_OFFSETS = {
-  REPORT_TYPE: 248,
-  VERSION: 240,
-  REQUESTER: 0,
-  REQUESTER_MASK: (1n << 160n) - 1n
-};
-
-// ../common/encoders.ts
-function encodeUint256(value) {
-  if (value < 0n || value > (1n << 256n) - 1n) {
-    handleError(62 /* INVALID_UINT256 */);
-  }
-  return new Uint8Array(Buffer.from(value.toString(16).padStart(64, "0"), "hex"));
-}
-function hexStringToUint8Array(hex) {
-  hex = hex.replace(/^0x/, "");
-  const length = hex.length / 2;
-  const res = new Uint8Array(length);
-  for (let i = 0;i < res.length; i++) {
-    res[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-  }
-  return res;
-}
-function packUint32(value) {
-  return new Uint8Array(new Uint32Array([value]).buffer);
-}
-function packUint8(value) {
-  return new Uint8Array([value]);
-}
-function packResponseConfig(reportType, version2, requester) {
-  return BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE) | BigInt(version2) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION) | BigInt(`0x${requester.replace(/^0x/, "")}`) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK;
-}
-
-// utils/packResult.ts
-function packResult(result) {
-  const chainTypesBytes = result.chainTypes.map((type) => packUint8(type));
-  const actionsBytes = result.actions.map((action) => packUint8(action));
-  const operatorAddressesBytes = result.operatorAddresses.map((addr) => hexStringToUint8Array(addr.padStart(40, "0")));
-  const bufferSize = COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH + chainTypesBytes.length + COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH + actionsBytes.length + COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH + operatorAddressesBytes.length * COMMON_REPORT_BYTE_SIZES.ADDRESS;
-  const res = new Uint8Array(bufferSize);
-  let offset = 0;
-  res.set(encodeUint256(packResponseConfig(result.reportType, result.version, result.requester)), offset);
-  offset += COMMON_REPORT_BYTE_SIZES.WORD;
-  res.set(packUint32(chainTypesBytes.length), offset);
-  offset += COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH;
-  chainTypesBytes.forEach((bytes) => {
-    res.set(bytes, offset);
-    offset += 1;
-  });
-  res.set(packUint32(actionsBytes.length), offset);
-  offset += COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH;
-  actionsBytes.forEach((action) => {
-    res.set(action, offset);
-    offset += 1;
-  });
-  res.set(packUint32(operatorAddressesBytes.length), offset);
-  offset += COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH;
-  operatorAddressesBytes.forEach((addr) => {
-    res.set(addr, offset);
-    offset += COMMON_REPORT_BYTE_SIZES.ADDRESS;
-  });
-  return res;
-}
-
-// constants/config.ts
-var CONFIG = {
-  REPORT_VERSION: 1
-};
-
 // index.ts
 async function main(bytesArgs) {
   try {
@@ -1529,7 +1819,8 @@ async function main(bytesArgs) {
       chainTypes: args.chainTypes,
       operatorAddresses: args.operatorAddresses
     };
-    return packResult(registrationReportResult);
+    const reportConfig = packReportConfig(2 /* OPERATOR_REGISTRATION */, CONFIG.REPORT_VERSION, args.operatorAddresses);
+    return packResult(registrationReportResult, reportConfig);
   } catch (error) {
     if (error instanceof CustomErrorHandler) {
       throw error;

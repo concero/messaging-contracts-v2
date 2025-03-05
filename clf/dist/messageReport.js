@@ -880,7 +880,7 @@ var init_size = () => {
 };
 
 // ../../../node_modules/viem/_esm/errors/version.js
-var version2 = "2.23.5";
+var version2 = "2.23.6";
 
 // ../../../node_modules/viem/_esm/errors/base.js
 function walk(err, fn) {
@@ -7627,33 +7627,6 @@ var init_call = __esm(() => {
   init_assertRequest();
 });
 
-// constants/reportBytes.ts
-var REPORT_BYTE_SIZES = {
-  INTERNAL_MESSAGE_CONFIG: 32,
-  MESSAGE_ID: 32,
-  MESSAGE_HASH_SUM: 32,
-  ALLOWED_OPERATORS_LENGTH: 2,
-  ALLOWED_OPERATORS: 32
-};
-
-// ../common/reportBytes.ts
-var COMMON_REPORT_BYTE_SIZES = {
-  ADDRESS: 20,
-  WORD: 32,
-  UINT32: 4,
-  UINT16: 2,
-  VERSION: 1,
-  REPORT_TYPE: 1,
-  OPERATOR: 32,
-  ARRAY_LENGTH: 4
-};
-var COMMON_REPORT_BYTE_OFFSETS = {
-  REPORT_TYPE: 248,
-  VERSION: 240,
-  REQUESTER: 0,
-  REQUESTER_MASK: (1n << 160n) - 1n
-};
-
 // ../common/errorType.ts
 var ErrorType;
 ((ErrorType2) => {
@@ -7714,53 +7687,6 @@ class CustomErrorHandler extends Error {
 }
 function handleError(type) {
   throw new CustomErrorHandler(type);
-}
-
-// ../common/encoders.ts
-function hexStringToUint8Array(hex) {
-  hex = hex.replace(/^0x/, "");
-  const length = hex.length / 2;
-  const res = new Uint8Array(length);
-  for (let i = 0;i < res.length; i++) {
-    res[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-  }
-  return res;
-}
-function packUint32(value) {
-  return new Uint8Array(new Uint32Array([value]).buffer);
-}
-function packResponseConfig(reportType, version, requester) {
-  return BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE) | BigInt(version) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION) | BigInt(`0x${requester.replace(/^0x/, "")}`) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK;
-}
-
-// utils/packResult.ts
-function packResult(result) {
-  const dstChainDataBytes = hexStringToUint8Array(result.dstChainData);
-  const allowedOperatorsBytes = result.allowedOperators.map(hexStringToUint8Array);
-  const bufferSize = COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.WORD + COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH + dstChainDataBytes.length + REPORT_BYTE_SIZES.ALLOWED_OPERATORS_LENGTH + allowedOperatorsBytes.length * REPORT_BYTE_SIZES.ALLOWED_OPERATORS;
-  const res = new Uint8Array(bufferSize);
-  let offset = 0;
-  const fixedFields = [
-    packResponseConfig(result.reportType, result.version, result.requester),
-    BigInt(result.internalMessageConfig),
-    BigInt(result.messageId),
-    BigInt(result.messageHashSum)
-  ];
-  for (const field of fixedFields) {
-    res.set(hexStringToUint8Array(field.toString()), offset);
-    offset += COMMON_REPORT_BYTE_SIZES.WORD;
-  }
-  res.set(packUint32(dstChainDataBytes.length), offset);
-  offset += COMMON_REPORT_BYTE_SIZES.ARRAY_LENGTH;
-  res.set(dstChainDataBytes, offset);
-  offset += dstChainDataBytes.length;
-  res.set(hexStringToUint8Array(allowedOperatorsBytes.length.toString().padStart(64, "0")), offset);
-  offset += REPORT_BYTE_SIZES.ALLOWED_OPERATORS_LENGTH;
-  for (const operator of allowedOperatorsBytes) {
-    res.set(operator, offset);
-    offset += REPORT_BYTE_SIZES.ALLOWED_OPERATORS;
-  }
-  return res;
 }
 
 // ../../../node_modules/viem/_esm/index.js
@@ -10114,7 +10040,7 @@ function getHttpRpcClient(url, options = {}) {
 
 // ../../../node_modules/viem/_esm/clients/transports/http.js
 function http(url, config = {}) {
-  const { batch, fetchOptions, key = "http", methods, name = "HTTP JSON-RPC", onFetchRequest, onFetchResponse, retryDelay } = config;
+  const { batch, fetchOptions, key = "http", methods, name = "HTTP JSON-RPC", onFetchRequest, onFetchResponse, retryDelay, raw } = config;
   return ({ chain, retryCount: retryCount_, timeout: timeout_ }) => {
     const { batchSize = 1000, wait: wait2 = 0 } = typeof batch === "object" ? batch : {};
     const retryCount = config.retryCount ?? retryCount_;
@@ -10151,6 +10077,8 @@ function http(url, config = {}) {
           })
         ];
         const [{ error, result }] = await fn(body);
+        if (raw)
+          return { error, result };
         if (error)
           throw new RpcRequestError({
             body,
@@ -14218,291 +14146,10 @@ function createPublicClient(parameters) {
 }
 // ../../../node_modules/viem/_esm/index.js
 init_decodeAbiParameters();
+init_encodeAbiParameters();
 init_toBytes();
 init_isAddress();
 init_keccak256();
-
-// ../common/healthy-rpcs.json
-var healthy_rpcs_default = {
-  "1": {
-    rpcs: [
-      {
-        chainId: "1",
-        url: "https://rpc.ankr.com/eth",
-        responseTime: 160
-      },
-      {
-        chainId: "1",
-        url: "https://go.getblock.io/aefd01aa907c4805ba3c00a9e5b48c6b",
-        responseTime: 77
-      },
-      {
-        chainId: "1",
-        url: "https://ethereum-rpc.publicnode.com",
-        responseTime: 173
-      },
-      {
-        chainId: "1",
-        url: "https://1rpc.io/eth",
-        responseTime: 552
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.mevblocker.io",
-        responseTime: 183
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.flashbots.net/",
-        responseTime: 258
-      },
-      {
-        chainId: "1",
-        url: "https://virginia.rpc.blxrbdn.com/",
-        responseTime: 160
-      },
-      {
-        chainId: "1",
-        url: "https://uk.rpc.blxrbdn.com/",
-        responseTime: 156
-      },
-      {
-        chainId: "1",
-        url: "https://singapore.rpc.blxrbdn.com/",
-        responseTime: 160
-      },
-      {
-        chainId: "1",
-        url: "https://eth.rpc.blxrbdn.com/",
-        responseTime: 158
-      },
-      {
-        chainId: "1",
-        url: "https://eth-mainnet.public.blastapi.io",
-        responseTime: 138
-      },
-      {
-        chainId: "1",
-        url: "https://api.securerpc.com/v1",
-        responseTime: 405
-      },
-      {
-        chainId: "1",
-        url: "https://openapi.bitstack.com/v1/wNFxbiJyQsSeLrX8RRCHi7NpRxrlErZk/DjShIqLishPCTB9HiMkPHXjUM9CNM9Na/ETH/mainnet",
-        responseTime: 966
-      },
-      {
-        chainId: "1",
-        url: "https://eth-pokt.nodies.app",
-        responseTime: 167
-      },
-      {
-        chainId: "1",
-        url: "https://ethereum.blockpi.network/v1/rpc/public",
-        responseTime: 81
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.payload.de",
-        responseTime: 185
-      },
-      {
-        chainId: "1",
-        url: "https://core.gashawk.io/rpc",
-        responseTime: 551
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.eth.gateway.fm",
-        responseTime: 155
-      },
-      {
-        chainId: "1",
-        url: "https://eth.meowrpc.com",
-        responseTime: 197
-      },
-      {
-        chainId: "1",
-        url: "https://eth.drpc.org",
-        responseTime: 180
-      },
-      {
-        chainId: "1",
-        url: "https://mainnet.gateway.tenderly.co",
-        responseTime: 170
-      },
-      {
-        chainId: "1",
-        url: "https://gateway.tenderly.co/public/mainnet",
-        responseTime: 162
-      },
-      {
-        chainId: "1",
-        url: "https://api.zan.top/eth-mainnet",
-        responseTime: 789
-      },
-      {
-        chainId: "1",
-        url: "https://eth.merkle.io",
-        responseTime: 403
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.lokibuilder.xyz/wallet",
-        responseTime: 193
-      },
-      {
-        chainId: "1",
-        url: "https://eth.nodeconnect.org/",
-        responseTime: 915
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.graffiti.farm",
-        responseTime: 203
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.public.curie.radiumblock.co/http/ethereum",
-        responseTime: 418
-      },
-      {
-        chainId: "1",
-        url: "https://rpc.public.curie.radiumblock.co/ws/ethereum",
-        responseTime: 406
-      },
-      {
-        chainId: "1",
-        url: "https://eth.blockrazor.xyz",
-        responseTime: 228
-      },
-      {
-        chainId: "1",
-        url: "https://endpoints.omniatech.io/v1/eth/mainnet/public",
-        responseTime: 254
-      },
-      {
-        chainId: "1",
-        url: "https://eth1.lava.build",
-        responseTime: 542
-      }
-    ]
-  },
-  "137": {
-    rpcs: [
-      {
-        chainId: "137",
-        url: "https://rpc.ankr.com/polygon",
-        responseTime: 166
-      },
-      {
-        chainId: "137",
-        url: "https://rpc-mainnet.matic.quiknode.pro",
-        responseTime: 303
-      },
-      {
-        chainId: "137",
-        url: "https://polygon-mainnet.public.blastapi.io",
-        responseTime: 296
-      },
-      {
-        chainId: "137",
-        url: "https://1rpc.io/matic",
-        responseTime: 509
-      },
-      {
-        chainId: "137",
-        url: "https://polygon-bor-rpc.publicnode.com",
-        responseTime: 202
-      },
-      {
-        chainId: "137",
-        url: "https://go.getblock.io/02667b699f05444ab2c64f9bff28f027",
-        responseTime: 428
-      },
-      {
-        chainId: "137",
-        url: "https://polygon.api.onfinality.io/public",
-        responseTime: 327
-      },
-      {
-        chainId: "137",
-        url: "https://polygon.drpc.org",
-        responseTime: 241
-      },
-      {
-        chainId: "137",
-        url: "https://polygon.gateway.tenderly.co",
-        responseTime: 164
-      },
-      {
-        chainId: "137",
-        url: "https://gateway.tenderly.co/public/polygon",
-        responseTime: 163
-      },
-      {
-        chainId: "137",
-        url: "https://api.zan.top/polygon-mainnet",
-        responseTime: 789
-      },
-      {
-        chainId: "137",
-        url: "https://polygon.meowrpc.com",
-        responseTime: 222
-      },
-      {
-        chainId: "137",
-        url: "https://endpoints.omniatech.io/v1/matic/mainnet/public",
-        responseTime: 215
-      },
-      {
-        chainId: "137",
-        url: "https://polygon.lava.build",
-        responseTime: 179
-      }
-    ]
-  }
-};
-
-// ../common/config.ts
-function isDevelopment() {
-  try {
-    return secrets?.CONCERO_CLF_DEVELOPMENT === "true";
-  } catch {
-    return false;
-  }
-}
-function getLocalhostRpcUrl() {
-  try {
-    return secrets?.LOCALHOST_RPC_URL;
-  } catch {
-    return;
-  }
-}
-var config = {
-  isDevelopment: isDevelopment(),
-  localhostRpcUrl: getLocalhostRpcUrl()
-};
-
-// ../common/developmentRpcs.ts
-var developmentRpcs = {
-  "1": {
-    rpcs: [
-      {
-        chainId: "1",
-        url: config.localhostRpcUrl
-      }
-    ]
-  },
-  "10": {
-    rpcs: [
-      {
-        chainId: "10",
-        url: config.localhostRpcUrl
-      }
-    ]
-  }
-};
 
 // ../../../node_modules/viem/_esm/op-stack/contracts.js
 var contracts = {
@@ -14617,6 +14264,35 @@ var chainConfig = {
   serializers
 };
 
+// ../../../node_modules/viem/_esm/chains/definitions/arbitrumSepolia.js
+var arbitrumSepolia = /* @__PURE__ */ defineChain({
+  id: 421614,
+  name: "Arbitrum Sepolia",
+  nativeCurrency: {
+    name: "Arbitrum Sepolia Ether",
+    symbol: "ETH",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia-rollup.arbitrum.io/rpc"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Arbiscan",
+      url: "https://sepolia.arbiscan.io",
+      apiUrl: "https://api-sepolia.arbiscan.io/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 81930
+    }
+  },
+  testnet: true
+});
 // ../../../node_modules/viem/_esm/chains/definitions/base.js
 var sourceId = 1;
 var base = /* @__PURE__ */ defineChain({
@@ -14667,6 +14343,58 @@ var base = /* @__PURE__ */ defineChain({
   },
   sourceId
 });
+// ../../../node_modules/viem/_esm/chains/definitions/baseSepolia.js
+var sourceId2 = 11155111;
+var baseSepolia = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 84532,
+  network: "base-sepolia",
+  name: "Base Sepolia",
+  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia.base.org"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Basescan",
+      url: "https://sepolia.basescan.org",
+      apiUrl: "https://api-sepolia.basescan.org/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    disputeGameFactory: {
+      [sourceId2]: {
+        address: "0xd6E6dBf4F7EA0ac412fD8b65ED297e64BB7a06E1"
+      }
+    },
+    l2OutputOracle: {
+      [sourceId2]: {
+        address: "0x84457ca9D0163FbC4bbfe4Dfbb20ba46e48DF254"
+      }
+    },
+    portal: {
+      [sourceId2]: {
+        address: "0x49f53e41452c74589e85ca1677426ba426459e85",
+        blockCreated: 4446677
+      }
+    },
+    l1StandardBridge: {
+      [sourceId2]: {
+        address: "0xfd0Bf71F60660E2f608ed56e1659C450eB113120",
+        blockCreated: 4446677
+      }
+    },
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 1059647
+    }
+  },
+  testnet: true,
+  sourceId: sourceId2
+});
 // ../../../node_modules/viem/_esm/chains/definitions/mainnet.js
 var mainnet = /* @__PURE__ */ defineChain({
   id: 1,
@@ -14698,6 +14426,26 @@ var mainnet = /* @__PURE__ */ defineChain({
     }
   }
 });
+// ../common/config.ts
+function isDevelopment() {
+  try {
+    return secrets?.CONCERO_CLF_DEVELOPMENT === "true";
+  } catch {
+    return false;
+  }
+}
+function getLocalhostRpcUrl() {
+  try {
+    return secrets?.LOCALHOST_RPC_URL;
+  } catch {
+    return;
+  }
+}
+var config = {
+  isDevelopment: isDevelopment(),
+  localhostRpcUrl: getLocalhostRpcUrl()
+};
+
 // constants/viemChains.ts
 var localhostChain = defineChain({
   id: 1,
@@ -14717,18 +14465,105 @@ var localhostChains = {
   1: localhostChain,
   10: localhostChain
 };
-var mainnetChains = {
+var liveChains = {
   1: mainnet,
-  8453: base
+  8453: base,
+  421614: arbitrumSepolia,
+  84532: baseSepolia
 };
-var viemChains = config.isDevelopment ? localhostChains : mainnetChains;
+var viemChains = config.isDevelopment ? localhostChains : liveChains;
+
+// ../common/developmentRpcs.ts
+var developmentRpcs = {
+  "1": {
+    rpcs: [
+      {
+        chainId: "1",
+        url: config.localhostRpcUrl
+      }
+    ]
+  },
+  "10": {
+    rpcs: [
+      {
+        chainId: "10",
+        url: config.localhostRpcUrl
+      }
+    ]
+  }
+};
+
+// ../common/healthyRPCs.ts
+var healthyRPCs = {
+  "1": {
+    rpcs: [
+      {
+        chainId: "1",
+        url: "https://rpc.ankr.com/eth"
+      },
+      {
+        chainId: "1",
+        url: "https://go.getblock.io/aefd01aa907c4805ba3c00a9e5b48c6b"
+      },
+      {
+        chainId: "1",
+        url: "https://ethereum-rpc.publicnode.com"
+      },
+      {
+        chainId: "1",
+        url: "https://1rpc.io/eth"
+      },
+      {
+        chainId: "1",
+        url: "https://rpc.mevblocker.io"
+      },
+      {
+        chainId: "1",
+        url: "https://rpc.flashbots.net/"
+      },
+      {
+        chainId: "1",
+        url: "https://virginia.rpc.blxrbdn.com/"
+      },
+      {
+        chainId: "1",
+        url: "https://uk.rpc.blxrbdn.com/"
+      },
+      {
+        chainId: "1",
+        url: "https://singapore.rpc.blxrbdn.com/"
+      },
+      {
+        chainId: "1",
+        url: "https://eth.rpc.blxrbdn.com/"
+      },
+      {
+        chainId: "1",
+        url: "https://eth-mainnet.public.blastapi.io"
+      }
+    ]
+  },
+  "84532": {
+    rpcs: [
+      { chainId: "84532", url: "https://base-sepolia.drpc.org" },
+      { chainId: "84532", url: "https://base-sepolia-rpc.publicnode.com" }
+    ]
+  },
+  "421614": {
+    rpcs: [
+      { chainId: "421614", url: "https://arbitrum-sepolia-rpc.publicnode.com" },
+      { chainId: "421614", url: "https://arbitrum-sepolia.drpc.org" },
+      { chainId: "421614", url: "https://sepolia-rollup.arbitrum.io/rpc" }
+    ]
+  }
+};
 
 // ../common/viemClient.ts
 function createCustomTransport(url, chainIdHex) {
   return http(url, { batch: true });
 }
 function createFallbackTransport(chainSelector) {
-  const chainConfig2 = config.isDevelopment ? developmentRpcs[chainSelector] : healthy_rpcs_default[chainSelector];
+  const chainConfig2 = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRPCs[chainSelector];
   if (!chainConfig2) {
     handleError(25 /* INVALID_CHAIN */);
   }
@@ -14740,7 +14575,7 @@ function createFallbackTransport(chainSelector) {
   return fallback(transportFactories);
 }
 function getPublicClient(chainSelector) {
-  const chainConfig2 = config.isDevelopment ? developmentRpcs[chainSelector] : healthy_rpcs_default[chainSelector];
+  const chainConfig2 = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRPCs[chainSelector];
   if (!chainConfig2 || !chainConfig2.rpcs.length) {
     handleError(22 /* NO_RPC_PROVIDERS */);
   }
@@ -14748,6 +14583,72 @@ function getPublicClient(chainSelector) {
     transport: createFallbackTransport(chainSelector),
     chain: viemChains[chainSelector]
   });
+}
+
+// constants/conceroRouters.ts
+function getConceroVerifier() {
+  try {
+    if (config.isDevelopment)
+      return secrets.CONCERO_VERIFIER_LOCALHOST;
+    return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
+  } catch {
+    return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
+  }
+}
+var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
+var conceroRouters = {
+  "1": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6"
+};
+
+// constants/config.ts
+var CONFIG = {
+  REPORT_VERSION: 1,
+  VIEM: {
+    RETRY_COUNT: 5,
+    RETRY_DELAY: 2000
+  }
+};
+
+// constants/abis.ts
+var ClientMessageRequestBase = "bytes32 internalMessageConfig, bytes dstChainData, bytes message";
+var ClientMessageRequest = `tuple(${ClientMessageRequestBase})`;
+var CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
+  "function getCohortsCount() external returns (uint8)",
+  "function getRegisteredOperators(uint8 chainType) external view returns (bytes[] memory)"
+]);
+var NonIndexedConceroMessageParams = [
+  { type: "bytes", name: "dstChainData" },
+  { type: "bytes", name: "message" }
+];
+
+// utils/decoders.ts
+function decodeConceroMessageLog(log) {
+  try {
+    const messageId = log.topics[1];
+    const internalMessageConfig = log.topics[2];
+    const [dstChainData, message] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
+    return {
+      messageId,
+      internalMessageConfig,
+      dstChainData,
+      message
+    };
+  } catch (error) {
+    handleError(33 /* INVALID_DATA */);
+  }
+}
+
+// utils/fetchConceroMessage.ts
+async function fetchConceroMessage(client, routerAddress, messageId, blockNumber) {
+  const logs = await client.getLogs({
+    address: routerAddress,
+    topics: [null, null, messageId],
+    fromBlock: blockNumber - 10n,
+    toBlock: blockNumber
+  });
+  if (!logs.length)
+    handleError(30 /* EVENT_NOT_FOUND */);
+  return logs[0];
 }
 
 // utils/utils.ts
@@ -14768,33 +14669,6 @@ function pick(array, n) {
   }
   return shuffled.slice(0, n);
 }
-
-// constants/abis.ts
-var ClientMessageRequestBase = "bytes32 internalMessageConfig, bytes dstChainData, bytes message";
-var ClientMessageRequest = `tuple(${ClientMessageRequestBase})`;
-var CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
-  "function getCohortsCount() external returns (uint8)",
-  "function getRegisteredOperators(uint8 chainType) external view returns (bytes[] memory)"
-]);
-var NonIndexedConceroMessageParams = [
-  { type: "bytes", name: "dstChainData" },
-  { type: "bytes", name: "message" }
-];
-
-// constants/conceroRouters.ts
-function getConceroVerifier() {
-  try {
-    if (config.isDevelopment)
-      return secrets.CONCERO_VERIFIER_LOCALHOST;
-    return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
-  } catch {
-    return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
-  }
-}
-var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
-var conceroRouters = {
-  "1": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6"
-};
 
 // utils/getAllowedOperators.ts
 async function getAllowedOperators(client, chainType, messageId) {
@@ -14840,20 +14714,43 @@ async function getRegisteredOperators(client, chainType) {
   return registeredOperators;
 }
 
-// constants/config.ts
-var CONFIG = {
-  REPORT_VERSION: 1,
-  VIEM: {
-    RETRY_COUNT: 5,
-    RETRY_DELAY: 2000
-  }
+// ../common/reportBytes.ts
+var COMMON_REPORT_BYTE_OFFSETS = {
+  REPORT_TYPE: 248,
+  VERSION: 240,
+  REQUESTER: 0,
+  REQUESTER_MASK: (1n << 160n) - 1n
 };
 
-// utils/verifyMessageHash.ts
-function verifyMessageHash(message, expectedHashSum) {
-  if (keccak256(message).toLowerCase() !== expectedHashSum.toLowerCase()) {
-    handleError(31 /* INVALID_HASHSUM */);
+// ../common/encoders.ts
+function hexStringToUint8Array(hex) {
+  hex = hex.replace(/^0x/, "");
+  const length = hex.length / 2;
+  const res = new Uint8Array(length);
+  for (let i = 0;i < res.length; i++) {
+    res[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
   }
+  return res;
+}
+
+// utils/packResult.ts
+function packResult(result, packedReportConfig) {
+  const encoded = encodeAbiParameters([
+    { type: "bytes32" },
+    { type: "bytes32" },
+    { type: "bytes32" },
+    { type: "bytes32" },
+    { type: "bytes" },
+    { type: "bytes[]" }
+  ], [
+    packedReportConfig,
+    result.internalMessageConfig,
+    result.messageId,
+    result.messageHashSum,
+    result.dstChainData,
+    result.allowedOperators
+  ]);
+  return hexStringToUint8Array(encoded);
 }
 
 // constants/internalMessageConfig.ts
@@ -14963,34 +14860,11 @@ function validateMessageFields(args) {
   }
 }
 
-// utils/decoders.ts
-function decodeConceroMessageLog(log) {
-  try {
-    const messageId = log.topics[1];
-    const internalMessageConfig = log.topics[2];
-    const [dstChainData, message] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
-    return {
-      messageId,
-      internalMessageConfig,
-      dstChainData,
-      message
-    };
-  } catch (error) {
-    handleError(33 /* INVALID_DATA */);
+// utils/verifyMessageHash.ts
+function verifyMessageHash(message, expectedHashSum) {
+  if (keccak256(message).toLowerCase() !== expectedHashSum.toLowerCase()) {
+    handleError(31 /* INVALID_HASHSUM */);
   }
-}
-
-// utils/fetchConceroMessage.ts
-async function fetchConceroMessage(client, routerAddress, messageId, blockNumber) {
-  const logs = await client.getLogs({
-    address: routerAddress,
-    topics: [null, null, messageId],
-    fromBlock: blockNumber - 10n,
-    toBlock: blockNumber
-  });
-  if (!logs.length)
-    handleError(30 /* EVENT_NOT_FOUND */);
-  return logs[0];
 }
 
 // index.ts
@@ -15019,7 +14893,8 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
       dstChainData: dstChainDataFromLog,
       allowedOperators
     };
-    return packResult(messageReportResult);
+    const packedReportConfig = packReportConfig(1 /* MESSAGE */, CONFIG.REPORT_VERSION, args.operatorAddress);
+    return packResult(messageReportResult, packedReportConfig);
   } catch (error) {
     console.log(error);
     if (error instanceof CustomErrorHandler) {

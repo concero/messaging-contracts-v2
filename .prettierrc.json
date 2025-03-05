@@ -19,7 +19,13 @@
                 "useTabs": true,
                 "importOrderSeparation": true,
                 "importOrderSortSpecifiers": true,
-                "importOrder": ["./utils/configureOperatorEnv", "^@concero/(.*)$", "^contracts/(.*)$", "^utils/(.*)$", "^[./]"]
+                "importOrder": [
+                    "./utils/configureOperatorEnv",
+                    "^@concero/(.*)$",
+                    "^contracts/(.*)$",
+                    "^utils/(.*)$",
+                    "^[./]"
+                ]
             }
         },
         {
@@ -34,16 +40,16 @@
             }
         },
         {
-            "files": "./clf/src/*",
+            "files": "./clf/src/**",
             "options": {
+                "parser": "typescript",
+                "tabWidth": 4,
                 "arrowParens": "avoid",
                 "printWidth": 120,
-                "tabWidth": 1,
                 "trailingComma": "all",
                 "singleQuote": false,
                 "bracketSpacing": true,
-                "semi": true,
-                "useTabs": true
+                "semi": true
             }
         }
     ]

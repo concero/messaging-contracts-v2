@@ -5,7 +5,7 @@ import { config } from "./config";
 import { developmentRpcs } from "./developmentRpcs";
 import { handleError } from "./errorHandler";
 import { ErrorType } from "./errorType";
-import healthyRpcs from "./healthy-rpcs.json";
+import { healthyRPCs } from "./healthyRPCs";
 
 function createCustomTransport(url: string, chainIdHex: string): Transport {
 	// return createTransport({
@@ -50,9 +50,7 @@ function createCustomTransport(url: string, chainIdHex: string): Transport {
 }
 
 export function createFallbackTransport(chainSelector: string): Transport {
-	const chainConfig = config.isDevelopment
-		? developmentRpcs[chainSelector]
-		: healthyRpcs[chainSelector];
+	const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRPCs[chainSelector];
 	if (!chainConfig) {
 		handleError(ErrorType.INVALID_CHAIN);
 	}
@@ -63,17 +61,13 @@ export function createFallbackTransport(chainSelector: string): Transport {
 
 	const chainIdHex = `0x${parseInt(chainConfig.rpcs[0].chainId, 10).toString(16)}`;
 
-	const transportFactories = chainConfig.rpcs.map(rpc =>
-		createCustomTransport(rpc.url, chainIdHex),
-	);
+	const transportFactories = chainConfig.rpcs.map(rpc => createCustomTransport(rpc.url, chainIdHex));
 
 	return fallback(transportFactories);
 }
 
 export function getPublicClient(chainSelector: string) {
-	const chainConfig = config.isDevelopment
-		? developmentRpcs[chainSelector]
-		: healthyRpcs[chainSelector];
+	const chainConfig = config.isDevelopment ? developmentRpcs[chainSelector] : healthyRPCs[chainSelector];
 
 	if (!chainConfig || !chainConfig.rpcs.length) {
 		handleError(ErrorType.NO_RPC_PROVIDERS);

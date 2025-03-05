@@ -9,11 +9,11 @@ function getCLFDonSigners(networkType: NetworkType) {
 	let networkName: ConceroNetworkNames;
 	switch (networkType) {
 		case "mainnet":
-			networkName = "base";
+			networkName = "arbitrum";
 			break;
 
 		case "testnet":
-			networkName = "baseSepolia";
+			networkName = "arbitrumSepolia";
 			break;
 
 		case "localhost":

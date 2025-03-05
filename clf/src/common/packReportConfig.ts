@@ -10,11 +10,7 @@ import { COMMON_REPORT_BYTE_OFFSETS } from "./reportBytes";
  * @param requester - Ethereum address of the requester (20-byte EVM address)
  * @returns A bytes32 (as hex string) with the packed configuration
  */
-export function packReportConfig(
-	reportType: number,
-	version: number,
-	requester: Address,
-): `0x${string}` {
+export function packReportConfig(reportType: number, version: number, requester: Address): `0x${string}` {
 	if (reportType < 0 || reportType > 255) throw new Error("reportType must be a uint8 (0-255)");
 	if (version < 0 || version > 255) throw new Error("version must be a uint8 (0-255)");
 

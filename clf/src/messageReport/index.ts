@@ -49,11 +49,7 @@ import { verifyMessageHash } from "./utils/verifyMessageHash";
 			allowedOperators,
 		};
 
-		const packedReportConfig = packReportConfig(
-			ReportType.MESSAGE,
-			CONFIG.REPORT_VERSION,
-			args.operatorAddress,
-		);
+		const packedReportConfig = packReportConfig(ReportType.MESSAGE, CONFIG.REPORT_VERSION, args.operatorAddress);
 
 		return packResult(messageReportResult, packedReportConfig);
 	} catch (error) {

@@ -4,6 +4,7 @@ import hre from "hardhat";
 import { resolve } from "path";
 
 import { conceroNetworks, networkEnvKeys } from "../../constants";
+import { CLF_DON_HOSTED_SECRETS_SLOT } from "../../constants/CLFSecretsConfig";
 import { ConceroNetworkNames } from "../../types/ConceroNetwork";
 import { getEnvVar, getHashSum, updateEnvVariable } from "../../utils";
 
@@ -32,7 +33,7 @@ export default buildModule("ConceroVerifier", m => {
 		getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
 		getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`),
 		getEnvVar(`CLF_DON_SECRETS_VERSION_${networkEnvKeys[name]}`),
-		"0", // clfDonHostedSecretsSlotId
+		CLF_DON_HOSTED_SECRETS_SLOT,
 		getEnvVar(`CLF_PREMIUM_FEE_USD_BPS_${networkEnvKeys[name]}`),
 		100_000n, // clfCallbackGasLimit
 		getHashSum(requestReportJs),

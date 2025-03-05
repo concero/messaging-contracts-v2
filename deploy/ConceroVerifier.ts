@@ -3,6 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { resolve } from "path";
 
 import { conceroNetworks, networkEnvKeys } from "../constants";
+import { CLF_DON_HOSTED_SECRETS_SLOT } from "../constants/CLFSecretsConfig";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { getEnvVar, getGasParameters, getHashSum, log, updateEnvVariable } from "../utils";
 
@@ -54,7 +55,7 @@ const deployVerifier: DeploymentFunction = async function (
 			donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
 			subscriptionId: getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`),
 			donHostedSecretsVersion: getEnvVar(`CLF_DON_SECRETS_VERSION_${networkEnvKeys[name]}`),
-			donHostedSecretsSlotId: "0",
+			donHostedSecretsSlotId: CLF_DON_HOSTED_SECRETS_SLOT,
 			premiumFeeUsdBps: getEnvVar(`CLF_PREMIUM_FEE_USD_BPS_${networkEnvKeys[name]}`),
 			callbackGasLimit: 100_000n,
 			requestCLFMessageReportJsCodeHash: getHashSum(requestReportJsCode),

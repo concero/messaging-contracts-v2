@@ -43,5 +43,3 @@ export function buildClfJs() {
 task("clf-build-js", "").setAction(async (_, __) => {
 	buildClfJs();
 });
-
-export default {};

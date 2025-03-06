@@ -1,6 +1,5 @@
 import type { Address } from "viem";
 
-import { secrets } from "../../../../constants/clf/secrets";
 import { config } from "../../common/config";
 
 function getConceroVerifier() {

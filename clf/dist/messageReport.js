@@ -15309,19 +15309,10 @@ function getPublicClient(chainSelector) {
   });
 }
 
-// constants/clf/secrets.ts
-var secrets2 = {
-  // MESSENGER_0_PRIVATE_KEY: getEnvVar("MESSENGER_0_PRIVATE_KEY"),
-  // MESSENGER_1_PRIVATE_KEY: getEnvVar("MESSENGER_1_PRIVATE_KEY"),
-  // MESSENGER_2_PRIVATE_KEY: getEnvVar("MESSENGER_2_PRIVATE_KEY"),
-  // INFURA_API_KEY: getEnvVar("INFURA_API_KEY"),
-  // ALCHEMY_API_KEY: getEnvVar("ALCHEMY_API_KEY"),
-};
-
 // clf/src/messageReport/constants/conceroRouters.ts
 function getConceroVerifier() {
   try {
-    if (config.isDevelopment) return secrets2.CONCERO_VERIFIER_LOCALHOST;
+    if (config.isDevelopment) return secrets.CONCERO_VERIFIER_LOCALHOST;
     return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
   } catch {
     return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
@@ -15417,7 +15408,6 @@ async function getAllowedOperators(client, chainType, messageId) {
     }
     return allowedOperators;
   } catch (error) {
-    console.log(error);
     handleError(54 /* OPERATOR_SELECTION_FAILED */);
   }
 }

@@ -42,5 +42,5 @@ const deployTransparentProxy: (
 	updateEnvAddress(proxyType, name, conceroProxyDeployment.address, `deployments.${type}`);
 };
 
-export default deployTransparentProxy;
+export { deployTransparentProxy };
 deployTransparentProxy.tags = ["TransparentProxy"];

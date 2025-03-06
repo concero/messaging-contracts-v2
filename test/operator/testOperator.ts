@@ -7,10 +7,11 @@ import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer/a/
 import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
 import { checkGas } from "@concero/v2-operators/src/relayer/common/utils";
 
-import deployConceroClientExample from "../../deploy/ConceroClientExample";
-import deployMockCLFRouter from "../../deploy/MockCLFRouter";
+import { deployConceroClientExample } from "../../deploy/ConceroClientExample";
+import { deployMockCLFRouter } from "../../deploy/MockCLFRouter";
 import { deployContracts } from "../../tasks";
-import { compileContracts, getTestClient } from "../../utils";
+import { compileContracts } from "../../utils/compileContracts";
+import { getTestClient } from "../../utils/getViemClients";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
 /*
@@ -30,7 +31,6 @@ async function operator() {
 async function testOperator() {
 	compileContracts({ quiet: true });
 	const hre = require("hardhat");
-	await compileContracts({ quiet: true });
 
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),

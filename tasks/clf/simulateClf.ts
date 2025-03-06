@@ -3,10 +3,10 @@ import fs from "fs";
 import { task, types } from "hardhat/config";
 import path from "path";
 
-import secrets from "../../constants/CLFSecrets";
-import CLFSimulationConfig from "../../constants/CLFSimulationConfig";
+import { secrets } from "../../constants/clf/secrets";
+import { simulationConfig } from "../../constants/clf/simulationConfig";
 import { log } from "../../utils";
-import getSimulationArgs from "./simulationArgs";
+import { getSimulationArgs } from "./simulationArgs";
 
 /**
  * Simulates the execution of a script with the given arguments.
@@ -38,7 +38,7 @@ export async function simulateCLFScript(
 					CONCERO_VERIFIER_LOCALHOST: secretsOverride?.CONCERO_VERIFIER_LOCALHOST,
 				},
 			},
-			...CLFSimulationConfig,
+			...simulationConfig,
 		});
 
 		const { errorString, capturedTerminalOutput, responseBytesHexstring } = result;

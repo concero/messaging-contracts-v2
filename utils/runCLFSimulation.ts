@@ -3,7 +3,7 @@ import type { SimulationResult } from "@chainlink/functions-toolkit/dist/types";
 import { execSync } from "child_process";
 import fs from "fs";
 
-import { CLFSimulationConfig, secrets } from "../constants";
+import { secrets, simulationConfig } from "../constants";
 
 export enum CLFType {
 	requestReport = "requestReport",
@@ -72,7 +72,7 @@ export async function runCLFSimulation(
 					fs.readFileSync(pathToFile, "utf8"),
 				bytesArgs: args,
 				secrets,
-				...CLFSimulationConfig,
+				...simulationConfig,
 			}),
 		);
 	}

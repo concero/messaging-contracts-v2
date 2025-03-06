@@ -1,11 +1,12 @@
 import { task } from "hardhat/config";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ProxyEnum, conceroNetworks } from "../../constants";
-import deployProxyAdmin from "../../deploy/ConceroProxyAdmin";
-import deployVerifier from "../../deploy/ConceroVerifier";
-import deployTransparentProxy from "../../deploy/TransparentProxy";
-import { compileContracts, getEnvAddress } from "../../utils";
+import { deployProxyAdmin } from "../../deploy/ConceroProxyAdmin";
+import { deployVerifier } from "../../deploy/ConceroVerifier";
+import { deployTransparentProxy } from "../../deploy/TransparentProxy";
+import { compileContracts } from "../../utils/compileContracts";
+import { getEnvAddress } from "../../utils/getEnvVar";
 import { addCLFConsumer } from "../clf";
 import { upgradeProxyImplementation } from "../utils/upgradeProxyImplementation";
 import { setVerifierVariables } from "./setVerifierVariables";

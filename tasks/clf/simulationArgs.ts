@@ -40,4 +40,4 @@ const getSimulationArgs: { [functionName: string]: ArgBuilder } = {
 	},
 };
 
-export default getSimulationArgs;
+export { getSimulationArgs };

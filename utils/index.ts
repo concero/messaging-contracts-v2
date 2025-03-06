@@ -1,4 +1,3 @@
-import { compileContracts } from "./compileContracts";
 import { configureDotEnv } from "./configureDotEnv";
 import { formatGas, shorten } from "./formatting";
 import { getEnvAddress, getEnvVar } from "./getEnvVar";
@@ -16,7 +15,6 @@ import { err, log, warn } from "./log";
 import { updateEnvAddress, updateEnvVariable } from "./updateEnvVariable";
 
 export {
-	// compileContracts,
 	configureDotEnv,
 	shorten,
 	formatGas,

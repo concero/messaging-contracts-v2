@@ -1,4 +1,4 @@
-const CLFSimulationConfig = {
+const simulationConfig = {
 	maxOnChainResponseBytes: 1024,
 	maxExecutionTimeMs: 100000,
 	maxMemoryUsageMb: 128,
@@ -9,4 +9,4 @@ const CLFSimulationConfig = {
 	maxQueryResponseBytes: 2097152,
 };
 
-export default CLFSimulationConfig;
+export { simulationConfig };

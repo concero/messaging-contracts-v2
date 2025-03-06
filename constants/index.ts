@@ -1,5 +1,5 @@
-import secrets from "./CLFSecrets";
-import CLFSimulationConfig from "./CLFSimulationConfig";
+import { secrets } from "./clf/secrets";
+import { simulationConfig } from "./clf/simulationConfig";
 import { conceroNetworks, networkEnvKeys, networkTypes } from "./conceroNetworks";
 import {
 	ProxyEnum,
@@ -7,13 +7,13 @@ import {
 	viemReceiptConfig,
 	writeContractConfig,
 } from "./deploymentVariables";
-import { liveNetworks } from "./liveNetworks";
+// import { liveNetworks } from "./liveNetworks";
 import { rpcUrl, urls } from "./rpcUrls";
 import { deployerTargetBalances, messengerTargetBalances } from "./targetBalances";
 
 export {
 	secrets,
-	CLFSimulationConfig,
+	simulationConfig,
 	conceroNetworks,
 	networkTypes,
 	networkEnvKeys,
@@ -25,5 +25,5 @@ export {
 	rpcUrl,
 	messengerTargetBalances,
 	deployerTargetBalances,
-	liveNetworks,
+	// liveNetworks,
 };

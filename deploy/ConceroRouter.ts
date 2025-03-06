@@ -95,5 +95,5 @@ const deployRouter: DeploymentFunction = async function (
 	return deployment;
 };
 
-export default deployRouter;
+export { deployRouter };
 deployRouter.tags = ["ConceroRouter"];

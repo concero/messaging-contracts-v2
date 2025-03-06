@@ -1,7 +1,7 @@
 import {
 	CLF_OPERATOR_REGISTRATION_JS_URL,
 	CLF_REQUEST_REPORT_JS_URL,
-} from "../constants/functionsJsCodeUrls";
+} from "../constants/clf/jsUrls";
 
 export enum ClfJsCodeType {
 	MessageReport,

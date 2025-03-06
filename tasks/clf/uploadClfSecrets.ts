@@ -1,12 +1,11 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
 
 import { networkEnvKeys } from "../../constants";
-import secrets from "../../constants/CLFSecrets";
-import { clfGatewayUrls } from "../../constants/clfGatewayUrls";
-import { CLF_ETHEREUM_TTL, CLF_TESTNET_TTL } from "../../constants/clfTtl";
+import { gatewayUrls } from "../../constants/clf/gatewayUrls";
+import { secrets } from "../../constants/clf/secrets";
+import { CLF_MAINNET_TTL, CLF_TESTNET_TTL } from "../../constants/clf/secretsConfig";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
-import { getEnvVar, getEthersSignerAndProvider } from "../../utils";
-import log from "../../utils/log";
+import { getEnvVar, getEthersSignerAndProvider, log } from "../../utils";
 import updateEnvVariable from "../../utils/updateEnvVariable";
 import { listSecrets } from "./listClfSecrets";
 
@@ -16,8 +15,7 @@ export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number)
 	for (const chain of chains) {
 		const { url, name } = chain;
 		const { signer } = getEthersSignerAndProvider(url);
-		const minutesUntilExpiration =
-			chain.type === "mainnet" ? CLF_ETHEREUM_TTL : CLF_TESTNET_TTL;
+		const minutesUntilExpiration = chain.type === "mainnet" ? CLF_MAINNET_TTL : CLF_TESTNET_TTL;
 
 		console.log({
 			signer,
@@ -42,7 +40,7 @@ export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number)
 
 		const { version } = await secretsManager.uploadEncryptedSecretsToDON({
 			encryptedSecretsHexstring: encryptedSecretsObj.encryptedSecrets,
-			gatewayUrls: clfGatewayUrls[chain.type],
+			gatewayUrls: gatewayUrls[chain.type],
 			slotId,
 			minutesUntilExpiration,
 		});

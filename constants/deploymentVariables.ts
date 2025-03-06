@@ -4,28 +4,28 @@ import type { WaitForTransactionReceiptParameters } from "viem/actions/public/wa
 import { ConceroNetwork } from "../types/ConceroNetwork";
 import { EnvPrefixes } from "../types/deploymentVariables";
 
-export const viemReceiptConfig: WaitForTransactionReceiptParameters = {
+enum ProxyEnum {
+	routerProxy = "routerProxy",
+	clfRouterProxy = "clfRouterProxy",
+}
+
+const viemReceiptConfig: WaitForTransactionReceiptParameters = {
 	timeout: 0,
 	confirmations: 2,
 };
-export function getViemReceiptConfig(
-	chain: ConceroNetwork,
-): Partial<WaitForTransactionReceiptParameters> {
+
+const writeContractConfig: WriteContractParameters = {
+	gas: 3000000n, // 3M
+};
+
+function getViemReceiptConfig(chain: ConceroNetwork): Partial<WaitForTransactionReceiptParameters> {
 	return {
 		timeout: 0,
 		confirmations: chain.confirmations,
 	};
 }
 
-export const writeContractConfig: WriteContractParameters = {
-	gas: 3000000n, // 3M
-};
-export enum ProxyEnum {
-	routerProxy = "routerProxy",
-	clfRouterProxy = "clfRouterProxy",
-}
-
-export const envPrefixes: EnvPrefixes = {
+const envPrefixes: EnvPrefixes = {
 	router: "CONCERO_ROUTER",
 	clfRouter: "CONCERO_CLF_ROUTER",
 	routerProxy: "CONCERO_ROUTER_PROXY",
@@ -36,3 +36,5 @@ export const envPrefixes: EnvPrefixes = {
 	create3Factory: "CREATE3_FACTORY",
 	pause: "CONCERO_PAUSE",
 };
+
+export { viemReceiptConfig, writeContractConfig, ProxyEnum, envPrefixes, getViemReceiptConfig };

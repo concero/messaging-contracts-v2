@@ -1,8 +1,17 @@
-import * as clf from "./clf";
-import { buildClfJs } from "./clf/buildClfJs";
 import { deployContracts } from "./deployContracts";
-import * as deployRouter from "./deployRouter";
-import * as deployVerifier from "./deployVerifier";
-import * as utils from "./utils";
+import { deployRouterTask } from "./deployRouter/deployRouterTask";
+import { setRouterVariables } from "./deployRouter/setRouterVariables";
+import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
+import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
+import { callContractFunction, changeOwnership, upgradeProxyImplementation } from "./utils";
 
-export { deployRouter, deployVerifier, clf, utils, deployContracts, buildClfJs };
+export {
+	callContractFunction,
+	changeOwnership,
+	upgradeProxyImplementation,
+	deployRouterTask,
+	deployVerifierTask,
+	setRouterVariables,
+	setVerifierVariables,
+	deployContracts,
+};

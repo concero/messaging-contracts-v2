@@ -1,4 +1,4 @@
-export const clfGatewayUrls = {
+const gatewayUrls = {
 	mainnet: [
 		"https://01.functions-gateway.chain.link/",
 		"https://02.functions-gateway.chain.link/",
@@ -12,3 +12,5 @@ export const clfGatewayUrls = {
 		"https://02.functions-gateway.testnet.chain.link/",
 	],
 };
+
+export { gatewayUrls };

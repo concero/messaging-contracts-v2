@@ -1,10 +1,9 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 import { readFileSync } from "fs";
-import hre from "hardhat";
 import { resolve } from "path";
 
 import { conceroNetworks, networkEnvKeys } from "../../constants";
-import { CLF_DON_HOSTED_SECRETS_SLOT } from "../../constants/CLFSecretsConfig";
+import { CLF_DON_HOSTED_SECRETS_SLOT } from "../../constants/clf/secretsConfig";
 import { ConceroNetworkNames } from "../../types/ConceroNetwork";
 import { getEnvVar, getHashSum, updateEnvVariable } from "../../utils";
 

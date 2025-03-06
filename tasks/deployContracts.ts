@@ -11,8 +11,8 @@ import {
 	Namespaces as verifierNamespaces,
 	PriceFeedSlots as verifierPriceFeedSlots,
 } from "../constants/storage/ConceroVerifierStorage";
-import deployRouter from "../deploy/ConceroRouter";
-import deployVerifier from "../deploy/ConceroVerifier";
+import { deployRouter } from "../deploy/ConceroRouter";
+import { deployVerifier } from "../deploy/ConceroVerifier";
 import { getFallbackClients } from "../utils";
 
 async function deployContracts(

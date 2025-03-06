@@ -9,21 +9,21 @@ import { err, getEnvVar, getFallbackClients, log } from "../../utils";
 
 //todo: base throws max block range 5000 error. find a better RPC to fetch signers for base.
 const mainnetNetworks = [
-	// conceroNetworks.mainnet, // no mainnet & opt object in conceroNetworks yet
+	// conceroNetworks.ethereum, // no mainnet & opt object in conceroNetworks yet
 	// conceroNetworks.base,
-	conceroNetworks.arbitrum,
+	// conceroNetworks.arbitrum,
 	// conceroNetworks.optimism,
-	// conceroNetworks.avalanche,
+	conceroNetworks.avalanche,
 	// conceroNetworks.polygon,
 ];
 
 const testnetNetworks = [
 	// conceroNetworks.sepolia,
 	// conceroNetworks.baseSepolia,
-	conceroNetworks.arbitrumSepolia,
+	// conceroNetworks.arbitrumSepolia,
 	// conceroNetworks.optimismSepolia,
 	// conceroNetworks.avalancheFuji,
-	// conceroNetworks.polygonAmoy,
+	conceroNetworks.polygonAmoy,
 ];
 
 const clfCoordinatorCreationBlock = {
@@ -38,7 +38,7 @@ const clfCoordinatorCreationBlock = {
 	avalanche: 48089579n,
 };
 
-const MAX_BLOCK_RANGE = 1000000n; // Adjust according to the provider's limits
+const MAX_BLOCK_RANGE = 10_000_000n; // Adjust according to the provider's limits
 
 async function fetchLogsInChunks(publicClient, parameters, maxBlockRange) {
 	const fromBlock = parameters.fromBlock;
@@ -72,23 +72,20 @@ export async function fetchDONSigners(isTestnet: boolean) {
 
 	for (const chain of watchedChains) {
 		const { viemChain, name } = chain;
-		const { walletClient, publicClient, account } = getFallbackClients(chain);
+		const { publicClient } = getFallbackClients(chain);
 
 		const functionsRouter = getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`);
 		const functionsDonId = getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`);
 		const functionsCoordinator = getEnvVar(`CLF_COORDINATOR_${networkEnvKeys[name]}`);
 
 		try {
-			const { result: fetchedCLFCoordinatorAddress } = await publicClient.simulateContract({
+			const fetchedCLFCoordinatorAddress = await publicClient.readContract({
 				address: functionsRouter,
 				abi: functionsRouterAbi,
 				functionName: "getContractById",
 				args: [functionsDonId],
 				chain: viemChain,
-				account,
 			});
-
-			// console.log(`[${name}] Fetched CLFCoordinator address: ${fetchedCLFCoordinatorAddress}`);
 
 			if (
 				fetchedCLFCoordinatorAddress &&

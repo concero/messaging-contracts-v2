@@ -1,7 +1,7 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
 
 import { networkEnvKeys } from "../../constants";
-import { clfGatewayUrls } from "../../constants/clfGatewayUrls";
+import { gatewayUrls } from "../../constants/clf/gatewayUrls";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
 import { getEnvVar, getEthersSignerAndProvider } from "../../utils";
 import log from "../../utils/log";
@@ -18,9 +18,7 @@ export async function listSecrets(
 
 	await secretsManager.initialize();
 
-	const { result } = await secretsManager.listDONHostedEncryptedSecrets(
-		clfGatewayUrls[chain.type],
-	);
+	const { result } = await secretsManager.listDONHostedEncryptedSecrets(gatewayUrls[chain.type]);
 	const allSecrets = {};
 
 	result.nodeResponses.forEach(nodeResponse => {

@@ -1,7 +1,7 @@
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 
 const networkColors: Record<ConceroNetworkNames, string> = {
-	mainnet: "\x1b[30m", // grey
+	ethereum: "\x1b[30m", // grey
 	arbitrum: "\x1b[34m", // blue
 	polygon: "\x1b[35m", // magenta
 	avalanche: "\x1b[31m", // red

@@ -4,7 +4,7 @@ import { computeNamespace } from "../../utils/computeNamespace";
  * @title Namespaces
  * @notice Contains namespace constants for ConceroRouter.
  */
-export const Namespaces = {
+const Namespaces = {
 	ROUTER: computeNamespace("concerorouter.router.storage"),
 	OPERATOR: computeNamespace("concerorouter.operator.storage"),
 	PRICEFEED: computeNamespace("concerorouter.pricefeed.storage"),
@@ -63,4 +63,4 @@ const PriceFeedSlots = (() => {
 	});
 })();
 
-export { RouterSlots, OperatorSlots, PriceFeedSlots };
+export { RouterSlots, OperatorSlots, PriceFeedSlots, Namespaces };

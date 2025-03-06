@@ -167,4 +167,4 @@ task("decode-clf-fulfill", "Decodes CLF TX to get signers and fulfillment data")
 		decodeReportResult(formattedData.report.results);
 	});
 
-export default {};
+export { decodeReport };

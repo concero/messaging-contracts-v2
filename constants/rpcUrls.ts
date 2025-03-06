@@ -25,6 +25,8 @@ export const urls: Record<string, string[]> = {
 	hardhat: [rpcUrl.hardhat],
 	localhost: [rpcUrl.localhost],
 	ethereum: [
+		"https://ethereum.blockpi.network/v1/rpc/public",
+		"https://eth.llamarpc.com",
 		`https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
 		`https://eth-mainnet.blastapi.io/${BLAST_API_KEY}`,
 		"https://rpc.ankr.com/eth",
@@ -66,21 +68,24 @@ export const urls: Record<string, string[]> = {
 		"https://rpc.ankr.com/optimism_sepolia",
 	],
 	polygon: [
+		"https://polygon-bor-rpc.publicnode.com",
 		`https://polygon.gateway.tenderly.co/${TENDERLY_API_KEY}`,
 		`https://polygon-mainnet.blastapi.io/${BLAST_API_KEY}`,
 		"https://rpc.ankr.com/polygon",
-		"https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}",
-		"https://polygon-bor-rpc.publicnode.com",
+		`https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
 	],
 	polygonAmoy: [
+		"https://rpc-amoy.polygon.technology",
 		"https://rpc.ankr.com/polygon_amoy",
 		`https://polygon-amoy.blastapi.io/${BLAST_API_KEY}`,
 		`https://polygon-amoy.infura.io/v3/${INFURA_API_KEY}`,
 	],
 	base: [
-		"https://rpc.ankr.com/base",
+		"https://base.lava.build",
+		"https://base.llamarpc.com",
+		"https://developer-access-mainnet.base.org",
 		`https://base-rpc.publicnode.com`,
-		`https://base-mainnet.blastapi.io/${BLAST_API_KEY}`,
+		"https://rpc.ankr.com/base",
 	],
 	baseSepolia: [
 		`https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,

@@ -3,9 +3,9 @@ import { keccak256, parseUnits } from "ethers";
 import { Address, encodeAbiParameters, zeroHash } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-import deployConceroClientExample from "../../deploy/ConceroClientExample";
-import deployVerifier from "../../deploy/ConceroVerifier";
-import deployMockCLFRouter from "../../deploy/MockCLFRouter";
+import { deployConceroClientExample } from "../../deploy/ConceroClientExample";
+import { deployVerifier } from "../../deploy/ConceroVerifier";
+import { deployMockCLFRouter } from "../../deploy/MockCLFRouter";
 import { simulateCLFScript } from "../../tasks/clf";
 import { deployContracts } from "../../tasks/deployContracts";
 import { getTestClient } from "../../utils";

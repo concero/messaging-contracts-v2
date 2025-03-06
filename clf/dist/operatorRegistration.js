@@ -1926,6 +1926,4 @@ async function main(bytesArgs) {
     }
   }
 }
-export {
-  main
-};
+return main();

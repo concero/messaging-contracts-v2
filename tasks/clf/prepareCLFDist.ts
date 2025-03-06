@@ -1,25 +1,35 @@
-function prepareCLFDist(sourceCode: string): string {
-	// Regular expression to find the export pattern and capture the module name
-	const exportRegex = /export\s*\{([^}]+)\s+as\s+main\}\s*;?\s*$/;
+/**
+ * Processes JavaScript files to prepare them for distribution by removing export statements
+ * and adding a return statement for the main function.
+ *
+ * @param sourceCode - Source code content to process
+ * @param isMinified - Whether the source is minified (affects export pattern matching)
+ * @returns Processed source code
+ */
+function prepareCLFDist(sourceCode: string, isMinified: boolean = false): string {
+	if (isMinified) {
+		// Pattern for minified files: export{moduleName as main};
+		const minifiedExportRegex = /export\s*\{([^}]+)\s+as\s+main\}\s*;?\s*$/;
+		const match = sourceCode.match(minifiedExportRegex);
 
-	// Try to match the export pattern
-	const match = sourceCode.match(exportRegex);
-
-	if (!match) {
-		// If the pattern isn't found, return the original source code
-		return sourceCode;
+		if (match) {
+			const moduleName = match[1].trim();
+			const processedCode = sourceCode.replace(minifiedExportRegex, "");
+			return processedCode + `\nreturn ${moduleName}();\n`;
+		}
+	} else {
+		// Pattern for unminified files: export { main };
+		// This pattern matches the closing brace of the function followed by the export statement
+		const unminifiedExportRegex = /\n?\}\n?export\s*\{\s*main\s*\}\s*;?\s*$/;
+		if (unminifiedExportRegex.test(sourceCode)) {
+			const processedCode = sourceCode.replace(unminifiedExportRegex, "\n}");
+			return processedCode + `\nreturn main();\n`;
+		}
 	}
 
-	// Extract the module name (e.g., "aM" from "export{aM as main};")
-	const moduleName = match[1].trim();
-
-	// Remove the export statement from the source code
-	const codeWithoutExport = sourceCode.replace(exportRegex, "");
-
-	// Append the return statement
-	const finalCode = codeWithoutExport + `\nreturn ${moduleName}();\n`;
-
-	return finalCode;
+	// If no patterns matched, return the original code
+	console.warn("Export pattern not found in the source code");
+	return sourceCode;
 }
 
 export { prepareCLFDist };

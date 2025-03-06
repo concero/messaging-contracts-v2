@@ -9,7 +9,7 @@ import {
 } from "./getEthersSignerAndProvider";
 import { getGasParameters } from "./getGasParameters";
 import getHashSum from "./getHashSum";
-import { getClients, getFallbackClients, getTestClient } from "./getViemClients";
+import { getClients, getFallbackClients, getTestClient, getViemAccount } from "./getViemClients";
 import { getWallet } from "./getWallet";
 import { err, log, warn } from "./log";
 import { updateEnvAddress, updateEnvVariable } from "./updateEnvVariable";
@@ -24,6 +24,7 @@ export {
 	getEthersSignerAndProvider,
 	getEthersV6FallbackSignerAndProvider,
 	getEthersV6SignerAndProvider,
+	getViemAccount,
 	getHashSum,
 	getClients,
 	getFallbackClients,

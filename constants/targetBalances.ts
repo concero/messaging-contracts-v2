@@ -1,6 +1,6 @@
 import { parseEther } from "viem";
 
-export const messengerTargetBalances: Record<string, bigint> = {
+const messengerTargetBalances: Record<string, bigint> = {
 	ethereum: parseEther("0.01"),
 	arbitrum: parseEther("0.01"),
 	polygon: parseEther("0.1"),
@@ -8,7 +8,7 @@ export const messengerTargetBalances: Record<string, bigint> = {
 	base: parseEther("0.01"),
 };
 
-export const deployerTargetBalances: Record<string, bigint> = {
+const deployerTargetBalances: Record<string, bigint> = {
 	ethereum: parseEther("0.01"),
 	arbitrum: parseEther("0.01"),
 	polygon: parseEther("1"),
@@ -21,3 +21,5 @@ export const deployerTargetBalances: Record<string, bigint> = {
 	avalancheFuji: parseEther("0.3"),
 	baseSepolia: parseEther("0.01"),
 };
+
+export { messengerTargetBalances, deployerTargetBalances };

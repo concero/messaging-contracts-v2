@@ -19,7 +19,7 @@ import { ConceroNetwork, ConceroNetworkType } from "../types/ConceroNetwork";
 import { getWallet } from "./getWallet";
 import { localhostViemChain } from "./localhostViemChain";
 
-export function getClients(
+function getClients(
 	viemChain: Chain,
 	url: string | undefined,
 	account?: PrivateKeyAccount = privateKeyToAccount(`0x${process.env.DEPLOYER_PRIVATE_KEY}`),
@@ -36,7 +36,7 @@ export function getClients(
 
 export type ExtendedTestClient = TestClient & WalletClient & PublicClient;
 
-export function getTestClient(account: PrivateKeyAccount): ExtendedTestClient {
+function getTestClient(account: PrivateKeyAccount): ExtendedTestClient {
 	const testClient = createTestClient({
 		chain: localhostViemChain,
 		mode: "hardhat",
@@ -49,7 +49,7 @@ export function getTestClient(account: PrivateKeyAccount): ExtendedTestClient {
 	return testClient;
 }
 
-export function getFallbackClients(
+function getFallbackClients(
 	chain: ConceroNetwork,
 	account?: PrivateKeyAccount,
 ): {
@@ -82,9 +82,11 @@ export function getFallbackClients(
 	return { walletClient, publicClient, account };
 }
 
-export function getViemAccount(
+function getViemAccount(
 	chainType: ConceroNetworkType,
 	accountType: "proxyDeployer" | "deployer",
 ) {
 	return privateKeyToAccount(`0x${getWallet(chainType, accountType, "privateKey")}`);
 }
+
+export { getClients, getFallbackClients, getTestClient, getViemAccount };

@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+
 import type { Address } from "viem";
 
 import { getEnvVar } from "../../utils";

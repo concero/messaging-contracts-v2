@@ -1,7 +1,8 @@
-import { simulateScript } from "@chainlink/functions-toolkit";
-import type { SimulationResult } from "@chainlink/functions-toolkit/dist/types";
 import { execSync } from "child_process";
 import fs from "fs";
+
+import { simulateScript } from "@chainlink/functions-toolkit";
+import type { SimulationResult } from "@chainlink/functions-toolkit/dist/types";
 
 import { secrets, simulationConfig } from "../constants";
 

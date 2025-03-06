@@ -1,12 +1,9 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
 
-import { networkEnvKeys } from "../../constants";
+import { CLF_MAINNET_TTL, CLF_TESTNET_TTL, networkEnvKeys, secrets } from "../../constants";
 import { gatewayUrls } from "../../constants/clf/gatewayUrls";
-import { secrets } from "../../constants/clf/secrets";
-import { CLF_MAINNET_TTL, CLF_TESTNET_TTL } from "../../constants/clf/secretsConfig";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
-import { getEnvVar, getEthersSignerAndProvider, log } from "../../utils";
-import updateEnvVariable from "../../utils/updateEnvVariable";
+import { getEnvVar, getEthersSignerAndProvider, log, updateEnvVariable } from "../../utils";
 import { listSecrets } from "./listClfSecrets";
 
 export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number) {

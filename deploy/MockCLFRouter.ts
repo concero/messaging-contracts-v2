@@ -27,4 +27,5 @@ async function deployMockCLFRouter(
 }
 
 export { deployMockCLFRouter };
+export default deployMockCLFRouter;
 deployMockCLFRouter.tags = ["MockCLFRouter"];

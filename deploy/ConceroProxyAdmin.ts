@@ -3,8 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks, writeContractConfig } from "../constants";
 import { IProxyType } from "../types/deploymentVariables";
-import { getWallet, updateEnvAddress } from "../utils";
-import log from "../utils/log";
+import { getWallet, log, updateEnvAddress } from "../utils";
 
 const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) => Promise<void> =
 	async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {
@@ -40,4 +39,5 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 	};
 
 export { deployProxyAdmin };
+export default deployProxyAdmin;
 deployProxyAdmin.tags = ["ConceroProxyAdmin"];

@@ -1,6 +1,7 @@
+import { Address, type WalletClient, zeroHash } from "viem";
+
 import { task } from "hardhat/config";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
-import { Address, type WalletClient, zeroHash } from "viem";
 
 import { conceroNetworks } from "../constants";
 import {

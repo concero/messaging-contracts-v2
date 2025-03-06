@@ -1,9 +1,17 @@
 import { secrets } from "./clf/secrets";
+import {
+	CLF_DON_HOSTED_SECRETS_SLOT,
+	CLF_MAINNET_TTL,
+	CLF_SECRETS_ETHEREUM_EXPIRATION,
+	CLF_SECRETS_TESTNET_EXPIRATION,
+	CLF_TESTNET_TTL,
+} from "./clf/secretsConfig";
 import { simulationConfig } from "./clf/simulationConfig";
 import { conceroNetworks, networkEnvKeys, networkTypes } from "./conceroNetworks";
 import {
 	ProxyEnum,
 	envPrefixes,
+	getViemReceiptConfig,
 	viemReceiptConfig,
 	writeContractConfig,
 } from "./deploymentVariables";
@@ -13,6 +21,11 @@ import { deployerTargetBalances, messengerTargetBalances } from "./targetBalance
 
 export {
 	secrets,
+	CLF_DON_HOSTED_SECRETS_SLOT,
+	CLF_MAINNET_TTL,
+	CLF_SECRETS_ETHEREUM_EXPIRATION,
+	CLF_SECRETS_TESTNET_EXPIRATION,
+	CLF_TESTNET_TTL,
 	simulationConfig,
 	conceroNetworks,
 	networkTypes,
@@ -21,6 +34,7 @@ export {
 	writeContractConfig,
 	ProxyEnum,
 	envPrefixes,
+	getViemReceiptConfig,
 	urls,
 	rpcUrl,
 	messengerTargetBalances,

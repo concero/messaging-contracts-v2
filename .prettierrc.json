@@ -6,7 +6,7 @@
     "plugins": ["prettier-plugin-solidity", "@trivago/prettier-plugin-sort-imports"],
     "overrides": [
         {
-            "files": "*.ts",
+            "files": ["*.ts", "*/**/*.ts"],
             "options": {
                 "parser": "typescript",
                 "arrowParens": "avoid",
@@ -21,9 +21,11 @@
                 "importOrderSortSpecifiers": true,
                 "importOrder": [
                     "./utils/configureOperatorEnv",
+                    "^viem(.*)$",
+                    "^hardhat(.*)$",
+                    "^@(.*)$",
                     "^@concero/(.*)$",
                     "^contracts/(.*)$",
-                    "^utils/(.*)$",
                     "^[./]"
                 ]
             }

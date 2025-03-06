@@ -1,8 +1,7 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks, networkEnvKeys } from "../constants";
-import { CLF_DON_HOSTED_SECRETS_SLOT } from "../constants/clf/secretsConfig";
+import { CLF_DON_HOSTED_SECRETS_SLOT, conceroNetworks, networkEnvKeys } from "../constants";
 import { addCLFConsumer } from "../tasks/clf";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { getEnvVar, getGasParameters, getHashSum, log, updateEnvVariable } from "../utils";
@@ -114,4 +113,5 @@ const deployVerifier: DeploymentFunction = async function (
 };
 
 export { deployVerifier };
+export default deployVerifier;
 deployVerifier.tags = ["ConceroVerifier"];

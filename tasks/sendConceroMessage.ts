@@ -1,6 +1,7 @@
+import { Address, WalletClient, parseUnits } from "viem";
+
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { Address, WalletClient, parseUnits } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { getFallbackClients } from "../utils";

@@ -1,10 +1,11 @@
-import { simulateScript } from "@chainlink/functions-toolkit";
 import fs from "fs";
-import { task, types } from "hardhat/config";
 import path from "path";
 
-import { secrets } from "../../constants/clf/secrets";
-import { simulationConfig } from "../../constants/clf/simulationConfig";
+import { task, types } from "hardhat/config";
+
+import { simulateScript } from "@chainlink/functions-toolkit";
+
+import { secrets, simulationConfig } from "../../constants";
 import { log } from "../../utils";
 import { getSimulationArgs } from "./simulationArgs";
 

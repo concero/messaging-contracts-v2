@@ -4,6 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { conceroNetworks, networkEnvKeys } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { getEnvVar, log, updateEnvVariable } from "../utils";
+import deployRouter from "./ConceroRouter";
 
 type DeployArgs = {
 	conceroRouter: string;
@@ -53,4 +54,6 @@ const deployConceroClientExample: DeploymentFunction = async function (
 };
 
 export { deployConceroClientExample };
+export default deployConceroClientExample;
+
 deployConceroClientExample.tags = ["ConceroClientExample"];

@@ -2,11 +2,9 @@ import { task } from "hardhat/config";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ProxyEnum } from "../../constants";
-import { deployProxyAdmin } from "../../deploy/ConceroProxyAdmin";
-import { deployRouter } from "../../deploy/ConceroRouter";
-import { deployTransparentProxy } from "../../deploy/TransparentProxy";
+import { deployProxyAdmin, deployRouter, deployTransparentProxy } from "../../deploy";
 import { compileContracts } from "../../utils/compileContracts";
-import { upgradeProxyImplementation } from "../utils/upgradeProxyImplementation";
+import { upgradeProxyImplementation } from "../utils";
 import { setRouterVariables } from "./setRouterVariables";
 
 async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {

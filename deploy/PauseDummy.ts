@@ -2,8 +2,7 @@ import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks, networkEnvKeys } from "../constants";
-import log from "../utils/log";
-import updateEnvVariable from "../utils/updateEnvVariable";
+import { log, updateEnvVariable } from "../utils";
 
 const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = async function (
 	hre: HardhatRuntimeEnvironment,
@@ -33,4 +32,5 @@ const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = asyn
 };
 
 export { deployPauseDummy };
+export default deployPauseDummy;
 deployPauseDummy.tags = ["PauseDummy"];

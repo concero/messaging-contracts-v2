@@ -3,9 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks, writeContractConfig } from "../constants";
 import { IProxyType } from "../types/deploymentVariables";
-import { getEnvAddress, updateEnvAddress } from "../utils";
-import { getGasParameters } from "../utils/getGasParameters";
-import log from "../utils/log";
+import { getEnvAddress, getGasParameters, log, updateEnvAddress } from "../utils";
 
 const deployTransparentProxy: (
 	hre: HardhatRuntimeEnvironment,
@@ -43,4 +41,5 @@ const deployTransparentProxy: (
 };
 
 export { deployTransparentProxy };
+export default deployTransparentProxy;
 deployTransparentProxy.tags = ["TransparentProxy"];

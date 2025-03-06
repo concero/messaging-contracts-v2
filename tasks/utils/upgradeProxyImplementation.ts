@@ -1,10 +1,20 @@
 import { task } from "hardhat/config";
 
-import { ProxyEnum, conceroNetworks, writeContractConfig } from "../../constants";
-import { getViemReceiptConfig } from "../../constants/deploymentVariables";
+import {
+	ProxyEnum,
+	conceroNetworks,
+	getViemReceiptConfig,
+	writeContractConfig,
+} from "../../constants";
 import { EnvPrefixes, IProxyType } from "../../types/deploymentVariables";
-import { err, formatGas, getEnvAddress, getFallbackClients, log } from "../../utils";
-import { getViemAccount } from "../../utils/getViemClients";
+import {
+	err,
+	formatGas,
+	getEnvAddress,
+	getFallbackClients,
+	getViemAccount,
+	log,
+} from "../../utils";
 
 export async function upgradeProxyImplementation(hre, proxyType: IProxyType, shouldPause: boolean) {
 	const { name: chainName } = hre.network;

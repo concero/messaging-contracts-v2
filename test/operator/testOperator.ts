@@ -1,17 +1,17 @@
-import { privateKeyToAccount } from "viem/accounts";
-
 import "./utils/configureOperatorEnv";
+
+import { privateKeyToAccount } from "viem/accounts";
 
 import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureDeposit";
 import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureOperatorIsRegistered";
 import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
 import { checkGas } from "@concero/v2-operators/src/relayer/common/utils";
 
-import { deployConceroClientExample } from "../../deploy/ConceroClientExample";
-import { deployMockCLFRouter } from "../../deploy/MockCLFRouter";
+import { deployConceroClientExample } from "../../deploy";
+import { deployMockCLFRouter } from "../../deploy";
 import { deployContracts } from "../../tasks";
+import { getTestClient } from "../../utils";
 import { compileContracts } from "../../utils/compileContracts";
-import { getTestClient } from "../../utils/getViemClients";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
 /*

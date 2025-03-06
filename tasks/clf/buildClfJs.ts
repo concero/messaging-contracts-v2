@@ -12,35 +12,45 @@ export function buildClfJs() {
 		const networkName = hre.network.name;
 		const conceroVerifier = getEnvVar(`CONCERO_VERIFIER_${networkEnvKeys[networkName]}`);
 		const conceroRouter = getEnvVar(`CONCERO_ROUTER_${networkEnvKeys[networkName]}`);
-		const cmdBase = `bun build index.ts --define CONCERO_VERIFIER='"${conceroVerifier}"' --define CONCERO_ROUTER='"${conceroRouter}"' `;
+
+		// Base esbuild command with common options
+		const cmdBase =
+			`esbuild --bundle --format=esm --target=esnext ` +
+			`--define:CONCERO_VERIFIER='"${conceroVerifier}"' ` +
+			`--define:CONCERO_ROUTER_OPTIMISM='"${conceroRouter}"' ` +
+			`--define:CONCERO_ROUTER_ETHEREUM='"${conceroRouter}"' `;
+
+		// Get all directories in clf/src
 		const dirs = execSync("ls -d */", { cwd: "clf/src" }).toString();
 		const dirsArray = dirs
 			.split("\n")
 			.filter(dir => dir !== "")
-			// Remove trailing slash from each directory name
-			.map(dir => dir.replace(/\/$/, ""));
+			.map(dir => dir.replace(/\/$/, "")); // Remove trailing slash
 
-		// execSync("bun build eval.js --minify --outfile=../dist/eval.js", {
-		// 	cwd: `clf/src/`,
-		// });
-
+		// For each directory, build standard and minified versions if they have an index.ts file
 		dirsArray.forEach(dir => {
 			const dirLs = execSync("ls", { cwd: `clf/src/${dir}` });
 
 			if (!dirLs.toString().includes("index.ts")) return;
 
-			execSync(cmdBase + `--outfile=../../dist/${dir}.js`, {
-				cwd: `clf/src/${dir}`,
+			// Build standard version
+			execSync(`${cmdBase} --outfile=clf/dist/${dir}.js ./clf/src/${dir}/index.ts`, {
+				stdio: "inherit",
 			});
-			execSync(cmdBase + `--minify --outfile=../../dist/${dir}.min.js`, {
-				cwd: `clf/src/${dir}`,
-			});
+
+			// Build minified version
+			execSync(
+				`${cmdBase} --minify --outfile=clf/dist/${dir}.min.js ./clf/src/${dir}/index.ts`,
+				{
+					stdio: "inherit",
+				},
+			);
 		});
 	} catch (e) {
 		console.error(e?.toString());
 	}
 }
 
-task("clf-build-js", "").setAction(async (_, __) => {
+task("clf-build-js", "Build CLF JavaScript files using esbuild").setAction(async (_, __) => {
 	buildClfJs();
 });

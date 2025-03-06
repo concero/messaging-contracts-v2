@@ -6,7 +6,8 @@ import { privateKeyToAccount } from "viem/accounts";
 import "@nomicfoundation/hardhat-chai-matchers";
 
 import { deployConceroClientExample, deployMockCLFRouter, deployVerifier } from "../../deploy";
-import { deployContracts, simulateCLFScript } from "../../tasks";
+import { deployContracts } from "../../tasks";
+import { simulateCLFScript } from "../../tasks/clf";
 import { getTestClient } from "../../utils";
 import { ConceroMessageConfig } from "../../utils/ConceroMessageConfig";
 import { encodedSrcChainData } from "./utils/encodeSrcChainData";

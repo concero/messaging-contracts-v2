@@ -29,7 +29,7 @@ export async function simulateCLFScript(
 	log(`Simulating ${scriptPath}`, "simulateCLFScript");
 	try {
 		const result = await simulateScript({
-			source: fs.readFileSync(scriptPath, "utf8") + "return main();",
+			source: fs.readFileSync(scriptPath, "utf8"),
 			bytesArgs: args,
 			secrets: {
 				...secrets,
@@ -78,7 +78,7 @@ task("clf-script-simulate", "Executes the JavaScript source code locally")
 				scriptPath = path.join(basePath, "./operatorRegistration.min.js");
 				break;
 			case "messageReport":
-				scriptPath = path.join(basePath, "./messageReport.min.js");
+				scriptPath = path.join(basePath, "./messageReport.js");
 				break;
 			default:
 				console.error(`Unknown function: ${scriptName}`);

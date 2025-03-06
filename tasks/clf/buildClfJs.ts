@@ -7,6 +7,20 @@ import { networkEnvKeys } from "../../constants";
 import { getEnvVar } from "../../utils";
 import { prepareCLFDist } from "./prepareCLFDist";
 
+/**
+ * Process a file with prepareCLFDist and save the result back to the same file
+ */
+function processFile(filePath: string, isMinified: boolean = false): void {
+	try {
+		const fileContent = fs.readFileSync(filePath, "utf8");
+		const processedContent = prepareCLFDist(fileContent, isMinified);
+		fs.writeFileSync(filePath, processedContent);
+		console.log(`Processed ${filePath}`);
+	} catch (error) {
+		console.error(`Error processing ${filePath}:`, error);
+	}
+}
+
 export function buildClfJs() {
 	const hre = require("hardhat");
 
@@ -40,6 +54,9 @@ export function buildClfJs() {
 				stdio: "inherit",
 			});
 
+			// Process the standard (unminified) file
+			processFile(`clf/dist/${dir}.js`, false);
+
 			// Build minified version
 			execSync(
 				`${cmdBase} --minify --outfile=clf/dist/${dir}.min.js ./clf/src/${dir}/index.ts`,
@@ -48,12 +65,8 @@ export function buildClfJs() {
 				},
 			);
 
-			// Process the minified file with prepareCLFDist
-			const minFilePath = `clf/dist/${dir}.min.js`;
-			const fileContent = fs.readFileSync(minFilePath, "utf8");
-			const processedContent = prepareCLFDist(fileContent);
-			fs.writeFileSync(minFilePath, processedContent);
-			console.log(`Processed ${minFilePath}`);
+			// Process the minified file
+			processFile(`clf/dist/${dir}.min.js`, true);
 		});
 	} catch (e) {
 		console.error(e?.toString());

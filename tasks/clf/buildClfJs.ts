@@ -1,9 +1,11 @@
 import { execSync } from "child_process";
+import fs from "fs";
 
 import { task } from "hardhat/config";
 
 import { networkEnvKeys } from "../../constants";
 import { getEnvVar } from "../../utils";
+import { prepareCLFDist } from "./prepareCLFDist";
 
 export function buildClfJs() {
 	const hre = require("hardhat");
@@ -15,7 +17,7 @@ export function buildClfJs() {
 
 		// Base esbuild command with common options
 		const cmdBase =
-			`esbuild --bundle --format=esm --target=esnext ` +
+			`esbuild --bundle --legal-comments=none --format=esm --global-name=conceromain --target=esnext ` +
 			`--define:CONCERO_VERIFIER='"${conceroVerifier}"' ` +
 			`--define:CONCERO_ROUTER_OPTIMISM='"${conceroRouter}"' ` +
 			`--define:CONCERO_ROUTER_ETHEREUM='"${conceroRouter}"' `;
@@ -45,6 +47,13 @@ export function buildClfJs() {
 					stdio: "inherit",
 				},
 			);
+
+			// Process the minified file with prepareCLFDist
+			const minFilePath = `clf/dist/${dir}.min.js`;
+			const fileContent = fs.readFileSync(minFilePath, "utf8");
+			const processedContent = prepareCLFDist(fileContent);
+			fs.writeFileSync(minFilePath, processedContent);
+			console.log(`Processed ${minFilePath}`);
 		});
 	} catch (e) {
 		console.error(e?.toString());

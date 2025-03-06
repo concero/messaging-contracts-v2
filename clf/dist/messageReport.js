@@ -15886,7 +15886,7 @@ function verifyMessageHash(message, expectedHashSum) {
 }
 
 // clf/src/messageReport/index.ts
-(async function main() {
+async function main() {
   try {
     const args = decodeInputs(bytesArgs);
     const msgConfig = args.internalMessageConfig;
@@ -15926,30 +15926,7 @@ function verifyMessageHash(message, expectedHashSum) {
       handleError(0 /* UNKNOWN_ERROR */);
     }
   }
-})();
-/*! Bundled license information:
-
-@noble/hashes/esm/utils.js:
-  (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@noble/curves/esm/abstract/utils.js:
-  (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@noble/curves/esm/abstract/modular.js:
-  (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@noble/curves/esm/abstract/curve.js:
-  (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@noble/curves/esm/abstract/weierstrass.js:
-  (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@noble/curves/esm/_shortw_utils.js:
-  (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@noble/curves/esm/secp256k1.js:
-  (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-
-@noble/hashes/esm/utils.js:
-  (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-*/
+}
+export {
+  main
+};

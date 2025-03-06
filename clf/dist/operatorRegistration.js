@@ -1929,8 +1929,3 @@ async function main(bytesArgs) {
 export {
   main
 };
-/*! Bundled license information:
-
-@noble/hashes/esm/utils.js:
-  (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-*/

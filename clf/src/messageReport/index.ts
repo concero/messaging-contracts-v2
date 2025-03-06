@@ -14,7 +14,7 @@ import { pick } from "./utils/utils";
 import { decodeInputs } from "./utils/validateInputs";
 import { verifyMessageHash } from "./utils/verifyMessageHash";
 
-(async function main() {
+export async function main() {
 	try {
 		const args = decodeInputs(bytesArgs);
 		const msgConfig = args.internalMessageConfig;
@@ -61,4 +61,4 @@ import { verifyMessageHash } from "./utils/verifyMessageHash";
 			handleError(ErrorType.UNKNOWN_ERROR);
 		}
 	}
-})();
+}

@@ -29,7 +29,7 @@ export async function simulateCLFScript(
 	log(`Simulating ${scriptPath}`, "simulateCLFScript");
 	try {
 		const result = await simulateScript({
-			source: fs.readFileSync(scriptPath, "utf8"),
+			source: fs.readFileSync(scriptPath, "utf8") + "return main();",
 			bytesArgs: args,
 			secrets: {
 				...secrets,

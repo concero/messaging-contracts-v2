@@ -17,7 +17,7 @@ export async function sendConceroMessage(
 		abi: exampleClientAbi,
 		functionName: "sendConceroMessage",
 		args: [clientAddress],
-		account: privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
+		account: walletClient.account,
 		value: parseUnits("0.001", 18),
 	});
 

@@ -8027,49 +8027,49 @@ var init_call = __esm({
 
 // clf/src/common/errorType.ts
 var ErrorType = /* @__PURE__ */ ((ErrorType2) => {
-  ErrorType2[ErrorType2["UNKNOWN_ERROR"] = 0] = "UNKNOWN_ERROR";
-  ErrorType2[ErrorType2["INVALID_BYTES_ARGS_LENGTH"] = 1] = "INVALID_BYTES_ARGS_LENGTH";
-  ErrorType2[ErrorType2["ARRAY_LENGTH_MISMATCH"] = 2] = "ARRAY_LENGTH_MISMATCH";
-  ErrorType2[ErrorType2["CONFIG_INVALID_VERSION"] = 10] = "CONFIG_INVALID_VERSION";
-  ErrorType2[ErrorType2["CONFIG_INVALID_RELAYER_CONFIG"] = 11] = "CONFIG_INVALID_RELAYER_CONFIG";
-  ErrorType2[ErrorType2["CONFIG_INVALID_MIN_SRC_CONFIRMATIONS"] = 12] = "CONFIG_INVALID_MIN_SRC_CONFIRMATIONS";
-  ErrorType2[ErrorType2["CONFIG_INVALID_MIN_DST_CONFIRMATIONS"] = 13] = "CONFIG_INVALID_MIN_DST_CONFIRMATIONS";
-  ErrorType2[ErrorType2["CONFIG_INVALID_SRC_CHAIN_SELECTOR"] = 14] = "CONFIG_INVALID_SRC_CHAIN_SELECTOR";
-  ErrorType2[ErrorType2["CONFIG_INVALID_DST_CHAIN_SELECTOR"] = 15] = "CONFIG_INVALID_DST_CHAIN_SELECTOR";
-  ErrorType2[ErrorType2["INVALID_MESSAGE_CONFIG"] = 16] = "INVALID_MESSAGE_CONFIG";
-  ErrorType2[ErrorType2["CONFIG_SAME_CHAINS"] = 17] = "CONFIG_SAME_CHAINS";
-  ErrorType2[ErrorType2["NO_CHAIN_DATA"] = 20] = "NO_CHAIN_DATA";
-  ErrorType2[ErrorType2["NO_RPC_DATA"] = 21] = "NO_RPC_DATA";
-  ErrorType2[ErrorType2["NO_RPC_PROVIDERS"] = 22] = "NO_RPC_PROVIDERS";
-  ErrorType2[ErrorType2["INVALID_SOURCE_CHAIN"] = 23] = "INVALID_SOURCE_CHAIN";
-  ErrorType2[ErrorType2["INVALID_DESTINATION_CHAIN"] = 24] = "INVALID_DESTINATION_CHAIN";
-  ErrorType2[ErrorType2["INVALID_CHAIN"] = 25] = "INVALID_CHAIN";
-  ErrorType2[ErrorType2["INVALID_RPC"] = 26] = "INVALID_RPC";
-  ErrorType2[ErrorType2["EVENT_NOT_FOUND"] = 30] = "EVENT_NOT_FOUND";
-  ErrorType2[ErrorType2["INVALID_HASHSUM"] = 31] = "INVALID_HASHSUM";
-  ErrorType2[ErrorType2["INVALID_MESSAGE_ID"] = 32] = "INVALID_MESSAGE_ID";
-  ErrorType2[ErrorType2["INVALID_DATA"] = 33] = "INVALID_DATA";
-  ErrorType2[ErrorType2["INVALID_EXTRA_ARGS"] = 34] = "INVALID_EXTRA_ARGS";
-  ErrorType2[ErrorType2["INVALID_INPUT"] = 35] = "INVALID_INPUT";
-  ErrorType2[ErrorType2["INVALID_HASH_SUM"] = 36] = "INVALID_HASH_SUM";
-  ErrorType2[ErrorType2["INVALID_CHAIN_DATA"] = 37] = "INVALID_CHAIN_DATA";
-  ErrorType2[ErrorType2["INVALID_CHAIN_TYPE"] = 38] = "INVALID_CHAIN_TYPE";
-  ErrorType2[ErrorType2["INVALID_TOKEN_TYPE"] = 40] = "INVALID_TOKEN_TYPE";
-  ErrorType2[ErrorType2["INVALID_TOKEN_AMOUNT"] = 41] = "INVALID_TOKEN_AMOUNT";
-  ErrorType2[ErrorType2["INVALID_RELAYER"] = 50] = "INVALID_RELAYER";
-  ErrorType2[ErrorType2["INVALID_OPERATOR_COUNT"] = 51] = "INVALID_OPERATOR_COUNT";
-  ErrorType2[ErrorType2["NO_REGISTERED_OPERATORS"] = 52] = "NO_REGISTERED_OPERATORS";
-  ErrorType2[ErrorType2["NO_ALLOWED_OPERATORS"] = 53] = "NO_ALLOWED_OPERATORS";
-  ErrorType2[ErrorType2["OPERATOR_SELECTION_FAILED"] = 54] = "OPERATOR_SELECTION_FAILED";
-  ErrorType2[ErrorType2["INVALID_COHORTS_COUNT"] = 55] = "INVALID_COHORTS_COUNT";
-  ErrorType2[ErrorType2["INVALID_OPERATOR_ADDRESS"] = 56] = "INVALID_OPERATOR_ADDRESS";
-  ErrorType2[ErrorType2["INVALID_ACTION"] = 57] = "INVALID_ACTION";
-  ErrorType2[ErrorType2["INVALID_OPERATOR_STAKE"] = 58] = "INVALID_OPERATOR_STAKE";
-  ErrorType2[ErrorType2["INVALID_RECEIVER"] = 60] = "INVALID_RECEIVER";
-  ErrorType2[ErrorType2["INVALID_SENDER"] = 61] = "INVALID_SENDER";
-  ErrorType2[ErrorType2["INVALID_UINT256"] = 62] = "INVALID_UINT256";
-  ErrorType2[ErrorType2["INVALID_ETHEREUM_ADDRESS"] = 63] = "INVALID_ETHEREUM_ADDRESS";
-  ErrorType2[ErrorType2["DECODE_FAILED"] = 70] = "DECODE_FAILED";
+  ErrorType2["UNKNOWN_ERROR"] = "0";
+  ErrorType2["INVALID_BYTES_ARGS_LENGTH"] = "1";
+  ErrorType2["ARRAY_LENGTH_MISMATCH"] = "2";
+  ErrorType2["CONFIG_INVALID_VERSION"] = "10";
+  ErrorType2["CONFIG_INVALID_RELAYER_CONFIG"] = "11";
+  ErrorType2["CONFIG_INVALID_MIN_SRC_CONFIRMATIONS"] = "12";
+  ErrorType2["CONFIG_INVALID_MIN_DST_CONFIRMATIONS"] = "13";
+  ErrorType2["CONFIG_INVALID_SRC_CHAIN_SELECTOR"] = "14";
+  ErrorType2["CONFIG_INVALID_DST_CHAIN_SELECTOR"] = "15";
+  ErrorType2["INVALID_MESSAGE_CONFIG"] = "16";
+  ErrorType2["CONFIG_SAME_CHAINS"] = "17";
+  ErrorType2["NO_CHAIN_DATA"] = "20";
+  ErrorType2["NO_RPC_DATA"] = "21";
+  ErrorType2["NO_RPC_PROVIDERS"] = "22";
+  ErrorType2["INVALID_SOURCE_CHAIN"] = "23";
+  ErrorType2["INVALID_DESTINATION_CHAIN"] = "24";
+  ErrorType2["INVALID_CHAIN"] = "25";
+  ErrorType2["INVALID_RPC"] = "26";
+  ErrorType2["EVENT_NOT_FOUND"] = "30";
+  ErrorType2["INVALID_HASHSUM"] = "31";
+  ErrorType2["INVALID_MESSAGE_ID"] = "32";
+  ErrorType2["INVALID_DATA"] = "33";
+  ErrorType2["INVALID_EXTRA_ARGS"] = "34";
+  ErrorType2["INVALID_INPUT"] = "35";
+  ErrorType2["INVALID_HASH_SUM"] = "36";
+  ErrorType2["INVALID_CHAIN_DATA"] = "37";
+  ErrorType2["INVALID_CHAIN_TYPE"] = "38";
+  ErrorType2["INVALID_TOKEN_TYPE"] = "40";
+  ErrorType2["INVALID_TOKEN_AMOUNT"] = "41";
+  ErrorType2["INVALID_RELAYER"] = "50";
+  ErrorType2["INVALID_OPERATOR_COUNT"] = "51";
+  ErrorType2["NO_REGISTERED_OPERATORS"] = "52";
+  ErrorType2["NO_ALLOWED_OPERATORS"] = "53";
+  ErrorType2["OPERATOR_SELECTION_FAILED"] = "54";
+  ErrorType2["INVALID_COHORTS_COUNT"] = "55";
+  ErrorType2["INVALID_OPERATOR_ADDRESS"] = "56";
+  ErrorType2["INVALID_ACTION"] = "57";
+  ErrorType2["INVALID_OPERATOR_STAKE"] = "58";
+  ErrorType2["INVALID_RECEIVER"] = "60";
+  ErrorType2["INVALID_SENDER"] = "61";
+  ErrorType2["INVALID_UINT256"] = "62";
+  ErrorType2["INVALID_ETHEREUM_ADDRESS"] = "63";
+  ErrorType2["DECODE_FAILED"] = "70";
   return ErrorType2;
 })(ErrorType || {});
 
@@ -15295,7 +15295,7 @@ function getRpcConfigForChain(chainSelector) {
 function createFallbackTransport(chainSelector) {
   const rpcConfig = getRpcConfigForChain(chainSelector);
   if (!rpcConfig || !rpcConfig.urls || rpcConfig.urls.length === 0) {
-    handleError(22 /* NO_RPC_PROVIDERS */);
+    handleError("22" /* NO_RPC_PROVIDERS */);
   }
   const transportFactories = rpcConfig.urls.map(
     (url) => http(url.startsWith("http") ? url : `https://${url}`, { batch: true })
@@ -15320,8 +15320,8 @@ function getConceroVerifier() {
 }
 var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 var conceroRouters = {
-  "1": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49",
-  "10": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49"
+  "1": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6",
+  "10": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6"
 };
 
 // clf/src/messageReport/constants/config.ts
@@ -15358,7 +15358,7 @@ function decodeConceroMessageLog(log) {
       message
     };
   } catch (error) {
-    handleError(33 /* INVALID_DATA */);
+    handleError("33" /* INVALID_DATA */);
   }
 }
 
@@ -15371,7 +15371,7 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
     fromBlock: blockNumber - 10n,
     toBlock: blockNumber
   });
-  if (!logs.length) handleError(30 /* EVENT_NOT_FOUND */);
+  if (!logs.length) handleError("30" /* EVENT_NOT_FOUND */);
   return logs[0];
 }
 
@@ -15384,7 +15384,7 @@ function getMessageCohortId(messageId, cohortsCount) {
 }
 function pick(array, n) {
   if (n > array.length) {
-    handleError(51 /* INVALID_OPERATOR_COUNT */);
+    handleError("51" /* INVALID_OPERATOR_COUNT */);
   }
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -15404,11 +15404,11 @@ async function getAllowedOperators(client, chainType, messageId) {
       (operator) => getOperatorCohortId(operator, cohortsCount) === messageCohort
     );
     if (!allowedOperators.length) {
-      handleError(53 /* NO_ALLOWED_OPERATORS */);
+      handleError("53" /* NO_ALLOWED_OPERATORS */);
     }
     return allowedOperators;
   } catch (error) {
-    handleError(54 /* OPERATOR_SELECTION_FAILED */);
+    handleError("54" /* OPERATOR_SELECTION_FAILED */);
   }
 }
 async function getCohortsCount(client) {
@@ -15419,7 +15419,7 @@ async function getCohortsCount(client) {
     args: []
   });
   if (cohortsCount <= 0) {
-    handleError(55 /* INVALID_COHORTS_COUNT */);
+    handleError("55" /* INVALID_COHORTS_COUNT */);
   }
   return cohortsCount;
 }
@@ -15434,7 +15434,7 @@ async function getRegisteredOperators(client, chainType) {
     args: [chainType]
   });
   if (!registeredOperators.length) {
-    handleError(52 /* NO_REGISTERED_OPERATORS */);
+    handleError("52" /* NO_REGISTERED_OPERATORS */);
   }
   return registeredOperators;
 }
@@ -15519,13 +15519,13 @@ function decodeInternalMessageConfig(config2) {
   };
 }
 function validateInternalMessageConfig(config2) {
-  if (config2.version === 0n) handleError(10 /* CONFIG_INVALID_VERSION */);
-  if (config2.relayerConfig > 255n) handleError(11 /* CONFIG_INVALID_RELAYER_CONFIG */);
-  if (config2.minSrcConfirmations === 0n) handleError(12 /* CONFIG_INVALID_MIN_SRC_CONFIRMATIONS */);
-  if (config2.minDstConfirmations === 0n) handleError(13 /* CONFIG_INVALID_MIN_DST_CONFIRMATIONS */);
-  if (!viemChains[config2.srcChainSelector.toString()]) handleError(14 /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
-  if (!viemChains[config2.dstChainSelector.toString()]) handleError(15 /* CONFIG_INVALID_DST_CHAIN_SELECTOR */);
-  if (config2.srcChainSelector === config2.dstChainSelector) handleError(17 /* CONFIG_SAME_CHAINS */);
+  if (config2.version === 0n) handleError("10" /* CONFIG_INVALID_VERSION */);
+  if (config2.relayerConfig > 255n) handleError("11" /* CONFIG_INVALID_RELAYER_CONFIG */);
+  if (config2.minSrcConfirmations === 0n) handleError("12" /* CONFIG_INVALID_MIN_SRC_CONFIRMATIONS */);
+  if (config2.minDstConfirmations === 0n) handleError("13" /* CONFIG_INVALID_MIN_DST_CONFIRMATIONS */);
+  if (!viemChains[config2.srcChainSelector.toString()]) handleError("14" /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
+  if (!viemChains[config2.dstChainSelector.toString()]) handleError("15" /* CONFIG_INVALID_DST_CHAIN_SELECTOR */);
+  if (config2.srcChainSelector === config2.dstChainSelector) handleError("17" /* CONFIG_SAME_CHAINS */);
 }
 
 // clf/src/messageReport/utils/validateInputs.ts
@@ -15546,7 +15546,7 @@ function decodeSrcChainData(srcChainSelector, srcChainData) {
 }
 function decodeInputs(bytesArgs2) {
   if (bytesArgs2.length < 6) {
-    handleError(1 /* INVALID_BYTES_ARGS_LENGTH */);
+    handleError("1" /* INVALID_BYTES_ARGS_LENGTH */);
   }
   const [, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs2;
   const decodedInternalMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
@@ -15567,29 +15567,29 @@ function validateDecodedArgs(args) {
 }
 function validateOperatorAddress(address) {
   if (!isAddress(address)) {
-    handleError(56 /* INVALID_OPERATOR_ADDRESS */);
+    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
 }
 function validateMessageFields(args) {
   const { internalMessageConfig, messageId, messageHashSum, srcChainData } = args;
   if (!internalMessageConfig || internalMessageConfig.length === 0) {
-    handleError(16 /* INVALID_MESSAGE_CONFIG */);
+    handleError("16" /* INVALID_MESSAGE_CONFIG */);
   }
   if (!messageId || messageId.length === 0) {
-    handleError(32 /* INVALID_MESSAGE_ID */);
+    handleError("32" /* INVALID_MESSAGE_ID */);
   }
   if (!messageHashSum || messageHashSum.length === 0) {
-    handleError(36 /* INVALID_HASH_SUM */);
+    handleError("36" /* INVALID_HASH_SUM */);
   }
   if (!srcChainData || srcChainData.length === 0) {
-    handleError(37 /* INVALID_CHAIN_DATA */);
+    handleError("37" /* INVALID_CHAIN_DATA */);
   }
 }
 
 // clf/src/messageReport/utils/verifyMessageHash.ts
 function verifyMessageHash(message, expectedHashSum) {
   if (keccak256(message).toLowerCase() !== expectedHashSum.toLowerCase()) {
-    handleError(31 /* INVALID_HASHSUM */);
+    handleError("31" /* INVALID_HASHSUM */);
   }
 }
 
@@ -15631,7 +15631,7 @@ async function main() {
     if (error instanceof CustomErrorHandler) {
       throw error;
     } else {
-      handleError(0 /* UNKNOWN_ERROR */);
+      handleError("0" /* UNKNOWN_ERROR */);
     }
   }
 }

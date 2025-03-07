@@ -8,7 +8,8 @@ pragma solidity 0.8.28;
 
 interface IConceroClientErrors {
     enum RequiredVariableUnsetType {
-        NativeUSDRate
+        NativeUSDRate,
+        lastGasPrice
     }
 
     enum MessageConfigErrorType {

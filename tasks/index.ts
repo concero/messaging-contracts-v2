@@ -3,6 +3,7 @@ import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
+import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
 import { callContractFunction, changeOwnership, upgradeProxyImplementation } from "./utils";
 
 export {
@@ -14,4 +15,5 @@ export {
 	setRouterVariables,
 	setVerifierVariables,
 	deployContracts,
+	setRouterPriceFeeds,
 };

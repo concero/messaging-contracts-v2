@@ -28,7 +28,7 @@ export type ConceroNetwork = {
 	chainId: number;
 	name: ConceroNetworkNames;
 	type: ConceroNetworkType;
-	chainSelector: string;
+	chainSelector: bigint;
 	accounts: string[];
 	viemChain: Chain;
 	confirmations: number;

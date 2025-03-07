@@ -42,7 +42,7 @@ const deployVerifier: DeploymentFunction = async function (
 	const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
 
 	const defaultArgs: DeployArgs = {
-		chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
+		chainSelector: chain.chainSelector,
 		usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
 		clfParams: {
 			router: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),

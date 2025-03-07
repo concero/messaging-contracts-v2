@@ -10,7 +10,7 @@ class CustomErrorHandler extends Error implements CustomError {
 	data: any;
 
 	constructor(type: ErrorType, data: any = null) {
-		super(data); // Convert enum value to string for error message
+		super(type);
 		this.type = type;
 		this.data = data;
 	}

@@ -26,8 +26,8 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
 		implementationKey = "pause";
 	} else if (proxyType === ProxyEnum.routerProxy) {
 		implementationKey = "router";
-	} else if (proxyType === ProxyEnum.clfRouterProxy) {
-		implementationKey = "clfRouter";
+	} else if (proxyType === ProxyEnum.verifierProxy) {
+		implementationKey = "verifier";
 	} else {
 		err(`Proxy type ${proxyType} not found`, "upgradeProxyImplementation", chainName);
 		return;

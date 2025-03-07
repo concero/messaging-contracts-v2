@@ -13,19 +13,19 @@ async function deployVerifierTask(taskArgs: any, hre: HardhatRuntimeEnvironment)
 	compileContracts({ quiet: true });
 	const conceroNetwork = conceroNetworks[hre.network.name];
 
-	if (taskArgs.deployproxy) {
-		await deployProxyAdmin(hre, ProxyEnum.clfRouterProxy);
-		await deployTransparentProxy(hre, ProxyEnum.clfRouterProxy);
-		const [proxyAddress] = getEnvAddress(ProxyEnum.clfRouterProxy, hre.network.name);
+	if (taskArgs.proxy) {
+		await deployProxyAdmin(hre, ProxyEnum.verifierProxy);
+		await deployTransparentProxy(hre, ProxyEnum.verifierProxy);
+		const [proxyAddress] = getEnvAddress(ProxyEnum.verifierProxy, hre.network.name);
 		await addCLFConsumer(conceroNetwork, [proxyAddress]);
 	}
 
-	if (taskArgs.deployimplementation) {
+	if (taskArgs.implementation) {
 		await deployVerifier(hre);
-		await upgradeProxyImplementation(hre, ProxyEnum.clfRouterProxy, false);
+		await upgradeProxyImplementation(hre, ProxyEnum.verifierProxy, false);
 	}
 
-	if (taskArgs.setvars) {
+	if (taskArgs.vars) {
 		await setVerifierVariables(hre);
 	}
 }

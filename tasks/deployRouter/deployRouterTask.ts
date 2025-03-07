@@ -12,17 +12,17 @@ async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 
 	//todo: when running --deployproxy W/O --deployimplementation,
 	//the initial proxy implementation is set to paused, but should be set to existing latest impl. from env.
-	if (taskArgs.deployproxy) {
+	if (taskArgs.proxy) {
 		await deployProxyAdmin(hre, ProxyEnum.routerProxy);
 		await deployTransparentProxy(hre, ProxyEnum.routerProxy);
 	}
 
-	if (taskArgs.deployimplementation) {
+	if (taskArgs.implementation) {
 		await deployRouter(hre);
 		await upgradeProxyImplementation(hre, ProxyEnum.routerProxy, false);
 	}
 
-	if (taskArgs.setvars) {
+	if (taskArgs.vars) {
 		await setRouterVariables(hre);
 	}
 }

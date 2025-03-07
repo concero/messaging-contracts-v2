@@ -6,7 +6,7 @@ import { EnvPrefixes } from "../types/deploymentVariables";
 
 enum ProxyEnum {
 	routerProxy = "routerProxy",
-	clfRouterProxy = "clfRouterProxy",
+	verifierProxy = "verifierProxy",
 }
 
 const viemReceiptConfig: WaitForTransactionReceiptParameters = {

@@ -8028,7 +8028,7 @@ var init_call = __esm({
 // clf/src/common/errorHandler.ts
 var CustomErrorHandler = class extends Error {
   constructor(type, data = null) {
-    super(type);
+    super(type.toString());
     this.type = type;
     this.data = data;
   }

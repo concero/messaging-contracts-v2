@@ -10,7 +10,7 @@ class CustomErrorHandler extends Error implements CustomError {
 	data: any;
 
 	constructor(type: ErrorType, data: any = null) {
-		super(type);
+		super(type.toString());
 		this.type = type;
 		this.data = data;
 	}

@@ -101,14 +101,6 @@ const deployVerifier: DeploymentFunction = async function (
 		`deployments.${networkType}`,
 	);
 
-	if (live) {
-		await addCLFConsumer(
-			conceroNetworks[name],
-			[deployment.address],
-			args.clfParams.subscriptionId,
-		);
-	}
-
 	return deployment;
 };
 

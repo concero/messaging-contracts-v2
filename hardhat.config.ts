@@ -1,4 +1,3 @@
-// import "@tenderly/hardhat-tenderly";
 import "solidity-coverage";
 
 import "hardhat-contract-sizer";
@@ -12,8 +11,9 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-ignition-viem";
 import "@nomicfoundation/hardhat-network-helpers";
+import "@nomicfoundation/hardhat-verify";
 import "@nomicfoundation/hardhat-viem";
-// import "@nomicfoundation/hardhat-verify";
+import "@tenderly/hardhat-tenderly";
 import "@typechain/hardhat";
 
 import { conceroNetworks } from "./constants";
@@ -63,16 +63,21 @@ const config: HardhatUserConfig = {
 		},
 	},
 	networks: conceroNetworks,
-	// etherscan: {
-	//     apiKey: {
-	//         arbitrum: process.env.ARBISCAN_API_KEY,
-	//         ethereum: process.env.ETHERSCAN_API_KEY,
-	//         polygon: process.env.POLYGONSCAN_API_KEY,
-	//         optimism: process.env.OPTIMISMSCAN_API_KEY,
-	//         celo: process.env.CELOSCAN_API_KEY,
-	//         avalanche: "snowtrace",
-	//         avalancheFuji: "snowtrace",
-	//     },
+	etherscan: {
+		apiKey: {
+			arbitrum: process.env.ARBISCAN_API_KEY,
+			arbitrumSepolia: process.env.ARBISCAN_API_KEY,
+			ethereum: process.env.ETHERSCAN_API_KEY,
+			sepolia: process.env.ETHERSCAN_API_KEY,
+			polygon: process.env.POLYGONSCAN_API_KEY,
+			polygonAmoy: process.env.POLYGONSCAN_API_KEY,
+			optimism: process.env.OPTIMISMSCAN_API_KEY,
+			optimismSepolia: process.env.OPTIMISMSCAN_API_KEY,
+			celo: process.env.CELOSCAN_API_KEY,
+			avalanche: "snowtrace",
+			avalancheFuji: "snowtrace",
+		},
+	},
 	//     customChains: [
 	//         {
 	//             network: "celo",
@@ -114,7 +119,7 @@ const config: HardhatUserConfig = {
 	//   },
 	// },
 	sourcify: {
-		enabled: false,
+		enabled: true,
 	},
 	gasReporter: {
 		enabled: enableGasReport,

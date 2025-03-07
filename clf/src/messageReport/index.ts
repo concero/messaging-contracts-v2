@@ -54,7 +54,6 @@ export async function main() {
 
 		return packResult(messageReportResult, packedReportConfig);
 	} catch (error) {
-		console.log(error);
 		if (error instanceof CustomErrorHandler) {
 			throw error;
 		} else {

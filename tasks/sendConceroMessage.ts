@@ -43,7 +43,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 				address: clientAddress,
 				abi: exampleClientAbi,
 				functionName: "sendConceroMessage",
-				args: [taskArgs.receiver],
+				args: [taskArgs.receiver ?? clientAddress],
 				account: walletClient.account,
 				value,
 			});

@@ -1720,58 +1720,10 @@ var init_decodeAbiParameters = __esm({
   }
 });
 
-// clf/src/common/errorType.ts
-var ErrorType = /* @__PURE__ */ ((ErrorType2) => {
-  ErrorType2["UNKNOWN_ERROR"] = "0";
-  ErrorType2["INVALID_BYTES_ARGS_LENGTH"] = "1";
-  ErrorType2["ARRAY_LENGTH_MISMATCH"] = "2";
-  ErrorType2["CONFIG_INVALID_VERSION"] = "10";
-  ErrorType2["CONFIG_INVALID_RELAYER_CONFIG"] = "11";
-  ErrorType2["CONFIG_INVALID_MIN_SRC_CONFIRMATIONS"] = "12";
-  ErrorType2["CONFIG_INVALID_MIN_DST_CONFIRMATIONS"] = "13";
-  ErrorType2["CONFIG_INVALID_SRC_CHAIN_SELECTOR"] = "14";
-  ErrorType2["CONFIG_INVALID_DST_CHAIN_SELECTOR"] = "15";
-  ErrorType2["INVALID_MESSAGE_CONFIG"] = "16";
-  ErrorType2["CONFIG_SAME_CHAINS"] = "17";
-  ErrorType2["NO_CHAIN_DATA"] = "20";
-  ErrorType2["NO_RPC_DATA"] = "21";
-  ErrorType2["NO_RPC_PROVIDERS"] = "22";
-  ErrorType2["INVALID_SOURCE_CHAIN"] = "23";
-  ErrorType2["INVALID_DESTINATION_CHAIN"] = "24";
-  ErrorType2["INVALID_CHAIN"] = "25";
-  ErrorType2["INVALID_RPC"] = "26";
-  ErrorType2["EVENT_NOT_FOUND"] = "30";
-  ErrorType2["INVALID_HASHSUM"] = "31";
-  ErrorType2["INVALID_MESSAGE_ID"] = "32";
-  ErrorType2["INVALID_DATA"] = "33";
-  ErrorType2["INVALID_EXTRA_ARGS"] = "34";
-  ErrorType2["INVALID_INPUT"] = "35";
-  ErrorType2["INVALID_HASH_SUM"] = "36";
-  ErrorType2["INVALID_CHAIN_DATA"] = "37";
-  ErrorType2["INVALID_CHAIN_TYPE"] = "38";
-  ErrorType2["INVALID_TOKEN_TYPE"] = "40";
-  ErrorType2["INVALID_TOKEN_AMOUNT"] = "41";
-  ErrorType2["INVALID_RELAYER"] = "50";
-  ErrorType2["INVALID_OPERATOR_COUNT"] = "51";
-  ErrorType2["NO_REGISTERED_OPERATORS"] = "52";
-  ErrorType2["NO_ALLOWED_OPERATORS"] = "53";
-  ErrorType2["OPERATOR_SELECTION_FAILED"] = "54";
-  ErrorType2["INVALID_COHORTS_COUNT"] = "55";
-  ErrorType2["INVALID_OPERATOR_ADDRESS"] = "56";
-  ErrorType2["INVALID_ACTION"] = "57";
-  ErrorType2["INVALID_OPERATOR_STAKE"] = "58";
-  ErrorType2["INVALID_RECEIVER"] = "60";
-  ErrorType2["INVALID_SENDER"] = "61";
-  ErrorType2["INVALID_UINT256"] = "62";
-  ErrorType2["INVALID_ETHEREUM_ADDRESS"] = "63";
-  ErrorType2["DECODE_FAILED"] = "70";
-  return ErrorType2;
-})(ErrorType || {});
-
 // clf/src/common/errorHandler.ts
 var CustomErrorHandler = class extends Error {
   constructor(type, data = null) {
-    super(ErrorType[type]);
+    super(data);
     this.type = type;
     this.data = data;
   }

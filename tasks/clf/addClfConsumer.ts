@@ -17,14 +17,14 @@ export async function addCLFConsumer(chain: ConceroNetwork, consumerAddresses: A
 		log(`Adding ${consumerAddress} to sub ${subscriptionId} on ${name}`, "addCLFConsumer");
 
 		const txOptions = { confirmations };
-		const linkToken = getEnvVar(`CL_CCIP_CHAIN_SELECTOR_${networkEnvKeys[name]}`);
+		const linkTokenAddress = getEnvVar(`LINK_${networkEnvKeys[name]}`);
 		const sm = new SubscriptionManager({
 			signer,
-			linkTokenAddress: linkToken,
+			linkTokenAddress,
 			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
 		});
 
-		await sm.estimateFunctionsRequestCost();
+		// await sm.estimateFunctionsRequestCost({ subscriptionId, consumerAddress, txOptions });
 		await sm.initialize();
 
 		try {

@@ -30,10 +30,10 @@ async function deployVerifierTask(taskArgs: any, hre: HardhatRuntimeEnvironment)
 	}
 }
 
-task("deploy-clf-router", "Deploy the MasterChainCLF contract")
-	.addFlag("deployproxy", "Deploy the proxy")
-	.addFlag("deployimplementation", "Deploy the implementation")
-	.addFlag("setvars", "Set the contract variables")
+task("deploy-verifier", "Deploy ConceroVerifier")
+	.addFlag("proxy", "Deploy proxy")
+	.addFlag("implementation", "Deploy implementation")
+	.addFlag("vars", "Set contract variables")
 	.setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
 		await deployVerifierTask(taskArgs, hre);
 	});

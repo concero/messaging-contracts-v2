@@ -27,8 +27,8 @@ const deployTransparentProxy: (
 		log: true,
 		autoMine: true,
 		skipIfAlreadyDeployed: false,
-		maxFeePerGas,
-		maxPriorityFeePerGas,
+		// maxFeePerGas,
+		// maxPriorityFeePerGas,
 		gasLimit: writeContractConfig.gas,
 	})) as Deployment;
 

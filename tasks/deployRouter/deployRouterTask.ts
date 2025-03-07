@@ -27,10 +27,10 @@ async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 	}
 }
 
-task("deploy-router", "Deploy the ConceroRouter contract")
-	.addFlag("deployproxy", "Deploy the proxy")
-	.addFlag("deployimplementation", "Deploy the implementation")
-	.addFlag("setvars", "Set the contract variables")
+task("deploy-router", "Deploy ConceroRouter")
+	.addFlag("proxy", "Deploy proxy")
+	.addFlag("implementation", "Deploy implementation")
+	.addFlag("vars", "Set contract variables")
 	.setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
 		await deployRouterTask(taskArgs, hre);
 	});

@@ -90,8 +90,8 @@ const deployVerifier: DeploymentFunction = async function (
 		log: true,
 		autoMine: true,
 		skipIfAlreadyDeployed: true,
-		maxFeePerGas,
-		maxPriorityFeePerGas,
+		// maxFeePerGas,
+		// maxPriorityFeePerGas,
 	});
 
 	log(`Deployed at: ${deployment.address}`, "deployVerifier", name);

@@ -81,8 +81,8 @@ const deployRouter: DeploymentFunction = async function (
 		],
 		log: true,
 		autoMine: true,
-		maxFeePerGas,
-		maxPriorityFeePerGas,
+		// maxFeePerGas,
+		// maxPriorityFeePerGas,
 	});
 
 	log(`Deployed at: ${deployment.address}`, "deployRouter", name);

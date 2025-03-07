@@ -27,11 +27,11 @@ function getViemReceiptConfig(chain: ConceroNetwork): Partial<WaitForTransaction
 
 const envPrefixes: EnvPrefixes = {
 	router: "CONCERO_ROUTER",
-	clfRouter: "CONCERO_CLF_ROUTER",
 	routerProxy: "CONCERO_ROUTER_PROXY",
 	routerProxyAdmin: "CONCERO_ROUTER_PROXY_ADMIN",
-	clfRouterProxy: "CONCERO_CLF_ROUTER_PROXY",
-	clfRouterProxyAdmin: "CONCERO_CLF_ROUTER_PROXY_ADMIN",
+	verifier: "CONCERO_VERIFIER",
+	verifierProxy: "CONCERO_VERIFIER_PROXY",
+	verifierProxyAdmin: "CONCERO_VERIFIER_PROXY_ADMIN",
 	lpToken: "LPTOKEN",
 	create3Factory: "CREATE3_FACTORY",
 	pause: "CONCERO_PAUSE",

@@ -1926,4 +1926,4 @@ async function main(bytesArgs) {
     }
   }
 }
-return main();
+ main();

@@ -15,7 +15,7 @@ function prepareCLFDist(sourceCode: string, isMinified: boolean = false): string
 		if (match) {
 			const moduleName = match[1].trim();
 			const processedCode = sourceCode.replace(minifiedExportRegex, "");
-			return processedCode + `\nreturn ${moduleName}();\n`;
+			return processedCode + `\n ${moduleName}();\n`;
 		}
 	} else {
 		// Pattern for unminified files: export { main };
@@ -23,7 +23,7 @@ function prepareCLFDist(sourceCode: string, isMinified: boolean = false): string
 		const unminifiedExportRegex = /\n?\}\n?export\s*\{\s*main\s*\}\s*;?\s*$/;
 		if (unminifiedExportRegex.test(sourceCode)) {
 			const processedCode = sourceCode.replace(unminifiedExportRegex, "\n}");
-			return processedCode + `\nreturn main();\n`;
+			return processedCode + `\n main();\n`;
 		}
 	}
 

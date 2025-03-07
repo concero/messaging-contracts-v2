@@ -15635,4 +15635,4 @@ async function main() {
     }
   }
 }
-return main();
+ main();

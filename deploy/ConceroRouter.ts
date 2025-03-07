@@ -1,7 +1,9 @@
+import { deployments } from "hardhat";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks, networkEnvKeys } from "../constants";
+import { getConceroVerifierNetwork } from "../constants/conceroNetworks";
 import { ConceroNetworkNames, NetworkType } from "../types/ConceroNetwork";
 import { getEnvVar, getGasParameters, log, updateEnvVariable } from "../utils/";
 
@@ -57,11 +59,15 @@ const deployRouter: DeploymentFunction = async function (
 
 	const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
 
+	const conceroVerifierNetwork = getConceroVerifierNetwork(networkType);
+
 	const defaultArgs: DeployArgs = {
 		chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
 		usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
-		conceroVerifier: getEnvVar(`CONCERO_VERIFIER_PROXY_${networkEnvKeys[name]}`),
-		conceroVerifierSubId: getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`),
+		conceroVerifier: getEnvVar(
+			`CONCERO_VERIFIER_PROXY_${networkEnvKeys[conceroVerifierNetwork.name]}`,
+		),
+		conceroVerifierSubId: getEnvVar(`CLF_SUBID_${networkEnvKeys[conceroVerifierNetwork.name]}`),
 		clfSigners: getCLFDonSigners(networkType),
 	};
 

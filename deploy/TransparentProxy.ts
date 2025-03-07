@@ -26,7 +26,6 @@ const deployTransparentProxy: (
 		args: [initialImplementation, proxyAdmin, "0x"],
 		log: true,
 		autoMine: true,
-		skipIfAlreadyDeployed: false,
 		// maxFeePerGas,
 		// maxPriorityFeePerGas,
 		gasLimit: writeContractConfig.gas,

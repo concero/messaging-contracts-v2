@@ -94,7 +94,6 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
 			enabled: false,
 			blockNumber: Number(process.env.LOCALHOST_FORK_LATEST_BLOCK_NUMBER),
 		},
-		saveDeployments: false,
 	},
 	localhost: {
 		name: "localhost",
@@ -126,6 +125,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		chainSelector: "11155111",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: sepolia,
+		saveDeployments: false,
 	},
 	avalancheFuji: {
 		name: "avalancheFuji",
@@ -137,6 +137,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		chainSelector: "43113",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: avalancheFuji,
+		saveDeployments: false,
 	},
 	optimismSepolia: {
 		name: "optimismSepolia",
@@ -148,6 +149,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		chainSelector: "11155420",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: optimismSepolia,
+		saveDeployments: false,
 	},
 	arbitrumSepolia: {
 		name: "arbitrumSepolia",
@@ -159,6 +161,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		chainSelector: "421614",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: arbitrumSepolia,
+		saveDeployments: false,
 	},
 	baseSepolia: {
 		name: "baseSepolia",
@@ -182,6 +185,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		chainSelector: "80002",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: polygonAmoy,
+		saveDeployments: false,
 	},
 };
 export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork> = {
@@ -195,6 +199,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 		chainSelector: "1",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: mainnet,
+		saveDeployments: false,
 	},
 	base: {
 		name: "base",
@@ -206,6 +211,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 		chainSelector: "8453",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: base,
+		saveDeployments: false,
 	},
 	arbitrum: {
 		name: "arbitrum",
@@ -217,6 +223,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 		chainSelector: "42161",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: arbitrum,
+		saveDeployments: false,
 	},
 	polygon: {
 		name: "polygon",
@@ -228,6 +235,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 		chainSelector: "137",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: polygon,
+		saveDeployments: false,
 	},
 	avalanche: {
 		name: "avalanche",
@@ -239,6 +247,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 		chainSelector: "43114",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: avalanche,
+		saveDeployments: false,
 	},
 	optimism: {
 		name: "optimism",
@@ -250,6 +259,7 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 		chainSelector: "10",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: optimism,
+		saveDeployments: false,
 	},
 	polygonZkEvm: {
 		chainId: 137,
@@ -261,8 +271,22 @@ export const mainnetNetworks: Record<ConceroMainnetNetworkNames, ConceroNetwork>
 		chainSelector: "137",
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: polygon,
+		saveDeployments: false,
 	},
 };
+
+export function getConceroVerifierNetwork(type: NetworkType): ConceroNetwork {
+	switch (type) {
+		case networkTypes.mainnet:
+			return mainnetNetworks.arbitrum;
+		case networkTypes.testnet:
+			return testnetNetworks.arbitrumSepolia;
+		case networkTypes.localhost:
+			return testingNetworks.localhost;
+		default:
+			throw new Error(`Invalid network type: ${type}`);
+	}
+}
 
 export const conceroNetworks: Record<ConceroNetworkNames, ConceroNetwork> = {
 	...testnetNetworks,

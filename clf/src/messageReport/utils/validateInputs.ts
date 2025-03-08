@@ -1,4 +1,4 @@
-import { decodeAbiParameters, isAddress } from "viem";
+import { decodeAbiParameters } from "viem";
 import { hexToBytes } from "viem";
 
 import { handleError } from "../../common/errorHandler";
@@ -55,8 +55,12 @@ function validateDecodedArgs(args: DecodedArgs): void {
 	validateMessageFields(args);
 }
 
+function isAddress(address: string): boolean {
+	return address.length === 42 && address.startsWith("0x");
+}
+
 function validateOperatorAddress(address: string): void {
-	if (!isAddress(address, { strict: false })) {
+	if (!isAddress(address)) {
 		handleError(ErrorType.INVALID_OPERATOR_ADDRESS);
 	}
 }

@@ -14588,7 +14588,6 @@ init_decodeAbiParameters();
 init_encodeAbiParameters();
 init_toBytes();
 init_fromHex();
-init_isAddress();
 init_keccak256();
 
 // clf/src/common/reportBytes.ts
@@ -15272,8 +15271,8 @@ function getConceroVerifier() {
 }
 var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 var conceroRouters = {
-  "1": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49",
-  "10": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49"
+  "1": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6",
+  "10": "0x3c598f47F1fAa37395335f371ea7cd3b741D06B6"
 };
 
 // clf/src/messageReport/constants/config.ts
@@ -15517,8 +15516,11 @@ function validateDecodedArgs(args) {
   validateOperatorAddress(args.operatorAddress);
   validateMessageFields(args);
 }
+function isAddress2(address) {
+  return address.length === 42 && address.startsWith("0x");
+}
 function validateOperatorAddress(address) {
-  if (!isAddress(address, { strict: false })) {
+  if (!isAddress2(address)) {
     handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
 }

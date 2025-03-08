@@ -1832,12 +1832,12 @@ function validateActions(actions) {
   }
 }
 function validateAddresses(addresses) {
-  if (!addresses.every(isAddress)) {
-    handleError("63" /* INVALID_ETHEREUM_ADDRESS */);
+  if (!addresses.every((address) => isAddress(address, { strict: false }))) {
+    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
 }
 function validateOperatorAddress(address) {
-  if (!isAddress(address)) {
+  if (!isAddress(address, { strict: false })) {
     handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
 }

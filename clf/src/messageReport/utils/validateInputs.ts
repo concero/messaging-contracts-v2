@@ -1,81 +1,82 @@
 import { decodeAbiParameters, isAddress } from "viem";
-import { DecodedArgs } from "../types";
-import { ErrorType } from "../../common/errorType";
-import { handleError } from "../../common/errorHandler";
-import { decodeInternalMessageConfig, validateInternalMessageConfig } from "./messageConfig";
 import { hexToBytes } from "viem";
 
+import { handleError } from "../../common/errorHandler";
+import { ErrorType } from "../../common/errorType";
+import { DecodedArgs } from "../types";
+import { decodeInternalMessageConfig, validateInternalMessageConfig } from "./messageConfig";
+
 type EvmSrcChainData = {
-    sender: string;
-    blockNumber: string;
+	sender: string;
+	blockNumber: string;
 };
 
 function decodeSrcChainData(srcChainSelector: bigint, srcChainData: string): EvmSrcChainData {
-    const srcChainDataBytes = hexToBytes(srcChainData);
+	const srcChainDataBytes = hexToBytes(srcChainData);
 
-    return decodeAbiParameters(
-        [
-            {
-                type: "tuple",
-                components: [
-                    { name: "sender", type: "address" },
-                    { name: "blockNumber", type: "uint256" },
-                ],
-            },
-        ],
-        srcChainDataBytes,
-    )[0];
+	return decodeAbiParameters(
+		[
+			{
+				type: "tuple",
+				components: [
+					{ name: "sender", type: "address" },
+					{ name: "blockNumber", type: "uint256" },
+				],
+			},
+		],
+		srcChainDataBytes,
+	)[0];
 }
 
 export function decodeInputs(bytesArgs: string[]): DecodedArgs {
-    if (bytesArgs.length < 6) {
-        handleError(ErrorType.INVALID_BYTES_ARGS_LENGTH);
-    }
+	if (bytesArgs.length < 6) {
+		handleError(ErrorType.INVALID_BYTES_ARGS_LENGTH);
+	}
 
-    const [, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
+	const [, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
 
-    const decodedInternalMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
-    validateInternalMessageConfig(decodedInternalMessageConfig);
+	const decodedInternalMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
+	validateInternalMessageConfig(decodedInternalMessageConfig);
 
-    const decodedArgs = {
-        internalMessageConfig: decodedInternalMessageConfig,
-        messageId,
-        messageHashSum,
-        srcChainData: decodeSrcChainData(decodedInternalMessageConfig.srcChainSelector, srcChainData),
-        operatorAddress,
-    };
+	const decodedArgs = {
+		internalMessageConfig: decodedInternalMessageConfig,
+		messageId,
+		messageHashSum,
+		srcChainData: decodeSrcChainData(decodedInternalMessageConfig.srcChainSelector, srcChainData),
+		operatorAddress,
+	};
 
-    validateDecodedArgs(decodedArgs);
-    return decodedArgs;
+	validateDecodedArgs(decodedArgs);
+	return decodedArgs;
 }
 
 function validateDecodedArgs(args: DecodedArgs): void {
-    validateOperatorAddress(args.operatorAddress);
-    validateMessageFields(args);
+	validateOperatorAddress(args.operatorAddress);
+	validateMessageFields(args);
 }
 
 function validateOperatorAddress(address: string): void {
-    if (!isAddress(address)) {
-        handleError(ErrorType.INVALID_OPERATOR_ADDRESS);
-    }
+	if (!isAddress(address, { strict: false })) {
+		handleError(ErrorType.INVALID_OPERATOR_ADDRESS);
+	}
 }
 
 function validateMessageFields(args: DecodedArgs): void {
-    const { internalMessageConfig, messageId, messageHashSum, srcChainData } = args;
+	const { internalMessageConfig, messageId, messageHashSum, srcChainData } = args;
 
-    if (!internalMessageConfig || internalMessageConfig.length === 0) {
-        handleError(ErrorType.INVALID_MESSAGE_CONFIG);
-    }
+	if (!internalMessageConfig || internalMessageConfig.length === 0) {
+		handleError(ErrorType.INVALID_MESSAGE_CONFIG);
+	}
 
-    if (!messageId || messageId.length === 0) {
-        handleError(ErrorType.INVALID_MESSAGE_ID);
-    }
+	if (!messageId || messageId.length === 0) {
+		handleError(ErrorType.INVALID_MESSAGE_ID);
+	}
 
-    if (!messageHashSum || messageHashSum.length === 0) {
-        handleError(ErrorType.INVALID_HASH_SUM);
-    }
+	if (!messageHashSum || messageHashSum.length === 0) {
+		handleError(ErrorType.INVALID_HASH_SUM);
+	}
 
-    if (!srcChainData || srcChainData.length === 0) {
-        handleError(ErrorType.INVALID_CHAIN_DATA);
-    }
+	if (!srcChainData || srcChainData.length === 0) {
+		handleError(ErrorType.INVALID_CHAIN_DATA);
+	}
 }

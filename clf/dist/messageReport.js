@@ -14588,7 +14588,6 @@ init_decodeAbiParameters();
 init_encodeAbiParameters();
 init_toBytes();
 init_fromHex();
-init_isAddress();
 init_keccak256();
 
 // clf/src/common/reportBytes.ts
@@ -15514,13 +15513,7 @@ function decodeInputs(bytesArgs2) {
   return decodedArgs;
 }
 function validateDecodedArgs(args) {
-  validateOperatorAddress(args.operatorAddress);
   validateMessageFields(args);
-}
-function validateOperatorAddress(address) {
-  if (!isAddress(address, { strict: false })) {
-    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
-  }
 }
 function validateMessageFields(args) {
   const { internalMessageConfig, messageId, messageHashSum, srcChainData } = args;

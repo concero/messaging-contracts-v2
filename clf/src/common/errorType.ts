@@ -1,4 +1,4 @@
-enum ErrorType {
+export enum ErrorType {
 	UNKNOWN_ERROR = "0",
 	INVALID_BYTES_ARGS_LENGTH = "1",
 	ARRAY_LENGTH_MISMATCH = "2",
@@ -55,4 +55,3 @@ enum ErrorType {
 	INVALID_ETHEREUM_ADDRESS = "63",
 	DECODE_FAILED = "70",
 }
-export { ErrorType };

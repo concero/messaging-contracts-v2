@@ -27,7 +27,7 @@ export default buildModule("ConceroVerifier", m => {
 	const { type } = conceroNetworks[name as ConceroNetworkNames];
 
 	const constructorArgs = [
-		getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
+		// getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
 		getEnvVar(`USDC_${networkEnvKeys[name]}`),
 		getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
 		getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),

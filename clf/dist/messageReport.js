@@ -15518,7 +15518,7 @@ function validateDecodedArgs(args) {
   validateMessageFields(args);
 }
 function validateOperatorAddress(address) {
-  if (!isAddress(address)) {
+  if (!isAddress(address, { strict: false })) {
     handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
 }

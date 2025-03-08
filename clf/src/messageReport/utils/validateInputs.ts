@@ -51,7 +51,7 @@ export function decodeInputs(bytesArgs: string[]): DecodedArgs {
 }
 
 function validateDecodedArgs(args: DecodedArgs): void {
-	// validateOperatorAddress(args.operatorAddress);
+	validateOperatorAddress(args.operatorAddress);
 	validateMessageFields(args);
 }
 

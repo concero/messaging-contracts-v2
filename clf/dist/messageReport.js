@@ -15513,7 +15513,16 @@ function decodeInputs(bytesArgs2) {
   return decodedArgs;
 }
 function validateDecodedArgs(args) {
+  validateOperatorAddress(args.operatorAddress);
   validateMessageFields(args);
+}
+function isAddress2(address) {
+  return address.length === 42 && address.startsWith("0x");
+}
+function validateOperatorAddress(address) {
+  if (!isAddress2(address)) {
+    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
+  }
 }
 function validateMessageFields(args) {
   const { internalMessageConfig, messageId, messageHashSum, srcChainData } = args;

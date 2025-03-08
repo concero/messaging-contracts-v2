@@ -34,7 +34,9 @@ export function buildClfJs() {
 			`esbuild --bundle --legal-comments=none --format=esm --global-name=conceromain --target=esnext ` +
 			`--define:CONCERO_VERIFIER='"${conceroVerifier}"' ` +
 			`--define:CONCERO_ROUTER_OPTIMISM='"${conceroRouter}"' ` +
-			`--define:CONCERO_ROUTER_ETHEREUM='"${conceroRouter}"' `;
+			`--define:CONCERO_ROUTER_ETHEREUM='"${conceroRouter}"' ` +
+			`--define:CONCERO_ROUTER_ARBITRUM_SEPOLIA='"${getEnvVar(`CONCERO_ROUTER_PROXY_ARBITRUM_SEPOLIA`)}"' ` +
+			`--define:CONCERO_ROUTER_BASE_SEPOLIA='"${getEnvVar(`CONCERO_ROUTER_PROXY_BASE_SEPOLIA`)}"' `;
 
 		// Get all directories in clf/src
 		const dirs = execSync("ls -d */", { cwd: "clf/src" }).toString();

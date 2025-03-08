@@ -15272,7 +15272,10 @@ function getConceroVerifier() {
 var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 var conceroRouters = {
   "1": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49",
-  "10": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49"
+  "10": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49",
+  // testnet
+  "421614": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
+  "84532": "0x842F3aA12bc34ff8c202a55488691A5bDcADF52a"
 };
 
 // clf/src/messageReport/constants/config.ts

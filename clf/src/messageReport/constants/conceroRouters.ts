@@ -16,4 +16,8 @@ export const CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 export const conceroRouters: Record<number, Address> = {
 	"1": CONCERO_ROUTER_ETHEREUM,
 	"10": CONCERO_ROUTER_OPTIMISM,
+
+	// testnet
+	"421614": CONCERO_ROUTER_ARBITRUM_SEPOLIA,
+	"84532": CONCERO_ROUTER_BASE_SEPOLIA,
 };

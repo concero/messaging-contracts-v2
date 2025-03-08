@@ -34,7 +34,7 @@ function getCLFDonSigners(networkType: NetworkType) {
 }
 
 type DeployArgs = {
-	chainSelector: string;
+	chainSelector: bigint;
 	usdc: string;
 	conceroVerifier: string;
 	conceroVerifierSubId: string;
@@ -62,7 +62,7 @@ const deployRouter: DeploymentFunction = async function (
 	const conceroVerifierNetwork = getConceroVerifierNetwork(networkType);
 
 	const defaultArgs: DeployArgs = {
-		chainSelector: getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
+		chainSelector: chain.chainSelector,
 		usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
 		conceroVerifier: getEnvVar(
 			`CONCERO_VERIFIER_PROXY_${networkEnvKeys[conceroVerifierNetwork.name]}`,

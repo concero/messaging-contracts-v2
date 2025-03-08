@@ -8,7 +8,7 @@ import { getEnvVar, getGasParameters, getHashSum, log, updateEnvVariable } from 
 import { ClfJsCodeType, getClfJsCode } from "../utils/getClfJsCode";
 
 type DeployArgs = {
-	chainSelector: string;
+	chainSelector: bigint;
 	usdc: string;
 	clfParams: {
 		router: string;

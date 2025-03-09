@@ -56,8 +56,9 @@ export async function main() {
 	} catch (error) {
 		if (error instanceof CustomErrorHandler) {
 			throw error;
-		} else {
-			handleError(ErrorType.UNKNOWN_ERROR);
 		}
+		// } else {
+		// 	handleError(ErrorType.UNKNOWN_ERROR);
+		// }
 	}
 }

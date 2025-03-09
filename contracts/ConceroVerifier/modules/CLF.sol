@@ -181,9 +181,9 @@ abstract contract CLF is FunctionsClient, Base {
         clfReqArgs[0] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
         clfReqArgs[1] = abi.encodePacked(internalMessageConfig);
         clfReqArgs[2] = abi.encodePacked(messageId);
-        clfReqArgs[3] = abi.encode(messageHashSum);
-        clfReqArgs[4] = abi.encode(srcChainData);
-        clfReqArgs[5] = abi.encode(msg.sender);
+        clfReqArgs[3] = abi.encodePacked(messageHashSum);
+        clfReqArgs[4] = abi.encodePacked(srcChainData);
+        clfReqArgs[5] = abi.encodePacked(msg.sender);
 
         clfRequestId = _sendCLFRequest(clfReqArgs);
         s.verifier().pendingCLFRequests[clfRequestId] = true;

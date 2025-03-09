@@ -1,4 +1,3 @@
-import { deployments } from "hardhat";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 

@@ -926,7 +926,7 @@ var init_size = __esm({
 var version2;
 var init_version2 = __esm({
   "node_modules/viem/_esm/errors/version.js"() {
-    version2 = "2.23.6";
+    version2 = "2.23.8";
   }
 });
 
@@ -10157,7 +10157,7 @@ function createTransport({ key, methods, name, request, retryCount = 3, retryDel
 init_node();
 init_rpc();
 function fallback(transports_, config2 = {}) {
-  const { key = "fallback", name = "Fallback", rank = false, retryCount, retryDelay } = config2;
+  const { key = "fallback", name = "Fallback", rank = false, shouldThrow: shouldThrow_ = shouldThrow, retryCount, retryDelay } = config2;
   return ({ chain, pollingInterval = 4e3, timeout, ...rest }) => {
     let transports = transports_;
     let onResponse = () => {
@@ -10195,7 +10195,7 @@ function fallback(transports_, config2 = {}) {
               transport: transport2,
               status: "error"
             });
-            if (shouldThrow(err))
+            if (shouldThrow_(err))
               throw err;
             if (i === transports.length - 1)
               throw err;
@@ -15577,8 +15577,6 @@ async function main() {
   } catch (error) {
     if (error instanceof CustomErrorHandler) {
       throw error;
-    } else {
-      handleError("0" /* UNKNOWN_ERROR */);
     }
   }
 }

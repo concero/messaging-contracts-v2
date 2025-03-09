@@ -28,7 +28,7 @@ export async function main() {
 		);
 
 		const {
-			messageId: messageIdFromLog,
+			messageId,
 			internalMessageConfig: messageConfigFromLog,
 			dstChainData: dstChainDataFromLog,
 			message: messageFromLog,

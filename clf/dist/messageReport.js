@@ -15357,7 +15357,7 @@ async function getAllowedOperators(client, chainType, messageId) {
     }
     return allowedOperators;
   } catch (error) {
-    handleError("54" /* OPERATOR_SELECTION_FAILED */);
+    throw error;
   }
 }
 async function getCohortsCount(client) {
@@ -15549,7 +15549,7 @@ async function main() {
       BigInt(args.srcChainData.blockNumber)
     );
     const {
-      messageId: messageIdFromLog,
+      messageId,
       internalMessageConfig: messageConfigFromLog,
       dstChainData: dstChainDataFromLog,
       message: messageFromLog

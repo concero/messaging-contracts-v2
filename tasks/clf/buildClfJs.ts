@@ -26,8 +26,8 @@ export function buildClfJs() {
 
 	try {
 		const networkName = hre.network.name;
-		const conceroVerifier = getEnvVar(`CONCERO_VERIFIER_${networkEnvKeys[networkName]}`);
-		const conceroRouter = getEnvVar(`CONCERO_ROUTER_${networkEnvKeys[networkName]}`);
+		const conceroVerifier = getEnvVar(`CONCERO_VERIFIER_PROXY_${networkEnvKeys[networkName]}`);
+		const conceroRouter = getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[networkName]}`);
 
 		// Base esbuild command with common options
 		const cmdBase =

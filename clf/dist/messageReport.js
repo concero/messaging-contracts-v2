@@ -15259,15 +15259,15 @@ function getPublicClient(chainSelector) {
 function getConceroVerifier() {
   try {
     if (config.isDevelopment) return secrets.CONCERO_VERIFIER_LOCALHOST;
-    return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
+    return "0x6cd1f5DB8f37CcC40cB5B48AD57E972dDeb02992";
   } catch {
-    return "0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4";
+    return "0x6cd1f5DB8f37CcC40cB5B48AD57E972dDeb02992";
   }
 }
 var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 var conceroRouters = {
-  "1": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49",
-  "10": "0x6d077f449BC9f6AEA23Cb9c777bd8Cc4c7C4fc49",
+  "1": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
+  "10": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
   // testnet
   "421614": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
   "84532": "0x842F3aA12bc34ff8c202a55488691A5bDcADF52a"

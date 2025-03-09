@@ -22,6 +22,8 @@ import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn, Opera
 
 import {CLF} from "./CLF.sol";
 
+import {Utils} from "../libraries/Utils.sol";
+
 abstract contract Operator is CLF {
     using SafeERC20 for IERC20;
     using s for s.Verifier;
@@ -133,11 +135,14 @@ abstract contract Operator is CLF {
         emit OperatorDeposited(msg.sender, msg.value);
     }
 
-    // @dev: TODO: remove in later
+    // @dev: TODO: remove in prod
     function setOperator(address operator) external onlyOwner {
-        bytes[] memory operatorBytes = new bytes[](1);
-        operatorBytes[0] = abi.encode(operator);
-        s.operator().registeredOperators[CommonTypes.ChainType.EVM] = operatorBytes;
+        Utils._addOperator(CommonTypes.ChainType.EVM, abi.encode(operator));
+    }
+
+    // @dev: TODO: remove in prod
+    function removeOperator(address operator) external onlyOwner {
+        Utils._removeOperator(CommonTypes.ChainType.EVM, abi.encode(operator));
     }
 
     /* INTERNAL FUNCTIONS */

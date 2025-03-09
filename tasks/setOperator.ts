@@ -10,11 +10,14 @@ task("set-operator", "Set price feeds for the router").setAction(async (_, hre) 
 	const conceroNetwork = conceroNetworks[hre.network.name];
 	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
 	const operator = "0xeee38505c47acba0c866df7265bd3e25da596b27";
+	const { abi: verifierAbi } = await import(
+		"../artifacts/contracts/ConceroVerifier/ConceroVerifier.sol/ConceroVerifier.json"
+	);
 
 	const setOperatorHash = await walletClient.writeContract({
 		account: walletClient.account,
 		address: verifierProxy,
-		abi: parseAbi(["function setOperator(address) external"]),
+		abi: verifierAbi,
 		functionName: "setOperator",
 		args: [operator],
 	});

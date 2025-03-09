@@ -19,8 +19,8 @@ function decodeSrcChainData(srcChainSelector: bigint, srcChainData: string): Evm
 			{
 				type: "tuple",
 				components: [
-					{ name: "sender", type: "address" },
 					{ name: "blockNumber", type: "uint256" },
+					{ name: "sender", type: "address" },
 				],
 			},
 		],

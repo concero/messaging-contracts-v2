@@ -54,9 +54,9 @@ export async function main() {
 
 		return packResult(messageReportResult, packedReportConfig);
 	} catch (error) {
-		if (error instanceof CustomErrorHandler) {
-			throw error;
-		}
+		// if (error instanceof CustomErrorHandler) {
+		throw error;
+		// }
 		// } else {
 		// 	handleError(ErrorType.UNKNOWN_ERROR);
 		// }

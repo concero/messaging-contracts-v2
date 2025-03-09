@@ -8025,18 +8025,6 @@ var init_call = __esm({
   }
 });
 
-// clf/src/common/errorHandler.ts
-var CustomErrorHandler = class extends Error {
-  constructor(type, data = null) {
-    super(type.toString());
-    this.type = type;
-    this.data = data;
-  }
-};
-function handleError(type) {
-  throw new CustomErrorHandler(type);
-}
-
 // node_modules/viem/_esm/index.js
 init_exports();
 
@@ -14633,6 +14621,18 @@ var config = {
   localhostRpcUrl: getLocalhostRpcUrl()
 };
 
+// clf/src/common/errorHandler.ts
+var CustomErrorHandler = class extends Error {
+  constructor(type, data = null) {
+    super(type.toString());
+    this.type = type;
+    this.data = data;
+  }
+};
+function handleError(type) {
+  throw new CustomErrorHandler(type);
+}
+
 // clf/src/common/rpcs/1.json
 var __default = {
   id: "1",
@@ -15575,9 +15575,7 @@ async function main() {
     const packedReportConfig = packReportConfig(1 /* MESSAGE */, CONFIG.REPORT_VERSION, args.operatorAddress);
     return packResult(messageReportResult, packedReportConfig);
   } catch (error) {
-    if (error instanceof CustomErrorHandler) {
-      throw error;
-    }
+    throw error;
   }
 }
  main();

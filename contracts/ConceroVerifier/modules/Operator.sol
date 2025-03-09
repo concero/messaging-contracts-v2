@@ -133,6 +133,13 @@ abstract contract Operator is CLF {
         emit OperatorDeposited(msg.sender, msg.value);
     }
 
+    // @dev: TODO: remove in later
+    function setOperator(address operator) external onlyOwner {
+        bytes[] memory operatorBytes = new bytes[](1);
+        operatorBytes[0] = abi.encode(operator);
+        s.operator().registeredOperators[CommonTypes.ChainType.EVM] = operatorBytes;
+    }
+
     /* INTERNAL FUNCTIONS */
 
     /* GETTER FUNCTIONS */

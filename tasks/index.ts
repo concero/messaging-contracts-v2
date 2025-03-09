@@ -5,6 +5,7 @@ import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import { sendConceroMessage } from "./sendConceroMessage";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
+import setOperator from "./setOperator";
 import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
 import { callContractFunction, changeOwnership, upgradeProxyImplementation } from "./utils";
 
@@ -20,4 +21,5 @@ export {
 	setRouterPriceFeeds,
 	setIsOperatorRegistered,
 	sendConceroMessage,
+	setOperator,
 };

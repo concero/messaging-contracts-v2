@@ -15357,7 +15357,7 @@ async function getAllowedOperators(client, chainType, messageId) {
     }
     return allowedOperators;
   } catch (error) {
-    throw error;
+    handleError("54" /* OPERATOR_SELECTION_FAILED */);
   }
 }
 async function getCohortsCount(client) {

@@ -39,8 +39,7 @@ export async function getAllowedOperators(
 
 		return allowedOperators;
 	} catch (error) {
-		// handleError(ErrorType.OPERATOR_SELECTION_FAILED);
-		throw error;
+		handleError(ErrorType.OPERATOR_SELECTION_FAILED);
 	}
 }
 

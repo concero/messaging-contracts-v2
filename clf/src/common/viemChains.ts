@@ -1,5 +1,14 @@
 import { type Chain, defineChain } from "viem";
-import { arbitrumSepolia, base, baseSepolia, mainnet, optimism } from "viem/chains";
+import {
+	arbitrumSepolia,
+	avalancheFuji,
+	base,
+	baseSepolia,
+	mainnet,
+	optimism,
+	optimismSepolia,
+	polygonAmoy,
+} from "viem/chains";
 
 import { config } from "./config";
 import { ChainSelector } from "./types";
@@ -32,6 +41,9 @@ const liveChains: Partial<Record<ChainSelector, Chain>> = {
 	// @dev testnets
 	"421614": arbitrumSepolia,
 	"84532": baseSepolia,
+	"43113": avalancheFuji,
+	"80002": polygonAmoy,
+	"11155420": optimismSepolia,
 };
 
 export const viemChains = config.isDevelopment ? localhostChains : liveChains;

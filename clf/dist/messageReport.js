@@ -15014,6 +15014,34 @@ var arbitrumSepolia = /* @__PURE__ */ defineChain({
   testnet: true
 });
 
+// node_modules/viem/_esm/chains/definitions/avalancheFuji.js
+var avalancheFuji = /* @__PURE__ */ defineChain({
+  id: 43113,
+  name: "Avalanche Fuji",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Avalanche Fuji",
+    symbol: "AVAX"
+  },
+  rpcUrls: {
+    default: { http: ["https://api.avax-test.network/ext/bc/C/rpc"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "SnowTrace",
+      url: "https://testnet.snowtrace.io",
+      apiUrl: "https://api-testnet.snowtrace.io"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 7096959
+    }
+  },
+  testnet: true
+});
+
 // node_modules/viem/_esm/chains/definitions/base.js
 var sourceId = 1;
 var base = /* @__PURE__ */ defineChain({
@@ -15199,6 +15227,82 @@ var optimism = /* @__PURE__ */ defineChain({
   sourceId: sourceId3
 });
 
+// node_modules/viem/_esm/chains/definitions/optimismSepolia.js
+var sourceId4 = 11155111;
+var optimismSepolia = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 11155420,
+  name: "OP Sepolia",
+  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia.optimism.io"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blockscout",
+      url: "https://optimism-sepolia.blockscout.com",
+      apiUrl: "https://optimism-sepolia.blockscout.com/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    disputeGameFactory: {
+      [sourceId4]: {
+        address: "0x05F9613aDB30026FFd634f38e5C4dFd30a197Fa1"
+      }
+    },
+    l2OutputOracle: {
+      [sourceId4]: {
+        address: "0x90E9c4f8a994a250F6aEfd61CAFb4F2e895D458F"
+      }
+    },
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 1620204
+    },
+    portal: {
+      [sourceId4]: {
+        address: "0x16Fc5058F25648194471939df75CF27A2fdC48BC"
+      }
+    },
+    l1StandardBridge: {
+      [sourceId4]: {
+        address: "0xFBb0621E0B23b5478B630BD55a5f21f67730B0F1"
+      }
+    }
+  },
+  testnet: true,
+  sourceId: sourceId4
+});
+
+// node_modules/viem/_esm/chains/definitions/polygonAmoy.js
+var polygonAmoy = /* @__PURE__ */ defineChain({
+  id: 80002,
+  name: "Polygon Amoy",
+  nativeCurrency: { name: "POL", symbol: "POL", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc-amoy.polygon.technology"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "PolygonScan",
+      url: "https://amoy.polygonscan.com",
+      apiUrl: "https://api-amoy.polygonscan.com/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 3127388
+    }
+  },
+  testnet: true
+});
+
 // clf/src/common/viemChains.ts
 var localhostChain = defineChain({
   id: 1,
@@ -15224,7 +15328,10 @@ var liveChains = {
   "8453": base,
   // @dev testnets
   "421614": arbitrumSepolia,
-  "84532": baseSepolia
+  "84532": baseSepolia,
+  "43113": avalancheFuji,
+  "80002": polygonAmoy,
+  "11155420": optimismSepolia
 };
 var viemChains = config.isDevelopment ? localhostChains : liveChains;
 
@@ -15270,7 +15377,10 @@ var conceroRouters = {
   "10": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
   // testnet
   "421614": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
-  "84532": "0x842F3aA12bc34ff8c202a55488691A5bDcADF52a"
+  "84532": "0x842F3aA12bc34ff8c202a55488691A5bDcADF52a",
+  "43113": "0xA7D39A04E11ed69CfD1c01b04c705AB5a5bDc066",
+  "80002": "0xbe43f1eAb754144b31B90Ee2D6E036b9AB3cC5B4",
+  "11155420": "0xbd480d6B8E6c18C397C408eD6c30B8e27f1B9234"
 };
 
 // clf/src/messageReport/constants/config.ts

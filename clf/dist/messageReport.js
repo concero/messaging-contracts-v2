@@ -15561,7 +15561,7 @@ async function main() {
       version: CONFIG.REPORT_VERSION,
       reportType: 1 /* MESSAGE */,
       requester: args.operatorAddress,
-      internalMessageConfig: messageConfigFromLog.toString(),
+      internalMessageConfig: "0x" + messageConfigFromLog.toString(16),
       messageId: args.messageId,
       messageHashSum: args.messageHashSum,
       dstChainData: dstChainDataFromLog,

@@ -74,6 +74,8 @@ abstract contract CLF is FunctionsClient, Base {
             reportType := byte(0, mload(add(response, 32)))
         }
 
+        // @dev TODO: where is isPending check?
+
         if (reportType == CommonTypes.CLFReportType.Message) {
             _handleCLFMessageReport(clfRequestId, response, err);
         } else if (reportType == CommonTypes.CLFReportType.OperatorRegistration) {
@@ -82,6 +84,7 @@ abstract contract CLF is FunctionsClient, Base {
             emit CLFRequestError(err);
         }
 
+        // @dev TODO: move the check to the top of the function
         delete s.verifier().pendingCLFRequests[clfRequestId];
     }
 

@@ -1,5 +1,5 @@
 import { decodeEventLog, parseUnits } from "viem";
-import { arbitrumSepolia, baseSepolia } from "viem/chains";
+import { arbitrumSepolia, baseSepolia, optimismSepolia, polygonAmoy } from "viem/chains";
 
 import { task } from "hardhat/config";
 
@@ -44,13 +44,13 @@ task("send-concero-message", "Send a test Concero message through the client")
 				abi: exampleClientAbi,
 				functionName: "sendConceroMessage",
 				args: [
-					baseSepolia.id,
+					polygonAmoy.id,
 					1,
 					1,
 					1,
 					false,
 					0,
-					getEnvVar("CONCERO_CLIENT_EXAMPLE_BASE_SEPOLIA"),
+					getEnvVar("CONCERO_CLIENT_EXAMPLE_POLYGON_AMOY"),
 					1_000_000n,
 					"0x001",
 				],
@@ -61,7 +61,10 @@ task("send-concero-message", "Send a test Concero message through the client")
 			log(`Transaction submitted: ${txHash}`, "send-concero-message");
 			log("Waiting for transaction receipt...", "send-concero-message");
 
-			const txReceipt = await publicClient.getTransactionReceipt({ hash: txHash });
+			const txReceipt = await publicClient.waitForTransactionReceipt({
+				hash: txHash,
+				confirmations: 3,
+			});
 
 			const foundMessageSentLog = txReceipt.logs.find(log => {
 				try {

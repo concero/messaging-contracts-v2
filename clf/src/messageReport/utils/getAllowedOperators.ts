@@ -6,6 +6,7 @@ import { config } from "../../common/config";
 import { ChainType } from "../../common/enums";
 import { handleError } from "../../common/errorHandler";
 import { ErrorType } from "../../common/errorType";
+import { getPublicClient } from "../../common/viemClient";
 import { CONCERO_VERIFIER_CONTRACT_ABI } from "../constants/abis";
 import { CONCERO_VERIFIER_CONTRACT_ADDRESS } from "../constants/conceroRouters";
 import { getMessageCohortId, getOperatorCohortId } from "./utils";
@@ -17,12 +18,9 @@ import { getMessageCohortId, getOperatorCohortId } from "./utils";
  * @param messageId - Message identifier
  * @returns Array of operator addresses allowed for the message
  */
-export async function getAllowedOperators(
-	client: PublicClient,
-	chainType: ChainType,
-	messageId: Hash,
-): Promise<Address[]> {
+export async function getAllowedOperators(chainType: ChainType, messageId: Hash): Promise<Address[]> {
 	try {
+		const client = getPublicClient(config.verifierChainSelector);
 		const cohortsCount = await getCohortsCount(client);
 		const messageCohort = getMessageCohortId(messageId, cohortsCount);
 

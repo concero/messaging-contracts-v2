@@ -17,4 +17,6 @@ function getLocalhostRpcUrl() {
 export const config = {
 	isDevelopment: isDevelopment(),
 	localhostRpcUrl: getLocalhostRpcUrl(),
+	// @dev TODO: remove this hardcoded value. pass chain id to clf to initialize isTestnet variable
+	verifierChainSelector: "421614",
 };

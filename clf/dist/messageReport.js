@@ -14618,7 +14618,9 @@ function getLocalhostRpcUrl() {
 }
 var config = {
   isDevelopment: isDevelopment(),
-  localhostRpcUrl: getLocalhostRpcUrl()
+  localhostRpcUrl: getLocalhostRpcUrl(),
+  // @dev TODO: remove this hardcoded value. pass chain id to clf to initialize isTestnet variable
+  verifierChainSelector: "421614"
 };
 
 // clf/src/common/errorHandler.ts
@@ -15454,8 +15456,9 @@ function pick(array, n) {
 }
 
 // clf/src/messageReport/utils/getAllowedOperators.ts
-async function getAllowedOperators(client, chainType, messageId) {
+async function getAllowedOperators(chainType, messageId) {
   try {
+    const client = getPublicClient(config.verifierChainSelector);
     const cohortsCount = await getCohortsCount(client);
     const messageCohort = getMessageCohortId(messageId, cohortsCount);
     const registeredOperators = await getRegisteredOperators(client, chainType);
@@ -15664,7 +15667,7 @@ async function main() {
     message: messageFromLog
   } = decodeConceroMessageLog(log);
   verifyMessageHash(messageFromLog, args.messageHashSum);
-  const operators = await getAllowedOperators(publicClient, 0 /* EVM */, args.messageId);
+  const operators = await getAllowedOperators(0 /* EVM */, args.messageId);
   const allowedOperators = pick(operators, 1);
   const messageReportResult = {
     version: CONFIG.REPORT_VERSION,

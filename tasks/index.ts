@@ -1,4 +1,5 @@
 import { deployContracts } from "./deployContracts";
+import deployExampleClient from "./deployExampleClient";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
@@ -22,4 +23,5 @@ export {
 	setIsOperatorRegistered,
 	sendConceroMessage,
 	setOperator,
+	deployExampleClient,
 };

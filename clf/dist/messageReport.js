@@ -15297,8 +15297,8 @@ var NonIndexedConceroMessageParams = [
 // clf/src/messageReport/utils/decoders.ts
 function decodeConceroMessageLog(log) {
   try {
-    const messageId = log.topics[1];
-    const internalMessageConfig = log.topics[2];
+    const messageId = log.topics[2];
+    const internalMessageConfig = log.topics[1];
     const [dstChainData, message] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
     return {
       messageId,
@@ -15538,39 +15538,35 @@ function verifyMessageHash(message, expectedHashSum) {
 
 // clf/src/messageReport/index.ts
 async function main() {
-  try {
-    const args = decodeInputs(bytesArgs);
-    const msgConfig = args.internalMessageConfig;
-    const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
-    const log = await fetchConceroMessage(
-      publicClient,
-      conceroRouters[Number(msgConfig.srcChainSelector)],
-      args.messageId,
-      BigInt(args.srcChainData.blockNumber)
-    );
-    const {
-      messageId,
-      internalMessageConfig: messageConfigFromLog,
-      dstChainData: dstChainDataFromLog,
-      message: messageFromLog
-    } = decodeConceroMessageLog(log);
-    verifyMessageHash(messageFromLog, args.messageHashSum);
-    const operators = await getAllowedOperators(publicClient, 0 /* EVM */, args.messageId);
-    const allowedOperators = pick(operators, 1);
-    const messageReportResult = {
-      version: CONFIG.REPORT_VERSION,
-      reportType: 1 /* MESSAGE */,
-      requester: args.operatorAddress,
-      internalMessageConfig: "0x" + messageConfigFromLog.toString(16),
-      messageId: args.messageId,
-      messageHashSum: args.messageHashSum,
-      dstChainData: dstChainDataFromLog,
-      allowedOperators
-    };
-    const packedReportConfig = packReportConfig(1 /* MESSAGE */, CONFIG.REPORT_VERSION, args.operatorAddress);
-    return packResult(messageReportResult, packedReportConfig);
-  } catch (error) {
-    throw error;
-  }
+  const args = decodeInputs(bytesArgs);
+  const msgConfig = args.internalMessageConfig;
+  const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
+  const log = await fetchConceroMessage(
+    publicClient,
+    conceroRouters[Number(msgConfig.srcChainSelector)],
+    args.messageId,
+    BigInt(args.srcChainData.blockNumber)
+  );
+  const {
+    messageId,
+    internalMessageConfig: messageConfigFromLog,
+    dstChainData: dstChainDataFromLog,
+    message: messageFromLog
+  } = decodeConceroMessageLog(log);
+  verifyMessageHash(messageFromLog, args.messageHashSum);
+  const operators = await getAllowedOperators(publicClient, 0 /* EVM */, args.messageId);
+  const allowedOperators = pick(operators, 1);
+  const messageReportResult = {
+    version: CONFIG.REPORT_VERSION,
+    reportType: 1 /* MESSAGE */,
+    requester: args.operatorAddress,
+    internalMessageConfig: messageConfigFromLog,
+    messageId: args.messageId,
+    messageHashSum: args.messageHashSum,
+    dstChainData: dstChainDataFromLog,
+    allowedOperators
+  };
+  const packedReportConfig = packReportConfig(1 /* MESSAGE */, CONFIG.REPORT_VERSION, args.operatorAddress);
+  return packResult(messageReportResult, packedReportConfig);
 }
  main();

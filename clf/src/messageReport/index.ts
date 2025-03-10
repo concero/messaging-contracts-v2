@@ -15,50 +15,41 @@ import { decodeInputs } from "./utils/validateInputs";
 import { verifyMessageHash } from "./utils/verifyMessageHash";
 
 export async function main() {
-	try {
-		const args = decodeInputs(bytesArgs);
-		const msgConfig = args.internalMessageConfig;
-		const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
+	const args = decodeInputs(bytesArgs);
+	const msgConfig = args.internalMessageConfig;
+	const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
 
-		const log = await fetchConceroMessage(
-			publicClient,
-			conceroRouters[Number(msgConfig.srcChainSelector)],
-			args.messageId,
-			BigInt(args.srcChainData.blockNumber),
-		);
+	const log = await fetchConceroMessage(
+		publicClient,
+		conceroRouters[Number(msgConfig.srcChainSelector)],
+		args.messageId,
+		BigInt(args.srcChainData.blockNumber),
+	);
 
-		const {
-			messageId,
-			internalMessageConfig: messageConfigFromLog,
-			dstChainData: dstChainDataFromLog,
-			message: messageFromLog,
-		} = decodeConceroMessageLog(log);
+	const {
+		messageId,
+		internalMessageConfig: messageConfigFromLog,
+		dstChainData: dstChainDataFromLog,
+		message: messageFromLog,
+	} = decodeConceroMessageLog(log);
 
-		verifyMessageHash(messageFromLog, args.messageHashSum);
+	verifyMessageHash(messageFromLog, args.messageHashSum);
 
-		const operators = await getAllowedOperators(publicClient, ChainType.EVM, args.messageId);
-		const allowedOperators = pick(operators, 1);
+	const operators = await getAllowedOperators(publicClient, ChainType.EVM, args.messageId);
+	const allowedOperators = pick(operators, 1);
 
-		const messageReportResult: MessageReportResult = {
-			version: CONFIG.REPORT_VERSION,
-			reportType: ReportType.MESSAGE,
-			requester: args.operatorAddress,
-			internalMessageConfig: "0x" + messageConfigFromLog.toString(16),
-			messageId: args.messageId,
-			messageHashSum: args.messageHashSum,
-			dstChainData: dstChainDataFromLog,
-			allowedOperators,
-		};
+	const messageReportResult: MessageReportResult = {
+		version: CONFIG.REPORT_VERSION,
+		reportType: ReportType.MESSAGE,
+		requester: args.operatorAddress,
+		internalMessageConfig: messageConfigFromLog,
+		messageId: args.messageId,
+		messageHashSum: args.messageHashSum,
+		dstChainData: dstChainDataFromLog,
+		allowedOperators,
+	};
 
-		const packedReportConfig = packReportConfig(ReportType.MESSAGE, CONFIG.REPORT_VERSION, args.operatorAddress);
+	const packedReportConfig = packReportConfig(ReportType.MESSAGE, CONFIG.REPORT_VERSION, args.operatorAddress);
 
-		return packResult(messageReportResult, packedReportConfig);
-	} catch (error) {
-		// if (error instanceof CustomErrorHandler) {
-		throw error;
-		// }
-		// } else {
-		// 	handleError(ErrorType.UNKNOWN_ERROR);
-		// }
-	}
+	return packResult(messageReportResult, packedReportConfig);
 }

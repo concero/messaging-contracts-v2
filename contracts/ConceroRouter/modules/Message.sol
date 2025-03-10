@@ -25,8 +25,6 @@ import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, Concero
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
 
-import {console} from "forge-std/src/console.sol";
-
 library Errors {
     error UnsupportedFeeTokenType();
     error MessageAlreadyProcessed(bytes32 messageId);
@@ -68,8 +66,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
         //        s.router().isMessageSent[_messageId] = true;
 
         emit ConceroMessageSent(internalMessageConfig, _messageId, dstChainData, message);
-        console.logString("Sent concero message with id:");
-        console.logBytes32(_messageId);
         return _messageId;
     }
 

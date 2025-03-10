@@ -1,4 +1,5 @@
 import { decodeEventLog, parseUnits } from "viem";
+import { arbitrumSepolia, baseSepolia } from "viem/chains";
 
 import { task } from "hardhat/config";
 
@@ -9,7 +10,7 @@ import { getEnvVar, getFallbackClients, log } from "../utils";
  * Sends a Concero message using the ConceroClientExample contract
  */
 task("send-concero-message", "Send a test Concero message through the client")
-	.addOptionalParam("value", "Amount of native token to send with the message", "0.001")
+	.addOptionalParam("value", "Amount of native token to send with the message", "0.0001")
 	.addOptionalParam("client", "Address of the ConceroClientExample contract")
 	.addOptionalParam("receiver", "Address of the receiver contract")
 	.setAction(async (taskArgs, hre) => {
@@ -30,7 +31,6 @@ task("send-concero-message", "Send a test Concero message through the client")
 		const { abi: exampleClientAbi } = await import(
 			"../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
 		);
-
 		const { abi: CONCERO_ROUTER_ABI } = await import(
 			"../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
 		);
@@ -43,7 +43,17 @@ task("send-concero-message", "Send a test Concero message through the client")
 				address: clientAddress,
 				abi: exampleClientAbi,
 				functionName: "sendConceroMessage",
-				args: [taskArgs.receiver ?? clientAddress],
+				args: [
+					baseSepolia.id,
+					1,
+					1,
+					1,
+					false,
+					0,
+					getEnvVar("CONCERO_CLIENT_EXAMPLE_BASE_SEPOLIA"),
+					1_000_000n,
+					"0x001",
+				],
 				account: walletClient.account,
 				value,
 			});

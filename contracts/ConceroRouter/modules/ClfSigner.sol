@@ -10,7 +10,6 @@ import {Base} from "./Base.sol";
 import {Types} from "../libraries/Types.sol";
 
 abstract contract ClfSigner is Base {
-
     error IncorrectNumberOfSignatures();
     error UnauthorizedSigner(address signer);
     error DuplicateSignatureDetected(address signer);
@@ -25,7 +24,11 @@ abstract contract ClfSigner is Base {
     address internal immutable i_conceroVerifier;
     uint64 internal immutable i_conceroVerifierSubId;
 
-    constructor(address conceroVerifier, uint64 conceroVerifierSubId, address[4] memory clfSigners) {
+    constructor(
+        address conceroVerifier,
+        uint64 conceroVerifierSubId,
+        address[4] memory clfSigners
+    ) {
         i_clfSigner0 = clfSigners[0];
         i_clfSigner1 = clfSigners[1];
         i_clfSigner2 = clfSigners[2];
@@ -60,15 +63,20 @@ abstract contract ClfSigner is Base {
         return keccak256(messageToHash);
     }
 
-    function _verifyClfReportOnChainMetadata(Types.ClfReportOnchainMetadata memory onchainMetadata) internal view {
+    function _verifyClfReportOnChainMetadata(
+        Types.ClfReportOnchainMetadata memory onchainMetadata
+    ) internal view {
         require(onchainMetadata.client == i_conceroVerifier, InvalidClfReportClient());
-        require(onchainMetadata.subscriptionId == i_conceroVerifierSubId, InvalidClfReportSubscriptionId());
+        require(
+            onchainMetadata.subscriptionId == i_conceroVerifierSubId,
+            InvalidClfReportSubscriptionId()
+        );
     }
     /**
      * @notice Verifies the signatures of the report.
      * @param reportSubmission The report submission data.
      */
-function _verifyClfReportSignatures(
+    function _verifyClfReportSignatures(
         Types.ClfDonReportSubmission calldata reportSubmission
     ) internal view {
         bytes32 clfReportHash = _computeCLFReportHash(
@@ -91,13 +99,13 @@ function _verifyClfReportSignatures(
         for (uint256 i; i < rs.length; i++) {
             // Extract the v value from the appropriate byte in the bytes32
             // Each v value is 8 bits, stored at byte position i
-            uint8 v = uint8(uint256(rawVs) >> (i * 8)) & 0xFF;
-            v = v + 27;  // Add 27 to get the correct v value
-            
+            // uint8 v = uint8(uint256(rawVs) >> (i * 8)) & 0xFF;
+            // v = v + 27; // Add 27 to get the correct v value
+
             bytes32 r = rs[i];
             bytes32 s = ss[i];
 
-            address signer = ecrecover(clfReportHash, v, r, s);
+            address signer = ecrecover(clfReportHash, uint8(rawVs[i]) + 27, r, s);
             require(_isAuthorizedClfSigner(signer), UnauthorizedSigner(signer));
 
             for (uint256 j = 0; j < i; j++) {

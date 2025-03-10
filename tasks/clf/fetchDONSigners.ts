@@ -21,11 +21,11 @@ const mainnetNetworks = [
 
 const testnetNetworks = [
 	// conceroNetworks.sepolia,
-	// conceroNetworks.baseSepolia,
-	// conceroNetworks.arbitrumSepolia,
+	conceroNetworks.baseSepolia,
+	conceroNetworks.arbitrumSepolia,
 	// conceroNetworks.optimismSepolia,
 	// conceroNetworks.avalancheFuji,
-	conceroNetworks.polygonAmoy,
+	// conceroNetworks.polygonAmoy,
 ];
 
 const clfCoordinatorCreationBlock = {

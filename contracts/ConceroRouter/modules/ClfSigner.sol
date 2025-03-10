@@ -97,11 +97,6 @@ abstract contract ClfSigner is Base {
         address[] memory signers = new address[](rs.length);
 
         for (uint256 i; i < rs.length; i++) {
-            // Extract the v value from the appropriate byte in the bytes32
-            // Each v value is 8 bits, stored at byte position i
-            // uint8 v = uint8(uint256(rawVs) >> (i * 8)) & 0xFF;
-            // v = v + 27; // Add 27 to get the correct v value
-
             bytes32 r = rs[i];
             bytes32 s = ss[i];
 

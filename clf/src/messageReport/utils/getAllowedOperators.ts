@@ -21,10 +21,11 @@ import { getMessageCohortId, getOperatorCohortId } from "./utils";
 export async function getAllowedOperators(chainType: ChainType, messageId: Hash): Promise<Address[]> {
 	try {
 		const client = getPublicClient(config.verifierChainSelector);
-		const cohortsCount = await getCohortsCount(client);
+		const [cohortsCount, registeredOperators] = await Promise.all([
+			getCohortsCount(client),
+			getRegisteredOperators(client, chainType),
+		]);
 		const messageCohort = getMessageCohortId(messageId, cohortsCount);
-
-		const registeredOperators = await getRegisteredOperators(client, chainType);
 
 		// Filter operators that belong to the same cohort as the message
 		const allowedOperators = registeredOperators.filter(

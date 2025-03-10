@@ -1,5 +1,11 @@
 import { decodeEventLog, parseUnits } from "viem";
-import { arbitrumSepolia, baseSepolia, optimismSepolia, polygonAmoy } from "viem/chains";
+import {
+	arbitrumSepolia,
+	avalancheFuji,
+	baseSepolia,
+	optimismSepolia,
+	polygonAmoy,
+} from "viem/chains";
 
 import { task } from "hardhat/config";
 
@@ -44,13 +50,13 @@ task("send-concero-message", "Send a test Concero message through the client")
 				abi: exampleClientAbi,
 				functionName: "sendConceroMessage",
 				args: [
-					polygonAmoy.id,
+					avalancheFuji.id,
 					1,
 					1,
 					1,
 					false,
 					0,
-					getEnvVar("CONCERO_CLIENT_EXAMPLE_POLYGON_AMOY"),
+					getEnvVar("CONCERO_CLIENT_EXAMPLE_FUJI"),
 					1_000_000n,
 					"0x001",
 				],

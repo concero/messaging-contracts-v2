@@ -19,12 +19,15 @@ export async function main() {
 	const msgConfig = args.internalMessageConfig;
 	const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
 
-	const log = await fetchConceroMessage(
-		publicClient,
-		conceroRouters[Number(msgConfig.srcChainSelector)],
-		args.messageId,
-		BigInt(args.srcChainData.blockNumber),
-	);
+	const [log, operators] = await Promise.all([
+		fetchConceroMessage(
+			publicClient,
+			conceroRouters[Number(msgConfig.srcChainSelector)],
+			args.messageId,
+			BigInt(args.srcChainData.blockNumber),
+		),
+		getAllowedOperators(ChainType.EVM, args.messageId),
+	]);
 
 	const {
 		messageId,
@@ -35,7 +38,6 @@ export async function main() {
 
 	verifyMessageHash(messageFromLog, args.messageHashSum);
 
-	const operators = await getAllowedOperators(ChainType.EVM, args.messageId);
 	const allowedOperators = pick(operators, 1);
 
 	const messageReportResult: MessageReportResult = {

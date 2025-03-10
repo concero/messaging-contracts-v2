@@ -15459,9 +15459,11 @@ function pick(array, n) {
 async function getAllowedOperators(chainType, messageId) {
   try {
     const client = getPublicClient(config.verifierChainSelector);
-    const cohortsCount = await getCohortsCount(client);
+    const [cohortsCount, registeredOperators] = await Promise.all([
+      getCohortsCount(client),
+      getRegisteredOperators(client, chainType)
+    ]);
     const messageCohort = getMessageCohortId(messageId, cohortsCount);
-    const registeredOperators = await getRegisteredOperators(client, chainType);
     const allowedOperators = registeredOperators.filter(
       (operator) => getOperatorCohortId(operator, cohortsCount) === messageCohort
     );
@@ -15654,12 +15656,15 @@ async function main() {
   const args = decodeInputs(bytesArgs);
   const msgConfig = args.internalMessageConfig;
   const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
-  const log = await fetchConceroMessage(
-    publicClient,
-    conceroRouters[Number(msgConfig.srcChainSelector)],
-    args.messageId,
-    BigInt(args.srcChainData.blockNumber)
-  );
+  const [log, operators] = await Promise.all([
+    fetchConceroMessage(
+      publicClient,
+      conceroRouters[Number(msgConfig.srcChainSelector)],
+      args.messageId,
+      BigInt(args.srcChainData.blockNumber)
+    ),
+    getAllowedOperators(0 /* EVM */, args.messageId)
+  ]);
   const {
     messageId,
     internalMessageConfig: messageConfigFromLog,
@@ -15667,7 +15672,6 @@ async function main() {
     message: messageFromLog
   } = decodeConceroMessageLog(log);
   verifyMessageHash(messageFromLog, args.messageHashSum);
-  const operators = await getAllowedOperators(0 /* EVM */, args.messageId);
   const allowedOperators = pick(operators, 1);
   const messageReportResult = {
     version: CONFIG.REPORT_VERSION,

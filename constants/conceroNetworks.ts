@@ -115,18 +115,18 @@ export const testingNetworks: Record<ConceroTestNetworkNames, ConceroNetwork> = 
 };
 
 export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork> = {
-	sepolia: {
-		name: "sepolia",
-		type: networkTypes.testnet,
-		chainId: 11155111,
-		url: urls.sepolia[0],
-		rpcUrls: urls.sepolia,
-		accounts: [testnetDeployerPK, testnetProxyDeployerPK],
-		chainSelector: 11155111n,
-		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
-		viemChain: sepolia,
-		saveDeployments: false,
-	},
+	// sepolia: {
+	// 	name: "sepolia",
+	// 	type: networkTypes.testnet,
+	// 	chainId: 11155111,
+	// 	url: urls.sepolia[0],
+	// 	rpcUrls: urls.sepolia,
+	// 	accounts: [testnetDeployerPK, testnetProxyDeployerPK],
+	// 	chainSelector: 11155111n,
+	// 	confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
+	// 	viemChain: sepolia,
+	// 	saveDeployments: false,
+	// },
 	avalancheFuji: {
 		name: "avalancheFuji",
 		type: networkTypes.testnet,

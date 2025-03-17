@@ -70,7 +70,7 @@ contract SendMessage is ConceroRouterTest {
             RouterSlots.nonce,
             bytes32(0)
         );
-        uint256 messageFee = conceroRouter.getMessageFeeNative(clientMessageConfig, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFee(clientMessageConfig, dstChainData);
 
         vm.recordLogs();
         bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
@@ -133,7 +133,7 @@ contract SendMessage is ConceroRouterTest {
     function test_RevertInsufficientFee() public {
         vm.startPrank(user);
 
-        uint256 messageFee = conceroRouter.getMessageFeeNative(i_clientMessageConfig, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFee(i_clientMessageConfig, dstChainData);
         uint256 insufficientFee = messageFee - 1;
 
         vm.expectRevert(
@@ -157,7 +157,7 @@ contract SendMessage is ConceroRouterTest {
         vm.startPrank(user);
 
         bytes32 invalidConfig = bytes32(0);
-        uint256 messageFee = conceroRouter.getMessageFeeNative(i_clientMessageConfig, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFee(i_clientMessageConfig, dstChainData);
 
         vm.expectRevert();
         conceroRouter.conceroSend{value: messageFee}(invalidConfig, dstChainData, message);

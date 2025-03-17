@@ -225,7 +225,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         return (totalFeeNative * nativeUsdRate) / 1e18;
     }
 
-    function getMessageFeeNative(
+    function getMessageFee(
         bytes32 clientMessageConfig,
         bytes memory dstChainData
     ) external view returns (uint256) {
@@ -233,17 +233,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
             uint8(uint256(clientMessageConfig >> offsets.OFFSET_FEE_TOKEN) & BitMasks.MASK_8)
         );
         require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeTokenType());
-        return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
-    }
-
-    function getMessageFeeUSDC(
-        bytes32 clientMessageConfig,
-        bytes memory dstChainData
-    ) external view returns (uint256) {
-        Types.FeeToken feeToken = Types.FeeToken(
-            uint8(uint256(clientMessageConfig >> offsets.OFFSET_FEE_TOKEN) & BitMasks.MASK_8)
-        );
-        require(feeToken == Types.FeeToken.usdc, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
     }
 }

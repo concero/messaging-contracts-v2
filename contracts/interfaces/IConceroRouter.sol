@@ -23,4 +23,9 @@ interface IConceroRouter {
         bytes calldata dstChainData,
         bytes calldata message
     ) external payable returns (bytes32 messageId);
+
+    function getMessageFeeNative(
+        bytes32 clientMessageConfig,
+        bytes memory dstChainData
+    ) external view returns (uint256);
 }

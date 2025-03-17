@@ -49,8 +49,6 @@ contract ConceroClientExample is ConceroClient {
             dstChainData,
             "Hello, World!"
         );
-        //        console.logString("ConceroClientExample: Message sent");
-        //        console.logBytes32(messageId);
     }
 
     function sendConceroMessage(

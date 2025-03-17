@@ -115,3 +115,5 @@ task("send-concero-message", "Send a test Concero message through the client")
 			throw error;
 		}
 	});
+
+export default {};

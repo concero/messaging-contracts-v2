@@ -8,6 +8,7 @@ const networkColors: Record<ConceroNetworkNames, string> = {
 	base: "\x1b[36m", // cyan
 	sepolia: "\x1b[30m", // grey
 	arbitrumSepolia: "\x1b[34m", // blue
+	optimismSepolia: "\x1b[31m", // red
 	polygonAmoy: "\x1b[35m", // magenta
 	avalancheFuji: "\x1b[31m", // red
 	baseSepolia: "\x1b[36m", // cyan

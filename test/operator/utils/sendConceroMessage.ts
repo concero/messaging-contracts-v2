@@ -1,5 +1,4 @@
 import { PublicClient, WalletClient, decodeEventLog, parseUnits } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 
 import { globalConfig } from "@concero/v2-operators/src/constants";
 

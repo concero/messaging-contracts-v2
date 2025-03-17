@@ -87,7 +87,8 @@ contract SendMessage is ConceroRouterTest {
         bool foundEvent = false;
         for (uint i = 0; i < entries.length; i++) {
             if (
-                entries[i].topics[0] == keccak256("ConceroMessageSent(bytes32,bytes32,bytes,bytes)")
+                entries[i].topics[0] ==
+                keccak256("ConceroMessageSent(bytes32,bytes32,bytes,bytes,bytes)")
             ) {
                 foundEvent = true;
 

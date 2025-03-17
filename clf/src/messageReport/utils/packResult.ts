@@ -18,6 +18,7 @@ export function packResult(result: MessageReportResult, packedReportConfig: Hash
 			{ type: "bytes32" }, // internalMessageConfig
 			{ type: "bytes32" }, // messageId
 			{ type: "bytes32" }, // messageHashSum
+			{ type: "bytes" }, // sender
 			{ type: "bytes" }, // dstChainData
 			{ type: "bytes[]" }, // allowedOperators
 		],
@@ -26,6 +27,7 @@ export function packResult(result: MessageReportResult, packedReportConfig: Hash
 			result.internalMessageConfig,
 			result.messageId,
 			result.messageHashSum,
+			result.sender,
 			result.dstChainData,
 			result.allowedOperators,
 		],

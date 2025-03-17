@@ -17,17 +17,19 @@ export function decodeConceroMessageLog(log: Log): {
 	internalMessageConfig: HexString;
 	dstChainData: HexString;
 	message: HexString;
+	sender: HexString;
 } {
 	try {
 		const messageId = log.topics[2];
 		const internalMessageConfig = log.topics[1];
-		const [dstChainData, message] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
+		const [dstChainData, message, sender] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
 
 		return {
 			messageId,
 			internalMessageConfig,
 			dstChainData,
 			message,
+			sender,
 		};
 	} catch (error) {
 		handleError(ErrorType.INVALID_DATA);

@@ -15403,7 +15403,8 @@ var CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
 ]);
 var NonIndexedConceroMessageParams = [
   { type: "bytes", name: "dstChainData" },
-  { type: "bytes", name: "message" }
+  { type: "bytes", name: "message" },
+  { type: "bytes", name: "sender" }
 ];
 
 // clf/src/messageReport/utils/decoders.ts
@@ -15411,12 +15412,13 @@ function decodeConceroMessageLog(log) {
   try {
     const messageId = log.topics[2];
     const internalMessageConfig = log.topics[1];
-    const [dstChainData, message] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
+    const [dstChainData, message, sender] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
     return {
       messageId,
       internalMessageConfig,
       dstChainData,
-      message
+      message,
+      sender
     };
   } catch (error) {
     handleError("33" /* INVALID_DATA */);
@@ -15527,6 +15529,8 @@ function packResult(result, packedReportConfig) {
       { type: "bytes32" },
       // messageHashSum
       { type: "bytes" },
+      // sender
+      { type: "bytes" },
       // dstChainData
       { type: "bytes[]" }
       // allowedOperators
@@ -15536,6 +15540,7 @@ function packResult(result, packedReportConfig) {
       result.internalMessageConfig,
       result.messageId,
       result.messageHashSum,
+      result.sender,
       result.dstChainData,
       result.allowedOperators
     ]
@@ -15669,7 +15674,8 @@ async function main() {
     messageId,
     internalMessageConfig: messageConfigFromLog,
     dstChainData: dstChainDataFromLog,
-    message: messageFromLog
+    message: messageFromLog,
+    sender
   } = decodeConceroMessageLog(log);
   verifyMessageHash(messageFromLog, args.messageHashSum);
   const allowedOperators = pick(operators, 1);
@@ -15680,6 +15686,7 @@ async function main() {
     internalMessageConfig: messageConfigFromLog,
     messageId: args.messageId,
     messageHashSum: args.messageHashSum,
+    sender,
     dstChainData: dstChainDataFromLog,
     allowedOperators
   };

@@ -53,7 +53,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
     ) external payable returns (bytes32) {
         _collectMessageFee(config, dstChainData);
 
-        (bytes32 _messageId, bytes32 internalMessageConfig) = MessageLib.buildInternalMessage(
+        (bytes32 messageId, bytes32 internalMessageConfig) = MessageLib.buildInternalMessage(
             config,
             dstChainData,
             message,
@@ -63,10 +63,15 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         s.router().nonce += 1;
-        //        s.router().isMessageSent[_messageId] = true;
 
-        emit ConceroMessageSent(internalMessageConfig, _messageId, dstChainData, message);
-        return _messageId;
+        emit ConceroMessageSent(
+            internalMessageConfig,
+            messageId,
+            dstChainData,
+            message,
+            abi.encode(msg.sender)
+        );
+        return messageId;
     }
 
     /**

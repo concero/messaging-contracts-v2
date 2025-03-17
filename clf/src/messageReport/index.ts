@@ -1,6 +1,4 @@
 import { ChainType, ReportType } from "../common/enums";
-import { CustomErrorHandler, handleError } from "../common/errorHandler";
-import { ErrorType } from "../common/errorType";
 import { packReportConfig } from "../common/packReportConfig";
 import { getPublicClient } from "../common/viemClient";
 import { conceroRouters } from "./constants/conceroRouters";
@@ -34,6 +32,7 @@ export async function main() {
 		internalMessageConfig: messageConfigFromLog,
 		dstChainData: dstChainDataFromLog,
 		message: messageFromLog,
+		sender,
 	} = decodeConceroMessageLog(log);
 
 	verifyMessageHash(messageFromLog, args.messageHashSum);
@@ -47,6 +46,7 @@ export async function main() {
 		internalMessageConfig: messageConfigFromLog,
 		messageId: args.messageId,
 		messageHashSum: args.messageHashSum,
+		sender,
 		dstChainData: dstChainDataFromLog,
 		allowedOperators,
 	};

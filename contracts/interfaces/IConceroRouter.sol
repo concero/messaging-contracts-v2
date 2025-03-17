@@ -11,7 +11,8 @@ event ConceroMessageSent(
     bytes32 indexed internalMessageConfig,
     bytes32 indexed messageId,
     bytes dstChainData,
-    bytes message
+    bytes message,
+    bytes sender
 );
 event ConceroMessageReceived(bytes32 indexed id);
 event ConceroMessageDelivered(bytes32 indexed id);

@@ -28,6 +28,7 @@ library CommonTypes {
         bytes32 internalMessageConfig;
         bytes32 messageId;
         bytes32 messageHashSum;
+        bytes sender;
         bytes dstChainData;
         bytes[] allowedOperators;
     }

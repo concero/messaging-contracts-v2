@@ -123,9 +123,16 @@ abstract contract Message is ClfSigner, IConceroRouter {
         require(isAllowedOperator, Errors.UnauthorizedOperator());
 
         emit ConceroMessageReceived(decodedMessageReportResult.messageId);
+
+        uint24 srcChainSelector = uint24(
+            uint256(decodedMessageReportResult.internalMessageConfig) >> offsets.OFFSET_SRC_CHAIN
+        );
+
         deliverMessage(
             decodedMessageReportResult.messageId,
             decodedMessageReportResult.dstChainData,
+            srcChainSelector,
+            decodedMessageReportResult.sender,
             message
         );
     }
@@ -133,15 +140,17 @@ abstract contract Message is ClfSigner, IConceroRouter {
     /**
      * @notice Delivers the message to the receiver contract if valid.
      * @param messageId The unique identifier of the message.
-     * @param _dstData The destination chain data of the message.
+     * @param dstData The destination chain data of the message.
      * @param message The message data.
      */
     function deliverMessage(
         bytes32 messageId,
-        bytes memory _dstData,
+        bytes memory dstData,
+        uint24 srcChainSelector,
+        bytes memory sender,
         bytes memory message
     ) internal {
-        Types.EvmDstChainData memory dstData = abi.decode(_dstData, (Types.EvmDstChainData));
+        Types.EvmDstChainData memory dstData = abi.decode(dstData, (Types.EvmDstChainData));
 
         s.router().isMessageProcessed[messageId] = true;
 

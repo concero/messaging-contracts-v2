@@ -13,18 +13,26 @@ abstract contract ConceroClient is IConceroClient {
 
     uint8 internal constant VERSION = 1;
     address internal immutable i_conceroRouter;
-    uint24 internal immutable i_chainSelector;
 
-    constructor(address conceroRouter, uint24 chainSelector) {
+    constructor(address conceroRouter) {
         require(conceroRouter != address(0), InvalidConceroRouter(conceroRouter));
         i_conceroRouter = conceroRouter;
-        i_chainSelector = chainSelector;
     }
 
-    function conceroReceive(bytes32 messageId, bytes calldata message) external {
+    function conceroReceive(
+        bytes32 messageId,
+        uint24 srcChainSelector,
+        bytes calldata sender,
+        bytes calldata message
+    ) external {
         require(msg.sender == i_conceroRouter, InvalidConceroRouter(msg.sender));
-        _conceroReceive(messageId, message);
+        _conceroReceive(messageId, srcChainSelector, sender, message);
     }
 
-    function _conceroReceive(bytes32 messageId, bytes calldata message) internal virtual;
+    function _conceroReceive(
+        bytes32 messageId,
+        uint24 srcChainSelector,
+        bytes calldata sender,
+        bytes calldata message
+    ) internal virtual;
 }

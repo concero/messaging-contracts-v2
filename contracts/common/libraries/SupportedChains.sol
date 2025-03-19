@@ -24,6 +24,10 @@ library SupportedChains {
     uint24 internal constant CHAIN_SELECTOR_BASE_SEPOLIA = 84532;
     uint24 internal constant CHAIN_SELECTOR_ARBITRUM_SEPOLIA = 421614;
     uint24 internal constant CHAIN_SELECTOR_AVALANCHE_FUJI = 43113;
+    uint24 internal constant CHAIN_SELECTOR_LINEA_SEPOLIA = 59141;
+    uint24 internal constant CHAIN_SELECTOR_BNB_TESTNET = 97;
+    uint24 internal constant CHAIN_SELECTOR_SONEIUM_MINATO = 1946;
+    uint24 internal constant CHAIN_SELECTOR_SONIC_BLAZE = 57054;
 
     function isEVMChain(uint24 chainSelector) internal pure returns (bool) {
         /* MAINNET */
@@ -45,7 +49,11 @@ library SupportedChains {
             chainSelector == CHAIN_SELECTOR_POLYGON_AMOY ||
             chainSelector == CHAIN_SELECTOR_BASE_SEPOLIA ||
             chainSelector == CHAIN_SELECTOR_ARBITRUM_SEPOLIA ||
-            chainSelector == CHAIN_SELECTOR_AVALANCHE_FUJI
+            chainSelector == CHAIN_SELECTOR_AVALANCHE_FUJI ||
+            chainSelector == CHAIN_SELECTOR_LINEA_SEPOLIA ||
+            chainSelector == CHAIN_SELECTOR_BNB_TESTNET ||
+            chainSelector == CHAIN_SELECTOR_SONEIUM_MINATO ||
+            chainSelector == CHAIN_SELECTOR_SONIC_BLAZE
         ) {
             return true;
         }
@@ -56,7 +64,7 @@ library SupportedChains {
     function getSupportedChainSelectors(
         uint24 chainSelector
     ) internal pure returns (uint24[] memory) {
-        uint24[] memory chainSelectors = new uint24[](6);
+        uint24[] memory chainSelectors = new uint24[](10);
 
         if (isMainnet(chainSelector)) {
             chainSelectors[0] = CHAIN_SELECTOR_ETHEREUM;
@@ -72,6 +80,10 @@ library SupportedChains {
             chainSelectors[3] = CHAIN_SELECTOR_BASE_SEPOLIA;
             chainSelectors[4] = CHAIN_SELECTOR_ARBITRUM_SEPOLIA;
             chainSelectors[5] = CHAIN_SELECTOR_AVALANCHE_FUJI;
+            chainSelectors[6] = CHAIN_SELECTOR_LINEA_SEPOLIA;
+            chainSelectors[7] = CHAIN_SELECTOR_BNB_TESTNET;
+            chainSelectors[8] = CHAIN_SELECTOR_SONEIUM_MINATO;
+            chainSelectors[9] = CHAIN_SELECTOR_SONIC_BLAZE;
         }
 
         return chainSelectors;

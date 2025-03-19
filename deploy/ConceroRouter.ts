@@ -1,3 +1,5 @@
+import { zeroAddress } from "viem";
+
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -62,7 +64,8 @@ const deployRouter: DeploymentFunction = async function (
 
 	const defaultArgs: DeployArgs = {
 		chainSelector: chain.chainSelector,
-		usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
+		// usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
+		usdc: zeroAddress,
 		conceroVerifier: getEnvVar(
 			`CONCERO_VERIFIER_PROXY_${networkEnvKeys[conceroVerifierNetwork.name]}`,
 		),

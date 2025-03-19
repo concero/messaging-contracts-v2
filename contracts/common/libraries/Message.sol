@@ -11,8 +11,6 @@ import {CommonTypes} from "../../common/CommonTypes.sol";
 import {CommonConstants, MessageConfigBitOffsets as offsets, ReportByteSizes} from "../../common/CommonConstants.sol";
 import {SupportedChains} from "./SupportedChains.sol";
 
-import {console} from "forge-std/src/console.sol";
-
 library Message {
     enum MessageConfigErrorType {
         InvalidMinSrcConfirmations, // 0

@@ -33,7 +33,7 @@ async function setAllowedOperators(hre: HardhatRuntimeEnvironment, network: Conc
 
 async function setSupportedChains(network: ConceroNetwork) {
 	const { abi: conceroRouterAbi } = await import(
-		"../../../v2-operators/src/abi/ConceroRouter.json"
+		"../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
 	);
 	const { publicClient, walletClient } = getFallbackClients(network);
 	const [conceroRouterAddress] = getEnvAddress(ProxyEnum.routerProxy, network.name);
@@ -50,7 +50,7 @@ async function setSupportedChains(network: ConceroNetwork) {
 		})) as boolean;
 
 		if (currentIsSupportedChain === true) {
-			log(`[Skip]`, "isChainSupported", network.name);
+			log(`[Skip] ${dstChain.name}`, "isChainSupported", network.name);
 			continue;
 		}
 
@@ -83,6 +83,6 @@ async function setSupportedChains(network: ConceroNetwork) {
 export async function setRouterVariables(hre: HardhatRuntimeEnvironment) {
 	const { live, name } = hre.network;
 	const network = conceroNetworks[name as ConceroNetworkNames];
-	await setAllowedOperators(hre, network);
+	// await setAllowedOperators(hre, network);
 	await setSupportedChains(network);
 }

@@ -57,6 +57,7 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 	bnbTestnet: "BNB_TESTNET",
 	soneiumMinato: "SONEIUM_MINATO",
 	sonicBlaze: "SONIC_BLAZE",
+	astarShibuya: "ASTAR_SHIBUYA",
 
 	//test
 	localhost: "LOCALHOST",
@@ -142,7 +143,7 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 	},
 	astarShibuya: {
 		name: "astarShibuya",
-		ype: networkTypes.testnet,
+		type: networkTypes.testnet,
 		chainId: 81,
 		url: urls.astarShibuya[0],
 		rpcUrls: urls.astarShibuya,

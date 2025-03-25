@@ -82,7 +82,6 @@ const deployRouter: DeploymentFunction = async function (
 		from: deployer,
 		args: [
 			args.chainSelector,
-			args.usdc,
 			args.conceroVerifier,
 			args.conceroVerifierSubId,
 			args.clfSigners,

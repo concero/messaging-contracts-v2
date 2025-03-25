@@ -10,10 +10,10 @@ import {ConceroOwnable} from "../../common/ConceroOwnable.sol";
 
 abstract contract Base is ConceroOwnable {
     uint24 internal immutable i_chainSelector;
-    address internal immutable i_USDC;
+    // address internal immutable i_USDC;
 
-    constructor(uint24 chainSelector, address USDC) ConceroOwnable() {
+    constructor(uint24 chainSelector) ConceroOwnable() {
         i_chainSelector = chainSelector;
-        i_USDC = USDC;
+        // i_USDC = USDC;
     }
 }

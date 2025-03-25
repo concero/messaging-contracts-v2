@@ -43,6 +43,7 @@ library Storage {
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;
         mapping(bytes32 messageId => mapping(Protocol => bool)) messageConfirmationsByProtocol;
+        mapping(uint24 chainSelector => bool isSupported) isChainSupported;
     }
 
     struct Operator {
@@ -84,15 +85,6 @@ library Storage {
 
     // @notice wrapper for gas savings
     function getNativeNativeRate(uint24 chainSelector) internal view returns (uint256) {
-        if (
-                chainSelector == SupportedChains.CHAIN_SELECTOR_POLYGON ||
-                chainSelector == SupportedChains.CHAIN_SELECTOR_POLYGON_AMOY
-            ) {
-                return priceFeed().nativeNativeRates[chainSelector];
-        }
-
-        else {
-                return 1e18;
-        }
-}
+        return priceFeed().nativeNativeRates[chainSelector];
+    }
 }

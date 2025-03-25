@@ -101,4 +101,5 @@ export const urls: Record<string, string[]> = {
 	scrollSepolia: ["https://rpc.ankr.com/scroll_sepolia"],
 	polygonZkEvm: [`https://polygon-zkevm-mainnet.blastapi.io/${BLAST_API_KEY}`],
 	polygonZkEvmCardona: [`https://polygon-zkevm-cardona.blastapi.io/${BLAST_API_KEY}`],
+	astarShibuya: ["https://evm.shibuya.astar.network"],
 };

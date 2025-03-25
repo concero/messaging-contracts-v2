@@ -93,4 +93,8 @@ abstract contract Owner is Base {
             s.priceFeed().lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
         }
     }
+
+    function setIsChainSupported(uint24 chainSelector, bool isSupported) external onlyOwner {
+        s.router().isChainSupported[chainSelector] = isSupported;
+    }
 }

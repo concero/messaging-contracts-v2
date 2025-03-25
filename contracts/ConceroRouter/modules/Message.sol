@@ -185,6 +185,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
         emit ConceroMessageDelivered(messageId);
     }
 
+    function isChainSupported(uint24 chainSelector) public view returns (bool) {
+        return s.router().isChainSupported[chainSelector];
+    }
+
     /* INTERNAL FUNCTIONS */
     function _collectMessageFee(bytes32 clientMessageConfig, bytes memory dstChainData) internal {
         Types.FeeToken feeToken = Types.FeeToken(

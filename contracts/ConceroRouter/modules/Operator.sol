@@ -37,9 +37,6 @@ abstract contract Operator is Base {
     }
 
     /* GETTER FUNCTIONS */
-    function isChainSupported(uint24 chainSelector) external view returns (bool) {
-        return SupportedChains.isChainSupported(chainSelector);
-    }
 
     function getCohort(address operator) external view returns (uint8) {
         return uint8(uint160(operator) % CommonConstants.COHORTS_COUNT);

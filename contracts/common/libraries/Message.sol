@@ -36,7 +36,7 @@ library Message {
         uint24 chainSelector,
         bytes calldata dstChainData,
         bytes calldata message
-    ) internal pure {
+    ) internal view {
         validateClientMessageConfig(config, chainSelector);
         require(dstChainData.length > 0, InvalidDstChainData());
         require(message.length < CommonConstants.MESSAGE_MAX_SIZE, MessageTooLarge());
@@ -46,13 +46,13 @@ library Message {
         bytes32 internalMessageConfig,
         bytes memory srcChainData,
         bytes memory dstChainData
-    ) internal pure {
+    ) internal view {
         validateInternalMessageConfig(internalMessageConfig);
         require(srcChainData.length > 0, InvalidSrcChainData());
         require(dstChainData.length > 0, InvalidDstChainData());
     }
 
-    function validateClientMessageConfig(bytes32 clientConfig, uint24 chainSelector) internal pure {
+    function validateClientMessageConfig(bytes32 clientConfig, uint24 chainSelector) internal view {
         uint256 configValue = uint256(clientConfig);
 
         uint24 dstChainSelector = uint24(configValue >> offsets.OFFSET_DST_CHAIN);
@@ -84,7 +84,7 @@ library Message {
         );
     }
 
-    function validateInternalMessageConfig(bytes32 config) private pure {
+    function validateInternalMessageConfig(bytes32 config) private view {
         uint256 configValue = uint256(config);
 
         uint8 version = uint8(configValue >> offsets.OFFSET_VERSION);

@@ -8,19 +8,22 @@ import {
 	optimism,
 	optimismSepolia,
 	polygonAmoy,
+	saigon,
 } from "viem/chains";
 
 import { config } from "./config";
 import { ChainSelector } from "./types";
 
+const defaultNativeCurrency = {
+	decimals: 18,
+	name: "Ether",
+	symbol: "ETH",
+};
+
 const localhostChain = defineChain({
 	id: 1,
 	name: "localhost",
-	nativeCurrency: {
-		decimals: 18,
-		name: "Ether",
-		symbol: "ETH",
-	},
+	nativeCurrency: defaultNativeCurrency,
 	rpcUrls: {
 		default: {
 			http: config.localhostRpcUrl,
@@ -33,7 +36,7 @@ const localhostChains: Partial<Record<ChainSelector, Chain>> = {
 	"10": localhostChain,
 };
 
-const liveChains: Partial<Record<ChainSelector, Chain>> = {
+const liveChains: Partial<Record<string, Chain>> = {
 	"1": mainnet,
 	"10": optimism,
 	"8453": base,
@@ -44,6 +47,8 @@ const liveChains: Partial<Record<ChainSelector, Chain>> = {
 	"43113": avalancheFuji,
 	"80002": polygonAmoy,
 	"11155420": optimismSepolia,
+	"81": defineChain({ id: 81, name: "astarShibuya", nativeCurrency: defaultNativeCurrency }),
+	"2021": saigon,
 };
 
 export const viemChains = config.isDevelopment ? localhostChains : liveChains;

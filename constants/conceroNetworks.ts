@@ -7,6 +7,7 @@ import {
 	mainnet,
 	optimism,
 	polygon,
+	saigon,
 } from "viem/chains";
 
 import {
@@ -58,6 +59,7 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 	soneiumMinato: "SONEIUM_MINATO",
 	sonicBlaze: "SONIC_BLAZE",
 	astarShibuya: "ASTAR_SHIBUYA",
+	roninSaigon: "RONIN_SAIGON",
 
 	//test
 	localhost: "LOCALHOST",
@@ -153,6 +155,31 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		viemChain: astarShibuya,
 		saveDeployments: false,
 	},
+	roninSaigon: {
+		name: "roninSaigon",
+		type: networkTypes.testnet,
+		chainId: 2021,
+		url: urls.roninSaigon[0],
+		rpcUrls: urls.roninSaigon,
+		accounts: [testnetDeployerPK, testnetProxyDeployerPK],
+		chainSelector: 2021n,
+		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
+		viemChain: saigon,
+		saveDeployments: false,
+	},
+	// monadTestnet: {
+	// 	name: "monadTestnet",
+	// 	type: networkTypes.testnet,
+	// 	chainId: 10_143,
+	// 	url: urls.monadTestnet[0],
+	// 	rpcUrls: urls.monadTestnet,
+	// 	accounts: [testnetDeployerPK, testnetProxyDeployerPK],
+	// 	chainSelector: 10_143n,
+	// 	confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
+	// 	viemChain: monadTestnet,
+	// 	saveDeployments: false,
+	// },
+
 	// sepolia: {
 	// 	name: "sepolia",
 	// 	type: networkTypes.testnet,

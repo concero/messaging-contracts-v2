@@ -102,4 +102,6 @@ export const urls: Record<string, string[]> = {
 	polygonZkEvm: [`https://polygon-zkevm-mainnet.blastapi.io/${BLAST_API_KEY}`],
 	polygonZkEvmCardona: [`https://polygon-zkevm-cardona.blastapi.io/${BLAST_API_KEY}`],
 	astarShibuya: ["https://evm.shibuya.astar.network"],
+	roninSaigon: ["https://saigon-testnet.roninchain.com/rpc"],
+	monadTestnet: ["https://testnet-rpc.monad.xyz"],
 };

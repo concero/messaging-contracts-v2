@@ -1,3 +1,5 @@
+import { monadTestnet, sonicBlazeTestnet } from "viem/chains";
+
 import { getEnvVar } from "../utils";
 
 const { INFURA_API_KEY, ALCHEMY_API_KEY, BLAST_API_KEY, CHAINSTACK_API_KEY, TENDERLY_API_KEY } =
@@ -98,11 +100,32 @@ export const urls: Record<string, string[]> = {
 	sonicBlaze: ["https://sonic-blaze-rpc.publicnode.com"],
 	bsc: ["https://rpc.ankr.com/bsc"],
 	scroll: ["https://rpc.ankr.com/scroll"],
-	scrollSepolia: ["https://rpc.ankr.com/scroll_sepolia"],
+	scrollSepolia: ["https://scroll-sepolia-rpc.publicnode.com"],
 	polygonZkEvm: [`https://polygon-zkevm-mainnet.blastapi.io/${BLAST_API_KEY}`],
 	polygonZkEvmCardona: [`https://polygon-zkevm-cardona.blastapi.io/${BLAST_API_KEY}`],
 	astarShibuya: ["https://evm.shibuya.astar.network"],
 	roninSaigon: ["https://saigon-testnet.roninchain.com/rpc"],
 	monadTestnet: ["https://testnet-rpc.monad.xyz"],
 	megaethTestnet: ["https://carrot.megaeth.com/rpc"],
+	sonicBlaze: ["https://sonic-testnet.drpc.org"],
+	monadTestnet: ["https://testnet-rpc.monad.xyz"],
+	apechainCurtiz: ["https://apechain-curtis.drpc.org"],
+	bitlayerTestnet: ["https://testnet-rpc.bitlayer.org"],
+	blastSepolia: ["https://sepolia.blast.io"],
+	botanixTestnet: ["https://node.botanixlabs.dev"],
+	celoAlfajores: ["https://alfajores-forno.celo-testnet.org"],
+	cronosTestnet: ["https://evm-t3.cronos.org"],
+	gnosisChiado: ["https://rpc.chiadochain.net"],
+	hashKeyTestnet: ["https://hashkey-testnet.drpc.org"],
+	inkSepolia: ["https://rpc-gel-sepolia.inkonchain.com"],
+	lineaSepolia: ["https://linea-sepolia-rpc.publicnode.com"],
+	mantleSepolia: ["https://rpc.sepolia.mantle.xyz"],
+	metisSepolia: ["https://metis-sepolia-rpc.publicnode.com"],
+	seiTestnet: ["https://evm-rpc-testnet.sei-apis.com"],
+	shibariumPuppynet: ["https://puppynet.shibrpc.com"],
+	soneiumMinato: ["https://rpc.minato.soneium.org"],
+	unichainSepolia: ["https://sepolia.unichain.org"],
+	xlayerSepolia: ["https://xlayertestrpc.okx.com"],
+	zircuitTestnet: ["https://testnet.zircuit.com"],
+	modeTestnet: ["https://sepolia.mode.network"],
 };

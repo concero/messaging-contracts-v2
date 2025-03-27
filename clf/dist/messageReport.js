@@ -14721,8 +14721,15 @@ var __default3 = {
   chainSelector: 137
 };
 
-// clf/src/common/rpcs/8453.json
+// clf/src/common/rpcs/6342.json
 var __default4 = {
+  id: "6342",
+  urls: ["carrot.megaeth.com/rpc"],
+  chainSelector: 6342
+};
+
+// clf/src/common/rpcs/8453.json
+var __default5 = {
   id: "8453",
   urls: [
     "gateway.tenderly.co/public/base",
@@ -14744,7 +14751,7 @@ var __default4 = {
 };
 
 // clf/src/common/rpcs/42161.json
-var __default5 = {
+var __default6 = {
   id: "42161",
   urls: [
     "rpc.ankr.com/arbitrum",
@@ -14764,7 +14771,7 @@ var __default5 = {
 };
 
 // clf/src/common/rpcs/43113.json
-var __default6 = {
+var __default7 = {
   id: "43113",
   urls: [
     "rpc.ankr.com/avalanche_fuji",
@@ -14778,7 +14785,7 @@ var __default6 = {
 };
 
 // clf/src/common/rpcs/43114.json
-var __default7 = {
+var __default8 = {
   id: "43114",
   urls: [
     "rpc.ankr.com/avalanche",
@@ -14798,7 +14805,7 @@ var __default7 = {
 };
 
 // clf/src/common/rpcs/80002.json
-var __default8 = {
+var __default9 = {
   id: "80002",
   urls: [
     "rpc.ankr.com/polygon_amoy",
@@ -14810,7 +14817,7 @@ var __default8 = {
 };
 
 // clf/src/common/rpcs/84532.json
-var __default9 = {
+var __default10 = {
   id: "84532",
   urls: [
     "base-sepolia.gateway.tenderly.co",
@@ -14820,14 +14827,14 @@ var __default9 = {
 };
 
 // clf/src/common/rpcs/421614.json
-var __default10 = {
+var __default11 = {
   id: "421614",
   urls: ["arbitrum-sepolia-rpc.publicnode.com", "arbitrum-sepolia.drpc.org"],
   chainSelector: 421614
 };
 
 // clf/src/common/rpcs/11155111.json
-var __default11 = {
+var __default12 = {
   id: "11155111",
   urls: [
     "gateway.tenderly.co/public/sepolia",
@@ -14845,7 +14852,7 @@ var __default11 = {
 };
 
 // clf/src/common/rpcs/11155420.json
-var __default12 = {
+var __default13 = {
   id: "11155420",
   urls: [
     "endpoints.omniatech.io/v1/op/sepolia/public",
@@ -14860,16 +14867,17 @@ var __default12 = {
 var rpcConfigs = {
   "1": __default,
   "10": __default2,
-  "11155111": __default11,
-  "11155420": __default12,
+  "11155111": __default12,
+  "11155420": __default13,
   "137": __default3,
-  "42161": __default5,
-  "421614": __default10,
-  "43113": __default6,
-  "43114": __default7,
-  "80002": __default8,
-  "8453": __default4,
-  "84532": __default9
+  "42161": __default6,
+  "421614": __default11,
+  "43113": __default7,
+  "43114": __default8,
+  "80002": __default9,
+  "8453": __default5,
+  "84532": __default10,
+  "6342": __default4
 };
 
 // node_modules/viem/_esm/op-stack/contracts.js

@@ -49,7 +49,7 @@ var init_size = __esm({
 var version;
 var init_version = __esm({
   "node_modules/viem/_esm/errors/version.js"() {
-    version = "2.23.8";
+    version = "2.23.12";
   }
 });
 

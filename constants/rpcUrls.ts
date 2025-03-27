@@ -104,4 +104,5 @@ export const urls: Record<string, string[]> = {
 	astarShibuya: ["https://evm.shibuya.astar.network"],
 	roninSaigon: ["https://saigon-testnet.roninchain.com/rpc"],
 	monadTestnet: ["https://testnet-rpc.monad.xyz"],
+	megaethTestnet: ["https://carrot.megaeth.com/rpc"],
 };

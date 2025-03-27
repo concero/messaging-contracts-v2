@@ -32,6 +32,7 @@ library Errors {
     error InvalidReceiver();
     error InvalidMessageHashSum();
     error UnauthorizedOperator();
+    error InvalidDstChainSelector();
 }
 
 abstract contract Message is ClfSigner, IConceroRouter {
@@ -99,6 +100,14 @@ abstract contract Message is ClfSigner, IConceroRouter {
         require(
             decodedMessageReportResult.messageHashSum == keccak256(message),
             Errors.InvalidMessageHashSum()
+        );
+
+        require(
+            uint24(
+                uint256(decodedMessageReportResult.internalMessageConfig) >>
+                    offsets.OFFSET_DST_CHAIN
+            ) == i_chainSelector,
+            Errors.InvalidDstChainSelector()
         );
 
         require(

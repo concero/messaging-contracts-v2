@@ -5,6 +5,7 @@ import {
 	base,
 	baseSepolia,
 	mainnet,
+	megaethTestnet,
 	optimism,
 	optimismSepolia,
 	polygonAmoy,
@@ -49,6 +50,7 @@ const liveChains: Partial<Record<string, Chain>> = {
 	"11155420": optimismSepolia,
 	"81": defineChain({ id: 81, name: "astarShibuya", nativeCurrency: defaultNativeCurrency }),
 	"2021": saigon,
+	"6342": megaethTestnet,
 };
 
 export const viemChains = config.isDevelopment ? localhostChains : liveChains;

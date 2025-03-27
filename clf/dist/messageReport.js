@@ -926,7 +926,7 @@ var init_size = __esm({
 var version2;
 var init_version2 = __esm({
   "node_modules/viem/_esm/errors/version.js"() {
-    version2 = "2.23.8";
+    version2 = "2.23.12";
   }
 });
 
@@ -6958,8 +6958,8 @@ function formatTransactionRequest(request) {
 function formatAuthorizationList(authorizationList) {
   return authorizationList.map((authorization) => ({
     address: authorization.contractAddress,
-    r: authorization.r,
-    s: authorization.s,
+    r: authorization.r ? numberToHex(BigInt(authorization.r)) : authorization.r,
+    s: authorization.s ? numberToHex(BigInt(authorization.s)) : authorization.s,
     chainId: numberToHex(authorization.chainId),
     nonce: numberToHex(authorization.nonce),
     ...typeof authorization.yParity !== "undefined" ? { yParity: numberToHex(authorization.yParity) } : {},
@@ -7742,7 +7742,7 @@ async function ccipRequest({ data, sender, urls }) {
     const body = method === "POST" ? { data, sender } : void 0;
     const headers = method === "POST" ? { "Content-Type": "application/json" } : {};
     try {
-      const response = await fetch(url.replace("{sender}", sender).replace("{data}", data), {
+      const response = await fetch(url.replace("{sender}", sender.toLowerCase()).replace("{data}", data), {
         body: JSON.stringify(body),
         headers,
         method
@@ -12623,7 +12623,7 @@ async function simulateBlocks(client, parameters) {
         const gasUsed = BigInt(call2.gasUsed);
         const logs = call2.logs?.map((log) => formatLog(log));
         const status = call2.status === "0x1" ? "success" : "failure";
-        const result2 = abi2 && status === "success" ? decodeFunctionResult({
+        const result2 = abi2 && status === "success" && data !== "0x" ? decodeFunctionResult({
           abi: abi2,
           data,
           functionName
@@ -15180,6 +15180,30 @@ var mainnet = /* @__PURE__ */ defineChain({
   }
 });
 
+// node_modules/viem/_esm/chains/definitions/megaethTestnet.js
+var megaethTestnet = /* @__PURE__ */ defineChain({
+  id: 6342,
+  name: "MegaETH Testnet",
+  nativeCurrency: {
+    name: "MegaETH Testnet Ether",
+    symbol: "ETH",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://carrot.megaeth.com/rpc"],
+      webSocket: ["wss://carrot.megaeth.com/ws"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "MegaETH Testnet Explorer",
+      url: "https://www.megaexplorer.xyz/"
+    }
+  },
+  testnet: true
+});
+
 // node_modules/viem/_esm/chains/definitions/optimism.js
 var sourceId3 = 1;
 var optimism = /* @__PURE__ */ defineChain({
@@ -15361,7 +15385,8 @@ var liveChains = {
   "80002": polygonAmoy,
   "11155420": optimismSepolia,
   "81": defineChain({ id: 81, name: "astarShibuya", nativeCurrency: defaultNativeCurrency }),
-  "2021": saigon
+  "2021": saigon,
+  "6342": megaethTestnet
 };
 var viemChains = config.isDevelopment ? localhostChains : liveChains;
 
@@ -15410,7 +15435,9 @@ var conceroRouters = {
   "84532": "0x842F3aA12bc34ff8c202a55488691A5bDcADF52a",
   "43113": "0xA7D39A04E11ed69CfD1c01b04c705AB5a5bDc066",
   "80002": "0xbe43f1eAb754144b31B90Ee2D6E036b9AB3cC5B4",
-  "11155420": "0xbd480d6B8E6c18C397C408eD6c30B8e27f1B9234"
+  "11155420": "0xbd480d6B8E6c18C397C408eD6c30B8e27f1B9234",
+  "2021": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "6342": "0x73b8Bbbb33f6F7aC8D0b5d1f27685a6106783328"
 };
 
 // clf/src/messageReport/constants/config.ts

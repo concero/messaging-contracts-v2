@@ -5,6 +5,7 @@ import {
 	base,
 	baseSepolia,
 	mainnet,
+	megaethTestnet,
 	optimism,
 	polygon,
 	saigon,
@@ -37,6 +38,8 @@ export const networkTypes: Record<NetworkType, NetworkType> = {
 	localhost: "localhost",
 };
 
+const testnetAccounts = [testnetDeployerPK, testnetProxyDeployerPK];
+
 export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 	// mainnets
 	ethereum: "ETHEREUM",
@@ -60,6 +63,7 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 	sonicBlaze: "SONIC_BLAZE",
 	astarShibuya: "ASTAR_SHIBUYA",
 	roninSaigon: "RONIN_SAIGON",
+	megaethTestnet: "MEGAETH_TESTNET",
 
 	//test
 	localhost: "LOCALHOST",
@@ -165,6 +169,18 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		chainSelector: 2021n,
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: saigon,
+		saveDeployments: false,
+	},
+	megaethTestnet: {
+		name: "megaethTestnet",
+		type: networkTypes.testnet,
+		chainId: 6342,
+		url: urls.megaethTestnet[0],
+		rpcUrls: urls.megaethTestnet,
+		accounts: testnetAccounts,
+		chainSelector: 6342n,
+		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
+		viemChain: megaethTestnet,
 		saveDeployments: false,
 	},
 	// monadTestnet: {

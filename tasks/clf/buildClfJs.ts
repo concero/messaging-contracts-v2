@@ -39,7 +39,9 @@ export function buildClfJs() {
 			`--define:CONCERO_ROUTER_BASE_SEPOLIA='"${getEnvVar(`CONCERO_ROUTER_PROXY_BASE_SEPOLIA`)}"' ` +
 			`--define:CONCERO_ROUTER_AVALANCHE_FUJI='"${getEnvVar(`CONCERO_ROUTER_PROXY_FUJI`)}"' ` +
 			`--define:CONCERO_ROUTER_POLYGON_AMOY='"${getEnvVar(`CONCERO_ROUTER_PROXY_POLYGON_AMOY`)}"' ` +
-			`--define:CONCERO_ROUTER_OPTIMISM_SEPOLIA='"${getEnvVar(`CONCERO_ROUTER_PROXY_OPTIMISM_SEPOLIA`)}"' `;
+			`--define:CONCERO_ROUTER_OPTIMISM_SEPOLIA='"${getEnvVar(`CONCERO_ROUTER_PROXY_OPTIMISM_SEPOLIA`)}"' ` +
+			`--define:CONCERO_ROUTER_RONIN_SAIGON='"${getEnvVar(`CONCERO_ROUTER_PROXY_RONIN_SAIGON`)}"' ` +
+			`--define:CONCERO_ROUTER_MEGAETH_TESTNET='"${getEnvVar(`CONCERO_ROUTER_PROXY_MEGAETH_TESTNET`)}"' `;
 
 		// Get all directories in clf/src
 		const dirs = execSync("ls -d */", { cwd: "clf/src" }).toString();

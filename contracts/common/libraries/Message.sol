@@ -10,6 +10,7 @@ import {Types} from "../../ConceroRouter/libraries/Types.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 import {CommonConstants, MessageConfigBitOffsets as offsets, ReportByteSizes} from "../../common/CommonConstants.sol";
 import {SupportedChains} from "./SupportedChains.sol";
+import {ConceroTypes} from "../../ConceroClient/ConceroTypes.sol";
 
 library Message {
     enum MessageConfigErrorType {
@@ -94,10 +95,10 @@ library Message {
         uint24 srcChainSelector = uint24(configValue >> offsets.OFFSET_SRC_CHAIN);
         uint24 dstChainSelector = uint24(configValue >> offsets.OFFSET_DST_CHAIN);
 
-        require(
-            version >= 1 && version < 2,
-            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidConfigVersion)
-        );
+        // require(
+        //     version >= 1 && version < 2,
+        //     InvalidInternalMessageConfig(MessageConfigErrorType.InvalidConfigVersion)
+        // );
         require(
             minSrcConfirmations > 0,
             InvalidInternalMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
@@ -106,10 +107,10 @@ library Message {
             minDstConfirmations > 0,
             InvalidInternalMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
         );
-        require(
-            SupportedChains.isChainSupported(srcChainSelector),
-            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidSrcChainSelector)
-        );
+        // require(
+        //     SupportedChains.isChainSupported(srcChainSelector),
+        //     InvalidInternalMessageConfig(MessageConfigErrorType.InvalidSrcChainSelector)
+        // );
         require(
             SupportedChains.isChainSupported(dstChainSelector),
             InvalidInternalMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
@@ -162,10 +163,37 @@ library Message {
         address sender,
         uint64 chainSelector,
         bytes32 internalMessageConfig
-    ) private view returns (bytes32) {
+    ) internal view returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(nonce, blockNumber, sender, chainSelector, internalMessageConfig)
             );
+    }
+
+    function _validateMessageParams(
+        ConceroTypes.ClientMessageConfig calldata messageReq,
+        bytes calldata dstChainData,
+        bytes calldata message
+    ) internal view {
+        require(dstChainData.length > 0, InvalidDstChainData());
+        require(message.length < CommonConstants.MESSAGE_MAX_SIZE, MessageTooLarge());
+
+        require(
+            messageReq.minSrcConfirmations > 0,
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
+        );
+        require(
+            messageReq.minSrcConfirmations > 0,
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
+        );
+        require(
+            SupportedChains.isChainSupported(messageReq.dstChainSelector),
+            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
+        );
+
+        require(
+            messageReq.feeToken == ConceroTypes.FeeToken.native,
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidFeeToken)
+        );
     }
 }

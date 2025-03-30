@@ -44,4 +44,39 @@ library ConceroUtils {
 
         return bytes32(config);
     }
+
+    function _packClientMessageConfigV2(
+        ConceroTypes.ClientMessageConfig calldata clientConfig,
+        uint24 chainSelector
+    ) internal pure returns (bytes32) {
+        uint256 config;
+
+        config |=
+            (uint256(uint24(clientConfig.dstChainSelector)) & masks.MASK_24) <<
+            offsets.OFFSET_DST_CHAIN;
+
+        config |=
+            (uint256(uint16(clientConfig.minSrcConfirmations)) & masks.MASK_16) <<
+            offsets.OFFSET_MIN_SRC_CONF;
+
+        config |=
+            (uint256(uint16(clientConfig.minDstConfirmations)) & masks.MASK_16) <<
+            offsets.OFFSET_MIN_DST_CONF;
+
+        config |=
+            (uint256(uint8(clientConfig.relayerConfig)) & masks.MASK_8) <<
+            offsets.OFFSET_RELAYER_CONF;
+
+        config |=
+            (uint256(clientConfig.isCallbackable ? 1 : 0) & masks.MASK_1) <<
+            offsets.OFFSET_CALLBACKABLE;
+
+        config |=
+            (uint256(uint8(clientConfig.feeToken)) & masks.MASK_8) <<
+            offsets.OFFSET_FEE_TOKEN;
+
+        config |= (uint256(chainSelector) & masks.MASK_16) << offsets.OFFSET_SRC_CHAIN;
+
+        return bytes32(config);
+    }
 }

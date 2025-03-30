@@ -23,7 +23,7 @@ abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
         super.setUp();
 
         conceroRouter = ConceroRouter(payable(deploy()));
-        conceroClient = new ConceroClientExample(payable(conceroRouter), SRC_CHAIN_SELECTOR);
+        conceroClient = new ConceroClientExample(payable(conceroRouter));
     }
 
     function _setPriceFeeds() internal {

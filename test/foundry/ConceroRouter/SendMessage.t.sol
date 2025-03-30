@@ -19,6 +19,8 @@ import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol"
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
+import {Message as MessageContract} from "contracts/ConceroRouter/modules/Message.sol";
+
 contract SendMessage is ConceroRouterTest {
     bytes internal dstChainData;
     bytes internal message;
@@ -44,11 +46,10 @@ contract SendMessage is ConceroRouterTest {
         uint256[] memory gasPrices = new uint256[](1);
         gasPrices[0] = 100_000; // 0.1 gwei
 
-        vm.prank(deployer);
+        vm.startPrank(deployer);
         conceroRouter.setNativeNativeRates(chainSelectors, rates);
-
-        vm.prank(deployer);
         conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        conceroRouter.setIsChainSupported(DST_CHAIN_SELECTOR, true);
     }
 
     function test_conceroSend() public {
@@ -83,6 +84,7 @@ contract SendMessage is ConceroRouterTest {
             RouterTypes.EvmSrcChainData({sender: user, blockNumber: block.number})
         );
 
+        // TODO: vm.expectEmit can be used instead of it
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bool foundEvent = false;
         for (uint i = 0; i < entries.length; i++) {
@@ -129,6 +131,63 @@ contract SendMessage is ConceroRouterTest {
         //        );
 
         vm.stopPrank();
+    }
+
+    function test_sendMessageV1() public {
+        vm.startPrank(user);
+
+        ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
+            dstChainSelector: DST_CHAIN_SELECTOR,
+            minSrcConfirmations: 1,
+            minDstConfirmations: 1,
+            relayerConfig: 0,
+            isCallbackable: false,
+            feeToken: ConceroTypes.FeeToken.native
+        });
+
+        bytes32 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
+        uint256 messageFee = conceroRouter.getMessageFee(clientMessageConfig, dstChainData);
+        conceroRouter.conceroSend{value: messageFee}(clientMessageConfig, dstChainData, message); // 88929
+    }
+
+    function test_sendMessageV2() public {
+        vm.startPrank(user);
+
+        ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
+            dstChainSelector: DST_CHAIN_SELECTOR,
+            minSrcConfirmations: 1,
+            minDstConfirmations: 1,
+            relayerConfig: 0,
+            isCallbackable: false,
+            feeToken: ConceroTypes.FeeToken.native
+        });
+
+        uint256 messageFee = conceroRouter.getMessageFee(
+            config.dstChainSelector,
+            dstChainData,
+            config.feeToken
+        );
+        conceroRouter.conceroSendV2{value: messageFee}(config, dstChainData, message); // 88623
+    }
+
+    function test_sendMessageV3() public {
+        vm.startPrank(user);
+
+        ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
+            dstChainSelector: DST_CHAIN_SELECTOR,
+            minSrcConfirmations: 1,
+            minDstConfirmations: 1,
+            relayerConfig: 0,
+            isCallbackable: false,
+            feeToken: ConceroTypes.FeeToken.native
+        });
+
+        uint256 messageFee = conceroRouter.getMessageFee(
+            config.dstChainSelector,
+            dstChainData,
+            config.feeToken
+        );
+        conceroRouter.conceroSendV3{value: messageFee}(config, dstChainData, message); // 86879
     }
 
     function test_RevertInsufficientFee() public {

@@ -5,12 +5,14 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
+
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import {Message as MessageLib} from "../../common/libraries/Message.sol";
 import {Decoder as DecoderLib} from "../../common/libraries/Decoder.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
+import {SupportedChains} from "../../common/libraries/SupportedChains.sol";
 
 import {BitMasks, CommonConstants, MessageConfigBitOffsets as offsets} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
@@ -24,6 +26,9 @@ import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, Concero
 
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
+
+import {ConceroTypes} from "../../ConceroClient/ConceroTypes.sol";
+import {ConceroUtils} from "../../ConceroClient/ConceroUtils.sol";
 
 library Errors {
     error UnsupportedFeeTokenType();
@@ -73,6 +78,89 @@ abstract contract Message is ClfSigner, IConceroRouter {
             abi.encode(msg.sender)
         );
         return messageId;
+    }
+
+    event ConceroMessageSentV2(
+        bytes32 indexed id,
+        bytes32 internalMessageConfig,
+        bytes dstChainData,
+        bytes message,
+        bytes sender
+    );
+
+    function conceroSendV2(
+        ConceroTypes.ClientMessageConfig calldata messageReq,
+        bytes calldata dstChainData,
+        bytes calldata message
+    ) external payable returns (bytes32) {
+        MessageLib._validateMessageParams(messageReq, dstChainData, message);
+
+        bytes32 internalMessageConfig = ConceroUtils._packClientMessageConfigV2(
+            messageReq,
+            i_chainSelector
+        );
+
+        Types.EvmSrcChainData memory srcChainData = Types.EvmSrcChainData({
+            sender: msg.sender,
+            blockNumber: block.number
+        });
+
+        bytes32 messageId = MessageLib.buildMessageId(
+            s.router().nonce,
+            srcChainData.blockNumber,
+            srcChainData.sender,
+            i_chainSelector,
+            internalMessageConfig
+        );
+
+        s.router().nonce += 1;
+
+        _collectMessageFee(internalMessageConfig, dstChainData);
+
+        emit ConceroMessageSentV2(
+            messageId,
+            internalMessageConfig,
+            dstChainData,
+            message,
+            abi.encode(msg.sender)
+        );
+
+        return messageId;
+    }
+
+    event ConceroMessageSentV3(
+        bytes32 indexed id,
+        ConceroTypes.ClientMessageConfig messageConfig,
+        bytes dstChainData,
+        bytes message,
+        bytes sender
+    );
+
+    function conceroSendV3(
+        ConceroTypes.ClientMessageConfig calldata messageReq,
+        bytes calldata dstChainData,
+        bytes calldata message
+    ) external payable returns (bytes32) {
+        MessageLib._validateMessageParams(messageReq, dstChainData, message);
+        bytes32 messageId = _buildMessageIdV3(s.router().nonce);
+
+        s.router().nonce += 1;
+
+        _collectMessageFeeV3(messageReq.dstChainSelector, dstChainData, messageReq.feeToken);
+
+        emit ConceroMessageSentV3(
+            messageId,
+            messageReq,
+            dstChainData,
+            message,
+            abi.encode(msg.sender)
+        );
+
+        return messageId;
+    }
+
+    function _buildMessageIdV3(uint256 nonce) internal view returns (bytes32) {
+        return keccak256(abi.encodePacked(nonce, block.number, msg.sender, i_chainSelector));
     }
 
     /**
@@ -218,6 +306,21 @@ abstract contract Message is ClfSigner, IConceroRouter {
         }
     }
 
+    function _collectMessageFeeV3(
+        uint24 dstChainSelector,
+        bytes memory dstChainData,
+        ConceroTypes.FeeToken feeToken
+    ) internal {
+        uint256 messageFee = _calculateMessageFee(dstChainSelector, dstChainData, feeToken);
+
+        if (feeToken == ConceroTypes.FeeToken.native) {
+            require(msg.value >= messageFee, CommonErrors.InsufficientFee(msg.value, messageFee));
+            payable(address(this)).transfer(messageFee);
+        } else {
+            revert Errors.UnsupportedFeeTokenType();
+        }
+    }
+
     //todo: adhere to SOLID. it shouldnt extract values from client config, do it on the level above
     function _calculateMessageFee(
         bytes32 clientMessageConfig,
@@ -263,5 +366,45 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
         require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
+    }
+
+    function getMessageFee(
+        uint24 dstChainSelector,
+        bytes memory dstChainData,
+        ConceroTypes.FeeToken feeToken
+    ) external view returns (uint256) {
+        require(feeToken == ConceroTypes.FeeToken.native, Errors.UnsupportedFeeTokenType());
+        return _calculateMessageFee(dstChainSelector, dstChainData, feeToken);
+    }
+
+    function _calculateMessageFee(
+        uint24 dstChainSelector,
+        bytes memory dstChainData,
+        ConceroTypes.FeeToken feeToken
+    ) internal view returns (uint256) {
+        uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
+        Types.EvmDstChainData memory evmDstChainData = abi.decode(
+            dstChainData,
+            (Types.EvmDstChainData)
+        );
+
+        uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
+            CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD,
+            nativeUsdRate
+        );
+
+        uint256 gasPrice = s.priceFeed().lastGasPrices[dstChainSelector];
+        uint256 gasFeeNative = gasPrice * evmDstChainData.gasLimit;
+
+        uint256 nativeNativeRate = s.getNativeNativeRate(dstChainSelector);
+        uint256 adjustedGasFeeNative = (gasFeeNative * nativeNativeRate) / 1e18;
+
+        uint256 totalFeeNative = baseFeeNative + adjustedGasFeeNative;
+
+        if (feeToken == ConceroTypes.FeeToken.native) {
+            return totalFeeNative;
+        }
+
+        return (totalFeeNative * nativeUsdRate) / 1e18;
     }
 }

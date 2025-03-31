@@ -128,4 +128,12 @@ export const urls: Record<string, string[]> = {
 	xlayerSepolia: ["https://xlayertestrpc.okx.com"],
 	zircuitTestnet: ["https://testnet.zircuit.com"],
 	modeTestnet: ["https://sepolia.mode.network"],
+	bitlayerTestnet: ["https://testnet-rpc.bitlayer.org"],
+	blastSepolia: ["https://sepolia.blast.io"],
+	botanixTestnet: ["https://node.botanixlabs.dev"],
+	celoAlfajores: ["https://alfajores-forno.celo-testnet.org"],
+	coreTestnet: ["https://rpc.test2.btcs.network"],
+	cronosTestnet: ["https://evm-t3.cronos.org"],
+	hashkeyTestnet: ["https://hashkey-testnet.drpc.org"],
+	inkSepolia: ["https://rpc-gel-sepolia.inkonchain.com"],
 };

@@ -14,3 +14,16 @@ export const astarShibuya = defineChain({
 		},
 	},
 });
+
+export const coreTestnet = defineChain({
+	id: 1114,
+	network: "core-testnet",
+	name: "Core testnet",
+	nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+	testnet: true,
+	rpcUrls: {
+		default: {
+			http: ["https://rpc.test2.btcs.network"],
+		},
+	},
+});

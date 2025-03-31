@@ -13,6 +13,7 @@ import {
 	gnosisChiado,
 	hashkeyTestnet,
 	inkSepolia,
+	lineaSepolia,
 	mainnet,
 	mantleSepoliaTestnet,
 	megaethTestnet,

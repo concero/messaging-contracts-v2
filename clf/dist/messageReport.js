@@ -9821,6 +9821,21 @@ function watchContractEvent(client, parameters) {
   return enablePolling ? pollContractEvent() : subscribeContractEvent();
 }
 
+// node_modules/viem/_esm/errors/account.js
+init_base();
+var AccountNotFoundError = class extends BaseError2 {
+  constructor({ docsPath: docsPath6 } = {}) {
+    super([
+      "Could not find an Account to execute with this Action.",
+      "Please provide an Account with the `account` argument on the Action, or by supplying an `account` to the Client."
+    ].join("\n"), {
+      docsPath: docsPath6,
+      docsSlug: "account",
+      name: "AccountNotFoundError"
+    });
+  }
+};
+
 // node_modules/viem/_esm/actions/wallet/sendRawTransaction.js
 async function sendRawTransaction(client, { serializedTransaction }) {
   return client.request({
@@ -14728,15 +14743,22 @@ var __default3 = {
   chainSelector: 137
 };
 
-// clf/src/common/rpcs/6342.json
+// clf/src/common/rpcs/2021.json
 var __default4 = {
+  id: "2021",
+  urls: ["saigon-testnet.roninchain.com/rpc"],
+  chainSelector: 2021
+};
+
+// clf/src/common/rpcs/6342.json
+var __default5 = {
   id: "6342",
   urls: ["carrot.megaeth.com/rpc"],
   chainSelector: 6342
 };
 
 // clf/src/common/rpcs/8453.json
-var __default5 = {
+var __default6 = {
   id: "8453",
   urls: [
     "gateway.tenderly.co/public/base",
@@ -14758,7 +14780,7 @@ var __default5 = {
 };
 
 // clf/src/common/rpcs/42161.json
-var __default6 = {
+var __default7 = {
   id: "42161",
   urls: [
     "rpc.ankr.com/arbitrum",
@@ -14778,7 +14800,7 @@ var __default6 = {
 };
 
 // clf/src/common/rpcs/43113.json
-var __default7 = {
+var __default8 = {
   id: "43113",
   urls: [
     "rpc.ankr.com/avalanche_fuji",
@@ -14792,7 +14814,7 @@ var __default7 = {
 };
 
 // clf/src/common/rpcs/43114.json
-var __default8 = {
+var __default9 = {
   id: "43114",
   urls: [
     "rpc.ankr.com/avalanche",
@@ -14812,7 +14834,7 @@ var __default8 = {
 };
 
 // clf/src/common/rpcs/80002.json
-var __default9 = {
+var __default10 = {
   id: "80002",
   urls: [
     "rpc.ankr.com/polygon_amoy",
@@ -14824,7 +14846,7 @@ var __default9 = {
 };
 
 // clf/src/common/rpcs/84532.json
-var __default10 = {
+var __default11 = {
   id: "84532",
   urls: [
     "base-sepolia.gateway.tenderly.co",
@@ -14834,14 +14856,14 @@ var __default10 = {
 };
 
 // clf/src/common/rpcs/421614.json
-var __default11 = {
+var __default12 = {
   id: "421614",
   urls: ["arbitrum-sepolia-rpc.publicnode.com", "arbitrum-sepolia.drpc.org"],
   chainSelector: 421614
 };
 
 // clf/src/common/rpcs/11155111.json
-var __default12 = {
+var __default13 = {
   id: "11155111",
   urls: [
     "gateway.tenderly.co/public/sepolia",
@@ -14859,7 +14881,7 @@ var __default12 = {
 };
 
 // clf/src/common/rpcs/11155420.json
-var __default13 = {
+var __default14 = {
   id: "11155420",
   urls: [
     "endpoints.omniatech.io/v1/op/sepolia/public",
@@ -14874,17 +14896,18 @@ var __default13 = {
 var rpcConfigs = {
   "1": __default,
   "10": __default2,
-  "11155111": __default12,
-  "11155420": __default13,
+  "11155111": __default13,
+  "11155420": __default14,
   "137": __default3,
-  "42161": __default6,
-  "421614": __default11,
-  "43113": __default7,
-  "43114": __default8,
-  "80002": __default9,
-  "8453": __default5,
-  "84532": __default10,
-  "6342": __default4
+  "42161": __default7,
+  "421614": __default12,
+  "43113": __default8,
+  "43114": __default9,
+  "80002": __default10,
+  "8453": __default6,
+  "84532": __default11,
+  "6342": __default5,
+  "2021": __default4
 };
 
 // node_modules/viem/_esm/op-stack/contracts.js
@@ -15650,6 +15673,123 @@ var inkSepolia = /* @__PURE__ */ defineChain({
   },
   testnet: true,
   sourceId: sourceId5
+});
+
+// node_modules/viem/_esm/linea/actions/estimateGas.js
+init_parseAccount();
+init_toHex();
+init_getCallError();
+init_extract();
+init_transactionRequest();
+init_assertRequest();
+async function estimateGas2(client, args) {
+  const { account: account_ = client.account } = args;
+  if (!account_)
+    throw new AccountNotFoundError();
+  const account = parseAccount(account_);
+  try {
+    const { accessList, blockNumber, blockTag, data, gas, gasPrice, maxFeePerGas, maxPriorityFeePerGas, nonce, to, value, ...rest } = args;
+    const blockNumberHex = blockNumber ? numberToHex(blockNumber) : void 0;
+    const block = blockNumberHex || blockTag;
+    assertRequest(args);
+    const chainFormat = client.chain?.formatters?.transactionRequest?.format;
+    const format = chainFormat || formatTransactionRequest;
+    const request = format({
+      // Pick out extra data that might exist on the chain's transaction request type.
+      ...extract(rest, { format: chainFormat }),
+      from: account?.address,
+      accessList,
+      data,
+      gas,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      nonce,
+      to,
+      value
+    });
+    const { baseFeePerGas, gasLimit, priorityFeePerGas } = await client.request({
+      method: "linea_estimateGas",
+      params: block ? [request, block] : [request]
+    });
+    return {
+      baseFeePerGas: BigInt(baseFeePerGas),
+      gasLimit: BigInt(gasLimit),
+      priorityFeePerGas: BigInt(priorityFeePerGas)
+    };
+  } catch (err) {
+    throw getCallError(err, {
+      ...args,
+      account,
+      chain: client.chain
+    });
+  }
+}
+
+// node_modules/viem/_esm/linea/chainConfig.js
+var chainConfig3 = {
+  fees: {
+    estimateFeesPerGas: estimateFeesPerGas2,
+    async maxPriorityFeePerGas({ block, client, request }) {
+      const response = await estimateFeesPerGas2({
+        block,
+        client,
+        multiply: (x) => x,
+        request,
+        type: "eip1559"
+      });
+      if (!response?.maxPriorityFeePerGas)
+        return null;
+      return response.maxPriorityFeePerGas;
+    }
+  }
+};
+async function estimateFeesPerGas2({ client, multiply, request, type }) {
+  try {
+    const response = await estimateGas2(client, {
+      ...request,
+      account: request?.account
+    });
+    const { priorityFeePerGas: maxPriorityFeePerGas } = response;
+    const baseFeePerGas = multiply(BigInt(response.baseFeePerGas));
+    const maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas;
+    if (type === "legacy")
+      return { gasPrice: maxFeePerGas };
+    return {
+      maxFeePerGas,
+      maxPriorityFeePerGas
+    };
+  } catch {
+    return null;
+  }
+}
+
+// node_modules/viem/_esm/chains/definitions/lineaSepolia.js
+var lineaSepolia = /* @__PURE__ */ defineChain({
+  ...chainConfig3,
+  id: 59141,
+  name: "Linea Sepolia Testnet",
+  nativeCurrency: { name: "Linea Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.sepolia.linea.build"],
+      webSocket: ["wss://rpc.sepolia.linea.build"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Etherscan",
+      url: "https://sepolia.lineascan.build",
+      apiUrl: "https://api-sepolia.lineascan.build/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 227427
+    }
+  },
+  testnet: true
 });
 
 // node_modules/viem/_esm/chains/definitions/mainnet.js

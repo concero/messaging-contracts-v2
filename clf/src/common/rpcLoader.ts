@@ -1,6 +1,7 @@
 import rpc1 from "../common/rpcs/1.json";
 import rpc10 from "../common/rpcs/10.json";
 import rpc137 from "../common/rpcs/137.json";
+import rpc2021 from "../common/rpcs/2021.json";
 import rpc6342 from "../common/rpcs/6342.json";
 import rpc8453 from "../common/rpcs/8453.json";
 import rpc42161 from "../common/rpcs/42161.json";
@@ -33,4 +34,5 @@ export const rpcConfigs: Record<ChainSelector, RpcConfig> = {
 	"8453": rpc8453 as RpcConfig,
 	"84532": rpc84532 as RpcConfig,
 	"6342": rpc6342 as RpcConfig,
+	"2021": rpc2021 as RpcConfig,
 };

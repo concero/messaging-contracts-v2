@@ -18,6 +18,7 @@ import {
 	mainnet,
 	mantleSepoliaTestnet,
 	megaethTestnet,
+	modeTestnet,
 	monadTestnet,
 	optimism,
 	optimismSepolia,
@@ -32,6 +33,7 @@ import {
 	sonicBlazeTestnet,
 	unichainSepolia,
 	xLayerTestnet,
+	zircuitTestnet,
 } from "viem/chains";
 
 import {
@@ -527,6 +529,30 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		chainSelector: 195n,
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: xLayerTestnet,
+		saveDeployments,
+	},
+	zircuitTestnet: {
+		name: "zircuitTestnet",
+		type: networkTypes.testnet,
+		chainId: 48899,
+		url: urls.zircuitTestnet[0],
+		rpcUrls: urls.zircuitTestnet,
+		accounts: [testnetDeployerPK, testnetProxyDeployerPK],
+		chainSelector: 48899n,
+		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
+		viemChain: zircuitTestnet,
+		saveDeployments,
+	},
+	modeTestnet: {
+		name: "modeTestnet",
+		type: networkTypes.testnet,
+		chainId: 919,
+		url: urls.modeTestnet[0],
+		rpcUrls: urls.modeTestnet,
+		accounts: [testnetDeployerPK, testnetProxyDeployerPK],
+		chainSelector: 919n,
+		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
+		viemChain: modeTestnet,
 		saveDeployments,
 	},
 };

@@ -1,0 +1,10 @@
+{
+    "id": "57054",
+    "urls": [
+        "endpoints.omniatech.io/v1/op/sepolia/public",
+        "optimism-sepolia.gateway.tenderly.co",
+        "optimism-sepolia.api.onfinality.io/public",
+        "api.zan.top/opt-sepolia"
+    ],
+    "chainSelector": 57054
+}

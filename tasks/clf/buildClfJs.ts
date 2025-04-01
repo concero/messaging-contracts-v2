@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { task } from "hardhat/config";
 
-import { networkEnvKeys } from "../../constants";
+import { conceroNetworks, networkEnvKeys } from "../../constants";
 import { getEnvVar } from "../../utils";
 import { prepareCLFDist } from "./prepareCLFDist";
 
@@ -32,16 +32,12 @@ export function buildClfJs() {
 		// Base esbuild command with common options
 		const cmdBase =
 			`esbuild --bundle --legal-comments=none --format=esm --global-name=conceromain --target=esnext ` +
-			`--define:CONCERO_VERIFIER='"${conceroVerifier}"' ` +
-			`--define:CONCERO_ROUTER_OPTIMISM='"${conceroRouter}"' ` +
-			`--define:CONCERO_ROUTER_ETHEREUM='"${conceroRouter}"' ` +
-			`--define:CONCERO_ROUTER_ARBITRUM_SEPOLIA='"${getEnvVar(`CONCERO_ROUTER_PROXY_ARBITRUM_SEPOLIA`)}"' ` +
-			`--define:CONCERO_ROUTER_BASE_SEPOLIA='"${getEnvVar(`CONCERO_ROUTER_PROXY_BASE_SEPOLIA`)}"' ` +
-			`--define:CONCERO_ROUTER_AVALANCHE_FUJI='"${getEnvVar(`CONCERO_ROUTER_PROXY_FUJI`)}"' ` +
-			`--define:CONCERO_ROUTER_POLYGON_AMOY='"${getEnvVar(`CONCERO_ROUTER_PROXY_POLYGON_AMOY`)}"' ` +
-			`--define:CONCERO_ROUTER_OPTIMISM_SEPOLIA='"${getEnvVar(`CONCERO_ROUTER_PROXY_OPTIMISM_SEPOLIA`)}"' ` +
-			`--define:CONCERO_ROUTER_RONIN_SAIGON='"${getEnvVar(`CONCERO_ROUTER_PROXY_RONIN_SAIGON`)}"' ` +
-			`--define:CONCERO_ROUTER_MEGAETH_TESTNET='"${getEnvVar(`CONCERO_ROUTER_PROXY_MEGAETH_TESTNET`)}"' `;
+			Object.values(conceroNetworks).reduce(
+				(acc, e) =>
+					acc +
+					`--define:CONCERO_ROUTER_${networkEnvKeys[e.name]}='"${getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[e.name]}`)}"' `,
+				"",
+			);
 
 		// Get all directories in clf/src
 		const dirs = execSync("ls -d */", { cwd: "clf/src" }).toString();

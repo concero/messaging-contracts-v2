@@ -26,8 +26,8 @@ const NETWORK_MINIMUMS = {
  */
 export async function getGasParameters(
 	chain: ConceroNetwork,
-	priorityMultiplier = 2,
-	maxFeeMultiplier = 2,
+	priorityMultiplier = 1,
+	maxFeeMultiplier = 1,
 ): Promise<GasParameters> {
 	const { publicClient } = getFallbackClients(chain);
 

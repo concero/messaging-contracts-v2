@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks, writeContractConfig } from "../constants";
 import { IProxyType } from "../types/deploymentVariables";
-import { getWallet, log, updateEnvAddress } from "../utils";
+import { getGasParameters, getWallet, log, updateEnvAddress } from "../utils";
 
 const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) => Promise<void> =
 	async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {
@@ -13,9 +13,9 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 		const networkType = conceroNetworks[name].type;
 
 		const initialOwner = getWallet(networkType, "proxyDeployer", "address");
-		const gasPrice = await hre.ethers.provider.getGasPrice();
-		const maxFeePerGas = gasPrice.mul(2); // Set it to twice the base fee
-		const maxPriorityFeePerGas = hre.ethers.utils.parseUnits("2", "gwei"); // Set a priority fee
+		const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(
+			conceroNetworks[name],
+		);
 
 		// log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
 		const deployProxyAdmin = (await deploy("ConceroProxyAdmin", {
@@ -24,9 +24,9 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 			log: true,
 			autoMine: true,
 			skipIfAlreadyDeployed: false,
-			// maxFeePerGas,
-			// maxPriorityFeePerGas,
-			gasLimit: writeContractConfig.gas,
+			maxFeePerGas,
+			maxPriorityFeePerGas,
+			// gasLimit: writeContractConfig.gas,
 		})) as Deployment;
 
 		log(`Deployed at: ${deployProxyAdmin.address}`, `deployProxyAdmin: ${proxyType}`, name);

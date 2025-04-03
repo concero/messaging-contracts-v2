@@ -15,7 +15,7 @@ task("deploy-concero-pause-to-all-chains", "").setAction(
 					throw new Error("unknown error");
 				if (chain === undefined) throw new Error("chain not found");
 
-				execSync(`yarn hardhat deploy --tags ConceroPause --network ${chain}`, {
+				execSync(`yarn hardhat deploy --tags PauseDummy --network ${chain}`, {
 					stdio: "inherit",
 				});
 			}

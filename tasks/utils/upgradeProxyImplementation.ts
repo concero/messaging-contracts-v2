@@ -52,7 +52,6 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
 	const implementationAlias = shouldPause ? pauseAlias : newImplementationAlias;
 
 	const txHash = await walletClient.writeContract({
-		...writeContractConfig,
 		address: proxyAdmin,
 		abi: proxyAdminAbi,
 		functionName: "upgradeAndCall",

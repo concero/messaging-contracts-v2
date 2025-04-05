@@ -16680,9 +16680,9 @@ function getPublicClient(chainSelector) {
 function getConceroVerifier() {
   try {
     if (config.isDevelopment) return secrets.CONCERO_VERIFIER_LOCALHOST;
-    return CONCERO_VERIFIER;
+    return "0x6cd1f5DB8f37CcC40cB5B48AD57E972dDeb02992";
   } catch {
-    return CONCERO_VERIFIER;
+    return "0x6cd1f5DB8f37CcC40cB5B48AD57E972dDeb02992";
   }
 }
 var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();

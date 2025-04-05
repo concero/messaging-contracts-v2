@@ -28,7 +28,6 @@ export function buildClfJs() {
 	try {
 		const networkName = hre.network.name;
 		const conceroVerifier = getEnvVar(`CONCERO_VERIFIER_PROXY_${networkEnvKeys[networkName]}`);
-		const conceroRouter = getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[networkName]}`);
 
 		// Base esbuild command with common options
 		const cmdBase =
@@ -38,7 +37,8 @@ export function buildClfJs() {
 					acc +
 					`--define:CONCERO_ROUTER_${networkEnvKeys[e.name]}='"${getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[e.name]}`)}"' `,
 				"",
-			);
+			) +
+			`--define:CONCERO_VERIFIER='"${conceroVerifier}"'`;
 
 		// Get all directories in clf/src
 		const dirs = execSync("ls -d */", { cwd: "clf/src" }).toString();

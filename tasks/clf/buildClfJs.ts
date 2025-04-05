@@ -3,7 +3,8 @@ import fs from "fs";
 
 import { task } from "hardhat/config";
 
-import { conceroNetworks, networkEnvKeys } from "../../constants";
+import { networkEnvKeys } from "../../constants";
+import { testnetNetworks } from "../../constants/conceroNetworks";
 import { getEnvVar } from "../../utils";
 import { prepareCLFDist } from "./prepareCLFDist";
 
@@ -32,7 +33,7 @@ export function buildClfJs() {
 		// Base esbuild command with common options
 		const cmdBase =
 			`esbuild --bundle --legal-comments=none --format=esm --global-name=conceromain --target=esnext ` +
-			Object.values(conceroNetworks).reduce(
+			Object.values(testnetNetworks).reduce(
 				(acc, e) =>
 					acc +
 					`--define:CONCERO_ROUTER_${networkEnvKeys[e.name]}='"${getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[e.name]}`)}"' `,

@@ -83,7 +83,7 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 	sepolia: "SEPOLIA",
 	optimismSepolia: "OPTIMISM_SEPOLIA",
 	arbitrumSepolia: "ARBITRUM_SEPOLIA",
-	avalancheFuji: "FUJI",
+	avalancheFuji: "AVALANCHE_FUJI",
 	baseSepolia: "BASE_SEPOLIA",
 	polygonAmoy: "POLYGON_AMOY",
 	lineaSepolia: "LINEA_SEPOLIA",

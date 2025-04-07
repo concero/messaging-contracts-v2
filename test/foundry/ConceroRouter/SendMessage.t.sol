@@ -21,12 +21,43 @@ import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
 import {Message as MessageContract} from "contracts/ConceroRouter/modules/Message.sol";
 
+contract InternalMessageConfigTest {
+    uint256 constant OFFSET_DST_CHAIN = 168;
+    uint256 constant OFFSET_CALLBACKABLE = 127;
+
+    struct InternalMessageConfig {
+        uint24 dstChainSelector;
+        uint8 minSrcConfirmations;
+        uint8 minDstConfirmations;
+        uint8 relayerConfig;
+        bool isCallbackable;
+        uint8 feeToken;
+    }
+
+    function validateConfigBitwise(
+        bytes32 config
+    ) public pure returns (uint24 dstChainSelector, bool isCallbackable) {
+        dstChainSelector = uint24(uint256(config) >> OFFSET_DST_CHAIN);
+        isCallbackable = (uint256(config) & (1 << OFFSET_CALLBACKABLE)) != 0;
+    }
+
+    function validateConfigStruct(
+        InternalMessageConfig calldata config
+    ) public pure returns (uint24 dstChainSelector, bool isCallbackable) {
+        dstChainSelector = config.dstChainSelector;
+        isCallbackable = config.isCallbackable;
+    }
+}
+
 contract SendMessage is ConceroRouterTest {
     bytes internal dstChainData;
     bytes internal message;
+    InternalMessageConfigTest internal configTest;
 
     function setUp() public override {
         super.setUp();
+
+        configTest = new InternalMessageConfigTest();
 
         dstChainData = abi.encode(
             RouterTypes.EvmDstChainData({receiver: address(0x456), gasLimit: 1_000_000})
@@ -133,9 +164,82 @@ contract SendMessage is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_sendMessageV1() public {
-        vm.startPrank(user);
+    function test_CompareInternalMessageConfigGasUsage() public {
+        bytes32 configAsBitmap = 0x0000000000000000002105000100010000000000000000000000000000000001; // Example with dstChainSelector = 0x002105 and isCallbackable = true
 
+        // Create the same config as a struct
+        InternalMessageConfigTest.InternalMessageConfig
+            memory configAsStruct = InternalMessageConfigTest.InternalMessageConfig({
+                dstChainSelector: DST_CHAIN_SELECTOR,
+                minSrcConfirmations: 1,
+                minDstConfirmations: 1,
+                relayerConfig: 0,
+                isCallbackable: true,
+                feeToken: 0
+            });
+
+        // Encode the struct to bytes
+        bytes memory encodedConfigAsStruct = abi.encode(configAsStruct);
+
+        // Test bitmap validation only
+        uint256 gasBitmapValidation;
+        vm.resetGasMetering();
+        (uint24 dstChain1, bool isCallbackable1) = configTest.validateConfigBitwise(configAsBitmap);
+        gasBitmapValidation = gasleft();
+        vm.pauseGasMetering();
+
+        // Test struct validation only
+        uint256 gasStructValidation;
+        vm.resetGasMetering();
+        (uint24 dstChain2, bool isCallbackable2) = configTest.validateConfigStruct(configAsStruct);
+        gasStructValidation = gasleft();
+        vm.pauseGasMetering();
+
+        // Test full struct approach with decoding
+        uint256 gasFullStruct;
+        vm.resetGasMetering();
+        // Decode bytes from report to struct
+        InternalMessageConfigTest.InternalMessageConfig memory decodedStruct = abi.decode(
+            encodedConfigAsStruct,
+            (InternalMessageConfigTest.InternalMessageConfig)
+        );
+        // Validate the decoded struct
+        (uint24 dstChain3, bool isCallbackable3) = configTest.validateConfigStruct(decodedStruct);
+        gasFullStruct = gasleft();
+        vm.pauseGasMetering();
+
+        // Log results
+        console.log("Gas used for bitmap validation only:", gasBitmapValidation);
+        console.log("Gas used for struct validation only:", gasStructValidation);
+        console.log("Gas used for struct approach with decoding:", gasFullStruct);
+
+        console.log(
+            "Validation gas difference (bitmap vs struct):",
+            gasBitmapValidation > gasStructValidation
+                ? gasBitmapValidation - gasStructValidation
+                : gasStructValidation - gasBitmapValidation
+        );
+
+        console.log(
+            "Total gas difference (bitmap vs struct+decode):",
+            gasBitmapValidation > gasFullStruct
+                ? gasBitmapValidation - gasFullStruct
+                : gasFullStruct - gasBitmapValidation
+        );
+
+        console.log(
+            "More efficient validation approach:",
+            gasBitmapValidation > gasStructValidation ? "Struct" : "Bitmap"
+        );
+
+        console.log(
+            "More efficient overall approach:",
+            gasBitmapValidation > gasFullStruct ? "Struct with decode" : "Bitmap"
+        );
+    }
+
+    function test_sendMessageV1() public {
+        // 88929 88665
         ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
             dstChainSelector: DST_CHAIN_SELECTOR,
             minSrcConfirmations: 1,
@@ -145,12 +249,15 @@ contract SendMessage is ConceroRouterTest {
             feeToken: ConceroTypes.FeeToken.native
         });
 
-        bytes32 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
+        bytes32 clientMessageConfig = ConceroUtils._packClientMessageConfig(config); // 3346 gas
         uint256 messageFee = conceroRouter.getMessageFee(clientMessageConfig, dstChainData);
-        conceroRouter.conceroSend{value: messageFee}(clientMessageConfig, dstChainData, message); // 88929
+        vm.resetGasMetering();
+        conceroRouter.conceroSend{value: messageFee}(clientMessageConfig, dstChainData, message);
+        vm.pauseGasMetering();
     }
 
     function test_sendMessageV2() public {
+        // 88623 88515
         vm.startPrank(user);
 
         ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
@@ -167,10 +274,13 @@ contract SendMessage is ConceroRouterTest {
             dstChainData,
             config.feeToken
         );
-        conceroRouter.conceroSendV2{value: messageFee}(config, dstChainData, message); // 88623
+        vm.resetGasMetering();
+        conceroRouter.conceroSendV2{value: messageFee}(config, dstChainData, message); // 58811
+        vm.pauseGasMetering();
     }
 
     function test_sendMessageV3() public {
+        // 86879
         vm.startPrank(user);
 
         ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
@@ -187,7 +297,26 @@ contract SendMessage is ConceroRouterTest {
             dstChainData,
             config.feeToken
         );
-        conceroRouter.conceroSendV3{value: messageFee}(config, dstChainData, message); // 86879
+        vm.resetGasMetering();
+        conceroRouter.conceroSendV3{value: messageFee}(config, dstChainData, message); // 56832
+        vm.pauseGasMetering();
+    }
+
+    function test_sendMessageWithOffchainConfig() public {
+        // 85765
+        vm.startPrank(user);
+
+        bytes32 config = 0x0000000000000000002105000100010000000000000000000000000000000000;
+
+        uint256 messageFee = conceroRouter.getMessageFee(
+            DST_CHAIN_SELECTOR,
+            dstChainData,
+            ConceroTypes.FeeToken.native
+        );
+
+        vm.resetGasMetering();
+        conceroRouter.conceroSend{value: messageFee}(config, dstChainData, message); // conceroSend - 56101
+        vm.pauseGasMetering();
     }
 
     function test_RevertInsufficientFee() public {

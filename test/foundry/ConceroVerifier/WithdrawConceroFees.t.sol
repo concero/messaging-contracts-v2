@@ -138,7 +138,7 @@ contract WithdrawConceroFees is ConceroVerifierTest {
     //     uint256[] memory amounts = new uint256[](1);
     //     amounts[0] = 1 ether;
 
-    //     vm.expectRevert(CommonErrors.NotOwner.selector);
+    //     vm.expectRevert(CommonErrors.Unauthorized.selector);
     //     conceroVerifier.withdrawConceroFees(tokens, amounts);
     //     vm.stopPrank();
     // }

@@ -25,8 +25,8 @@ big-endian bit ordering
 
 library Types {
     enum FeeToken {
-        native,
-        usdc
+        native, //                0
+        usdc //                   1
     }
 
     struct EvmSrcChainData {

@@ -11,7 +11,6 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 
 import {CommonConstants} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
-import {SupportedChains} from "../../common/libraries/SupportedChains.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 
 import {OperatorFeeWithdrawn} from "../../interfaces/IConceroRouter.sol";

@@ -17,19 +17,27 @@ const Namespaces = {
  */
 const RouterSlots = (() => {
 	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
+	const RESERVED_ARRAY_GAP = 49;
 	const UINTS_COUNT = 1;
+	const ARRAYS_COUNT = 1;
+
+	const nonce = 0;
+	const supportedChainSelectors = UINTS_COUNT + RESERVED_VARIABLE_GAP;
 
 	return Object.freeze({
-		nonce: 0,
-		isMessageSent: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
-		isMessageProcessed: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
-		receivedMessages: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2,
+		nonce,
+		supportedChainSelectors,
+		isMessageSent: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 0,
+		isMessageProcessed:
+			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 1,
+		receivedMessages:
+			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 2,
 		messageConfirmationsByProtocol:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 3,
+			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 3,
+		isChainSupported:
+			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 4,
 	});
 })();
-
 /**
  * @title OperatorSlots
  * @notice Storage slot definitions for ConceroOperator contract

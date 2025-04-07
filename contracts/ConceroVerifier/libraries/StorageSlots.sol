@@ -13,20 +13,24 @@ pragma solidity 0.8.28;
  * @notice Storage slot definitions for ConceroVerifier contract
  * @dev All slots are calculated using standard Solidity storage layout rules
  */
-library VerifierSlots {
-    uint256 private constant RESERVED_VARIABLE_GAP = 50;
-    uint256 private constant RESERVED_ARRAY_GAP = 50;
-    uint256 private constant UINTS_COUNT = 1;
+ library VerifierSlots {
+     uint256 internal constant nonce = 0;
+     uint256 private constant RESERVED_VARIABLE_GAP = 50;
+     uint256 private constant UINTS_COUNT = 1;
 
-    uint256 internal constant nonce = 0;
+     uint256 internal constant supportedChainSelectors = UINTS_COUNT + RESERVED_VARIABLE_GAP;
+     uint256 private constant RESERVED_ARRAY_GAP = 49;
+     uint256 private constant ARRAYS_COUNT = 1;
 
-    uint256 internal constant clfRequestStatus =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
-    uint256 internal constant pendingCLFRequests =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
-    uint256 internal constant pendingMessageReports =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2;
-}
+     uint256 internal constant clfRequestStatus =
+         RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 0;
+     uint256 internal constant pendingCLFRequests =
+         RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 1;
+     uint256 internal constant pendingMessageReports =
+         RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 2;
+     uint256 internal constant isChainSupported =
+         RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 3;
+ }
 
 /**
  * @title OperatorSlots

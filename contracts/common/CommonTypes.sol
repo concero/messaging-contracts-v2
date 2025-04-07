@@ -8,18 +8,18 @@ pragma solidity 0.8.28;
 
 library CommonTypes {
     enum FeeToken {
-        native,
-        usdc
+        native, //              0
+        usdc //                 1
     }
 
     enum ChainType {
-        EVM,
-        NON_EVM
+        EVM, //                 0
+        NON_EVM //              1
     }
 
     enum CLFReportType {
-        Unknown, // 0
-        Message, // 1
+        Unknown, //             0
+        Message, //             1
         OperatorRegistration // 2
     }
 

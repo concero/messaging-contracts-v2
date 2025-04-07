@@ -17,14 +17,21 @@ export const Namespaces = {
  */
 const VerifierSlots = (() => {
 	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
+	const RESERVED_ARRAY_GAP = 49;
 	const UINTS_COUNT = 1;
+	const ARRAYS_COUNT = 1;
 
 	return Object.freeze({
 		nonce: 0,
-		clfRequestStatus: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
-		pendingCLFRequests: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
-		pendingMessageReports: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2,
+		supportedChainSelectors: UINTS_COUNT + RESERVED_VARIABLE_GAP,
+		clfRequestStatus:
+			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 0,
+		pendingCLFRequests:
+			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 1,
+		pendingMessageReports:
+			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 2,
+		isChainSupported:
+			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 3,
 	});
 })();
 

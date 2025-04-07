@@ -6,7 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import "forge-std/src/console.sol";
 import {Base} from "./Base.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -18,6 +17,17 @@ abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.PriceFeed;
     using s for s.Operator;
+
+    address immutable i_feedUpdater;
+
+    constructor(address _feedUpdater) {
+        i_feedUpdater = _feedUpdater;
+    }
+
+    modifier onlyFeedUpdater() {
+        require(msg.sender == i_feedUpdater || msg.sender == i_owner, CommonErrors.Unauthorized());
+        _;
+    }
 
     /**
      * @notice Calculates the amount of native token fees available for withdrawal
@@ -70,14 +80,14 @@ abstract contract Owner is Base {
         }
     }
 
-    function setNativeUsdRate(uint256 amount) external onlyOwner {
+    function setNativeUsdRate(uint256 amount) external onlyFeedUpdater {
         s.priceFeed().nativeUsdRate = amount;
     }
 
     function setNativeNativeRates(
         uint24[] memory dstChainSelectors,
         uint256[] memory rates
-    ) external onlyOwner {
+    ) external onlyFeedUpdater {
         require(dstChainSelectors.length == rates.length, CommonErrors.LengthMismatch());
         for (uint256 i = 0; i < dstChainSelectors.length; i++) {
             s.priceFeed().nativeNativeRates[dstChainSelectors[i]] = rates[i];
@@ -87,7 +97,7 @@ abstract contract Owner is Base {
     function setLastGasPrices(
         uint24[] memory dstChainSelectors,
         uint256[] memory gasPrices
-    ) external onlyOwner {
+    ) external onlyFeedUpdater {
         require(dstChainSelectors.length == gasPrices.length, CommonErrors.LengthMismatch());
         for (uint256 i = 0; i < dstChainSelectors.length; i++) {
             s.priceFeed().lastGasPrices[dstChainSelectors[i]] = gasPrices[i];

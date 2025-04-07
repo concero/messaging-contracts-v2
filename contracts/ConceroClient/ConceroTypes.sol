@@ -8,8 +8,8 @@ pragma solidity 0.8.28;
 
 library ConceroTypes {
     enum FeeToken {
-        native,
-        usdc
+        native, //                0
+        usdc //                   1
     }
 
     struct EvmDstChainData {

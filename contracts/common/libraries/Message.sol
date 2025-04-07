@@ -52,6 +52,7 @@ library Message {
         require(dstChainData.length > 0, InvalidDstChainData());
     }
 
+    //to be moved to conceroRouter as a module
     function validateClientMessageConfig(bytes32 clientConfig, uint24 chainSelector) internal view {
         uint256 configValue = uint256(clientConfig);
 
@@ -68,22 +69,25 @@ library Message {
             feeToken == CommonTypes.FeeToken.native,
             InvalidClientMessageConfig(MessageConfigErrorType.InvalidFeeToken)
         );
-        require(
-            SupportedChains.isChainSupported(dstChainSelector),
-            InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
-        );
-        require(
-            minSrcConfirmations > 0 &&
-                minSrcConfirmations <= SupportedChains.maxConfirmations(chainSelector),
-            InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
-        );
-        require(
-            minDstConfirmations > 0 &&
-                minDstConfirmations <= SupportedChains.maxConfirmations(dstChainSelector),
-            InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
-        );
+
+        //@notice: this is being moved to conceroVerifier
+        // require(
+        //     SupportedChains.isChainSupported(dstChainSelector),
+        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
+        // );
+        // require(
+        //     minSrcConfirmations > 0 &&
+        //         minSrcConfirmations <= SupportedChains.maxConfirmations(chainSelector),
+        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
+        // );
+        // require(
+        //     minDstConfirmations > 0 &&
+        //         minDstConfirmations <= SupportedChains.maxConfirmations(dstChainSelector),
+        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
+        // );
     }
 
+    // to be moved to ConceroVerifier as a module
     function validateInternalMessageConfig(bytes32 config) private view {
         uint256 configValue = uint256(config);
 
@@ -106,14 +110,14 @@ library Message {
             minDstConfirmations > 0,
             InvalidInternalMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
         );
-        require(
-            SupportedChains.isChainSupported(srcChainSelector),
-            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidSrcChainSelector)
-        );
-        require(
-            SupportedChains.isChainSupported(dstChainSelector),
-            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
-        );
+        //        require(
+        //            SupportedChains.isChainSupported(srcChainSelector),
+        //            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidSrcChainSelector)
+        //        );
+        //        require(
+        //            SupportedChains.isChainSupported(dstChainSelector),
+        //            InvalidInternalMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
+        //        );
     }
 
     /* BUILD FUNCTIONS */

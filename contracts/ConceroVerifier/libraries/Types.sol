@@ -22,29 +22,29 @@ struct CLFParams {
 
 library Types {
     enum FeeToken {
-        native,
-        usdc
+        native, //                0
+        usdc //                   1
     }
 
     enum ChainType {
-        EVM,
-        NON_EVM
+        EVM, //                   0
+        NON_EVM //                1
     }
 
     enum CLFReportType {
-        Message,
-        OperatorRegistration
+        Message, //               0
+        OperatorRegistration //   1
     }
 
     enum CLFRequestStatus {
-        NotStarted,
-        Pending,
-        FulFilled
+        NotStarted, //            0
+        Pending, //               1
+        FulFilled //              2
     }
 
     enum OperatorRegistrationAction {
-        Deregister, // 0
-        Register // 1
+        Deregister, //            0
+        Register //               1
     }
 
     struct MessageReportRequest {

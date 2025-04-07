@@ -6,9 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
-import {SupportedChains} from "../../common/libraries/SupportedChains.sol";
-
 library Namespaces {
     bytes32 internal constant ROUTER =
         keccak256(
@@ -38,7 +35,8 @@ library Storage {
     struct Router {
         uint256 nonce;
         uint256[50] __var_gap;
-        uint256[50] __array_gap;
+        uint24[] supportedChainSelectors;
+        uint256[49] __array_gap;
         mapping(bytes32 messageId => bool isSent) isMessageSent;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;

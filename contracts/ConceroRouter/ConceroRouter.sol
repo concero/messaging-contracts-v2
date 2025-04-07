@@ -16,14 +16,25 @@ import {Owner} from "./modules/Owner.sol";
 import {SupportedChains} from "./modules/SupportedChains.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 
-contract ConceroRouter is IConceroRouter, Operator, Message, GenericStorage, Owner, SupportedChains {
+contract ConceroRouter is
+    IConceroRouter,
+    Operator,
+    Message,
+    GenericStorage,
+    Owner,
+    SupportedChains
+{
     constructor(
         uint24 chainSelector,
         address feedUpdater,
         address conceroVerifier,
         uint64 conceroVerifierSubId,
         address[4] memory clfSigners
-    ) Message(conceroVerifier, conceroVerifierSubId, clfSigners) Base(chainSelector) Owner(feedUpdater) {}
+    )
+        Message(conceroVerifier, conceroVerifierSubId, clfSigners)
+        Base(chainSelector)
+        Owner(feedUpdater)
+    {}
 
     receive() external payable {}
 

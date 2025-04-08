@@ -1,11 +1,5 @@
 import { decodeEventLog, parseUnits } from "viem";
-import {
-	arbitrumSepolia,
-	avalancheFuji,
-	baseSepolia,
-	optimismSepolia,
-	polygonAmoy,
-} from "viem/chains";
+import { baseSepolia } from "viem/chains";
 
 import { task } from "hardhat/config";
 

@@ -22,7 +22,9 @@ import { localhostViemChain } from "./localhostViemChain";
 function getClients(
 	viemChain: Chain,
 	url: string | undefined,
-	account?: PrivateKeyAccount = privateKeyToAccount(`0x${process.env.DEPLOYER_PRIVATE_KEY}`),
+	account?: PrivateKeyAccount = privateKeyToAccount(
+		`0x${process.env.TESTNET_DEPLOYER_PRIVATE_KEY}`,
+	),
 ): {
 	walletClient: WalletClient;
 	publicClient: PublicClient;

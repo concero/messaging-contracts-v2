@@ -473,11 +473,11 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 	scrollSepolia: {
 		name: "scrollSepolia",
 		type: networkTypes.testnet,
-		chainId: 534_351,
+		chainId: 534351,
 		url: urls.scrollSepolia[0],
 		rpcUrls: urls.scrollSepolia,
 		accounts: [testnetDeployerPK, testnetProxyDeployerPK],
-		chainSelector: 534_351n,
+		chainSelector: 534351n,
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: scrollSepolia,
 		saveDeployments,

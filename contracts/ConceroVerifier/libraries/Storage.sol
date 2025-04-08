@@ -6,7 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 
 import {Types} from "./Types.sol";

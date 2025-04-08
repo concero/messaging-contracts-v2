@@ -34,18 +34,16 @@ contract InternalMessageConfigTest {
         uint8 feeToken;
     }
 
-    function validateConfigBitwise(
+    function decodeConfigBitwise(
         bytes32 config
     ) public pure returns (uint24 dstChainSelector, bool isCallbackable) {
         dstChainSelector = uint24(uint256(config) >> OFFSET_DST_CHAIN);
         isCallbackable = (uint256(config) & (1 << OFFSET_CALLBACKABLE)) != 0;
     }
 
-    function validateConfigStruct(
-        InternalMessageConfig calldata config
-    ) public pure returns (uint24 dstChainSelector, bool isCallbackable) {
-        dstChainSelector = config.dstChainSelector;
-        isCallbackable = config.isCallbackable;
+    function validateConfigUniversal(uint24 dstChainSelector, bool isCallbackable) public pure {
+        if (dstChainSelector == 0) revert("Wrong dst chain selector");
+        if (isCallbackable) revert("Wrong isCallbackable");
     }
 }
 
@@ -164,77 +162,30 @@ contract SendMessage is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_CompareInternalMessageConfigGasUsage() public {
-        bytes32 configAsBitmap = 0x0000000000000000002105000100010000000000000000000000000000000001; // Example with dstChainSelector = 0x002105 and isCallbackable = true
+    function test_CompareInternalMessageConfigGasUsageBitwise() public {
+        // 6455
 
-        // Create the same config as a struct
+        bytes32 configAsBitmap = 0x0000000000000000002105000100010000000000000000000000000000000001;
+        (uint24 dstChain1, bool isCallbackable1) = configTest.decodeConfigBitwise(configAsBitmap);
+        configTest.validateConfigUniversal(dstChain1, isCallbackable1);
+    }
+
+    function test_CompareInternalMessageConfigGasUsageStruct() public {
+        // 5712
+
         InternalMessageConfigTest.InternalMessageConfig
             memory configAsStruct = InternalMessageConfigTest.InternalMessageConfig({
                 dstChainSelector: DST_CHAIN_SELECTOR,
                 minSrcConfirmations: 1,
                 minDstConfirmations: 1,
                 relayerConfig: 0,
-                isCallbackable: true,
+                isCallbackable: false,
                 feeToken: 0
             });
 
-        // Encode the struct to bytes
-        bytes memory encodedConfigAsStruct = abi.encode(configAsStruct);
-
-        // Test bitmap validation only
-        uint256 gasBitmapValidation;
-        vm.resetGasMetering();
-        (uint24 dstChain1, bool isCallbackable1) = configTest.validateConfigBitwise(configAsBitmap);
-        gasBitmapValidation = gasleft();
-        vm.pauseGasMetering();
-
-        // Test struct validation only
-        uint256 gasStructValidation;
-        vm.resetGasMetering();
-        (uint24 dstChain2, bool isCallbackable2) = configTest.validateConfigStruct(configAsStruct);
-        gasStructValidation = gasleft();
-        vm.pauseGasMetering();
-
-        // Test full struct approach with decoding
-        uint256 gasFullStruct;
-        vm.resetGasMetering();
-        // Decode bytes from report to struct
-        InternalMessageConfigTest.InternalMessageConfig memory decodedStruct = abi.decode(
-            encodedConfigAsStruct,
-            (InternalMessageConfigTest.InternalMessageConfig)
-        );
-        // Validate the decoded struct
-        (uint24 dstChain3, bool isCallbackable3) = configTest.validateConfigStruct(decodedStruct);
-        gasFullStruct = gasleft();
-        vm.pauseGasMetering();
-
-        // Log results
-        console.log("Gas used for bitmap validation only:", gasBitmapValidation);
-        console.log("Gas used for struct validation only:", gasStructValidation);
-        console.log("Gas used for struct approach with decoding:", gasFullStruct);
-
-        console.log(
-            "Validation gas difference (bitmap vs struct):",
-            gasBitmapValidation > gasStructValidation
-                ? gasBitmapValidation - gasStructValidation
-                : gasStructValidation - gasBitmapValidation
-        );
-
-        console.log(
-            "Total gas difference (bitmap vs struct+decode):",
-            gasBitmapValidation > gasFullStruct
-                ? gasBitmapValidation - gasFullStruct
-                : gasFullStruct - gasBitmapValidation
-        );
-
-        console.log(
-            "More efficient validation approach:",
-            gasBitmapValidation > gasStructValidation ? "Struct" : "Bitmap"
-        );
-
-        console.log(
-            "More efficient overall approach:",
-            gasBitmapValidation > gasFullStruct ? "Struct with decode" : "Bitmap"
+        configTest.validateConfigUniversal(
+            configAsStruct.dstChainSelector,
+            configAsStruct.isCallbackable
         );
     }
 

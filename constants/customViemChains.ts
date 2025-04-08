@@ -27,3 +27,16 @@ export const coreTestnet = defineChain({
 		},
 	},
 });
+
+export const apechainCurtis = defineChain({
+	id: 33111,
+	network: "apechainCurtis",
+	name: "apechainCurtis",
+	nativeCurrency: { name: "APE", symbol: "APE", decimals: 18 },
+	testnet: true,
+	rpcUrls: {
+		default: {
+			http: ["https://rpc.curtis.apechain.com"],
+		},
+	},
+});

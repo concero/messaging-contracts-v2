@@ -14719,8 +14719,22 @@ var __default2 = {
   chainSelector: 10
 };
 
-// clf/src/common/rpcs/137.json
+// clf/src/common/rpcs/97.json
 var __default3 = {
+  id: "97",
+  urls: ["bsc-testnet-rpc.publicnode.com"],
+  chainSelector: 97
+};
+
+// clf/src/common/rpcs/133.json
+var __default4 = {
+  id: "133",
+  urls: ["hashkey-testnet.drpc.org"],
+  chainSelector: 133
+};
+
+// clf/src/common/rpcs/137.json
+var __default5 = {
   id: "137",
   urls: [
     "gateway.tenderly.co/public/polygon",
@@ -14743,22 +14757,92 @@ var __default3 = {
   chainSelector: 137
 };
 
+// clf/src/common/rpcs/157.json
+var __default6 = {
+  id: "157",
+  urls: ["puppynet.shibrpc.com"],
+  chainSelector: 157
+};
+
+// clf/src/common/rpcs/195.json
+var __default7 = {
+  id: "195",
+  urls: ["xlayertestrpc.okx.com"],
+  chainSelector: 195
+};
+
+// clf/src/common/rpcs/338.json
+var __default8 = {
+  id: "338",
+  urls: ["evm-t3.cronos.org"],
+  chainSelector: 338
+};
+
+// clf/src/common/rpcs/919.json
+var __default9 = {
+  id: "919",
+  urls: ["sepolia.mode.network"],
+  chainSelector: 919
+};
+
+// clf/src/common/rpcs/1114.json
+var __default10 = {
+  id: "1114",
+  urls: ["rpc.test2.btcs.network"],
+  chainSelector: 1114
+};
+
+// clf/src/common/rpcs/1301.json
+var __default11 = {
+  id: "1301",
+  urls: ["sepolia.unichain.org"],
+  chainSelector: 1301
+};
+
+// clf/src/common/rpcs/1328.json
+var __default12 = {
+  id: "1328",
+  urls: ["evm-rpc-testnet.sei-apis.com"],
+  chainSelector: 1328
+};
+
+// clf/src/common/rpcs/1946.json
+var __default13 = {
+  id: "1946",
+  urls: ["rpc.minato.soneium.org"],
+  chainSelector: 1946
+};
+
 // clf/src/common/rpcs/2021.json
-var __default4 = {
+var __default14 = {
   id: "2021",
   urls: ["saigon-testnet.roninchain.com/rpc"],
   chainSelector: 2021
 };
 
+// clf/src/common/rpcs/3636.json
+var __default15 = {
+  id: "3636",
+  urls: ["node.botanixlabs.dev"],
+  chainSelector: 3636
+};
+
+// clf/src/common/rpcs/5003.json
+var __default16 = {
+  id: "5003",
+  urls: ["rpc.sepolia.mantle.xyz"],
+  chainSelector: 5003
+};
+
 // clf/src/common/rpcs/6342.json
-var __default5 = {
+var __default17 = {
   id: "6342",
   urls: ["carrot.megaeth.com/rpc"],
   chainSelector: 6342
 };
 
 // clf/src/common/rpcs/8453.json
-var __default6 = {
+var __default18 = {
   id: "8453",
   urls: [
     "gateway.tenderly.co/public/base",
@@ -14779,8 +14863,22 @@ var __default6 = {
   chainSelector: 8453
 };
 
+// clf/src/common/rpcs/10143.json
+var __default19 = {
+  id: "10143",
+  urls: ["testnet-rpc.monad.xyz"],
+  chainSelector: 10143
+};
+
+// clf/src/common/rpcs/10200.json
+var __default20 = {
+  id: "10200",
+  urls: ["rpc.chiadochain.net"],
+  chainSelector: 10200
+};
+
 // clf/src/common/rpcs/42161.json
-var __default7 = {
+var __default21 = {
   id: "42161",
   urls: [
     "rpc.ankr.com/arbitrum",
@@ -14800,7 +14898,7 @@ var __default7 = {
 };
 
 // clf/src/common/rpcs/43113.json
-var __default8 = {
+var __default22 = {
   id: "43113",
   urls: [
     "rpc.ankr.com/avalanche_fuji",
@@ -14814,7 +14912,7 @@ var __default8 = {
 };
 
 // clf/src/common/rpcs/43114.json
-var __default9 = {
+var __default23 = {
   id: "43114",
   urls: [
     "rpc.ankr.com/avalanche",
@@ -14833,8 +14931,41 @@ var __default9 = {
   chainSelector: 43114
 };
 
+// clf/src/common/rpcs/44787.json
+var __default24 = {
+  id: "44787",
+  urls: ["alfajores-forno.celo-testnet.org"],
+  chainSelector: 44787
+};
+
+// clf/src/common/rpcs/48899.json
+var __default25 = {
+  id: "48899",
+  urls: ["testnet.zircuit.com"],
+  chainSelector: 48899
+};
+
+// clf/src/common/rpcs/57054.json
+var __default26 = {
+  id: "57054",
+  urls: [
+    "endpoints.omniatech.io/v1/op/sepolia/public",
+    "optimism-sepolia.gateway.tenderly.co",
+    "optimism-sepolia.api.onfinality.io/public",
+    "api.zan.top/opt-sepolia"
+  ],
+  chainSelector: 57054
+};
+
+// clf/src/common/rpcs/59141.json
+var __default27 = {
+  id: "59141",
+  urls: ["linea-sepolia-rpc.publicnode.com"],
+  chainSelector: 59141
+};
+
 // clf/src/common/rpcs/80002.json
-var __default10 = {
+var __default28 = {
   id: "80002",
   urls: [
     "rpc.ankr.com/polygon_amoy",
@@ -14846,7 +14977,7 @@ var __default10 = {
 };
 
 // clf/src/common/rpcs/84532.json
-var __default11 = {
+var __default29 = {
   id: "84532",
   urls: [
     "base-sepolia.gateway.tenderly.co",
@@ -14855,15 +14986,36 @@ var __default11 = {
   chainSelector: 84532
 };
 
+// clf/src/common/rpcs/200810.json
+var __default30 = {
+  id: "200810",
+  urls: ["testnet-rpc.bitlayer.org"],
+  chainSelector: 200810
+};
+
 // clf/src/common/rpcs/421614.json
-var __default12 = {
+var __default31 = {
   id: "421614",
   urls: ["arbitrum-sepolia-rpc.publicnode.com", "arbitrum-sepolia.drpc.org"],
   chainSelector: 421614
 };
 
+// clf/src/common/rpcs/534351.json
+var __default32 = {
+  id: "534351",
+  urls: ["scroll-sepolia-rpc.publicnode.com"],
+  chainSelector: 534351
+};
+
+// clf/src/common/rpcs/763373.json
+var __default33 = {
+  id: "763373",
+  urls: ["rpc-gel-sepolia.inkonchain.com"],
+  chainSelector: 763373
+};
+
 // clf/src/common/rpcs/11155111.json
-var __default13 = {
+var __default34 = {
   id: "11155111",
   urls: [
     "gateway.tenderly.co/public/sepolia",
@@ -14881,7 +15033,7 @@ var __default13 = {
 };
 
 // clf/src/common/rpcs/11155420.json
-var __default14 = {
+var __default35 = {
   id: "11155420",
   urls: [
     "endpoints.omniatech.io/v1/op/sepolia/public",
@@ -14892,22 +15044,51 @@ var __default14 = {
   chainSelector: 11155420
 };
 
+// clf/src/common/rpcs/168587773.json
+var __default36 = {
+  id: "168587773",
+  urls: ["sepolia.blast.io"],
+  chainSelector: 168587773
+};
+
 // clf/src/common/rpcLoader.ts
 var rpcConfigs = {
   "1": __default,
   "10": __default2,
-  "11155111": __default13,
-  "11155420": __default14,
-  "137": __default3,
-  "42161": __default7,
-  "421614": __default12,
-  "43113": __default8,
-  "43114": __default9,
-  "80002": __default10,
-  "8453": __default6,
-  "84532": __default11,
-  "6342": __default5,
-  "2021": __default4
+  "11155111": __default34,
+  "11155420": __default35,
+  "137": __default5,
+  "42161": __default21,
+  "421614": __default31,
+  "43113": __default22,
+  "43114": __default23,
+  "80002": __default28,
+  "8453": __default18,
+  "84532": __default29,
+  "6342": __default17,
+  "2021": __default14,
+  "57054": __default26,
+  "10143": __default19,
+  "59141": __default27,
+  "97": __default3,
+  "1946": __default13,
+  "200810": __default30,
+  "168587773": __default36,
+  "3636": __default15,
+  "44787": __default24,
+  "1114": __default10,
+  "338": __default8,
+  "10200": __default20,
+  "133": __default4,
+  "763373": __default33,
+  "5003": __default16,
+  "534351": __default32,
+  "1328": __default12,
+  "157": __default6,
+  "1301": __default11,
+  "195": __default7,
+  "48899": __default25,
+  "919": __default9
 };
 
 // node_modules/viem/_esm/op-stack/contracts.js
@@ -16506,16 +16687,38 @@ function getConceroVerifier() {
 }
 var CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 var conceroRouters = {
-  "1": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
-  "10": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
+  // "1": CONCERO_ROUTER_ETHEREUM,
+  // "10": CONCERO_ROUTER_OPTIMISM,
   // testnet
   "421614": "0x4dEbca8c425561d190fb225977BA3ffcdeBC0baE",
   "84532": "0x842F3aA12bc34ff8c202a55488691A5bDcADF52a",
   "43113": "0xA7D39A04E11ed69CfD1c01b04c705AB5a5bDc066",
-  "80002": "0xbe43f1eAb754144b31B90Ee2D6E036b9AB3cC5B4",
-  "11155420": "0xbd480d6B8E6c18C397C408eD6c30B8e27f1B9234",
+  "80002": "0xD0E5Bb624619771696915cD5DB4643170Fc33342",
+  "11155420": "0x09526c5844F836f4EF326924d8AA484F8Cb135A1",
   "2021": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "6342": "0x73b8Bbbb33f6F7aC8D0b5d1f27685a6106783328"
+  "6342": "0x73b8Bbbb33f6F7aC8D0b5d1f27685a6106783328",
+  "11155111": "0x5e164d9bfce0B1B374c23a44f4e187448Ee86535",
+  "57054": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4",
+  "1946": "0x2BdfD3b25AD6f2796BFD44039b29f6BAA41e9B3c",
+  "59141": "0xA80a668566517BeE1ab71df78B384e6281b02625",
+  "97": "0xA80a668566517BeE1ab71df78B384e6281b02625",
+  "10143": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "33111": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4",
+  "200810": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "1685877": "0x2F76a32Fa252E57c45e245aeCe84B40A55a904D7",
+  "3636": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "44787": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4",
+  "10200": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "133": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4",
+  "763373": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "5003": "0xFc282e2E6ED03583f2ae000C401dC12A86F5F886",
+  "534351": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "1328": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "157": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "1301": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "195": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "48899": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "919": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
 };
 
 // clf/src/messageReport/constants/config.ts

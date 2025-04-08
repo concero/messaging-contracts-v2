@@ -4,6 +4,7 @@ import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
+import fetchTransactionTask from "./fetchTransaction.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import sendConceroMessage from "./sendConceroMessage";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
@@ -28,4 +29,5 @@ export {
 	deployExampleClient,
 	withdrawFees,
 	deployConceroPauseToAllChains,
+	fetchTransactionTask,
 };

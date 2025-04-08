@@ -46,7 +46,7 @@ import {
 } from "../types/ConceroNetwork";
 import { getEnvVar, getWallet } from "../utils";
 import { hardhatViemChain, localhostViemChain } from "../utils/localhostViemChain";
-import { astarShibuya, coreTestnet } from "./customViemChains";
+import { apechainCurtis, astarShibuya, coreTestnet } from "./customViemChains";
 import { rpcUrl, urls } from "./rpcUrls";
 
 const DEFAULT_BLOCK_CONFIRMATIONS = 2;
@@ -83,7 +83,7 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 	sepolia: "SEPOLIA",
 	optimismSepolia: "OPTIMISM_SEPOLIA",
 	arbitrumSepolia: "ARBITRUM_SEPOLIA",
-	avalancheFuji: "FUJI",
+	avalancheFuji: "AVALANCHE_FUJI",
 	baseSepolia: "BASE_SEPOLIA",
 	polygonAmoy: "POLYGON_AMOY",
 	lineaSepolia: "LINEA_SEPOLIA",
@@ -302,7 +302,18 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 		viemChain: soneiumMinato,
 		saveDeployments: false,
 	},
-
+	apechainCurtis: {
+		name: "apechainCurtis",
+		type: networkTypes.testnet,
+		chainId: 33111,
+		url: urls.apechainCurtis[0],
+		rpcUrls: urls.apechainCurtis,
+		accounts: [testnetDeployerPK, testnetProxyDeployerPK],
+		chainSelector: 33111,
+		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
+		viemChain: apechainCurtis,
+		saveDeployments,
+	},
 	avalancheFuji: {
 		name: "avalancheFuji",
 		type: networkTypes.testnet,
@@ -354,11 +365,11 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 	blastSepolia: {
 		name: "blastSepolia",
 		type: networkTypes.testnet,
-		chainId: 168_587_773,
+		chainId: 168587773,
 		url: urls.blastSepolia[0],
 		rpcUrls: urls.blastSepolia,
 		accounts: [testnetDeployerPK, testnetProxyDeployerPK],
-		chainSelector: 168_587_773n,
+		chainSelector: 1685877n,
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: blastSepolia,
 		saveDeployments,
@@ -462,11 +473,11 @@ export const testnetNetworks: Record<ConceroTestnetNetworkNames, ConceroNetwork>
 	scrollSepolia: {
 		name: "scrollSepolia",
 		type: networkTypes.testnet,
-		chainId: 534_351,
+		chainId: 534351,
 		url: urls.scrollSepolia[0],
 		rpcUrls: urls.scrollSepolia,
 		accounts: [testnetDeployerPK, testnetProxyDeployerPK],
-		chainSelector: 534_351n,
+		chainSelector: 534351n,
 		confirmations: DEFAULT_BLOCK_CONFIRMATIONS,
 		viemChain: scrollSepolia,
 		saveDeployments,

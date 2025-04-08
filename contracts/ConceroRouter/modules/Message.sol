@@ -8,7 +8,6 @@ pragma solidity 0.8.28;
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {Message as MessageLib} from "../../common/libraries/Message.sol";
 import {Decoder as DecoderLib} from "../../common/libraries/Decoder.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 
@@ -33,6 +32,10 @@ library Errors {
     error InvalidMessageHashSum();
     error UnauthorizedOperator();
     error InvalidDstChainSelector();
+    error InvalidClientMessageConfig();
+    error InvalidDstChainData();
+    error InvalidSrcChainData();
+    error MessageTooLarge();
 }
 
 abstract contract Message is ClfSigner, IConceroRouter {
@@ -47,6 +50,100 @@ abstract contract Message is ClfSigner, IConceroRouter {
         address[4] memory clfSigners
     ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {}
 
+    function validateClientMessageRequest(
+        bytes32 config,
+        uint24 chainSelector,
+        bytes calldata dstChainData,
+        bytes calldata message
+    ) internal view {
+        validateClientMessageConfig(config, chainSelector);
+        require(dstChainData.length > 0, Errors.InvalidDstChainData());
+        require(message.length < CommonConstants.MESSAGE_MAX_SIZE, Errors.MessageTooLarge());
+    }
+
+    function validateClientMessageConfig(bytes32 clientConfig, uint24 chainSelector) internal view {
+        uint256 configValue = uint256(clientConfig);
+
+        uint24 dstChainSelector = uint24(configValue >> offsets.OFFSET_DST_CHAIN);
+        uint16 minSrcConfirmations = uint16(configValue >> offsets.OFFSET_MIN_SRC_CONF);
+        uint16 minDstConfirmations = uint16(configValue >> offsets.OFFSET_MIN_DST_CONF);
+        // uint8 additionalRelayers = uint8(configValue >> offsets.OFFSET_RELAYER_CONF);
+        // bool isCallbackable = (configValue >> offsets.OFFSET_CALLBACKABLE & 1) != 0;
+        CommonTypes.FeeToken feeToken = CommonTypes.FeeToken(
+            uint8(configValue >> offsets.OFFSET_FEE_TOKEN)
+        );
+
+        require(feeToken == CommonTypes.FeeToken.native, Errors.InvalidClientMessageConfig());
+
+        //@notice: this is being moved to conceroVerifier
+        // require(
+        //     SupportedChains.isChainSupported(dstChainSelector),
+        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
+        // );
+        // require(
+        //     minSrcConfirmations > 0 &&
+        //         minSrcConfirmations <= SupportedChains.maxConfirmations(chainSelector),
+        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
+        // );
+        // require(
+        //     minDstConfirmations > 0 &&
+        //         minDstConfirmations <= SupportedChains.maxConfirmations(dstChainSelector),
+        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
+        // );
+    }
+
+    function buildInternalMessageConfig(
+        bytes32 clientMessageConfig,
+        uint24 srcChainSelector
+    ) internal pure returns (bytes32) {
+        return
+            bytes32(
+                uint256(clientMessageConfig) |
+                    (uint256(CommonConstants.MESSAGE_VERSION) << offsets.OFFSET_VERSION) |
+                    (uint256(srcChainSelector) << offsets.OFFSET_SRC_CHAIN)
+            );
+    }
+
+    function buildInternalMessage(
+        bytes32 clientMessageConfig,
+        bytes calldata dstChainData,
+        bytes calldata message,
+        uint24 chainSelector,
+        uint256 nonce
+    ) internal view returns (bytes32 messageId, bytes32 internalMessageConfig) {
+        validateClientMessageRequest(clientMessageConfig, chainSelector, dstChainData, message);
+
+        Types.EvmSrcChainData memory srcChainData = Types.EvmSrcChainData({
+            sender: msg.sender,
+            blockNumber: block.number
+        });
+
+        internalMessageConfig = buildInternalMessageConfig(clientMessageConfig, chainSelector);
+
+        messageId = buildMessageId(
+            nonce,
+            srcChainData.blockNumber,
+            srcChainData.sender,
+            chainSelector,
+            internalMessageConfig
+        );
+
+        return (messageId, internalMessageConfig);
+    }
+
+    function buildMessageId(
+        uint256 nonce,
+        uint256 blockNumber,
+        address sender,
+        uint64 chainSelector,
+        bytes32 internalMessageConfig
+    ) private view returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked(nonce, blockNumber, sender, chainSelector, internalMessageConfig)
+            );
+    }
+
     function conceroSend(
         bytes32 config,
         bytes calldata dstChainData,
@@ -54,7 +151,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
     ) external payable returns (bytes32) {
         _collectMessageFee(config, dstChainData);
 
-        (bytes32 messageId, bytes32 internalMessageConfig) = MessageLib.buildInternalMessage(
+        (bytes32 messageId, bytes32 internalMessageConfig) = buildInternalMessage(
             config,
             dstChainData,
             message,

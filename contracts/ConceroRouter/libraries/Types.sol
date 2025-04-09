@@ -11,7 +11,7 @@ big-endian bit ordering
 (most significant bits first, where bit 255 is the leftmost bit and bit 0 is the rightmost bit)
 
 | INTERNAL MESSAGE CONFIG| Bits | Description                           |
-|------------------------|------|---------------------------------------|
+|------------------------|--    ----|---------------------------------------|
 | version                | 8    | Config version (0-255)                |
 | srcChainSelector       | 24   | Source chain ID                       |
 | Reserved/Unused        | 32   | Reserved for alignment (padding)      |

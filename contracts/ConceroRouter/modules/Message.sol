@@ -75,21 +75,20 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         require(feeToken == CommonTypes.FeeToken.native, Errors.InvalidClientMessageConfig());
 
-        //@notice: this is being moved to conceroVerifier
-        // require(
-        //     SupportedChains.isChainSupported(dstChainSelector),
-        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
-        // );
-        // require(
-        //     minSrcConfirmations > 0 &&
-        //         minSrcConfirmations <= SupportedChains.maxConfirmations(chainSelector),
-        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
-        // );
-        // require(
-        //     minDstConfirmations > 0 &&
-        //         minDstConfirmations <= SupportedChains.maxConfirmations(dstChainSelector),
-        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
-        // );
+        require(
+            isChainSupported(dstChainSelector),
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
+        );
+        require(
+            minSrcConfirmations > 0 &&
+                minSrcConfirmations <= SupportedChains.maxConfirmations(chainSelector),
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
+        );
+        require(
+            minDstConfirmations > 0 &&
+                minDstConfirmations <= SupportedChains.maxConfirmations(dstChainSelector),
+            InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
+        );
     }
 
     function buildInternalMessageConfig(

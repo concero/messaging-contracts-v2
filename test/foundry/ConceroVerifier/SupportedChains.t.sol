@@ -152,11 +152,7 @@ contract SupportedChains is ConceroVerifierTest {
 
         // 2 chains should be supported (Chain 2 and Chain 4)
         uint24[] memory supportedChains = conceroVerifier.getSupportedChains();
-        assertEq(
-            supportedChains.length,
-            2,
-            "Should have exactly 2 supported chains"
-        );
+        assertEq(supportedChains.length, 2, "Should have exactly 2 supported chains");
 
         vm.stopPrank();
     }
@@ -221,18 +217,11 @@ contract SupportedChains is ConceroVerifierTest {
     }
 
     function test_isChainSupported_ReturnsFalseForUnknownChain() public {
-        assertFalse(
-            conceroVerifier.isChainSupported(999),
-            "Unknown chain should not be supported"
-        );
+        assertFalse(conceroVerifier.isChainSupported(999), "Unknown chain should not be supported");
     }
 
     function test_getSupportedChains_EmptyByDefault() public {
         uint24[] memory supportedChains = conceroVerifier.getSupportedChains();
-        assertEq(
-            supportedChains.length,
-            0,
-            "Supported chains should be empty by default"
-        );
+        assertEq(supportedChains.length, 0, "Supported chains should be empty by default");
     }
 }

@@ -13,17 +13,10 @@ import {Operator} from "./modules/Operator.sol";
 import {Message} from "./modules/Message.sol";
 import {GenericStorage} from "./modules/GenericStorage.sol";
 import {Owner} from "./modules/Owner.sol";
-import {SupportedChains} from "./modules/SupportedChains.sol";
+
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 
-contract ConceroRouter is
-    IConceroRouter,
-    Operator,
-    Message,
-    GenericStorage,
-    Owner,
-    SupportedChains
-{
+contract ConceroRouter is IConceroRouter, Operator, Message, GenericStorage, Owner {
     constructor(
         uint24 chainSelector,
         address feedUpdater,

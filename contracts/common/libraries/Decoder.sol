@@ -45,31 +45,6 @@ library Decoder {
         requester = address(uint160(uint256(reportConfig)));
     }
 
-    function decodeInternalMessageConfig(
-        bytes32 config
-    ) internal pure returns (RouterTypes.InternalMessageConfig memory) {
-        uint256 configUint = uint256(config);
-
-        return
-            RouterTypes.InternalMessageConfig({
-                version: uint8((configUint >> offsets.OFFSET_VERSION) & BitMasks.MASK_8),
-                srcChainSelector: uint24(
-                    (configUint >> offsets.OFFSET_SRC_CHAIN) & BitMasks.MASK_24
-                ),
-                dstChainSelector: uint24(
-                    (configUint >> offsets.OFFSET_DST_CHAIN) & BitMasks.MASK_24
-                ),
-                minSrcConfirmations: uint16(
-                    (configUint >> offsets.OFFSET_MIN_SRC_CONF) & BitMasks.MASK_16
-                ),
-                minDstConfirmations: uint16(
-                    (configUint >> offsets.OFFSET_MIN_DST_CONF) & BitMasks.MASK_16
-                ),
-                relayerConfig: uint8((configUint >> offsets.OFFSET_RELAYER_CONF) & BitMasks.MASK_8),
-                isCallbackable: (configUint & (BitMasks.MASK_1 << offsets.OFFSET_CALLBACKABLE)) != 0
-            });
-    }
-
     function _decodeCLFMessageReportResponse(
         bytes memory response
     ) internal pure returns (CommonTypes.MessageReportResult memory) {

@@ -77,4 +77,23 @@ abstract contract Owner is Base {
     function setNativeUsdRate(uint256 amount) external onlyOwner {
         s.priceFeed().nativeUsdRate = amount;
     }
+
+    /**
+     * @notice Set support status for multiple chains at once
+     * @param chainSelectors Array of chain selectors to update
+     * @param isSupported Array of boolean values indicating support status for each corresponding chain selector
+     */
+    function setSupportedChains(
+        uint24[] calldata chainSelectors,
+        bool[] calldata isSupported
+    ) external onlyOwner {
+        require(chainSelectors.length == isSupported.length, CommonErrors.LengthMismatch());
+
+        for (uint256 index = 0; index < chainSelectors.length; index++) {
+            uint24 chainSelector = chainSelectors[index];
+            bool supported = isSupported[index];
+
+            s.verifier().isChainSupported[chainSelector] = supported;
+        }
+    }
 }

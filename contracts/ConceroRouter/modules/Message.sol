@@ -356,4 +356,8 @@ abstract contract Message is ClfSigner, IConceroRouter {
         require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeTokenType());
         return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
     }
+
+    function isChainSupported(uint24 chainSelector) public view returns (bool) {
+        return s.router().isChainSupported[chainSelector];
+    }
 }

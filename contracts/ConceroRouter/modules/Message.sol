@@ -297,4 +297,8 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         return _calculateMessageFee(dstChainSelector, feeToken, dstChainData);
     }
+
+    function isChainSupported(uint24 chainSelector) public view returns (bool) {
+        return s.router().isChainSupported[chainSelector];
+    }
 }

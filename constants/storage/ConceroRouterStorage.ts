@@ -16,41 +16,31 @@ const Namespaces = {
  * @dev All slots are calculated using standard Solidity storage layout rules with namespace isolation
  */
 const RouterSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 49;
-	const UINTS_COUNT = 1;
-	const ARRAYS_COUNT = 1;
-
-	const nonce = 0;
-	const supportedChainSelectors = UINTS_COUNT + RESERVED_VARIABLE_GAP;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
-		nonce,
-		supportedChainSelectors,
-		isMessageSent: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 0,
-		isMessageProcessed:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 1,
-		receivedMessages:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 2,
-		messageConfirmationsByProtocol:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 3,
-		isChainSupported:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 4,
+		nonce: 0,
+		isMessageSent: _var_gap + _arr_gap + 1,
+		isMessageProcessed: _var_gap + _arr_gap + 2,
+		receivedMessages: _var_gap + _arr_gap + 3,
+		messageConfirmationsByProtocol: _var_gap + _arr_gap + 4,
+		isChainSupported: _var_gap + _arr_gap + 5,
 	});
 })();
+
 /**
  * @title OperatorSlots
  * @notice Storage slot definitions for ConceroOperator contract
  * @dev All slots are calculated using standard Solidity storage layout rules
  */
 const OperatorSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
-	const UINTS_COUNT = 1;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
 		totalFeesEarnedNative: 0,
-		feesEarnedNative: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
+		feesEarnedNative: _var_gap + _arr_gap + 1,
 	});
 })();
 
@@ -60,15 +50,13 @@ const OperatorSlots = (() => {
  * @dev All slots are calculated using standard Solidity storage layout rules with namespace isolation
  */
 const PriceFeedSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
-	const UINTS_COUNT = 1;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
 		nativeUsdRate: 0,
-		lastGasPrices: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
-		nativeNativeRates: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
+		lastGasPrices: _var_gap + _arr_gap + 1,
+		nativeNativeRates: _var_gap + _arr_gap + 2,
 	});
 })();
-
 export { RouterSlots, OperatorSlots, PriceFeedSlots, Namespaces };

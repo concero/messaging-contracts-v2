@@ -16,22 +16,15 @@ export const Namespaces = {
  * @dev All slots are calculated using standard Solidity storage layout rules
  */
 const VerifierSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 49;
-	const UINTS_COUNT = 1;
-	const ARRAYS_COUNT = 1;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
 		nonce: 0,
-		supportedChainSelectors: UINTS_COUNT + RESERVED_VARIABLE_GAP,
-		clfRequestStatus:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 0,
-		pendingCLFRequests:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 1,
-		pendingMessageReports:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 2,
-		isChainSupported:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + ARRAYS_COUNT + 3,
+		clfRequestStatus: _var_gap + _arr_gap + 1,
+		pendingCLFRequests: _var_gap + _arr_gap + 2,
+		pendingMessageReports: _var_gap + _arr_gap + 3,
+		isChainSupported: _var_gap + _arr_gap + 4,
 	});
 })();
 
@@ -41,18 +34,17 @@ const VerifierSlots = (() => {
  * @dev All slots are calculated using standard Solidity storage layout rules
  */
 const OperatorSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
-	const UINTS_COUNT = 2;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
 		totalFeesEarnedNative: 0,
 		totalDepositsNative: 1,
-		registeredOperators: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
-		isRegistered: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
-		depositsNative: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2,
-		walletAddress: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 3,
-		feesEarnedNative: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 4,
+		registeredOperators: _var_gap + _arr_gap + 2,
+		isRegistered: _var_gap + _arr_gap + 3,
+		depositsNative: _var_gap + _arr_gap + 4,
+		walletAddress: _var_gap + _arr_gap + 5,
+		feesEarnedNative: _var_gap + _arr_gap + 6,
 	});
 })();
 
@@ -62,14 +54,13 @@ const OperatorSlots = (() => {
  * @dev All slots are calculated using standard Solidity storage layout rules
  */
 const PriceFeedSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
-	const UINTS_COUNT = 1;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
 		nativeUsdRate: 0,
-		lastGasPrices: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
-		nativeNativeRates: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
+		lastGasPrices: _var_gap + _arr_gap + 1,
+		nativeNativeRates: _var_gap + _arr_gap + 2,
 	});
 })();
 

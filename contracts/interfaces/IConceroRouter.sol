@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {EvmDstChainData} from "../ConceroClient/ConceroTypes.sol";
+import {ConceroTypes} from "../ConceroClient/ConceroTypes.sol";
 
 //todo: change to conceroSent( indexed id, version, dstChainSelector, bool shouldFinaliseSrc, dstChainData, sender, message)
 event ConceroMessageSent(
@@ -26,7 +26,7 @@ interface IConceroRouter {
     function conceroSend(
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
-        EvmDstChainData dstChainData,
+        ConceroTypes.EvmDstChainData memory dstChainData,
         bytes calldata message
     ) external payable returns (bytes32 messageId);
 

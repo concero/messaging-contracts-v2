@@ -14,8 +14,6 @@ import {Base} from "./Base.sol";
 abstract contract SupportedChains is Base {
     using s for s.Router;
 
-    error UnsupportedChainSelector();
-
     function isChainSupported(uint24 chainSelector) public view returns (bool) {
         return s.router().isChainSupported[chainSelector];
     }
@@ -36,30 +34,6 @@ abstract contract SupportedChains is Base {
             bool supported = isSupported[index];
 
             s.router().isChainSupported[chainSelector] = supported;
-
-            if (supported) {
-                s.router().supportedChainSelectors.push(chainSelector);
-            } else {
-                uint256 length = s.router().supportedChainSelectors.length;
-                for (uint256 i = 0; i < length; i++) {
-                    if (s.router().supportedChainSelectors[i] == chainSelector) {
-                        if (i < length - 1) {
-                            s.router().supportedChainSelectors[i] = s.router().supportedChainSelectors[length - 1];
-                        }
-                        s.router().supportedChainSelectors.pop();
-                        break;
-                    }
-                }
-            }
         }
     }
-
-    function getSupportedChains() public view returns (uint24[] memory) {
-        uint24[] memory supportedChains = new uint24[](s.router().supportedChainSelectors.length);
-        for (uint256 i = 0; i < s.router().supportedChainSelectors.length; i++) {
-            supportedChains[i] = s.router().supportedChainSelectors[i];
-        }
-        return supportedChains;
-    }
-
 }

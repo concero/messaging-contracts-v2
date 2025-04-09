@@ -36,6 +36,7 @@ library Errors {
     error InvalidDstChainData();
     error InvalidSrcChainData();
     error MessageTooLarge();
+    error FinalisationIsNotSupportedYet();
 }
 
 abstract contract Message is ClfSigner, IConceroRouter {
@@ -44,130 +45,42 @@ abstract contract Message is ClfSigner, IConceroRouter {
     using s for s.PriceFeed;
     using s for s.Operator;
 
+    uint8 private constant ROUTER_VERSION = 1;
+
     constructor(
         address conceroVerifier,
         uint64 conceroVerifierSubId,
         address[4] memory clfSigners
     ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {}
 
-    function validateClientMessageRequest(
-        bytes32 config,
-        uint24 chainSelector,
-        bytes calldata dstChainData,
-        bytes calldata message
-    ) internal view {
-        validateClientMessageConfig(config, chainSelector);
-        require(dstChainData.length > 0, Errors.InvalidDstChainData());
-        require(message.length < CommonConstants.MESSAGE_MAX_SIZE, Errors.MessageTooLarge());
-    }
-
-    function validateClientMessageConfig(bytes32 clientConfig, uint24 chainSelector) internal view {
-        uint256 configValue = uint256(clientConfig);
-
-        uint24 dstChainSelector = uint24(configValue >> offsets.OFFSET_DST_CHAIN);
-        uint16 minSrcConfirmations = uint16(configValue >> offsets.OFFSET_MIN_SRC_CONF);
-        uint16 minDstConfirmations = uint16(configValue >> offsets.OFFSET_MIN_DST_CONF);
-        // uint8 additionalRelayers = uint8(configValue >> offsets.OFFSET_RELAYER_CONF);
-        // bool isCallbackable = (configValue >> offsets.OFFSET_CALLBACKABLE & 1) != 0;
-        CommonTypes.FeeToken feeToken = CommonTypes.FeeToken(
-            uint8(configValue >> offsets.OFFSET_FEE_TOKEN)
-        );
-
-        require(feeToken == CommonTypes.FeeToken.native, Errors.InvalidClientMessageConfig());
-
-        //        require(
-        //            isChainSupported(dstChainSelector),
-        //            InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
-        //        );
-        //        require(
-        //            minSrcConfirmations > 0 &&
-        //                minSrcConfirmations <= SupportedChains.maxConfirmations(chainSelector),
-        //            InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinSrcConfirmations)
-        //        );
-        //        require(
-        //            minDstConfirmations > 0 &&
-        //                minDstConfirmations <= SupportedChains.maxConfirmations(dstChainSelector),
-        //            InvalidClientMessageConfig(MessageConfigErrorType.InvalidMinDstConfirmations)
-        //        );
-    }
-
-    function buildInternalMessageConfig(
-        bytes32 clientMessageConfig,
-        uint24 srcChainSelector
-    ) internal pure returns (bytes32) {
-        return
-            bytes32(
-                uint256(clientMessageConfig) |
-                    (uint256(CommonConstants.MESSAGE_VERSION) << offsets.OFFSET_VERSION) |
-                    (uint256(srcChainSelector) << offsets.OFFSET_SRC_CHAIN)
-            );
-    }
-
-    function buildInternalMessage(
-        bytes32 clientMessageConfig,
-        bytes calldata dstChainData,
-        bytes calldata message,
-        uint24 chainSelector,
-        uint256 nonce
-    ) internal view returns (bytes32 messageId, bytes32 internalMessageConfig) {
-        validateClientMessageRequest(clientMessageConfig, chainSelector, dstChainData, message);
-
-        Types.EvmSrcChainData memory srcChainData = Types.EvmSrcChainData({
-            sender: msg.sender,
-            blockNumber: block.number
-        });
-
-        internalMessageConfig = buildInternalMessageConfig(clientMessageConfig, chainSelector);
-
-        messageId = buildMessageId(
-            nonce,
-            srcChainData.blockNumber,
-            srcChainData.sender,
-            chainSelector,
-            internalMessageConfig
-        );
-
-        return (messageId, internalMessageConfig);
-    }
-
-    function buildMessageId(
-        uint256 nonce,
-        uint256 blockNumber,
-        address sender,
-        uint64 chainSelector,
-        bytes32 internalMessageConfig
-    ) private view returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(nonce, blockNumber, sender, chainSelector, internalMessageConfig)
-            );
-    }
-
     function conceroSend(
-        bytes32 config,
+        uint24 dstChainSelector,
+        bool shouldFinaliseSrc,
+        address feeToken,
         bytes calldata dstChainData,
         bytes calldata message
     ) external payable returns (bytes32) {
-        _collectMessageFee(config, dstChainData);
-
-        (bytes32 messageId, bytes32 internalMessageConfig) = buildInternalMessage(
-            config,
+        _validateMessageParams(
+            dstChainSelector,
+            shouldFinaliseSrc,
+            feeToken,
             dstChainData,
-            message,
-            i_chainSelector,
-            // @dev TODO: we can use ++s.router().nonce
-            s.router().nonce
+            message
         );
+        _collectMessageFee(dstChainSelector, feeToken, dstChainData);
 
-        s.router().nonce += 1;
+        bytes32 messageId = _buildMessageId(dstChainSelector);
 
         emit ConceroMessageSent(
-            internalMessageConfig,
             messageId,
+            ROUTER_VERSION,
+            shouldFinaliseSrc,
+            dstChainSelector,
             dstChainData,
-            message,
-            abi.encode(msg.sender)
+            abi.encode(msg.sender),
+            message
         );
+
         return messageId;
     }
 
@@ -242,6 +155,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
     }
 
+    function getRouterVersion() external pure returns (uint8) {
+        return ROUTER_VERSION;
+    }
+
     /**
      * @notice Delivers the message to the receiver contract if valid.
      * @param messageId The unique identifier of the message.
@@ -291,39 +208,62 @@ abstract contract Message is ClfSigner, IConceroRouter {
     }
 
     /* INTERNAL FUNCTIONS */
-    function _collectMessageFee(bytes32 clientMessageConfig, bytes memory dstChainData) internal {
-        Types.FeeToken feeToken = Types.FeeToken(
-            uint8(uint256(clientMessageConfig >> offsets.OFFSET_FEE_TOKEN) & BitMasks.MASK_8)
-        );
 
-        uint256 messageFee = _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
+    function _validateMessageParams(
+        uint24 dstChainSelector,
+        bool shouldFinaliseSrc,
+        address feeToken,
+        bytes calldata dstChainData,
+        bytes calldata message
+    ) internal view {
+        require(feeToken == address(0), Errors.UnsupportedFeeTokenType());
+        require(dstChainData.length > 0, Errors.InvalidDstChainData());
+        require(message.length < CommonConstants.MESSAGE_MAX_SIZE, Errors.MessageTooLarge());
+        require(!shouldFinaliseSrc, Errors.FinalisationIsNotSupportedYet());
+        // require(
+        //     isChainSupported(dstChainSelector),
+        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
+        // );
+    }
 
-        if (feeToken == Types.FeeToken.native) {
+    function _buildMessageId(uint24 dstChainSelector) private returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked(
+                    ++s.router().nonce,
+                    block.number,
+                    msg.sender,
+                    i_chainSelector,
+                    dstChainSelector
+                )
+            );
+    }
+
+    function _collectMessageFee(
+        uint24 dstChainSelector,
+        address feeToken,
+        bytes memory dstChainData
+    ) internal {
+        uint256 messageFee = _calculateMessageFee(dstChainSelector, feeToken, dstChainData);
+
+        if (feeToken == address(0)) {
             require(msg.value >= messageFee, CommonErrors.InsufficientFee(msg.value, messageFee));
+            // TODO: is it really needed?
             payable(address(this)).transfer(messageFee);
-        }
-        //        else if (feeToken == Types.FeeToken.usdc) {
-        //            IERC20(i_USDC).safeTransferFrom(msg.sender, address(this), messageFee);
-        //        }
-        else {
+        } else {
             revert Errors.UnsupportedFeeTokenType();
         }
     }
 
-    //todo: adhere to SOLID. it shouldnt extract values from client config, do it on the level above
     function _calculateMessageFee(
-        bytes32 clientMessageConfig,
-        bytes memory dstChainData,
-        Types.FeeToken feeToken
+        uint24 dstChainSelector,
+        address feeToken,
+        bytes memory dstChainData
     ) internal view returns (uint256) {
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
         Types.EvmDstChainData memory evmDstChainData = abi.decode(
             dstChainData,
             (Types.EvmDstChainData)
-        );
-
-        uint24 dstChainSelector = uint24(
-            uint256(clientMessageConfig >> offsets.OFFSET_DST_CHAIN) & BitMasks.MASK_24
         );
 
         uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
@@ -339,7 +279,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         uint256 totalFeeNative = baseFeeNative + adjustedGasFeeNative;
 
-        if (feeToken == Types.FeeToken.native) {
+        if (feeToken == address(0)) {
             return totalFeeNative;
         }
 
@@ -347,13 +287,14 @@ abstract contract Message is ClfSigner, IConceroRouter {
     }
 
     function getMessageFee(
-        bytes32 clientMessageConfig,
-        bytes memory dstChainData
+        uint24 dstChainSelector,
+        bool shouldFinaliseSrc,
+        address feeToken,
+        bytes calldata dstChainData
     ) external view returns (uint256) {
-        Types.FeeToken feeToken = Types.FeeToken(
-            uint8(uint256(clientMessageConfig >> offsets.OFFSET_FEE_TOKEN) & BitMasks.MASK_8)
-        );
-        require(feeToken == Types.FeeToken.native, Errors.UnsupportedFeeTokenType());
-        return _calculateMessageFee(clientMessageConfig, dstChainData, feeToken);
+        require(feeToken == address(0), Errors.UnsupportedFeeTokenType());
+        require(!shouldFinaliseSrc, Errors.FinalisationIsNotSupportedYet());
+
+        return _calculateMessageFee(dstChainSelector, feeToken, dstChainData);
     }
 }

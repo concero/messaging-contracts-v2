@@ -8,14 +8,14 @@ pragma solidity 0.8.28;
 
 import {ConceroTypes} from "../ConceroClient/ConceroTypes.sol";
 
-//todo: change to conceroSent( indexed id, version, dstChainSelector, bool shouldFinaliseSrc, dstChainData, sender, message)
 event ConceroMessageSent(
-    // @dev TODO: check if it needed
-    bytes32 indexed internalMessageConfig,
     bytes32 indexed messageId,
+    uint8 version,
+    bool shouldFinaliseSrc,
+    uint24 dstChainSelector,
     bytes dstChainData,
-    bytes message,
-    bytes sender
+    bytes sender,
+    bytes message
 );
 
 event ConceroMessageReceived(bytes32 indexed id);
@@ -26,12 +26,15 @@ interface IConceroRouter {
     function conceroSend(
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
-        ConceroTypes.EvmDstChainData memory dstChainData,
+        address feeToken,
+        bytes calldata dstChainData,
         bytes calldata message
     ) external payable returns (bytes32 messageId);
 
     function getMessageFee(
-        bytes32 clientMessageConfig,
-        bytes memory dstChainData
+        uint24 dstChainSelector,
+        bool shouldFinaliseSrc,
+        address feeToken,
+        bytes calldata dstChainData
     ) external view returns (uint256);
 }

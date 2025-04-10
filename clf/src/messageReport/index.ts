@@ -14,13 +14,12 @@ import { verifyMessageHash } from "./utils/verifyMessageHash";
 
 export async function main() {
 	const args = decodeInputs(bytesArgs);
-	const msgConfig = args.internalMessageConfig;
-	const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
+	const publicClient = getPublicClient(args.srcChainSelector.toString());
 
 	const [log, operators] = await Promise.all([
 		fetchConceroMessage(
 			publicClient,
-			conceroRouters[Number(msgConfig.srcChainSelector)],
+			conceroRouters[Number(args.srcChainSelector)],
 			args.messageId,
 			BigInt(args.srcChainData.blockNumber),
 		),
@@ -48,7 +47,7 @@ export async function main() {
 		messageId: args.messageId,
 		messageHashSum: args.messageHashSum,
 		sender,
-		srcChainSelector: msgConfig.srcChainSelector,
+		srcChainSelector: args.srcChainSelector,
 		dstChainSelector,
 		dstChainData,
 		shouldFinaliseSrc,

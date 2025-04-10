@@ -16896,55 +16896,6 @@ function packResult(result, packedReportConfig) {
   return hexStringToUint8Array(encodedClfReport);
 }
 
-// clf/src/common/bitMasks.ts
-var MASKS = {
-  UINT24: 0xffffffn,
-  // Mask for uint24 (24 bits)
-  UINT16: 0xffffn,
-  // Mask for uint16 (16 bits)
-  UINT8: 0xffn,
-  // Mask for uint8 (8 bits)
-  BOOL: 0x1n,
-  // Mask for 1 bit (bool)
-  UPPER_BYTE: 65280,
-  LOWER_BYTE: 255,
-  UPPER_BYTE_SHIFT: 8
-};
-
-// clf/src/messageReport/constants/internalMessageConfig.ts
-var INTERNAL_MESSAGE_CONFIG_OFFSETS = {
-  VERSION: 224,
-  SRC_CHAIN: 224,
-  DST_CHAIN: 168,
-  MIN_SRC_CONF: 152,
-  MIN_DST_CONF: 136,
-  RELAYER: 128,
-  CALLBACKABLE: 127
-};
-
-// clf/src/messageReport/utils/messageConfig.ts
-function decodeInternalMessageConfig(config2) {
-  const bigIntConfig = BigInt(config2);
-  return {
-    version: bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.VERSION) & MASKS.UINT8,
-    srcChainSelector: bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.SRC_CHAIN) & MASKS.UINT24,
-    dstChainSelector: bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.DST_CHAIN) & MASKS.UINT24,
-    minSrcConfirmations: bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.MIN_SRC_CONF) & MASKS.UINT16,
-    minDstConfirmations: bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.MIN_DST_CONF) & MASKS.UINT16,
-    relayerConfig: bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.RELAYER) & MASKS.UINT8,
-    isCallbackable: Boolean(bigIntConfig >> BigInt(INTERNAL_MESSAGE_CONFIG_OFFSETS.CALLBACKABLE) & MASKS.BOOL)
-  };
-}
-function validateInternalMessageConfig(config2) {
-  if (config2.version === 0n) handleError("10" /* CONFIG_INVALID_VERSION */);
-  if (config2.relayerConfig > 255n) handleError("11" /* CONFIG_INVALID_RELAYER_CONFIG */);
-  if (config2.minSrcConfirmations === 0n) handleError("12" /* CONFIG_INVALID_MIN_SRC_CONFIRMATIONS */);
-  if (config2.minDstConfirmations === 0n) handleError("13" /* CONFIG_INVALID_MIN_DST_CONFIRMATIONS */);
-  if (!viemChains[config2.srcChainSelector.toString()]) handleError("14" /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
-  if (!viemChains[config2.dstChainSelector.toString()]) handleError("15" /* CONFIG_INVALID_DST_CHAIN_SELECTOR */);
-  if (config2.srcChainSelector === config2.dstChainSelector) handleError("17" /* CONFIG_SAME_CHAINS */);
-}
-
 // clf/src/messageReport/utils/validateInputs.ts
 function decodeSrcChainData(srcChainSelector, srcChainData) {
   const srcChainDataBytes = hexToBytes(srcChainData);
@@ -16965,14 +16916,13 @@ function decodeInputs(bytesArgs2) {
   if (bytesArgs2.length < 6) {
     handleError("1" /* INVALID_BYTES_ARGS_LENGTH */);
   }
-  const [, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs2;
-  const decodedInternalMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
-  validateInternalMessageConfig(decodedInternalMessageConfig);
+  const [, srcChainSelector, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs2;
+  if (!viemChains[srcChainSelector.toString()]) handleError("14" /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
   const decodedArgs = {
-    internalMessageConfig: decodedInternalMessageConfig,
+    srcChainSelector,
     messageId,
     messageHashSum,
-    srcChainData: decodeSrcChainData(decodedInternalMessageConfig.srcChainSelector, srcChainData),
+    srcChainData: decodeSrcChainData(srcChainSelector, srcChainData),
     operatorAddress
   };
   validateDecodedArgs(decodedArgs);
@@ -16982,10 +16932,7 @@ function validateDecodedArgs(args) {
   validateMessageFields(args);
 }
 function validateMessageFields(args) {
-  const { internalMessageConfig, messageId, messageHashSum, srcChainData } = args;
-  if (!internalMessageConfig || internalMessageConfig.length === 0) {
-    handleError("16" /* INVALID_MESSAGE_CONFIG */);
-  }
+  const { messageId, messageHashSum, srcChainData } = args;
   if (!messageId || messageId.length === 0) {
     handleError("32" /* INVALID_MESSAGE_ID */);
   }
@@ -17007,12 +16954,11 @@ function verifyMessageHash(message, expectedHashSum) {
 // clf/src/messageReport/index.ts
 async function main() {
   const args = decodeInputs(bytesArgs);
-  const msgConfig = args.internalMessageConfig;
-  const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
+  const publicClient = getPublicClient(args.srcChainSelector.toString());
   const [log, operators] = await Promise.all([
     fetchConceroMessage(
       publicClient,
-      conceroRouters[Number(msgConfig.srcChainSelector)],
+      conceroRouters[Number(args.srcChainSelector)],
       args.messageId,
       BigInt(args.srcChainData.blockNumber)
     ),
@@ -17036,7 +16982,7 @@ async function main() {
     messageId: args.messageId,
     messageHashSum: args.messageHashSum,
     sender,
-    srcChainSelector: msgConfig.srcChainSelector,
+    srcChainSelector: args.srcChainSelector,
     dstChainSelector,
     dstChainData,
     shouldFinaliseSrc,

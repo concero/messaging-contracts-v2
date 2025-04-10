@@ -10,7 +10,7 @@ import {console} from "forge-std/src/console.sol";
 
 import {Base} from "./Base.sol";
 
-import {CLFRequestError, MessageReport, OperatorRegistered} from "../../interfaces/IConceroVerifier.sol";
+import {CLFRequestError, MessageReport, OperatorRegistered, MessageReportRequested} from "../../interfaces/IConceroVerifier.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 import {CommonConstants} from "../../common/CommonConstants.sol";
@@ -179,9 +179,9 @@ abstract contract CLF is FunctionsClient, Base {
 
     /* CLF REQUEST FORMATION */
     function _requestMessageReport(
-        bytes32 internalMessageConfig,
         bytes32 messageId,
         bytes32 messageHashSum,
+        uint24 srcChainSelector,
         bytes memory srcChainData
     ) internal returns (bytes32 clfRequestId) {
         _witholdOperatorDeposit(
@@ -195,7 +195,7 @@ abstract contract CLF is FunctionsClient, Base {
         bytes[] memory clfReqArgs = new bytes[](6);
 
         clfReqArgs[0] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
-        clfReqArgs[1] = abi.encodePacked(internalMessageConfig);
+        clfReqArgs[1] = abi.encodePacked(srcChainSelector);
         clfReqArgs[2] = abi.encodePacked(messageId);
         clfReqArgs[3] = abi.encodePacked(messageHashSum);
         clfReqArgs[4] = abi.encodePacked(srcChainData);
@@ -203,6 +203,9 @@ abstract contract CLF is FunctionsClient, Base {
 
         clfRequestId = _sendCLFRequest(clfReqArgs);
         s.verifier().pendingCLFRequests[clfRequestId] = true;
+
+        emit MessageReportRequested(messageId);
+
         return clfRequestId;
     }
 

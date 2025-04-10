@@ -2,30 +2,20 @@ import { HexString } from "ethers/lib.commonjs/utils/data";
 
 import { type Address, type Hash } from "viem";
 
-interface EvmSrcChainData {
+export interface EvmSrcChainData {
 	sender: Address;
 	blockNumber: string;
 }
 
-interface InternalMessageConfig {
-	version: bigint; // uint8
-	srcChainSelector: bigint; // uint24
-	dstChainSelector: bigint; // uint24
-	minSrcConfirmations: bigint; // uint16
-	minDstConfirmations: bigint; // uint16
-	relayerConfig: bigint; // uint8
-	isCallbackable: boolean; // bool
-}
-
-interface DecodedArgs {
-	internalMessageConfig: InternalMessageConfig;
+export interface DecodedArgs {
 	messageId: Hash;
 	messageHashSum: Hash;
+	srcChainSelector: Number;
 	srcChainData: EvmSrcChainData;
 	operatorAddress: Address;
 }
 
-interface MessageReportResult {
+export interface MessageReportResult {
 	reportVersion: number;
 	reportType: number;
 	requester: Address;
@@ -39,5 +29,3 @@ interface MessageReportResult {
 	shouldFinaliseSrc: Boolean;
 	allowedOperators: string[];
 }
-
-export { EvmSrcChainData, DecodedArgs, InternalMessageConfig, MessageReportResult };

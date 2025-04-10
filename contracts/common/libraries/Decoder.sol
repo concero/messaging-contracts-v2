@@ -47,17 +47,9 @@ library Decoder {
 
     function _decodeCLFMessageReportResponse(
         bytes memory response
-    ) internal pure returns (CommonTypes.MessageReportResult memory) {
-        CommonTypes.MessageReportResult memory result;
-        (
-            result.reportConfig,
-            result.internalMessageConfig,
-            result.messageId,
-            result.messageHashSum,
-            result.sender,
-            result.dstChainData,
-            result.allowedOperators
-        ) = abi.decode(response, (bytes32, bytes32, bytes32, bytes32, bytes, bytes, bytes[]));
+    ) internal pure returns (CommonTypes.ClfReportResult memory) {
+        CommonTypes.ClfReportResult memory result;
+        (result.reportConfig, result.encodedReportData) = abi.decode(response, (bytes32, bytes));
 
         return result;
     }

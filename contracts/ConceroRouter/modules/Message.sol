@@ -87,15 +87,15 @@ abstract contract Message is ClfSigner, IConceroRouter {
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
      * @param reportSubmission the serialized report data.
-     * @param message the message data.
+     * @param messagePayload the message payload.
      */
     function submitMessageReport(
         Types.ClfDonReportSubmission calldata reportSubmission,
-        bytes calldata message
+        bytes calldata messagePayload
     ) external {
-        Types.ClfReport memory clfReport = DecoderLib._decodeCLFReport(reportSubmission.report);
         _verifyClfReportSignatures(reportSubmission);
 
+        Types.ClfReport memory clfReport = DecoderLib._decodeCLFReport(reportSubmission.report);
         Types.ClfReportOnchainMetadata memory onchainMetadata = abi.decode(
             clfReport.onchainMetadata[0],
             (Types.ClfReportOnchainMetadata)
@@ -103,34 +103,77 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         _verifyClfReportOnChainMetadata(onchainMetadata);
 
-        CommonTypes.MessageReportResult memory decodedMessageReportResult = DecoderLib
+        CommonTypes.ClfReportResult memory decodedReportResult = DecoderLib
             ._decodeCLFMessageReportResponse(clfReport.results[0]);
 
+        (, uint8 reportVersion, ) = DecoderLib._decodeCLFReportConfig(
+            decodedReportResult.reportConfig
+        );
+
+        if (CommonTypes.CLFReportVersion(reportVersion) == CommonTypes.CLFReportVersion.V1) {
+            _handleClfReportV1(decodedReportResult.encodedReportData, messagePayload);
+        }
+    }
+
+    function getRouterVersion() external pure returns (uint8) {
+        return ROUTER_VERSION;
+    }
+
+    /* INTERNAL FUNCTIONS */
+
+    function _handleClfReportV1(bytes memory clfReportData, bytes memory messagePayload) internal {
+        CommonTypes.ClfMessageReportDataV1 memory clfMessageReportData = abi.decode(
+            clfReportData,
+            (CommonTypes.ClfMessageReportDataV1)
+        );
+
+        _verifyIsSenderOperator(clfMessageReportData.allowedOperators);
+
+        if (uint8(clfMessageReportData.encodedMessageData[0]) == 1) {
+            _handleMessageV1(
+                clfMessageReportData.messageId,
+                clfMessageReportData.encodedMessageData,
+                messagePayload
+            );
+        }
+    }
+
+    function _handleMessageV1(
+        bytes32 messageId,
+        bytes memory message,
+        bytes memory messagePayload
+    ) internal {
+        CommonTypes.MessageDataV1 memory messageData = abi.decode(
+            message,
+            (CommonTypes.MessageDataV1)
+        );
+
         require(
-            decodedMessageReportResult.messageHashSum == keccak256(message),
+            messageData.messageHashSum == keccak256(messagePayload),
             Errors.InvalidMessageHashSum()
         );
-
+        require(messageData.dstChainSelector == i_chainSelector, Errors.InvalidDstChainSelector());
         require(
-            uint24(
-                uint256(decodedMessageReportResult.internalMessageConfig) >>
-                    offsets.OFFSET_DST_CHAIN
-            ) == i_chainSelector,
-            Errors.InvalidDstChainSelector()
+            !s.router().isMessageProcessed[messageId],
+            Errors.MessageAlreadyProcessed(messageId)
         );
 
-        require(
-            !s.router().isMessageProcessed[decodedMessageReportResult.messageId],
-            Errors.MessageAlreadyProcessed(decodedMessageReportResult.messageId)
-        );
+        emit ConceroMessageReceived(messageId);
 
+        _deliverMessage(
+            messageId,
+            messageData.dstChainData,
+            messageData.srcChainSelector,
+            messageData.sender,
+            messagePayload
+        );
+    }
+
+    function _verifyIsSenderOperator(bytes[] memory allowedOperators) internal {
         bool isAllowedOperator = false;
 
-        for (uint256 i = 0; i < decodedMessageReportResult.allowedOperators.length; i++) {
-            address allowedOperator = abi.decode(
-                decodedMessageReportResult.allowedOperators[i],
-                (address)
-            );
+        for (uint256 i = 0; i < allowedOperators.length; i++) {
+            address allowedOperator = abi.decode(allowedOperators[i], (address));
 
             if (allowedOperator == msg.sender) {
                 isAllowedOperator = true;
@@ -139,24 +182,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
         }
 
         require(isAllowedOperator, Errors.UnauthorizedOperator());
-
-        emit ConceroMessageReceived(decodedMessageReportResult.messageId);
-
-        uint24 srcChainSelector = uint24(
-            uint256(decodedMessageReportResult.internalMessageConfig) >> offsets.OFFSET_SRC_CHAIN
-        );
-
-        deliverMessage(
-            decodedMessageReportResult.messageId,
-            decodedMessageReportResult.dstChainData,
-            srcChainSelector,
-            decodedMessageReportResult.sender,
-            message
-        );
-    }
-
-    function getRouterVersion() external pure returns (uint8) {
-        return ROUTER_VERSION;
     }
 
     /**
@@ -165,7 +190,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
      * @param dstData The destination chain data of the message.
      * @param message The message data.
      */
-    function deliverMessage(
+    function _deliverMessage(
         bytes32 messageId,
         bytes memory dstData,
         uint24 srcChainSelector,
@@ -206,8 +231,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         emit ConceroMessageDelivered(messageId);
     }
-
-    /* INTERNAL FUNCTIONS */
 
     function _validateMessageParams(
         uint24 dstChainSelector,

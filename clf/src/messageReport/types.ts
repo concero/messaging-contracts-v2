@@ -26,15 +26,17 @@ interface DecodedArgs {
 }
 
 interface MessageReportResult {
-	reportType: number; //                ─╮
-	version: number; //                    │ Report Response Config
-	// 10 bytes reserved for future use    │ Packed as a uint256
-	requester: Address; //                ─╯
-	internalMessageConfig: string;
+	reportVersion: number;
+	reportType: number;
+	requester: Address;
+	messageVersion: Number;
 	messageId: Hash;
 	messageHashSum: Hash;
 	sender: HexString;
+	srcChainSelector: Number;
+	dstChainSelector: Number;
 	dstChainData: string;
+	shouldFinaliseSrc: Boolean;
 	allowedOperators: string[];
 }
 

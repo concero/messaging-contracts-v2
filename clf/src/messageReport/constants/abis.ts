@@ -1,6 +1,7 @@
 import { parseAbi } from "viem";
 
-export const ClientMessageRequestBase = "bytes32 internalMessageConfig, bytes dstChainData, bytes message";
+export const ClientMessageRequestBase =
+	"uint8 version, bool shouldFinaliseSrc, uint24 dstChainSelector, bytes dstChainData, bytes sender, bytes message";
 export const ClientMessageRequest = `tuple(${ClientMessageRequestBase})`;
 export const CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
 	"function getCohortsCount() external returns (uint8)",
@@ -9,16 +10,21 @@ export const CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
 
 export const ConceroMessageLogParams = [
 	{ type: "bytes32", name: "messageId", indexed: true },
-	{ type: "uint256", name: "internalMessageConfig", indexed: true },
+	{ type: "uint8", name: "version" },
+	{ type: "bool", name: "shouldFinaliseSrc" },
+	{ type: "uint24", name: "dstChainSelector" },
 	{ type: "bytes", name: "dstChainData" },
-	{ type: "bytes", name: "message" },
 	{ type: "bytes", name: "sender" },
+	{ type: "bytes", name: "message" },
 ];
 
 export const NonIndexedConceroMessageParams = [
+	{ type: "uint8", name: "version" },
+	{ type: "bool", name: "shouldFinaliseSrc" },
+	{ type: "uint24", name: "dstChainSelector" },
 	{ type: "bytes", name: "dstChainData" },
-	{ type: "bytes", name: "message" },
 	{ type: "bytes", name: "sender" },
+	{ type: "bytes", name: "message" },
 ];
 
 export const EvmSrcChainDataParams = [
@@ -27,5 +33,5 @@ export const EvmSrcChainDataParams = [
 ];
 
 export const ConceroMessageSentEvent = [
-	`event ConceroMessageSent(bytes32 indexed internalMessageConfig, bytes32 indexed messageId, bytes dstChainData, bytes message, bytes sender)`,
+	`event ConceroMessageSent(bytes32 indexed messageId, uint8 version, bool shouldFinaliseSrc, uint24 dstChainSelector, bytes dstChainData, bytes sender, bytes message)`,
 ];

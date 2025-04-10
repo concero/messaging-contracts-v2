@@ -13,23 +13,26 @@ type Log = {
 };
 
 export function decodeConceroMessageLog(log: Log): {
-	messageId: HexString;
-	internalMessageConfig: HexString;
+	version: HexString;
+	shouldFinaliseSrc: HexString;
+	dstChainSelector: HexString;
 	dstChainData: HexString;
-	message: HexString;
 	sender: HexString;
+	message: HexString;
 } {
 	try {
-		const messageId = log.topics[2];
-		const internalMessageConfig = log.topics[1];
-		const [dstChainData, message, sender] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
+		const [version, shouldFinaliseSrc, dstChainSelector, dstChainData, sender, message] = decodeAbiParameters(
+			NonIndexedConceroMessageParams,
+			log.data,
+		);
 
 		return {
-			messageId,
-			internalMessageConfig,
+			version,
+			shouldFinaliseSrc,
+			dstChainSelector,
 			dstChainData,
-			message,
 			sender,
+			message,
 		};
 	} catch (error) {
 		handleError(ErrorType.INVALID_DATA);

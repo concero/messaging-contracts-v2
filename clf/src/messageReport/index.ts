@@ -28,30 +28,35 @@ export async function main() {
 	]);
 
 	const {
-		messageId,
-		internalMessageConfig: messageConfigFromLog,
-		dstChainData: dstChainDataFromLog,
-		message: messageFromLog,
+		version: messageVersion,
+		shouldFinaliseSrc,
+		dstChainSelector,
+		dstChainData,
 		sender,
+		message,
 	} = decodeConceroMessageLog(log);
 
-	verifyMessageHash(messageFromLog, args.messageHashSum);
+	verifyMessageHash(message, args.messageHashSum);
 
 	const allowedOperators = pick(operators, 1);
 
 	const messageReportResult: MessageReportResult = {
-		version: CONFIG.REPORT_VERSION,
+		reportVersion: CONFIG.REPORT_VERSION,
 		reportType: ReportType.MESSAGE,
 		requester: args.operatorAddress,
-		internalMessageConfig: messageConfigFromLog,
+		messageVersion,
 		messageId: args.messageId,
 		messageHashSum: args.messageHashSum,
 		sender,
-		dstChainData: dstChainDataFromLog,
+		srcChainSelector: msgConfig.srcChainSelector,
+		dstChainSelector,
+		dstChainData,
+		shouldFinaliseSrc,
 		allowedOperators,
 	};
 
-	const packedReportConfig = packReportConfig(ReportType.MESSAGE, CONFIG.REPORT_VERSION, args.operatorAddress);
-
-	return packResult(messageReportResult, packedReportConfig);
+	return packResult(
+		messageReportResult,
+		packReportConfig(ReportType.MESSAGE, CONFIG.REPORT_VERSION, args.operatorAddress),
+	);
 }

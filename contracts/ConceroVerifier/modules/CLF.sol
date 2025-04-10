@@ -99,11 +99,17 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        CommonTypes.MessageReportResult memory result = Decoder._decodeCLFMessageReportResponse(
+        CommonTypes.ClfReportResult memory result = Decoder._decodeCLFMessageReportResponse(
             response
         );
 
-        (, , address requester) = Decoder._decodeCLFReportConfig(result.reportConfig);
+        (, uint8 reportVersion, address requester) = Decoder._decodeCLFReportConfig(
+            result.reportConfig
+        );
+
+        if (reportVersion == 1) {
+            _handleClfReportV1(result.encodedReportData);
+        }
 
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
 
@@ -116,8 +122,15 @@ abstract contract CLF is FunctionsClient, Base {
             CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
+    }
 
-        emit MessageReport(result.messageId);
+    function _handleClfReportV1(bytes memory encodedReportData) internal {
+        CommonTypes.ClfMessageReportDataV1 memory decodedClfReportData = abi.decode(
+            encodedReportData,
+            (CommonTypes.ClfMessageReportDataV1)
+        );
+
+        emit MessageReport(decodedClfReportData.messageId);
     }
 
     function _handleCLFOperatorRegistrationReport(

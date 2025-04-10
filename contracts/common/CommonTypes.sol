@@ -7,11 +7,6 @@
 pragma solidity 0.8.28;
 
 library CommonTypes {
-    enum FeeToken {
-        native, //              0
-        usdc //                 1
-    }
-
     enum ChainType {
         EVM, //                 0
         NON_EVM //              1
@@ -23,14 +18,27 @@ library CommonTypes {
         OperatorRegistration // 2
     }
 
-    struct MessageReportResult {
+    enum CLFReportVersion {
+        V1
+    }
+
+    struct ClfReportResult {
         bytes32 reportConfig;
-        bytes32 internalMessageConfig;
+        bytes encodedReportData;
+    }
+
+    struct ClfMessageReportDataV1 {
         bytes32 messageId;
+        bytes[] allowedOperators;
+        bytes encodedMessageData;
+    }
+
+    struct MessageDataV1 {
         bytes32 messageHashSum;
         bytes sender;
+        uint24 srcChainSelector;
+        uint24 dstChainSelector;
         bytes dstChainData;
-        bytes[] allowedOperators;
     }
 
     // @dev clfReportResponseConfig is a bitmasked uint256

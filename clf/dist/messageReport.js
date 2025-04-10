@@ -16731,30 +16731,35 @@ var CONFIG = {
 };
 
 // clf/src/messageReport/constants/abis.ts
-var ClientMessageRequestBase = "bytes32 internalMessageConfig, bytes dstChainData, bytes message";
+var ClientMessageRequestBase = "uint8 version, bool shouldFinaliseSrc, uint24 dstChainSelector, bytes dstChainData, bytes sender, bytes message";
 var ClientMessageRequest = `tuple(${ClientMessageRequestBase})`;
 var CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
   "function getCohortsCount() external returns (uint8)",
   "function getRegisteredOperators(uint8 chainType) external view returns (bytes[] memory)"
 ]);
 var NonIndexedConceroMessageParams = [
+  { type: "uint8", name: "version" },
+  { type: "bool", name: "shouldFinaliseSrc" },
+  { type: "uint24", name: "dstChainSelector" },
   { type: "bytes", name: "dstChainData" },
-  { type: "bytes", name: "message" },
-  { type: "bytes", name: "sender" }
+  { type: "bytes", name: "sender" },
+  { type: "bytes", name: "message" }
 ];
 
 // clf/src/messageReport/utils/decoders.ts
 function decodeConceroMessageLog(log) {
   try {
-    const messageId = log.topics[2];
-    const internalMessageConfig = log.topics[1];
-    const [dstChainData, message, sender] = decodeAbiParameters(NonIndexedConceroMessageParams, log.data);
+    const [version4, shouldFinaliseSrc, dstChainSelector, dstChainData, sender, message] = decodeAbiParameters(
+      NonIndexedConceroMessageParams,
+      log.data
+    );
     return {
-      messageId,
-      internalMessageConfig,
+      version: version4,
+      shouldFinaliseSrc,
+      dstChainSelector,
       dstChainData,
-      message,
-      sender
+      sender,
+      message
     };
   } catch (error) {
     handleError("33" /* INVALID_DATA */);
@@ -16765,8 +16770,7 @@ function decodeConceroMessageLog(log) {
 async function fetchConceroMessage(client, routerAddress, messageId, blockNumber) {
   const logs = await client.getLogs({
     address: routerAddress,
-    // @dev TODO: specify first topic to filter logs by event signature
-    topics: [null, null, messageId],
+    topics: [null, messageId],
     fromBlock: blockNumber - 10n,
     toBlock: blockNumber
   });
@@ -16854,34 +16858,42 @@ function hexStringToUint8Array(hex) {
 
 // clf/src/messageReport/utils/packResult.ts
 function packResult(result, packedReportConfig) {
-  const encoded = encodeAbiParameters(
+  const encodedMessageDataV1 = encodeAbiParameters(
     [
-      { type: "bytes32" },
-      // reportConfig
-      { type: "bytes32" },
-      // internalMessageConfig
-      { type: "bytes32" },
-      // messageId
       { type: "bytes32" },
       // messageHashSum
       { type: "bytes" },
       // sender
-      { type: "bytes" },
+      { type: "uint24" },
+      // srcChainSelector
+      { type: "uint24" },
+      // dstChainSelector
+      { type: "bytes" }
       // dstChainData
-      { type: "bytes[]" }
-      // allowedOperators
     ],
-    [
-      packedReportConfig,
-      result.internalMessageConfig,
-      result.messageId,
-      result.messageHashSum,
-      result.sender,
-      result.dstChainData,
-      result.allowedOperators
-    ]
+    [result.messageHashSum, result.sender, result.srcChainSelector, result.dstChainSelector, result.dstChainData]
   );
-  return hexStringToUint8Array(encoded);
+  const encodedClfMessageReportDataV1 = encodeAbiParameters(
+    [
+      { type: "bytes32" },
+      // messageId
+      { type: "bytes[]" },
+      // allowedOperators
+      { type: "bytes" }
+      // encodedMessage
+    ],
+    [result.messageId, result.allowedOperators, encodedMessageDataV1]
+  );
+  const encodedClfReport = encodeAbiParameters(
+    [
+      { type: "bytes32" },
+      // reportConfig
+      { type: "bytes" }
+      // encodedMessage
+    ],
+    [packedReportConfig, encodedClfMessageReportDataV1]
+  );
+  return hexStringToUint8Array(encodedClfReport);
 }
 
 // clf/src/common/bitMasks.ts
@@ -17007,26 +17019,32 @@ async function main() {
     getAllowedOperators(0 /* EVM */, args.messageId)
   ]);
   const {
-    messageId,
-    internalMessageConfig: messageConfigFromLog,
-    dstChainData: dstChainDataFromLog,
-    message: messageFromLog,
-    sender
+    version: messageVersion,
+    shouldFinaliseSrc,
+    dstChainSelector,
+    dstChainData,
+    sender,
+    message
   } = decodeConceroMessageLog(log);
-  verifyMessageHash(messageFromLog, args.messageHashSum);
+  verifyMessageHash(message, args.messageHashSum);
   const allowedOperators = pick(operators, 1);
   const messageReportResult = {
-    version: CONFIG.REPORT_VERSION,
+    reportVersion: CONFIG.REPORT_VERSION,
     reportType: 1 /* MESSAGE */,
     requester: args.operatorAddress,
-    internalMessageConfig: messageConfigFromLog,
+    messageVersion,
     messageId: args.messageId,
     messageHashSum: args.messageHashSum,
     sender,
-    dstChainData: dstChainDataFromLog,
+    srcChainSelector: msgConfig.srcChainSelector,
+    dstChainSelector,
+    dstChainData,
+    shouldFinaliseSrc,
     allowedOperators
   };
-  const packedReportConfig = packReportConfig(1 /* MESSAGE */, CONFIG.REPORT_VERSION, args.operatorAddress);
-  return packResult(messageReportResult, packedReportConfig);
+  return packResult(
+    messageReportResult,
+    packReportConfig(1 /* MESSAGE */, CONFIG.REPORT_VERSION, args.operatorAddress)
+  );
 }
  main();

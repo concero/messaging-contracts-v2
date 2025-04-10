@@ -10,6 +10,7 @@ import sendConceroMessage from "./sendConceroMessage";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
 import setOperator from "./setOperator";
 import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
+import testScript from "./test";
 import { callContractFunction, changeOwnership, upgradeProxyImplementation } from "./utils";
 import { withdrawFees } from "./withdrawFees";
 
@@ -30,4 +31,5 @@ export {
 	withdrawFees,
 	deployConceroPauseToAllChains,
 	fetchTransactionTask,
+	testScript,
 };

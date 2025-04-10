@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks, networkEnvKeys } from "../constants/conceroNetworks";
+import { networkEnvKeys } from "../constants";
+import { conceroNetworks } from "../constants/conceroNetworks";
 import { getFallbackClients } from "../utils";
 import log from "../utils/log";
 import updateEnvVariable from "../utils/updateEnvVariable";

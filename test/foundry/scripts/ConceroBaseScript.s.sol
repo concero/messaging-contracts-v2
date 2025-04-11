@@ -11,7 +11,6 @@ import {Script} from "forge-std/src/Script.sol";
 import {MessageConfigBitOffsets as offsets} from "contracts/common/CommonConstants.sol";
 import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
 import {DeployMockERC20} from "./deploy/DeployMockERC20.s.sol";
-import {ConceroUtils} from "contracts/ConceroClient/ConceroUtils.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
@@ -21,8 +20,6 @@ abstract contract ConceroBaseScript is Script {
     address public immutable deployer;
     address public immutable proxyDeployer;
     uint64 immutable i_conceroVerifierSubscriptionId;
-    bytes32 internal immutable i_clientMessageConfig;
-    bytes32 internal immutable i_internalMessageConfig;
 
     address public constant operator = address(0x4242424242424242424242424242424242424242);
     address public constant user = address(0x0101010101010101010101010101010101010101);
@@ -55,22 +52,6 @@ abstract contract ConceroBaseScript is Script {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");
         proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
         i_conceroVerifierSubscriptionId = uint64(vm.envUint("CLF_SUBID_LOCALHOST"));
-
-        i_clientMessageConfig = ConceroUtils._packClientMessageConfig(
-            ConceroTypes.ClientMessageConfig({
-                dstChainSelector: DST_CHAIN_SELECTOR,
-                minSrcConfirmations: 1,
-                minDstConfirmations: 1,
-                relayerConfig: 0,
-                isCallbackable: false,
-                feeToken: ConceroTypes.FeeToken.native
-            })
-        );
-
-        i_internalMessageConfig = MessageLib.buildInternalMessageConfig(
-            i_clientMessageConfig,
-            SRC_CHAIN_SELECTOR
-        );
     }
 
     function setUp() public virtual {

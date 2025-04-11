@@ -30,6 +30,7 @@ contract SubmitMessageReport is ConceroRouterTest {
     bytes32 internal constant TEST_MESSAGE_ID = bytes32(uint256(1));
     bytes internal constant TEST_MESSAGE = "Test message";
     uint256 internal constant GAS_LIMIT = 1_000_000;
+    uint24 internal constant DST_CHAIN_SELECTOR = 1;
 
     event ConceroMessageReceived(bytes32 indexed messageId);
     event ConceroMessageDelivered(bytes32 indexed messageId);
@@ -58,25 +59,31 @@ contract SubmitMessageReport is ConceroRouterTest {
             dstChainDataRaw
         );
 
-        bytes32 internalMessageConfig = MessageLib.buildInternalMessageConfig(
-            i_clientMessageConfig,
-            SRC_CHAIN_SELECTOR
-        );
-
         bytes[] memory allowedOperators = new bytes[](1);
         allowedOperators[0] = abi.encode(operator);
 
-        bytes memory encodedResult = abi.encode(
-            reportConfig,
-            internalMessageConfig,
-            TEST_MESSAGE_ID,
-            keccak256(TEST_MESSAGE),
-            dstChainDataRaw,
-            allowedOperators
-        );
+        CommonTypes.MessageDataV1 memory messageDataV1 = CommonTypes.MessageDataV1({
+            messageHashSum: keccak256(TEST_MESSAGE),
+            sender: abi.encode(address(this)),
+            srcChainSelector: SRC_CHAIN_SELECTOR,
+            dstChainSelector: DST_CHAIN_SELECTOR,
+            dstChainData: dstChainData
+        });
+
+        CommonTypes.ClfMessageReportDataV1 memory clfMessageReportDataV1 = CommonTypes
+            .ClfMessageReportDataV1({
+                messageId: TEST_MESSAGE_ID,
+                allowedOperators: allowedOperators,
+                encodedMessageData: abi.encode(messageDataV1)
+            });
+
+        CommonTypes.ClfReportResult memory clfReportResult = CommonTypes.ClfReportResult({
+            reportConfig: reportConfig,
+            encodedReportData: abi.encode(ClfMessageReportDataV1)
+        });
 
         Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
-            encodedResult
+            abi.encode(clfReportResult)
         );
 
         vm.recordLogs();

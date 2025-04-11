@@ -10,7 +10,6 @@ import {Vm} from "forge-std/src/Vm.sol";
 import {console} from "forge-std/src/Console.sol";
 
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
-import {ConceroUtils} from "contracts/ConceroClient/ConceroUtils.sol";
 import {Message} from "contracts/common/libraries/Message.sol";
 import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
 import {RouterSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
@@ -52,29 +51,29 @@ contract SendMessage is ConceroRouterTest {
     }
 
     function test_conceroSend() public {
+        uint24 dstChainSelector = DST_CHAIN_SELECTOR;
+        bool shouldFinaliseSrc = false;
+        address feeToken = address(0);
+
         vm.startPrank(user);
-
-        ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
-            dstChainSelector: DST_CHAIN_SELECTOR,
-            minSrcConfirmations: 1,
-            minDstConfirmations: 1,
-            relayerConfig: 0,
-            isCallbackable: false,
-            feeToken: ConceroTypes.FeeToken.native
-        });
-
-        bytes32 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
 
         uint256 initialNonce = conceroRouter.getStorage(
             Namespaces.ROUTER,
             RouterSlots.nonce,
             bytes32(0)
         );
-        uint256 messageFee = conceroRouter.getMessageFee(clientMessageConfig, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFee(
+            DST_CHAIN_SELECTOR,
+            shouldFinaliseSrc,
+            feeToken,
+            dstChainData
+        );
 
         vm.recordLogs();
         bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
-            clientMessageConfig,
+            DST_CHAIN_SELECTOR,
+            shouldFinaliseSrc,
+            feeToken,
             dstChainData,
             message
         );
@@ -86,16 +85,16 @@ contract SendMessage is ConceroRouterTest {
         Vm.Log[] memory entries = vm.getRecordedLogs();
         bool foundEvent = false;
         for (uint i = 0; i < entries.length; i++) {
+            // TODO: vm.expectEmit should be used instead of it
             if (
                 entries[i].topics[0] ==
-                keccak256("ConceroMessageSent(bytes32,bytes32,bytes,bytes,bytes)")
+                keccak256("event ConceroMessageSent(bytes32,uint8,bool,uint24,bytes,bytes,bytes)")
             ) {
                 foundEvent = true;
 
                 bytes32 internalMessageConfig = bytes32(entries[i].topics[1]);
                 bytes32 emittedMessageId = bytes32(entries[i].topics[2]);
 
-                console.logBytes32(clientMessageConfig);
                 console.logBytes32(emittedMessageId);
 
                 (bytes memory dstChainDataFromEvent, bytes memory messageFromEvent) = abi.decode(
@@ -132,9 +131,18 @@ contract SendMessage is ConceroRouterTest {
     }
 
     function test_RevertInsufficientFee() public {
+        uint24 dstChainSelector = DST_CHAIN_SELECTOR;
+        bool shouldFinaliseSrc = false;
+        address feeToken = address(0);
+
         vm.startPrank(user);
 
-        uint256 messageFee = conceroRouter.getMessageFee(i_clientMessageConfig, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFee(
+            dstChainSelector,
+            shouldFinaliseSrc,
+            feeToken,
+            dstChainData
+        );
         uint256 insufficientFee = messageFee - 1;
 
         vm.expectRevert(
@@ -146,7 +154,9 @@ contract SendMessage is ConceroRouterTest {
         );
 
         conceroRouter.conceroSend{value: insufficientFee}(
-            i_clientMessageConfig,
+            dstChainSelector,
+            shouldFinaliseSrc,
+            feeToken,
             dstChainData,
             message
         );
@@ -155,10 +165,19 @@ contract SendMessage is ConceroRouterTest {
     }
 
     function test_RevertInvalidMessageConfig() public {
+        uint24 dstChainSelector = DST_CHAIN_SELECTOR;
+        bool shouldFinaliseSrc = false;
+        address feeToken = address(0);
+
         vm.startPrank(user);
 
         bytes32 invalidConfig = bytes32(0);
-        uint256 messageFee = conceroRouter.getMessageFee(i_clientMessageConfig, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFee(
+            dstChainSelector,
+            shouldFinaliseSrc,
+            feeToken,
+            dstChainData
+        );
 
         vm.expectRevert();
         conceroRouter.conceroSend{value: messageFee}(invalidConfig, dstChainData, message);

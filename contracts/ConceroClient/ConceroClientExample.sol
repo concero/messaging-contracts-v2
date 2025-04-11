@@ -9,7 +9,6 @@ pragma solidity 0.8.28;
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {ConceroClient} from "./ConceroClient.sol";
 import {ConceroTypes} from "./ConceroTypes.sol";
-import {ConceroUtils} from "./ConceroUtils.sol";
 
 contract ConceroClientExample is ConceroClient {
     event MessageReceived(bytes32 messageId, bytes message);

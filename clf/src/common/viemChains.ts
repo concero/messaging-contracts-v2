@@ -10,6 +10,7 @@ import {
 	bscTestnet,
 	celoAlfajores,
 	cronosTestnet,
+	curtis,
 	gnosisChiado,
 	hashkeyTestnet,
 	inkSepolia,
@@ -96,6 +97,7 @@ const liveChains: Partial<Record<string, Chain>> = {
 	"195": xLayerTestnet,
 	"48899": zircuitTestnet,
 	"919": modeTestnet,
+	"33111": curtis,
 };
 
 export const viemChains = config.isDevelopment ? localhostChains : liveChains;

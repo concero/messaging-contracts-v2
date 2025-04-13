@@ -4456,7 +4456,7 @@ var init_hmac = __esm({
   }
 });
 
-// node_modules/viem/node_modules/@noble/curves/esm/abstract/utils.js
+// node_modules/@noble/curves/esm/abstract/utils.js
 var utils_exports = {};
 __export(utils_exports, {
   aInRange: () => aInRange,
@@ -4702,7 +4702,7 @@ function memoized(fn) {
 }
 var _0n2, _1n2, _2n2, hexes2, asciis, isPosBig, bitMask, u8n, u8fr, validatorFns, notImplemented;
 var init_utils4 = __esm({
-  "node_modules/viem/node_modules/@noble/curves/esm/abstract/utils.js"() {
+  "node_modules/@noble/curves/esm/abstract/utils.js"() {
     _0n2 = /* @__PURE__ */ BigInt(0);
     _1n2 = /* @__PURE__ */ BigInt(1);
     _2n2 = /* @__PURE__ */ BigInt(2);
@@ -4729,7 +4729,7 @@ var init_utils4 = __esm({
   }
 });
 
-// node_modules/viem/node_modules/@noble/curves/esm/abstract/modular.js
+// node_modules/@noble/curves/esm/abstract/modular.js
 function mod(a, b) {
   const result = a % b;
   return result >= _0n3 ? result : b + result;
@@ -4978,7 +4978,7 @@ function mapHashToField(key, fieldOrder, isLE2 = false) {
 }
 var _0n3, _1n3, _2n3, _3n, _4n, _5n, _8n, _9n, _16n, FIELD_FIELDS;
 var init_modular = __esm({
-  "node_modules/viem/node_modules/@noble/curves/esm/abstract/modular.js"() {
+  "node_modules/@noble/curves/esm/abstract/modular.js"() {
     init_utils4();
     _0n3 = BigInt(0);
     _1n3 = BigInt(1);
@@ -5011,7 +5011,7 @@ var init_modular = __esm({
   }
 });
 
-// node_modules/viem/node_modules/@noble/curves/esm/abstract/curve.js
+// node_modules/@noble/curves/esm/abstract/curve.js
 function constTimeNegate(condition, item) {
   const neg = item.negate();
   return condition ? neg : item;
@@ -5235,7 +5235,7 @@ function validateBasic(curve) {
 }
 var _0n4, _1n4, pointPrecomputes, pointWindowSizes;
 var init_curve = __esm({
-  "node_modules/viem/node_modules/@noble/curves/esm/abstract/curve.js"() {
+  "node_modules/@noble/curves/esm/abstract/curve.js"() {
     init_modular();
     init_utils4();
     _0n4 = BigInt(0);
@@ -5245,7 +5245,7 @@ var init_curve = __esm({
   }
 });
 
-// node_modules/viem/node_modules/@noble/curves/esm/abstract/weierstrass.js
+// node_modules/@noble/curves/esm/abstract/weierstrass.js
 function validateSigVerOpts(opts) {
   if (opts.lowS !== void 0)
     abool("lowS", opts.lowS);
@@ -6102,7 +6102,7 @@ function mapToCurveSimpleSWU(Fp, opts) {
 }
 var b2n, h2b, DERErr, DER, _0n5, _1n5, _2n4, _3n2, _4n2;
 var init_weierstrass = __esm({
-  "node_modules/viem/node_modules/@noble/curves/esm/abstract/weierstrass.js"() {
+  "node_modules/@noble/curves/esm/abstract/weierstrass.js"() {
     init_curve();
     init_modular();
     init_utils4();
@@ -6222,7 +6222,7 @@ var init_weierstrass = __esm({
   }
 });
 
-// node_modules/viem/node_modules/@noble/curves/esm/_shortw_utils.js
+// node_modules/@noble/curves/esm/_shortw_utils.js
 function getHash(hash2) {
   return {
     hash: hash2,
@@ -6235,14 +6235,14 @@ function createCurve(curveDef, defHash) {
   return { ...create(defHash), create };
 }
 var init_shortw_utils = __esm({
-  "node_modules/viem/node_modules/@noble/curves/esm/_shortw_utils.js"() {
+  "node_modules/@noble/curves/esm/_shortw_utils.js"() {
     init_hmac();
     init_utils2();
     init_weierstrass();
   }
 });
 
-// node_modules/viem/node_modules/@noble/curves/esm/abstract/hash-to-curve.js
+// node_modules/@noble/curves/esm/abstract/hash-to-curve.js
 function i2osp(value, length) {
   anum(value);
   anum(length);
@@ -6384,14 +6384,14 @@ function createHasher(Point2, mapToCurve, def) {
 }
 var os2ip;
 var init_hash_to_curve = __esm({
-  "node_modules/viem/node_modules/@noble/curves/esm/abstract/hash-to-curve.js"() {
+  "node_modules/@noble/curves/esm/abstract/hash-to-curve.js"() {
     init_modular();
     init_utils4();
     os2ip = bytesToNumberBE;
   }
 });
 
-// node_modules/viem/node_modules/@noble/curves/esm/secp256k1.js
+// node_modules/@noble/curves/esm/secp256k1.js
 var secp256k1_exports = {};
 __export(secp256k1_exports, {
   encodeToCurve: () => encodeToCurve,
@@ -6494,7 +6494,7 @@ function schnorrVerify(signature, message, publicKey) {
 }
 var secp256k1P, secp256k1N, _1n6, _2n5, divNearest, Fpk1, secp256k1, _0n6, TAGGED_HASH_PREFIXES, pointToBytes, numTo32b, modP, modN, Point, GmulAdd, num, schnorr, isoMap, mapSWU, htf, hashToCurve, encodeToCurve;
 var init_secp256k1 = __esm({
-  "node_modules/viem/node_modules/@noble/curves/esm/secp256k1.js"() {
+  "node_modules/@noble/curves/esm/secp256k1.js"() {
     init_sha256();
     init_utils2();
     init_shortw_utils();
@@ -15757,6 +15757,25 @@ var cronosTestnet = /* @__PURE__ */ defineChain({
   testnet: true
 });
 
+// node_modules/viem/_esm/chains/definitions/curtis.js
+var curtis = /* @__PURE__ */ defineChain({
+  id: 33111,
+  name: "Curtis",
+  nativeCurrency: { name: "ApeCoin", symbol: "APE", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.curtis.apechain.com"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Curtis Explorer",
+      url: "https://explorer.curtis.apechain.com"
+    }
+  },
+  testnet: true
+});
+
 // node_modules/viem/_esm/chains/definitions/gnosisChiado.js
 var gnosisChiado = /* @__PURE__ */ defineChain({
   id: 10200,
@@ -16645,7 +16664,8 @@ var liveChains = {
   "1301": unichainSepolia,
   "195": xLayerTestnet,
   "48899": zircuitTestnet,
-  "919": modeTestnet
+  "919": modeTestnet,
+  "33111": curtis
 };
 var viemChains = config.isDevelopment ? localhostChains : liveChains;
 

@@ -14877,8 +14877,15 @@ var __default20 = {
   chainSelector: 10200
 };
 
-// clf/src/common/rpcs/42161.json
+// clf/src/common/rpcs/33111.json
 var __default21 = {
+  id: "33111",
+  urls: ["rpc.curtis.apechain.com"],
+  chainSelector: 33111
+};
+
+// clf/src/common/rpcs/42161.json
+var __default22 = {
   id: "42161",
   urls: [
     "rpc.ankr.com/arbitrum",
@@ -14898,7 +14905,7 @@ var __default21 = {
 };
 
 // clf/src/common/rpcs/43113.json
-var __default22 = {
+var __default23 = {
   id: "43113",
   urls: [
     "rpc.ankr.com/avalanche_fuji",
@@ -14912,7 +14919,7 @@ var __default22 = {
 };
 
 // clf/src/common/rpcs/43114.json
-var __default23 = {
+var __default24 = {
   id: "43114",
   urls: [
     "rpc.ankr.com/avalanche",
@@ -14932,21 +14939,21 @@ var __default23 = {
 };
 
 // clf/src/common/rpcs/44787.json
-var __default24 = {
+var __default25 = {
   id: "44787",
   urls: ["alfajores-forno.celo-testnet.org"],
   chainSelector: 44787
 };
 
 // clf/src/common/rpcs/48899.json
-var __default25 = {
+var __default26 = {
   id: "48899",
   urls: ["testnet.zircuit.com"],
   chainSelector: 48899
 };
 
 // clf/src/common/rpcs/57054.json
-var __default26 = {
+var __default27 = {
   id: "57054",
   urls: [
     "endpoints.omniatech.io/v1/op/sepolia/public",
@@ -14958,14 +14965,14 @@ var __default26 = {
 };
 
 // clf/src/common/rpcs/59141.json
-var __default27 = {
+var __default28 = {
   id: "59141",
   urls: ["linea-sepolia-rpc.publicnode.com"],
   chainSelector: 59141
 };
 
 // clf/src/common/rpcs/80002.json
-var __default28 = {
+var __default29 = {
   id: "80002",
   urls: [
     "rpc.ankr.com/polygon_amoy",
@@ -14977,7 +14984,7 @@ var __default28 = {
 };
 
 // clf/src/common/rpcs/84532.json
-var __default29 = {
+var __default30 = {
   id: "84532",
   urls: [
     "base-sepolia.gateway.tenderly.co",
@@ -14987,35 +14994,35 @@ var __default29 = {
 };
 
 // clf/src/common/rpcs/200810.json
-var __default30 = {
+var __default31 = {
   id: "200810",
   urls: ["testnet-rpc.bitlayer.org"],
   chainSelector: 200810
 };
 
 // clf/src/common/rpcs/421614.json
-var __default31 = {
+var __default32 = {
   id: "421614",
   urls: ["arbitrum-sepolia-rpc.publicnode.com", "arbitrum-sepolia.drpc.org"],
   chainSelector: 421614
 };
 
 // clf/src/common/rpcs/534351.json
-var __default32 = {
+var __default33 = {
   id: "534351",
   urls: ["scroll-sepolia-rpc.publicnode.com"],
   chainSelector: 534351
 };
 
 // clf/src/common/rpcs/763373.json
-var __default33 = {
+var __default34 = {
   id: "763373",
   urls: ["rpc-gel-sepolia.inkonchain.com"],
   chainSelector: 763373
 };
 
 // clf/src/common/rpcs/11155111.json
-var __default34 = {
+var __default35 = {
   id: "11155111",
   urls: [
     "gateway.tenderly.co/public/sepolia",
@@ -15033,7 +15040,7 @@ var __default34 = {
 };
 
 // clf/src/common/rpcs/11155420.json
-var __default35 = {
+var __default36 = {
   id: "11155420",
   urls: [
     "endpoints.omniatech.io/v1/op/sepolia/public",
@@ -15045,7 +15052,7 @@ var __default35 = {
 };
 
 // clf/src/common/rpcs/168587773.json
-var __default36 = {
+var __default37 = {
   id: "168587773",
   urls: ["sepolia.blast.io"],
   chainSelector: 168587773
@@ -15055,40 +15062,41 @@ var __default36 = {
 var rpcConfigs = {
   "1": __default,
   "10": __default2,
-  "11155111": __default34,
-  "11155420": __default35,
+  "11155111": __default35,
+  "11155420": __default36,
   "137": __default5,
-  "42161": __default21,
-  "421614": __default31,
-  "43113": __default22,
-  "43114": __default23,
-  "80002": __default28,
+  "42161": __default22,
+  "421614": __default32,
+  "43113": __default23,
+  "43114": __default24,
+  "80002": __default29,
   "8453": __default18,
-  "84532": __default29,
+  "84532": __default30,
   "6342": __default17,
   "2021": __default14,
-  "57054": __default26,
+  "57054": __default27,
   "10143": __default19,
-  "59141": __default27,
+  "59141": __default28,
   "97": __default3,
   "1946": __default13,
-  "200810": __default30,
-  "168587773": __default36,
+  "200810": __default31,
+  "168587773": __default37,
   "3636": __default15,
-  "44787": __default24,
+  "44787": __default25,
   "1114": __default10,
   "338": __default8,
   "10200": __default20,
   "133": __default4,
-  "763373": __default33,
+  "763373": __default34,
   "5003": __default16,
-  "534351": __default32,
+  "534351": __default33,
   "1328": __default12,
   "157": __default6,
   "1301": __default11,
   "195": __default7,
-  "48899": __default25,
-  "919": __default9
+  "48899": __default26,
+  "919": __default9,
+  "33111": __default21
 };
 
 // node_modules/viem/_esm/op-stack/contracts.js

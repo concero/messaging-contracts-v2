@@ -81,7 +81,7 @@ const liveChains: Partial<Record<string, Chain>> = {
 	"97": bscTestnet,
 	"1946": soneiumMinato,
 	"200810": bitlayerTestnet,
-	"168587773": blastSepolia,
+	"1685877": blastSepolia,
 	"3636": botanixTestnet,
 	"44787": celoAlfajores,
 	"1114": defineChain({ id: 1114, name: "coreTestnet", nativeCurrency: defaultNativeCurrency }),

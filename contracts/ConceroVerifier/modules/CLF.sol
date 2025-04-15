@@ -6,8 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/console.sol";
-
 import {Base} from "./Base.sol";
 
 import {CLFRequestError, MessageReport, OperatorRegistered} from "../../interfaces/IConceroVerifier.sol";
@@ -141,14 +139,12 @@ abstract contract CLF is FunctionsClient, Base {
             CommonErrors.LengthMismatch()
         );
 
-        for (uint256 i = 0; i < result.operatorChains.length; i++) {
+        for (uint256 i; i < result.operatorChains.length; ++i) {
             CommonTypes.ChainType chainType = result.operatorChains[i];
             Types.OperatorRegistrationAction action = result.operatorActions[i];
 
             if (chainType == CommonTypes.ChainType.EVM) {
-                bytes memory addressBytes = result.operatorAddresses[i];
-
-                address operatorAddress = abi.decode(addressBytes, (address));
+                address operatorAddress = abi.decode(result.operatorAddresses[i], (address));
                 require(operatorAddress == requester, Errors.OperatorAddressMismatch());
 
                 if (action == Types.OperatorRegistrationAction.Register) {

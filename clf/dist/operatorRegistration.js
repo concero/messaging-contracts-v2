@@ -70,29 +70,29 @@ var init_base = __esm({
       version: `viem@${version}`
     };
     BaseError = class _BaseError extends Error {
-      constructor(shortMessage, args2 = {}) {
+      constructor(shortMessage, args = {}) {
         const details = (() => {
-          if (args2.cause instanceof _BaseError)
-            return args2.cause.details;
-          if (args2.cause?.message)
-            return args2.cause.message;
-          return args2.details;
+          if (args.cause instanceof _BaseError)
+            return args.cause.details;
+          if (args.cause?.message)
+            return args.cause.message;
+          return args.details;
         })();
         const docsPath = (() => {
-          if (args2.cause instanceof _BaseError)
-            return args2.cause.docsPath || args2.docsPath;
-          return args2.docsPath;
+          if (args.cause instanceof _BaseError)
+            return args.cause.docsPath || args.docsPath;
+          return args.docsPath;
         })();
-        const docsUrl = errorConfig.getDocsUrl?.({ ...args2, docsPath });
+        const docsUrl = errorConfig.getDocsUrl?.({ ...args, docsPath });
         const message = [
           shortMessage || "An error occurred.",
           "",
-          ...args2.metaMessages ? [...args2.metaMessages, ""] : [],
+          ...args.metaMessages ? [...args.metaMessages, ""] : [],
           ...docsUrl ? [`Docs: ${docsUrl}`] : [],
           ...details ? [`Details: ${details}`] : [],
           ...errorConfig.version ? [`Version: ${errorConfig.version}`] : []
         ].join("\n");
-        super(message, args2.cause ? { cause: args2.cause } : void 0);
+        super(message, args.cause ? { cause: args.cause } : void 0);
         Object.defineProperty(this, "details", {
           enumerable: true,
           configurable: true,
@@ -131,8 +131,8 @@ var init_base = __esm({
         });
         this.details = details;
         this.docsPath = docsPath;
-        this.metaMessages = args2.metaMessages;
-        this.name = args2.name ?? this.name;
+        this.metaMessages = args.metaMessages;
+        this.name = args.name ?? this.name;
         this.shortMessage = shortMessage;
         this.version = version;
       }
@@ -1796,8 +1796,8 @@ function packResult(result, reportConfig) {
 }
 
 // clf/src/operatorRegistration/utils/validateInputs.ts
-function decodeInputs(bytesArgs) {
-  const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, requester] = bytesArgs;
+function decodeInputs(bytesArgs2) {
+  const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, requester] = bytesArgs2;
   try {
     const chainTypes = decodeAbiParameters([{ type: "uint8[]" }], rawChainTypes)[0];
     const actions = decodeAbiParameters([{ type: "uint8[]" }], rawActions)[0];
@@ -1812,12 +1812,12 @@ function decodeInputs(bytesArgs) {
     handleError("70" /* DECODE_FAILED */);
   }
 }
-function validateDecodedArgs(args2) {
-  validateChainTypes(args2.chainTypes);
-  validateActions(args2.actions);
-  validateAddresses(args2.operatorAddresses);
-  validateOperatorAddress(args2.requester);
-  validateArrayLengths(args2);
+function validateDecodedArgs(args) {
+  validateChainTypes(args.chainTypes);
+  validateActions(args.actions);
+  validateAddresses(args.operatorAddresses);
+  validateOperatorAddress(args.requester);
+  validateArrayLengths(args);
 }
 function validateChainTypes(chainTypes) {
   const validChainTypes = /* @__PURE__ */ new Set([0 /* EVM */, 1 /* NON_EVM */]);
@@ -1841,41 +1841,33 @@ function validateOperatorAddress(address) {
     handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
 }
-function validateArrayLengths(args2) {
-  const { chainTypes, actions, operatorAddresses } = args2;
+function validateArrayLengths(args) {
+  const { chainTypes, actions, operatorAddresses } = args;
   if (chainTypes.length !== actions.length || actions.length !== operatorAddresses.length) {
     handleError("2" /* ARRAY_LENGTH_MISMATCH */);
   }
 }
 
 // clf/src/operatorRegistration/index.ts
-async function main(bytesArgs) {
-  try {
-    const decodedArgs = decodeInputs(bytesArgs);
-    const validatedArgs = validateDecodedArgs(decodedArgs);
-    if (args.chainTypes.includes(0 /* EVM */) && args.operatorAddresses[0] !== args.requester) {
-      handleError("56" /* INVALID_OPERATOR_ADDRESS */);
-    }
-    const registrationReportResult = {
-      version: CONFIG.REPORT_VERSION,
-      reportType: 2 /* OPERATOR_REGISTRATION */,
-      requester: args.requester,
-      actions: args.actions,
-      chainTypes: args.chainTypes,
-      operatorAddresses: args.operatorAddresses
-    };
-    const reportConfig = packReportConfig(
-      2 /* OPERATOR_REGISTRATION */,
-      CONFIG.REPORT_VERSION,
-      args.operatorAddresses
-    );
-    return packResult(registrationReportResult, reportConfig);
-  } catch (error) {
-    if (error instanceof CustomErrorHandler) {
-      throw error;
-    } else {
-      handleError("0" /* UNKNOWN_ERROR */);
-    }
+async function main() {
+  const decodedArgs = decodeInputs(bytesArgs);
+  validateDecodedArgs(decodedArgs);
+  if (decodedArgs.chainTypes.includes(0 /* EVM */) && decodedArgs.operatorAddresses[0] !== decodedArgs.requester) {
+    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
+  const registrationReportResult = {
+    version: CONFIG.REPORT_VERSION,
+    reportType: 2 /* OPERATOR_REGISTRATION */,
+    requester: decodedArgs.requester,
+    actions: decodedArgs.actions,
+    chainTypes: decodedArgs.chainTypes,
+    operatorAddresses: decodedArgs.operatorAddresses
+  };
+  const reportConfig = packReportConfig(
+    2 /* OPERATOR_REGISTRATION */,
+    CONFIG.REPORT_VERSION,
+    decodedArgs.operatorAddresses
+  );
+  return packResult(registrationReportResult, reportConfig);
 }
  main();

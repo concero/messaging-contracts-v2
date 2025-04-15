@@ -24,10 +24,10 @@ library Types {
 
     struct ClfDonReportSubmission {
         bytes32[3] context;
-        bytes report; // ClfReport
+        bytes report;
         bytes32[] rs;
         bytes32[] ss;
-        bytes32 rawVs;
+        bytes rawVs;
     }
 
     struct ClfReport {

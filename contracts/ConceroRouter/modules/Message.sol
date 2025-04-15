@@ -192,13 +192,11 @@ abstract contract Message is ClfSigner, IConceroRouter {
      */
     function _deliverMessage(
         bytes32 messageId,
-        bytes memory dstData,
+        Types.EvmDstChainData memory dstData,
         uint24 srcChainSelector,
         bytes memory sender,
         bytes memory message
     ) internal {
-        Types.EvmDstChainData memory dstData = abi.decode(dstData, (Types.EvmDstChainData));
-
         s.router().isMessageProcessed[messageId] = true;
 
         require(dstData.receiver != address(0), Errors.InvalidReceiver());

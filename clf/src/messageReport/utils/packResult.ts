@@ -32,22 +32,22 @@ export function packResult(result: MessageReportResult, packedReportConfig: Hash
 		],
 	);
 
-	const encodedClfMessageReportDataV1 = encodeAbiParameters(
+	const messageMetadata = encodeAbiParameters(
 		[
 			{ type: "bytes32" }, // messageId
 			{ type: "bytes[]" }, // allowedOperators
-			{ type: "bytes" }, // encodedMessage
+			{ type: "bytes" }, // messageData
 		],
 		[result.messageId, result.allowedOperators, encodedMessageDataV1],
 	);
 
-	const encodedClfReport = encodeAbiParameters(
+	const encodedClfReportResponse = encodeAbiParameters(
 		[
 			{ type: "bytes32" }, // reportConfig
-			{ type: "bytes" }, // encodedMessage
+			{ type: "bytes" }, // encodedClfMessageReportDataV1
 		],
-		[packedReportConfig, encodedClfMessageReportDataV1],
+		[packedReportConfig, messageMetadata],
 	);
 
-	return hexStringToUint8Array(encodedClfReport);
+	return hexStringToUint8Array(encodedClfReportResponse);
 }

@@ -30,7 +30,7 @@ contract SubmitMessageReport is ConceroRouterTest {
     bytes32 internal constant TEST_MESSAGE_ID = bytes32(uint256(1));
     bytes internal constant TEST_MESSAGE = "Test message";
     uint256 internal constant GAS_LIMIT = 1_000_000;
-    uint24 internal constant DST_CHAIN_SELECTOR = 1;
+    //    uint24 internal constant DST_CHAIN_SELECTOR = 1;
 
     event ConceroMessageReceived(bytes32 indexed messageId);
     event ConceroMessageDelivered(bytes32 indexed messageId);
@@ -43,7 +43,10 @@ contract SubmitMessageReport is ConceroRouterTest {
     }
 
     function test_SubmitMessageReport() public {
-        bytes memory dstChainDataRaw = abi.encode(address(conceroClient), GAS_LIMIT);
+        Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
+            receiver: address(conceroClient),
+            gasLimit: GAS_LIMIT
+        });
 
         bytes32 reportConfig = bytes32(
             (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
@@ -53,11 +56,6 @@ contract SubmitMessageReport is ConceroRouterTest {
 
         bytes[] memory operators = new bytes[](1);
         operators[0] = abi.encode(operator);
-
-        bytes memory encodedDstChainData = abi.encode(
-            uint32(dstChainDataRaw.length),
-            dstChainDataRaw
-        );
 
         bytes[] memory allowedOperators = new bytes[](1);
         allowedOperators[0] = abi.encode(operator);
@@ -80,7 +78,7 @@ contract SubmitMessageReport is ConceroRouterTest {
 
         CommonTypes.ClfReportResult memory clfReportResult = CommonTypes.ClfReportResult({
             reportConfig: reportConfig,
-            encodedReportData: abi.encode(ClfMessageReportDataV1)
+            encodedReportData: abi.encode(clfMessageReportDataV1)
         });
 
         Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(

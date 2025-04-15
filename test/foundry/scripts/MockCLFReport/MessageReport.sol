@@ -27,9 +27,11 @@ contract MessageReport is BaseMockCLFReport {
         return
             getResponse(
                 address(operator),
-                i_internalMessageConfig,
                 bytes32("messageId"),
                 bytes32("messageHashSum"),
+                SRC_CHAIN_SELECTOR,
+                DST_CHAIN_SELECTOR,
+                address(user),
                 "dstChain",
                 new bytes[](0)
             );
@@ -37,9 +39,11 @@ contract MessageReport is BaseMockCLFReport {
 
     function getResponse(
         address requester,
-        bytes32 internalMessageConfig,
         bytes32 messageId,
         bytes32 messageHashSum,
+        uint24 srcChainSelector,
+        uint24 dstChainSelector,
+        address messageSender,
         bytes memory dstChainData,
         bytes[] memory allowedOperators
     ) public view returns (bytes memory) {
@@ -50,14 +54,17 @@ contract MessageReport is BaseMockCLFReport {
                 (uint256(uint160(requester)))
         );
 
-        return
-            abi.encode(
-                reportConfig,
-                internalMessageConfig,
-                messageId,
-                messageHashSum,
-                dstChainData,
-                allowedOperators
-            );
+        bytes memory messageData = abi.encode(
+            messageHashSum,
+            abi.encode(messageSender),
+            srcChainSelector,
+            dstChainSelector,
+            dstChainData
+        );
+
+        bytes memory messageMetadata = abi.encode(messageId, allowedOperators, messageData);
+        bytes memory response = abi.encode(reportConfig, messageMetadata);
+
+        return response;
     }
 }

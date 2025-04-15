@@ -6,6 +6,8 @@
  */
 pragma solidity 0.8.28;
 
+import {Types} from "../ConceroRouter/libraries/Types.sol";
+
 library CommonTypes {
     enum ChainType {
         EVM, //                 0
@@ -39,7 +41,7 @@ library CommonTypes {
         bytes sender;
         uint24 srcChainSelector;
         uint24 dstChainSelector;
-        bytes dstChainData;
+        Types.EvmDstChainData dstChainData;
     }
 
     // @dev clfReportResponseConfig is a bitmasked uint256

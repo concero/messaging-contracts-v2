@@ -163,25 +163,4 @@ contract SendMessage is ConceroRouterTest {
 
         vm.stopPrank();
     }
-
-    function test_RevertInvalidMessageConfig() public {
-        uint24 dstChainSelector = DST_CHAIN_SELECTOR;
-        bool shouldFinaliseSrc = false;
-        address feeToken = address(0);
-
-        vm.startPrank(user);
-
-        bytes32 invalidConfig = bytes32(0);
-        uint256 messageFee = conceroRouter.getMessageFee(
-            dstChainSelector,
-            shouldFinaliseSrc,
-            feeToken,
-            dstChainData
-        );
-
-        vm.expectRevert();
-        conceroRouter.conceroSend{value: messageFee}(invalidConfig, dstChainData, message);
-
-        vm.stopPrank();
-    }
 }

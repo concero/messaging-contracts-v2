@@ -167,4 +167,8 @@ abstract contract Operator is CLF {
     function isOperatorRegistered(address operator) external view returns (bool) {
         return s.operator().isRegistered[operator];
     }
+
+    function isChainSupported(uint24 chainSelector) public view returns (bool) {
+        return s.verifier().isChainSupported[chainSelector];
+    }
 }

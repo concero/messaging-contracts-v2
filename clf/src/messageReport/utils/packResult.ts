@@ -15,13 +15,21 @@ export function packResult(result: MessageReportResult, packedReportConfig: Hash
 
 	const encodedMessageDataV1 = encodeAbiParameters(
 		[
+			{ type: "uint8" }, // messageVersion
 			{ type: "bytes32" }, // messageHashSum
 			{ type: "bytes" }, // sender
 			{ type: "uint24" }, // srcChainSelector
 			{ type: "uint24" }, // dstChainSelector
 			{ type: "bytes" }, // dstChainData
 		],
-		[result.messageHashSum, result.sender, result.srcChainSelector, result.dstChainSelector, result.dstChainData],
+		[
+			result.messageVersion,
+			result.messageHashSum,
+			result.sender,
+			result.srcChainSelector,
+			result.dstChainSelector,
+			result.dstChainData,
+		],
 	);
 
 	const encodedClfMessageReportDataV1 = encodeAbiParameters(

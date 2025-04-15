@@ -34,6 +34,7 @@ library CommonTypes {
     }
 
     struct MessageDataV1 {
+        uint8 version;
         bytes32 messageHashSum;
         bytes sender;
         uint24 srcChainSelector;

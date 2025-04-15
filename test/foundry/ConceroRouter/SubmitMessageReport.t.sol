@@ -63,6 +63,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         allowedOperators[0] = abi.encode(operator);
 
         CommonTypes.MessageDataV1 memory messageDataV1 = CommonTypes.MessageDataV1({
+            version: 1,
             messageHashSum: keccak256(TEST_MESSAGE),
             sender: abi.encode(address(this)),
             srcChainSelector: SRC_CHAIN_SELECTOR,

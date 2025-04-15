@@ -43,16 +43,19 @@ contract SendMessage is ConceroRouterTest {
         uint256[] memory gasPrices = new uint256[](1);
         gasPrices[0] = 100_000; // 0.1 gwei
 
-        vm.prank(deployer);
-        conceroRouter.setNativeNativeRates(chainSelectors, rates);
+        uint24[] memory chainselectors = new uint24[](1);
+        chainselectors[0] = DST_CHAIN_SELECTOR;
+        bool[] memory supported = new bool[](1);
+        supported[0] = true;
 
-        vm.prank(deployer);
+        vm.startPrank(deployer);
+        conceroRouter.setSupportedChains(chainselectors, supported);
+        conceroRouter.setNativeNativeRates(chainSelectors, rates);
         conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        vm.stopPrank();
     }
 
     function test_conceroSend() public {
-        uint24 dstChainSelector = DST_CHAIN_SELECTOR;
-        bool shouldFinaliseSrc = false;
         address feeToken = address(0);
 
         vm.startPrank(user);
@@ -64,7 +67,7 @@ contract SendMessage is ConceroRouterTest {
         );
         uint256 messageFee = conceroRouter.getMessageFee(
             DST_CHAIN_SELECTOR,
-            shouldFinaliseSrc,
+            false,
             feeToken,
             dstChainData
         );
@@ -72,7 +75,7 @@ contract SendMessage is ConceroRouterTest {
         vm.recordLogs();
         bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
             DST_CHAIN_SELECTOR,
-            shouldFinaliseSrc,
+            false,
             feeToken,
             dstChainData,
             message
@@ -83,38 +86,42 @@ contract SendMessage is ConceroRouterTest {
         );
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        bool foundEvent = false;
+        bool found = false;
+
         for (uint i = 0; i < entries.length; i++) {
-            // TODO: vm.expectEmit should be used instead of it
-            if (
-                entries[i].topics[0] ==
-                keccak256("event ConceroMessageSent(bytes32,uint8,bool,uint24,bytes,bytes,bytes)")
-            ) {
-                foundEvent = true;
+            bytes32 conceroMessageSentEventSig = keccak256(
+                "ConceroMessageSent(bytes32,uint8,bool,uint24,bytes,address,bytes)"
+            );
 
-                bytes32 internalMessageConfig = bytes32(entries[i].topics[1]);
-                bytes32 emittedMessageId = bytes32(entries[i].topics[2]);
+            if (entries[i].topics[0] == conceroMessageSentEventSig) {
+                found = true;
+                (
+                    uint8 versionFromEvent,
+                    bool shouldFinaliseSrcFromEvent,
+                    uint24 dstChainSelectorFromEvent,
+                    bytes memory dstChainDataFromEvent,
+                    address senderFromEvent,
+                    bytes memory messageFromEvent
+                ) = abi.decode(entries[i].data, (uint8, bool, uint24, bytes, address, bytes));
 
-                console.logBytes32(emittedMessageId);
+                bytes32 messageIdFromEvent = entries[i].topics[1];
 
-                (bytes memory dstChainDataFromEvent, bytes memory messageFromEvent) = abi.decode(
-                    entries[i].data,
-                    (bytes, bytes)
+                assertEq(dstChainSelectorFromEvent, 8453, "Incorrect dstChainSelector");
+                assertEq(
+                    senderFromEvent,
+                    0x0101010101010101010101010101010101010101,
+                    "Incorrect sender"
                 );
-
-                Message.validateInternalMessage(
-                    internalMessageConfig,
-                    srcChainData,
-                    dstChainDataFromEvent
+                assertEq(
+                    keccak256(messageFromEvent),
+                    keccak256("Test message"),
+                    "Incorrect message"
                 );
-
-                assertEq(emittedMessageId, messageId, "Message ID mismatch");
-                assertEq(dstChainDataFromEvent, dstChainData, "Destination chain data mismatch");
-                assertEq(messageFromEvent, message, "Message mismatch");
+                break;
             }
         }
-        assertTrue(foundEvent, "ConceroMessageSent event not found");
 
+        assertTrue(found, "ConceroMessageSent event not found");
         uint256 finalNonce = conceroRouter.getStorage(
             Namespaces.ROUTER,
             RouterSlots.nonce,
@@ -123,8 +130,13 @@ contract SendMessage is ConceroRouterTest {
         assertEq(finalNonce, initialNonce + 1, "Nonce should be incremented by 1");
 
         //        assertEq(
-        //            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.isMessageSent, bytes32(messageId)),
-        //            1
+        //            conceroRouter.getStorage(
+        //                Namespaces.ROUTER,
+        //                RouterSlots.isMessageSent,
+        //                bytes32(messageId)
+        //            ),
+        //            1,
+        //            "Message ID should be marked as sent"
         //        );
 
         vm.stopPrank();

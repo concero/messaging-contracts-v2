@@ -110,7 +110,7 @@ contract SubmitMessageReport is ConceroRouterTest {
                 assertEq(
                     entries[i].topics[1],
                     TEST_MESSAGE_ID,
-                    "ConceroMessageDelivered event has incorrect messageId"
+                    "ConceroMessageDelivered event not emitted with correct messageId"
                 );
             }
         }

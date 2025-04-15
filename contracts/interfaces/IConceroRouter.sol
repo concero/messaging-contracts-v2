@@ -14,7 +14,7 @@ event ConceroMessageSent(
     bool shouldFinaliseSrc,
     uint24 dstChainSelector,
     bytes dstChainData,
-    bytes sender,
+    address sender,
     bytes message
 );
 

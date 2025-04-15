@@ -45,7 +45,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
     using s for s.PriceFeed;
     using s for s.Operator;
 
-    uint8 private constant ROUTER_VERSION = 1;
+    uint8 private constant MESSAGE_VERSION = 1;
 
     constructor(
         address conceroVerifier,
@@ -73,11 +73,11 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         emit ConceroMessageSent(
             messageId,
-            ROUTER_VERSION,
+            MESSAGE_VERSION,
             shouldFinaliseSrc,
             dstChainSelector,
             dstChainData,
-            abi.encode(msg.sender),
+            msg.sender,
             message
         );
 
@@ -113,10 +113,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
         if (CommonTypes.CLFReportVersion(reportVersion) == CommonTypes.CLFReportVersion.V1) {
             _handleClfReportV1(decodedReportResult.encodedReportData, messagePayload);
         }
-    }
-
-    function getRouterVersion() external pure returns (uint8) {
-        return ROUTER_VERSION;
     }
 
     /* INTERNAL FUNCTIONS */
@@ -321,5 +317,9 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
     function isChainSupported(uint24 chainSelector) public view returns (bool) {
         return s.router().isChainSupported[chainSelector];
+    }
+
+    function getMessageVersion() external pure returns (uint8) {
+        return MESSAGE_VERSION;
     }
 }

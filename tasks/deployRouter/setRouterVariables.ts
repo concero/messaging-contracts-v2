@@ -69,6 +69,7 @@ async function setSupportedChains(network: ConceroNetwork) {
 		const setIsChainSupportedStatus = (
 			await publicClient.waitForTransactionReceipt({
 				hash: setIsChainSupportedHash,
+				confirmations: 3,
 			})
 		).status;
 

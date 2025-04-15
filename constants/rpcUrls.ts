@@ -1,5 +1,3 @@
-import { monadTestnet, sonicBlazeTestnet } from "viem/chains";
-
 import { getEnvVar } from "../utils";
 
 const { INFURA_API_KEY, ALCHEMY_API_KEY, BLAST_API_KEY, CHAINSTACK_API_KEY, TENDERLY_API_KEY } =
@@ -43,12 +41,7 @@ export const urls: Record<string, string[]> = {
 		"https://rpc.ankr.com/avalanche",
 		`https://avalanche-mainnet.infura.io/v3/${INFURA_API_KEY}`,
 	],
-	avalancheFuji: [
-		"https://rpc.ankr.com/avalanche_fuji",
-		`https://avalanche-fuji.infura.io/v3/${INFURA_API_KEY}`,
-		`https://avalanche-fuji.core.chainstack.com/ext/bc/C/rpc/${CHAINSTACK_API_KEY}`,
-		`https://ava-testnet.blastapi.io/${BLAST_API_KEY}`,
-	],
+	avalancheFuji: ["https://avalanche-fuji-c-chain-rpc.publicnode.com"],
 	arbitrum: [
 		`https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
 		`https://arbitrum-one.blastapi.io/${BLAST_API_KEY}`,
@@ -97,7 +90,7 @@ export const urls: Record<string, string[]> = {
 	bnbTestnet: ["https://bsc-testnet-rpc.publicnode.com"],
 	lineaSepolia: ["https://linea-sepolia-rpc.publicnode.com"],
 	soneiumMinato: ["https://rpc.minato.soneium.org", "https://soneium-minato.drpc.org"],
-	sonicBlaze: ["https://sonic-blaze-rpc.publicnode.com"],
+	sonicBlaze: ["https://rpc.blaze.soniclabs.com"],
 	bsc: ["https://rpc.ankr.com/bsc"],
 	scroll: ["https://rpc.ankr.com/scroll"],
 	scrollSepolia: ["https://scroll-sepolia-rpc.publicnode.com"],
@@ -106,7 +99,6 @@ export const urls: Record<string, string[]> = {
 	astarShibuya: ["https://evm.shibuya.astar.network"],
 	roninSaigon: ["https://saigon-testnet.roninchain.com/rpc"],
 	megaethTestnet: ["https://carrot.megaeth.com/rpc"],
-	sonicBlaze: ["https://sonic-testnet.drpc.org"],
 	monadTestnet: ["https://testnet-rpc.monad.xyz"],
 	apechainCurtis: ["https://apechain-curtis.drpc.org"],
 	blastSepolia: ["https://sepolia.blast.io"],

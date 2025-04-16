@@ -48,41 +48,29 @@ contract SubmitMessageReport is ConceroRouterTest {
             gasLimit: GAS_LIMIT
         });
 
-        bytes32 reportConfig = bytes32(
-            (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
-                (uint256(1) << 240) |
-                (uint256(uint160(operator)))
-        );
-
-        bytes[] memory operators = new bytes[](1);
-        operators[0] = abi.encode(operator);
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: CommonTypes.ResultType.Message,
+            payloadVersion: 1,
+            requester: operator
+        });
 
         bytes[] memory allowedOperators = new bytes[](1);
         allowedOperators[0] = abi.encode(operator);
 
-        CommonTypes.MessageDataV1 memory messageDataV1 = CommonTypes.MessageDataV1({
-            version: 1,
+        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
+            messageId: TEST_MESSAGE_ID,
             messageHashSum: keccak256(TEST_MESSAGE),
-            sender: abi.encode(address(this)),
+            messageSender: abi.encode(address(this)),
             srcChainSelector: SRC_CHAIN_SELECTOR,
-            dstChainSelector: DST_CHAIN_SELECTOR,
-            dstChainData: dstChainData
+            dstChainSelector: 1,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
         });
 
-        CommonTypes.ClfMessageReportDataV1 memory clfMessageReportDataV1 = CommonTypes
-            .ClfMessageReportDataV1({
-                messageId: TEST_MESSAGE_ID,
-                allowedOperators: allowedOperators,
-                encodedMessageData: abi.encode(messageDataV1)
-            });
-
-        CommonTypes.ClfReportResult memory clfReportResult = CommonTypes.ClfReportResult({
-            reportConfig: reportConfig,
-            encodedReportData: abi.encode(clfMessageReportDataV1)
-        });
+        bytes memory payload = abi.encode(messagePayloadV1);
 
         Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
-            abi.encode(clfReportResult)
+            abi.encode(resultConfig, payload)
         );
 
         vm.recordLogs();
@@ -207,7 +195,7 @@ contract SubmitMessageReport is ConceroRouterTest {
 
     //     VerifierTypes.MessageReportResult memory result = VerifierTypes.MessageReportResult({
     //         version: 1,
-    //         reportType: VerifierTypes.CLFReportType.Message,
+    //         reportType: VerifierTypes.VerifierResultType.Message,
     //         operator: operator,
     //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
     //             i_clientMessageConfig,
@@ -237,7 +225,7 @@ contract SubmitMessageReport is ConceroRouterTest {
 
     //     CommonTypes.MessageReportResult memory result = CommonTypes.MessageReportResult({
     //         version: 1,
-    //         reportType: CommonTypes.CLFReportType.Message,
+    //         reportType: CommonTypes.ResultType.Message,
     //         operator: operator,
     //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
     //             i_clientMessageConfig,

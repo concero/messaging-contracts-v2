@@ -45,28 +45,20 @@ library Decoder {
         requester = address(uint160(uint256(reportConfig)));
     }
 
-    function _decodeCLFMessageReportResponse(
-        bytes memory response
-    ) internal pure returns (CommonTypes.ClfReportResult memory) {
-        CommonTypes.ClfReportResult memory result;
-        (result.reportConfig, result.encodedReportData) = abi.decode(response, (bytes32, bytes));
-
-        return result;
+    function _decodeVerifierResult(
+        bytes memory result
+    ) internal pure returns (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) {
+        return abi.decode(result, (CommonTypes.ResultConfig, bytes));
     }
 
-    function _decodeCLFOperatorRegistrationReport(
+    function _decodeVerifierOperatorRegistrationResult(
         bytes memory response
     ) internal pure returns (VerifierTypes.OperatorRegistrationResult memory) {
         VerifierTypes.OperatorRegistrationResult memory result;
 
-        (
-            result.reportConfig,
-            result.operatorChains,
-            result.operatorActions,
-            result.operatorAddresses
-        ) = abi.decode(
+        (result.operatorChains, result.operatorActions, result.operatorAddresses) = abi.decode(
             response,
-            (bytes32, CommonTypes.ChainType[], VerifierTypes.OperatorRegistrationAction[], bytes[])
+            (CommonTypes.ChainType[], VerifierTypes.OperatorRegistrationAction[], bytes[])
         );
 
         return result;

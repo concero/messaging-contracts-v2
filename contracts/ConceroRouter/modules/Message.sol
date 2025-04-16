@@ -90,17 +90,16 @@ abstract contract Message is ClfSigner, IConceroRouter {
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
      * @param reportSubmission the serialized report data.
-     * @param messagePayload the message payload.
+     * @param messageBody the message body.
      */
     function submitMessageReport(
         Types.ClfDonReportSubmission calldata reportSubmission,
-        bytes calldata messagePayload
+        bytes calldata messageBody
     ) external {
         _verifyClfReportSignatures(reportSubmission);
 
-        console.logString("verified signatures");
         Types.ClfReport memory clfReport = DecoderLib._decodeCLFReport(reportSubmission.report);
-        console.logString("decoded clfReport");
+
         Types.ClfReportOnchainMetadata memory onchainMetadata = abi.decode(
             clfReport.onchainMetadata[0],
             (Types.ClfReportOnchainMetadata)
@@ -108,65 +107,49 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         _verifyClfReportOnChainMetadata(onchainMetadata);
 
-        CommonTypes.ClfReportResult memory decodedReportResult = DecoderLib
-            ._decodeCLFMessageReportResponse(clfReport.results[0]);
+        (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = DecoderLib
+            ._decodeVerifierResult(clfReport.results[0]);
 
-        (, uint8 reportVersion, ) = DecoderLib._decodeCLFReportConfig(
-            decodedReportResult.reportConfig
-        );
-
-        if (CommonTypes.CLFReportVersion(reportVersion) == CommonTypes.CLFReportVersion.V1) {
-            _handleClfReportV1(decodedReportResult.encodedReportData, messagePayload);
+        if (resultConfig.payloadVersion == 1) {
+            _handleMessagePayloadV1(payload, messageBody);
         }
     }
 
     /* INTERNAL FUNCTIONS */
 
-    function _handleClfReportV1(bytes memory clfReportData, bytes memory messagePayload) internal {
-        CommonTypes.ClfMessageReportDataV1 memory clfMessageReportData = abi.decode(
-            clfReportData,
-            (CommonTypes.ClfMessageReportDataV1)
-        );
-
-        _verifyIsSenderOperator(clfMessageReportData.allowedOperators);
-
-        if (uint8(clfMessageReportData.encodedMessageData[0]) == 1) {
-            _handleMessageV1(
-                clfMessageReportData.messageId,
-                clfMessageReportData.encodedMessageData,
-                messagePayload
-            );
-        }
-    }
-
-    function _handleMessageV1(
-        bytes32 messageId,
-        bytes memory message,
-        bytes memory messagePayload
+    function _handleMessagePayloadV1(
+        bytes memory _messagePayload,
+        bytes memory messageBody
     ) internal {
-        CommonTypes.MessageDataV1 memory messageData = abi.decode(
-            message,
-            (CommonTypes.MessageDataV1)
+        CommonTypes.MessagePayloadV1 memory messagePayload = abi.decode(
+            _messagePayload,
+            (CommonTypes.MessagePayloadV1)
         );
 
+        _verifyIsSenderOperator(messagePayload.allowedOperators);
+
+        console.logUint(i_chainSelector);
         require(
-            messageData.messageHashSum == keccak256(messagePayload),
+            messagePayload.messageHashSum == keccak256(messageBody),
             Errors.InvalidMessageHashSum()
         );
-        require(messageData.dstChainSelector == i_chainSelector, Errors.InvalidDstChainSelector());
         require(
-            !s.router().isMessageProcessed[messageId],
-            Errors.MessageAlreadyProcessed(messageId)
+            messagePayload.dstChainSelector == i_chainSelector,
+            Errors.InvalidDstChainSelector()
+        );
+        require(
+            !s.router().isMessageProcessed[messagePayload.messageId],
+            Errors.MessageAlreadyProcessed(messagePayload.messageId)
         );
 
-        emit ConceroMessageReceived(messageId);
+        emit ConceroMessageReceived(messagePayload.messageId);
 
         _deliverMessage(
-            messageId,
-            messageData.dstChainData,
-            messageData.srcChainSelector,
-            messageData.sender,
-            messagePayload
+            messagePayload.messageId,
+            messagePayload.dstChainData,
+            messagePayload.srcChainSelector,
+            messagePayload.messageSender,
+            messageBody
         );
     }
 

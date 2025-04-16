@@ -31,7 +31,7 @@ library Types {
         NON_EVM //                1
     }
 
-    enum CLFReportType {
+    enum VerifierResultType {
         Message, //               0
         OperatorRegistration //   1
     }
@@ -56,7 +56,6 @@ library Types {
     }
 
     struct OperatorRegistrationResult {
-        bytes32 reportConfig;
         CommonTypes.ChainType[] operatorChains;
         OperatorRegistrationAction[] operatorActions;
         bytes[] operatorAddresses;

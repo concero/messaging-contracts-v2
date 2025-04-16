@@ -32,7 +32,7 @@ contract MessageReport is BaseMockCLFReport {
                 SRC_CHAIN_SELECTOR,
                 DST_CHAIN_SELECTOR,
                 address(user),
-                "dstChain",
+                RouterTypes.EvmDstChainData({receiver: address(0), gasLimit: 1_000_000}),
                 new bytes[](0)
             );
     }
@@ -44,27 +44,26 @@ contract MessageReport is BaseMockCLFReport {
         uint24 srcChainSelector,
         uint24 dstChainSelector,
         address messageSender,
-        bytes memory dstChainData,
+        RouterTypes.EvmDstChainData memory dstChainData,
         bytes[] memory allowedOperators
     ) public view returns (bytes memory) {
-        bytes32 reportConfig = bytes32(
-            (uint256(uint8(CommonTypes.CLFReportType.Message)) <<
-                ReportConfigBitOffsets.OFFSET_REPORT_TYPE) |
-                (uint256(1) << ReportConfigBitOffsets.OFFSET_VERSION) |
-                (uint256(uint160(requester)))
-        );
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: CommonTypes.ResultType.Message,
+            payloadVersion: 1,
+            requester: requester
+        });
 
-        bytes memory messageData = abi.encode(
-            messageHashSum,
-            abi.encode(messageSender),
-            srcChainSelector,
-            dstChainSelector,
-            dstChainData
-        );
+        CommonTypes.MessagePayloadV1 memory messagePayload = CommonTypes.MessagePayloadV1({
+            messageId: messageId,
+            messageHashSum: messageHashSum,
+            messageSender: abi.encode(messageSender),
+            srcChainSelector: srcChainSelector,
+            dstChainSelector: dstChainSelector,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
+        });
 
-        bytes memory messageMetadata = abi.encode(messageId, allowedOperators, messageData);
-        bytes memory response = abi.encode(reportConfig, messageMetadata);
-
+        bytes memory response = abi.encode(resultConfig, abi.encode(messagePayload));
         return response;
     }
 }

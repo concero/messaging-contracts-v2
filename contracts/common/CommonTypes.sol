@@ -14,41 +14,31 @@ library CommonTypes {
         NON_EVM //              1
     }
 
-    enum CLFReportType {
+    enum ResultType {
         Unknown, //             0
         Message, //             1
         OperatorRegistration // 2
     }
 
-    enum CLFReportVersion {
-        V1
+    struct ResultConfig {
+        ResultType resultType;
+        uint8 payloadVersion;
+        address requester;
     }
 
-    struct ClfReportResult {
-        bytes32 reportConfig;
-        bytes encodedReportData;
-    }
-
-    struct ClfMessageReportDataV1 {
+    struct MessagePayloadV1 {
         bytes32 messageId;
-        bytes[] allowedOperators;
-        bytes encodedMessageData;
-    }
-
-    struct MessageDataV1 {
-        uint8 version;
         bytes32 messageHashSum;
-        bytes sender;
+        bytes messageSender;
         uint24 srcChainSelector;
         uint24 dstChainSelector;
         Types.EvmDstChainData dstChainData;
+        bytes[] allowedOperators;
     }
 
-    // @dev clfReportResponseConfig is a bitmasked uint256
-    struct ClfReportResponseConfig {
-        uint8 reportType; //               1 byte, (0-255)
-        uint8 version; //                  1 byte, (0-255)
-        //                                 10 bytes reserved for future use
-        address requester; //              20 bytes
+    struct VerifierResult {
+        ResultConfig resultConfig;
+        bytes payload;
     }
+    // VerifierResult = abi.encode(ResultConfig resultConfig, bytes payload);
 }

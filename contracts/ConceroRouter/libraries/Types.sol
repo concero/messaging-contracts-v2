@@ -32,7 +32,7 @@ library Types {
 
     struct ClfReport {
         bytes32[] requestIds;
-        bytes[] results; // ConceroVerifier:fulfillRequest() gets results[0] as response
+        bytes[] results; // ConceroVerifier:fulfillRequest() gets results[0] as result
         bytes[] errors;
         bytes[] onchainMetadata;
         bytes[] offchainMetadata;

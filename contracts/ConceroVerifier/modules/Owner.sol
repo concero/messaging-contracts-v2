@@ -14,8 +14,6 @@ import {Errors} from "../libraries/Errors.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {Base} from "./Base.sol";
 
-import {console} from "forge-std/src/console.sol";
-
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.Verifier;

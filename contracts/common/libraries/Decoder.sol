@@ -5,7 +5,7 @@
  * @contact email: security@concero.io
  */
 pragma solidity 0.8.28;
-import {console} from "forge-std/src/console.sol";
+
 import {CommonTypes} from "../CommonTypes.sol";
 import {BitMasks, MessageConfigBitOffsets as offsets, ReportConfigBitOffsets, ReportByteSizes} from "../CommonConstants.sol";
 import {ReportByteSizes} from "contracts/common/CommonConstants.sol";

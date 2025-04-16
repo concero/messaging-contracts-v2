@@ -1,6 +1,5 @@
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/console.sol";
 import {BaseMockCLFReport} from "./BaseMockCLFReport.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {ReportConfigBitOffsets} from "contracts/common/CommonConstants.sol";

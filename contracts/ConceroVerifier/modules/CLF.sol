@@ -6,8 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/console.sol";
-
 import {Base} from "./Base.sol";
 
 import {CLFRequestError, MessageReport, OperatorRegistered, MessageReportRequested} from "../../interfaces/IConceroVerifier.sol";

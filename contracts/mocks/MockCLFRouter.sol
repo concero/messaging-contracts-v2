@@ -1,7 +1,5 @@
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/console.sol";
-
 interface IMockCLFRouter {
     function setConsumer(address _consumer) external;
 

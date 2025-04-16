@@ -33,18 +33,6 @@ library Decoder {
         return decodedReport;
     }
 
-    function _decodeCLFReportConfig(
-        bytes32 reportConfig
-    ) internal pure returns (uint8 reportType, uint8 version, address requester) {
-        reportType = uint8(
-            uint256(reportConfig >> ReportConfigBitOffsets.OFFSET_REPORT_TYPE) & BitMasks.MASK_8
-        );
-        version = uint8(
-            uint256(reportConfig >> ReportConfigBitOffsets.OFFSET_VERSION) & BitMasks.MASK_8
-        );
-        requester = address(uint160(uint256(reportConfig)));
-    }
-
     function _decodeVerifierResult(
         bytes memory result
     ) internal pure returns (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) {

@@ -7,13 +7,8 @@
 pragma solidity 0.8.28;
 
 library Types {
-    enum FeeToken {
-        native, //                0
-        usdc //                   1
-    }
-
     struct EvmSrcChainData {
-        address sender; //may not be needed
+        address sender;
         uint256 blockNumber; // L2s have issues with blocknumber
     }
 

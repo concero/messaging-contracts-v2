@@ -21,19 +21,9 @@ struct CLFParams {
 }
 
 library Types {
-    enum FeeToken {
-        native, //                0
-        usdc //                   1
-    }
-
     enum ChainType {
         EVM, //                   0
         NON_EVM //                1
-    }
-
-    enum VerifierResultType {
-        Message, //               0
-        OperatorRegistration //   1
     }
 
     enum CLFRequestStatus {
@@ -45,14 +35,6 @@ library Types {
     enum OperatorRegistrationAction {
         Deregister, //            0
         Register //               1
-    }
-
-    struct MessageReportRequest {
-        bytes32 internalMessageConfig;
-        bytes32 messageId;
-        bytes32 messageHashSum;
-        bytes srcChainData;
-        bytes dstChainData;
     }
 
     struct OperatorRegistrationResult {

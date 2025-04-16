@@ -19,15 +19,17 @@ import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
 contract SendMessage is ConceroRouterTest {
-    bytes internal dstChainData;
+    ConceroTypes.EvmDstChainData internal dstChainData;
     bytes internal message;
 
     function setUp() public override {
         super.setUp();
 
-        dstChainData = abi.encode(
-            RouterTypes.EvmDstChainData({receiver: address(0x456), gasLimit: 1_000_000})
-        );
+        dstChainData = ConceroTypes.EvmDstChainData({
+            receiver: address(0x456),
+            gasLimit: 1_000_000
+        });
+
         message = "Test message";
 
         vm.deal(user, 100 ether);

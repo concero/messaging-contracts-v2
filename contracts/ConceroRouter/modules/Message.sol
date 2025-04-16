@@ -14,6 +14,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Decoder as DecoderLib} from "../../common/libraries/Decoder.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 
+import {ConceroTypes} from "../../ConceroClient/ConceroTypes.sol";
 import {BitMasks, CommonConstants, MessageConfigBitOffsets as offsets} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
@@ -32,14 +33,15 @@ library Errors {
     error MessageAlreadyProcessed(bytes32 messageId);
     error MessageDeliveryFailed(bytes32 messageId);
     error InvalidReceiver();
+    error InvalidGasLimit();
     error InvalidMessageHashSum();
     error UnauthorizedOperator();
-    error InvalidDstChainSelector();
+    error InvalidDstChainSelector(uint24 dstChainSelector);
     error InvalidClientMessageConfig();
     error InvalidDstChainData();
     error InvalidSrcChainData();
     error MessageTooLarge();
-    error FinalisationIsNotSupportedYet();
+    error FinalityNotYetSupported();
 }
 
 abstract contract Message is ClfSigner, IConceroRouter {
@@ -60,7 +62,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
         address feeToken,
-        bytes calldata dstChainData,
+        ConceroTypes.EvmDstChainData memory dstChainData,
         bytes calldata message
     ) external payable returns (bytes32) {
         _validateMessageParams(
@@ -79,7 +81,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
             MESSAGE_VERSION,
             shouldFinaliseSrc,
             dstChainSelector,
-            dstChainData,
+            abi.encode(dstChainData),
             msg.sender,
             message
         );
@@ -135,7 +137,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
         require(
             messagePayload.dstChainSelector == i_chainSelector,
-            Errors.InvalidDstChainSelector()
+            Errors.InvalidDstChainSelector(messagePayload.dstChainSelector)
         );
         require(
             !s.router().isMessageProcessed[messagePayload.messageId],
@@ -218,17 +220,18 @@ abstract contract Message is ClfSigner, IConceroRouter {
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
         address feeToken,
-        bytes calldata dstChainData,
+        ConceroTypes.EvmDstChainData memory dstChainData,
         bytes calldata message
     ) internal view {
         require(feeToken == address(0), Errors.UnsupportedFeeTokenType());
-        require(dstChainData.length > 0, Errors.InvalidDstChainData());
+        require(dstChainData.receiver != address(0), Errors.InvalidReceiver());
+        require(dstChainData.gasLimit > 0, Errors.InvalidGasLimit());
         require(message.length < CommonConstants.MESSAGE_MAX_SIZE, Errors.MessageTooLarge());
-        require(!shouldFinaliseSrc, Errors.FinalisationIsNotSupportedYet());
-        // require(
-        //     isChainSupported(dstChainSelector),
-        //     InvalidClientMessageConfig(MessageConfigErrorType.InvalidDstChainSelector)
-        // );
+        require(!shouldFinaliseSrc, Errors.FinalityNotYetSupported());
+        require(
+            isChainSupported(dstChainSelector),
+            Errors.InvalidDstChainSelector(dstChainSelector)
+        );
     }
 
     function _buildMessageId(uint24 dstChainSelector) private returns (bytes32) {
@@ -247,7 +250,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
     function _collectMessageFee(
         uint24 dstChainSelector,
         address feeToken,
-        bytes memory dstChainData
+        ConceroTypes.EvmDstChainData memory dstChainData
     ) internal {
         uint256 messageFee = _calculateMessageFee(dstChainSelector, feeToken, dstChainData);
 
@@ -263,13 +266,9 @@ abstract contract Message is ClfSigner, IConceroRouter {
     function _calculateMessageFee(
         uint24 dstChainSelector,
         address feeToken,
-        bytes memory dstChainData
+        ConceroTypes.EvmDstChainData memory dstChainData
     ) internal view returns (uint256) {
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
-        Types.EvmDstChainData memory evmDstChainData = abi.decode(
-            dstChainData,
-            (Types.EvmDstChainData)
-        );
 
         uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
             CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD,
@@ -277,7 +276,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         uint256 gasPrice = s.priceFeed().lastGasPrices[dstChainSelector];
-        uint256 gasFeeNative = gasPrice * evmDstChainData.gasLimit;
+        uint256 gasFeeNative = gasPrice * dstChainData.gasLimit;
 
         uint256 nativeNativeRate = s.getNativeNativeRate(dstChainSelector);
         uint256 adjustedGasFeeNative = (gasFeeNative * nativeNativeRate) / 1e18;
@@ -295,10 +294,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
         address feeToken,
-        bytes calldata dstChainData
+        ConceroTypes.EvmDstChainData calldata dstChainData
     ) external view returns (uint256) {
         require(feeToken == address(0), Errors.UnsupportedFeeTokenType());
-        require(!shouldFinaliseSrc, Errors.FinalisationIsNotSupportedYet());
+        require(!shouldFinaliseSrc, Errors.FinalityNotYetSupported());
 
         return _calculateMessageFee(dstChainSelector, feeToken, dstChainData);
     }

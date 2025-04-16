@@ -27,7 +27,7 @@ interface IConceroRouter {
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
         address feeToken,
-        bytes calldata dstChainData,
+        ConceroTypes.EvmDstChainData memory dstChainData,
         bytes calldata message
     ) external payable returns (bytes32 messageId);
 
@@ -35,6 +35,6 @@ interface IConceroRouter {
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
         address feeToken,
-        bytes calldata dstChainData
+        ConceroTypes.EvmDstChainData memory dstChainData
     ) external view returns (uint256);
 }

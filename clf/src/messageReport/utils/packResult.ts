@@ -9,45 +9,55 @@ import { MessageReportResult } from "../types";
  * @param result - The message report result object to pack
  * @returns Packed binary data as Uint8Array
  */
-export function packResult(result: MessageReportResult, packedReportConfig: Hash): Uint8Array {
-	// Using viem's encodeAbiParameters to encode data in the same format
-	// as the Solidity abi.decode expects
-
-	const encodedMessageDataV1 = encodeAbiParameters(
+export function packResult(result: MessageReportResult): Uint8Array {
+	const messagePayloadV1 = encodeAbiParameters(
 		[
-			{ type: "uint8" }, // messageVersion
+			{ type: "bytes32" }, // messageId
 			{ type: "bytes32" }, // messageHashSum
-			{ type: "bytes" }, // sender
+			{ type: "bytes" }, // messageSender
 			{ type: "uint24" }, // srcChainSelector
 			{ type: "uint24" }, // dstChainSelector
-			{ type: "bytes" }, // dstChainData
+			{
+				type: "tuple",
+				components: [
+					{ type: "address", name: "receiver" },
+					{ type: "bytes", name: "data" },
+				],
+			}, // dstChainData
+			{ type: "bytes[]" }, // allowedOperators
 		],
 		[
-			result.messageVersion,
+			result.messageId,
 			result.messageHashSum,
 			result.sender,
 			result.srcChainSelector,
 			result.dstChainSelector,
 			result.dstChainData,
+			result.allowedOperators,
 		],
 	);
 
-	const messageMetadata = encodeAbiParameters(
+	const encodedResult = encodeAbiParameters(
 		[
-			{ type: "bytes32" }, // messageId
-			{ type: "bytes[]" }, // allowedOperators
-			{ type: "bytes" }, // messageData
+			{
+				type: "tuple",
+				components: [
+					{ type: "uint8", name: "resultType" },
+					{ type: "uint8", name: "payloadVersion" },
+					{ type: "address", name: "requester" },
+				],
+			}, // ResultConfig
+			{ type: "bytes" }, // payload
 		],
-		[result.messageId, result.allowedOperators, encodedMessageDataV1],
-	);
-
-	const encodedClfReportResponse = encodeAbiParameters(
 		[
-			{ type: "bytes32" }, // reportConfig
-			{ type: "bytes" }, // encodedClfMessageReportDataV1
+			{
+				resultType: result.resultType,
+				payloadVersion: result.payloadVersion,
+				requester: result.requester,
+			},
+			messagePayloadV1,
 		],
-		[packedReportConfig, messageMetadata],
 	);
 
-	return hexStringToUint8Array(encodedClfReportResponse);
+	return hexStringToUint8Array(encodedResult);
 }

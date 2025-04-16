@@ -1,4 +1,4 @@
-import { ChainType, ReportType } from "../common/enums";
+import { ChainType, ResultType } from "../common/enums";
 import { CustomErrorHandler, handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
 import { packReportConfig } from "../common/packReportConfig";
@@ -19,20 +19,15 @@ export async function main(bytesArgs: string[]) {
 		// await verifyOperatorStake(args.requester);
 
 		const registrationReportResult: OperatorRegistrationResult = {
-			version: CONFIG.REPORT_VERSION,
-			reportType: ReportType.OPERATOR_REGISTRATION,
+			payloadVersion: CONFIG.REPORT_VERSION,
+			resultType: ResultType.OPERATOR_REGISTRATION,
 			requester: args.requester,
 			actions: args.actions,
 			chainTypes: args.chainTypes,
 			operatorAddresses: args.operatorAddresses,
 		};
 
-		const reportConfig = packReportConfig(
-			ReportType.OPERATOR_REGISTRATION,
-			CONFIG.REPORT_VERSION,
-			args.operatorAddresses,
-		);
-		return packResult(registrationReportResult, reportConfig);
+		return packResult(registrationReportResult);
 	} catch (error) {
 		if (error instanceof CustomErrorHandler) {
 			throw error;

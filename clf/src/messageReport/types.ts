@@ -16,9 +16,11 @@ export interface DecodedArgs {
 }
 
 export interface MessageReportResult {
-	reportVersion: number;
-	reportType: number;
+	// resultConfig
+	payloadVersion: number;
+	resultType: number;
 	requester: Address;
+	// payload
 	messageVersion: Number;
 	messageId: Hash;
 	messageHashSum: Hash;

@@ -1,4 +1,4 @@
-import { ChainType, ReportType } from "../common/enums";
+import { ChainType, ResultType } from "../common/enums";
 import { packReportConfig } from "../common/packReportConfig";
 import { getPublicClient } from "../common/viemClient";
 import { conceroRouters } from "./constants/conceroRouters";
@@ -40,8 +40,8 @@ export async function main() {
 	const allowedOperators = pick(operators, 1);
 
 	const messageReportResult: MessageReportResult = {
-		reportVersion: CONFIG.REPORT_VERSION,
-		reportType: ReportType.MESSAGE,
+		payloadVersion: CONFIG.PAYLOAD_VERSION,
+		resultType: ResultType.MESSAGE,
 		requester: args.operatorAddress,
 		messageVersion,
 		messageId: args.messageId,
@@ -54,8 +54,5 @@ export async function main() {
 		allowedOperators,
 	};
 
-	return packResult(
-		messageReportResult,
-		packReportConfig(ReportType.MESSAGE, CONFIG.REPORT_VERSION, args.operatorAddress),
-	);
+	return packResult(messageReportResult);
 }

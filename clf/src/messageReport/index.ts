@@ -43,14 +43,12 @@ export async function main() {
 		payloadVersion: CONFIG.PAYLOAD_VERSION,
 		resultType: ResultType.MESSAGE,
 		requester: args.operatorAddress,
-		messageVersion,
 		messageId: args.messageId,
 		messageHashSum: args.messageHashSum,
 		sender,
 		srcChainSelector: args.srcChainSelector,
 		dstChainSelector,
 		dstChainData,
-		shouldFinaliseSrc,
 		allowedOperators,
 	};
 

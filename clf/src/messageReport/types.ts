@@ -21,13 +21,11 @@ export interface MessageReportResult {
 	resultType: number;
 	requester: Address;
 	// payload
-	messageVersion: Number;
 	messageId: Hash;
 	messageHashSum: Hash;
-	sender: HexString;
+	messageSender: HexString;
 	srcChainSelector: Number;
 	dstChainSelector: Number;
 	dstChainData: string;
-	shouldFinaliseSrc: Boolean;
 	allowedOperators: string[];
 }

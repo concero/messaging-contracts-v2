@@ -29,7 +29,7 @@ export function packResult(result: MessageReportResult): Uint8Array {
 		[
 			result.messageId,
 			result.messageHashSum,
-			result.sender,
+			result.messageSender,
 			result.srcChainSelector,
 			result.dstChainSelector,
 			result.dstChainData,

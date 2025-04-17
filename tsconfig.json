@@ -1,13 +1,17 @@
 {
-  "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
-  },
-  "ts-node": {
-  }
+    "compilerOptions": {
+        "target": "es2020",
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "paths": {
+            "@concero/contract-utils": ["./node_modules/@concero/contract-utils"],
+            "@concero/rpcs": ["./node_modules/@concero/rpcs"],
+            "@concero/v2-networks": ["./node_modules/@concero/v2-networks"]
+        }
+    },
+    "ts-node": {}
 }

@@ -1,32 +1,10 @@
 import { Chain } from "viem";
 
-export type ConceroMainnetNetworkNames =
-	| "ethereum"
-	| "arbitrum"
-	| "optimism"
-	| "polygon"
-	| "polygonZkEvm"
-	| "avalanche"
-	| "base";
-export type ConceroTestnetNetworkNames =
-	| "localhost"
-	| "sepolia"
-	| "optimismSepolia"
-	| "arbitrumSepolia"
-	| "avalancheFuji"
-	| "baseSepolia"
-	| "polygonAmoy";
-export type ConceroTestNetworkNames = "localhost" | "hardhat";
-
-export type ConceroNetworkNames =
-	| ConceroMainnetNetworkNames
-	| ConceroTestnetNetworkNames
-	| ConceroTestNetworkNames;
-
 export type ConceroNetworkType = "mainnet" | "testnet" | "localhost";
+
 export type ConceroNetwork = {
 	chainId: number;
-	name: ConceroNetworkNames;
+	name: string;
 	type: ConceroNetworkType;
 	chainSelector: bigint;
 	accounts: string[];
@@ -36,4 +14,28 @@ export type ConceroNetwork = {
 	rpcUrls: string[];
 };
 
-export type NetworkType = "mainnet" | "testnet" | "localhost";
+export interface ChainDefinition {
+	id: number;
+	name: string;
+	rpcUrls: string[];
+	blockExplorer?: {
+		name: string;
+		url: string;
+	};
+	isTestnet: boolean;
+}
+
+export type ConceroLocalNetwork = ConceroNetwork & {
+	saveDeployments?: boolean;
+	forking?: {
+		url: string;
+		enabled: boolean;
+		blockNumber?: number;
+	};
+};
+export type ConceroHardhatNetwork = Omit<ConceroLocalNetwork, "accounts"> & {
+	accounts: Array<{
+		privateKey: string;
+		balance: string;
+	}>;
+};

@@ -1,135 +1,26 @@
-import { monadTestnet, sonicBlazeTestnet } from "viem/chains";
+import { mainnetChains, testnetChains } from "@concero/rpcs";
+import {
+	mainnetNetworks as v2MainnetNetworks,
+	testnetNetworks as v2TestnetNetworks,
+} from "@concero/v2-networks";
 
 import { getEnvVar } from "../utils";
 
-const { INFURA_API_KEY, ALCHEMY_API_KEY, BLAST_API_KEY, CHAINSTACK_API_KEY, TENDERLY_API_KEY } =
-	process.env;
-
-export const rpcUrl: Record<string, string> = {
-	hardhat: getEnvVar("HARDHAT_RPC_URL"),
-	localhost: getEnvVar("LOCALHOST_RPC_URL"),
-	arbitrum: `https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}`,
-	arbitrumSepolia: `https://arbitrum-sepolia.infura.io/v3/${INFURA_API_KEY}`,
-	base: `https://base-sepolia.infura.io/v3/${INFURA_API_KEY}`,
-	baseSepolia: `https://base-sepolia.infura.io/v3/${INFURA_API_KEY}`,
-	avalanche: `https://avalanche-mainnet.infura.io/v3/${INFURA_API_KEY}`,
-	avalancheFuji: `https://avalanche-fuji.infura.io/v3/${INFURA_API_KEY}`,
-	ethereum: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
-	sepolia: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
-	optimism: `https://optimism-mainnet.infura.io/v3/${INFURA_API_KEY}`,
-	optimismSepolia: `https://optimism-sepolia.infura.io/v3/${INFURA_API_KEY}`,
-	polygon: `https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
-	polygonAmoy: `https://polygon-amoy.infura.io/v3/${INFURA_API_KEY}`,
-};
-
-// Warning: ANKR endpoints are limited to 30 requests/sec and not suitable for production use
 export const urls: Record<string, string[]> = {
-	hardhat: [rpcUrl.hardhat],
-	localhost: [rpcUrl.localhost],
-	ethereum: [
-		"https://ethereum.blockpi.network/v1/rpc/public",
-		"https://eth.llamarpc.com",
-		`https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
-		`https://eth-mainnet.blastapi.io/${BLAST_API_KEY}`,
-		"https://rpc.ankr.com/eth",
-	],
-	sepolia: [
-		`https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
-		`https://eth-sepolia.blastapi.io/${BLAST_API_KEY}`,
-		"https://rpc.ankr.com/eth_sepolia",
-	],
-	avalanche: [
-		`https://ava-mainnet.blastapi.io/${BLAST_API_KEY}`,
-		"https://rpc.ankr.com/avalanche",
-		`https://avalanche-mainnet.infura.io/v3/${INFURA_API_KEY}`,
-	],
-	avalancheFuji: [
-		"https://rpc.ankr.com/avalanche_fuji",
-		`https://avalanche-fuji.infura.io/v3/${INFURA_API_KEY}`,
-		`https://avalanche-fuji.core.chainstack.com/ext/bc/C/rpc/${CHAINSTACK_API_KEY}`,
-		`https://ava-testnet.blastapi.io/${BLAST_API_KEY}`,
-	],
-	arbitrum: [
-		`https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-		`https://arbitrum-one.blastapi.io/${BLAST_API_KEY}`,
-		"https://rpc.ankr.com/arbitrum",
-	],
-	arbitrumSepolia: [
-		`https://arbitrum-sepolia.infura.io/v3/${INFURA_API_KEY}`,
-		`https://arbitrum-sepolia.blastapi.io/${BLAST_API_KEY}`,
-		"https://rpc.ankr.com/arbitrum_sepolia",
-	],
-	optimism: [
-		`https://optimism-mainnet.infura.io/v3/${INFURA_API_KEY}`,
-		`https://optimism-mainnet.blastapi.io/${BLAST_API_KEY}`,
-		"https://rpc.ankr.com/optimism",
-	],
-	optimismSepolia: [
-		`https://optimism-sepolia.infura.io/v3/${INFURA_API_KEY}`,
-		`https://optimism-sepolia.blastapi.io/${BLAST_API_KEY}`,
-		"https://rpc.ankr.com/optimism_sepolia",
-	],
-	polygon: [
-		"https://polygon-bor-rpc.publicnode.com",
-		`https://polygon.gateway.tenderly.co/${TENDERLY_API_KEY}`,
-		`https://polygon-mainnet.blastapi.io/${BLAST_API_KEY}`,
-		"https://rpc.ankr.com/polygon",
-		`https://polygon-mainnet.infura.io/v3/${INFURA_API_KEY}`,
-	],
-	polygonAmoy: [
-		"https://rpc-amoy.polygon.technology",
-		"https://rpc.ankr.com/polygon_amoy",
-		`https://polygon-amoy.blastapi.io/${BLAST_API_KEY}`,
-		`https://polygon-amoy.infura.io/v3/${INFURA_API_KEY}`,
-	],
-	base: [
-		"https://base.lava.build",
-		"https://base.llamarpc.com",
-		"https://developer-access-mainnet.base.org",
-		`https://base-rpc.publicnode.com`,
-		"https://rpc.ankr.com/base",
-	],
-	baseSepolia: [
-		`https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-		"https://rpc.ankr.com/base_sepolia",
-		`https://base-sepolia.blastapi.io/${BLAST_API_KEY}`,
-	],
-	bnbTestnet: ["https://bsc-testnet-rpc.publicnode.com"],
-	lineaSepolia: ["https://linea-sepolia-rpc.publicnode.com"],
-	soneiumMinato: ["https://rpc.minato.soneium.org", "https://soneium-minato.drpc.org"],
-	sonicBlaze: ["https://sonic-blaze-rpc.publicnode.com"],
-	bsc: ["https://rpc.ankr.com/bsc"],
-	scroll: ["https://rpc.ankr.com/scroll"],
-	scrollSepolia: ["https://scroll-sepolia-rpc.publicnode.com"],
-	polygonZkEvm: [`https://polygon-zkevm-mainnet.blastapi.io/${BLAST_API_KEY}`],
-	polygonZkEvmCardona: [`https://polygon-zkevm-cardona.blastapi.io/${BLAST_API_KEY}`],
-	astarShibuya: ["https://evm.shibuya.astar.network"],
-	roninSaigon: ["https://saigon-testnet.roninchain.com/rpc"],
-	megaethTestnet: ["https://carrot.megaeth.com/rpc"],
-	sonicBlaze: ["https://sonic-testnet.drpc.org"],
-	monadTestnet: ["https://testnet-rpc.monad.xyz"],
-	apechainCurtis: ["https://apechain-curtis.drpc.org"],
-	blastSepolia: ["https://sepolia.blast.io"],
-	botanixTestnet: ["https://node.botanixlabs.dev"],
-	celoAlfajores: ["https://alfajores-forno.celo-testnet.org"],
-	cronosTestnet: ["https://evm-t3.cronos.org"],
-	gnosisChiado: ["https://rpc.chiadochain.net"],
-	lineaSepolia: ["https://linea-sepolia-rpc.publicnode.com"],
-	mantleSepolia: ["https://rpc.sepolia.mantle.xyz"],
-	metisSepolia: ["https://metis-sepolia-rpc.publicnode.com"],
-	seiTestnet: ["https://evm-rpc-testnet.sei-apis.com"],
-	shibariumPuppynet: ["https://puppynet.shibrpc.com"],
-	soneiumMinato: ["https://rpc.minato.soneium.org"],
-	unichainSepolia: ["https://sepolia.unichain.org"],
-	xlayerSepolia: ["https://xlayertestrpc.okx.com"],
-	zircuitTestnet: ["https://zircuit1-testnet.p2pify.com"],
-	modeTestnet: ["https://sepolia.mode.network"],
-	bitlayerTestnet: ["https://testnet-rpc.bitlayer.org"],
-	blastSepolia: ["https://sepolia.blast.io"],
-	botanixTestnet: ["https://node.botanixlabs.dev"],
-	celoAlfajores: ["https://alfajores-forno.celo-testnet.org"],
-	coreTestnet: ["https://rpc.test2.btcs.network"],
-	cronosTestnet: ["https://evm-t3.cronos.org"],
-	hashkeyTestnet: ["https://hashkeychain-testnet.alt.technology"],
-	inkSepolia: ["https://rpc-gel-sepolia.inkonchain.com"],
+	hardhat: [getEnvVar("HARDHAT_RPC_URL")],
+	localhost: [getEnvVar("LOCALHOST_RPC_URL")],
 };
+
+Object.keys(v2MainnetNetworks).forEach(networkName => {
+	const chainId = v2MainnetNetworks[networkName].chainId.toString();
+	if (mainnetChains[chainId]) {
+		urls[networkName] = mainnetChains[chainId].urls;
+	}
+});
+
+Object.keys(v2TestnetNetworks).forEach(networkName => {
+	const chainId = v2TestnetNetworks[networkName].chainId.toString();
+	if (testnetChains[chainId]) {
+		urls[networkName] = testnetChains[chainId].urls;
+	}
+});

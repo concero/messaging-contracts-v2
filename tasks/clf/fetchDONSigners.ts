@@ -20,7 +20,7 @@ const mainnetNetworks = [
 ];
 
 const testnetNetworks = [
-	// conceroNetworks.sepolia,
+	// conceroNetworks.ethereumSepolia,
 	conceroNetworks.baseSepolia,
 	conceroNetworks.arbitrumSepolia,
 	// conceroNetworks.optimismSepolia,
@@ -29,7 +29,7 @@ const testnetNetworks = [
 ];
 
 const clfCoordinatorCreationBlock = {
-	sepolia: 6324301n,
+	ethereumSepolia: 6324301n,
 	optimismSepolia: 13984884n,
 	baseSepolia: 6597139n,
 	arbitrumSepolia: 6597139n,

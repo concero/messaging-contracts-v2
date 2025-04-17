@@ -68,7 +68,7 @@ const config: HardhatUserConfig = {
 			arbitrum: process.env.ARBISCAN_API_KEY,
 			arbitrumSepolia: process.env.ARBISCAN_API_KEY,
 			ethereum: process.env.ETHERSCAN_API_KEY,
-			sepolia: process.env.ETHERSCAN_API_KEY,
+			ethereumSepolia: process.env.ETHERSCAN_API_KEY,
 			polygon: process.env.POLYGONSCAN_API_KEY,
 			polygonAmoy: process.env.POLYGONSCAN_API_KEY,
 			optimism: process.env.OPTIMISMSCAN_API_KEY,

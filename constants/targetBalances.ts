@@ -15,7 +15,7 @@ const deployerTargetBalances: Record<string, bigint> = {
 	avalanche: parseEther("0.3"),
 	base: parseEther("0.01"),
 	//testnet
-	sepolia: parseEther("0.1"),
+	ethereumSepolia: parseEther("0.1"),
 	arbitrumSepolia: parseEther("0.01"),
 	polygonAmoy: parseEther("0.01"),
 	avalancheFuji: parseEther("0.3"),

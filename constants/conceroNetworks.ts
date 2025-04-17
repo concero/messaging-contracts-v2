@@ -1,18 +1,18 @@
+import { type NetworkType } from "@concero/contract-utils/dist/types";
 import {
-	ConceroNetwork,
-	conceroNetworks as baseNetworks,
-	networkTypes,
-} from "@concero/contract-utils";
-import {
-	type ConceroMainnetNetworkNames,
-	type ConceroTestnetNetworkNames,
-	type NetworkType,
-} from "@concero/contract-utils/dist/types";
+	mainnetNetworks as v2MainnetNetworks,
+	testnetNetworks as v2TestnetNetworks,
+} from "@concero/v2-networks";
 
-import { ConceroTestNetworkNames } from "../types/ConceroNetwork";
+import {
+	ChainDefinition,
+	ConceroHardhatNetwork,
+	ConceroLocalNetwork,
+	ConceroNetwork,
+} from "../types/ConceroNetwork";
 import { getEnvVar, getWallet } from "../utils";
-import { hardhatViemChain, localhostViemChain } from "../utils/localhostViemChain";
-import { rpcUrl, urls } from "./rpcUrls";
+import { createViemChain } from "../utils/createViemChain";
+import { urls } from "./rpcUrls";
 
 const mainnetProxyDeployerPK = getWallet("mainnet", "proxyDeployer", "privateKey");
 const testnetProxyDeployerPK = getWallet("testnet", "proxyDeployer", "privateKey");
@@ -23,19 +23,28 @@ const localhostDeployerPK = getWallet("localhost", "deployer", "privateKey");
 
 const testnetAccounts = [testnetDeployerPK, testnetProxyDeployerPK];
 
-export interface ExtendedConceroNetwork extends ConceroNetwork {
-	url?: string;
-	rpcUrls?: string[];
-	accounts?: any[];
-	saveDeployments?: boolean;
-	forking?: {
-		url: string;
-		enabled: boolean;
-		blockNumber: number;
-	};
-}
+const networkTypes: Record<NetworkType, NetworkType> = {
+	mainnet: "mainnet",
+	testnet: "testnet",
+	localhost: "localhost",
+};
 
-const testingNetworks: Record<"localhost" | "hardhat", ExtendedConceroNetwork> = {
+const hardhatViemChain = createViemChain({
+	id: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
+	name: "hardhat",
+	rpcUrls: ["http://127.0.0.1:8545"],
+	isTestnet: true,
+});
+
+const localhostViemChain = createViemChain({
+	id: Number(process.env.LOCALHOST_FORK_CHAIN_ID || "1"),
+	name: "localhost",
+	rpcUrls: [process.env.LOCALHOST_RPC_URL || "http://localhost:8545"],
+	isTestnet: true,
+});
+
+const testingNetworks: Record<"localhost", ConceroLocalNetwork> &
+	Record<"hardhat", ConceroHardhatNetwork> = {
 	hardhat: {
 		name: "hardhat",
 		chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
@@ -59,7 +68,7 @@ const testingNetworks: Record<"localhost" | "hardhat", ExtendedConceroNetwork> =
 				balance: "10000000000000000000000",
 			},
 		],
-		chainSelector: Number(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
+		chainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
 		confirmations: 1,
 		viemChain: hardhatViemChain,
 		forking: {
@@ -73,83 +82,89 @@ const testingNetworks: Record<"localhost" | "hardhat", ExtendedConceroNetwork> =
 		type: networkTypes.localhost,
 		chainId: 1,
 		viemChain: localhostViemChain,
-		url: rpcUrl.localhost,
-		rpcUrls: [rpcUrl.localhost],
 		confirmations: 1,
-		chainSelector: Number(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
+		chainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
 		accounts: [
 			localhostDeployerPK,
 			localhostProxyDeployerPK,
 			getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
 		],
-		saveDeployments: true, // Keep this as true for localhost as in the original
+		saveDeployments: true,
+		url: process.env.LOCALHOST_RPC_URL || "http://localhost:8545",
 	},
 };
 
-// Extend the testnet networks with additional fields
-const extendedTestnetNetworks: Record<ConceroTestnetNetworkNames, ExtendedConceroNetwork> =
-	Object.fromEntries(
-		Object.entries(baseNetworks)
-			.filter(
-				([key]) =>
-					Object.keys(baseNetworks).includes(key) &&
-					!Object.keys(testingNetworks).includes(key),
-			)
-			.map(([key, network]) => {
-				const networkKey = key as ConceroTestnetNetworkNames;
-				return [
-					networkKey,
-					{
-						...network,
-						url: urls[networkKey]?.[0],
-						rpcUrls: urls[networkKey],
-						accounts: testnetAccounts,
-						saveDeployments: false,
-					},
-				];
-			}),
-	) as Record<ConceroTestnetNetworkNames, ExtendedConceroNetwork>;
+export type ConceroMainnetNetworkNames = keyof typeof v2MainnetNetworks;
+export type ConceroTestnetNetworkNames = keyof typeof v2TestnetNetworks;
 
-// Extend the mainnet networks with additional fields
-const extendedMainnetNetworks: Record<ConceroMainnetNetworkNames, ExtendedConceroNetwork> =
-	Object.fromEntries(
-		Object.entries(baseNetworks)
-			.filter(
-				([key]) =>
-					Object.keys(baseNetworks).includes(key) &&
-					Object.keys(baseNetworks).includes(key),
-			)
-			.map(([key, network]) => {
-				const networkKey = key as ConceroMainnetNetworkNames;
-				return [
-					networkKey,
-					{
-						...network,
-						url: urls[networkKey]?.[0],
-						rpcUrls: urls[networkKey],
-						accounts: [mainnetDeployerPK, mainnetProxyDeployerPK],
-						saveDeployments: false,
-					},
-				];
-			}),
-	) as Record<ConceroMainnetNetworkNames, ExtendedConceroNetwork>;
+function createExtendedNetworks<T extends string>(
+	networks: Record<string, any>,
+	networkType: NetworkType,
+	accounts: string[],
+	isTestnet: boolean,
+): Record<T, ConceroNetwork> {
+	return Object.fromEntries(
+		Object.entries(networks).map(([key, network]) => {
+			const networkKey = key as T;
 
-// Combined networks
-export type ConceroNetworkNames =
-	| ConceroMainnetNetworkNames
-	| ConceroTestnetNetworkNames
-	| ConceroTestNetworkNames;
+			const chainDefinition: ChainDefinition = {
+				id: network.chainId,
+				name: network.name,
+				rpcUrls: network.rpcs || [],
+				isTestnet,
+				...(network.blockExplorers && network.blockExplorers.length > 0
+					? {
+							blockExplorer: {
+								name: network.blockExplorers[0].name,
+								url: network.blockExplorers[0].url,
+							},
+						}
+					: {}),
+			};
 
-export const mainnetNetworks = extendedMainnetNetworks;
-export const testnetNetworks = extendedTestnetNetworks;
+			const viemChain = createViemChain(chainDefinition);
 
-export const conceroNetworks: Record<ConceroNetworkNames, ExtendedConceroNetwork> = {
-	...extendedTestnetNetworks,
-	...extendedMainnetNetworks,
+			return [
+				networkKey,
+				{
+					name: network.name,
+					chainId: network.chainId,
+					type: networkType,
+					url: network.rpcs?.[0] || urls[networkKey]?.[0] || "",
+					accounts,
+					chainSelector: BigInt(network.chainSelector),
+					confirmations: 1,
+					viemChain,
+				},
+			];
+		}),
+	) as Record<T, ConceroNetwork>;
+}
+
+export const testnetNetworks = createExtendedNetworks<ConceroTestnetNetworkNames>(
+	v2TestnetNetworks,
+	networkTypes.testnet,
+	testnetAccounts,
+	true,
+);
+
+export const mainnetNetworks = createExtendedNetworks<ConceroMainnetNetworkNames>(
+	v2MainnetNetworks,
+	networkTypes.mainnet,
+	[mainnetDeployerPK, mainnetProxyDeployerPK],
+	false,
+);
+
+export const conceroNetworks: Record<
+	ConceroMainnetNetworkNames | ConceroTestnetNetworkNames | "localhost" | "hardhat",
+	ConceroNetwork | ConceroLocalNetwork | ConceroHardhatNetwork
+> = {
+	...testnetNetworks,
+	...mainnetNetworks,
 	...testingNetworks,
 };
 
-export function getConceroVerifierNetwork(type: NetworkType): ExtendedConceroNetwork {
+export function getConceroVerifierNetwork(type: NetworkType): ConceroNetwork {
 	switch (type) {
 		case networkTypes.mainnet:
 			return mainnetNetworks.arbitrum;

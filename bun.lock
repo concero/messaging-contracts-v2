@@ -11,6 +11,7 @@
         "@chainlink/local": "^0.2.3",
         "@chainlink/solhint-plugin-chainlink-solidity": "^1.0.1",
         "@concero/contract-utils": "github:concero/contract-utils",
+        "@concero/v2-networks": "github:concero/v2-networks",
         "@concero/v2-operators": "github:concero/v2-operators",
         "@nomicfoundation/hardhat-ignition-viem": "^0.15.9",
         "@nomicfoundation/hardhat-viem": "^2.0.6",
@@ -211,6 +212,8 @@
     "@colors/colors": ["@colors/colors@1.5.0", "", {}, "sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ=="],
 
     "@concero/contract-utils": ["@concero/contract-utils@github:concero/contract-utils#3359c16", { "dependencies": { "viem": "2.26.2" } }, "concero-contract-utils-3359c16"],
+
+    "@concero/v2-networks": ["@concero/v2-networks@github:concero/v2-networks#e32438a", {}, "concero-v2-networks-e32438a"],
 
     "@concero/v2-operators": ["concero-v2-operators@github:concero/v2-operators#139d896", { "dependencies": { "dotenv": "^16.4.7", "ethers": "^6.13.5", "viem": "^2.22.17", "winston": "^3.17.0", "winston-daily-rotate-file": "^5.0.0" }, "peerDependencies": { "typescript": "^5.0.0" } }, "concero-v2-operators-139d896"],
 

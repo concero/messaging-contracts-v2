@@ -14,7 +14,7 @@ export const networkEnvKeys: Record<ConceroNetworkNames, string> = {
 	base: "BASE",
 
 	// testnets
-	sepolia: "SEPOLIA",
+	ethereumSepolia: "SEPOLIA",
 	optimismSepolia: "OPTIMISM_SEPOLIA",
 	arbitrumSepolia: "ARBITRUM_SEPOLIA",
 	avalancheFuji: "AVALANCHE_FUJI",

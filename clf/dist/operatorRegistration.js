@@ -1732,10 +1732,14 @@ function handleError(type) {
   throw new CustomErrorHandler(type);
 }
 
+// clf/src/operatorRegistration/constants/config.ts
+var CONFIG = {
+  REPORT_VERSION: 1
+};
+
 // node_modules/viem/_esm/index.js
 init_decodeAbiParameters();
 init_encodeAbiParameters();
-init_fromHex();
 init_isAddress();
 
 // clf/src/common/reportBytes.ts
@@ -1750,22 +1754,6 @@ var COMMON_REPORT_BYTE_OFFSETS = {
   REQUESTER_MASK: (1n << 160n) - 1n
 };
 
-// clf/src/common/packReportConfig.ts
-function packReportConfig(reportType, version2, requester) {
-  if (reportType < 0 || reportType > 255) throw new Error("reportType must be a uint8 (0-255)");
-  if (version2 < 0 || version2 > 255) throw new Error("version must be a uint8 (0-255)");
-  const reportTypeBits = BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE);
-  const versionBits = BigInt(version2) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION);
-  const requesterBits = hexToBigInt(requester) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK;
-  const packedValue = reportTypeBits | versionBits | requesterBits;
-  return `0x${packedValue.toString(16).padStart(64, "0")}`;
-}
-
-// clf/src/operatorRegistration/constants/config.ts
-var CONFIG = {
-  REPORT_VERSION: 1
-};
-
 // clf/src/common/encoders.ts
 function hexStringToUint8Array(hex) {
   hex = hex.replace(/^0x/, "");
@@ -1778,21 +1766,40 @@ function hexStringToUint8Array(hex) {
 }
 
 // clf/src/operatorRegistration/utils/packResult.ts
-function packResult(result, reportConfig) {
-  const encoded = encodeAbiParameters(
+function packResult(result) {
+  const payloadEncoded = encodeAbiParameters(
     [
-      { type: "bytes32" },
-      // reportConfig
       { type: "uint8[]" },
-      // chainTypes
+      // operatorChains
       { type: "uint8[]" },
-      // actions
-      { type: "address[]" }
+      // operatorActions
+      { type: "bytes[]" }
       // operatorAddresses
     ],
-    [reportConfig, result.chainTypes, result.actions, result.operatorAddresses]
+    [result.chainTypes, result.actions, result.operatorAddresses]
   );
-  return hexStringToUint8Array(encoded);
+  const encodedResult = encodeAbiParameters(
+    [
+      {
+        type: "tuple",
+        components: [
+          { type: "uint8", name: "resultType" },
+          { type: "uint8", name: "payloadVersion" },
+          { type: "address", name: "requester" }
+        ]
+      },
+      { type: "bytes", name: "payload" }
+    ],
+    [
+      {
+        resultType: result.resultType,
+        payloadVersion: result.payloadVersion,
+        requester: result.requester
+      },
+      payloadEncoded
+    ]
+  );
+  return hexStringToUint8Array(encodedResult);
 }
 
 // clf/src/operatorRegistration/utils/validateInputs.ts
@@ -1856,18 +1863,13 @@ async function main() {
     handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
   const registrationReportResult = {
-    version: CONFIG.REPORT_VERSION,
-    reportType: 2 /* OPERATOR_REGISTRATION */,
+    payloadVersion: CONFIG.REPORT_VERSION,
+    resultType: 2 /* OPERATOR_REGISTRATION */,
     requester: decodedArgs.requester,
     actions: decodedArgs.actions,
     chainTypes: decodedArgs.chainTypes,
     operatorAddresses: decodedArgs.operatorAddresses
   };
-  const reportConfig = packReportConfig(
-    2 /* OPERATOR_REGISTRATION */,
-    CONFIG.REPORT_VERSION,
-    decodedArgs.operatorAddresses
-  );
-  return packResult(registrationReportResult, reportConfig);
+  return packResult(registrationReportResult);
 }
  main();

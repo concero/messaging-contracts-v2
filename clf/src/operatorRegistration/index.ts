@@ -1,7 +1,6 @@
-import { ChainType, ReportType } from "../common/enums";
+import { ChainType, ResultType } from "../common/enums";
 import { handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
-import { packReportConfig } from "../common/packReportConfig";
 import { CONFIG } from "./constants/config";
 import { OperatorRegistrationResult } from "./types";
 import { packResult } from "./utils/packResult";
@@ -18,18 +17,13 @@ export async function main() {
 	// await verifyOperatorStake(decodedArgs.requester);
 
 	const registrationReportResult: OperatorRegistrationResult = {
-		version: CONFIG.REPORT_VERSION,
-		reportType: ReportType.OPERATOR_REGISTRATION,
+		payloadVersion: CONFIG.REPORT_VERSION,
+		resultType: ResultType.OPERATOR_REGISTRATION,
 		requester: decodedArgs.requester,
 		actions: decodedArgs.actions,
 		chainTypes: decodedArgs.chainTypes,
 		operatorAddresses: decodedArgs.operatorAddresses,
 	};
 
-	const reportConfig = packReportConfig(
-		ReportType.OPERATOR_REGISTRATION,
-		CONFIG.REPORT_VERSION,
-		decodedArgs.operatorAddresses,
-	);
-	return packResult(registrationReportResult, reportConfig);
+	return packResult(registrationReportResult);
 }

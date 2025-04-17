@@ -1,5 +1,4 @@
 import { encodeAbiParameters } from "viem";
-import type { Hash } from "viem";
 
 import { hexStringToUint8Array } from "../../common/encoders";
 import { OperatorRegistrationResult } from "../types";
@@ -8,11 +7,9 @@ import { OperatorRegistrationResult } from "../types";
  * Packs the operator registration result into a binary format using viem's ABI encoder
  *
  * @param result - The operator registration result object
- * @param reportConfig - Optional override for the report configuration
  * @returns Packed binary data as Uint8Array
  */
 export function packResult(result: OperatorRegistrationResult): Uint8Array {
-	// First encode the OperatorRegistrationResult as payload
 	const payloadEncoded = encodeAbiParameters(
 		[
 			{ type: "uint8[]" }, // operatorChains
@@ -22,11 +19,9 @@ export function packResult(result: OperatorRegistrationResult): Uint8Array {
 		[result.chainTypes, result.actions, result.operatorAddresses],
 	);
 
-	// Then encode the entire structure with ResultConfig and payload
-	const finalEncoded = encodeAbiParameters(
+	const encodedResult = encodeAbiParameters(
 		[
 			{
-				// ResultConfig struct
 				type: "tuple",
 				components: [
 					{ type: "uint8", name: "resultType" },
@@ -34,18 +29,17 @@ export function packResult(result: OperatorRegistrationResult): Uint8Array {
 					{ type: "address", name: "requester" },
 				],
 			},
-			{ type: "bytes", name: "payload" }, // The encoded payload
+			{ type: "bytes", name: "payload" },
 		],
 		[
-			// ResultConfig values
 			{
 				resultType: result.resultType,
 				payloadVersion: result.payloadVersion,
 				requester: result.requester,
 			},
-			payloadEncoded, // The encoded payload
+			payloadEncoded,
 		],
 	);
 
-	return hexStringToUint8Array(finalEncoded);
+	return hexStringToUint8Array(encodedResult);
 }

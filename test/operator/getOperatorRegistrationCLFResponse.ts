@@ -1,24 +1,30 @@
-import { execSync } from "child_process";
+import { encodeAbiParameters, zeroHash } from "viem";
 
+import { OperatorRegistrationArgs } from "../../clf/src/operatorRegistration/types";
+import { simulateCLFScript } from "../../tasks/clf";
 import { getEnvVar } from "../../utils";
+import { getCLFReport } from "./getCLFReport";
 
-async function getOperatorRegistrationCLFResponse() {
-	try {
-		const responseJson = execSync(
-			`make script "args=test/foundry/scripts/MockCLFReport/OperatorRegistrationReport.sol --sig 'getResponse(address)' ${getEnvVar("TESTNET_OPERATOR_ADDRESS")} --json"`,
-		).toString();
+export async function getOperatorRegistrationCLFResponse(
+	operatorRegistrationArgs: OperatorRegistrationArgs,
+) {
+	const clfSimulationResult = await simulateCLFScript(
+		__dirname + "/../../clf/dist/operatorRegistration.js",
+		[
+			zeroHash,
+			encodeAbiParameters([{ type: "uint8[]" }], [operatorRegistrationArgs.chainTypes]),
+			encodeAbiParameters([{ type: "uint8[]" }], [operatorRegistrationArgs.actions]),
+			encodeAbiParameters(
+				[{ type: "address[]" }],
+				[operatorRegistrationArgs.operatorAddresses],
+			),
+			operatorRegistrationArgs.requester,
+		],
+	);
 
-		const jsonStart = responseJson.indexOf("{");
-		const jsonStr = responseJson.slice(jsonStart);
-
-		const result = JSON.parse(jsonStr);
-		const rawBytes = result.returns["0"].value;
-
-		return rawBytes;
-	} catch (error) {
-		console.error("Error running MockCLFReport script:", error);
-		throw error;
-	}
+	return getCLFReport(
+		clfSimulationResult.responseBytesHexstring,
+		zeroHash,
+		getEnvVar("CONCERO_VERIFIER_PROXY_LOCALHOST"),
+	);
 }
-
-export { getOperatorRegistrationCLFResponse };

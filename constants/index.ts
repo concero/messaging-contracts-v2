@@ -7,7 +7,7 @@ import {
 	CLF_TESTNET_TTL,
 } from "./clf/secretsConfig";
 import { simulationConfig } from "./clf/simulationConfig";
-import { conceroNetworks, networkTypes } from "./conceroNetworks";
+import { conceroNetworks } from "./conceroNetworks";
 import {
 	ProxyEnum,
 	envPrefixes,
@@ -29,7 +29,6 @@ export {
 	CLF_TESTNET_TTL,
 	simulationConfig,
 	conceroNetworks,
-	networkTypes,
 	networkEnvKeys,
 	viemReceiptConfig,
 	writeContractConfig,

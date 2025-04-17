@@ -48,7 +48,6 @@ export function buildClfJs() {
 			.filter(dir => dir !== "")
 			.map(dir => dir.replace(/\/$/, "")); // Remove trailing slash
 
-		// For each directory, build standard and minified versions if they have an index.ts file
 		dirsArray.forEach(dir => {
 			const dirLs = execSync("ls", { cwd: `clf/src/${dir}` });
 

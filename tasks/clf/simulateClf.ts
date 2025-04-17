@@ -15,54 +15,50 @@ import { getSimulationArgs } from "./simulationArgs";
  * @param scriptName - The name of the script to simulate.
  * @param args - The array of arguments to pass to the simulation.
  */
-export async function simulateCLFScript(
-	scriptPath: string,
-	scriptName: string,
-	args: string[],
-	secretsOverride?: any,
-): Promise<string | undefined> {
+export async function simulateCLFScript(scriptPath: string, args: string[], secretsOverride?: any) {
 	if (!fs.existsSync(scriptPath)) {
 		console.error(`File not found: ${scriptPath}`);
 		return;
 	}
 
 	log(`Simulating ${scriptPath}`, "simulateCLFScript");
-	try {
-		const result = await simulateScript({
-			source: fs.readFileSync(scriptPath, "utf8"),
-			bytesArgs: args,
-			secrets: {
-				...secrets,
-				...{
-					CONCERO_CLF_DEVELOPMENT: "true",
-					LOCALHOST_RPC_URL: process.env.LOCALHOST_RPC_URL,
-					CONCERO_VERIFIER_LOCALHOST: secretsOverride?.CONCERO_VERIFIER_LOCALHOST,
-				},
-			},
-			...simulationConfig,
-		});
 
-		const { errorString, capturedTerminalOutput, responseBytesHexstring } = result;
+	const mergedSecrets = {
+		...secrets,
+		CONCERO_CLF_DEVELOPMENT: "true",
+		LOCALHOST_RPC_URL: process.env.LOCALHOST_RPC_URL,
+		...(secretsOverride?.CONCERO_VERIFIER_LOCALHOST && {
+			CONCERO_VERIFIER_LOCALHOST: secretsOverride.CONCERO_VERIFIER_LOCALHOST,
+		}),
+	};
 
-		if (errorString) {
-			log(errorString, "simulateCLFScript – Error:");
-		}
+	const result = await simulateScript({
+		source: fs.readFileSync(scriptPath, "utf8") + "return await main();",
+		bytesArgs: args,
+		secrets: mergedSecrets,
+		...simulationConfig,
+	});
 
-		if (capturedTerminalOutput) {
-			log(capturedTerminalOutput, "simulateCLFScript – Terminal output:");
-		}
+	const { errorString, capturedTerminalOutput, responseBytesHexstring } = result;
 
-		if (responseBytesHexstring) {
-			log(responseBytesHexstring, "simulateCLFScript – Response Bytes:");
-			// const decodedResponse = decodeCLFResponse(scriptName, responseBytesHexstring);
-			// if (decodedResponse) {
-			//     log(decodedResponse, "simulateCLFScript – Decoded Response:");
-			// }
-			return responseBytesHexstring;
-		}
-	} catch (error) {
-		console.error("Simulation failed:", error);
+	if (errorString) {
+		log(errorString, "simulateCLFScript – Error:");
 	}
+
+	if (capturedTerminalOutput) {
+		log(capturedTerminalOutput, "simulateCLFScript – Terminal output:");
+	}
+
+	if (responseBytesHexstring) {
+		log(responseBytesHexstring, "simulateCLFScript – Response Bytes:");
+		// const decodedResponse = decodeCLFResponse(scriptName, responseBytesHexstring);
+		// if (decodedResponse) {
+		//     log(decodedResponse, "simulateCLFScript – Decoded Response:");
+		// }
+		// return responseBytesHexstring;
+	}
+
+	return result;
 }
 
 task("clf-script-simulate", "Executes the JavaScript source code locally")

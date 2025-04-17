@@ -10,7 +10,10 @@ export async function main() {
 	const decodedArgs = decodeInputs(bytesArgs);
 	validateDecodedArgs(decodedArgs);
 
-	if (decodedArgs.chainTypes.includes(ChainType.EVM) && decodedArgs.operatorAddresses[0] !== decodedArgs.requester) {
+	if (
+		decodedArgs.chainTypes.includes(ChainType.EVM) &&
+		decodedArgs.operatorAddresses[0].toLocaleLowerCase() !== decodedArgs.requester.toLocaleLowerCase()
+	) {
 		handleError(ErrorType.INVALID_OPERATOR_ADDRESS);
 	}
 

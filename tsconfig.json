@@ -6,7 +6,10 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@concero/contract-utils": ["./node_modules/@concero/contract-utils"]
+    },
   },
   "ts-node": {
   }

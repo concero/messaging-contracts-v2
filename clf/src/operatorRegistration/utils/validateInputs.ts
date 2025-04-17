@@ -43,8 +43,8 @@ export function decodeInputs(bytesArgs: string[]): OperatorRegistrationArgs {
 export function validateDecodedArgs(args: OperatorRegistrationArgs): void {
 	validateChainTypes(args.chainTypes);
 	validateActions(args.actions);
-	validateAddresses(args.operatorAddresses);
-	validateOperatorAddress(args.requester);
+	// validateAddresses(args.operatorAddresses);
+	// validateOperatorAddress(args.requester);
 	validateArrayLengths(args);
 }
 

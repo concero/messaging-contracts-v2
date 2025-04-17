@@ -698,13 +698,13 @@
   integrity sha512-ld0eHzKJZjs/iNKfZtwbR4yP/0YdkBiB+GASYCUz89V+hEn6nCaRoRywgIONRERhHIv5DEDOhcKjo2u2zYHIUA==
 
 "@changesets/apply-release-plan@^7.0.8":
-  version "7.0.11"
-  resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-7.0.11.tgz#d105bc1e5e1ba111f6878020a3853249bb5019a3"
-  integrity sha512-0iDv9lXJ6dmQ42yxPJQ3N7bKytxpJ/UL4omozNDe32nU7a5Jm+AtYyEnXaLQzZd/adJdExnhkCtxMyw6jvc9lQ==
+  version "7.0.12"
+  resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-7.0.12.tgz#8413977f117fa95f6e2db6f0c35479a2eba6960a"
+  integrity sha512-EaET7As5CeuhTzvXTQCRZeBUcisoYPDDcXvgTE/2jmmypKp0RC7LxKj/yzqeh/1qFTZI7oDGFcL1PHRuQuketQ==
   dependencies:
     "@changesets/config" "^3.1.1"
     "@changesets/get-version-range-type" "^0.4.0"
-    "@changesets/git" "^3.0.3"
+    "@changesets/git" "^3.0.4"
     "@changesets/should-skip-package" "^0.1.2"
     "@changesets/types" "^6.1.0"
     "@manypkg/get-packages" "^1.1.3"
@@ -817,14 +817,14 @@
     node-fetch "^2.5.0"
 
 "@changesets/get-release-plan@^4.0.6":
-  version "4.0.9"
-  resolved "https://registry.yarnpkg.com/@changesets/get-release-plan/-/get-release-plan-4.0.9.tgz#0ecf0a73ffb496c3d73641a0baf79af8371ed0e4"
-  integrity sha512-fddyWtaq+c63HAMxkclZUHCO9+11w2+qicKoEYKmZdXdrUnLF/WF3GfNGI1E0e6KinO6BVxbs77KFowdhHKG3w==
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/@changesets/get-release-plan/-/get-release-plan-4.0.10.tgz#2e35996232250511fdbc11085620a4f02b9bc123"
+  integrity sha512-CCJ/f3edYaA3MqoEnWvGGuZm0uMEMzNJ97z9hdUR34AOvajSwySwsIzC/bBu3+kuGDsB+cny4FljG8UBWAa7jg==
   dependencies:
     "@changesets/assemble-release-plan" "^6.0.6"
     "@changesets/config" "^3.1.1"
     "@changesets/pre" "^2.0.2"
-    "@changesets/read" "^0.6.4"
+    "@changesets/read" "^0.6.5"
     "@changesets/types" "^6.1.0"
     "@manypkg/get-packages" "^1.1.3"
 
@@ -833,10 +833,10 @@
   resolved "https://registry.yarnpkg.com/@changesets/get-version-range-type/-/get-version-range-type-0.4.0.tgz#429a90410eefef4368502c41c63413e291740bf5"
   integrity sha512-hwawtob9DryoGTpixy1D3ZXbGgJu1Rhr+ySH2PvTLHvkZuQ7sRT4oQwMh0hbqZH1weAooedEjRsbrWcGLCeyVQ==
 
-"@changesets/git@^3.0.2", "@changesets/git@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@changesets/git/-/git-3.0.3.tgz#3558840000b88ca5ff3398ca9bd201b47e0b67bf"
-  integrity sha512-YWMBHldVK7+KuMIKl0GZJGDU+UaWaCFh/CSnQwU+rIZ5cH7dDovpOxD+lxXa6a4jdgv/6GnO619N6VidTJbSLw==
+"@changesets/git@^3.0.2", "@changesets/git@^3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@changesets/git/-/git-3.0.4.tgz#75e3811ab407ec010beb51131ceb5c6b3975c914"
+  integrity sha512-BXANzRFkX+XcC1q/d27NKvlJ1yf7PSAgi8JG6dt8EfbHFHi4neau7mufcSca5zRhwOL8j9s6EqsxmT+s+/E6Sw==
   dependencies:
     "@changesets/errors" "^0.2.0"
     "@manypkg/get-packages" "^1.1.3"
@@ -1078,9 +1078,9 @@
   integrity sha512-kM3HKb16VIXZyIeVrM1ygYmZBKybX8N4p754bw390wGO3Tf2j4L2/WYL+4suWujpgf6GBYs3jv7TyUivdd05JA==
 
 "@eslint-community/eslint-utils@^4.2.0", "@eslint-community/eslint-utils@^4.4.0":
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/@eslint-community/eslint-utils/-/eslint-utils-4.6.0.tgz#bfe67b3d334a8579a35e48fe240dc0638d1bcd91"
-  integrity sha512-WhCn7Z7TauhBtmzhvKpoQs0Wwb/kBcy4CwpuI0/eEIr2Lx2auxmulAzLr91wVZJaz47iUZdkXOK7WlAfxGKCnA==
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/@eslint-community/eslint-utils/-/eslint-utils-4.6.1.tgz#e4c58fdcf0696e7a5f19c30201ed43123ab15abc"
+  integrity sha512-KTsJMmobmbrFLe3LDh0PC2FXpcSYJt/MLjlkh/9LEnmKYLSYmT/0EW9JWANjeoemiuZrmogti0tW5Ch+qNUYDw==
   dependencies:
     eslint-visitor-keys "^3.4.3"
 
@@ -8941,9 +8941,9 @@ postgres-range@^1.1.1:
   integrity sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==
 
 posthog-node@^4.10.1:
-  version "4.11.6"
-  resolved "https://registry.yarnpkg.com/posthog-node/-/posthog-node-4.11.6.tgz#dd468ac72dd04a2b14d4b93306447c4cbd1baeef"
-  integrity sha512-fYZSuoKmulyD9RKXyfejbaAs0WZADDb3zj2zJMsN7wjZ5YcbwYG6gybzJt8OBYWNJflu0PsOZhJuY9VnlrJdPg==
+  version "4.11.7"
+  resolved "https://registry.yarnpkg.com/posthog-node/-/posthog-node-4.11.7.tgz#eeeb055b32563b6e9402d1fe7e904e5e79416664"
+  integrity sha512-nG6LcJBD2kdI9zbOqUm52821G0y2j9W7DK8P68exQAs/A5VNPwMKwwYO3b/1KamcUPLGf6A7vDyog0zKGK1/Hg==
   dependencies:
     axios "^1.8.2"
 
@@ -10509,10 +10509,24 @@ viem@2.24.2:
     ox "0.6.9"
     ws "8.18.1"
 
+viem@2.26.2:
+  version "2.26.2"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.26.2.tgz#0095676262ffe44bf5a6c7f8a221a4b81bc766d7"
+  integrity sha512-+yXSl1n+jV/Kn/zpETiNq0WOcINXti29nxdPIONvvNh+Es0VfeusW8bb2okVfa55pmuc8kOCOpB5wq3ZIUCTSA==
+  dependencies:
+    "@noble/curves" "1.8.1"
+    "@noble/hashes" "1.7.1"
+    "@scure/bip32" "1.6.2"
+    "@scure/bip39" "1.5.4"
+    abitype "1.0.8"
+    isows "1.0.6"
+    ox "0.6.9"
+    ws "8.18.1"
+
 viem@^2.27.0:
-  version "2.27.0"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.27.0.tgz#edfca8e107d96eecff70d6c4f049c5e43422f902"
-  integrity sha512-pKw2dcwDi6TaWlTzLHYazOgjO1GgbUpE1zdLsLNSiCjHNrMTpL/teL0wVHnJDLiB2tR5CL19LBqefYNtRUkH5Q==
+  version "2.27.2"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.27.2.tgz#226e89a09e7d89a230b0c99910040e75b1ffee8d"
+  integrity sha512-VwsB+RswcflbwBNPMvzTHuafDA51iT8v4SuIFcudTP2skmxcdodbgoOLP4dYELVnCzcedxoSJDOeext4V3zdnA==
   dependencies:
     "@noble/curves" "1.8.1"
     "@noble/hashes" "1.7.1"

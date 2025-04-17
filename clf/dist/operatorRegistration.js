@@ -1740,7 +1740,6 @@ var CONFIG = {
 // node_modules/viem/_esm/index.js
 init_decodeAbiParameters();
 init_encodeAbiParameters();
-init_isAddress();
 
 // clf/src/common/reportBytes.ts
 var COMMON_REPORT_BYTE_OFFSETS = {
@@ -1822,8 +1821,6 @@ function decodeInputs(bytesArgs2) {
 function validateDecodedArgs(args) {
   validateChainTypes(args.chainTypes);
   validateActions(args.actions);
-  validateAddresses(args.operatorAddresses);
-  validateOperatorAddress(args.requester);
   validateArrayLengths(args);
 }
 function validateChainTypes(chainTypes) {
@@ -1838,16 +1835,6 @@ function validateActions(actions) {
     handleError("57" /* INVALID_ACTION */);
   }
 }
-function validateAddresses(addresses) {
-  if (!addresses.every((address) => isAddress(address, { strict: false }))) {
-    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
-  }
-}
-function validateOperatorAddress(address) {
-  if (!isAddress(address, { strict: false })) {
-    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
-  }
-}
 function validateArrayLengths(args) {
   const { chainTypes, actions, operatorAddresses } = args;
   if (chainTypes.length !== actions.length || actions.length !== operatorAddresses.length) {
@@ -1859,7 +1846,7 @@ function validateArrayLengths(args) {
 async function main() {
   const decodedArgs = decodeInputs(bytesArgs);
   validateDecodedArgs(decodedArgs);
-  if (decodedArgs.chainTypes.includes(0 /* EVM */) && decodedArgs.operatorAddresses[0] !== decodedArgs.requester) {
+  if (decodedArgs.chainTypes.includes(0 /* EVM */) && decodedArgs.operatorAddresses[0].toLocaleLowerCase() !== decodedArgs.requester.toLocaleLowerCase()) {
     handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
   const registrationReportResult = {

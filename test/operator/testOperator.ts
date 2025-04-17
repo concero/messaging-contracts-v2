@@ -31,7 +31,6 @@ async function operator() {
 async function testOperator() {
 	compileContracts({ quiet: true });
 	const hre = require("hardhat");
-
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
 	);

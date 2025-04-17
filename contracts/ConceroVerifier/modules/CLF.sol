@@ -154,7 +154,10 @@ abstract contract CLF is FunctionsClient, Base {
 
             if (chainType == CommonTypes.ChainType.EVM) {
                 address operatorAddress = abi.decode(result.operatorAddresses[i], (address));
-                require(operatorAddress == requester, Errors.OperatorAddressMismatch());
+                require(
+                    operatorAddress == resultConfig.requester,
+                    Errors.OperatorAddressMismatch()
+                );
 
                 if (action == Types.OperatorRegistrationAction.Register) {
                     Utils._addOperator(chainType, abi.encodePacked(operatorAddress));

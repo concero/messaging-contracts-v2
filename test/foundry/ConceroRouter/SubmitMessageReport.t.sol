@@ -30,6 +30,7 @@ contract SubmitMessageReport is ConceroRouterTest {
     bytes32 internal constant TEST_MESSAGE_ID = bytes32(uint256(1));
     bytes internal constant TEST_MESSAGE = "Test message";
     uint256 internal constant GAS_LIMIT = 1_000_000;
+    //    uint24 internal constant DST_CHAIN_SELECTOR = 1;
 
     event ConceroMessageReceived(bytes32 indexed messageId);
     event ConceroMessageDelivered(bytes32 indexed messageId);
@@ -42,41 +43,34 @@ contract SubmitMessageReport is ConceroRouterTest {
     }
 
     function test_SubmitMessageReport() public {
-        bytes memory dstChainDataRaw = abi.encode(address(conceroClient), GAS_LIMIT);
+        Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
+            receiver: address(conceroClient),
+            gasLimit: GAS_LIMIT
+        });
 
-        bytes32 reportConfig = bytes32(
-            (uint256(uint8(CommonTypes.CLFReportType.Message)) << 248) |
-                (uint256(1) << 240) |
-                (uint256(uint160(operator)))
-        );
-
-        bytes[] memory operators = new bytes[](1);
-        operators[0] = abi.encode(operator);
-
-        bytes memory encodedDstChainData = abi.encode(
-            uint32(dstChainDataRaw.length),
-            dstChainDataRaw
-        );
-
-        bytes32 internalMessageConfig = MessageLib.buildInternalMessageConfig(
-            i_clientMessageConfig,
-            SRC_CHAIN_SELECTOR
-        );
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: CommonTypes.ResultType.Message,
+            payloadVersion: 1,
+            requester: operator
+        });
 
         bytes[] memory allowedOperators = new bytes[](1);
         allowedOperators[0] = abi.encode(operator);
 
-        bytes memory encodedResult = abi.encode(
-            reportConfig,
-            internalMessageConfig,
-            TEST_MESSAGE_ID,
-            keccak256(TEST_MESSAGE),
-            dstChainDataRaw,
-            allowedOperators
-        );
+        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
+            messageId: TEST_MESSAGE_ID,
+            messageHashSum: keccak256(TEST_MESSAGE),
+            messageSender: abi.encode(address(this)),
+            srcChainSelector: SRC_CHAIN_SELECTOR,
+            dstChainSelector: 1,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
+        });
+
+        bytes memory payload = abi.encode(messagePayloadV1);
 
         Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
-            encodedResult
+            abi.encode(resultConfig, payload)
         );
 
         vm.recordLogs();
@@ -104,7 +98,7 @@ contract SubmitMessageReport is ConceroRouterTest {
                 assertEq(
                     entries[i].topics[1],
                     TEST_MESSAGE_ID,
-                    "ConceroMessageDelivered event has incorrect messageId"
+                    "ConceroMessageDelivered event not emitted with correct messageId"
                 );
             }
         }
@@ -201,7 +195,7 @@ contract SubmitMessageReport is ConceroRouterTest {
 
     //     VerifierTypes.MessageReportResult memory result = VerifierTypes.MessageReportResult({
     //         version: 1,
-    //         reportType: VerifierTypes.CLFReportType.Message,
+    //         reportType: VerifierTypes.VerifierResultType.Message,
     //         operator: operator,
     //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
     //             i_clientMessageConfig,
@@ -231,7 +225,7 @@ contract SubmitMessageReport is ConceroRouterTest {
 
     //     CommonTypes.MessageReportResult memory result = CommonTypes.MessageReportResult({
     //         version: 1,
-    //         reportType: CommonTypes.CLFReportType.Message,
+    //         reportType: CommonTypes.ResultType.Message,
     //         operator: operator,
     //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
     //             i_clientMessageConfig,

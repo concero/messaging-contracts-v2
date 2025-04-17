@@ -6,18 +6,30 @@
  */
 pragma solidity 0.8.28;
 
-import "forge-std/src/console.sol";
 import {Base} from "./Base.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import {Storage as s} from "../libraries/Storage.sol";
+import {Errors} from "../libraries/Errors.sol";
 
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.PriceFeed;
     using s for s.Operator;
+
+    address immutable i_feedUpdater;
+
+    constructor(address _feedUpdater) {
+        i_feedUpdater = _feedUpdater;
+    }
+
+    modifier onlyFeedUpdater() {
+        require(msg.sender == i_feedUpdater || msg.sender == i_owner, CommonErrors.Unauthorized());
+        _;
+    }
 
     /**
      * @notice Calculates the amount of native token fees available for withdrawal
@@ -70,16 +82,39 @@ abstract contract Owner is Base {
         }
     }
 
-    function setNativeUsdRate(uint256 amount) external onlyOwner {
+    /**
+     * @notice Set support status for multiple chains at once
+     * @param chainSelectors Array of chain selectors to update
+     * @param isSupported Array of boolean values indicating support status for each corresponding chain selector
+     */
+    function setSupportedChains(
+        uint24[] calldata chainSelectors,
+        bool[] calldata isSupported
+    ) external onlyOwner {
+        require(chainSelectors.length == isSupported.length, CommonErrors.LengthMismatch());
+
+        for (uint256 index = 0; index < chainSelectors.length; index++) {
+            uint24 chainSelector = chainSelectors[index];
+            bool supported = isSupported[index];
+
+            s.router().isChainSupported[chainSelector] = supported;
+        }
+    }
+
+    function setNativeUsdRate(uint256 amount) external onlyFeedUpdater {
         s.priceFeed().nativeUsdRate = amount;
     }
 
     function setNativeNativeRates(
         uint24[] memory dstChainSelectors,
         uint256[] memory rates
-    ) external onlyOwner {
+    ) external onlyFeedUpdater {
         require(dstChainSelectors.length == rates.length, CommonErrors.LengthMismatch());
         for (uint256 i = 0; i < dstChainSelectors.length; i++) {
+            require(
+                s.router().isChainSupported[dstChainSelectors[i]],
+                Errors.UnsupportedChainSelector(dstChainSelectors[i])
+            );
             s.priceFeed().nativeNativeRates[dstChainSelectors[i]] = rates[i];
         }
     }
@@ -87,14 +122,14 @@ abstract contract Owner is Base {
     function setLastGasPrices(
         uint24[] memory dstChainSelectors,
         uint256[] memory gasPrices
-    ) external onlyOwner {
+    ) external onlyFeedUpdater {
         require(dstChainSelectors.length == gasPrices.length, CommonErrors.LengthMismatch());
         for (uint256 i = 0; i < dstChainSelectors.length; i++) {
+            require(
+                s.router().isChainSupported[dstChainSelectors[i]],
+                Errors.UnsupportedChainSelector(dstChainSelectors[i])
+            );
             s.priceFeed().lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
         }
-    }
-
-    function setIsChainSupported(uint24 chainSelector, bool isSupported) external onlyOwner {
-        s.router().isChainSupported[chainSelector] = isSupported;
     }
 }

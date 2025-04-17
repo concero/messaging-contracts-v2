@@ -21,42 +21,23 @@ struct CLFParams {
 }
 
 library Types {
-    enum FeeToken {
-        native,
-        usdc
-    }
-
     enum ChainType {
-        EVM,
-        NON_EVM
-    }
-
-    enum CLFReportType {
-        Message,
-        OperatorRegistration
+        EVM, //                   0
+        NON_EVM //                1
     }
 
     enum CLFRequestStatus {
-        NotStarted,
-        Pending,
-        FulFilled
+        NotStarted, //            0
+        Pending, //               1
+        FulFilled //              2
     }
 
     enum OperatorRegistrationAction {
-        Deregister, // 0
-        Register // 1
-    }
-
-    struct MessageReportRequest {
-        bytes32 internalMessageConfig;
-        bytes32 messageId;
-        bytes32 messageHashSum;
-        bytes srcChainData;
-        bytes dstChainData;
+        Deregister, //            0
+        Register //               1
     }
 
     struct OperatorRegistrationResult {
-        bytes32 reportConfig;
         CommonTypes.ChainType[] operatorChains;
         OperatorRegistrationAction[] operatorActions;
         bytes[] operatorAddresses;

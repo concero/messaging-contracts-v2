@@ -85,7 +85,7 @@ abstract contract ClfSigner is Base {
         );
         bytes32[] memory rs = reportSubmission.rs;
         bytes32[] memory ss = reportSubmission.ss;
-        bytes32 rawVs = reportSubmission.rawVs;
+        bytes memory rawVs = reportSubmission.rawVs;
 
         uint256 expectedNumSignatures = 3;
 

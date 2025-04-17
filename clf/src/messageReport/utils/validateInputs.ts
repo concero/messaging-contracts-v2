@@ -3,8 +3,8 @@ import { hexToBytes } from "viem";
 
 import { handleError } from "../../common/errorHandler";
 import { ErrorType } from "../../common/errorType";
+import { viemChains } from "../../common/viemChains";
 import { DecodedArgs } from "../types";
-import { decodeInternalMessageConfig, validateInternalMessageConfig } from "./messageConfig";
 
 type EvmSrcChainData = {
 	sender: string;
@@ -33,16 +33,15 @@ export function decodeInputs(bytesArgs: string[]): DecodedArgs {
 		handleError(ErrorType.INVALID_BYTES_ARGS_LENGTH);
 	}
 
-	const [, internalMessageConfig, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
+	const [, srcChainSelector, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
 
-	const decodedInternalMessageConfig = decodeInternalMessageConfig(internalMessageConfig);
-	validateInternalMessageConfig(decodedInternalMessageConfig);
+	if (!viemChains[srcChainSelector.toString()]) handleError(ErrorType.CONFIG_INVALID_SRC_CHAIN_SELECTOR);
 
 	const decodedArgs = {
-		internalMessageConfig: decodedInternalMessageConfig,
+		srcChainSelector,
 		messageId,
 		messageHashSum,
-		srcChainData: decodeSrcChainData(decodedInternalMessageConfig.srcChainSelector, srcChainData),
+		srcChainData: decodeSrcChainData(srcChainSelector, srcChainData),
 		operatorAddress,
 	};
 
@@ -66,11 +65,7 @@ function validateOperatorAddress(address: string): void {
 }
 
 function validateMessageFields(args: DecodedArgs): void {
-	const { internalMessageConfig, messageId, messageHashSum, srcChainData } = args;
-
-	if (!internalMessageConfig || internalMessageConfig.length === 0) {
-		handleError(ErrorType.INVALID_MESSAGE_CONFIG);
-	}
+	const { messageId, messageHashSum, srcChainData } = args;
 
 	if (!messageId || messageId.length === 0) {
 		handleError(ErrorType.INVALID_MESSAGE_ID);

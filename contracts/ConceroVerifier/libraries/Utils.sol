@@ -14,7 +14,6 @@ import {Errors} from "./Errors.sol";
 
 library Utils {
     using s for s.Operator;
-    error InvalidNativeUSDRate();
 
     /* OPERATOR UTILS */
     function _addOperator(CommonTypes.ChainType chainType, bytes memory operatorAddress) internal {

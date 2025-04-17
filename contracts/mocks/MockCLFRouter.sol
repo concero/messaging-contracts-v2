@@ -1,7 +1,5 @@
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/console.sol";
-
 interface IMockCLFRouter {
     function setConsumer(address _consumer) external;
 
@@ -17,7 +15,7 @@ interface IMockCLFRouter {
         bytes calldata report,
         bytes32[] calldata rs,
         bytes32[] calldata ss,
-        bytes32 rawVs
+        bytes calldata rawVs
     ) external;
 }
 
@@ -52,7 +50,7 @@ contract MockCLFRouter {
         bytes calldata report,
         bytes32[] calldata rs,
         bytes32[] calldata ss,
-        bytes32 rawVs
+        bytes calldata rawVs
     ) external {
         (
             bytes32[] memory requestIds,

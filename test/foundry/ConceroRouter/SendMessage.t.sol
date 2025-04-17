@@ -7,11 +7,8 @@
 pragma solidity 0.8.28;
 
 import {Vm} from "forge-std/src/Vm.sol";
-import {console} from "forge-std/src/Console.sol";
 
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
-import {ConceroUtils} from "contracts/ConceroClient/ConceroUtils.sol";
-import {Message} from "contracts/common/libraries/Message.sol";
 import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
 import {RouterSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
@@ -20,15 +17,17 @@ import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
 contract SendMessage is ConceroRouterTest {
-    bytes internal dstChainData;
+    ConceroTypes.EvmDstChainData internal dstChainData;
     bytes internal message;
 
     function setUp() public override {
         super.setUp();
 
-        dstChainData = abi.encode(
-            RouterTypes.EvmDstChainData({receiver: address(0x456), gasLimit: 1_000_000})
-        );
+        dstChainData = ConceroTypes.EvmDstChainData({
+            receiver: address(0x456),
+            gasLimit: 1_000_000
+        });
+
         message = "Test message";
 
         vm.deal(user, 100 ether);
@@ -44,37 +43,40 @@ contract SendMessage is ConceroRouterTest {
         uint256[] memory gasPrices = new uint256[](1);
         gasPrices[0] = 100_000; // 0.1 gwei
 
-        vm.prank(deployer);
-        conceroRouter.setNativeNativeRates(chainSelectors, rates);
+        uint24[] memory chainselectors = new uint24[](1);
+        chainselectors[0] = DST_CHAIN_SELECTOR;
+        bool[] memory supported = new bool[](1);
+        supported[0] = true;
 
-        vm.prank(deployer);
+        vm.startPrank(deployer);
+        conceroRouter.setSupportedChains(chainselectors, supported);
+        conceroRouter.setNativeNativeRates(chainSelectors, rates);
         conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        vm.stopPrank();
     }
 
     function test_conceroSend() public {
+        address feeToken = address(0);
+
         vm.startPrank(user);
-
-        ConceroTypes.ClientMessageConfig memory config = ConceroTypes.ClientMessageConfig({
-            dstChainSelector: DST_CHAIN_SELECTOR,
-            minSrcConfirmations: 1,
-            minDstConfirmations: 1,
-            relayerConfig: 0,
-            isCallbackable: false,
-            feeToken: ConceroTypes.FeeToken.native
-        });
-
-        bytes32 clientMessageConfig = ConceroUtils._packClientMessageConfig(config);
 
         uint256 initialNonce = conceroRouter.getStorage(
             Namespaces.ROUTER,
             RouterSlots.nonce,
             bytes32(0)
         );
-        uint256 messageFee = conceroRouter.getMessageFee(clientMessageConfig, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFee(
+            DST_CHAIN_SELECTOR,
+            false,
+            feeToken,
+            dstChainData
+        );
 
         vm.recordLogs();
         bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
-            clientMessageConfig,
+            DST_CHAIN_SELECTOR,
+            false,
+            feeToken,
             dstChainData,
             message
         );
@@ -84,38 +86,42 @@ contract SendMessage is ConceroRouterTest {
         );
 
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        bool foundEvent = false;
+        bool found = false;
+
         for (uint i = 0; i < entries.length; i++) {
-            if (
-                entries[i].topics[0] ==
-                keccak256("ConceroMessageSent(bytes32,bytes32,bytes,bytes,bytes)")
-            ) {
-                foundEvent = true;
+            bytes32 conceroMessageSentEventSig = keccak256(
+                "ConceroMessageSent(bytes32,uint8,bool,uint24,bytes,address,bytes)"
+            );
 
-                bytes32 internalMessageConfig = bytes32(entries[i].topics[1]);
-                bytes32 emittedMessageId = bytes32(entries[i].topics[2]);
+            if (entries[i].topics[0] == conceroMessageSentEventSig) {
+                found = true;
+                (
+                    uint8 versionFromEvent,
+                    bool shouldFinaliseSrcFromEvent,
+                    uint24 dstChainSelectorFromEvent,
+                    bytes memory dstChainDataFromEvent,
+                    address senderFromEvent,
+                    bytes memory messageFromEvent
+                ) = abi.decode(entries[i].data, (uint8, bool, uint24, bytes, address, bytes));
 
-                console.logBytes32(clientMessageConfig);
-                console.logBytes32(emittedMessageId);
+                bytes32 messageIdFromEvent = entries[i].topics[1];
 
-                (bytes memory dstChainDataFromEvent, bytes memory messageFromEvent) = abi.decode(
-                    entries[i].data,
-                    (bytes, bytes)
+                assertEq(dstChainSelectorFromEvent, 8453, "Incorrect dstChainSelector");
+                assertEq(
+                    senderFromEvent,
+                    0x0101010101010101010101010101010101010101,
+                    "Incorrect sender"
                 );
-
-                Message.validateInternalMessage(
-                    internalMessageConfig,
-                    srcChainData,
-                    dstChainDataFromEvent
+                assertEq(
+                    keccak256(messageFromEvent),
+                    keccak256("Test message"),
+                    "Incorrect message"
                 );
-
-                assertEq(emittedMessageId, messageId, "Message ID mismatch");
-                assertEq(dstChainDataFromEvent, dstChainData, "Destination chain data mismatch");
-                assertEq(messageFromEvent, message, "Message mismatch");
+                break;
             }
         }
-        assertTrue(foundEvent, "ConceroMessageSent event not found");
 
+        assertTrue(found, "ConceroMessageSent event not found");
         uint256 finalNonce = conceroRouter.getStorage(
             Namespaces.ROUTER,
             RouterSlots.nonce,
@@ -124,17 +130,31 @@ contract SendMessage is ConceroRouterTest {
         assertEq(finalNonce, initialNonce + 1, "Nonce should be incremented by 1");
 
         //        assertEq(
-        //            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.isMessageSent, bytes32(messageId)),
-        //            1
+        //            conceroRouter.getStorage(
+        //                Namespaces.ROUTER,
+        //                RouterSlots.isMessageSent,
+        //                bytes32(messageId)
+        //            ),
+        //            1,
+        //            "Message ID should be marked as sent"
         //        );
 
         vm.stopPrank();
     }
 
     function test_RevertInsufficientFee() public {
+        uint24 dstChainSelector = DST_CHAIN_SELECTOR;
+        bool shouldFinaliseSrc = false;
+        address feeToken = address(0);
+
         vm.startPrank(user);
 
-        uint256 messageFee = conceroRouter.getMessageFee(i_clientMessageConfig, dstChainData);
+        uint256 messageFee = conceroRouter.getMessageFee(
+            dstChainSelector,
+            shouldFinaliseSrc,
+            feeToken,
+            dstChainData
+        );
         uint256 insufficientFee = messageFee - 1;
 
         vm.expectRevert(
@@ -146,22 +166,12 @@ contract SendMessage is ConceroRouterTest {
         );
 
         conceroRouter.conceroSend{value: insufficientFee}(
-            i_clientMessageConfig,
+            dstChainSelector,
+            shouldFinaliseSrc,
+            feeToken,
             dstChainData,
             message
         );
-
-        vm.stopPrank();
-    }
-
-    function test_RevertInvalidMessageConfig() public {
-        vm.startPrank(user);
-
-        bytes32 invalidConfig = bytes32(0);
-        uint256 messageFee = conceroRouter.getMessageFee(i_clientMessageConfig, dstChainData);
-
-        vm.expectRevert();
-        conceroRouter.conceroSend{value: messageFee}(invalidConfig, dstChainData, message);
 
         vm.stopPrank();
     }

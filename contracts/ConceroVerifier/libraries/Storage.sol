@@ -6,7 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 
 import {Types} from "./Types.sol";
@@ -38,6 +37,7 @@ library Storage {
         mapping(bytes32 => Types.CLFRequestStatus) clfRequestStatus;
         mapping(bytes32 clfRequestId => bool isPending) pendingCLFRequests;
         mapping(bytes32 messageId => bool isPending) pendingMessageReports;
+        mapping(uint24 chainSelector => bool isSupported) isChainSupported;
     }
 
     struct Operator {

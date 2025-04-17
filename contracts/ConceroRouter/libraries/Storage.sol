@@ -6,9 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {GenericStorage} from "../../common/libraries/GenericStorage.sol";
-import {SupportedChains} from "../../common/libraries/SupportedChains.sol";
-
 library Namespaces {
     bytes32 internal constant ROUTER =
         keccak256(

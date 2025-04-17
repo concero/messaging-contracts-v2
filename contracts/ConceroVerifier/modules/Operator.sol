@@ -6,7 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/console.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -18,7 +17,7 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 import {Errors} from "../libraries/Errors.sol";
 
-import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn, OperatorRegistrationRequested, MessageReportRequested} from "../../interfaces/IConceroVerifier.sol";
+import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn, OperatorRegistrationRequested} from "../../interfaces/IConceroVerifier.sol";
 
 import {CLF} from "./CLF.sol";
 
@@ -30,16 +29,14 @@ abstract contract Operator is CLF {
     using s for s.Operator;
 
     function requestMessageReport(
-        bytes32 internalMessageConfig,
         bytes32 messageId,
         bytes32 messageHashSum,
+        uint24 srcChainSelector,
         bytes memory srcChainData
     ) external onlyOperator returns (bytes32) {
         require(!s.verifier().pendingMessageReports[messageId], Errors.MessageAlreadyProcessed());
         s.verifier().pendingMessageReports[messageId] = true;
-        emit MessageReportRequested(internalMessageConfig, messageId, messageHashSum, srcChainData);
-        return
-            _requestMessageReport(internalMessageConfig, messageId, messageHashSum, srcChainData);
+        return _requestMessageReport(messageId, messageHashSum, srcChainSelector, srcChainData);
     }
 
     /**
@@ -147,5 +144,9 @@ abstract contract Operator is CLF {
 
     function isOperatorRegistered(address operator) external view returns (bool) {
         return s.operator().isRegistered[operator];
+    }
+
+    function isChainSupported(uint24 chainSelector) public view returns (bool) {
+        return s.verifier().isChainSupported[chainSelector];
     }
 }

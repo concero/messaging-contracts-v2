@@ -8,7 +8,7 @@ pragma solidity 0.8.28;
 
 import {Base} from "./Base.sol";
 
-import {CLFRequestError, MessageReport, OperatorRegistered} from "../../interfaces/IConceroVerifier.sol";
+import {CLFRequestError, MessageReport, OperatorRegistered, MessageReportRequested} from "../../interfaces/IConceroVerifier.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 import {CommonConstants} from "../../common/CommonConstants.sol";
@@ -67,16 +67,16 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory response,
         bytes memory err
     ) internal override {
-        CommonTypes.CLFReportType reportType;
+        CommonTypes.ResultType reportType;
         assembly {
             reportType := byte(0, mload(add(response, 32)))
         }
 
         // @dev TODO: where is isPending check?
 
-        if (reportType == CommonTypes.CLFReportType.Message) {
+        if (reportType == CommonTypes.ResultType.Message) {
             _handleCLFMessageReport(clfRequestId, response, err);
-        } else if (reportType == CommonTypes.CLFReportType.OperatorRegistration) {
+        } else if (reportType == CommonTypes.ResultType.OperatorRegistration) {
             _handleCLFOperatorRegistrationReport(clfRequestId, response, err);
         } else {
             emit CLFRequestError(err);
@@ -97,25 +97,33 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        CommonTypes.MessageReportResult memory result = Decoder._decodeCLFMessageReportResponse(
-            response
-        );
+        (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = Decoder
+            ._decodeVerifierResult(response);
 
-        (, , address requester) = Decoder._decodeCLFReportConfig(result.reportConfig);
+        if (resultConfig.payloadVersion == 1) {
+            _handleMessagePayloadV1(payload);
+        }
 
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
 
-        s.operator().feesEarnedNative[requester] += CommonUtils.convertUsdBpsToNative(
+        s.operator().feesEarnedNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
             CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
 
-        s.operator().depositsNative[requester] += CommonUtils.convertUsdBpsToNative(
+        s.operator().depositsNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
             CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
+    }
 
-        emit MessageReport(result.messageId);
+    function _handleMessagePayloadV1(bytes memory _payload) internal {
+        CommonTypes.MessagePayloadV1 memory payload = abi.decode(
+            _payload,
+            (CommonTypes.MessagePayloadV1)
+        );
+
+        emit MessageReport(payload.messageId);
     }
 
     function _handleCLFOperatorRegistrationReport(
@@ -128,10 +136,11 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        Types.OperatorRegistrationResult memory result = Decoder
-            ._decodeCLFOperatorRegistrationReport(response);
+        (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = Decoder
+            ._decodeVerifierResult(response);
 
-        (, , address requester) = Decoder._decodeCLFReportConfig(result.reportConfig);
+        Types.OperatorRegistrationResult memory result = Decoder
+            ._decodeVerifierOperatorRegistrationResult(payload);
 
         require(
             result.operatorChains.length == result.operatorAddresses.length &&
@@ -149,22 +158,26 @@ abstract contract CLF is FunctionsClient, Base {
 
                 if (action == Types.OperatorRegistrationAction.Register) {
                     Utils._addOperator(chainType, abi.encodePacked(operatorAddress));
-                    s.operator().isRegistered[requester] = true;
+                    s.operator().isRegistered[resultConfig.requester] = true;
                 } else if (action == Types.OperatorRegistrationAction.Deregister) {
                     Utils._removeOperator(chainType, abi.encodePacked(operatorAddress));
-                    s.operator().isRegistered[requester] = false;
+                    s.operator().isRegistered[resultConfig.requester] = false;
                 }
             }
         }
 
-        emit OperatorRegistered(requester, result.operatorChains, result.operatorActions);
+        emit OperatorRegistered(
+            resultConfig.requester,
+            result.operatorChains,
+            result.operatorActions
+        );
     }
 
     /* CLF REQUEST FORMATION */
     function _requestMessageReport(
-        bytes32 internalMessageConfig,
         bytes32 messageId,
         bytes32 messageHashSum,
+        uint24 srcChainSelector,
         bytes memory srcChainData
     ) internal returns (bytes32 clfRequestId) {
         _witholdOperatorDeposit(
@@ -178,7 +191,7 @@ abstract contract CLF is FunctionsClient, Base {
         bytes[] memory clfReqArgs = new bytes[](6);
 
         clfReqArgs[0] = abi.encodePacked(i_requestCLFMessageReportJsCodeHash);
-        clfReqArgs[1] = abi.encodePacked(internalMessageConfig);
+        clfReqArgs[1] = abi.encodePacked(srcChainSelector);
         clfReqArgs[2] = abi.encodePacked(messageId);
         clfReqArgs[3] = abi.encodePacked(messageHashSum);
         clfReqArgs[4] = abi.encodePacked(srcChainData);
@@ -186,6 +199,9 @@ abstract contract CLF is FunctionsClient, Base {
 
         clfRequestId = _sendCLFRequest(clfReqArgs);
         s.verifier().pendingCLFRequests[clfRequestId] = true;
+
+        emit MessageReportRequested(messageId);
+
         return clfRequestId;
     }
 

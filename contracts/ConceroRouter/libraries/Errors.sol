@@ -11,4 +11,5 @@ library Errors {
     error MessageDeliveryFailed(bytes32 messageId);
     error InvalidReceiver();
     error InvalidMessageHashSum();
+    error UnsupportedChainSelector(uint24 chainSelector);
 }

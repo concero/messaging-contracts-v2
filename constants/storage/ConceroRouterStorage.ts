@@ -16,17 +16,16 @@ const Namespaces = {
  * @dev All slots are calculated using standard Solidity storage layout rules with namespace isolation
  */
 const RouterSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
-	const UINTS_COUNT = 1;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
 		nonce: 0,
-		isMessageSent: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
-		isMessageProcessed: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
-		receivedMessages: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2,
-		messageConfirmationsByProtocol:
-			RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 3,
+		isMessageSent: _var_gap + _arr_gap + 1,
+		isMessageProcessed: _var_gap + _arr_gap + 2,
+		receivedMessages: _var_gap + _arr_gap + 3,
+		messageConfirmationsByProtocol: _var_gap + _arr_gap + 4,
+		isChainSupported: _var_gap + _arr_gap + 5,
 	});
 })();
 
@@ -36,13 +35,12 @@ const RouterSlots = (() => {
  * @dev All slots are calculated using standard Solidity storage layout rules
  */
 const OperatorSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
-	const UINTS_COUNT = 1;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
 		totalFeesEarnedNative: 0,
-		feesEarnedNative: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
+		feesEarnedNative: _var_gap + _arr_gap + 1,
 	});
 })();
 
@@ -52,15 +50,13 @@ const OperatorSlots = (() => {
  * @dev All slots are calculated using standard Solidity storage layout rules with namespace isolation
  */
 const PriceFeedSlots = (() => {
-	const RESERVED_VARIABLE_GAP = 50;
-	const RESERVED_ARRAY_GAP = 50;
-	const UINTS_COUNT = 1;
+	const _var_gap = 50;
+	const _arr_gap = 50;
 
 	return Object.freeze({
 		nativeUsdRate: 0,
-		lastGasPrices: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT,
-		nativeNativeRates: RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1,
+		lastGasPrices: _var_gap + _arr_gap + 1,
+		nativeNativeRates: _var_gap + _arr_gap + 2,
 	});
 })();
-
 export { RouterSlots, OperatorSlots, PriceFeedSlots, Namespaces };

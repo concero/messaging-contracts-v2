@@ -27,37 +27,43 @@ contract MessageReport is BaseMockCLFReport {
         return
             getResponse(
                 address(operator),
-                i_internalMessageConfig,
                 bytes32("messageId"),
                 bytes32("messageHashSum"),
-                "dstChain",
+                SRC_CHAIN_SELECTOR,
+                DST_CHAIN_SELECTOR,
+                address(user),
+                RouterTypes.EvmDstChainData({receiver: address(0), gasLimit: 1_000_000}),
                 new bytes[](0)
             );
     }
 
     function getResponse(
         address requester,
-        bytes32 internalMessageConfig,
         bytes32 messageId,
         bytes32 messageHashSum,
-        bytes memory dstChainData,
+        uint24 srcChainSelector,
+        uint24 dstChainSelector,
+        address messageSender,
+        RouterTypes.EvmDstChainData memory dstChainData,
         bytes[] memory allowedOperators
     ) public view returns (bytes memory) {
-        bytes32 reportConfig = bytes32(
-            (uint256(uint8(CommonTypes.CLFReportType.Message)) <<
-                ReportConfigBitOffsets.OFFSET_REPORT_TYPE) |
-                (uint256(1) << ReportConfigBitOffsets.OFFSET_VERSION) |
-                (uint256(uint160(requester)))
-        );
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: CommonTypes.ResultType.Message,
+            payloadVersion: 1,
+            requester: requester
+        });
 
-        return
-            abi.encode(
-                reportConfig,
-                internalMessageConfig,
-                messageId,
-                messageHashSum,
-                dstChainData,
-                allowedOperators
-            );
+        CommonTypes.MessagePayloadV1 memory messagePayload = CommonTypes.MessagePayloadV1({
+            messageId: messageId,
+            messageHashSum: messageHashSum,
+            messageSender: abi.encode(messageSender),
+            srcChainSelector: srcChainSelector,
+            dstChainSelector: dstChainSelector,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
+        });
+
+        bytes memory response = abi.encode(resultConfig, abi.encode(messagePayload));
+        return response;
     }
 }

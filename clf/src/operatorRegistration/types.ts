@@ -14,11 +14,11 @@ interface OperatorRegistrationArgs {
 }
 
 interface OperatorRegistrationResult {
-	reportType: number; //                ─╮
-	version: number; //                    │ Report Response Config
-	// 10 bytes reserved for future use    │ Packed as a uint256
-	requester: Address; //                ─╯
-
+	// resultConfig
+	resultType: number;
+	payloadVersion: number;
+	requester: Address;
+	// payload
 	chainTypes: ChainType[];
 	actions: OperatorRegistrationAction[];
 	operatorAddresses: string[];

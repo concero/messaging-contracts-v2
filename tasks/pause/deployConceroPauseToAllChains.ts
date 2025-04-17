@@ -2,7 +2,8 @@ import { execSync } from "child_process";
 
 import { task } from "hardhat/config";
 
-import { networkEnvKeys, testnetNetworks } from "../../constants/conceroNetworks";
+import { networkEnvKeys } from "../../constants";
+import { testnetNetworks } from "../../constants/conceroNetworks";
 import { getEnvVar } from "../../utils";
 
 task("deploy-concero-pause-to-all-chains", "").setAction(

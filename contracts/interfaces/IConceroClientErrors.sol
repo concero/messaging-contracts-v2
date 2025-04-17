@@ -8,20 +8,20 @@ pragma solidity 0.8.28;
 
 interface IConceroClientErrors {
     enum RequiredVariableUnsetType {
-        NativeUSDRate,
-        lastGasPrice
+        NativeUSDRate, //                0
+        lastGasPrice //                  1
     }
 
     enum MessageConfigErrorType {
-        InvalidMinSrcConfirmations,
-        InvalidMinDstConfirmations,
-        InvalidAdditionalRelayers,
-        InvalidFeeToken,
-        InvalidConfigVersion,
-        InvalidRelayerConfig,
-        InvalidSrcChainSelector,
-        InvalidDstChainSelector,
-        InvalidOperatorLength
+        InvalidMinSrcConfirmations, //   0
+        InvalidMinDstConfirmations, //   1
+        InvalidAdditionalRelayers, //    2
+        InvalidFeeToken, //              3
+        InvalidConfigVersion, //         4
+        InvalidRelayerConfig, //         5
+        InvalidSrcChainSelector, //      6
+        InvalidDstChainSelector, //      7
+        InvalidOperatorLength //         8
     }
 
     // conceroSend Errors

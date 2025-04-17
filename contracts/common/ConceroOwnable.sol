@@ -12,7 +12,7 @@ abstract contract ConceroOwnable {
     address public immutable i_owner;
 
     modifier onlyOwner() {
-        require(msg.sender == i_owner, CommonErrors.NotOwner());
+        require(msg.sender == i_owner, CommonErrors.Unauthorized());
         _;
     }
 

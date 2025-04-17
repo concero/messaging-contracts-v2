@@ -6,38 +6,39 @@
  */
 pragma solidity 0.8.28;
 
+import {Types} from "../ConceroRouter/libraries/Types.sol";
+
 library CommonTypes {
-    enum FeeToken {
-        native,
-        usdc
-    }
-
     enum ChainType {
-        EVM,
-        NON_EVM
+        EVM, //                 0
+        NON_EVM //              1
     }
 
-    enum CLFReportType {
-        Unknown, // 0
-        Message, // 1
+    enum ResultType {
+        Unknown, //             0
+        Message, //             1
         OperatorRegistration // 2
     }
 
-    struct MessageReportResult {
-        bytes32 reportConfig;
-        bytes32 internalMessageConfig;
+    struct ResultConfig {
+        ResultType resultType;
+        uint8 payloadVersion;
+        address requester;
+    }
+
+    struct MessagePayloadV1 {
         bytes32 messageId;
         bytes32 messageHashSum;
-        bytes sender;
-        bytes dstChainData;
+        bytes messageSender;
+        uint24 srcChainSelector;
+        uint24 dstChainSelector;
+        Types.EvmDstChainData dstChainData;
         bytes[] allowedOperators;
     }
 
-    // @dev clfReportResponseConfig is a bitmasked uint256
-    struct ClfReportResponseConfig {
-        uint8 reportType; //               1 byte, (0-255)
-        uint8 version; //                  1 byte, (0-255)
-        //                                 10 bytes reserved for future use
-        address requester; //              20 bytes
+    struct VerifierResult {
+        ResultConfig resultConfig;
+        bytes payload;
     }
+    // VerifierResult = abi.encode(ResultConfig resultConfig, bytes payload);
 }

@@ -1,4 +1,4 @@
-import { ChainType, ReportType } from "../common/enums";
+import { ChainType, ResultType } from "../common/enums";
 import { packReportConfig } from "../common/packReportConfig";
 import { getPublicClient } from "../common/viemClient";
 import { conceroRouters } from "./constants/conceroRouters";
@@ -14,13 +14,12 @@ import { verifyMessageHash } from "./utils/verifyMessageHash";
 
 export async function main() {
 	const args = decodeInputs(bytesArgs);
-	const msgConfig = args.internalMessageConfig;
-	const publicClient = getPublicClient(msgConfig.srcChainSelector.toString());
+	const publicClient = getPublicClient(args.srcChainSelector.toString());
 
 	const [log, operators] = await Promise.all([
 		fetchConceroMessage(
 			publicClient,
-			conceroRouters[Number(msgConfig.srcChainSelector)],
+			conceroRouters[Number(args.srcChainSelector)],
 			args.messageId,
 			BigInt(args.srcChainData.blockNumber),
 		),
@@ -28,30 +27,30 @@ export async function main() {
 	]);
 
 	const {
-		messageId,
-		internalMessageConfig: messageConfigFromLog,
-		dstChainData: dstChainDataFromLog,
-		message: messageFromLog,
+		version: messageVersion,
+		shouldFinaliseSrc,
+		dstChainSelector,
+		dstChainData,
 		sender,
+		message,
 	} = decodeConceroMessageLog(log);
 
-	verifyMessageHash(messageFromLog, args.messageHashSum);
+	verifyMessageHash(message, args.messageHashSum);
 
 	const allowedOperators = pick(operators, 1);
 
 	const messageReportResult: MessageReportResult = {
-		version: CONFIG.REPORT_VERSION,
-		reportType: ReportType.MESSAGE,
+		payloadVersion: CONFIG.PAYLOAD_VERSION,
+		resultType: ResultType.MESSAGE,
 		requester: args.operatorAddress,
-		internalMessageConfig: messageConfigFromLog,
 		messageId: args.messageId,
 		messageHashSum: args.messageHashSum,
 		sender,
-		dstChainData: dstChainDataFromLog,
+		srcChainSelector: args.srcChainSelector,
+		dstChainSelector,
+		dstChainData,
 		allowedOperators,
 	};
 
-	const packedReportConfig = packReportConfig(ReportType.MESSAGE, CONFIG.REPORT_VERSION, args.operatorAddress);
-
-	return packResult(messageReportResult, packedReportConfig);
+	return packResult(messageReportResult);
 }

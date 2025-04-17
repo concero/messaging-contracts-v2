@@ -869,12 +869,12 @@
     "@manypkg/get-packages" "^1.1.3"
     fs-extra "^7.0.1"
 
-"@changesets/read@^0.6.2", "@changesets/read@^0.6.4":
-  version "0.6.4"
-  resolved "https://registry.yarnpkg.com/@changesets/read/-/read-0.6.4.tgz#ee87725d59e54b8cdf452807ac127f1f408801a7"
-  integrity sha512-XP6rUXTp8gWQ6rI2aSJc07RNuQjNaabhFFJbuhQHG71w9+LYRWK6j79OwWEF8v44cpkfNXLByMrNw1NntGY14w==
+"@changesets/read@^0.6.2", "@changesets/read@^0.6.5":
+  version "0.6.5"
+  resolved "https://registry.yarnpkg.com/@changesets/read/-/read-0.6.5.tgz#7a68457e6356d3df187aa18e388f1b8dba3d2156"
+  integrity sha512-UPzNGhsSjHD3Veb0xO/MwvasGe8eMyNrR/sT9gR8Q3DhOQZirgKhhXv/8hVsI0QpPjR004Z9iFxoJU6in3uGMg==
   dependencies:
-    "@changesets/git" "^3.0.3"
+    "@changesets/git" "^3.0.4"
     "@changesets/logger" "^0.1.1"
     "@changesets/parse" "^0.4.1"
     "@changesets/types" "^6.1.0"
@@ -919,6 +919,12 @@
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.6.0.tgz#ec6cd237440700bc23ca23087f513c75508958b0"
   integrity sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==
+
+"@concero/contract-utils@github:concero/contract-utils":
+  version "1.0.0"
+  resolved "https://codeload.github.com/concero/contract-utils/tar.gz/3359c16a5741296330b9fcbd5577b9b3c2190784"
+  dependencies:
+    viem "2.26.2"
 
 "@concero/v2-operators@github:concero/v2-operators":
   version "1.0.0"

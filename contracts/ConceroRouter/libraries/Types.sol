@@ -6,31 +6,9 @@
  */
 pragma solidity 0.8.28;
 
-/*
-big-endian bit ordering
-(most significant bits first, where bit 255 is the leftmost bit and bit 0 is the rightmost bit)
-
-| INTERNAL MESSAGE CONFIG| Bits | Description                           |
-|------------------------|------|---------------------------------------|
-| version                | 8    | Config version (0-255)                |
-| srcChainSelector       | 24   | Source chain ID                       |
-| Reserved/Unused        | 32   | Reserved for alignment (padding)      |
-| dstChainSelector       | 24   | Destination chain ID                  |
-| minSrcConfirmations    | 16   | Min. source chain confirmations       |
-| minDstConfirmations    | 16   | Min. destination chain confirmations  |
-| relayer_config         | 8    | Bitmap of additional relayers allowed |
-| isCallbackable         | 1    | Callback flag (0: No, 1: Yes)         |
-| Unused                 | 127  |                                       |
-*/
-
 library Types {
-    enum FeeToken {
-        native,
-        usdc
-    }
-
     struct EvmSrcChainData {
-        address sender; //may not be needed
+        address sender;
         uint256 blockNumber; // L2s have issues with blocknumber
     }
 
@@ -38,41 +16,18 @@ library Types {
         address receiver;
         uint256 gasLimit;
     }
-    // @dev InternalMessageConfig is a bitmasked uint256
-    struct InternalMessageConfig {
-        uint8 version; //                  ─╮ Internal
-        uint24 srcChainSelector; //         │ ConceroRouter config
-        //	                               ─╯ 32-bit padding reserved.
-        uint24 dstChainSelector; //        ─╮
-        uint16 minSrcConfirmations; //      │ Base config
-        uint16 minDstConfirmations; //      │ (32 bits total)
-        uint8 relayerConfig; //             │
-        bool isCallbackable; //            ─╯
-        //                                    Remaining: 127 bits
-    }
-
-    // @dev ClientMessageConfig is a bitmasked uint256
-    struct ClientMessageConfig {
-        uint24 dstChainSelector; //        ─╮
-        uint16 minSrcConfirmations; //      │ Base config
-        uint16 minDstConfirmations; //      │ (32 bits)
-        uint8 relayerConfig; //             │
-        bool isCallbackable; //            ─╯
-        //
-        FeeToken feeToken; //              ─  Not included in InternalMessageConfig
-    }
 
     struct ClfDonReportSubmission {
         bytes32[3] context;
-        bytes report; // ClfReport
+        bytes report;
         bytes32[] rs;
         bytes32[] ss;
-        bytes32 rawVs;
+        bytes rawVs;
     }
 
     struct ClfReport {
         bytes32[] requestIds;
-        bytes[] results; // ConceroVerifier:fulfillRequest() gets results[0] as response
+        bytes[] results; // ConceroVerifier:fulfillRequest() gets results[0] as result
         bytes[] errors;
         bytes[] onchainMetadata;
         bytes[] offchainMetadata;

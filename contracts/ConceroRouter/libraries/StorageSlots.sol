@@ -13,20 +13,15 @@ pragma solidity 0.8.28;
  * @dev All slots are calculated using standard Solidity storage layout rules with namespace isolation
  */
 library RouterSlots {
-    uint256 private constant RESERVED_VARIABLE_GAP = 50;
-    uint256 private constant RESERVED_ARRAY_GAP = 50;
-    uint256 private constant UINTS_COUNT = 1;
-
     uint256 internal constant nonce = 0;
+    uint256 private constant _var_gap = 50;
+    uint256 private constant _arr_gap = 50;
 
-    uint256 internal constant isMessageSent =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
-    uint256 internal constant isMessageProcessed =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
-    uint256 internal constant receivedMessages =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 2;
-    uint256 internal constant messageConfirmationsByProtocol =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 3;
+    uint256 internal constant isMessageSent = _var_gap + _arr_gap + 1;
+    uint256 internal constant isMessageProcessed = _var_gap + _arr_gap + 2;
+    uint256 internal constant receivedMessages = _var_gap + _arr_gap + 3;
+    uint256 internal constant messageConfirmationsByProtocol = _var_gap + _arr_gap + 4;
+    uint256 internal constant isChainSupported = _var_gap + _arr_gap + 5;
 }
 
 /**
@@ -35,30 +30,22 @@ library RouterSlots {
  * @dev All slots are calculated using standard Solidity storage layout rules with namespace isolation
  */
 library PriceFeedSlots {
-    uint256 private constant RESERVED_VARIABLE_GAP = 50;
-    uint256 private constant RESERVED_ARRAY_GAP = 50;
-    uint256 private constant UINTS_COUNT = 1;
-
     uint256 internal constant nativeUsdRate = 0;
+    uint256 private constant _var_gap = 50;
+    uint256 private constant _arr_gap = 50;
 
-    uint256 internal constant lastGasPrices =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
-    uint256 internal constant nativeNativeRates =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 1;
+    uint256 internal constant lastGasPrices = _var_gap + _arr_gap + 1;
+    uint256 internal constant nativeNativeRates = _var_gap + _arr_gap + 2;
 }
-
 /**
  * @title OperatorSlots
  * @notice Storage slot definitions for ConceroOperator contract
  * @dev All slots are calculated using standard Solidity storage layout rules
  */
 library OperatorSlots {
-    uint256 private constant RESERVED_VARIABLE_GAP = 50;
-    uint256 private constant RESERVED_ARRAY_GAP = 50;
-    uint256 private constant UINTS_COUNT = 1;
-
     uint256 internal constant totalFeesEarnedNative = 0;
+    uint256 private constant _var_gap = 50;
+    uint256 private constant _arr_gap = 50;
 
-    uint256 internal constant feesEarnedNative =
-        RESERVED_VARIABLE_GAP + RESERVED_ARRAY_GAP + UINTS_COUNT + 0;
+    uint256 internal constant feesEarnedNative = _var_gap + _arr_gap + 1;
 }

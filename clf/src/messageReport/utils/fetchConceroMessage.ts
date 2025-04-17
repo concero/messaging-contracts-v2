@@ -11,8 +11,7 @@ export async function fetchConceroMessage(
 ) {
 	const logs = await client.getLogs({
 		address: routerAddress,
-		// @dev TODO: specify first topic to filter logs by event signature
-		topics: [null, null, messageId],
+		topics: [null, messageId],
 		fromBlock: blockNumber - 10n,
 		toBlock: blockNumber,
 	});

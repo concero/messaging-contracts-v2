@@ -2,10 +2,10 @@ enum ChainType {
 	EVM,
 	NON_EVM,
 }
-enum ReportType {
+enum ResultType {
 	UNKNOWN = 0,
 	MESSAGE = 1,
 	OPERATOR_REGISTRATION = 2,
 }
 
-export { ReportType, ChainType };
+export { ResultType, ChainType };

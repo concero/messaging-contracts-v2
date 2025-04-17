@@ -27,17 +27,14 @@ contract RequestMessageReport is ConceroVerifierTest {
     function test_requestMessageReport() public returns (bytes32) {
         bytes32 messageId = bytes32(uint256(1));
         bytes32 messageHashSum = bytes32(uint256(2));
-        bytes32 internalMessageConfig = MessageLib.buildInternalMessageConfig(
-            i_clientMessageConfig,
-            SRC_CHAIN_SELECTOR
-        );
+
         bytes memory srcChainData = new bytes(0);
 
         vm.prank(operator);
         bytes32 clfRequestId = conceroVerifier.requestMessageReport(
-            internalMessageConfig,
             messageId,
             messageHashSum,
+            SRC_CHAIN_SELECTOR,
             srcChainData
         );
 

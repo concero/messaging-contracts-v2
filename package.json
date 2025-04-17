@@ -23,7 +23,8 @@
         "build:operatorRegistration": "bun build ./clf/src/operatorRegistration/index.ts --outfile ./ clf/dist/operatorRegistration.min.js --target node",
         "size-contracts": "hardhat size-contracts",
         "check-updates": "npx npm-check-updates",
-        "prepare": "husky"
+        "prepare": "husky",
+        "operator-setup": "bun test/operator/testOperator.ts"
     },
     "devDependencies": {
         "@chainlink/env-enc": "1.0.5",

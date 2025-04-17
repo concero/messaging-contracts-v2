@@ -44,12 +44,14 @@ async function testOperator() {
 	const conceroClientExample = await deployConceroClientExample(hre, {
 		conceroRouter: conceroRouter.address,
 	});
+
 	await setupOperatorTestListeners({
 		testClient,
 		mockCLFRouter: mockCLFRouter.address,
 		conceroClientExample: conceroClientExample.address,
 		conceroVerifier: conceroVerifier.address,
 	});
+
 	await operator();
 }
 

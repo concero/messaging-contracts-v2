@@ -1,9 +1,10 @@
 import { Address, Hash, decodeEventLog, parseEther } from "viem";
 
-import { globalConfig, networkEnvKeys } from "@concero/v2-operators/src/constants";
+import { globalConfig } from "@concero/v2-operators/src/constants";
 import { config } from "@concero/v2-operators/src/relayer/a/constants";
 import { decodeLogs } from "@concero/v2-operators/src/relayer/common/eventListener/decodeLogs";
 
+import { networkEnvKeys } from "../../../constants/conceroNetworks";
 import { getEnvVar } from "../../../utils";
 import { ExtendedTestClient } from "../../../utils/getViemClients";
 import { getOperatorRegistrationCLFResponse } from "../getOperatorRegistrationCLFResponse";
@@ -42,7 +43,7 @@ export async function handleOperatorRegistration(
 	const operatorRegistrationCLFResponseBytes = await getOperatorRegistrationCLFResponse();
 
 	const conceroVerifierAddress = getEnvVar(
-		`CONCERO_VERIFIER_${networkEnvKeys[config.networks.conceroVerifier.name]}`,
+		`CONCERO_VERIFIER_PROXY_${networkEnvKeys[config.networks.conceroVerifier.name]}`,
 	);
 
 	await testClient.setBalance({

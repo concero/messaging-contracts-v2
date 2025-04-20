@@ -38,17 +38,4 @@ library Decoder {
     ) internal pure returns (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) {
         return abi.decode(result, (CommonTypes.ResultConfig, bytes));
     }
-
-    function _decodeVerifierOperatorRegistrationResult(
-        bytes memory response
-    ) internal pure returns (VerifierTypes.OperatorRegistrationResult memory) {
-        VerifierTypes.OperatorRegistrationResult memory result;
-
-        (result.operatorChains, result.operatorActions, result.operatorAddresses) = abi.decode(
-            response,
-            (CommonTypes.ChainType[], VerifierTypes.OperatorRegistrationAction[], bytes[])
-        );
-
-        return result;
-    }
 }

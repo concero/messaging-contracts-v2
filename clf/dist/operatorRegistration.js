@@ -1766,36 +1766,55 @@ function hexStringToUint8Array(hex) {
 
 // clf/src/operatorRegistration/utils/packResult.ts
 function packResult(result) {
+  const encodedOperatorAddressesArr = result.operatorAddresses.map(
+    (operatorAddress) => encodeAbiParameters([{ type: "address" }], [operatorAddress])
+  );
   const payloadEncoded = encodeAbiParameters(
     [
-      { type: "uint8[]" },
-      // operatorChains
-      { type: "uint8[]" },
-      // operatorActions
-      { type: "bytes[]" }
-      // operatorAddresses
+      {
+        type: "tuple",
+        components: [
+          { type: "uint8[]", name: "operatorChains" },
+          { type: "uint8[]", name: "operatorActions" },
+          { type: "bytes[]", name: "operatorAddresses" }
+        ]
+      }
     ],
-    [result.chainTypes, result.actions, result.operatorAddresses]
+    [
+      {
+        operatorChains: result.chainTypes,
+        operatorActions: result.actions,
+        operatorAddresses: encodedOperatorAddressesArr
+      }
+    ]
   );
   const encodedResult = encodeAbiParameters(
     [
       {
         type: "tuple",
         components: [
-          { type: "uint8", name: "resultType" },
-          { type: "uint8", name: "payloadVersion" },
-          { type: "address", name: "requester" }
+          {
+            type: "tuple",
+            name: "config",
+            components: [
+              { type: "uint8", name: "resultType" },
+              { type: "uint8", name: "payloadVersion" },
+              { type: "address", name: "requester" }
+            ]
+          },
+          { type: "bytes", name: "payload" }
         ]
-      },
-      { type: "bytes", name: "payload" }
+      }
     ],
     [
       {
-        resultType: result.resultType,
-        payloadVersion: result.payloadVersion,
-        requester: result.requester
-      },
-      payloadEncoded
+        config: {
+          resultType: result.resultType,
+          payloadVersion: result.payloadVersion,
+          requester: result.requester
+        },
+        payload: payloadEncoded
+      }
     ]
   );
   return hexStringToUint8Array(encodedResult);

@@ -2,8 +2,6 @@ import { encodeAbiParameters, zeroHash } from "viem";
 
 import { OperatorRegistrationArgs } from "../../clf/src/operatorRegistration/types";
 import { simulateCLFScript } from "../../tasks/clf";
-import { getEnvVar } from "../../utils";
-import { getCLFReport } from "./getCLFReport";
 
 export async function getOperatorRegistrationCLFResponse(
 	operatorRegistrationArgs: OperatorRegistrationArgs,
@@ -22,9 +20,5 @@ export async function getOperatorRegistrationCLFResponse(
 		],
 	);
 
-	return getCLFReport(
-		clfSimulationResult.responseBytesHexstring,
-		zeroHash,
-		getEnvVar("CONCERO_VERIFIER_PROXY_LOCALHOST"),
-	);
+	return clfSimulationResult.responseBytesHexstring;
 }

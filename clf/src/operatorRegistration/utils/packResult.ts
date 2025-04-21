@@ -38,29 +38,22 @@ export function packResult(result: OperatorRegistrationResult): Uint8Array {
 		[
 			{
 				type: "tuple",
+				name: "resultConfig",
 				components: [
-					{
-						type: "tuple",
-						name: "resultConfig",
-						components: [
-							{ type: "uint8", name: "resultType" },
-							{ type: "uint8", name: "payloadVersion" },
-							{ type: "address", name: "requester" },
-						],
-					},
-					{ type: "bytes", name: "payload" },
+					{ type: "uint8", name: "resultType" },
+					{ type: "uint8", name: "payloadVersion" },
+					{ type: "address", name: "requester" },
 				],
 			},
+			{ type: "bytes", name: "payload" },
 		],
 		[
 			{
-				resultConfig: {
-					resultType: result.resultType,
-					payloadVersion: result.payloadVersion,
-					requester: result.requester,
-				},
-				payload: payloadEncoded,
+				resultType: result.resultType,
+				payloadVersion: result.payloadVersion,
+				requester: result.requester,
 			},
+			payloadEncoded,
 		],
 	);
 

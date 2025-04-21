@@ -12,15 +12,15 @@ export async function sendConceroMessage(
 	);
 
 	const txHash = await walletClient.writeContract({
+		account: walletClient.account,
 		address: clientAddress,
 		abi: exampleClientAbi,
 		functionName: "sendConceroMessage",
 		args: [clientAddress],
-		account: walletClient.account,
-		value: parseUnits("0.001", 18),
+		value: parseUnits("0.01", 18),
 	});
 
-	const txReceipt = await publicClient.getTransactionReceipt({ hash: txHash });
+	const txReceipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
 
 	const foundMessageSentLog = txReceipt.logs.find(log => {
 		try {
@@ -28,8 +28,8 @@ export async function sendConceroMessage(
 				abi: globalConfig.ABI.CONCERO_ROUTER,
 				data: log.data,
 				topics: log.topics,
-				strict: true,
 			});
+
 			return decoded.eventName === "ConceroMessageSent";
 		} catch {
 			return false;

@@ -17,14 +17,25 @@ async function deployContracts(
 	const { abi: mockCLFRouterAbi } = await import(
 		"../artifacts/contracts/mocks/MockCLFRouter.sol/MockCLFRouter.json"
 	);
+	const { abi: conceroRouterAbi } = await import(
+		"../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
+	);
 	const conceroNetwork = conceroNetworks[hre.network.name];
-	const { publicClient, walletClient } = getFallbackClients(conceroNetwork);
+	const { walletClient } = getFallbackClients(conceroNetwork);
 
 	const conceroVerifier = await deployVerifier(hre, { clfParams: { router: mockCLFRouter } });
 	const conceroRouter = await deployRouter(hre, { conceroVerifier: conceroVerifier.address });
 
 	await setVerifierPriceFeeds(conceroVerifier.address, walletClient);
 	await setRouterPriceFeeds(conceroRouter.address, walletClient);
+
+	await walletClient.writeContract({
+		address: conceroRouter.address,
+		abi: conceroRouterAbi,
+		functionName: "setSupportedChains",
+		args: [[137], [true]],
+	});
+
 	await walletClient.writeContract({
 		address: mockCLFRouter,
 		abi: mockCLFRouterAbi,

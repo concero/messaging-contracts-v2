@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { task } from "hardhat/config";
 
-import { testnetNetworks } from "@concero/contract-utils";
+import { testnetNetworks } from "@concero/v2-networks";
 
 import { networkEnvKeys } from "../../constants";
 import { getEnvVar } from "../../utils";

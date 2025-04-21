@@ -17,7 +17,7 @@ import {
 } from "./deploymentVariables";
 import { networkEnvKeys } from "./networkEnvKeys";
 // import { liveNetworks } from "./liveNetworks";
-import { rpcUrl, urls } from "./rpcUrls";
+import { urls } from "./rpcUrls";
 import { deployerTargetBalances, messengerTargetBalances } from "./targetBalances";
 
 export {
@@ -36,7 +36,6 @@ export {
 	envPrefixes,
 	getViemReceiptConfig,
 	urls,
-	rpcUrl,
 	messengerTargetBalances,
 	deployerTargetBalances,
 	// liveNetworks,

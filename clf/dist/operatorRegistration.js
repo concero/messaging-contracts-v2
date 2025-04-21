@@ -1795,7 +1795,7 @@ function packResult(result) {
         components: [
           {
             type: "tuple",
-            name: "config",
+            name: "resultConfig",
             components: [
               { type: "uint8", name: "resultType" },
               { type: "uint8", name: "payloadVersion" },
@@ -1808,7 +1808,7 @@ function packResult(result) {
     ],
     [
       {
-        config: {
+        resultConfig: {
           resultType: result.resultType,
           payloadVersion: result.payloadVersion,
           requester: result.requester

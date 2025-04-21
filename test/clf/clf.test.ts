@@ -74,7 +74,6 @@ describe("sendMessage\n", async () => {
 
 		await simulateCLFScript(
 			__dirname + "/../../clf/dist/messageReport.min.js",
-			"messageReport",
 			[
 				zeroHash,
 				messageConfig.hexConfig,

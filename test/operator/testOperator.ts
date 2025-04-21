@@ -31,7 +31,6 @@ async function operator() {
 async function testOperator() {
 	compileContracts({ quiet: true });
 	const hre = require("hardhat");
-
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
 	);
@@ -44,12 +43,14 @@ async function testOperator() {
 	const conceroClientExample = await deployConceroClientExample(hre, {
 		conceroRouter: conceroRouter.address,
 	});
+
 	await setupOperatorTestListeners({
 		testClient,
 		mockCLFRouter: mockCLFRouter.address,
 		conceroClientExample: conceroClientExample.address,
 		conceroVerifier: conceroVerifier.address,
 	});
+
 	await operator();
 }
 

@@ -93,11 +93,8 @@ abstract contract Owner is Base {
     ) external onlyOwner {
         require(chainSelectors.length == isSupported.length, CommonErrors.LengthMismatch());
 
-        for (uint256 index = 0; index < chainSelectors.length; index++) {
-            uint24 chainSelector = chainSelectors[index];
-            bool supported = isSupported[index];
-
-            s.router().isChainSupported[chainSelector] = supported;
+        for (uint256 index; index < chainSelectors.length; ++index) {
+            s.router().isChainSupported[chainSelectors[index]] = isSupported[index];
         }
     }
 

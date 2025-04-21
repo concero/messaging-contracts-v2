@@ -70,29 +70,29 @@ var init_base = __esm({
       version: `viem@${version}`
     };
     BaseError = class _BaseError extends Error {
-      constructor(shortMessage, args2 = {}) {
+      constructor(shortMessage, args = {}) {
         const details = (() => {
-          if (args2.cause instanceof _BaseError)
-            return args2.cause.details;
-          if (args2.cause?.message)
-            return args2.cause.message;
-          return args2.details;
+          if (args.cause instanceof _BaseError)
+            return args.cause.details;
+          if (args.cause?.message)
+            return args.cause.message;
+          return args.details;
         })();
         const docsPath = (() => {
-          if (args2.cause instanceof _BaseError)
-            return args2.cause.docsPath || args2.docsPath;
-          return args2.docsPath;
+          if (args.cause instanceof _BaseError)
+            return args.cause.docsPath || args.docsPath;
+          return args.docsPath;
         })();
-        const docsUrl = errorConfig.getDocsUrl?.({ ...args2, docsPath });
+        const docsUrl = errorConfig.getDocsUrl?.({ ...args, docsPath });
         const message = [
           shortMessage || "An error occurred.",
           "",
-          ...args2.metaMessages ? [...args2.metaMessages, ""] : [],
+          ...args.metaMessages ? [...args.metaMessages, ""] : [],
           ...docsUrl ? [`Docs: ${docsUrl}`] : [],
           ...details ? [`Details: ${details}`] : [],
           ...errorConfig.version ? [`Version: ${errorConfig.version}`] : []
         ].join("\n");
-        super(message, args2.cause ? { cause: args2.cause } : void 0);
+        super(message, args.cause ? { cause: args.cause } : void 0);
         Object.defineProperty(this, "details", {
           enumerable: true,
           configurable: true,
@@ -131,8 +131,8 @@ var init_base = __esm({
         });
         this.details = details;
         this.docsPath = docsPath;
-        this.metaMessages = args2.metaMessages;
-        this.name = args2.name ?? this.name;
+        this.metaMessages = args.metaMessages;
+        this.name = args.name ?? this.name;
         this.shortMessage = shortMessage;
         this.version = version;
       }
@@ -1732,11 +1732,14 @@ function handleError(type) {
   throw new CustomErrorHandler(type);
 }
 
+// clf/src/operatorRegistration/constants/config.ts
+var CONFIG = {
+  REPORT_VERSION: 1
+};
+
 // node_modules/viem/_esm/index.js
 init_decodeAbiParameters();
 init_encodeAbiParameters();
-init_fromHex();
-init_isAddress();
 
 // clf/src/common/reportBytes.ts
 var COMMON_REPORT_BYTE_OFFSETS = {
@@ -1748,22 +1751,6 @@ var COMMON_REPORT_BYTE_OFFSETS = {
   REQUESTER: 0,
   // 240 - 160 bits
   REQUESTER_MASK: (1n << 160n) - 1n
-};
-
-// clf/src/common/packReportConfig.ts
-function packReportConfig(reportType, version2, requester) {
-  if (reportType < 0 || reportType > 255) throw new Error("reportType must be a uint8 (0-255)");
-  if (version2 < 0 || version2 > 255) throw new Error("version must be a uint8 (0-255)");
-  const reportTypeBits = BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE);
-  const versionBits = BigInt(version2) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION);
-  const requesterBits = hexToBigInt(requester) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK;
-  const packedValue = reportTypeBits | versionBits | requesterBits;
-  return `0x${packedValue.toString(16).padStart(64, "0")}`;
-}
-
-// clf/src/operatorRegistration/constants/config.ts
-var CONFIG = {
-  REPORT_VERSION: 1
 };
 
 // clf/src/common/encoders.ts
@@ -1778,26 +1765,64 @@ function hexStringToUint8Array(hex) {
 }
 
 // clf/src/operatorRegistration/utils/packResult.ts
-function packResult(result, reportConfig) {
-  const encoded = encodeAbiParameters(
-    [
-      { type: "bytes32" },
-      // reportConfig
-      { type: "uint8[]" },
-      // chainTypes
-      { type: "uint8[]" },
-      // actions
-      { type: "address[]" }
-      // operatorAddresses
-    ],
-    [reportConfig, result.chainTypes, result.actions, result.operatorAddresses]
+function packResult(result) {
+  const encodedOperatorAddressesArr = result.operatorAddresses.map(
+    (operatorAddress) => encodeAbiParameters([{ type: "address" }], [operatorAddress])
   );
-  return hexStringToUint8Array(encoded);
+  const payloadEncoded = encodeAbiParameters(
+    [
+      {
+        type: "tuple",
+        components: [
+          { type: "uint8[]", name: "operatorChains" },
+          { type: "uint8[]", name: "operatorActions" },
+          { type: "bytes[]", name: "operatorAddresses" }
+        ]
+      }
+    ],
+    [
+      {
+        operatorChains: result.chainTypes,
+        operatorActions: result.actions,
+        operatorAddresses: encodedOperatorAddressesArr
+      }
+    ]
+  );
+  const encodedResult = encodeAbiParameters(
+    [
+      {
+        type: "tuple",
+        components: [
+          {
+            type: "tuple",
+            name: "config",
+            components: [
+              { type: "uint8", name: "resultType" },
+              { type: "uint8", name: "payloadVersion" },
+              { type: "address", name: "requester" }
+            ]
+          },
+          { type: "bytes", name: "payload" }
+        ]
+      }
+    ],
+    [
+      {
+        config: {
+          resultType: result.resultType,
+          payloadVersion: result.payloadVersion,
+          requester: result.requester
+        },
+        payload: payloadEncoded
+      }
+    ]
+  );
+  return hexStringToUint8Array(encodedResult);
 }
 
 // clf/src/operatorRegistration/utils/validateInputs.ts
-function decodeInputs(bytesArgs) {
-  const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, requester] = bytesArgs;
+function decodeInputs(bytesArgs2) {
+  const [_unusedHash, rawChainTypes, rawActions, rawOperatorAddresses, requester] = bytesArgs2;
   try {
     const chainTypes = decodeAbiParameters([{ type: "uint8[]" }], rawChainTypes)[0];
     const actions = decodeAbiParameters([{ type: "uint8[]" }], rawActions)[0];
@@ -1812,12 +1837,10 @@ function decodeInputs(bytesArgs) {
     handleError("70" /* DECODE_FAILED */);
   }
 }
-function validateDecodedArgs(args2) {
-  validateChainTypes(args2.chainTypes);
-  validateActions(args2.actions);
-  validateAddresses(args2.operatorAddresses);
-  validateOperatorAddress(args2.requester);
-  validateArrayLengths(args2);
+function validateDecodedArgs(args) {
+  validateChainTypes(args.chainTypes);
+  validateActions(args.actions);
+  validateArrayLengths(args);
 }
 function validateChainTypes(chainTypes) {
   const validChainTypes = /* @__PURE__ */ new Set([0 /* EVM */, 1 /* NON_EVM */]);
@@ -1831,51 +1854,28 @@ function validateActions(actions) {
     handleError("57" /* INVALID_ACTION */);
   }
 }
-function validateAddresses(addresses) {
-  if (!addresses.every((address) => isAddress(address, { strict: false }))) {
-    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
-  }
-}
-function validateOperatorAddress(address) {
-  if (!isAddress(address, { strict: false })) {
-    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
-  }
-}
-function validateArrayLengths(args2) {
-  const { chainTypes, actions, operatorAddresses } = args2;
+function validateArrayLengths(args) {
+  const { chainTypes, actions, operatorAddresses } = args;
   if (chainTypes.length !== actions.length || actions.length !== operatorAddresses.length) {
     handleError("2" /* ARRAY_LENGTH_MISMATCH */);
   }
 }
 
 // clf/src/operatorRegistration/index.ts
-async function main(bytesArgs) {
-  try {
-    const decodedArgs = decodeInputs(bytesArgs);
-    const validatedArgs = validateDecodedArgs(decodedArgs);
-    if (args.chainTypes.includes(0 /* EVM */) && args.operatorAddresses[0] !== args.requester) {
-      handleError("56" /* INVALID_OPERATOR_ADDRESS */);
-    }
-    const registrationReportResult = {
-      version: CONFIG.REPORT_VERSION,
-      reportType: 2 /* OPERATOR_REGISTRATION */,
-      requester: args.requester,
-      actions: args.actions,
-      chainTypes: args.chainTypes,
-      operatorAddresses: args.operatorAddresses
-    };
-    const reportConfig = packReportConfig(
-      2 /* OPERATOR_REGISTRATION */,
-      CONFIG.REPORT_VERSION,
-      args.operatorAddresses
-    );
-    return packResult(registrationReportResult, reportConfig);
-  } catch (error) {
-    if (error instanceof CustomErrorHandler) {
-      throw error;
-    } else {
-      handleError("0" /* UNKNOWN_ERROR */);
-    }
+async function main() {
+  const decodedArgs = decodeInputs(bytesArgs);
+  validateDecodedArgs(decodedArgs);
+  if (decodedArgs.chainTypes.includes(0 /* EVM */) && decodedArgs.operatorAddresses[0].toLocaleLowerCase() !== decodedArgs.requester.toLocaleLowerCase()) {
+    handleError("56" /* INVALID_OPERATOR_ADDRESS */);
   }
+  const registrationReportResult = {
+    payloadVersion: CONFIG.REPORT_VERSION,
+    resultType: 2 /* OPERATOR_REGISTRATION */,
+    requester: decodedArgs.requester,
+    actions: decodedArgs.actions,
+    chainTypes: decodedArgs.chainTypes,
+    operatorAddresses: decodedArgs.operatorAddresses
+  };
+  return packResult(registrationReportResult);
 }
  main();

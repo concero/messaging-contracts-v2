@@ -78,46 +78,6 @@ const config: HardhatUserConfig = {
 			avalancheFuji: "snowtrace",
 		},
 	},
-	//     customChains: [
-	//         {
-	//             network: "celo",
-	//             chainId: 42220,
-	//             urls: {
-	//                 apiURL: "https://api.celoscan.io/api",
-	//                 browserURL: "https://celoscan.io/",
-	//             },
-	//         },
-	//         {
-	//             network: "optimism",
-	//             chainId: 10,
-	//             urls: {
-	//                 apiURL: "https://api-optimistic.etherscan.io/api",
-	//                 browserURL: "https://optimistic.etherscan.io/",
-	//             },
-	//         },
-	//         {
-	//             network: "arbitrum",
-	//             chainId: conceroNetworks.arbitrum.id,
-	//             urls: {
-	//                 apiURL: "https://api.arbiscan.io/api",
-	//                 browserURL: "https://arbiscan.io/",
-	//             },
-	//         },
-	//         {
-	//             network: "avalancheFuji",
-	//             chainId: conceroNetworks.avalancheFuji.id,
-	//             urls: {
-	//                 apiURL: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
-	//                 browserURL: "https://snowtrace.io",
-	//             },
-	//         },
-	//     ],
-	// },
-	// verify: {
-	//   etherscan: {
-	//     apiKey: `${etherscanApiKey}`,
-	//   },
-	// },
 	sourcify: {
 		enabled: true,
 	},

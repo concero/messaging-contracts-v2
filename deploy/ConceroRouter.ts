@@ -71,6 +71,7 @@ const deployRouter: DeploymentFunction = async function (
 		),
 		conceroVerifierSubId: getEnvVar(`CLF_SUBID_${networkEnvKeys[conceroVerifierNetwork.name]}`),
 		clfSigners: getCLFDonSigners(networkType),
+		feedUpdater: deployer,
 	};
 
 	const args: DeployArgs = {
@@ -82,6 +83,7 @@ const deployRouter: DeploymentFunction = async function (
 		from: deployer,
 		args: [
 			args.chainSelector,
+			args.feedUpdater,
 			args.conceroVerifier,
 			args.conceroVerifierSubId,
 			args.clfSigners,

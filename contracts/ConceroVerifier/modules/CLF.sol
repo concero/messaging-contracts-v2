@@ -23,10 +23,14 @@ import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
 
+import "hardhat/console.sol";
+
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Verifier;
     using s for s.Operator;
+
+    error WrongClfResultType();
 
     constructor(
         address clfRouter,
@@ -67,19 +71,24 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory response,
         bytes memory err
     ) internal override {
-        CommonTypes.ResultType reportType;
-        assembly {
-            reportType := byte(0, mload(add(response, 32)))
-        }
+        CommonTypes.VerifierResult memory result = abi.decode(
+            response,
+            (CommonTypes.VerifierResult)
+        );
 
         // @dev TODO: where is isPending check?
 
-        if (reportType == CommonTypes.ResultType.Message) {
+        if (result.resultConfig.resultType == CommonTypes.ResultType.Message) {
             _handleCLFMessageReport(clfRequestId, response, err);
-        } else if (reportType == CommonTypes.ResultType.OperatorRegistration) {
-            _handleCLFOperatorRegistrationReport(clfRequestId, response, err);
+        } else if (result.resultConfig.resultType == CommonTypes.ResultType.OperatorRegistration) {
+            _handleCLFOperatorRegistrationReport(
+                clfRequestId,
+                result.payload,
+                err,
+                result.resultConfig.requester
+            );
         } else {
-            emit CLFRequestError(err);
+            revert WrongClfResultType();
         }
 
         // @dev TODO: move the check to the top of the function
@@ -96,7 +105,6 @@ abstract contract CLF is FunctionsClient, Base {
             emit CLFRequestError(err);
             return;
         }
-
         (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = Decoder
             ._decodeVerifierResult(response);
 
@@ -128,19 +136,19 @@ abstract contract CLF is FunctionsClient, Base {
 
     function _handleCLFOperatorRegistrationReport(
         bytes32 clfRequestId,
-        bytes memory response,
-        bytes memory err
+        bytes memory payload,
+        bytes memory err,
+        address requester
     ) internal {
         if (err.length != 0) {
             emit CLFRequestError(err);
             return;
         }
 
-        (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = Decoder
-            ._decodeVerifierResult(response);
-
-        Types.OperatorRegistrationResult memory result = Decoder
-            ._decodeVerifierOperatorRegistrationResult(payload);
+        Types.OperatorRegistrationResult memory result = abi.decode(
+            payload,
+            (Types.OperatorRegistrationResult)
+        );
 
         require(
             result.operatorChains.length == result.operatorAddresses.length &&
@@ -148,34 +156,25 @@ abstract contract CLF is FunctionsClient, Base {
             CommonErrors.LengthMismatch()
         );
 
-        for (uint256 i = 0; i < result.operatorChains.length; i++) {
+        for (uint256 i; i < result.operatorChains.length; ++i) {
             CommonTypes.ChainType chainType = result.operatorChains[i];
             Types.OperatorRegistrationAction action = result.operatorActions[i];
 
             if (chainType == CommonTypes.ChainType.EVM) {
-                bytes memory addressBytes = result.operatorAddresses[i];
-
-                address operatorAddress = abi.decode(addressBytes, (address));
-                require(
-                    operatorAddress == resultConfig.requester,
-                    Errors.OperatorAddressMismatch()
-                );
+                address operatorAddress = abi.decode(result.operatorAddresses[i], (address));
+                require(operatorAddress == requester, Errors.OperatorAddressMismatch());
 
                 if (action == Types.OperatorRegistrationAction.Register) {
                     Utils._addOperator(chainType, abi.encodePacked(operatorAddress));
-                    s.operator().isRegistered[resultConfig.requester] = true;
+                    s.operator().isRegistered[requester] = true;
                 } else if (action == Types.OperatorRegistrationAction.Deregister) {
                     Utils._removeOperator(chainType, abi.encodePacked(operatorAddress));
-                    s.operator().isRegistered[resultConfig.requester] = false;
+                    s.operator().isRegistered[requester] = false;
                 }
             }
         }
 
-        emit OperatorRegistered(
-            resultConfig.requester,
-            result.operatorChains,
-            result.operatorActions
-        );
+        emit OperatorRegistered(requester, result.operatorChains, result.operatorActions);
     }
 
     /* CLF REQUEST FORMATION */

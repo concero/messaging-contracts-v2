@@ -37,7 +37,7 @@ const deployConceroClientExample: DeploymentFunction = async function (
 
 	const deployment = await deploy("ConceroClientExample", {
 		from: deployer,
-		args: [args.conceroRouter, args.chainSelector],
+		args: [args.conceroRouter],
 		log: true,
 		autoMine: true,
 	});

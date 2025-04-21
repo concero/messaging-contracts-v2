@@ -67,16 +67,7 @@ abstract contract Operator is CLF {
     /// @notice Allows an operator to withdraw their earned fees
     /// @param amount The amount of native tokens to withdraw
     /// @return success Boolean indicating if the withdrawal was successful
-    function withdrawOperatorFee(
-        uint256 amount
-    )
-        external
-        onlyOperator
-        returns (
-            // nonReentrant
-            bool success
-        )
-    {
+    function withdrawOperatorFee(uint256 amount) external onlyOperator returns (bool success) {
         uint256 currentFees = s.operator().feesEarnedNative[msg.sender];
         require(amount > 0, CommonErrors.InvalidAmount());
         require(amount <= currentFees, Errors.InsufficientFee(amount, currentFees));
@@ -116,9 +107,7 @@ abstract contract Operator is CLF {
     /// @notice Allows operators to deposit native ETH as collateral
     /// @dev Implements nonReentrant guard to prevent reentrancy attacks
     /// @param operator The address of the operator making the deposit
-    function operatorDeposit(
-        address operator // nonReentrant
-    ) external payable {
+    function operatorDeposit(address operator) external payable {
         uint256 minimumDeposit = getCLFDeposit();
         require(
             msg.value >= minimumDeposit,
@@ -130,16 +119,6 @@ abstract contract Operator is CLF {
         s.operator().totalDepositsNative += msg.value;
 
         emit OperatorDeposited(msg.sender, msg.value);
-    }
-
-    // @dev: TODO: remove in prod
-    function setOperator(address operator) external onlyOwner {
-        Utils._addOperator(CommonTypes.ChainType.EVM, abi.encode(operator));
-    }
-
-    // @dev: TODO: remove in prod
-    function removeOperator(address operator) external onlyOwner {
-        Utils._removeOperator(CommonTypes.ChainType.EVM, abi.encode(operator));
     }
 
     /* INTERNAL FUNCTIONS */

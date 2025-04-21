@@ -23,8 +23,6 @@ import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
 
-import {console} from "forge-std/src/Console.sol";
-
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Verifier;

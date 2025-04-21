@@ -36,11 +36,12 @@ contract OperatorRegistrationReport is BaseMockCLFReport {
         result.operatorAddresses = new bytes[](1);
         result.operatorAddresses[0] = abi.encode(requester);
 
-        bytes memory payload = abi.encode(
-            result.operatorChains,
-            result.operatorActions,
-            result.operatorAddresses
-        );
+        VerifierTypes.OperatorRegistrationResult memory payload = VerifierTypes
+            .OperatorRegistrationResult({
+                operatorChains: result.operatorChains,
+                operatorActions: result.operatorActions,
+                operatorAddresses: result.operatorAddresses
+            });
 
         CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
             resultType: resultType,
@@ -48,6 +49,6 @@ contract OperatorRegistrationReport is BaseMockCLFReport {
             requester: requester
         });
 
-        return abi.encode(resultConfig, payload);
+        return abi.encode(resultConfig, abi.encode(payload));
     }
 }

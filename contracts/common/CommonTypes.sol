@@ -36,9 +36,5 @@ library CommonTypes {
         bytes[] allowedOperators;
     }
 
-    struct VerifierResult {
-        ResultConfig resultConfig;
-        bytes payload;
-    }
     // VerifierResult = abi.encode(ResultConfig resultConfig, bytes payload);
 }

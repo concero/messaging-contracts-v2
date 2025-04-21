@@ -23,8 +23,6 @@ import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
 
-import {console} from "forge-std/src/Console.sol";
-
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Verifier;
@@ -145,27 +143,23 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        (
-            CommonTypes.ChainType[] memory operatorChains,
-            Types.OperatorRegistrationAction[] memory operatorActions,
-            bytes[] memory operatorAddresses
-        ) = abi.decode(
-                payload,
-                (CommonTypes.ChainType[], Types.OperatorRegistrationAction[], bytes[])
-            );
+        Types.OperatorRegistrationResult memory result = abi.decode(
+            payload,
+            (Types.OperatorRegistrationResult)
+        );
 
         require(
-            operatorChains.length == operatorAddresses.length &&
-                operatorChains.length == operatorActions.length,
+            result.operatorChains.length == result.operatorAddresses.length &&
+                result.operatorChains.length == result.operatorActions.length,
             CommonErrors.LengthMismatch()
         );
 
-        for (uint256 i; i < operatorChains.length; ++i) {
-            CommonTypes.ChainType chainType = operatorChains[i];
-            Types.OperatorRegistrationAction action = operatorActions[i];
+        for (uint256 i; i < result.operatorChains.length; ++i) {
+            CommonTypes.ChainType chainType = result.operatorChains[i];
+            Types.OperatorRegistrationAction action = result.operatorActions[i];
 
             if (chainType == CommonTypes.ChainType.EVM) {
-                address operatorAddress = abi.decode(operatorAddresses[i], (address));
+                address operatorAddress = abi.decode(result.operatorAddresses[i], (address));
                 require(operatorAddress == requester, Errors.OperatorAddressMismatch());
 
                 if (action == Types.OperatorRegistrationAction.Register) {
@@ -178,7 +172,7 @@ abstract contract CLF is FunctionsClient, Base {
             }
         }
 
-        emit OperatorRegistered(requester, operatorChains, operatorActions);
+        emit OperatorRegistered(requester, result.operatorChains, result.operatorActions);
     }
 
     /* CLF REQUEST FORMATION */

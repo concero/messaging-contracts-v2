@@ -3358,7 +3358,7 @@ function prettyPrint(args) {
   const maxLength = entries.reduce((acc, [key]) => Math.max(acc, key.length), 0);
   return entries.map(([key, value]) => `  ${`${key}:`.padEnd(maxLength + 1)}  ${value}`).join("\n");
 }
-var FeeConflictError, InvalidSerializableTransactionError, TransactionNotFoundError, TransactionReceiptNotFoundError, WaitForTransactionReceiptTimeoutError;
+var FeeConflictError, InvalidLegacyVError, InvalidSerializableTransactionError, InvalidStorageKeySizeError, TransactionNotFoundError, TransactionReceiptNotFoundError, WaitForTransactionReceiptTimeoutError;
 var init_transaction = __esm({
   "node_modules/viem/_esm/errors/transaction.js"() {
     init_base();
@@ -3368,6 +3368,13 @@ var init_transaction = __esm({
           "Cannot specify both a `gasPrice` and a `maxFeePerGas`/`maxPriorityFeePerGas`.",
           "Use `maxFeePerGas`/`maxPriorityFeePerGas` for EIP-1559 compatible networks, and `gasPrice` for others."
         ].join("\n"), { name: "FeeConflictError" });
+      }
+    };
+    InvalidLegacyVError = class extends BaseError2 {
+      constructor({ v }) {
+        super(`Invalid \`v\` value "${v}". Expected 27 or 28.`, {
+          name: "InvalidLegacyVError"
+        });
       }
     };
     InvalidSerializableTransactionError = class extends BaseError2 {
@@ -3389,6 +3396,11 @@ var init_transaction = __esm({
           ],
           name: "InvalidSerializableTransactionError"
         });
+      }
+    };
+    InvalidStorageKeySizeError = class extends BaseError2 {
+      constructor({ storageKey }) {
+        super(`Size for storage key "${storageKey}" is invalid. Expected 32 bytes. Got ${Math.floor((storageKey.length - 2) / 2)} bytes.`, { name: "InvalidStorageKeySizeError" });
       }
     };
     TransactionNotFoundError = class extends BaseError2 {
@@ -5066,15 +5078,15 @@ function wNAF(c, bits) {
       const { windows, windowSize } = calcWOpts(W, bits);
       const points = [];
       let p = elm;
-      let base = p;
+      let base2 = p;
       for (let window = 0; window < windows; window++) {
-        base = p;
-        points.push(base);
+        base2 = p;
+        points.push(base2);
         for (let i = 1; i < windowSize; i++) {
-          base = base.add(p);
-          points.push(base);
+          base2 = base2.add(p);
+          points.push(base2);
         }
-        p = base.double();
+        p = base2.double();
       }
       return points;
     },
@@ -6878,6 +6890,32 @@ var init_extract = __esm({
   }
 });
 
+// node_modules/viem/_esm/utils/formatters/formatter.js
+function defineFormatter(type, format) {
+  return ({ exclude, format: overrides }) => {
+    return {
+      exclude,
+      format: (args) => {
+        const formatted = format(args);
+        if (exclude) {
+          for (const key of exclude) {
+            delete formatted[key];
+          }
+        }
+        return {
+          ...formatted,
+          ...overrides(args)
+        };
+      },
+      type
+    };
+  };
+}
+var init_formatter = __esm({
+  "node_modules/viem/_esm/utils/formatters/formatter.js"() {
+  }
+});
+
 // node_modules/viem/_esm/utils/formatters/transactionRequest.js
 function formatTransactionRequest(request) {
   const rpcRequest = {};
@@ -6928,10 +6966,11 @@ function formatAuthorizationList(authorizationList) {
     ...typeof authorization.v !== "undefined" && typeof authorization.yParity === "undefined" ? { v: numberToHex(authorization.v) } : {}
   }));
 }
-var rpcTransactionType;
+var rpcTransactionType, defineTransactionRequest;
 var init_transactionRequest = __esm({
   "node_modules/viem/_esm/utils/formatters/transactionRequest.js"() {
     init_toHex();
+    init_formatter();
     rpcTransactionType = {
       legacy: "0x0",
       eip2930: "0x1",
@@ -6939,6 +6978,7 @@ var init_transactionRequest = __esm({
       eip4844: "0x3",
       eip7702: "0x4"
     };
+    defineTransactionRequest = /* @__PURE__ */ defineFormatter("transactionRequest", formatTransactionRequest);
   }
 });
 
@@ -7430,7 +7470,7 @@ var init_contracts = __esm({
 });
 
 // node_modules/viem/_esm/errors/chain.js
-var ChainDoesNotSupportContract, ClientChainNotConfiguredError;
+var ChainDoesNotSupportContract, ClientChainNotConfiguredError, InvalidChainIdError;
 var init_chain = __esm({
   "node_modules/viem/_esm/errors/chain.js"() {
     init_base();
@@ -7454,6 +7494,11 @@ var init_chain = __esm({
         super("No chain was provided to the Client.", {
           name: "ClientChainNotConfiguredError"
         });
+      }
+    };
+    InvalidChainIdError = class extends BaseError2 {
+      constructor({ chainId }) {
+        super(typeof chainId === "number" ? `Chain ID "${chainId}" is invalid.` : "Chain ID is invalid.", { name: "InvalidChainIdError" });
       }
     };
   }
@@ -8418,8 +8463,12 @@ var BlockNotFoundError = class extends BaseError2 {
 // node_modules/viem/_esm/actions/public/getBlock.js
 init_toHex();
 
+// node_modules/viem/_esm/utils/formatters/block.js
+init_formatter();
+
 // node_modules/viem/_esm/utils/formatters/transaction.js
 init_fromHex();
+init_formatter();
 var transactionType = {
   "0x0": "legacy",
   "0x1": "eip2930",
@@ -8478,6 +8527,7 @@ function formatTransaction(transaction) {
   }
   return transaction_;
 }
+var defineTransaction = /* @__PURE__ */ defineFormatter("transaction", formatTransaction);
 function formatAuthorizationList2(authorizationList) {
   return authorizationList.map((authorization) => ({
     address: authorization.address,
@@ -8514,6 +8564,7 @@ function formatBlock(block) {
     totalDifficulty: block.totalDifficulty ? BigInt(block.totalDifficulty) : null
   };
 }
+var defineBlock = /* @__PURE__ */ defineFormatter("block", formatBlock);
 
 // node_modules/viem/_esm/actions/public/getBlock.js
 async function getBlock(client, { blockHash, blockNumber, blockTag: blockTag_, includeTransactions: includeTransactions_ } = {}) {
@@ -8604,18 +8655,18 @@ async function internal_estimateFeesPerGas(client, args) {
     throw new BaseFeeScalarError();
   const decimals = baseFeeMultiplier.toString().split(".")[1]?.length ?? 0;
   const denominator = 10 ** decimals;
-  const multiply = (base) => base * BigInt(Math.ceil(baseFeeMultiplier * denominator)) / BigInt(denominator);
+  const multiply = (base2) => base2 * BigInt(Math.ceil(baseFeeMultiplier * denominator)) / BigInt(denominator);
   const block = block_ ? block_ : await getAction(client, getBlock, "getBlock")({});
   if (typeof chain?.fees?.estimateFeesPerGas === "function") {
-    const fees = await chain.fees.estimateFeesPerGas({
+    const fees2 = await chain.fees.estimateFeesPerGas({
       block: block_,
       client,
       multiply,
       request,
       type
     });
-    if (fees !== null)
-      return fees;
+    if (fees2 !== null)
+      return fees2;
   }
   if (type === "eip1559") {
     if (typeof block.baseFeePerGas !== "bigint")
@@ -8728,6 +8779,9 @@ var maxBytesPerTransaction = bytesPerBlob * blobsPerTransaction - // terminator 
 1 - // zero byte (0x00) appended to each field element.
 1 * fieldElementsPerBlob * blobsPerTransaction;
 
+// node_modules/viem/_esm/constants/kzg.js
+var versionedHashVersionKzg = 1;
+
 // node_modules/viem/_esm/errors/blob.js
 init_base();
 var BlobSizeTooLargeError = class extends BaseError2 {
@@ -8741,6 +8795,25 @@ var BlobSizeTooLargeError = class extends BaseError2 {
 var EmptyBlobError = class extends BaseError2 {
   constructor() {
     super("Blob data must not be empty.", { name: "EmptyBlobError" });
+  }
+};
+var InvalidVersionedHashSizeError = class extends BaseError2 {
+  constructor({ hash: hash2, size: size5 }) {
+    super(`Versioned hash "${hash2}" size is invalid.`, {
+      metaMessages: ["Expected: 32", `Received: ${size5}`],
+      name: "InvalidVersionedHashSizeError"
+    });
+  }
+};
+var InvalidVersionedHashVersionError = class extends BaseError2 {
+  constructor({ hash: hash2, version: version4 }) {
+    super(`Versioned hash "${hash2}" version is invalid.`, {
+      metaMessages: [
+        `Expected: ${versionedHashVersionKzg}`,
+        `Received: ${version4}`
+      ],
+      name: "InvalidVersionedHashVersionError"
+    });
   }
 };
 
@@ -9748,6 +9821,21 @@ function watchContractEvent(client, parameters) {
   return enablePolling ? pollContractEvent() : subscribeContractEvent();
 }
 
+// node_modules/viem/_esm/errors/account.js
+init_base();
+var AccountNotFoundError = class extends BaseError2 {
+  constructor({ docsPath: docsPath6 } = {}) {
+    super([
+      "Could not find an Account to execute with this Action.",
+      "Please provide an Account with the `account` argument on the Action, or by supplying an `account` to the Client."
+    ].join("\n"), {
+      docsPath: docsPath6,
+      docsSlug: "account",
+      name: "AccountNotFoundError"
+    });
+  }
+};
+
 // node_modules/viem/_esm/actions/wallet/sendRawTransaction.js
 async function sendRawTransaction(client, { serializedTransaction }) {
   return client.request({
@@ -9862,12 +9950,12 @@ function createClient(parameters) {
     type,
     uid: uid()
   };
-  function extend(base) {
+  function extend(base2) {
     return (extendFn) => {
-      const extended = extendFn(base);
+      const extended = extendFn(base2);
       for (const key2 in client)
         delete extended[key2];
-      const combined = { ...base, ...extended };
+      const combined = { ...base2, ...extended };
       return Object.assign(combined, { extend: extend(combined) });
     };
   }
@@ -11162,6 +11250,16 @@ async function getFilterLogs(_client, { filter }) {
 // node_modules/viem/_esm/actions/public/getProof.js
 init_toHex();
 
+// node_modules/viem/_esm/utils/chain/defineChain.js
+function defineChain(chain) {
+  return {
+    formatters: void 0,
+    fees: void 0,
+    serializers: void 0,
+    ...chain
+  };
+}
+
 // node_modules/viem/_esm/utils/typedData.js
 init_abi();
 init_address();
@@ -11325,9 +11423,9 @@ function validateTypedData(parameters) {
       const value = data[name];
       const integerMatch = type.match(integerRegex2);
       if (integerMatch && (typeof value === "number" || typeof value === "bigint")) {
-        const [_type, base, size_] = integerMatch;
+        const [_type, base2, size_] = integerMatch;
         numberToHex(value, {
-          signed: base === "int",
+          signed: base2 === "int",
           size: Number.parseInt(size_) / 8
         });
       }
@@ -11384,8 +11482,336 @@ function validateReference(type) {
 // node_modules/viem/_esm/utils/index.js
 init_encodeFunctionData();
 
+// node_modules/viem/_esm/utils/authorization/serializeAuthorizationList.js
+init_toHex();
+
+// node_modules/viem/_esm/utils/transaction/serializeTransaction.js
+init_transaction();
+init_concat();
+init_trim();
+init_toHex();
+
+// node_modules/viem/_esm/utils/transaction/assertTransaction.js
+init_number();
+init_address();
+init_base();
+init_chain();
+init_node();
+init_isAddress();
+init_size();
+init_slice();
+init_fromHex();
+function assertTransactionEIP7702(transaction) {
+  const { authorizationList } = transaction;
+  if (authorizationList) {
+    for (const authorization of authorizationList) {
+      const { chainId } = authorization;
+      const address = authorization.address;
+      if (!isAddress(address))
+        throw new InvalidAddressError({ address });
+      if (chainId < 0)
+        throw new InvalidChainIdError({ chainId });
+    }
+  }
+  assertTransactionEIP1559(transaction);
+}
+function assertTransactionEIP4844(transaction) {
+  const { blobVersionedHashes } = transaction;
+  if (blobVersionedHashes) {
+    if (blobVersionedHashes.length === 0)
+      throw new EmptyBlobError();
+    for (const hash2 of blobVersionedHashes) {
+      const size_ = size(hash2);
+      const version4 = hexToNumber(slice(hash2, 0, 1));
+      if (size_ !== 32)
+        throw new InvalidVersionedHashSizeError({ hash: hash2, size: size_ });
+      if (version4 !== versionedHashVersionKzg)
+        throw new InvalidVersionedHashVersionError({
+          hash: hash2,
+          version: version4
+        });
+    }
+  }
+  assertTransactionEIP1559(transaction);
+}
+function assertTransactionEIP1559(transaction) {
+  const { chainId, maxPriorityFeePerGas, maxFeePerGas, to } = transaction;
+  if (chainId <= 0)
+    throw new InvalidChainIdError({ chainId });
+  if (to && !isAddress(to))
+    throw new InvalidAddressError({ address: to });
+  if (maxFeePerGas && maxFeePerGas > maxUint256)
+    throw new FeeCapTooHighError({ maxFeePerGas });
+  if (maxPriorityFeePerGas && maxFeePerGas && maxPriorityFeePerGas > maxFeePerGas)
+    throw new TipAboveFeeCapError({ maxFeePerGas, maxPriorityFeePerGas });
+}
+function assertTransactionEIP2930(transaction) {
+  const { chainId, maxPriorityFeePerGas, gasPrice, maxFeePerGas, to } = transaction;
+  if (chainId <= 0)
+    throw new InvalidChainIdError({ chainId });
+  if (to && !isAddress(to))
+    throw new InvalidAddressError({ address: to });
+  if (maxPriorityFeePerGas || maxFeePerGas)
+    throw new BaseError2("`maxFeePerGas`/`maxPriorityFeePerGas` is not a valid EIP-2930 Transaction attribute.");
+  if (gasPrice && gasPrice > maxUint256)
+    throw new FeeCapTooHighError({ maxFeePerGas: gasPrice });
+}
+function assertTransactionLegacy(transaction) {
+  const { chainId, maxPriorityFeePerGas, gasPrice, maxFeePerGas, to } = transaction;
+  if (to && !isAddress(to))
+    throw new InvalidAddressError({ address: to });
+  if (typeof chainId !== "undefined" && chainId <= 0)
+    throw new InvalidChainIdError({ chainId });
+  if (maxPriorityFeePerGas || maxFeePerGas)
+    throw new BaseError2("`maxFeePerGas`/`maxPriorityFeePerGas` is not a valid Legacy Transaction attribute.");
+  if (gasPrice && gasPrice > maxUint256)
+    throw new FeeCapTooHighError({ maxFeePerGas: gasPrice });
+}
+
+// node_modules/viem/_esm/utils/transaction/serializeAccessList.js
+init_address();
+init_transaction();
+init_isAddress();
+function serializeAccessList(accessList) {
+  if (!accessList || accessList.length === 0)
+    return [];
+  const serializedAccessList = [];
+  for (let i = 0; i < accessList.length; i++) {
+    const { address, storageKeys } = accessList[i];
+    for (let j = 0; j < storageKeys.length; j++) {
+      if (storageKeys[j].length - 2 !== 64) {
+        throw new InvalidStorageKeySizeError({ storageKey: storageKeys[j] });
+      }
+    }
+    if (!isAddress(address, { strict: false })) {
+      throw new InvalidAddressError({ address });
+    }
+    serializedAccessList.push([address, storageKeys]);
+  }
+  return serializedAccessList;
+}
+
+// node_modules/viem/_esm/utils/transaction/serializeTransaction.js
+function serializeTransaction(transaction, signature) {
+  const type = getTransactionType(transaction);
+  if (type === "eip1559")
+    return serializeTransactionEIP1559(transaction, signature);
+  if (type === "eip2930")
+    return serializeTransactionEIP2930(transaction, signature);
+  if (type === "eip4844")
+    return serializeTransactionEIP4844(transaction, signature);
+  if (type === "eip7702")
+    return serializeTransactionEIP7702(transaction, signature);
+  return serializeTransactionLegacy(transaction, signature);
+}
+function serializeTransactionEIP7702(transaction, signature) {
+  const { authorizationList, chainId, gas, nonce, to, value, maxFeePerGas, maxPriorityFeePerGas, accessList, data } = transaction;
+  assertTransactionEIP7702(transaction);
+  const serializedAccessList = serializeAccessList(accessList);
+  const serializedAuthorizationList = serializeAuthorizationList(authorizationList);
+  return concatHex([
+    "0x04",
+    toRlp([
+      toHex(chainId),
+      nonce ? toHex(nonce) : "0x",
+      maxPriorityFeePerGas ? toHex(maxPriorityFeePerGas) : "0x",
+      maxFeePerGas ? toHex(maxFeePerGas) : "0x",
+      gas ? toHex(gas) : "0x",
+      to ?? "0x",
+      value ? toHex(value) : "0x",
+      data ?? "0x",
+      serializedAccessList,
+      serializedAuthorizationList,
+      ...toYParitySignatureArray(transaction, signature)
+    ])
+  ]);
+}
+function serializeTransactionEIP4844(transaction, signature) {
+  const { chainId, gas, nonce, to, value, maxFeePerBlobGas, maxFeePerGas, maxPriorityFeePerGas, accessList, data } = transaction;
+  assertTransactionEIP4844(transaction);
+  let blobVersionedHashes = transaction.blobVersionedHashes;
+  let sidecars = transaction.sidecars;
+  if (transaction.blobs && (typeof blobVersionedHashes === "undefined" || typeof sidecars === "undefined")) {
+    const blobs2 = typeof transaction.blobs[0] === "string" ? transaction.blobs : transaction.blobs.map((x) => bytesToHex(x));
+    const kzg = transaction.kzg;
+    const commitments2 = blobsToCommitments({
+      blobs: blobs2,
+      kzg
+    });
+    if (typeof blobVersionedHashes === "undefined")
+      blobVersionedHashes = commitmentsToVersionedHashes({
+        commitments: commitments2
+      });
+    if (typeof sidecars === "undefined") {
+      const proofs2 = blobsToProofs({ blobs: blobs2, commitments: commitments2, kzg });
+      sidecars = toBlobSidecars({ blobs: blobs2, commitments: commitments2, proofs: proofs2 });
+    }
+  }
+  const serializedAccessList = serializeAccessList(accessList);
+  const serializedTransaction = [
+    toHex(chainId),
+    nonce ? toHex(nonce) : "0x",
+    maxPriorityFeePerGas ? toHex(maxPriorityFeePerGas) : "0x",
+    maxFeePerGas ? toHex(maxFeePerGas) : "0x",
+    gas ? toHex(gas) : "0x",
+    to ?? "0x",
+    value ? toHex(value) : "0x",
+    data ?? "0x",
+    serializedAccessList,
+    maxFeePerBlobGas ? toHex(maxFeePerBlobGas) : "0x",
+    blobVersionedHashes ?? [],
+    ...toYParitySignatureArray(transaction, signature)
+  ];
+  const blobs = [];
+  const commitments = [];
+  const proofs = [];
+  if (sidecars)
+    for (let i = 0; i < sidecars.length; i++) {
+      const { blob, commitment, proof } = sidecars[i];
+      blobs.push(blob);
+      commitments.push(commitment);
+      proofs.push(proof);
+    }
+  return concatHex([
+    "0x03",
+    sidecars ? (
+      // If sidecars are enabled, envelope turns into a "wrapper":
+      toRlp([serializedTransaction, blobs, commitments, proofs])
+    ) : (
+      // If sidecars are disabled, standard envelope is used:
+      toRlp(serializedTransaction)
+    )
+  ]);
+}
+function serializeTransactionEIP1559(transaction, signature) {
+  const { chainId, gas, nonce, to, value, maxFeePerGas, maxPriorityFeePerGas, accessList, data } = transaction;
+  assertTransactionEIP1559(transaction);
+  const serializedAccessList = serializeAccessList(accessList);
+  const serializedTransaction = [
+    toHex(chainId),
+    nonce ? toHex(nonce) : "0x",
+    maxPriorityFeePerGas ? toHex(maxPriorityFeePerGas) : "0x",
+    maxFeePerGas ? toHex(maxFeePerGas) : "0x",
+    gas ? toHex(gas) : "0x",
+    to ?? "0x",
+    value ? toHex(value) : "0x",
+    data ?? "0x",
+    serializedAccessList,
+    ...toYParitySignatureArray(transaction, signature)
+  ];
+  return concatHex([
+    "0x02",
+    toRlp(serializedTransaction)
+  ]);
+}
+function serializeTransactionEIP2930(transaction, signature) {
+  const { chainId, gas, data, nonce, to, value, accessList, gasPrice } = transaction;
+  assertTransactionEIP2930(transaction);
+  const serializedAccessList = serializeAccessList(accessList);
+  const serializedTransaction = [
+    toHex(chainId),
+    nonce ? toHex(nonce) : "0x",
+    gasPrice ? toHex(gasPrice) : "0x",
+    gas ? toHex(gas) : "0x",
+    to ?? "0x",
+    value ? toHex(value) : "0x",
+    data ?? "0x",
+    serializedAccessList,
+    ...toYParitySignatureArray(transaction, signature)
+  ];
+  return concatHex([
+    "0x01",
+    toRlp(serializedTransaction)
+  ]);
+}
+function serializeTransactionLegacy(transaction, signature) {
+  const { chainId = 0, gas, data, nonce, to, value, gasPrice } = transaction;
+  assertTransactionLegacy(transaction);
+  let serializedTransaction = [
+    nonce ? toHex(nonce) : "0x",
+    gasPrice ? toHex(gasPrice) : "0x",
+    gas ? toHex(gas) : "0x",
+    to ?? "0x",
+    value ? toHex(value) : "0x",
+    data ?? "0x"
+  ];
+  if (signature) {
+    const v = (() => {
+      if (signature.v >= 35n) {
+        const inferredChainId = (signature.v - 35n) / 2n;
+        if (inferredChainId > 0)
+          return signature.v;
+        return 27n + (signature.v === 35n ? 0n : 1n);
+      }
+      if (chainId > 0)
+        return BigInt(chainId * 2) + BigInt(35n + signature.v - 27n);
+      const v2 = 27n + (signature.v === 27n ? 0n : 1n);
+      if (signature.v !== v2)
+        throw new InvalidLegacyVError({ v: signature.v });
+      return v2;
+    })();
+    const r = trim(signature.r);
+    const s = trim(signature.s);
+    serializedTransaction = [
+      ...serializedTransaction,
+      toHex(v),
+      r === "0x00" ? "0x" : r,
+      s === "0x00" ? "0x" : s
+    ];
+  } else if (chainId > 0) {
+    serializedTransaction = [
+      ...serializedTransaction,
+      toHex(chainId),
+      "0x",
+      "0x"
+    ];
+  }
+  return toRlp(serializedTransaction);
+}
+function toYParitySignatureArray(transaction, signature_) {
+  const signature = signature_ ?? transaction;
+  const { v, yParity } = signature;
+  if (typeof signature.r === "undefined")
+    return [];
+  if (typeof signature.s === "undefined")
+    return [];
+  if (typeof v === "undefined" && typeof yParity === "undefined")
+    return [];
+  const r = trim(signature.r);
+  const s = trim(signature.s);
+  const yParity_ = (() => {
+    if (typeof yParity === "number")
+      return yParity ? toHex(1) : "0x";
+    if (v === 0n)
+      return "0x";
+    if (v === 1n)
+      return toHex(1);
+    return v === 27n ? "0x" : toHex(1);
+  })();
+  return [yParity_, r === "0x00" ? "0x" : r, s === "0x00" ? "0x" : s];
+}
+
+// node_modules/viem/_esm/utils/authorization/serializeAuthorizationList.js
+function serializeAuthorizationList(authorizationList) {
+  if (!authorizationList || authorizationList.length === 0)
+    return [];
+  const serializedAuthorizationList = [];
+  for (const authorization of authorizationList) {
+    const { chainId, nonce, ...signature } = authorization;
+    const contractAddress = authorization.address;
+    serializedAuthorizationList.push([
+      chainId ? toHex(chainId) : "0x",
+      contractAddress,
+      nonce ? toHex(nonce) : "0x",
+      ...toYParitySignatureArray({}, signature)
+    ]);
+  }
+  return serializedAuthorizationList;
+}
+
 // node_modules/viem/_esm/utils/formatters/transactionReceipt.js
 init_fromHex();
+init_formatter();
 var receiptStatuses = {
   "0x0": "reverted",
   "0x1": "success"
@@ -11410,6 +11836,7 @@ function formatTransactionReceipt(transactionReceipt) {
     receipt.blobGasUsed = BigInt(transactionReceipt.blobGasUsed);
   return receipt;
 }
+var defineTransactionReceipt = /* @__PURE__ */ defineFormatter("transactionReceipt", formatTransactionReceipt);
 
 // node_modules/viem/_esm/utils/index.js
 init_fromHex();
@@ -11573,7 +12000,7 @@ init_encodeFunctionData();
 init_getChainContractAddress();
 async function multicall(client, parameters) {
   const { allowFailure = true, batchSize: batchSize_, blockNumber, blockTag, multicallAddress: multicallAddress_, stateOverride } = parameters;
-  const contracts = parameters.contracts;
+  const contracts2 = parameters.contracts;
   const batchSize = batchSize_ ?? (typeof client.batch?.multicall === "object" && client.batch.multicall.batchSize || 1024);
   let multicallAddress = multicallAddress_;
   if (!multicallAddress) {
@@ -11588,8 +12015,8 @@ async function multicall(client, parameters) {
   const chunkedCalls = [[]];
   let currentChunk = 0;
   let currentChunkSize = 0;
-  for (let i = 0; i < contracts.length; i++) {
-    const { abi: abi2, address, args, functionName } = contracts[i];
+  for (let i = 0; i < contracts2.length; i++) {
+    const { abi: abi2, address, args, functionName } = contracts2[i];
     try {
       const callData = encodeFunctionData({ abi: abi2, args, functionName });
       currentChunkSize += (callData.length - 2) / 2;
@@ -11659,7 +12086,7 @@ async function multicall(client, parameters) {
     for (let j = 0; j < aggregate3Result.length; j++) {
       const { returnData, success } = aggregate3Result[j];
       const { callData } = chunkedCalls[i][j];
-      const { abi: abi2, address, functionName, args } = contracts[results.length];
+      const { abi: abi2, address, functionName, args } = contracts2[results.length];
       try {
         if (callData === "0x")
           throw new AbiDecodingZeroDataError();
@@ -11686,7 +12113,7 @@ async function multicall(client, parameters) {
       }
     }
   }
-  if (results.length !== contracts.length)
+  if (results.length !== contracts2.length)
     throw new BaseError2("multicall results mismatch");
   return results;
 }
@@ -14935,6 +15362,1584 @@ var rpcConfigs = {
   "33111": __default21
 };
 
+// node_modules/viem/_esm/op-stack/contracts.js
+var contracts = {
+  gasPriceOracle: { address: "0x420000000000000000000000000000000000000F" },
+  l1Block: { address: "0x4200000000000000000000000000000000000015" },
+  l2CrossDomainMessenger: {
+    address: "0x4200000000000000000000000000000000000007"
+  },
+  l2Erc721Bridge: { address: "0x4200000000000000000000000000000000000014" },
+  l2StandardBridge: { address: "0x4200000000000000000000000000000000000010" },
+  l2ToL1MessagePasser: {
+    address: "0x4200000000000000000000000000000000000016"
+  }
+};
+
+// node_modules/viem/_esm/op-stack/formatters.js
+init_fromHex();
+var formatters = {
+  block: /* @__PURE__ */ defineBlock({
+    format(args) {
+      const transactions = args.transactions?.map((transaction) => {
+        if (typeof transaction === "string")
+          return transaction;
+        const formatted = formatTransaction(transaction);
+        if (formatted.typeHex === "0x7e") {
+          formatted.isSystemTx = transaction.isSystemTx;
+          formatted.mint = transaction.mint ? hexToBigInt(transaction.mint) : void 0;
+          formatted.sourceHash = transaction.sourceHash;
+          formatted.type = "deposit";
+        }
+        return formatted;
+      });
+      return {
+        transactions,
+        stateRoot: args.stateRoot
+      };
+    }
+  }),
+  transaction: /* @__PURE__ */ defineTransaction({
+    format(args) {
+      const transaction = {};
+      if (args.type === "0x7e") {
+        transaction.isSystemTx = args.isSystemTx;
+        transaction.mint = args.mint ? hexToBigInt(args.mint) : void 0;
+        transaction.sourceHash = args.sourceHash;
+        transaction.type = "deposit";
+      }
+      return transaction;
+    }
+  }),
+  transactionReceipt: /* @__PURE__ */ defineTransactionReceipt({
+    format(args) {
+      return {
+        l1GasPrice: args.l1GasPrice ? hexToBigInt(args.l1GasPrice) : null,
+        l1GasUsed: args.l1GasUsed ? hexToBigInt(args.l1GasUsed) : null,
+        l1Fee: args.l1Fee ? hexToBigInt(args.l1Fee) : null,
+        l1FeeScalar: args.l1FeeScalar ? Number(args.l1FeeScalar) : null
+      };
+    }
+  })
+};
+
+// node_modules/viem/_esm/op-stack/serializers.js
+init_address();
+init_isAddress();
+init_concat();
+init_toHex();
+function serializeTransaction2(transaction, signature) {
+  if (isDeposit(transaction))
+    return serializeTransactionDeposit(transaction);
+  return serializeTransaction(transaction, signature);
+}
+var serializers = {
+  transaction: serializeTransaction2
+};
+function serializeTransactionDeposit(transaction) {
+  assertTransactionDeposit(transaction);
+  const { sourceHash, data, from: from5, gas, isSystemTx, mint, to, value } = transaction;
+  const serializedTransaction = [
+    sourceHash,
+    from5,
+    to ?? "0x",
+    mint ? toHex(mint) : "0x",
+    value ? toHex(value) : "0x",
+    gas ? toHex(gas) : "0x",
+    isSystemTx ? "0x1" : "0x",
+    data ?? "0x"
+  ];
+  return concatHex([
+    "0x7e",
+    toRlp(serializedTransaction)
+  ]);
+}
+function isDeposit(transaction) {
+  if (transaction.type === "deposit")
+    return true;
+  if (typeof transaction.sourceHash !== "undefined")
+    return true;
+  return false;
+}
+function assertTransactionDeposit(transaction) {
+  const { from: from5, to } = transaction;
+  if (from5 && !isAddress(from5))
+    throw new InvalidAddressError({ address: from5 });
+  if (to && !isAddress(to))
+    throw new InvalidAddressError({ address: to });
+}
+
+// node_modules/viem/_esm/op-stack/chainConfig.js
+var chainConfig = {
+  contracts,
+  formatters,
+  serializers
+};
+
+// node_modules/viem/_esm/chains/definitions/arbitrumSepolia.js
+var arbitrumSepolia = /* @__PURE__ */ defineChain({
+  id: 421614,
+  name: "Arbitrum Sepolia",
+  nativeCurrency: {
+    name: "Arbitrum Sepolia Ether",
+    symbol: "ETH",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia-rollup.arbitrum.io/rpc"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Arbiscan",
+      url: "https://sepolia.arbiscan.io",
+      apiUrl: "https://api-sepolia.arbiscan.io/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 81930
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/avalancheFuji.js
+var avalancheFuji = /* @__PURE__ */ defineChain({
+  id: 43113,
+  name: "Avalanche Fuji",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Avalanche Fuji",
+    symbol: "AVAX"
+  },
+  rpcUrls: {
+    default: { http: ["https://api.avax-test.network/ext/bc/C/rpc"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "SnowTrace",
+      url: "https://testnet.snowtrace.io",
+      apiUrl: "https://api-testnet.snowtrace.io"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 7096959
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/base.js
+var sourceId = 1;
+var base = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 8453,
+  name: "Base",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://mainnet.base.org"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Basescan",
+      url: "https://basescan.org",
+      apiUrl: "https://api.basescan.org/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    disputeGameFactory: {
+      [sourceId]: {
+        address: "0x43edB88C4B80fDD2AdFF2412A7BebF9dF42cB40e"
+      }
+    },
+    l2OutputOracle: {
+      [sourceId]: {
+        address: "0x56315b90c40730925ec5485cf004d835058518A0"
+      }
+    },
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 5022
+    },
+    portal: {
+      [sourceId]: {
+        address: "0x49048044D57e1C92A77f79988d21Fa8fAF74E97e",
+        blockCreated: 17482143
+      }
+    },
+    l1StandardBridge: {
+      [sourceId]: {
+        address: "0x3154Cf16ccdb4C6d922629664174b904d80F2C35",
+        blockCreated: 17482143
+      }
+    }
+  },
+  sourceId
+});
+
+// node_modules/viem/_esm/chains/definitions/baseSepolia.js
+var sourceId2 = 11155111;
+var baseSepolia = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 84532,
+  network: "base-sepolia",
+  name: "Base Sepolia",
+  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia.base.org"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Basescan",
+      url: "https://sepolia.basescan.org",
+      apiUrl: "https://api-sepolia.basescan.org/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    disputeGameFactory: {
+      [sourceId2]: {
+        address: "0xd6E6dBf4F7EA0ac412fD8b65ED297e64BB7a06E1"
+      }
+    },
+    l2OutputOracle: {
+      [sourceId2]: {
+        address: "0x84457ca9D0163FbC4bbfe4Dfbb20ba46e48DF254"
+      }
+    },
+    portal: {
+      [sourceId2]: {
+        address: "0x49f53e41452c74589e85ca1677426ba426459e85",
+        blockCreated: 4446677
+      }
+    },
+    l1StandardBridge: {
+      [sourceId2]: {
+        address: "0xfd0Bf71F60660E2f608ed56e1659C450eB113120",
+        blockCreated: 4446677
+      }
+    },
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 1059647
+    }
+  },
+  testnet: true,
+  sourceId: sourceId2
+});
+
+// node_modules/viem/_esm/chains/definitions/bitlayerTestnet.js
+var bitlayerTestnet = /* @__PURE__ */ defineChain({
+  id: 200810,
+  name: "Bitlayer Testnet",
+  nativeCurrency: {
+    name: "BTC",
+    symbol: "BTC",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://testnet-rpc.bitlayer.org"],
+      webSocket: ["wss://testnet-ws.bitlayer.org"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "bitlayer testnet scan",
+      url: "https://testnet.btrscan.com"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0x5B256fE9e993902eCe49D138a5b1162cBb529474",
+      blockCreated: 4135671
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/blastSepolia.js
+var sourceId3 = 11155111;
+var blastSepolia = /* @__PURE__ */ defineChain({
+  id: 168587773,
+  name: "Blast Sepolia",
+  nativeCurrency: {
+    name: "Ether",
+    symbol: "ETH",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia.blast.io"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blastscan",
+      url: "https://sepolia.blastscan.io",
+      apiUrl: "https://api-sepolia.blastscan.io/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 756690
+    }
+  },
+  testnet: true,
+  sourceId: sourceId3
+});
+
+// node_modules/viem/_esm/chains/definitions/botanixTestnet.js
+var botanixTestnet = /* @__PURE__ */ defineChain({
+  id: 3636,
+  name: "Botanix Testnet",
+  nativeCurrency: { name: "Botanix", symbol: "BTC", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://node.botanixlabs.dev"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Botanix Testnet Explorer",
+      url: "https://testnet.botanixscan.io"
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/bscTestnet.js
+var bscTestnet = /* @__PURE__ */ defineChain({
+  id: 97,
+  name: "Binance Smart Chain Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "BNB",
+    symbol: "tBNB"
+  },
+  rpcUrls: {
+    default: { http: ["https://data-seed-prebsc-1-s1.bnbchain.org:8545"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "BscScan",
+      url: "https://testnet.bscscan.com",
+      apiUrl: "https://api-testnet.bscscan.com/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 17422483
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/celo/fees.js
+var fees = {
+  /*
+     * Estimates the fees per gas for a transaction.
+  
+     * If the transaction is to be paid in a token (feeCurrency is present) then the fees
+     * are estimated in the value of the token. Otherwise falls back to the default
+     * estimation by returning null.
+     *
+     * @param params fee estimation function parameters
+     */
+  estimateFeesPerGas: async (params) => {
+    if (!params.request?.feeCurrency)
+      return null;
+    const [gasPrice, maxPriorityFeePerGas, cel2] = await Promise.all([
+      estimateFeePerGasInFeeCurrency(params.client, params.request.feeCurrency),
+      estimateMaxPriorityFeePerGasInFeeCurrency(params.client, params.request.feeCurrency),
+      isCel2(params.client)
+    ]);
+    const maxFeePerGas = cel2 ? (
+      // eth_gasPrice for cel2 returns baseFeePerGas + maxPriorityFeePerGas
+      params.multiply(gasPrice - maxPriorityFeePerGas) + maxPriorityFeePerGas
+    ) : (
+      // eth_gasPrice for Celo L1 returns (baseFeePerGas * multiplier), where the multiplier is 2 by default.
+      gasPrice + maxPriorityFeePerGas
+    );
+    return {
+      maxFeePerGas,
+      maxPriorityFeePerGas
+    };
+  }
+};
+async function estimateFeePerGasInFeeCurrency(client, feeCurrency) {
+  const fee = await client.request({
+    method: "eth_gasPrice",
+    params: [feeCurrency]
+  });
+  return BigInt(fee);
+}
+async function estimateMaxPriorityFeePerGasInFeeCurrency(client, feeCurrency) {
+  const feesPerGas = await client.request({
+    method: "eth_maxPriorityFeePerGas",
+    params: [feeCurrency]
+  });
+  return BigInt(feesPerGas);
+}
+async function isCel2(client) {
+  const proxyAdminAddress = "0x4200000000000000000000000000000000000018";
+  const code = await getCode(client, { address: proxyAdminAddress });
+  return Boolean(code);
+}
+
+// node_modules/viem/_esm/celo/formatters.js
+init_fromHex();
+init_transactionRequest();
+
+// node_modules/viem/_esm/celo/utils.js
+init_trim();
+function isEmpty(value) {
+  return value === 0 || value === 0n || value === void 0 || value === null || value === "0" || value === "" || typeof value === "string" && (trim(value).toLowerCase() === "0x" || trim(value).toLowerCase() === "0x00");
+}
+function isPresent(value) {
+  return !isEmpty(value);
+}
+function isEIP1559(transaction) {
+  return typeof transaction.maxFeePerGas !== "undefined" && typeof transaction.maxPriorityFeePerGas !== "undefined";
+}
+function isCIP64(transaction) {
+  if (transaction.type === "cip64") {
+    return true;
+  }
+  return isEIP1559(transaction) && isPresent(transaction.feeCurrency);
+}
+
+// node_modules/viem/_esm/celo/formatters.js
+var formatters2 = {
+  block: /* @__PURE__ */ defineBlock({
+    format(args) {
+      const transactions = args.transactions?.map((transaction) => {
+        if (typeof transaction === "string")
+          return transaction;
+        const formatted = formatTransaction(transaction);
+        return {
+          ...formatted,
+          ...transaction.gatewayFee ? {
+            gatewayFee: hexToBigInt(transaction.gatewayFee),
+            gatewayFeeRecipient: transaction.gatewayFeeRecipient
+          } : {},
+          feeCurrency: transaction.feeCurrency
+        };
+      });
+      return {
+        transactions,
+        ...args.randomness ? { randomness: args.randomness } : {}
+      };
+    }
+  }),
+  transaction: /* @__PURE__ */ defineTransaction({
+    format(args) {
+      if (args.type === "0x7e")
+        return {
+          isSystemTx: args.isSystemTx,
+          mint: args.mint ? hexToBigInt(args.mint) : void 0,
+          sourceHash: args.sourceHash,
+          type: "deposit"
+        };
+      const transaction = { feeCurrency: args.feeCurrency };
+      if (args.type === "0x7b")
+        transaction.type = "cip64";
+      else {
+        if (args.type === "0x7c")
+          transaction.type = "cip42";
+        transaction.gatewayFee = args.gatewayFee ? hexToBigInt(args.gatewayFee) : null;
+        transaction.gatewayFeeRecipient = args.gatewayFeeRecipient;
+      }
+      return transaction;
+    }
+  }),
+  transactionRequest: /* @__PURE__ */ defineTransactionRequest({
+    format(args) {
+      const request = {};
+      if (args.feeCurrency)
+        request.feeCurrency = args.feeCurrency;
+      if (isCIP64(args))
+        request.type = "0x7b";
+      return request;
+    }
+  })
+};
+
+// node_modules/viem/_esm/celo/serializers.js
+init_number();
+init_address();
+init_base();
+init_chain();
+init_node();
+init_isAddress();
+init_concat();
+init_toHex();
+function serializeTransaction3(transaction, signature) {
+  if (isCIP64(transaction))
+    return serializeTransactionCIP64(transaction, signature);
+  return serializeTransaction2(transaction, signature);
+}
+var serializers2 = {
+  transaction: serializeTransaction3
+};
+function serializeTransactionCIP64(transaction, signature) {
+  assertTransactionCIP64(transaction);
+  const { chainId, gas, nonce, to, value, maxFeePerGas, maxPriorityFeePerGas, accessList, feeCurrency, data } = transaction;
+  const serializedTransaction = [
+    toHex(chainId),
+    nonce ? toHex(nonce) : "0x",
+    maxPriorityFeePerGas ? toHex(maxPriorityFeePerGas) : "0x",
+    maxFeePerGas ? toHex(maxFeePerGas) : "0x",
+    gas ? toHex(gas) : "0x",
+    to ?? "0x",
+    value ? toHex(value) : "0x",
+    data ?? "0x",
+    serializeAccessList(accessList),
+    feeCurrency,
+    ...toYParitySignatureArray(transaction, signature)
+  ];
+  return concatHex([
+    "0x7b",
+    toRlp(serializedTransaction)
+  ]);
+}
+var MAX_MAX_FEE_PER_GAS = maxUint256;
+function assertTransactionCIP64(transaction) {
+  const { chainId, maxPriorityFeePerGas, gasPrice, maxFeePerGas, to, feeCurrency } = transaction;
+  if (chainId <= 0)
+    throw new InvalidChainIdError({ chainId });
+  if (to && !isAddress(to))
+    throw new InvalidAddressError({ address: to });
+  if (gasPrice)
+    throw new BaseError2("`gasPrice` is not a valid CIP-64 Transaction attribute.");
+  if (isPresent(maxFeePerGas) && maxFeePerGas > MAX_MAX_FEE_PER_GAS)
+    throw new FeeCapTooHighError({ maxFeePerGas });
+  if (isPresent(maxPriorityFeePerGas) && isPresent(maxFeePerGas) && maxPriorityFeePerGas > maxFeePerGas)
+    throw new TipAboveFeeCapError({ maxFeePerGas, maxPriorityFeePerGas });
+  if (isPresent(feeCurrency) && !isAddress(feeCurrency)) {
+    throw new BaseError2("`feeCurrency` MUST be a token address for CIP-64 transactions.");
+  }
+  if (isEmpty(feeCurrency)) {
+    throw new BaseError2("`feeCurrency` must be provided for CIP-64 transactions.");
+  }
+}
+
+// node_modules/viem/_esm/celo/chainConfig.js
+var chainConfig2 = {
+  contracts,
+  formatters: formatters2,
+  serializers: serializers2,
+  fees
+};
+
+// node_modules/viem/_esm/chains/definitions/celoAlfajores.js
+var sourceId4 = 17e3;
+var celoAlfajores = /* @__PURE__ */ defineChain({
+  ...chainConfig2,
+  id: 44787,
+  name: "Alfajores",
+  nativeCurrency: {
+    decimals: 18,
+    name: "CELO",
+    symbol: "A-CELO"
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://alfajores-forno.celo-testnet.org"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Celo Alfajores Explorer",
+      url: "https://celo-alfajores.blockscout.com",
+      apiUrl: "https://celo-alfajores.blockscout.com/api"
+    }
+  },
+  contracts: {
+    ...chainConfig2.contracts,
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 14569001
+    },
+    portal: {
+      [sourceId4]: {
+        address: "0x82527353927d8D069b3B452904c942dA149BA381",
+        blockCreated: 2411324
+      }
+    },
+    disputeGameFactory: {
+      [sourceId4]: {
+        address: "0xE28AAdcd9883746c0e5068F58f9ea06027b214cb",
+        blockCreated: 2411324
+      }
+    },
+    l2OutputOracle: {
+      [sourceId4]: {
+        address: "0x4a2635e9e4f6e45817b1D402ac4904c1d1752438",
+        blockCreated: 2411324
+      }
+    },
+    l1StandardBridge: {
+      [sourceId4]: {
+        address: "0xD1B0E0581973c9eB7f886967A606b9441A897037",
+        blockCreated: 2411324
+      }
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/cronosTestnet.js
+var cronosTestnet = /* @__PURE__ */ defineChain({
+  id: 338,
+  name: "Cronos Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "CRO",
+    symbol: "tCRO"
+  },
+  rpcUrls: {
+    default: { http: ["https://evm-t3.cronos.org"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "Cronos Explorer",
+      url: "https://cronos.org/explorer/testnet3"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 10191251
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/curtis.js
+var curtis = /* @__PURE__ */ defineChain({
+  id: 33111,
+  name: "Curtis",
+  nativeCurrency: { name: "ApeCoin", symbol: "APE", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.curtis.apechain.com"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Curtis Explorer",
+      url: "https://explorer.curtis.apechain.com"
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/gnosisChiado.js
+var gnosisChiado = /* @__PURE__ */ defineChain({
+  id: 10200,
+  name: "Gnosis Chiado",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Gnosis",
+    symbol: "xDAI"
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.chiadochain.net"],
+      webSocket: ["wss://rpc.chiadochain.net/wss"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blockscout",
+      url: "https://blockscout.chiadochain.net",
+      apiUrl: "https://blockscout.chiadochain.net/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 4967313
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/hashkeyChainTestnet.js
+var hashkeyTestnet = /* @__PURE__ */ defineChain({
+  id: 133,
+  name: "HashKey Chain Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "HashKey EcoPoints",
+    symbol: "HSK"
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://hashkeychain-testnet.alt.technology"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "HashKey Chain Explorer",
+      url: "https://hashkeychain-testnet-explorer.alt.technology"
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/inkSepolia.js
+var sourceId5 = 11155111;
+var inkSepolia = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 763373,
+  name: "Ink Sepolia",
+  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc-gel-sepolia.inkonchain.com"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blockscout",
+      url: "https://explorer-sepolia.inkonchain.com/",
+      apiUrl: "https://explorer-sepolia.inkonchain.com/api/v2"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 0
+    },
+    disputeGameFactory: {
+      [sourceId5]: {
+        address: "0x860e626c700af381133d9f4af31412a2d1db3d5d"
+      }
+    },
+    portal: {
+      [sourceId5]: {
+        address: "0x5c1d29c6c9c8b0800692acc95d700bcb4966a1d7"
+      }
+    },
+    l1StandardBridge: {
+      [sourceId5]: {
+        address: "0x33f60714bbd74d62b66d79213c348614de51901c"
+      }
+    }
+  },
+  testnet: true,
+  sourceId: sourceId5
+});
+
+// node_modules/viem/_esm/linea/actions/estimateGas.js
+init_parseAccount();
+init_toHex();
+init_getCallError();
+init_extract();
+init_transactionRequest();
+init_assertRequest();
+async function estimateGas2(client, args) {
+  const { account: account_ = client.account } = args;
+  if (!account_)
+    throw new AccountNotFoundError();
+  const account = parseAccount(account_);
+  try {
+    const { accessList, blockNumber, blockTag, data, gas, gasPrice, maxFeePerGas, maxPriorityFeePerGas, nonce, to, value, ...rest } = args;
+    const blockNumberHex = blockNumber ? numberToHex(blockNumber) : void 0;
+    const block = blockNumberHex || blockTag;
+    assertRequest(args);
+    const chainFormat = client.chain?.formatters?.transactionRequest?.format;
+    const format = chainFormat || formatTransactionRequest;
+    const request = format({
+      // Pick out extra data that might exist on the chain's transaction request type.
+      ...extract(rest, { format: chainFormat }),
+      from: account?.address,
+      accessList,
+      data,
+      gas,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      nonce,
+      to,
+      value
+    });
+    const { baseFeePerGas, gasLimit, priorityFeePerGas } = await client.request({
+      method: "linea_estimateGas",
+      params: block ? [request, block] : [request]
+    });
+    return {
+      baseFeePerGas: BigInt(baseFeePerGas),
+      gasLimit: BigInt(gasLimit),
+      priorityFeePerGas: BigInt(priorityFeePerGas)
+    };
+  } catch (err) {
+    throw getCallError(err, {
+      ...args,
+      account,
+      chain: client.chain
+    });
+  }
+}
+
+// node_modules/viem/_esm/linea/chainConfig.js
+var chainConfig3 = {
+  fees: {
+    estimateFeesPerGas: estimateFeesPerGas2,
+    async maxPriorityFeePerGas({ block, client, request }) {
+      const response = await estimateFeesPerGas2({
+        block,
+        client,
+        multiply: (x) => x,
+        request,
+        type: "eip1559"
+      });
+      if (!response?.maxPriorityFeePerGas)
+        return null;
+      return response.maxPriorityFeePerGas;
+    }
+  }
+};
+async function estimateFeesPerGas2({ client, multiply, request, type }) {
+  try {
+    const response = await estimateGas2(client, {
+      ...request,
+      account: request?.account
+    });
+    const { priorityFeePerGas: maxPriorityFeePerGas } = response;
+    const baseFeePerGas = multiply(BigInt(response.baseFeePerGas));
+    const maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas;
+    if (type === "legacy")
+      return { gasPrice: maxFeePerGas };
+    return {
+      maxFeePerGas,
+      maxPriorityFeePerGas
+    };
+  } catch {
+    return null;
+  }
+}
+
+// node_modules/viem/_esm/chains/definitions/lineaSepolia.js
+var lineaSepolia = /* @__PURE__ */ defineChain({
+  ...chainConfig3,
+  id: 59141,
+  name: "Linea Sepolia Testnet",
+  nativeCurrency: { name: "Linea Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.sepolia.linea.build"],
+      webSocket: ["wss://rpc.sepolia.linea.build"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Etherscan",
+      url: "https://sepolia.lineascan.build",
+      apiUrl: "https://api-sepolia.lineascan.build/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 227427
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/mainnet.js
+var mainnet = /* @__PURE__ */ defineChain({
+  id: 1,
+  name: "Ethereum",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://eth.merkle.io"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Etherscan",
+      url: "https://etherscan.io",
+      apiUrl: "https://api.etherscan.io/api"
+    }
+  },
+  contracts: {
+    ensRegistry: {
+      address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"
+    },
+    ensUniversalResolver: {
+      address: "0xce01f8eee7E479C928F8919abD53E553a36CeF67",
+      blockCreated: 19258213
+    },
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 14353601
+    }
+  }
+});
+
+// node_modules/viem/_esm/chains/definitions/mantleSepoliaTestnet.js
+var mantleSepoliaTestnet = /* @__PURE__ */ defineChain({
+  id: 5003,
+  name: "Mantle Sepolia Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "MNT",
+    symbol: "MNT"
+  },
+  rpcUrls: {
+    default: { http: ["https://rpc.sepolia.mantle.xyz"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "Mantle Testnet Explorer",
+      url: "https://explorer.sepolia.mantle.xyz/",
+      apiUrl: "https://explorer.sepolia.mantle.xyz/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 4584012
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/megaethTestnet.js
+var megaethTestnet = /* @__PURE__ */ defineChain({
+  id: 6342,
+  name: "MegaETH Testnet",
+  nativeCurrency: {
+    name: "MegaETH Testnet Ether",
+    symbol: "ETH",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://carrot.megaeth.com/rpc"],
+      webSocket: ["wss://carrot.megaeth.com/ws"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "MegaETH Testnet Explorer",
+      url: "https://www.megaexplorer.xyz/"
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/modeTestnet.js
+var sourceId6 = 11155111;
+var modeTestnet = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 919,
+  name: "Mode Testnet",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia.mode.network"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blockscout",
+      url: "https://sepolia.explorer.mode.network",
+      apiUrl: "https://sepolia.explorer.mode.network/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    l2OutputOracle: {
+      [sourceId6]: {
+        address: "0x2634BD65ba27AB63811c74A63118ACb312701Bfa",
+        blockCreated: 3778393
+      }
+    },
+    portal: {
+      [sourceId6]: {
+        address: "0x320e1580effF37E008F1C92700d1eBa47c1B23fD",
+        blockCreated: 3778395
+      }
+    },
+    l1StandardBridge: {
+      [sourceId6]: {
+        address: "0xbC5C679879B2965296756CD959C3C739769995E2",
+        blockCreated: 3778392
+      }
+    },
+    multicall3: {
+      address: "0xBAba8373113Fb7a68f195deF18732e01aF8eDfCF",
+      blockCreated: 3019007
+    }
+  },
+  testnet: true,
+  sourceId: sourceId6
+});
+
+// node_modules/viem/_esm/chains/definitions/monadTestnet.js
+var monadTestnet = /* @__PURE__ */ defineChain({
+  id: 10143,
+  name: "Monad Testnet",
+  nativeCurrency: {
+    name: "Testnet MON Token",
+    symbol: "MON",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://testnet-rpc.monad.xyz"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Monad Testnet explorer",
+      url: "https://testnet.monadexplorer.com"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 251449
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/optimism.js
+var sourceId7 = 1;
+var optimism = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 10,
+  name: "OP Mainnet",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://mainnet.optimism.io"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Optimism Explorer",
+      url: "https://optimistic.etherscan.io",
+      apiUrl: "https://api-optimistic.etherscan.io/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    disputeGameFactory: {
+      [sourceId7]: {
+        address: "0xe5965Ab5962eDc7477C8520243A95517CD252fA9"
+      }
+    },
+    l2OutputOracle: {
+      [sourceId7]: {
+        address: "0xdfe97868233d1aa22e815a266982f2cf17685a27"
+      }
+    },
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 4286263
+    },
+    portal: {
+      [sourceId7]: {
+        address: "0xbEb5Fc579115071764c7423A4f12eDde41f106Ed"
+      }
+    },
+    l1StandardBridge: {
+      [sourceId7]: {
+        address: "0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1"
+      }
+    }
+  },
+  sourceId: sourceId7
+});
+
+// node_modules/viem/_esm/chains/definitions/optimismSepolia.js
+var sourceId8 = 11155111;
+var optimismSepolia = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 11155420,
+  name: "OP Sepolia",
+  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia.optimism.io"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blockscout",
+      url: "https://optimism-sepolia.blockscout.com",
+      apiUrl: "https://optimism-sepolia.blockscout.com/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    disputeGameFactory: {
+      [sourceId8]: {
+        address: "0x05F9613aDB30026FFd634f38e5C4dFd30a197Fa1"
+      }
+    },
+    l2OutputOracle: {
+      [sourceId8]: {
+        address: "0x90E9c4f8a994a250F6aEfd61CAFb4F2e895D458F"
+      }
+    },
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 1620204
+    },
+    portal: {
+      [sourceId8]: {
+        address: "0x16Fc5058F25648194471939df75CF27A2fdC48BC"
+      }
+    },
+    l1StandardBridge: {
+      [sourceId8]: {
+        address: "0xFBb0621E0B23b5478B630BD55a5f21f67730B0F1"
+      }
+    }
+  },
+  testnet: true,
+  sourceId: sourceId8
+});
+
+// node_modules/viem/_esm/chains/definitions/polygonAmoy.js
+var polygonAmoy = /* @__PURE__ */ defineChain({
+  id: 80002,
+  name: "Polygon Amoy",
+  nativeCurrency: { name: "POL", symbol: "POL", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc-amoy.polygon.technology"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "PolygonScan",
+      url: "https://amoy.polygonscan.com",
+      apiUrl: "https://api-amoy.polygonscan.com/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 3127388
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/saigon.js
+var saigon = /* @__PURE__ */ defineChain({
+  id: 2021,
+  name: "Saigon Testnet",
+  nativeCurrency: { name: "RON", symbol: "RON", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://saigon-testnet.roninchain.com/rpc"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Saigon Explorer",
+      url: "https://saigon-app.roninchain.com"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 18736871
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/scrollSepolia.js
+var scrollSepolia = /* @__PURE__ */ defineChain({
+  id: 534351,
+  name: "Scroll Sepolia",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia-rpc.scroll.io"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Scrollscan",
+      url: "https://sepolia.scrollscan.com",
+      apiUrl: "https://api-sepolia.scrollscan.com/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 9473
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/seiTestnet.js
+var seiTestnet = /* @__PURE__ */ defineChain({
+  id: 1328,
+  name: "Sei Testnet",
+  nativeCurrency: { name: "Sei", symbol: "SEI", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://evm-rpc-testnet.sei-apis.com"],
+      webSocket: ["wss://evm-ws-testnet.sei-apis.com"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Seitrace",
+      url: "https://seitrace.com"
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/sepolia.js
+var sepolia = /* @__PURE__ */ defineChain({
+  id: 11155111,
+  name: "Sepolia",
+  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia.drpc.org"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Etherscan",
+      url: "https://sepolia.etherscan.io",
+      apiUrl: "https://api-sepolia.etherscan.io/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 751532
+    },
+    ensRegistry: { address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e" },
+    ensUniversalResolver: {
+      address: "0xc8Af999e38273D658BE1b921b88A9Ddf005769cC",
+      blockCreated: 5317080
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/shibariumTestnet.js
+var shibariumTestnet = /* @__PURE__ */ defineChain({
+  id: 157,
+  name: "Puppynet Shibarium",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Bone",
+    symbol: "BONE"
+  },
+  rpcUrls: {
+    default: { http: ["https://puppynet.shibrpc.com"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blockscout",
+      url: "https://puppyscan.shib.io",
+      apiUrl: "https://puppyscan.shib.io/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xA4029b74FBA366c926eDFA7Dd10B21C621170a4c",
+      blockCreated: 3035769
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/soneiumMinato.js
+var sourceId9 = 11155111;
+var soneiumMinato = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 1946,
+  name: "Soneium Minato Testnet",
+  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.minato.soneium.org"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Blockscout",
+      url: "https://soneium-minato.blockscout.com",
+      apiUrl: "https://soneium-minato.blockscout.com/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    disputeGameFactory: {
+      [sourceId9]: {
+        address: "0xB3Ad2c38E6e0640d7ce6aA952AB3A60E81bf7a01"
+      }
+    },
+    l2OutputOracle: {
+      [sourceId9]: {
+        address: "0x710e5286C746eC38beeB7538d0146f60D27be343"
+      }
+    },
+    portal: {
+      [sourceId9]: {
+        address: "0x65ea1489741A5D72fFdD8e6485B216bBdcC15Af3",
+        blockCreated: 6466136
+      }
+    },
+    l1StandardBridge: {
+      [sourceId9]: {
+        address: "0x5f5a404A5edabcDD80DB05E8e54A78c9EBF000C2",
+        blockCreated: 6466136
+      }
+    },
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 1
+    }
+  },
+  testnet: true,
+  sourceId: sourceId9
+});
+
+// node_modules/viem/_esm/chains/definitions/sonicBlazeTestnet.js
+var sonicBlazeTestnet = /* @__PURE__ */ defineChain({
+  id: 57054,
+  name: "Sonic Blaze Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Sonic",
+    symbol: "S"
+  },
+  rpcUrls: {
+    default: { http: ["https://rpc.blaze.soniclabs.com"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "Sonic Blaze Testnet Explorer",
+      url: "https://testnet.sonicscan.org"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 1100
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/unichainSepolia.js
+var sourceId10 = 11155111;
+var unichainSepolia = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 1301,
+  name: "Unichain Sepolia",
+  nativeCurrency: {
+    name: "Ether",
+    symbol: "ETH",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://sepolia.unichain.org"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Uniscan",
+      url: "https://sepolia.uniscan.xyz",
+      apiUrl: "https://api-sepolia.uniscan.xyz/api"
+    }
+  },
+  contracts: {
+    ...chainConfig.contracts,
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 0
+    },
+    portal: {
+      [sourceId10]: {
+        address: "0x0d83dab629f0e0F9d36c0Cbc89B69a489f0751bD"
+      }
+    },
+    l1StandardBridge: {
+      [sourceId10]: {
+        address: "0xea58fcA6849d79EAd1f26608855c2D6407d54Ce2"
+      }
+    },
+    disputeGameFactory: {
+      [sourceId10]: {
+        address: "0xeff73e5aa3B9AEC32c659Aa3E00444d20a84394b"
+      }
+    }
+  },
+  testnet: true,
+  sourceId: sourceId10
+});
+
+// node_modules/viem/_esm/chains/definitions/xLayerTestnet.js
+var xLayerTestnet = /* @__PURE__ */ defineChain({
+  id: 195,
+  name: "X1 Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "OKB",
+    symbol: "OKB"
+  },
+  rpcUrls: {
+    default: { http: ["https://xlayertestrpc.okx.com"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "OKLink",
+      url: "https://www.oklink.com/xlayer-test"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 624344
+    }
+  },
+  testnet: true
+});
+
+// node_modules/viem/_esm/chains/definitions/zircuitTestnet.js
+var sourceId11 = 11155111;
+var zircuitTestnet = /* @__PURE__ */ defineChain({
+  ...chainConfig,
+  id: 48899,
+  name: "Zircuit Testnet",
+  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: [
+        "https://testnet.zircuit.com",
+        "https://zircuit1-testnet.p2pify.com",
+        "https://zircuit1-testnet.liquify.com"
+      ]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Zircuit Testnet Explorer",
+      url: "https://explorer.testnet.zircuit.com"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 6040287
+    },
+    l2OutputOracle: {
+      [sourceId11]: {
+        address: "0x740C2dac453aEf7140809F80b72bf0e647af8148"
+      }
+    },
+    portal: {
+      [sourceId11]: {
+        address: "0x787f1C8c5924178689E0560a43D848bF8E54b23e"
+      }
+    },
+    l1StandardBridge: {
+      [sourceId11]: {
+        address: "0x0545c5fe980098C16fcD0eCB5E79753afa6d9af9"
+      }
+    }
+  },
+  testnet: true
+});
+
+// clf/src/common/viemChains.ts
+var defaultNativeCurrency = {
+  decimals: 18,
+  name: "Ether",
+  symbol: "ETH"
+};
+var localhostChain = defineChain({
+  id: 1,
+  name: "localhost",
+  nativeCurrency: defaultNativeCurrency,
+  rpcUrls: {
+    default: {
+      http: config.localhostRpcUrl
+    }
+  }
+});
+var localhostChains = {
+  "1": localhostChain,
+  "10": localhostChain
+};
+var liveChains = {
+  "1": mainnet,
+  "10": optimism,
+  "8453": base,
+  // @dev testnets
+  "421614": arbitrumSepolia,
+  "84532": baseSepolia,
+  "43113": avalancheFuji,
+  "80002": polygonAmoy,
+  "11155420": optimismSepolia,
+  "81": defineChain({ id: 81, name: "astarShibuya", nativeCurrency: defaultNativeCurrency }),
+  "2021": saigon,
+  "6342": megaethTestnet,
+  "57054": sonicBlazeTestnet,
+  "10143": monadTestnet,
+  "11155111": sepolia,
+  "59141": lineaSepolia,
+  "97": bscTestnet,
+  "1946": soneiumMinato,
+  "200810": bitlayerTestnet,
+  "1685877": blastSepolia,
+  "3636": botanixTestnet,
+  "44787": celoAlfajores,
+  "1114": defineChain({ id: 1114, name: "coreTestnet", nativeCurrency: defaultNativeCurrency }),
+  "338": cronosTestnet,
+  "10200": gnosisChiado,
+  "133": hashkeyTestnet,
+  "763373": inkSepolia,
+  "5003": mantleSepoliaTestnet,
+  "534351": scrollSepolia,
+  "1328": seiTestnet,
+  "157": shibariumTestnet,
+  "1301": unichainSepolia,
+  "195": xLayerTestnet,
+  "48899": zircuitTestnet,
+  "919": modeTestnet,
+  "33111": curtis
+};
+var viemChains = config.isDevelopment ? localhostChains : liveChains;
+
 // clf/src/common/viemClient.ts
 function getRpcConfigForChain(chainSelector) {
   if (config.isDevelopment) {
@@ -14958,7 +16963,7 @@ function createFallbackTransport(chainSelector) {
 function getPublicClient(chainSelector) {
   return createPublicClient({
     transport: createFallbackTransport(chainSelector),
-    chain: (void 0)[chainSelector]
+    chain: viemChains[chainSelector]
   });
 }
 
@@ -15236,7 +17241,7 @@ function decodeInputs(bytesArgs2) {
     handleError("1" /* INVALID_BYTES_ARGS_LENGTH */);
   }
   const [, srcChainSelector, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs2;
-  if (!(void 0)[srcChainSelector.toString()]) handleError("14" /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
+  if (!viemChains[srcChainSelector.toString()]) handleError("14" /* CONFIG_INVALID_SRC_CHAIN_SELECTOR */);
   const decodedArgs = {
     srcChainSelector,
     messageId,

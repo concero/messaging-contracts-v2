@@ -77,7 +77,21 @@ function getFallbackClients(
 
 	const { viemChain, name } = chain;
 
-	const transport = fallback(urls[name].map(url => http(url)));
+	const transport = fallback(
+		urls[name].map(url =>
+			http(url, {
+				timeout: 10000,
+				retryCount: 1,
+				retryDelay: 250,
+				onFetchResponse: async response => {
+					if (response.status >= 400) {
+						throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+					}
+					return response;
+				},
+			}),
+		),
+	);
 	const publicClient = createPublicClient({ transport, chain: viemChain });
 	const walletClient = createWalletClient({ transport, chain: viemChain, account });
 

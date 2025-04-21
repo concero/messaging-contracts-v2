@@ -63,6 +63,11 @@ contract MessageReport is BaseMockCLFReport {
             allowedOperators: allowedOperators
         });
 
+        //        CommonTypes.VerifierResult memory response = CommonTypes.VerifierResult({
+        //            resultConfig: resultConfig,
+        //            payload: abi.encode(messagePayload)
+        //        });
+
         bytes memory response = abi.encode(resultConfig, abi.encode(messagePayload));
         return response;
     }

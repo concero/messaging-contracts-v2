@@ -22,8 +22,10 @@ contract OperatorRegistrationReport is BaseMockCLFReport {
         return getResponse(address(operator));
     }
 
-    function getResponse(address operator) public pure returns (bytes memory) {
+    function getResponse(address requester) public pure returns (bytes memory) {
         VerifierTypes.OperatorRegistrationResult memory result;
+        CommonTypes.ResultType resultType = CommonTypes.ResultType.OperatorRegistration;
+        uint8 payloadVersion = 1;
 
         result.operatorChains = new CommonTypes.ChainType[](1);
         result.operatorChains[0] = CommonTypes.ChainType.EVM;
@@ -32,9 +34,20 @@ contract OperatorRegistrationReport is BaseMockCLFReport {
         result.operatorActions[0] = VerifierTypes.OperatorRegistrationAction.Register;
 
         result.operatorAddresses = new bytes[](1);
-        result.operatorAddresses[0] = abi.encode(operator); // Changed from encodePacked to encode
+        result.operatorAddresses[0] = abi.encode(requester);
 
-        // We need to create a proper ABI encoding of the entire struct
-        return abi.encode(result.operatorChains, result.operatorActions, result.operatorAddresses);
+        bytes memory payload = abi.encode(
+            result.operatorChains,
+            result.operatorActions,
+            result.operatorAddresses
+        );
+
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: resultType,
+            payloadVersion: payloadVersion,
+            requester: requester
+        });
+
+        return abi.encode(resultConfig, payload);
     }
 }

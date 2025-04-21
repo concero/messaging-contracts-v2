@@ -41,7 +41,7 @@ export function packResult(result: OperatorRegistrationResult): Uint8Array {
 				components: [
 					{
 						type: "tuple",
-						name: "config",
+						name: "resultConfig",
 						components: [
 							{ type: "uint8", name: "resultType" },
 							{ type: "uint8", name: "payloadVersion" },
@@ -54,7 +54,7 @@ export function packResult(result: OperatorRegistrationResult): Uint8Array {
 		],
 		[
 			{
-				config: {
+				resultConfig: {
 					resultType: result.resultType,
 					payloadVersion: result.payloadVersion,
 					requester: result.requester,

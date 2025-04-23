@@ -31,7 +31,7 @@ async function operator() {
 	await setupEventListeners();
 }
 
-async function setupChain() {
+async function testOperator() {
 	compileContracts({ quiet: true });
 	const hre = require("hardhat");
 	const testClient = getTestClient(
@@ -54,35 +54,7 @@ async function setupChain() {
 		conceroVerifier: conceroVerifier.address,
 	});
 
-	return { testClient, mockCLFRouter, conceroRouter, conceroVerifier, conceroClientExample };
+	await operator();
 }
 
-async function main() {
-	const args = process.argv.slice(2);
-	const mode = args[0] ? args[0].toLowerCase() : null;
-
-	switch (mode) {
-		case "chain":
-			await setupChain();
-			break;
-		case "operator":
-			await operator();
-			break;
-		case null:
-			await setupChain();
-			await operator();
-			break;
-		default:
-			console.error(
-				"Please specify a mode: 'chain' (setup chain), 'run' (operator logic), or '' (both)",
-			);
-			process.exit(1);
-	}
-}
-
-if (require.main === module) {
-	main().catch(error => {
-		console.error(error);
-		process.exit(1);
-	});
-}
+testOperator();

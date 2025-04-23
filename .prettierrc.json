@@ -20,6 +20,7 @@
                 "importOrderSeparation": true,
                 "importOrderSortSpecifiers": true,
                 "importOrder": [
+                    "./utils/configureDotEnv",
                     "./utils/configureOperatorEnv",
                     "^viem(.*)$",
                     "^hardhat(.*)$",

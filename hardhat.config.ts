@@ -1,5 +1,7 @@
 import "solidity-coverage";
 
+import "./utils/configureDotEnv";
+
 import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
@@ -18,7 +20,6 @@ import "@typechain/hardhat";
 
 import { conceroNetworks } from "./constants";
 import "./tasks";
-import "./utils/configureDotEnv";
 
 const enableGasReport = process.env.REPORT_GAS !== "false";
 

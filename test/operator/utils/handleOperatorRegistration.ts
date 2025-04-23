@@ -2,6 +2,7 @@ import { Address, Hash, decodeEventLog, parseEther } from "viem";
 
 import { globalConfig, networkEnvKeys } from "@concero/v2-operators/src/constants";
 import { config } from "@concero/v2-operators/src/relayer/a/constants";
+import { deploymentsManager } from "@concero/v2-operators/src/relayer/common/constants/deploymentsManager";
 import { decodeLogs } from "@concero/v2-operators/src/relayer/common/eventListener/decodeLogs";
 
 import { ChainType } from "../../../clf/src/common/enums";
@@ -48,9 +49,7 @@ export async function handleOperatorRegistration(
 		requester: getEnvVar("TESTNET_OPERATOR_ADDRESS"),
 	});
 
-	const conceroVerifierAddress = getEnvVar(
-		`CONCERO_VERIFIER_PROXY_${networkEnvKeys[config.networks.conceroVerifier.name]}`,
-	);
+	const conceroVerifierAddress = await deploymentsManager.getConceroVerifier();
 
 	await testClient.setBalance({
 		address: mockCLFRouter,

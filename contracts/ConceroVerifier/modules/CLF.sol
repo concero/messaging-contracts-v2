@@ -253,7 +253,7 @@ abstract contract CLF is FunctionsClient, Base {
         return _sendRequest(req.encodeCBOR(), i_clfSubscriptionId, CLF_GAS_LIMIT, i_clfDonId);
     }
 
-    function getCLFDeposit() public view returns (uint256 depositNative) {
+    function getCLFCost() public view returns (uint256) {
         uint256 lastGasPrice = s.priceFeed().lastGasPrices[i_chainSelector];
         require(
             lastGasPrice > 0,

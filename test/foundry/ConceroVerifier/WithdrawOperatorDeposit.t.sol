@@ -34,7 +34,7 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
     }
 
     function test_OperatorDeposit() public {
-        uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
+        uint256 minimumDeposit = conceroVerifier.getCLFCost();
 
         vm.prank(operator);
         conceroVerifier.operatorDeposit{value: minimumDeposit}(operator);
@@ -47,7 +47,7 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
     }
 
     function test_MultipleDeposits() public {
-        uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
+        uint256 minimumDeposit = conceroVerifier.getCLFCost();
 
         vm.startPrank(operator);
         conceroVerifier.operatorDeposit{value: minimumDeposit}(operator);
@@ -62,7 +62,7 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
     }
 
     function test_WithdrawOperatorDeposit() public {
-        uint256 depositAmount = conceroVerifier.getCLFDeposit();
+        uint256 depositAmount = conceroVerifier.getCLFCost();
         uint256 withdrawAmount = depositAmount;
 
         vm.startPrank(operator);
@@ -89,7 +89,7 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
     }
 
     function test_withdrawOperatorDeposit_WhenAmountExceedsDeposit_Reverts() public {
-        uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
+        uint256 minimumDeposit = conceroVerifier.getCLFCost();
         uint256 depositAmount = minimumDeposit;
         uint256 withdrawAmount = depositAmount + 1 ether;
 
@@ -108,7 +108,7 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
     }
 
     function test_withdrawOperatorDeposit_WhenAmountBelowMinimum_Reverts() public {
-        uint256 minimumDeposit = conceroVerifier.getCLFDeposit();
+        uint256 minimumDeposit = conceroVerifier.getCLFCost();
         uint256 depositAmount = minimumDeposit;
         uint256 withdrawAmount = depositAmount + 1;
 

@@ -71,7 +71,7 @@
         "@concero/contract-utils": "github:concero/contract-utils",
         "@concero/rpcs": "github:concero/rpcs#feature/refactor",
         "@concero/v2-networks": "github:concero/v2-networks",
-        "@concero/v2-operators": "github:concero/v2-operators",
+        "@concero/v2-operators": "github:concero/v2-operators#feature/stage-updates",
         "@nomicfoundation/hardhat-ignition-viem": "^0.15.9",
         "@nomicfoundation/hardhat-viem": "^2.0.6",
         "@openzeppelin/contracts": "5.2.0",

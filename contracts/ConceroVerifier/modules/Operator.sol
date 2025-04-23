@@ -108,7 +108,7 @@ abstract contract Operator is CLF {
     /// @dev Implements nonReentrant guard to prevent reentrancy attacks
     /// @param operator The address of the operator making the deposit
     function operatorDeposit(address operator) external payable {
-        uint256 minimumDeposit = getCLFDeposit();
+        uint256 minimumDeposit = getCLFCost();
         require(
             msg.value >= minimumDeposit,
             Errors.InsufficientOperatorDeposit(msg.value, minimumDeposit)
@@ -136,6 +136,10 @@ abstract contract Operator is CLF {
 
     function getOperatorDeposit(address operator) external view returns (uint256) {
         return s.operator().depositsNative[operator];
+    }
+
+    function getMinimumOperatorDeposit() external view returns (uint256) {
+        return getCLFCost();
     }
 
     function getOperatorFeesEarned(address operator) external view returns (uint256) {

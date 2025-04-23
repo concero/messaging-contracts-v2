@@ -1,6 +1,5 @@
 import { Address } from "viem";
 
-import { task } from "hardhat/config";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
@@ -46,9 +45,5 @@ async function deployContracts(
 
 	return { conceroVerifier, conceroRouter };
 }
-
-task("operator-setup", "Setup the operator").setAction(async () => {
-	await deployContracts();
-});
 
 export { deployContracts };

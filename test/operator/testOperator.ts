@@ -2,6 +2,7 @@ import "./utils/configureOperatorEnv";
 
 import { privateKeyToAccount } from "viem/accounts";
 
+import { initializeManagers } from "@concero/v2-operators/src/relayer/a";
 import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureDeposit";
 import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureOperatorIsRegistered";
 import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
@@ -22,6 +23,8 @@ Testing pipeline:
 */
 
 async function operator() {
+	await initializeManagers();
+
 	await checkGas();
 	await ensureDeposit();
 	await ensureOperatorIsRegistered();

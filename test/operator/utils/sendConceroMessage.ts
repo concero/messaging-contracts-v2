@@ -11,6 +11,7 @@ export async function sendConceroMessage(
 		"../../../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
 	);
 
+	console.log("SENDING CONCERO MESSAGE");
 	const txHash = await walletClient.writeContract({
 		account: walletClient.account,
 		address: clientAddress,

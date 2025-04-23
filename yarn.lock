@@ -936,7 +936,7 @@
 
 "@concero/v2-operators@github:concero/v2-operators#feature/stage-updates":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/v2-operators/tar.gz/f6ea19082e64b35aec5ab7d8c976f923af678276"
+  resolved "https://codeload.github.com/concero/v2-operators/tar.gz/d32fe38203a1b43ff05e8d896f46f16a895840e1"
   dependencies:
     "@concero/contract-utils" "github:concero/contract-utils"
     "@concero/v2-networks" "github:concero/v2-networks"

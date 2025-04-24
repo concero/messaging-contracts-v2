@@ -11,7 +11,6 @@ export async function sendConceroMessage(
 		"../../../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
 	);
 
-	console.log("SENDING CONCERO MESSAGE");
 	const txHash = await walletClient.writeContract({
 		account: walletClient.account,
 		address: clientAddress,
@@ -45,14 +44,6 @@ export async function sendConceroMessage(
 		abi: globalConfig.ABI.CONCERO_ROUTER,
 		data: foundMessageSentLog.data,
 		topics: foundMessageSentLog.topics,
-	});
-
-	console.log("sent Concero message", {
-		txHash,
-		blockNumber: txReceipt.blockNumber,
-		internalMessageConfig: foundMessageSentLog.topics[1],
-		messageId: foundMessageSentLog.topics[2],
-		eventArgs: decodedEvent.args,
 	});
 
 	return {

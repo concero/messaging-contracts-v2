@@ -27,7 +27,7 @@ export function packResult(result: MessageReportResult): Uint8Array {
 			{ type: "bytes[]" }, // allowedOperators
 		],
 		[
-			result.messageId,
+			result.messageId
 			result.messageHashSum,
 			result.messageSender,
 			result.srcChainSelector,

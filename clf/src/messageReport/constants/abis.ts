@@ -8,30 +8,32 @@ export const CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
 	"function getRegisteredOperators(uint8 chainType) external view returns (bytes[] memory)",
 ]);
 
-export const ConceroMessageLogParams = [
-	{ type: "bytes32", name: "messageId", indexed: true },
-	{ type: "uint8", name: "version" },
-	{ type: "bool", name: "shouldFinaliseSrc" },
-	{ type: "uint24", name: "dstChainSelector" },
-	{ type: "bytes", name: "dstChainData" },
-	{ type: "bytes", name: "sender" },
-	{ type: "bytes", name: "message" },
-];
-
 export const NonIndexedConceroMessageParams = [
 	{ type: "uint8", name: "version" },
 	{ type: "bool", name: "shouldFinaliseSrc" },
 	{ type: "uint24", name: "dstChainSelector" },
 	{ type: "bytes", name: "dstChainData" },
-	{ type: "bytes", name: "sender" },
+	{ type: "address", name: "sender" },
 	{ type: "bytes", name: "message" },
 ];
 
-export const EvmSrcChainDataParams = [
-	{ type: "address", name: "sender" },
-	{ type: "uint256", name: "blockNumber" },
+export const ConceroMessageLogParams = [
+	{ type: "bytes32", name: "messageId", indexed: true },
+	...NonIndexedConceroMessageParams,
 ];
 
+export const EvmSrcChainDataParams = [
+	{
+		type: "tuple",
+		components: [
+			{ name: "blockNumber", type: "uint256" },
+			{ name: "sender", type: "address" },
+		],
+	},
+];
+
+export const conceroMessageSentEventName = "ConceroMessageSent";
+
 export const ConceroMessageSentEvent = [
-	`event ConceroMessageSent(bytes32 indexed messageId, uint8 version, bool shouldFinaliseSrc, uint24 dstChainSelector, bytes dstChainData, bytes sender, bytes message)`,
+	`event ${conceroMessageSentEventName}(bytes32 indexed messageId, uint8 version, bool shouldFinaliseSrc, uint24 dstChainSelector, bytes dstChainData, bytes sender, bytes message)`,
 ];

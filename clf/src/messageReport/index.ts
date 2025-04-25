@@ -1,5 +1,4 @@
 import { ChainType, ResultType } from "../common/enums";
-import { packReportConfig } from "../common/packReportConfig";
 import { getPublicClient } from "../common/viemClient";
 import { conceroRouters } from "./constants/conceroRouters";
 import { CONFIG } from "./constants/config";

@@ -40,10 +40,6 @@ export function decodeConceroMessageLog(log: Log): {
 }
 
 export function decodeEvmSrcChainData(encodedData: string): EvmSrcChainData {
-	if (!encodedData || typeof encodedData !== "string") {
-		handleError(ErrorType.INVALID_DATA);
-	}
-
 	try {
 		const [sender, blockNumber] = decodeAbiParameters(EvmSrcChainDataParams, encodedData);
 

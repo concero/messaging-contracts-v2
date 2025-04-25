@@ -17,8 +17,7 @@ import { getSimulationArgs } from "./simulationArgs";
  */
 export async function simulateCLFScript(scriptPath: string, args: string[], secretsOverride?: any) {
 	if (!fs.existsSync(scriptPath)) {
-		console.error(`File not found: ${scriptPath}`);
-		return;
+		throw new Error(`File not found: ${scriptPath}`);
 	}
 
 	log(`Simulating ${scriptPath}`, "simulateCLFScript");
@@ -31,6 +30,8 @@ export async function simulateCLFScript(scriptPath: string, args: string[], secr
 			CONCERO_VERIFIER_LOCALHOST: secretsOverride.CONCERO_VERIFIER_LOCALHOST,
 		}),
 	};
+
+	console.log(args);
 
 	const result = await simulateScript({
 		source: fs.readFileSync(scriptPath, "utf8") + "return await main();",

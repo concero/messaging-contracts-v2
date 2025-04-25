@@ -1,5 +1,4 @@
 import { encodeAbiParameters } from "viem";
-import type { Hash } from "viem";
 
 import { hexStringToUint8Array } from "../../common/encoders";
 import { MessageReportResult } from "../types";
@@ -17,19 +16,13 @@ export function packResult(result: MessageReportResult): Uint8Array {
 			{ type: "bytes" }, // messageSender
 			{ type: "uint24" }, // srcChainSelector
 			{ type: "uint24" }, // dstChainSelector
-			{
-				type: "tuple",
-				components: [
-					{ type: "address", name: "receiver" },
-					{ type: "bytes", name: "data" },
-				],
-			}, // dstChainData
+			{ type: "bytes" }, // dstChainData
 			{ type: "bytes[]" }, // allowedOperators
 		],
 		[
-			result.messageId
+			result.messageId,
 			result.messageHashSum,
-			result.messageSender,
+			result.sender,
 			result.srcChainSelector,
 			result.dstChainSelector,
 			result.dstChainData,

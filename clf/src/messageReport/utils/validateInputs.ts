@@ -33,7 +33,8 @@ export function decodeInputs(bytesArgs: string[]): DecodedArgs {
 		handleError(ErrorType.INVALID_BYTES_ARGS_LENGTH);
 	}
 
-	const [, srcChainSelector, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
+	const [, hexSrcChainSelector, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
+	const srcChainSelector = Number(hexSrcChainSelector);
 
 	if (!viemChains[srcChainSelector.toString()]) handleError(ErrorType.CONFIG_INVALID_SRC_CHAIN_SELECTOR);
 

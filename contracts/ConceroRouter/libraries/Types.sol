@@ -22,7 +22,7 @@ library Types {
         bytes report;
         bytes32[] rs;
         bytes32[] ss;
-        bytes rawVs;
+        bytes32 rawVs;
     }
 
     struct ClfReport {

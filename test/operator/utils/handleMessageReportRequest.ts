@@ -127,12 +127,14 @@ export async function handleMessageReportRequest(
 					{ name: "report", type: "bytes" },
 					{ name: "rs", type: "bytes32[]" },
 					{ name: "ss", type: "bytes32[]" },
-					{ name: "rawVs", type: "bytes" },
+					{ name: "rawVs", type: "bytes32" },
 				],
 			},
 		],
 		clfReportBytes,
 	);
+
+	console.log("decoded", decoded);
 
 	const clfDonReportSubmission = decoded[0];
 

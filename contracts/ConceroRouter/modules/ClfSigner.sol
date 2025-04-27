@@ -85,7 +85,6 @@ abstract contract ClfSigner is Base {
         );
         bytes32[] memory rs = reportSubmission.rs;
         bytes32[] memory ss = reportSubmission.ss;
-        bytes memory rawVs = reportSubmission.rawVs;
 
         uint256 expectedNumSignatures = 3;
 
@@ -97,7 +96,12 @@ abstract contract ClfSigner is Base {
         address[] memory signers = new address[](rs.length);
 
         for (uint256 i; i < rs.length; ++i) {
-            address signer = ecrecover(clfReportHash, uint8(rawVs[i]) + 27, rs[i], ss[i]);
+            address signer = ecrecover(
+                clfReportHash,
+                uint8(reportSubmission.rawVs[i]) + 27,
+                rs[i],
+                ss[i]
+            );
             require(_isAuthorizedClfSigner(signer), UnauthorizedSigner(signer));
 
             for (uint256 j = 0; j < i; j++) {

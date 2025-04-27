@@ -37,3 +37,25 @@ export const conceroMessageSentEventName = "ConceroMessageSent";
 export const ConceroMessageSentEvent = [
 	`event ${conceroMessageSentEventName}(bytes32 indexed messageId, uint8 version, bool shouldFinaliseSrc, uint24 dstChainSelector, bytes dstChainData, bytes sender, bytes message)`,
 ];
+
+export const messageReportResultParams = [
+	{
+		type: "tuple",
+		components: [
+			{ type: "bytes32", name: "messageId" },
+			{ type: "bytes32", name: "messageHashSum" },
+			{ type: "bytes", name: "sender" },
+			{ type: "uint24", name: "srcChainSelector" },
+			{ type: "uint24", name: "dstChainSelector" },
+			{
+				type: "tuple",
+				name: "dstChainData",
+				components: [
+					{ type: "address", name: "receiver" },
+					{ type: "uint256", name: "gasLimit" },
+				],
+			},
+			{ type: "bytes[]", name: "allowedOperators" },
+		],
+	},
+];

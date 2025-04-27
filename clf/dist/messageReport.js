@@ -17455,9 +17455,6 @@ async function getCohortsCount(client) {
   return cohortsCount;
 }
 async function getRegisteredOperators(client, chainType) {
-  if (config.isDevelopment) {
-    return [zeroAddress];
-  }
   const registeredOperators = await client.readContract({
     abi: CONCERO_VERIFIER_CONTRACT_ABI,
     address: CONCERO_VERIFIER_CONTRACT_ADDRESS,
@@ -17495,32 +17492,50 @@ function hexStringToUint8Array(hex) {
 
 // clf/src/messageReport/utils/packResult.ts
 function packResult(result) {
-  console.log("result", result);
+  const decodedDstChainData = decodeAbiParameters(
+    [
+      {
+        type: "tuple",
+        components: [
+          { type: "address", name: "receiver" },
+          { type: "uint256", name: "gasLimit" }
+        ]
+      }
+    ],
+    hexToBytes(result.dstChainData)
+  );
   const messagePayloadV1 = encodeAbiParameters(
     [
-      { type: "bytes32" },
-      // messageId
-      { type: "bytes32" },
-      // messageHashSum
-      { type: "bytes" },
-      // messageSender
-      { type: "uint24" },
-      // srcChainSelector
-      { type: "uint24" },
-      // dstChainSelector
-      { type: "bytes" },
-      // dstChainData
-      { type: "bytes[]" }
-      // allowedOperators
+      {
+        type: "tuple",
+        components: [
+          { type: "bytes32", name: "messageId" },
+          { type: "bytes32", name: "messageHashSum" },
+          { type: "bytes", name: "sender" },
+          { type: "uint24", name: "srcChainSelector" },
+          { type: "uint24", name: "dstChainSelector" },
+          {
+            type: "tuple",
+            name: "dstChainData",
+            components: [
+              { type: "address", name: "receiver" },
+              { type: "uint256", name: "gasLimit" }
+            ]
+          },
+          { type: "bytes[]", name: "allowedOperators" }
+        ]
+      }
     ],
     [
-      result.messageId,
-      result.messageHashSum,
-      result.sender,
-      result.srcChainSelector,
-      result.dstChainSelector,
-      result.dstChainData,
-      result.allowedOperators
+      {
+        messageId: result.messageId,
+        messageHashSum: result.messageHashSum,
+        sender: result.sender,
+        srcChainSelector: result.srcChainSelector,
+        dstChainSelector: result.dstChainSelector,
+        dstChainData: decodedDstChainData[0],
+        allowedOperators: result.allowedOperators
+      }
     ]
   );
   const encodedResult = encodeAbiParameters(
@@ -17546,7 +17561,6 @@ function packResult(result) {
       messagePayloadV1
     ]
   );
-  console.log("encodedResult", encodedResult);
   return hexStringToUint8Array(encodedResult);
 }
 

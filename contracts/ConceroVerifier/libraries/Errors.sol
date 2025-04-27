@@ -20,4 +20,5 @@ library Errors {
 
     error NoNativeRateAvailable();
     error NoGasPriceAvailable();
+    error InvalidMessageVersion();
 }

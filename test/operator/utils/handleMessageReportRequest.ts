@@ -117,6 +117,7 @@ export async function handleMessageReportRequest(
 
 	const clfRequestId = requestSentLog.log.topics[1];
 	const clfReportBytes = getCLFReport(messageResponseBytes, clfRequestId, conceroVerifier);
+
 	const decoded = decodeAbiParameters(
 		[
 			{
@@ -126,7 +127,7 @@ export async function handleMessageReportRequest(
 					{ name: "report", type: "bytes" },
 					{ name: "rs", type: "bytes32[]" },
 					{ name: "ss", type: "bytes32[]" },
-					{ name: "rawVs", type: "bytes32" },
+					{ name: "rawVs", type: "bytes" },
 				],
 			},
 		],

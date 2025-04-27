@@ -118,7 +118,6 @@ contract BaseMockCLFReport is ConceroVerifierTest {
         rs = new bytes32[](numSignatures);
         ss = new bytes32[](numSignatures);
 
-        // Initialize rawVs as a bytes array
         rawVs = new bytes(numSignatures);
 
         uint256[3] memory mockDonPrivateKeys = [
@@ -129,10 +128,10 @@ contract BaseMockCLFReport is ConceroVerifierTest {
 
         for (uint256 i = 0; i < numSignatures; i++) {
             (uint8 v, bytes32 r, bytes32 s) = vm.sign(mockDonPrivateKeys[i], hash);
+
             rs[i] = r;
             ss[i] = s;
 
-            // Store each v value as a single byte in the bytes array
             rawVs[i] = bytes1(v - 27);
         }
     }

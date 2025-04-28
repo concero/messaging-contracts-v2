@@ -1741,18 +1741,6 @@ var CONFIG = {
 init_decodeAbiParameters();
 init_encodeAbiParameters();
 
-// clf/src/common/reportBytes.ts
-var COMMON_REPORT_BYTE_OFFSETS = {
-  REPORT_TYPE: 248,
-  // 256 - 8 bits
-  VERSION: 240,
-  // 248 - 8 bits
-  // 80 bits (10 bytes) reserved
-  REQUESTER: 0,
-  // 240 - 160 bits
-  REQUESTER_MASK: (1n << 160n) - 1n
-};
-
 // clf/src/common/encoders.ts
 function hexStringToUint8Array(hex) {
   hex = hex.replace(/^0x/, "");

@@ -1,6 +1,5 @@
 import { handleError } from "./errorHandler";
 import { ErrorType } from "./errorType";
-import { COMMON_REPORT_BYTE_OFFSETS } from "./reportBytes";
 
 /**
  * Converts a BigInt to a 32-byte (Uint256) buffer
@@ -44,19 +43,4 @@ export function packUint16(value: number): Uint8Array {
 
 export function packUint8(value: number): Uint8Array {
 	return new Uint8Array([value]);
-}
-
-/**
- * Packs CLF report response configuration into a single uint256
- * @param reportType - Report type (8 bits)
- * @param version - Version number (8 bits)
- * @param requester - Ethereum address (160 bits)
- * @returns Packed configuration as BigInt
- */
-export function packResponseConfig(reportType: number, version: number, requester: string): bigint {
-	return (
-		(BigInt(reportType) << BigInt(COMMON_REPORT_BYTE_OFFSETS.REPORT_TYPE)) |
-		(BigInt(version) << BigInt(COMMON_REPORT_BYTE_OFFSETS.VERSION)) |
-		(BigInt(`0x${requester.replace(/^0x/, "")}`) & COMMON_REPORT_BYTE_OFFSETS.REQUESTER_MASK)
-	);
 }

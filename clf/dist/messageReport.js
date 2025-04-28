@@ -17301,7 +17301,7 @@ var conceroRouters = {
   "11155420": "0x09526c5844F836f4EF326924d8AA484F8Cb135A1",
   "2021": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "6342": "0x73b8Bbbb33f6F7aC8D0b5d1f27685a6106783328",
-  "11155111": "0x5e164d9bfce0B1B374c23a44f4e187448Ee86535",
+  "11155111": CONCERO_ROUTER_SEPOLIA,
   "57054": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4",
   "1946": "0x2BdfD3b25AD6f2796BFD44039b29f6BAA41e9B3c",
   "59141": "0xA80a668566517BeE1ab71df78B384e6281b02625",
@@ -17356,6 +17356,27 @@ var ConceroMessageLogParams = [
 var conceroMessageSentEventName = "ConceroMessageSent";
 var ConceroMessageSentEvent = [
   `event ${conceroMessageSentEventName}(bytes32 indexed messageId, uint8 version, bool shouldFinaliseSrc, uint24 dstChainSelector, bytes dstChainData, bytes sender, bytes message)`
+];
+var messageReportResultParams = [
+  {
+    type: "tuple",
+    components: [
+      { type: "bytes32", name: "messageId" },
+      { type: "bytes32", name: "messageHashSum" },
+      { type: "bytes", name: "sender" },
+      { type: "uint24", name: "srcChainSelector" },
+      { type: "uint24", name: "dstChainSelector" },
+      {
+        type: "tuple",
+        name: "dstChainData",
+        components: [
+          { type: "address", name: "receiver" },
+          { type: "uint256", name: "gasLimit" }
+        ]
+      },
+      { type: "bytes[]", name: "allowedOperators" }
+    ]
+  }
 ];
 
 // clf/src/messageReport/utils/decoders.ts
@@ -17467,18 +17488,6 @@ async function getRegisteredOperators(client, chainType) {
   return registeredOperators;
 }
 
-// clf/src/common/reportBytes.ts
-var COMMON_REPORT_BYTE_OFFSETS = {
-  REPORT_TYPE: 248,
-  // 256 - 8 bits
-  VERSION: 240,
-  // 248 - 8 bits
-  // 80 bits (10 bytes) reserved
-  REQUESTER: 0,
-  // 240 - 160 bits
-  REQUESTER_MASK: (1n << 160n) - 1n
-};
-
 // clf/src/common/encoders.ts
 function hexStringToUint8Array(hex) {
   hex = hex.replace(/^0x/, "");
@@ -17504,40 +17513,17 @@ function packResult(result) {
     ],
     hexToBytes(result.dstChainData)
   );
-  const messagePayloadV1 = encodeAbiParameters(
-    [
-      {
-        type: "tuple",
-        components: [
-          { type: "bytes32", name: "messageId" },
-          { type: "bytes32", name: "messageHashSum" },
-          { type: "bytes", name: "sender" },
-          { type: "uint24", name: "srcChainSelector" },
-          { type: "uint24", name: "dstChainSelector" },
-          {
-            type: "tuple",
-            name: "dstChainData",
-            components: [
-              { type: "address", name: "receiver" },
-              { type: "uint256", name: "gasLimit" }
-            ]
-          },
-          { type: "bytes[]", name: "allowedOperators" }
-        ]
-      }
-    ],
-    [
-      {
-        messageId: result.messageId,
-        messageHashSum: result.messageHashSum,
-        sender: result.sender,
-        srcChainSelector: result.srcChainSelector,
-        dstChainSelector: result.dstChainSelector,
-        dstChainData: decodedDstChainData[0],
-        allowedOperators: result.allowedOperators
-      }
-    ]
-  );
+  const messagePayloadV1 = encodeAbiParameters(messageReportResultParams, [
+    {
+      messageId: result.messageId,
+      messageHashSum: result.messageHashSum,
+      sender: encodeAbiParameters([{ type: "address" }], [result.sender]),
+      srcChainSelector: result.srcChainSelector,
+      dstChainSelector: result.dstChainSelector,
+      dstChainData: decodedDstChainData[0],
+      allowedOperators: result.allowedOperators
+    }
+  ]);
   const encodedResult = encodeAbiParameters(
     [
       {

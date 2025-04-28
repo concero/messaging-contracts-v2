@@ -69,6 +69,11 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory response,
         bytes memory err
     ) internal override {
+        if (err.length != 0) {
+            emit CLFRequestError(err);
+            return;
+        }
+
         (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = abi.decode(
             response,
             (CommonTypes.ResultConfig, bytes)
@@ -99,10 +104,6 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory response,
         bytes memory err
     ) internal {
-        if (err.length != 0) {
-            emit CLFRequestError(err);
-            return;
-        }
         (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = Decoder
             ._decodeVerifierResult(response);
 
@@ -140,11 +141,6 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory err,
         address requester
     ) internal {
-        if (err.length != 0) {
-            emit CLFRequestError(err);
-            return;
-        }
-
         Types.OperatorRegistrationResult memory result = abi.decode(
             payload,
             (Types.OperatorRegistrationResult)

@@ -56,6 +56,7 @@ const deployRouter: DeploymentFunction = async function (
 	const { name } = hre.network;
 
 	const chain = conceroNetworks[name as ConceroNetworkNames];
+
 	const { type: networkType } = chain;
 
 	const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
@@ -71,7 +72,7 @@ const deployRouter: DeploymentFunction = async function (
 		),
 		conceroVerifierSubId: getEnvVar(`CLF_SUBID_${networkEnvKeys[conceroVerifierNetwork.name]}`),
 		clfSigners: getCLFDonSigners(networkType),
-		feedUpdater: deployer,
+		feedUpdater: process.env.FEED_UPDATER_ADDRESS,
 	};
 
 	const args: DeployArgs = {

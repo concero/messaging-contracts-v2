@@ -919,9 +919,9 @@
   dependencies:
     viem "2.26.2"
 
-"@concero/rpcs@github:concero/rpcs", "concero-rpcs@github:concero/rpcs":
+"@concero/rpcs@github:concero/rpcs":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/rpcs/tar.gz/9e5bccaac87232664d5840e592d197886357442c"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/a429286d8bc96f15be3c6786237fe56ca6b0b396"
   dependencies:
     acorn "^8.14.0"
     acorn-walk "^8.3.4"
@@ -938,12 +938,9 @@
   version "1.0.0"
   resolved "https://codeload.github.com/concero/v2-operators/tar.gz/8846672a5e3e328553b76d08204e4724d00f7735"
   dependencies:
-    "@concero/contract-utils" "github:concero/contract-utils"
-    "@concero/v2-networks" "github:concero/v2-networks"
-    axios "^1.8.4"
     dotenv "^16.4.7"
     ethers "^6.13.5"
-    viem "2.24.1"
+    viem "^2.22.17"
     winston "^3.17.0"
     winston-daily-rotate-file "^5.0.0"
 
@@ -5520,6 +5517,17 @@ concat-stream@~1.6.2:
     inherits "^2.0.3"
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
+
+"concero-rpcs@github:concero/rpcs":
+  version "1.0.0"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/9e5bccaac87232664d5840e592d197886357442c"
+  dependencies:
+    acorn "^8.14.0"
+    acorn-walk "^8.3.4"
+    node-cron "^3.0.3"
+    simple-git "^3.27.0"
+    winston "^3.17.0"
+    winston-daily-rotate-file "^5.0.0"
 
 config-chain@^1.1.11:
   version "1.1.13"

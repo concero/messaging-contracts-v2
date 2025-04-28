@@ -61,7 +61,7 @@ abstract contract CLF is FunctionsClient, Base {
     uint32 internal immutable i_clfCallbackGasLimit;
     uint8 internal immutable i_clfDonHostedSecretsSlotId;
     string internal constant CLF_JS_CODE =
-        "var n;((e)=>e[e.H=0]='H')(n||={});var a=await fetch('https://raw.githubusercontent.com/concero/v2-contracts/refs/heads/master/clf/dist/messageReport.min.js').then((t)=>t.text()),o='0x'+Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(a)))).map((t)=>t.toString(16).padStart(2,'0')).join('');if(o!==bytesArgs[0])throw 'hash mismatch';return eval(a);";
+        "var n;((e)=>e[e.H=0]='H')(n||={});var a=await fetch('https://raw.githubusercontent.com/concero/messaging-contracts-v2/refs/heads/master/clf/dist/messageReport.min.js').then((t)=>t.text()),o='0x'+Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(a)))).map((t)=>t.toString(16).padStart(2,'0')).join('');if(o.toLowerCase()!==bytesArgs[0].toLowerCase())throw `${o.toLowerCase()}!==${bytesArgs[0].toLowerCase()}`;return eval(a);";
     uint32 internal constant CLF_GAS_LIMIT = 100_000;
 
     function fulfillRequest(

@@ -919,9 +919,9 @@
   dependencies:
     viem "2.26.2"
 
-"@concero/rpcs@github:concero/rpcs", "concero-rpcs@github:concero/rpcs":
+"@concero/rpcs@github:concero/rpcs":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/rpcs/tar.gz/2ec5e826b3b5980632ad81a43d46b82f0d03506d"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/117516c4391375c2ffe22f39f87f6110bf2d221b"
   dependencies:
     acorn "^8.14.0"
     acorn-walk "^8.3.4"
@@ -938,12 +938,9 @@
   version "1.0.0"
   resolved "https://codeload.github.com/concero/v2-operators/tar.gz/9a47726aea7c7a91773d2302eadb106a14b4d407"
   dependencies:
-    "@concero/contract-utils" "github:concero/contract-utils"
-    "@concero/v2-networks" "github:concero/v2-networks"
-    axios "^1.8.4"
     dotenv "^16.4.7"
     ethers "^6.13.5"
-    viem "2.24.1"
+    viem "^2.22.17"
     winston "^3.17.0"
     winston-daily-rotate-file "^5.0.0"
 
@@ -4787,7 +4784,7 @@ axios@^0.27.2:
     follow-redirects "^1.14.9"
     form-data "^4.0.0"
 
-axios@^1.4.0, axios@^1.6.7, axios@^1.7.2, axios@^1.7.4, axios@^1.8.2, axios@^1.8.4:
+axios@^1.4.0, axios@^1.6.7, axios@^1.7.2, axios@^1.7.4, axios@^1.8.2:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.9.0.tgz#25534e3b72b54540077d33046f77e3b8d7081901"
   integrity sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==
@@ -5520,6 +5517,17 @@ concat-stream@~1.6.2:
     inherits "^2.0.3"
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
+
+"concero-rpcs@github:concero/rpcs":
+  version "1.0.0"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/2ec5e826b3b5980632ad81a43d46b82f0d03506d"
+  dependencies:
+    acorn "^8.14.0"
+    acorn-walk "^8.3.4"
+    node-cron "^3.0.3"
+    simple-git "^3.27.0"
+    winston "^3.17.0"
+    winston-daily-rotate-file "^5.0.0"
 
 config-chain@^1.1.11:
   version "1.1.13"
@@ -10547,20 +10555,6 @@ validate-npm-package-name@^5.0.0:
   resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-5.0.1.tgz#a316573e9b49f3ccd90dbb6eb52b3f06c6d604e8"
   integrity sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==
 
-viem@2.24.1:
-  version "2.24.1"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.24.1.tgz#5fe8a78f535aa7b585bef8abd6addb3aa674a4d1"
-  integrity sha512-xptFlc081SIPz+ZNDeb0XS/Nn5PU28onq+im+UxEAPCXTIuL1kfw1GTnV8NhbUNoEONnrwcZNqoI0AT0ADF5XQ==
-  dependencies:
-    "@noble/curves" "1.8.1"
-    "@noble/hashes" "1.7.1"
-    "@scure/bip32" "1.6.2"
-    "@scure/bip39" "1.5.4"
-    abitype "1.0.8"
-    isows "1.0.6"
-    ox "0.6.9"
-    ws "8.18.1"
-
 viem@2.24.2:
   version "2.24.2"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.24.2.tgz#68aac43c35e8d73587bbdab2c547579dd60ebb80"
@@ -10589,7 +10583,7 @@ viem@2.26.2:
     ox "0.6.9"
     ws "8.18.1"
 
-viem@^2.27.0:
+viem@^2.22.17, viem@^2.27.0:
   version "2.28.0"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.28.0.tgz#b04bea64f067d6bfdb8603b39561b732a1e64066"
   integrity sha512-Z4W5O1pe+6pirYTFm451FcZmfGAUxUWt2L/eWC+YfTF28j/8rd7q6MBAi05lMN4KhLJjhN0s5YGIPB+kf1L20g==

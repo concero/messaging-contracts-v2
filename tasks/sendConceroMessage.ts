@@ -1,5 +1,4 @@
 import { decodeEventLog, parseUnits } from "viem";
-import { baseSepolia } from "viem/chains";
 
 import { task } from "hardhat/config";
 
@@ -37,25 +36,23 @@ task("send-concero-message", "Send a test Concero message through the client")
 			"../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
 		);
 
+		// @dev change this to send message
+		const dstNetwork = conceroNetworks["unichainSepolia"];
+		const dstChainSelector = dstNetwork.chainSelector;
+
 		const value = parseUnits(taskArgs.value, 18);
 		log(`Sending with value: ${taskArgs.value} ETH`, "send-concero-message");
+
+		const dstChainClient = getEnvVar(
+			`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(dstNetwork.name)}`,
+		);
 
 		try {
 			const txHash = await walletClient.writeContract({
 				address: clientAddress,
-				abi: exampleClientAbi,
+				abi: [...exampleClientAbi, ...CONCERO_ROUTER_ABI],
 				functionName: "sendConceroMessage",
-				args: [
-					baseSepolia.id,
-					1,
-					1,
-					1,
-					false,
-					0,
-					getEnvVar("CONCERO_CLIENT_EXAMPLE_BASE_SEPOLIA"),
-					1_000_000n,
-					"0x001",
-				],
+				args: [dstChainClient, dstChainSelector],
 				account: walletClient.account,
 				value,
 			});
@@ -63,10 +60,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 			log(`Transaction submitted: ${txHash}`, "send-concero-message");
 			log("Waiting for transaction receipt...", "send-concero-message");
 
-			const txReceipt = await publicClient.waitForTransactionReceipt({
-				hash: txHash,
-				confirmations: 3,
-			});
+			const txReceipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
 
 			const foundMessageSentLog = txReceipt.logs.find(log => {
 				try {

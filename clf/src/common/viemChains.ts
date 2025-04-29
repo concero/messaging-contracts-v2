@@ -33,6 +33,7 @@ import {
 	unichainSepolia,
 	xLayerTestnet,
 	zircuitTestnet,
+	zksyncSepoliaTestnet,
 } from "viem/chains";
 
 import { config } from "./config";
@@ -98,6 +99,7 @@ const liveChains: Partial<Record<string, Chain>> = {
 	"48899": zircuitTestnet,
 	"919": modeTestnet,
 	"33111": curtis,
+	"300": zksyncSepoliaTestnet,
 };
 
 export const viemChains = config.isDevelopment ? localhostChains : liveChains;

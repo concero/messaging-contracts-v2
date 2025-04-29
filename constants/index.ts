@@ -18,7 +18,6 @@ import {
 import { networkEnvKeys } from "./networkEnvKeys";
 // import { liveNetworks } from "./liveNetworks";
 import { urls } from "./rpcUrls";
-import { deployerTargetBalances, messengerTargetBalances } from "./targetBalances";
 
 export {
 	secrets,
@@ -36,7 +35,5 @@ export {
 	envPrefixes,
 	getViemReceiptConfig,
 	urls,
-	messengerTargetBalances,
-	deployerTargetBalances,
 	// liveNetworks,
 };

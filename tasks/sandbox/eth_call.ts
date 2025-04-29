@@ -1,8 +1,10 @@
+import { encodeFunctionData, parseAbi } from "viem";
+
 import { conceroNetworks } from "../../constants/conceroNetworks";
 import { getFallbackClients } from "../../utils";
 
-export function eth_call_test() {
-    for (const networkName of Object.keys(conceroNetworks)) {
+export async function eth_call_test() {
+	for (const networkName of Object.keys(conceroNetworks)) {
 		const network = conceroNetworks[networkName];
 		const { publicClient } = getFallbackClients(network);
 

@@ -121,12 +121,11 @@ abstract contract Owner is Base {
         uint256[] memory gasPrices
     ) external onlyFeedUpdater {
         require(dstChainSelectors.length == gasPrices.length, CommonErrors.LengthMismatch());
+
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+
         for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            require(
-                s.router().isChainSupported[dstChainSelectors[i]],
-                Errors.UnsupportedChainSelector(dstChainSelectors[i])
-            );
-            s.priceFeed().lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
+            priceFeedStorage.lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
         }
     }
 }

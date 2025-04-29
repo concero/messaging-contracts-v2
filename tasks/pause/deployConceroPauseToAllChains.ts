@@ -2,7 +2,6 @@ import { execSync } from "child_process";
 
 import { task } from "hardhat/config";
 
-import { networkEnvKeys } from "../../constants";
 import { testnetNetworks } from "../../constants/conceroNetworks";
 import { getEnvVar } from "../../utils";
 
@@ -10,7 +9,7 @@ task("deploy-concero-pause-to-all-chains", "").setAction(
 	async (taskArgs, hre: HardhatRuntimeEnvironment) => {
 		for (const chain in testnetNetworks) {
 			try {
-				getEnvVar(`CONCERO_PAUSE_${networkEnvKeys[chain]}`);
+				getEnvVar(`CONCERO_PAUSE_${getNetworkEnvKey(chain)}`);
 			} catch (error) {
 				if (!error.message.includes("Missing required environment variable"))
 					throw new Error("unknown error");

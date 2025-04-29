@@ -2,7 +2,6 @@ import { Address } from "viem";
 
 import { SubscriptionManager } from "@chainlink/functions-toolkit";
 
-import { networkEnvKeys } from "../../constants";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
 import { getEnvVar, log } from "../../utils";
 
@@ -11,17 +10,17 @@ export async function addCLFConsumer(chain: ConceroNetwork, consumerAddresses: A
 	const { confirmations, name } = chain;
 	const adminAddress = process.env.TESTNET_DEPLOYER_ADDRESS;
 	const signer = await hre.ethers.getSigner(adminAddress);
-	const subscriptionId = getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`);
+	const subscriptionId = getEnvVar(`CLF_SUBID_${getNetworkEnvKey(name)}`);
 
 	for (const consumerAddress of consumerAddresses) {
 		log(`Adding ${consumerAddress} to sub ${subscriptionId} on ${name}`, "addCLFConsumer");
 
 		const txOptions = { confirmations };
-		const linkTokenAddress = getEnvVar(`LINK_${networkEnvKeys[name]}`);
+		const linkTokenAddress = getEnvVar(`LINK_${getNetworkEnvKey(name)}`);
 		const sm = new SubscriptionManager({
 			signer,
 			linkTokenAddress,
-			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
+			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${getNetworkEnvKey(name)}`),
 		});
 
 		// await sm.estimateFunctionsRequestCost({ subscriptionId, consumerAddress, txOptions });

@@ -5,8 +5,9 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import functionsCoordinatorAbi from "@chainlink/contracts/abi/v0.8/FunctionsCoordinator.json";
 import functionsRouterAbi from "@chainlink/contracts/abi/v0.8/FunctionsRouter.json";
+import { getNetworkEnvKey } from "@concero/contract-utils";
 
-import { conceroNetworks, networkEnvKeys } from "../../constants";
+import { conceroNetworks } from "../../constants";
 import { err, getEnvVar, getFallbackClients, log } from "../../utils";
 
 //todo: base throws max block range 5000 error. find a better RPC to fetch signers for base.
@@ -76,9 +77,9 @@ export async function fetchDONSigners(isTestnet: boolean) {
 		const { viemChain, name } = chain;
 		const { publicClient } = getFallbackClients(chain);
 
-		const functionsRouter = getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`);
-		const functionsDonId = getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`);
-		const functionsCoordinator = getEnvVar(`CLF_COORDINATOR_${networkEnvKeys[name]}`);
+		const functionsRouter = getEnvVar(`CLF_ROUTER_${getNetworkEnvKey(name)}`);
+		const functionsDonId = getEnvVar(`CLF_DONID_${getNetworkEnvKey(name)}`);
+		const functionsCoordinator = getEnvVar(`CLF_COORDINATOR_${getNetworkEnvKey(name)}`);
 
 		try {
 			const fetchedCLFCoordinatorAddress = await publicClient.readContract({

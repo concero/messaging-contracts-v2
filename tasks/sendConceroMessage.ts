@@ -3,7 +3,9 @@ import { baseSepolia } from "viem/chains";
 
 import { task } from "hardhat/config";
 
-import { conceroNetworks, networkEnvKeys } from "../constants";
+import { getNetworkEnvKey } from "@concero/contract-utils";
+
+import { conceroNetworks } from "../constants";
 import { getEnvVar, getFallbackClients, log } from "../utils";
 
 /**
@@ -17,7 +19,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 		// Get the client address from args or env variables
 		const clientAddress =
 			taskArgs.client ||
-			getEnvVar(`CONCERO_CLIENT_EXAMPLE_${networkEnvKeys[hre.network.name]}`);
+			getEnvVar(`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(hre.network.name)}`);
 		if (!clientAddress) {
 			throw new Error("Client address not provided and not found in environment variables");
 		}

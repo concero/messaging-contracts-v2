@@ -1,7 +1,9 @@
 import { readFileSync, writeFileSync } from "fs";
 import path from "path";
 
-import { envPrefixes, networkEnvKeys } from "../constants";
+import { getNetworkEnvKey } from "@concero/contract-utils";
+
+import { envPrefixes } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { EnvFileName, EnvPrefixes } from "../types/deploymentVariables";
 import log from "./log";
@@ -37,7 +39,7 @@ export function updateEnvAddress(
 	envFileName: EnvFileName,
 ): void {
 	const searchKey = networkPostfix
-		? `${envPrefixes[prefix]}_${networkEnvKeys[networkPostfix]}`
+		? `${envPrefixes[prefix]}_${getNetworkEnvKey(networkPostfix)}`
 		: envPrefixes[prefix];
 
 	updateEnvVariable(searchKey, newValue, envFileName);

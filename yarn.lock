@@ -919,9 +919,9 @@
   dependencies:
     viem "2.26.2"
 
-"@concero/rpcs@github:concero/rpcs":
+"@concero/rpcs@github:concero/rpcs", "concero-rpcs@github:concero/rpcs":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/rpcs/tar.gz/117516c4391375c2ffe22f39f87f6110bf2d221b"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/50339b4fec9bd75eaf2bfce6f4d7fe715d3065a8"
   dependencies:
     acorn "^8.14.0"
     acorn-walk "^8.3.4"
@@ -932,15 +932,18 @@
 
 "@concero/v2-networks@github:concero/v2-networks":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/710fcc682d9060b3467ed9fd9292420819b29937"
+  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/20c6b909e76610c368304ca2ce0bfbfbf623a7f2"
 
 "@concero/v2-operators@github:concero/v2-operators":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/v2-operators/tar.gz/9a47726aea7c7a91773d2302eadb106a14b4d407"
+  resolved "https://codeload.github.com/concero/v2-operators/tar.gz/c737833bd77096805de68f07985f83cc59738268"
   dependencies:
+    "@concero/contract-utils" "github:concero/contract-utils"
+    "@concero/v2-networks" "github:concero/v2-networks"
+    axios "^1.8.4"
     dotenv "^16.4.7"
     ethers "^6.13.5"
-    viem "^2.22.17"
+    viem "2.24.1"
     winston "^3.17.0"
     winston-daily-rotate-file "^5.0.0"
 
@@ -4784,7 +4787,7 @@ axios@^0.27.2:
     follow-redirects "^1.14.9"
     form-data "^4.0.0"
 
-axios@^1.4.0, axios@^1.6.7, axios@^1.7.2, axios@^1.7.4, axios@^1.8.2:
+axios@^1.4.0, axios@^1.6.7, axios@^1.7.2, axios@^1.7.4, axios@^1.8.2, axios@^1.8.4:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.9.0.tgz#25534e3b72b54540077d33046f77e3b8d7081901"
   integrity sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==
@@ -5518,17 +5521,6 @@ concat-stream@~1.6.2:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-"concero-rpcs@github:concero/rpcs":
-  version "1.0.0"
-  resolved "https://codeload.github.com/concero/rpcs/tar.gz/2ec5e826b3b5980632ad81a43d46b82f0d03506d"
-  dependencies:
-    acorn "^8.14.0"
-    acorn-walk "^8.3.4"
-    node-cron "^3.0.3"
-    simple-git "^3.27.0"
-    winston "^3.17.0"
-    winston-daily-rotate-file "^5.0.0"
-
 config-chain@^1.1.11:
   version "1.1.13"
   resolved "https://registry.yarnpkg.com/config-chain/-/config-chain-1.1.13.tgz#fad0795aa6a6cdaff9ed1b68e9dff94372c232f4"
@@ -5931,9 +5923,9 @@ eccrypto@1.1.6:
     secp256k1 "3.7.1"
 
 electron-to-chromium@^1.5.73:
-  version "1.5.143"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.143.tgz#b057bcb9dddd3a9b24ba6c9b9e39a82bee84bdaf"
-  integrity sha512-QqklJMOFBMqe46k8iIOwA9l2hz57V2OKMmP5eSWcUvwx+mASAsbU+wkF1pHjn9ZVSBPrsYWr4/W/95y5SwYg2g==
+  version "1.5.144"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.144.tgz#9804fd6c342802e1d4b4fe57babbe8b64ca0b46c"
+  integrity sha512-eJIaMRKeAzxfBSxtjYnoIAw/tdD6VIH6tHBZepZnAbE3Gyqqs5mGN87DvcldPUbVkIljTK8pY0CMcUljP64lfQ==
 
 elliptic@6.5.4:
   version "6.5.4"
@@ -10555,6 +10547,20 @@ validate-npm-package-name@^5.0.0:
   resolved "https://registry.yarnpkg.com/validate-npm-package-name/-/validate-npm-package-name-5.0.1.tgz#a316573e9b49f3ccd90dbb6eb52b3f06c6d604e8"
   integrity sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==
 
+viem@2.24.1:
+  version "2.24.1"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.24.1.tgz#5fe8a78f535aa7b585bef8abd6addb3aa674a4d1"
+  integrity sha512-xptFlc081SIPz+ZNDeb0XS/Nn5PU28onq+im+UxEAPCXTIuL1kfw1GTnV8NhbUNoEONnrwcZNqoI0AT0ADF5XQ==
+  dependencies:
+    "@noble/curves" "1.8.1"
+    "@noble/hashes" "1.7.1"
+    "@scure/bip32" "1.6.2"
+    "@scure/bip39" "1.5.4"
+    abitype "1.0.8"
+    isows "1.0.6"
+    ox "0.6.9"
+    ws "8.18.1"
+
 viem@2.24.2:
   version "2.24.2"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.24.2.tgz#68aac43c35e8d73587bbdab2c547579dd60ebb80"
@@ -10583,10 +10589,10 @@ viem@2.26.2:
     ox "0.6.9"
     ws "8.18.1"
 
-viem@^2.22.17, viem@^2.27.0:
-  version "2.28.0"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.28.0.tgz#b04bea64f067d6bfdb8603b39561b732a1e64066"
-  integrity sha512-Z4W5O1pe+6pirYTFm451FcZmfGAUxUWt2L/eWC+YfTF28j/8rd7q6MBAi05lMN4KhLJjhN0s5YGIPB+kf1L20g==
+viem@^2.27.0:
+  version "2.28.1"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-2.28.1.tgz#4aed0247373f3a42e9b017e0cfc7d637f41072de"
+  integrity sha512-7eqGfxAPlMW9u9aE3SMEFPzNYqqU7uFLKUQyd/GwccyW4OAdq7VqJkPIpdULUePN9m3XmfBunA9mswYFp9sUuQ==
   dependencies:
     "@noble/curves" "1.8.2"
     "@noble/hashes" "1.7.2"

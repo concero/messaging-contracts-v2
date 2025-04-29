@@ -1,7 +1,9 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks, networkEnvKeys } from "../constants";
+import { getNetworkEnvKey } from "@concero/contract-utils";
+
+import { conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { getEnvVar, log, updateEnvVariable } from "../utils";
 
@@ -26,7 +28,7 @@ const deployConceroClientExample: DeploymentFunction = async function (
 	const { type: networkType } = chain;
 
 	const defaultArgs: DeployArgs = {
-		conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[name]}`),
+		conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
 		chainSelector: chain.chainSelector,
 	};
 
@@ -44,7 +46,7 @@ const deployConceroClientExample: DeploymentFunction = async function (
 
 	log(`Deployed at: ${deployment.address}`, "ConceroClientExample", name);
 	updateEnvVariable(
-		`CONCERO_CLIENT_EXAMPLE_${networkEnvKeys[name]}`,
+		`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(name)}`,
 		deployment.address,
 		`deployments.${networkType}`,
 	);

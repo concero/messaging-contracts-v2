@@ -15,7 +15,6 @@ import {
 	viemReceiptConfig,
 	writeContractConfig,
 } from "./deploymentVariables";
-import { networkEnvKeys } from "./networkEnvKeys";
 // import { liveNetworks } from "./liveNetworks";
 import { urls } from "./rpcUrls";
 import { deployerTargetBalances, messengerTargetBalances } from "./targetBalances";
@@ -29,7 +28,6 @@ export {
 	CLF_TESTNET_TTL,
 	simulationConfig,
 	conceroNetworks,
-	networkEnvKeys,
 	viemReceiptConfig,
 	writeContractConfig,
 	ProxyEnum,

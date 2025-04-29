@@ -1,6 +1,6 @@
 import { Address, Hash, decodeEventLog, parseEther } from "viem";
 
-import { globalConfig, networkEnvKeys } from "@concero/v2-operators/src/constants";
+import { globalConfig } from "@concero/v2-operators/src/constants";
 import { decodeLogs } from "@concero/v2-operators/src/relayer/common/eventListener/decodeLogs";
 import { deploymentsManager } from "@concero/v2-operators/src/relayer/common/managers/DeploymentManager";
 

@@ -1,6 +1,5 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
 
-import { networkEnvKeys } from "../../constants";
 import { gatewayUrls } from "../../constants/clf/gatewayUrls";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
 import { getEnvVar, getEthersSignerAndProvider, log } from "../../utils";
@@ -11,8 +10,8 @@ export async function listSecrets(
 	const { signer } = getEthersSignerAndProvider(chain.url);
 	const secretsManager = new SecretsManager({
 		signer,
-		functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[chain.name]}`),
-		donId: getEnvVar(`CLF_DONID_${networkEnvKeys[chain.name]}_ALIAS`),
+		functionsRouterAddress: getEnvVar(`CLF_ROUTER_${getNetworkEnvKey(chain.name)}`),
+		donId: getEnvVar(`CLF_DONID_${getNetworkEnvKey(chain.name)}_ALIAS`),
 	});
 
 	await secretsManager.initialize();

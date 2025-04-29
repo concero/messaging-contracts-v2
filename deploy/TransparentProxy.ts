@@ -1,7 +1,7 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks, writeContractConfig } from "../constants";
+import { conceroNetworks } from "../constants";
 import { IProxyType } from "../types/deploymentVariables";
 import { getEnvAddress, getGasParameters, log, updateEnvAddress } from "../utils";
 
@@ -15,7 +15,7 @@ const deployTransparentProxy: (
 	const chain = conceroNetworks[name];
 	const { type } = chain;
 
-	const [initialImplementation, initialImplementationAlias] = getEnvAddress("pause", name);
+	const [initialImplementation, initialImplementationAlias] = getEnvAddress("router", name);
 	const [proxyAdmin, proxyAdminAlias] = getEnvAddress(`${proxyType}Admin`, name);
 
 	const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);

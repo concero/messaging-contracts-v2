@@ -10,6 +10,10 @@ import { setRouterVariables } from "./setRouterVariables";
 async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 	compileContracts({ quiet: true });
 
+	if (taskArgs.implementation) {
+		await deployRouter(hre);
+	}
+
 	//todo: when running --deployproxy W/O --deployimplementation,
 	//the initial proxy implementation is set to paused, but should be set to existing latest impl. from env.
 	if (taskArgs.proxy) {
@@ -18,7 +22,6 @@ async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 	}
 
 	if (taskArgs.implementation) {
-		await deployRouter(hre);
 		await upgradeProxyImplementation(hre, ProxyEnum.routerProxy, false);
 	}
 

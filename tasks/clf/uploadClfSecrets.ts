@@ -1,6 +1,7 @@
 import { SecretsManager } from "@chainlink/functions-toolkit";
+import { getNetworkEnvKey } from "@concero/contract-utils";
 
-import { CLF_MAINNET_TTL, CLF_TESTNET_TTL, networkEnvKeys, secrets } from "../../constants";
+import { CLF_MAINNET_TTL, CLF_TESTNET_TTL, secrets } from "../../constants";
 import { gatewayUrls } from "../../constants/clf/gatewayUrls";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
 import { getEnvVar, getEthersSignerAndProvider, log, updateEnvVariable } from "../../utils";
@@ -16,14 +17,14 @@ export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number)
 
 		console.log({
 			signer,
-			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
-			donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
+			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${getNetworkEnvKey(name)}`),
+			donId: getEnvVar(`CLF_DONID_${getNetworkEnvKey(name)}`),
 		});
 
 		const secretsManager = new SecretsManager({
 			signer,
-			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
-			donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}_ALIAS`),
+			functionsRouterAddress: getEnvVar(`CLF_ROUTER_${getNetworkEnvKey(name)}`),
+			donId: getEnvVar(`CLF_DONID_${getNetworkEnvKey(name)}_ALIAS`),
 		});
 		await secretsManager.initialize();
 
@@ -50,7 +51,7 @@ export async function uploadClfSecrets(chains: ConceroNetwork[], slotid: number)
 		await listSecrets(chain);
 
 		updateEnvVariable(
-			`CLF_DON_SECRETS_VERSION_${networkEnvKeys[name]}`,
+			`CLF_DON_SECRETS_VERSION_${getNetworkEnvKey(name)}`,
 			version,
 			"../../../.env.clf",
 		);

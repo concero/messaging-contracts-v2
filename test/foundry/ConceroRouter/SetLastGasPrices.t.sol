@@ -26,7 +26,6 @@ contract SetLastGasPricesTest is ConceroRouterTest {
 
     function setUp() public override {
         super.setUp();
-
     }
 
     function test_setLastGasPrices() public {

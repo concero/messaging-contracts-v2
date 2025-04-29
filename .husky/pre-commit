@@ -5,8 +5,8 @@
 
 # Pre-commit checks
 # yarn hardhat compile
-yarn format:ts
-yarn format:sol
+# yarn format:ts
+# yarn format:sol
 #yarn lint:ts
 #yarn lint:sol
 # make test

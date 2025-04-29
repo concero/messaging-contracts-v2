@@ -131,6 +131,7 @@ function createExtendedNetworks<T extends string>(
 					chainId: network.chainId,
 					type: networkType,
 					url: network.rpcs?.[0] || urls[networkKey]?.[0] || "",
+					saveDeployments: true,
 					accounts,
 					chainSelector: BigInt(network.chainSelector),
 					confirmations: 1,

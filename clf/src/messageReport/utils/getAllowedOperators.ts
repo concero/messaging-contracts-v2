@@ -1,4 +1,4 @@
-import { type Address, zeroAddress } from "viem";
+import { type Address } from "viem";
 import { Hash } from "viem";
 import { PublicClient } from "viem/clients/createPublicClient";
 
@@ -25,6 +25,7 @@ export async function getAllowedOperators(chainType: ChainType, messageId: Hash)
 			getCohortsCount(client),
 			getRegisteredOperators(client, chainType),
 		]);
+
 		const messageCohort = getMessageCohortId(messageId, cohortsCount);
 
 		// Filter operators that belong to the same cohort as the message
@@ -58,11 +59,6 @@ async function getCohortsCount(client: PublicClient): Promise<number> {
 }
 
 async function getRegisteredOperators(client: PublicClient, chainType: ChainType): Promise<Address[]> {
-	//@dev TODO: remove it!
-	if (config.isDevelopment) {
-		return [zeroAddress];
-	}
-
 	const registeredOperators = (await client.readContract({
 		abi: CONCERO_VERIFIER_CONTRACT_ABI,
 		address: CONCERO_VERIFIER_CONTRACT_ADDRESS,

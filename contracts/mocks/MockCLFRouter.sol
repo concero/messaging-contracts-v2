@@ -15,7 +15,7 @@ interface IMockCLFRouter {
         bytes calldata report,
         bytes32[] calldata rs,
         bytes32[] calldata ss,
-        bytes calldata rawVs
+        bytes32 rawVs
     ) external;
 }
 
@@ -50,7 +50,7 @@ contract MockCLFRouter {
         bytes calldata report,
         bytes32[] calldata rs,
         bytes32[] calldata ss,
-        bytes calldata rawVs
+        bytes32 rawVs
     ) external {
         (
             bytes32[] memory requestIds,

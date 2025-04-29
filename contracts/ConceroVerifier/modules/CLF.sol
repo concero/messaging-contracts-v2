@@ -108,6 +108,8 @@ abstract contract CLF is FunctionsClient, Base {
 
         if (resultConfig.payloadVersion == 1) {
             _handleMessagePayloadV1(payload);
+        } else {
+            revert Errors.InvalidMessageVersion();
         }
 
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
@@ -123,13 +125,13 @@ abstract contract CLF is FunctionsClient, Base {
         );
     }
 
-    function _handleMessagePayloadV1(bytes memory _payload) internal {
-        CommonTypes.MessagePayloadV1 memory payload = abi.decode(
-            _payload,
+    function _handleMessagePayloadV1(bytes memory payload) internal {
+        CommonTypes.MessagePayloadV1 memory decodedPayload = abi.decode(
+            payload,
             (CommonTypes.MessagePayloadV1)
         );
 
-        emit MessageReport(payload.messageId);
+        emit MessageReport(decodedPayload.messageId);
     }
 
     function _handleCLFOperatorRegistrationReport(

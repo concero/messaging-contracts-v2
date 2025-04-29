@@ -3,33 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { ProxyEnum, conceroNetworks } from "../../constants";
 import { testnetNetworks } from "../../constants/conceroNetworks";
 import { ConceroNetwork, ConceroNetworkNames } from "../../types/ConceroNetwork";
-import { getEnvAddress, getFallbackClients, getWallet, log } from "../../utils";
-
-async function setAllowedOperators(hre: HardhatRuntimeEnvironment, network: ConceroNetwork) {
-	const { abi: conceroRouterAbi } = await import(
-		"../../../v2-operators/src/abi/ConceroRouter.json"
-	);
-
-	const { publicClient, walletClient, account } = getFallbackClients(network);
-
-	const operatorAddress = getWallet(network.type, "operator", "address");
-	const [conceroRouter] = getEnvAddress("routerProxy", network.name);
-
-	const { request: registerOperatorRequest } = await publicClient.simulateContract({
-		address: conceroRouter,
-		abi: conceroRouterAbi,
-		functionName: "registerOperator",
-		account,
-		args: [operatorAddress],
-	});
-
-	const registerHash = await walletClient.writeContract(registerOperatorRequest);
-	log(
-		`Operator registered with hash: ${registerHash}`,
-		"setConceroRouterVariables",
-		network.name,
-	);
-}
+import { getEnvAddress, getFallbackClients, log } from "../../utils";
 
 async function setSupportedChains(network: ConceroNetwork) {
 	const { abi: conceroRouterAbi } = await import(
@@ -37,6 +11,7 @@ async function setSupportedChains(network: ConceroNetwork) {
 	);
 	const { publicClient, walletClient } = getFallbackClients(network);
 	const [conceroRouterAddress] = getEnvAddress(ProxyEnum.routerProxy, network.name);
+	const chainSelectorsToSet = [];
 
 	for (const chainKey in testnetNetworks) {
 		const dstChain = testnetNetworks[chainKey];
@@ -54,36 +29,40 @@ async function setSupportedChains(network: ConceroNetwork) {
 			continue;
 		}
 
-		const setIsChainSupportedRequest = (
-			await publicClient.simulateContract({
-				account: walletClient.account,
-				address: conceroRouterAddress,
-				abi: conceroRouterAbi,
-				functionName: "setIsChainSupported",
-				args: [dstChain.chainSelector, true],
-			})
-		).request;
-		const setIsChainSupportedHash = await walletClient.writeContract(
-			setIsChainSupportedRequest,
-		);
-		const setIsChainSupportedStatus = (
-			await publicClient.waitForTransactionReceipt({
-				hash: setIsChainSupportedHash,
-				confirmations: 3,
-			})
-		).status;
+		chainSelectorsToSet.push(dstChain.chainSelector);
+	}
 
-		if (setIsChainSupportedStatus === "success") {
-			log(`added new chain: ${dstChain.name}`, "setIsChainSupported", network.name);
-		} else {
-			throw new Error(`set chain reverted ${setIsChainSupportedHash}`);
-		}
+	if (!chainSelectorsToSet.length) {
+		log("no new networks to add", "setSupportedChains");
+		return;
+	}
+
+	const setIsChainSupportedRequest = (
+		await publicClient.simulateContract({
+			account: walletClient.account,
+			address: conceroRouterAddress,
+			abi: conceroRouterAbi,
+			functionName: "setSupportedChains",
+			args: [chainSelectorsToSet, chainSelectorsToSet.map(() => true)],
+		})
+	).request;
+	const setIsChainSupportedHash = await walletClient.writeContract(setIsChainSupportedRequest);
+	const setIsChainSupportedStatus = (
+		await publicClient.waitForTransactionReceipt({
+			hash: setIsChainSupportedHash,
+		})
+	).status;
+
+	if (setIsChainSupportedStatus === "success") {
+		log(`added new chains: ${chainSelectorsToSet.length}`, "setSupportedChains", network.name);
+	} else {
+		throw new Error(`set chain reverted ${setIsChainSupportedHash}`);
 	}
 }
 
 export async function setRouterVariables(hre: HardhatRuntimeEnvironment) {
-	const { live, name } = hre.network;
+	const { name } = hre.network;
 	const network = conceroNetworks[name as ConceroNetworkNames];
-	// await setAllowedOperators(hre, network);
+
 	await setSupportedChains(network);
 }

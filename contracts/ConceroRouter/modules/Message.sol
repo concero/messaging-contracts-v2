@@ -152,7 +152,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
     }
 
-    function _verifyIsSenderOperator(bytes[] memory allowedOperators) internal {
+    function _verifyIsSenderOperator(bytes[] memory allowedOperators) internal view {
         bool isAllowedOperator = false;
 
         for (uint256 i = 0; i < allowedOperators.length; i++) {

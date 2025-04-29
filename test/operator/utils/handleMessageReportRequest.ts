@@ -1,4 +1,11 @@
-import { Address, Hash, decodeAbiParameters, decodeEventLog, encodeAbiParameters } from "viem";
+import {
+	Address,
+	Hash,
+	decodeAbiParameters,
+	decodeEventLog,
+	encodeAbiParameters,
+	keccak256,
+} from "viem";
 
 import { globalConfig } from "@concero/v2-operators/src/constants";
 
@@ -14,6 +21,21 @@ export function createDstChainData(reciever: Address, gasLimit: bigint): string 
 	);
 
 	return dstChainData;
+}
+
+function createSrcChainData(sender: Address, blockNumber: number) {
+	return encodeAbiParameters(
+		[
+			{
+				type: "tuple",
+				components: [
+					{ type: "uint256", name: "blockNumber" },
+					{ type: "address", name: "sender" },
+				],
+			},
+		],
+		[{ sender, blockNumber: BigInt(blockNumber) }],
+	);
 }
 
 export async function handleMessageReportRequest(
@@ -55,20 +77,47 @@ export async function handleMessageReportRequest(
 
 	if (!requestSentLog) throw new Error("RequestSent event not found");
 
-	const clfRequestId = requestSentLog.log.topics[1];
-	const gasLimit = 100_000n;
-
-	const messageResponseBytes = await getMessageCLFReportResponse({
-		conceroClientExample,
-		requester: getEnvVar("OPERATOR_ADDRESS"),
-		internalMessageConfig: messageReportLog.decoded.args.internalMessageConfig.toString(),
-		messageId: messageReportLog.decoded.args.messageId,
-		messageHashSum: messageReportLog.decoded.args.messageHashSum,
-		dstChainData: createDstChainData(conceroClientExample, gasLimit),
-		allowedOperators: [getEnvVar("OPERATOR_ADDRESS")],
+	const latestBlockNumber = await testClient.getBlockNumber();
+	const logs = await testClient.getLogs({
+		fromBlock: BigInt(Math.max(0, Number(latestBlockNumber - 10000n))),
+		toBlock: latestBlockNumber,
 	});
 
+	let messageLog;
+	let messageLogBlockNumber;
+	for (const log of logs) {
+		try {
+			const decoded = decodeEventLog({
+				abi: globalConfig.ABI.CONCERO_ROUTER,
+				data: log.data,
+				topics: log.topics,
+			});
+
+			if (
+				decoded.eventName === "ConceroMessageSent" &&
+				decoded.args.messageId.toLowerCase() ===
+					messageReportLog.log.topics[1]?.toLocaleLowerCase()
+			) {
+				messageLog = decoded;
+				messageLogBlockNumber = log.blockNumber;
+				break;
+			}
+		} catch {
+			continue;
+		}
+	}
+
+	const messageResponseBytes = await getMessageCLFReportResponse({
+		messageId: messageReportLog.decoded.args.messageId,
+		messageHash: keccak256(messageLog.args.message),
+		srcChainSelector: testClient.chain?.id.toString(),
+		srcChainData: createSrcChainData(messageLog.args.sender, messageLogBlockNumber),
+		operatorAddresses: getEnvVar("OPERATOR_ADDRESS"),
+	});
+
+	const clfRequestId = requestSentLog.log.topics[1];
 	const clfReportBytes = getCLFReport(messageResponseBytes, clfRequestId, conceroVerifier);
+
 	const decoded = decodeAbiParameters(
 		[
 			{
@@ -84,6 +133,8 @@ export async function handleMessageReportRequest(
 		],
 		clfReportBytes,
 	);
+
+	console.log("decoded", decoded);
 
 	const clfDonReportSubmission = decoded[0];
 

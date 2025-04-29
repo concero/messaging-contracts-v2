@@ -1,7 +1,7 @@
 import { task } from "hardhat/config";
 
 import { conceroNetworks } from "../constants";
-import { getClients, getFallbackClients } from "../utils";
+import { getFallbackClients } from "../utils";
 
 task("fetch-transaction-info", "")
 	.addParam("hash", "")

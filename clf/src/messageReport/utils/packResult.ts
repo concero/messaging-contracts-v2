@@ -1,7 +1,7 @@
-import { encodeAbiParameters } from "viem";
-import type { Hash } from "viem";
+import { decodeAbiParameters, encodeAbiParameters, hexToBytes } from "viem";
 
 import { hexStringToUint8Array } from "../../common/encoders";
+import { messageReportResultParams } from "../constants/abis";
 import { MessageReportResult } from "../types";
 
 /**
@@ -10,32 +10,30 @@ import { MessageReportResult } from "../types";
  * @returns Packed binary data as Uint8Array
  */
 export function packResult(result: MessageReportResult): Uint8Array {
-	const messagePayloadV1 = encodeAbiParameters(
+	const decodedDstChainData = decodeAbiParameters(
 		[
-			{ type: "bytes32" }, // messageId
-			{ type: "bytes32" }, // messageHashSum
-			{ type: "bytes" }, // messageSender
-			{ type: "uint24" }, // srcChainSelector
-			{ type: "uint24" }, // dstChainSelector
 			{
 				type: "tuple",
 				components: [
 					{ type: "address", name: "receiver" },
-					{ type: "bytes", name: "data" },
+					{ type: "uint256", name: "gasLimit" },
 				],
-			}, // dstChainData
-			{ type: "bytes[]" }, // allowedOperators
+			},
 		],
-		[
-			result.messageId
-			result.messageHashSum,
-			result.messageSender,
-			result.srcChainSelector,
-			result.dstChainSelector,
-			result.dstChainData,
-			result.allowedOperators,
-		],
+		hexToBytes(result.dstChainData),
 	);
+
+	const messagePayloadV1 = encodeAbiParameters(messageReportResultParams, [
+		{
+			messageId: result.messageId,
+			messageHashSum: result.messageHashSum,
+			sender: result.sender,
+			srcChainSelector: result.srcChainSelector,
+			dstChainSelector: result.dstChainSelector,
+			dstChainData: decodedDstChainData[0],
+			allowedOperators: result.allowedOperators,
+		},
+	]);
 
 	const encodedResult = encodeAbiParameters(
 		[

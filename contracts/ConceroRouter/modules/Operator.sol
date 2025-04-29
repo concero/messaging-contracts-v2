@@ -37,7 +37,7 @@ abstract contract Operator is Base {
 
     /* GETTER FUNCTIONS */
 
-    function getCohort(address operator) external view returns (uint8) {
+    function getCohort(address operator) external pure returns (uint8) {
         return uint8(uint160(operator) % CommonConstants.COHORTS_COUNT);
     }
 }

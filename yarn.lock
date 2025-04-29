@@ -921,7 +921,7 @@
 
 "@concero/rpcs@github:concero/rpcs", "concero-rpcs@github:concero/rpcs":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/rpcs/tar.gz/56e4d8d8b8d9a9b5720925a69ef57313f7395200"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/4e13dff9b100053d7727aa4bec5ffa1098620121"
   dependencies:
     acorn "^8.14.0"
     acorn-walk "^8.3.4"
@@ -932,7 +932,7 @@
 
 "@concero/v2-networks@github:concero/v2-networks":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/f626aee5a02476046e47a8fd172058cd1cd4bd8b"
+  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/b8ac46d612b6c32640ab9936269d898e04044246"
 
 "@concero/v2-operators@github:concero/v2-operators":
   version "1.0.0"
@@ -9739,9 +9739,9 @@ socks@^2.8.3:
     smart-buffer "^4.2.0"
 
 solady@^0.1.1:
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/solady/-/solady-0.1.16.tgz#bfa6505e6a81f503922851cd891ff88dc3079e61"
-  integrity sha512-BTNLkEFO1mbpR/g3Z9DolFbHH5iToQXnYlQHU6TJvWc7PWRuL5OF0x/TsJkNp1Jszj4UAMbJnvF8Sdgb6Ib//w==
+  version "0.1.17"
+  resolved "https://registry.yarnpkg.com/solady/-/solady-0.1.17.tgz#9c60218881b1da0546e8e47fa9a0de1db8a84e39"
+  integrity sha512-DOAe6KqFf5SOdz99kAr1eLL8z2T/AKYJAzs3ByzwsWzyUhtLwTFgF6x+pDoyFOptX681OAP0eWYzy8mqp604+Q==
 
 solc@0.8.26:
   version "0.8.26"

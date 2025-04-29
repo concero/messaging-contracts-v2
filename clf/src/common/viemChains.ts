@@ -4,6 +4,7 @@ import {
 	avalancheFuji,
 	base,
 	baseSepolia,
+	berachainBepolia,
 	bitlayerTestnet,
 	blastSepolia,
 	botanixTestnet,
@@ -104,6 +105,7 @@ const liveChains: Partial<Record<string, Chain>> = {
 	"300": zksyncSepoliaTestnet,
 	"2358": kromaSepolia,
 	"296": hederaTestnet,
+	"80069": berachainBepolia,
 };
 
 export const viemChains = config.isDevelopment ? localhostChains : liveChains;

@@ -16264,6 +16264,33 @@ var baseSepolia = /* @__PURE__ */ defineChain({
   sourceId: sourceId2
 });
 
+// node_modules/viem/_esm/chains/definitions/berachainBepolia.js
+var berachainBepolia = /* @__PURE__ */ defineChain({
+  id: 80069,
+  name: "Berachain Bepolia",
+  nativeCurrency: {
+    decimals: 18,
+    name: "BERA Token",
+    symbol: "BERA"
+  },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 0
+    }
+  },
+  rpcUrls: {
+    default: { http: ["https://bepolia.rpc.berachain.com"] }
+  },
+  blockExplorers: {
+    default: {
+      name: "Berascan",
+      url: "https://bepolia.beratrail.io"
+    }
+  },
+  testnet: true
+});
+
 // node_modules/viem/_esm/chains/definitions/bitlayerTestnet.js
 var bitlayerTestnet = /* @__PURE__ */ defineChain({
   id: 200810,
@@ -17652,7 +17679,8 @@ var liveChains = {
   "33111": curtis,
   "300": zksyncSepoliaTestnet,
   "2358": kromaSepolia,
-  "296": hederaTestnet
+  "296": hederaTestnet,
+  "80069": berachainBepolia
 };
 var viemChains = config.isDevelopment ? localhostChains : liveChains;
 
@@ -17728,7 +17756,8 @@ var conceroRouters = {
   "919": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "300": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "2358": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "296": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
+  "296": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "80069": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
 };
 
 // clf/src/messageReport/constants/config.ts

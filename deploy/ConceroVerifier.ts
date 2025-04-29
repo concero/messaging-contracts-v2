@@ -71,8 +71,6 @@ const deployVerifier: DeploymentFunction = async function (
 		},
 	};
 
-	console.log(args);
-
 	const deployment = await deploy("ConceroVerifier", {
 		from: deployer,
 		args: [

@@ -921,7 +921,7 @@
 
 "@concero/rpcs@github:concero/rpcs", "concero-rpcs@github:concero/rpcs":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/rpcs/tar.gz/06dbd56ccecab2ba492196a08c65d8c9b5d4daef"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/56e4d8d8b8d9a9b5720925a69ef57313f7395200"
   dependencies:
     acorn "^8.14.0"
     acorn-walk "^8.3.4"
@@ -932,7 +932,7 @@
 
 "@concero/v2-networks@github:concero/v2-networks":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/02eb982720829463663d01e7faa90ab6e9239e73"
+  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/f626aee5a02476046e47a8fd172058cd1cd4bd8b"
 
 "@concero/v2-operators@github:concero/v2-operators":
   version "1.0.0"
@@ -8282,9 +8282,9 @@ mocha@^10.0.0, mocha@^10.2.0:
     yargs-unparser "^2.0.0"
 
 module-details-from-path@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/module-details-from-path/-/module-details-from-path-1.0.3.tgz#114c949673e2a8a35e9d35788527aa37b679da2b"
-  integrity sha512-ySViT69/76t8VhE1xXHK6Ch4NcDd26gx0MzKXLO+F7NOtnqH68d9zF94nT8ZWSxXh8ELOERsnJO/sWt1xZYw5A==
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/module-details-from-path/-/module-details-from-path-1.0.4.tgz#b662fdcd93f6c83d3f25289da0ce81c8d9685b94"
+  integrity sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==
 
 module-error@^1.0.1:
   version "1.0.2"

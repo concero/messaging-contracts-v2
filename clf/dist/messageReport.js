@@ -16727,6 +16727,30 @@ var hashkeyTestnet = /* @__PURE__ */ defineChain({
   testnet: true
 });
 
+// node_modules/viem/_esm/chains/definitions/hederaTestnet.js
+var hederaTestnet = /* @__PURE__ */ defineChain({
+  id: 296,
+  name: "Hedera Testnet",
+  network: "hedera-testnet",
+  nativeCurrency: {
+    symbol: "HBAR",
+    name: "HBAR",
+    decimals: 18
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://testnet.hashio.io/api"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Hashscan",
+      url: "https://hashscan.io/testnet"
+    }
+  },
+  testnet: true
+});
+
 // node_modules/viem/_esm/chains/definitions/inkSepolia.js
 var sourceId5 = 11155111;
 var inkSepolia = /* @__PURE__ */ defineChain({
@@ -17627,7 +17651,8 @@ var liveChains = {
   "919": modeTestnet,
   "33111": curtis,
   "300": zksyncSepoliaTestnet,
-  "2358": kromaSepolia
+  "2358": kromaSepolia,
+  "296": hederaTestnet
 };
 var viemChains = config.isDevelopment ? localhostChains : liveChains;
 
@@ -17702,7 +17727,8 @@ var conceroRouters = {
   "48899": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "919": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "300": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "2358": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
+  "2358": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "296": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
 };
 
 // clf/src/messageReport/constants/config.ts

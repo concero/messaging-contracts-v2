@@ -16772,6 +16772,32 @@ var inkSepolia = /* @__PURE__ */ defineChain({
   sourceId: sourceId5
 });
 
+// node_modules/viem/_esm/chains/definitions/kromaSepolia.js
+var kromaSepolia = /* @__PURE__ */ defineChain({
+  id: 2358,
+  name: "Kroma Sepolia",
+  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://api.sepolia.kroma.network"]
+    }
+  },
+  blockExplorers: {
+    default: {
+      name: "Kroma Sepolia Explorer",
+      url: "https://blockscout.sepolia.kroma.network",
+      apiUrl: "https://blockscout.sepolia.kroma.network/api"
+    }
+  },
+  contracts: {
+    multicall3: {
+      address: "0xcA11bde05977b3631167028862bE2a173976CA11",
+      blockCreated: 8900914
+    }
+  },
+  testnet: true
+});
+
 // node_modules/viem/_esm/linea/actions/estimateGas.js
 init_parseAccount();
 init_toHex();
@@ -17600,7 +17626,8 @@ var liveChains = {
   "48899": zircuitTestnet,
   "919": modeTestnet,
   "33111": curtis,
-  "300": zksyncSepoliaTestnet
+  "300": zksyncSepoliaTestnet,
+  "2358": kromaSepolia
 };
 var viemChains = config.isDevelopment ? localhostChains : liveChains;
 
@@ -17674,7 +17701,8 @@ var conceroRouters = {
   "195": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "48899": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "919": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "300": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
+  "300": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "2358": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
 };
 
 // clf/src/messageReport/constants/config.ts

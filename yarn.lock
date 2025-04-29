@@ -921,7 +921,7 @@
 
 "@concero/rpcs@github:concero/rpcs", "concero-rpcs@github:concero/rpcs":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/rpcs/tar.gz/50339b4fec9bd75eaf2bfce6f4d7fe715d3065a8"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/11805b97e1c2d117e80646accdc55fa1c5084b36"
   dependencies:
     acorn "^8.14.0"
     acorn-walk "^8.3.4"
@@ -932,11 +932,11 @@
 
 "@concero/v2-networks@github:concero/v2-networks":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/20c6b909e76610c368304ca2ce0bfbfbf623a7f2"
+  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/02eb982720829463663d01e7faa90ab6e9239e73"
 
 "@concero/v2-operators@github:concero/v2-operators":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/v2-operators/tar.gz/c737833bd77096805de68f07985f83cc59738268"
+  resolved "https://codeload.github.com/concero/v2-operators/tar.gz/ebf0c816a221d7085339dbf554bb04997481db6e"
   dependencies:
     "@concero/contract-utils" "github:concero/contract-utils"
     "@concero/v2-networks" "github:concero/v2-networks"

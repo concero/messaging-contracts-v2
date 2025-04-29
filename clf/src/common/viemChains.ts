@@ -14,6 +14,7 @@ import {
 	gnosisChiado,
 	hashkeyTestnet,
 	inkSepolia,
+	kromaSepolia,
 	lineaSepolia,
 	mainnet,
 	mantleSepoliaTestnet,
@@ -100,6 +101,7 @@ const liveChains: Partial<Record<string, Chain>> = {
 	"919": modeTestnet,
 	"33111": curtis,
 	"300": zksyncSepoliaTestnet,
+	"2358": kromaSepolia,
 };
 
 export const viemChains = config.isDevelopment ? localhostChains : liveChains;

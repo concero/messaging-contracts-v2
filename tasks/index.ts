@@ -2,6 +2,7 @@ import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
+import updateSupportedChainsForAllRouters from "./deployRouter/updateSupportedChainsForAllRouters.task";
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
@@ -32,4 +33,5 @@ export {
 	deployConceroPauseToAllChains,
 	fetchTransactionTask,
 	testScript,
+	updateSupportedChainsForAllRouters,
 };

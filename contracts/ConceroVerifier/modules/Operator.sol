@@ -34,8 +34,11 @@ abstract contract Operator is CLF {
         uint24 srcChainSelector,
         bytes memory srcChainData
     ) external onlyOperator returns (bytes32) {
-        require(!s.verifier().pendingMessageReports[messageId], Errors.MessageAlreadyProcessed());
-        s.verifier().pendingMessageReports[messageId] = true;
+
+        bytes32 clfRequestId = s.verifier().clfRequestIdByMessageId[messageId];
+        if (clfRequestId != bytes32(0)) {
+            require(s.verifier().clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Failed, Errors.MessageAlreadyProcessed());
+        }
         return _requestMessageReport(messageId, messageHashSum, srcChainSelector, srcChainData);
     }
 

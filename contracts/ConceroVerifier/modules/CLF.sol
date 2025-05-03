@@ -28,8 +28,6 @@ abstract contract CLF is FunctionsClient, Base {
     using s for s.Verifier;
     using s for s.Operator;
 
-    error WrongClfResultType();
-
     constructor(
         address clfRouter,
         bytes32 clfDonId,
@@ -63,14 +61,17 @@ abstract contract CLF is FunctionsClient, Base {
     string internal constant CLF_JS_CODE =
         "var n;((e)=>e[e.H=0]='H')(n||={});var a=await fetch('https://raw.githubusercontent.com/concero/messaging-contracts-v2/refs/heads/master/clf/dist/messageReport.min.js').then((t)=>t.text()),o='0x'+Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(a)))).map((t)=>t.toString(16).padStart(2,'0')).join('');if(o.toLowerCase()!==bytesArgs[0].toLowerCase())throw `${o.toLowerCase()}!==${bytesArgs[0].toLowerCase()}`;return eval(a);";
     uint32 internal constant CLF_GAS_LIMIT = 100_000;
-
     function fulfillRequest(
         bytes32 clfRequestId,
         bytes memory response,
         bytes memory err
     ) internal override {
-        if (err.length != 0) {
+        s.Verifier storage verifier = s.verifier();
+        require(verifier.clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Pending, Errors.InvalidClfRequestId(clfRequestId));
+
+        if (err.length > 0) {
             emit CLFRequestError(err);
+            verifier.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Failed;
             return;
         }
 
@@ -79,7 +80,6 @@ abstract contract CLF is FunctionsClient, Base {
             (CommonTypes.ResultConfig, bytes)
         );
 
-        // @dev TODO: where is isPending check?
 
         if (resultConfig.resultType == CommonTypes.ResultType.Message) {
             _handleCLFMessageReport(clfRequestId, response, err);
@@ -91,11 +91,10 @@ abstract contract CLF is FunctionsClient, Base {
                 resultConfig.requester
             );
         } else {
-            revert WrongClfResultType();
+            revert Errors.InvalidClfResultType();
         }
 
-        // @dev TODO: move the check to the top of the function
-        delete s.verifier().pendingCLFRequests[clfRequestId];
+        verifier.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Fulfilled;
     }
 
     /* CLF RESPONSE HANDLING */
@@ -198,10 +197,10 @@ abstract contract CLF is FunctionsClient, Base {
         clfReqArgs[5] = abi.encodePacked(msg.sender);
 
         clfRequestId = _sendCLFRequest(clfReqArgs);
-        s.verifier().pendingCLFRequests[clfRequestId] = true;
+        s.verifier().clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
+        s.verifier().clfRequestIdByMessageId[messageId] = clfRequestId;
 
         emit MessageReportRequested(messageId);
-
         return clfRequestId;
     }
 
@@ -234,14 +233,14 @@ abstract contract CLF is FunctionsClient, Base {
         clfReqArgs[4] = abi.encode(msg.sender);
 
         clfRequestId = _sendCLFRequest(clfReqArgs);
-        s.verifier().pendingCLFRequests[clfRequestId] = true;
+        s.verifier().clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
 
         return clfRequestId;
     }
 
     function _requestOperatorDeregistration() internal {
         // _witholdOperatorDeposit(msg.sender,  Utils.convertUsdBpsToNative(CommonConstants.sol.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD, s.priceFeed().nativeUsdRate)
-        //        s.verifier().pendingCLFRequests[clfRequestId] = true;
+        //        s.verifier().clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
     }
 
     function _sendCLFRequest(bytes[] memory args) internal returns (bytes32) {

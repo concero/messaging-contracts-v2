@@ -41,13 +41,12 @@ contract RequestOperatorRegistration is ConceroVerifierTest {
             operatorAddresses
         );
 
-        bool isCLFRequestPending = conceroVerifier.getStorage(
-            Namespaces.VERIFIER,
-            VerifierSlots.pendingCLFRequests,
-            clfRequestId
-        ) == 1;
 
-        assertTrue(isCLFRequestPending);
+        assertTrue(conceroVerifier.getStorage(
+            Namespaces.VERIFIER,
+            VerifierSlots.CLFRequestStatus,
+            clfRequestId
+        ) == uint256(VerifierTypes.CLFRequestStatus.Pending));
 
         return clfRequestId;
     }

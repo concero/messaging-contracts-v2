@@ -80,7 +80,6 @@ abstract contract CLF is FunctionsClient, Base {
             (CommonTypes.ResultConfig, bytes)
         );
 
-
         if (resultConfig.resultType == CommonTypes.ResultType.Message) {
             _handleCLFMessageReport(clfRequestId, response, err);
         } else if (resultConfig.resultType == CommonTypes.ResultType.OperatorRegistration) {

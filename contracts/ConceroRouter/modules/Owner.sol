@@ -93,8 +93,10 @@ abstract contract Owner is Base {
     ) external onlyOwner {
         require(chainSelectors.length == isSupported.length, CommonErrors.LengthMismatch());
 
+        s.Router storage s_router = s.router();
+
         for (uint256 index; index < chainSelectors.length; ++index) {
-            s.router().isChainSupported[chainSelectors[index]] = isSupported[index];
+            s_router.isChainSupported[chainSelectors[index]] = isSupported[index];
         }
     }
 
@@ -107,9 +109,12 @@ abstract contract Owner is Base {
         uint256[] memory rates
     ) external onlyFeedUpdater {
         require(dstChainSelectors.length == rates.length, CommonErrors.LengthMismatch());
+
+        s.Router storage s_router = s.router();
+
         for (uint256 i = 0; i < dstChainSelectors.length; i++) {
             require(
-                s.router().isChainSupported[dstChainSelectors[i]],
+                s_router.isChainSupported[dstChainSelectors[i]],
                 Errors.UnsupportedChainSelector(dstChainSelectors[i])
             );
             s.priceFeed().nativeNativeRates[dstChainSelectors[i]] = rates[i];
@@ -121,12 +126,16 @@ abstract contract Owner is Base {
         uint256[] memory gasPrices
     ) external onlyFeedUpdater {
         require(dstChainSelectors.length == gasPrices.length, CommonErrors.LengthMismatch());
+
+        s.Router storage s_router = s.router();
+        s.PriceFeed storage s_priceFeed = s.priceFeed();
+
         for (uint256 i = 0; i < dstChainSelectors.length; i++) {
             require(
-                s.router().isChainSupported[dstChainSelectors[i]],
+                s_router.isChainSupported[dstChainSelectors[i]],
                 Errors.UnsupportedChainSelector(dstChainSelectors[i])
             );
-            s.priceFeed().lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
+            s_priceFeed.lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
         }
     }
 }

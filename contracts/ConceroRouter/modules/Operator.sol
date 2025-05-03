@@ -22,12 +22,14 @@ abstract contract Operator is Base {
     using s for s.Operator;
 
     function withdrawOperatorFee(uint256 amount) external returns (bool success) {
-        uint256 currentFees = s.operator().feesEarnedNative[msg.sender];
+        s.Operator storage s_operator = s.operator();
+
+        uint256 currentFees = s_operator.feesEarnedNative[msg.sender];
         require(amount > 0, CommonErrors.InvalidAmount());
         require(amount <= currentFees, CommonErrors.InsufficientFee(amount, currentFees));
 
-        s.operator().feesEarnedNative[msg.sender] = currentFees - amount;
-        s.operator().totalFeesEarnedNative -= amount;
+        s_operator.feesEarnedNative[msg.sender] = currentFees - amount;
+        s_operator.totalFeesEarnedNative -= amount;
 
         (success, ) = msg.sender.call{value: amount}("");
         require(success, CommonErrors.TransferFailed());

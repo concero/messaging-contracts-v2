@@ -34,10 +34,11 @@ abstract contract Operator is CLF {
         uint24 srcChainSelector,
         bytes memory srcChainData
     ) external onlyOperator returns (bytes32) {
+        s.Verifier storage verifier = s.verifier();
 
-        bytes32 clfRequestId = s.verifier().clfRequestIdByMessageId[messageId];
+        bytes32 clfRequestId = verifier.clfRequestIdByMessageId[messageId];
         if (clfRequestId != bytes32(0)) {
-            require(s.verifier().clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Failed, Errors.MessageAlreadyProcessed());
+            require(verifier.clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Failed, Errors.MessageAlreadyProcessed());
         }
         return _requestMessageReport(messageId, messageHashSum, srcChainSelector, srcChainData);
     }

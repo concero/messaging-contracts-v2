@@ -66,12 +66,12 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory response,
         bytes memory err
     ) internal override {
-        s.Verifier storage verifier = s.verifier();
-        require(verifier.clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Pending, Errors.InvalidClfRequestId(clfRequestId));
+        s.Verifier storage s_verifier = s.verifier();
+        require(s_verifier.clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Pending, Errors.InvalidClfRequestId(clfRequestId));
 
         if (err.length > 0) {
             emit CLFRequestError(err);
-            verifier.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Failed;
+            s_verifier.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Failed;
             return;
         }
 
@@ -94,7 +94,7 @@ abstract contract CLF is FunctionsClient, Base {
             revert Errors.InvalidClfResultType();
         }
 
-        verifier.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Fulfilled;
+        s_verifier.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Fulfilled;
     }
 
     /* CLF RESPONSE HANDLING */
@@ -103,6 +103,8 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory response,
         bytes memory err
     ) internal {
+        s.Operator storage s_operator = s.operator();
+
         (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = Decoder
             ._decodeVerifierResult(response);
 
@@ -114,12 +116,12 @@ abstract contract CLF is FunctionsClient, Base {
 
         uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
 
-        s.operator().feesEarnedNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
+        s_operator.feesEarnedNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
             CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
 
-        s.operator().depositsNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
+        s_operator.depositsNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
             CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
             nativeUsdRate
         );
@@ -140,6 +142,9 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory err,
         address requester
     ) internal {
+
+        s.Operator storage s_operator = s.operator();
+
         Types.OperatorRegistrationResult memory result = abi.decode(
             payload,
             (Types.OperatorRegistrationResult)
@@ -161,10 +166,10 @@ abstract contract CLF is FunctionsClient, Base {
 
                 if (action == Types.OperatorRegistrationAction.Register) {
                     Utils._addOperator(chainType, abi.encodePacked(operatorAddress));
-                    s.operator().isRegistered[requester] = true;
+                    s_operator.isRegistered[requester] = true;
                 } else if (action == Types.OperatorRegistrationAction.Deregister) {
                     Utils._removeOperator(chainType, abi.encodePacked(operatorAddress));
-                    s.operator().isRegistered[requester] = false;
+                    s_operator.isRegistered[requester] = false;
                 }
             }
         }
@@ -179,6 +184,8 @@ abstract contract CLF is FunctionsClient, Base {
         uint24 srcChainSelector,
         bytes memory srcChainData
     ) internal returns (bytes32 clfRequestId) {
+        s.Verifier storage verifier = s.verifier();
+
         _witholdOperatorDeposit(
             msg.sender,
             CommonUtils.convertUsdBpsToNative(
@@ -197,8 +204,8 @@ abstract contract CLF is FunctionsClient, Base {
         clfReqArgs[5] = abi.encodePacked(msg.sender);
 
         clfRequestId = _sendCLFRequest(clfReqArgs);
-        s.verifier().clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
-        s.verifier().clfRequestIdByMessageId[messageId] = clfRequestId;
+        verifier.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
+        verifier.clfRequestIdByMessageId[messageId] = clfRequestId;
 
         emit MessageReportRequested(messageId);
         return clfRequestId;
@@ -276,13 +283,15 @@ abstract contract CLF is FunctionsClient, Base {
         address operator,
         uint256 depositWithholdable
     ) internal returns (uint256) {
-        uint256 currentDeposit = s.operator().depositsNative[operator];
+        s.Operator storage s_operator = s.operator();
+
+        uint256 currentDeposit = s_operator.depositsNative[operator];
         require(
-            s.operator().depositsNative[operator] >= depositWithholdable,
+            currentDeposit >= depositWithholdable,
             Errors.InsufficientOperatorDeposit(currentDeposit, depositWithholdable)
         );
 
-        s.operator().depositsNative[operator] -= depositWithholdable;
+        s_operator.depositsNative[operator] -= depositWithholdable;
         return depositWithholdable;
     }
 

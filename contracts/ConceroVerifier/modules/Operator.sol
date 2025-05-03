@@ -72,12 +72,13 @@ abstract contract Operator is CLF {
     /// @param amount The amount of native tokens to withdraw
     /// @return success Boolean indicating if the withdrawal was successful
     function withdrawOperatorFee(uint256 amount) external onlyOperator returns (bool success) {
-        uint256 currentFees = s.operator().feesEarnedNative[msg.sender];
+        s.Operator storage s_operator = s.operator();
+        uint256 currentFees = s_operator.feesEarnedNative[msg.sender];
         require(amount > 0, CommonErrors.InvalidAmount());
         require(amount <= currentFees, Errors.InsufficientFee(amount, currentFees));
 
-        s.operator().feesEarnedNative[msg.sender] = currentFees - amount;
-        s.operator().totalFeesEarnedNative -= amount;
+        s_operator.feesEarnedNative[msg.sender] = currentFees - amount;
+        s_operator.totalFeesEarnedNative -= amount;
 
         (success, ) = msg.sender.call{value: amount}("");
         require(success, CommonErrors.TransferFailed());
@@ -90,7 +91,9 @@ abstract contract Operator is CLF {
     /// @param amount The amount of native tokens to withdraw
     /// @return success Boolean indicating if the withdrawal was successful
     function withdrawOperatorDeposit(uint256 amount) external onlyOperator returns (bool success) {
-        uint256 currentDeposit = s.operator().depositsNative[msg.sender];
+        s.Operator storage s_operator = s.operator();
+
+        uint256 currentDeposit = s_operator.depositsNative[msg.sender];
 
         require(amount > 0, CommonErrors.InvalidAmount());
         require(
@@ -98,8 +101,8 @@ abstract contract Operator is CLF {
             Errors.InsufficientOperatorDeposit(currentDeposit, amount)
         );
 
-        s.operator().depositsNative[msg.sender] = currentDeposit - amount;
-        s.operator().totalDepositsNative -= amount;
+        s_operator.depositsNative[msg.sender] = currentDeposit - amount;
+        s_operator.totalDepositsNative -= amount;
 
         (success, ) = msg.sender.call{value: amount}("");
         require(success, CommonErrors.TransferFailed());
@@ -112,6 +115,8 @@ abstract contract Operator is CLF {
     /// @dev Implements nonReentrant guard to prevent reentrancy attacks
     /// @param operator The address of the operator making the deposit
     function operatorDeposit(address operator) external payable {
+        s.Operator storage s_operator = s.operator();
+
         uint256 minimumDeposit = getCLFCost();
         require(
             msg.value >= minimumDeposit,
@@ -119,8 +124,8 @@ abstract contract Operator is CLF {
         );
         require(operator != address(0), CommonErrors.InvalidAddress());
 
-        s.operator().depositsNative[operator] += msg.value;
-        s.operator().totalDepositsNative += msg.value;
+        s_operator.depositsNative[operator] += msg.value;
+        s_operator.totalDepositsNative += msg.value;
 
         emit OperatorDeposited(msg.sender, msg.value);
     }

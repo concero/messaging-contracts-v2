@@ -5,7 +5,7 @@ import { handleError } from "./errorHandler";
 import { ErrorType } from "./errorType";
 import { rpcConfigs } from "./rpcLoader";
 import { ChainSelector } from "./types";
-import { viemChains } from "./viemChains";
+import { getViemChain } from "./viemChains";
 
 function getRpcConfigForChain(chainSelector: ChainSelector) {
 	if (config.isDevelopment) {
@@ -34,6 +34,6 @@ export function createFallbackTransport(chainSelector: ChainSelector): Transport
 export function getPublicClient(chainSelector: ChainSelector) {
 	return createPublicClient({
 		transport: createFallbackTransport(chainSelector),
-		chain: viemChains[chainSelector],
+		chain: getViemChain(chainSelector),
 	});
 }

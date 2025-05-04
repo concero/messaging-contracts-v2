@@ -3,7 +3,6 @@ import { hexToBytes } from "viem";
 
 import { handleError } from "../../common/errorHandler";
 import { ErrorType } from "../../common/errorType";
-import { viemChains } from "../../common/viemChains";
 import { DecodedArgs } from "../types";
 
 type EvmSrcChainData = {
@@ -35,8 +34,6 @@ export function decodeInputs(bytesArgs: string[]): DecodedArgs {
 
 	const [, hexSrcChainSelector, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs;
 	const srcChainSelector = Number(hexSrcChainSelector);
-
-	if (!viemChains[srcChainSelector.toString()]) handleError(ErrorType.CONFIG_INVALID_SRC_CHAIN_SELECTOR);
 
 	const decodedArgs = {
 		srcChainSelector,

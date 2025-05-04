@@ -15377,20 +15377,7 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
     toBlock: blockNumber
   });
   if (!logs.length) handleError("30" /* EVENT_NOT_FOUND */);
-  const conceroMessageSentLog = logs.reduce((acc, currLog) => {
-    try {
-      const decodedLog = decodeEventLog({
-        abi: ConceroMessageLogParams,
-        data: currLog.data
-      });
-      if (decodedLog.args.messageId.toLowerCase() === messageId.toLowerCase()) {
-        return currLog;
-      }
-    } catch {
-      return acc;
-    }
-    return acc;
-  });
+  const conceroMessageSentLog = logs.find((log) => log.topics[1]?.toLowerCase() === messageId.toLowerCase());
   if (!conceroMessageSentLog) handleError("30" /* EVENT_NOT_FOUND */);
   return conceroMessageSentLog;
 }

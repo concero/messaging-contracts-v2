@@ -24,9 +24,8 @@ export async function fetchConceroMessage(
 			const { args } = decodeEventLog({
 				abi: ConceroMessageLogParams,
 				data: currLog.data,
-				topics: currLog.topics,
 			});
-			return args.messageId.toLowerCase() === messageId.toLowerCase();
+			return args?.messageId.toLowerCase() === messageId.toLowerCase();
 		} catch {
 			return false;
 		}

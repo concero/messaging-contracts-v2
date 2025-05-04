@@ -15128,21 +15128,7 @@ var inkSepolia_default = {
 // node_modules/@concero/rpcs/output/testnet/11155111-ethereumSepolia.json
 var ethereumSepolia_default = {
   id: "11155111",
-  urls: [
-    "https://gateway.tenderly.co/public/sepolia",
-    "https://0xrpc.io/sep",
-    "https://endpoints.omniatech.io/v1/eth/sepolia/public",
-    "https://eth-sepolia.public.blastapi.io",
-    "https://sepolia.gateway.tenderly.co",
-    "https://ethereum-sepolia-rpc.publicnode.com",
-    "https://ethereum-sepolia.rpc.subquery.network/public",
-    "https://eth-sepolia.api.onfinality.io/public",
-    "https://sepolia.drpc.org",
-    "https://rpc.sepolia.ethpandaops.io",
-    "https://api.zan.top/eth-sepolia",
-    "https://1rpc.io/sepolia",
-    "https://rpc-sepolia.rockx.com"
-  ],
+  urls: ["https://ethereum-sepolia-rpc.publicnode.com"],
   chainSelector: 11155111,
   name: "ethereumSepolia"
 };

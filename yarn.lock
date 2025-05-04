@@ -926,7 +926,7 @@
 
 "@concero/rpcs@github:concero/rpcs", "concero-rpcs@github:concero/rpcs":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/rpcs/tar.gz/c5c34671ff87851f7f4fa0d3de5c99d997d81434"
+  resolved "https://codeload.github.com/concero/rpcs/tar.gz/102349b87addc942eac35f58ea274cf7a038c611"
   dependencies:
     acorn "^8.14.0"
     acorn-walk "^8.3.4"

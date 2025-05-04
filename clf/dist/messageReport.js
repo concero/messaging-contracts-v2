@@ -15377,16 +15377,19 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
     toBlock: blockNumber
   });
   if (!logs.length) handleError("30" /* EVENT_NOT_FOUND */);
-  const conceroMessageSentLog = logs.find((currLog) => {
+  const conceroMessageSentLog = logs.reduce((acc, currLog) => {
     try {
-      const { args } = decodeEventLog({
+      const decodedLog = decodeEventLog({
         abi: ConceroMessageLogParams,
         data: currLog.data
       });
-      return args.messageId.toLowerCase() === messageId.toLowerCase();
+      if (decodedLog.args.messageId.toLowerCase() === messageId.toLowerCase()) {
+        return currLog;
+      }
     } catch {
-      return false;
+      return acc;
     }
+    return acc;
   });
   if (!conceroMessageSentLog) handleError("30" /* EVENT_NOT_FOUND */);
   return conceroMessageSentLog;

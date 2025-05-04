@@ -19,17 +19,21 @@ export async function fetchConceroMessage(
 
 	if (!logs.length) handleError(ErrorType.EVENT_NOT_FOUND);
 
-	const conceroMessageSentLog = logs.find(currLog => {
+	// TODO: this code could be shorter
+	const conceroMessageSentLog = logs.reduce((acc, currLog) => {
 		try {
-			const { args } = decodeEventLog({
+			const decodedLog = decodeEventLog({
 				abi: ConceroMessageLogParams,
 				data: currLog.data,
-			}); 
+			});
 
-			return args.messageId.toLowerCase() === messageId.toLowerCase();
+			if (decodedLog.args.messageId.toLowerCase() === messageId.toLowerCase()) {
+				return currLog;
+			}
 		} catch {
-			return false;
+			return acc;
 		}
+		return acc;
 	});
 
 	if (!conceroMessageSentLog) handleError(ErrorType.EVENT_NOT_FOUND);

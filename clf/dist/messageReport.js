@@ -15377,16 +15377,16 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
     toBlock: blockNumber
   });
   if (!logs.length) handleError("30" /* EVENT_NOT_FOUND */);
-  const conceroMessageSentLog = logs.reduce((_, currLog) => {
+  const conceroMessageSentLog = logs.find((currLog) => {
     try {
-      const decodedLog = decodeEventLog({
+      const { args } = decodeEventLog({
         abi: ConceroMessageLogParams,
-        data: currLog.data
+        data: currLog.data,
+        topics: currLog.topics
       });
-      if (decodedLog.args.messageId.toLowerCase() === messageId.toLowerCase()) {
-        return currLog;
-      }
+      return args.messageId.toLowerCase() === messageId.toLowerCase();
     } catch {
+      return false;
     }
   });
   if (!conceroMessageSentLog) handleError("30" /* EVENT_NOT_FOUND */);
@@ -15587,14 +15587,7 @@ async function main() {
     ),
     getAllowedOperators(0 /* EVM */, args.messageId)
   ]);
-  const {
-    version: messageVersion,
-    shouldFinaliseSrc,
-    dstChainSelector,
-    dstChainData,
-    sender,
-    message
-  } = decodeConceroMessageLog(log);
+  const { dstChainSelector, dstChainData, sender, message } = decodeConceroMessageLog(log);
   verifyMessageHash(message, args.messageHashSum);
   const allowedOperators = pick(operators, 1);
   const messageReportResult = {

@@ -15381,9 +15381,10 @@ async function fetchConceroMessage(client, routerAddress, messageId, blockNumber
     try {
       const { args } = decodeEventLog({
         abi: ConceroMessageLogParams,
-        data: currLog.data
+        data: currLog.data,
+        topics: currLog.topics
       });
-      return args?.messageId.toLowerCase() === messageId.toLowerCase();
+      return args[0].toLowerCase() === messageId.toLowerCase();
     } catch {
       return false;
     }

@@ -21,6 +21,11 @@ library Namespaces {
         keccak256(
             abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.pricefeed.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
+
+    bytes32 internal constant RETRY =
+        keccak256(
+            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.retry.storage"))) - 1)
+        ) & ~bytes32(uint256(0xff));
 }
 
 library Storage {
@@ -30,6 +35,12 @@ library Storage {
         ProtocolC,
         ProtocolD,
         ProtocolE
+    }
+
+    enum Status {
+        Unknown,
+        Received,
+        Delivered
     }
 
     struct Router {
@@ -58,6 +69,12 @@ library Storage {
         mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
     }
 
+    struct Retry {
+        uint256[50] __var_gap;
+        uint256[50] __array_gap;
+        mapping(bytes32 messageHash => Status) messageStatus;
+    }
+
     /* SLOT-BASED STORAGE ACCESS */
     function router() internal pure returns (Router storage s) {
         bytes32 slot = Namespaces.ROUTER;
@@ -75,6 +92,13 @@ library Storage {
 
     function priceFeed() internal pure returns (PriceFeed storage s) {
         bytes32 slot = Namespaces.PRICEFEED;
+        assembly {
+            s.slot := slot
+        }
+    }
+
+    function retry() internal pure returns (Retry storage s) {
+        bytes32 slot = Namespaces.RETRY;
         assembly {
             s.slot := slot
         }

@@ -21,19 +21,27 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
-import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent} from "../../interfaces/IConceroRouter.sol";
+import {
+    IConceroRouter,
+    ConceroMessageDelivered,
+    ConceroMessageReceived,
+    ConceroMessageSent,
+    MessageDeliveryFailedWithError
+} from "../../interfaces/IConceroRouter.sol";
 
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
 
 library Errors {
     error UnsupportedFeeTokenType();
+    error MessageAlreadyDelivered();
     error MessageAlreadyProcessed(bytes32 messageId);
     error MessageDeliveryFailed(bytes32 messageId);
     error InvalidReceiver();
     error InvalidGasLimit();
     error InvalidMessageHashSum();
     error UnauthorizedOperator();
+    error UnknownMessage();
     error InvalidDstChainSelector(uint24 dstChainSelector);
     error InvalidClientMessageConfig();
     error InvalidDstChainData();
@@ -47,8 +55,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
     using s for s.Router;
     using s for s.PriceFeed;
     using s for s.Operator;
+    using s for s.Retry;
 
     uint8 private constant MESSAGE_VERSION = 1;
+    uint16 private constant MAX_RET_BYTES = 256;
 
     constructor(
         address conceroVerifier,
@@ -113,6 +123,36 @@ abstract contract Message is ClfSigner, IConceroRouter {
         if (resultConfig.payloadVersion == 1) {
             _handleMessagePayloadV1(payload, messageBody);
         }
+    }
+
+    /**
+     * @notice Re-attempts delivery of a previously failed message to the specified receiver.
+     * @param messageId The unique identifier of the message to retry.
+     * @param receiver The address of the contract that should receive the message.
+     * @param gasLimit The amount of gas to forward for the message execution.
+     * @param callData The calldata to send to the receiver during message delivery.
+     */
+    function retry(
+        bytes32 messageId,
+        address receiver,
+        uint256 gasLimit,
+        bytes calldata callData
+    ) external {
+        bytes32 messageHash = _hash(messageId, receiver, callData);
+        s.Status messageStatus = s.retry().messageStatus[messageHash];
+
+        require(messageStatus != s.Status.Delivered, Errors.MessageAlreadyDelivered());
+        require(messageStatus == s.Status.Received, Errors.UnknownMessage());
+
+        s.retry().messageStatus[messageHash] = s.Status.Delivered;
+
+        (bool success, ) = CommonUtils.safeCall(receiver, gasLimit, 0, MAX_RET_BYTES, callData);
+
+        if (!success) {
+            revert Errors.MessageDeliveryFailed(messageId);
+        }
+
+        emit ConceroMessageDelivered(messageId);
     }
 
     /* INTERNAL FUNCTIONS */
@@ -193,24 +233,36 @@ abstract contract Message is ClfSigner, IConceroRouter {
             message
         );
 
-        (bool success, ) = CommonUtils.safeCall(
+        (bool success, bytes memory returnData) = CommonUtils.safeCall(
             dstData.receiver,
             dstData.gasLimit,
             0,
-            256,
+            MAX_RET_BYTES,
             callData
         );
 
         if (!success) {
-            revert Errors.MessageDeliveryFailed(messageId);
+            bytes32 messageHash = _hash(messageId, dstData.receiver, callData);
+            s.retry().messageStatus[messageHash] = s.Status.Received;
+
+            emit ConceroMessageReceived(messageId);
+            emit MessageDeliveryFailedWithError(messageId, returnData);
+        } else {
+            emit ConceroMessageDelivered(messageId);
         }
 
         s.operator().feesEarnedNative[msg.sender] += CommonUtils.convertUsdBpsToNative(
             CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
             s.priceFeed().nativeUsdRate
         );
+    }
 
-        emit ConceroMessageDelivered(messageId);
+    function _hash(
+        bytes32 messageId,
+        address receiver,
+        bytes memory data
+    ) internal pure returns (bytes32) {
+        return keccak256(abi.encode(messageId, receiver, keccak256(data)));
     }
 
     function _validateMessageParams(

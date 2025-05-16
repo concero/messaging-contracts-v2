@@ -49,3 +49,15 @@ library OperatorSlots {
 
     uint256 internal constant feesEarnedNative = _var_gap + _arr_gap + 1;
 }
+
+/**
+ * @title RetrySlots
+ * @notice Storage slot definitions for ConceroRouter contract
+ * @dev All slots are calculated using standard Solidity storage layout rules
+ */
+library RetrySlots {
+    uint256 private constant _var_gap = 50;
+    uint256 private constant _arr_gap = 50;
+
+    uint256 internal constant messageStatus = _var_gap + _arr_gap;
+}

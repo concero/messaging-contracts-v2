@@ -46,6 +46,7 @@ const config: HardhatUserConfig = {
 				version: "0.8.28",
 				settings: {
 					viaIR: false,
+					evmVersion: "paris",
 					optimizer: {
 						enabled: true,
 						runs: 200,

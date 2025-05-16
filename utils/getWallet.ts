@@ -1,4 +1,5 @@
 import { ConceroNetworkType } from "../types/ConceroNetwork";
+import { warn } from "./log";
 
 export function getWallet(
 	chainType: ConceroNetworkType,
@@ -37,7 +38,7 @@ export function getWallet(
 	const walletValue = process.env[envKey];
 
 	if (!walletValue) {
-		throw new Error(`Environment variable ${envKey} is not set.`);
+		warn(`Missing env variable: ${envKey}`, "getEnvVar");
 	}
 
 	return walletValue;

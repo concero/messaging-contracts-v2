@@ -107,11 +107,13 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         _verifyClfReportOnChainMetadata(onchainMetadata);
 
-        (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = DecoderLib
-            ._decodeVerifierResult(clfReport.results[0]);
+        for (uint256 i; i < clfReport.results.length; ++i) {
+            (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = DecoderLib
+                ._decodeVerifierResult(clfReport.results[i]);
 
-        if (resultConfig.payloadVersion == 1) {
-            _handleMessagePayloadV1(payload, messageBody);
+            if (resultConfig.payloadVersion == 1) {
+                _handleMessagePayloadV1(payload, messageBody);
+            }
         }
     }
 
@@ -128,14 +130,13 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         _verifyIsSenderOperator(messagePayload.allowedOperators);
 
+        if (messagePayload.dstChainSelector != i_chainSelector) return;
+
         require(
             messagePayload.messageHashSum == keccak256(messageBody),
             Errors.InvalidMessageHashSum()
         );
-        require(
-            messagePayload.dstChainSelector == i_chainSelector,
-            Errors.InvalidDstChainSelector(messagePayload.dstChainSelector)
-        );
+
         require(
             !s.router().isMessageProcessed[messagePayload.messageId],
             Errors.MessageAlreadyProcessed(messagePayload.messageId)

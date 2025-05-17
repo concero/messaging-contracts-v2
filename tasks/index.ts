@@ -8,6 +8,7 @@ import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import sendConceroMessage from "./sendConceroMessage";
+import sendValueTask from "./sendValue.task";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
 import setOperator from "./setOperator";
 import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
@@ -34,4 +35,5 @@ export {
 	fetchTransactionTask,
 	testScript,
 	updateSupportedChainsForAllRouters,
+	sendValueTask,
 };

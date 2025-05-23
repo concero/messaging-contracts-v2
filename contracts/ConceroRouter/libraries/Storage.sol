@@ -21,11 +21,6 @@ library Namespaces {
         keccak256(
             abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.pricefeed.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
-
-    bytes32 internal constant RETRY =
-        keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.retry.storage"))) - 1)
-        ) & ~bytes32(uint256(0xff));
 }
 
 library Storage {
@@ -52,6 +47,7 @@ library Storage {
         mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;
         mapping(bytes32 messageId => mapping(Protocol => bool)) messageConfirmationsByProtocol;
         mapping(uint24 chainSelector => bool isSupported) isChainSupported;
+        mapping(bytes32 messageHash => Status) messageStatus;
     }
 
     struct Operator {
@@ -67,12 +63,6 @@ library Storage {
         uint256[50] __array_gap;
         mapping(uint24 dstChainSelector => uint256) lastGasPrices;
         mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
-    }
-
-    struct Retry {
-        uint256[50] __var_gap;
-        uint256[50] __array_gap;
-        mapping(bytes32 messageHash => Status) messageStatus;
     }
 
     /* SLOT-BASED STORAGE ACCESS */
@@ -92,13 +82,6 @@ library Storage {
 
     function priceFeed() internal pure returns (PriceFeed storage s) {
         bytes32 slot = Namespaces.PRICEFEED;
-        assembly {
-            s.slot := slot
-        }
-    }
-
-    function retry() internal pure returns (Retry storage s) {
-        bytes32 slot = Namespaces.RETRY;
         assembly {
             s.slot := slot
         }

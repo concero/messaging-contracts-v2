@@ -55,7 +55,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
     using s for s.Router;
     using s for s.PriceFeed;
     using s for s.Operator;
-    using s for s.Retry;
 
     uint8 private constant MESSAGE_VERSION = 1;
     uint16 private constant MAX_RET_BYTES = 256;
@@ -139,12 +138,12 @@ abstract contract Message is ClfSigner, IConceroRouter {
         bytes calldata callData
     ) external {
         bytes32 messageHash = _hash(messageId, receiver, callData);
-        s.Status messageStatus = s.retry().messageStatus[messageHash];
+        s.Status messageStatus = s.router().messageStatus[messageHash];
 
         require(messageStatus != s.Status.Delivered, Errors.MessageAlreadyDelivered());
         require(messageStatus == s.Status.Received, Errors.UnknownMessage());
 
-        s.retry().messageStatus[messageHash] = s.Status.Delivered;
+        s.router().messageStatus[messageHash] = s.Status.Delivered;
 
         (bool success, ) = CommonUtils.safeCall(receiver, gasLimit, 0, MAX_RET_BYTES, callData);
 
@@ -243,7 +242,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         if (!success) {
             bytes32 messageHash = _hash(messageId, dstData.receiver, callData);
-            s.retry().messageStatus[messageHash] = s.Status.Received;
+            s.router().messageStatus[messageHash] = s.Status.Received;
 
             emit ConceroMessageReceived(messageId);
             emit MessageDeliveryFailedWithError(messageId, returnData);

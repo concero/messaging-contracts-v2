@@ -16,7 +16,7 @@ import {ConceroClientRevertMock, ErrorType} from "contracts/mocks/ConceroClientR
 import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
 
 import {Storage as s, Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
-import {RetrySlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {RouterSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {Types} from "contracts/ConceroRouter/libraries/Types.sol";
 import {Errors} from "contracts/ConceroRouter/modules/Message.sol";
 
@@ -47,7 +47,7 @@ contract RetryMessage is ConceroRouterTest {
         _submitMessageReport(message);
 
         assertEq(
-            conceroRouter.getStorage(Namespaces.RETRY, RetrySlots.messageStatus, messageHash),
+            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.messageStatus, messageHash),
             uint8(s.Status.Received),
             "Storage getter failed for messageStatus"
         );
@@ -169,7 +169,7 @@ contract RetryMessage is ConceroRouterTest {
         conceroRouter.retry(TEST_MESSAGE_ID, address(conceroClientRevert), GAS_LIMIT, callData);
 
         assertEq(
-            conceroRouter.getStorage(Namespaces.RETRY, RetrySlots.messageStatus, messageHash),
+            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.messageStatus, messageHash),
             uint8(s.Status.Delivered),
             "Storage getter failed for messageStatus"
         );
@@ -232,7 +232,7 @@ contract RetryMessage is ConceroRouterTest {
 
     function _receiveMessage(
         bytes memory receivedMessage
-    ) private returns (Types.ClfDonReportSubmission memory reportSubmission) {
+    ) private view returns (Types.ClfDonReportSubmission memory reportSubmission) {
         Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
             receiver: address(conceroClientRevert),
             gasLimit: GAS_LIMIT

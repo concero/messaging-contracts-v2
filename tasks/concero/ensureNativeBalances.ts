@@ -21,14 +21,15 @@ const TESTNET_DEPLOYER_ADDRESS = getEnvVar("TESTNET_DEPLOYER_ADDRESS");
 
 // Watched addresses
 const FEED_UPDATER_ADDRESS = getEnvVar("FEED_UPDATER_ADDRESS");
+const OPERATOR_ADDRESS = getEnvVar("OPERATOR_ADDRESS");
 
 const TARGET_ADDRESSES: Record<string, string[]> = {
-	testnet: [FEED_UPDATER_ADDRESS],
+	testnet: [FEED_UPDATER_ADDRESS, OPERATOR_ADDRESS],
 	mainnet: [],
 };
 
 const TARGET_ALIASES: Record<string, string[]> = {
-	testnet: ["Feed Updater EOA"],
+	testnet: ["Feed Updater EOA", "Operator"],
 	mainnet: [],
 };
 

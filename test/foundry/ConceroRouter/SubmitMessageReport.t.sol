@@ -63,6 +63,7 @@ contract SubmitMessageReport is ConceroRouterTest {
             messageSender: abi.encode(address(this)),
             srcChainSelector: SRC_CHAIN_SELECTOR,
             dstChainSelector: 1,
+            srcBlockNumber: block.number,
             dstChainData: dstChainData,
             allowedOperators: allowedOperators
         });
@@ -77,7 +78,11 @@ contract SubmitMessageReport is ConceroRouterTest {
 
         vm.prank(operator);
         vm.resetGasMetering();
-        conceroRouter.submitMessageReport(reportSubmission, TEST_MESSAGE);
+        bytes[] memory messageBodies = new bytes[](1);
+        messageBodies[0] = TEST_MESSAGE;
+        uint256[] memory indexes = new uint256[](1);
+        indexes[0] = 0;
+        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
         vm.pauseGasMetering();
         Vm.Log[] memory entries = vm.getRecordedLogs();
 

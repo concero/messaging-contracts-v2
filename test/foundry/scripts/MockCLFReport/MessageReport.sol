@@ -32,6 +32,7 @@ contract MessageReport is BaseMockCLFReport {
                 SRC_CHAIN_SELECTOR,
                 DST_CHAIN_SELECTOR,
                 address(user),
+                12345678, // Default block number
                 RouterTypes.EvmDstChainData({receiver: address(0), gasLimit: 1_000_000}),
                 new bytes[](0)
             );
@@ -44,6 +45,7 @@ contract MessageReport is BaseMockCLFReport {
         uint24 srcChainSelector,
         uint24 dstChainSelector,
         address messageSender,
+        uint256 srcBlockNumber,
         RouterTypes.EvmDstChainData memory dstChainData,
         bytes[] memory allowedOperators
     ) public view returns (bytes memory) {
@@ -59,6 +61,7 @@ contract MessageReport is BaseMockCLFReport {
             messageSender: abi.encode(messageSender),
             srcChainSelector: srcChainSelector,
             dstChainSelector: dstChainSelector,
+            srcBlockNumber: srcBlockNumber,
             dstChainData: dstChainData,
             allowedOperators: allowedOperators
         });

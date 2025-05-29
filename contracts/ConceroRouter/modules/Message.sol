@@ -90,12 +90,16 @@ abstract contract Message is ClfSigner, IConceroRouter {
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
      * @param reportSubmission the serialized report data.
-     * @param messageBody the message body.
+     * @param messageBodies the array of message bodies.
+     * @param indexes the array of indexes.
      */
     function submitMessageReport(
         Types.ClfDonReportSubmission calldata reportSubmission,
-        bytes calldata messageBody
+        bytes[] calldata messageBodies,
+        uint256[] calldata indexes
     ) external {
+        require(messageBodies.length == indexes.length, CommonErrors.LengthMismatch());
+
         _verifyClfReportSignatures(reportSubmission);
 
         Types.ClfReport memory clfReport = DecoderLib._decodeCLFReport(reportSubmission.report);
@@ -107,12 +111,12 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         _verifyClfReportOnChainMetadata(onchainMetadata);
 
-        for (uint256 i; i < clfReport.results.length; ++i) {
+        for (uint256 i; i < indexes.length; ++i) {
             (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = DecoderLib
-                ._decodeVerifierResult(clfReport.results[i]);
+                ._decodeVerifierResult(clfReport.results[indexes[i]]);
 
             if (resultConfig.payloadVersion == 1) {
-                _handleMessagePayloadV1(payload, messageBody);
+                _handleMessagePayloadV1(payload, messageBodies[i]);
             }
         }
     }

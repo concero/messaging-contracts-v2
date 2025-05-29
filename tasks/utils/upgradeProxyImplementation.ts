@@ -1,11 +1,6 @@
 import { task } from "hardhat/config";
 
-import {
-	ProxyEnum,
-	conceroNetworks,
-	getViemReceiptConfig,
-	writeContractConfig,
-} from "../../constants";
+import { ProxyEnum, conceroNetworks, getViemReceiptConfig } from "../../constants";
 import { EnvPrefixes, IProxyType } from "../../types/deploymentVariables";
 import {
 	err,
@@ -46,10 +41,11 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
 	const [conceroProxy, conceroProxyAlias] = getEnvAddress(proxyType, chainName);
 	const [proxyAdmin, proxyAdminAlias] = getEnvAddress(`${proxyType}Admin`, chainName);
 	const [newImplementation, newImplementationAlias] = getEnvAddress(implementationKey, chainName);
-	const [pauseDummy, pauseAlias] = getEnvAddress("pause", chainName);
 
-	const implementation = shouldPause ? pauseDummy : newImplementation;
-	const implementationAlias = shouldPause ? pauseAlias : newImplementationAlias;
+	const implementation = shouldPause ? getEnvAddress("pause", chainName)[0] : newImplementation;
+	const implementationAlias = shouldPause
+		? getEnvAddress("pause", chainName)[1]
+		: newImplementationAlias;
 
 	const txHash = await walletClient.writeContract({
 		address: proxyAdmin,

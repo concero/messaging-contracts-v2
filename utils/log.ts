@@ -19,7 +19,7 @@ const reset = "\x1b[0m";
 
 export function log(message: any, functionName: string, networkName?: ConceroNetworkNames) {
 	const greenFill = "\x1b[32m";
-	const network = networkName ? `${networkColors[networkName]}[${networkName}]${reset}` : "";
+	const network = networkName ? `\x1b[35m[${networkName}]${reset}` : "";
 
 	console.log(`${network}${greenFill}[${functionName}]${reset}`, message);
 }

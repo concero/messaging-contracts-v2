@@ -3,9 +3,9 @@ import fs from "fs";
 
 import { task } from "hardhat/config";
 
+import { getNetworkEnvKey } from "@concero/contract-utils";
 import { testnetNetworks } from "@concero/v2-networks";
 
-import { networkEnvKeys } from "../../constants";
 import { getEnvVar } from "../../utils";
 import { prepareCLFDist } from "./prepareCLFDist";
 
@@ -28,7 +28,11 @@ export function buildClfJs() {
 
 	try {
 		const networkName = hre.network.name;
-		const conceroVerifier = getEnvVar(`CONCERO_VERIFIER_PROXY_${networkEnvKeys[networkName]}`);
+		const conceroVerifier = getEnvVar(
+			`CONCERO_VERIFIER_PROXY_${getNetworkEnvKey(networkName)}`,
+		);
+
+
 
 		// Base esbuild command with common options
 		const cmdBase =
@@ -36,7 +40,7 @@ export function buildClfJs() {
 			Object.values(testnetNetworks).reduce((acc, e) => {
 				return (
 					acc +
-					`--define:CONCERO_ROUTER_${networkEnvKeys[e.name]}='"${getEnvVar(`CONCERO_ROUTER_PROXY_${networkEnvKeys[e.name]}`)}"' `
+					`--define:CONCERO_ROUTER_${getNetworkEnvKey(e.name)}='"${getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(e.name)}`)}"' `
 				);
 			}, "") +
 			`--define:CONCERO_VERIFIER='"${conceroVerifier}"'`;

@@ -1,7 +1,9 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { CLF_DON_HOSTED_SECRETS_SLOT, conceroNetworks, networkEnvKeys } from "../constants";
+import { getNetworkEnvKey } from "@concero/contract-utils";
+
+import { CLF_DON_HOSTED_SECRETS_SLOT, conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { getEnvVar, getGasParameters, getHashSum, log, updateEnvVariable } from "../utils";
 import { ClfJsCodeType, getClfJsCode } from "../utils/getClfJsCode";
@@ -42,14 +44,14 @@ const deployVerifier: DeploymentFunction = async function (
 
 	const defaultArgs: DeployArgs = {
 		chainSelector: chain.chainSelector,
-		usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
+		usdc: getEnvVar(`USDC_${getNetworkEnvKey(name)}`),
 		clfParams: {
-			router: getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
-			donId: getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
-			subscriptionId: getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`),
-			donHostedSecretsVersion: getEnvVar(`CLF_DON_SECRETS_VERSION_${networkEnvKeys[name]}`),
+			router: getEnvVar(`CLF_ROUTER_${getNetworkEnvKey(name)}`),
+			donId: getEnvVar(`CLF_DONID_${getNetworkEnvKey(name)}`),
+			subscriptionId: getEnvVar(`CLF_SUBID_${getNetworkEnvKey(name)}`),
+			donHostedSecretsVersion: getEnvVar(`CLF_DON_SECRETS_VERSION_${getNetworkEnvKey(name)}`),
 			donHostedSecretsSlotId: CLF_DON_HOSTED_SECRETS_SLOT,
-			premiumFeeUsdBps: getEnvVar(`CLF_PREMIUM_FEE_USD_BPS_${networkEnvKeys[name]}`),
+			premiumFeeUsdBps: getEnvVar(`CLF_PREMIUM_FEE_USD_BPS_${getNetworkEnvKey(name)}`),
 			callbackGasLimit: 100_000n,
 			requestCLFMessageReportJsCodeHash: getHashSum(
 				await getClfJsCode(ClfJsCodeType.MessageReport),
@@ -95,7 +97,7 @@ const deployVerifier: DeploymentFunction = async function (
 
 	log(`Deployed at: ${deployment.address}`, "deployVerifier", name);
 	updateEnvVariable(
-		`CONCERO_VERIFIER_${networkEnvKeys[name]}`,
+		`CONCERO_VERIFIER_${getNetworkEnvKey(name)}`,
 		deployment.address,
 		`deployments.${networkType}`,
 	);

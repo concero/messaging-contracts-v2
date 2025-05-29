@@ -2,7 +2,9 @@ import process from "process";
 
 import { Address } from "viem";
 
-import { envPrefixes, networkEnvKeys } from "../constants";
+import { getNetworkEnvKey } from "@concero/contract-utils";
+
+import { envPrefixes } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { EnvPrefixes } from "../types/deploymentVariables";
 import { type env } from "../types/env";
@@ -24,7 +26,7 @@ function getEnvAddress(
 	networkName?: ConceroNetworkNames | string,
 ): [Address, string] {
 	const searchKey = networkName
-		? `${envPrefixes[prefix]}_${networkEnvKeys[networkName]}`
+		? `${envPrefixes[prefix]}_${getNetworkEnvKey(networkName)}`
 		: envPrefixes[prefix];
 	const value = getEnvVar(searchKey) as Address;
 	const friendlyName = `${prefix}(${shorten(value)})`;

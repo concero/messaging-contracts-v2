@@ -9,6 +9,7 @@ import {
 	publicActions,
 	walletActions,
 } from "viem";
+import { nonceManager } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { PrivateKeyAccount } from "viem/accounts/types";
 import { PublicClient } from "viem/clients/createPublicClient";
@@ -65,7 +66,9 @@ function getFallbackClients(
 				account = privateKeyToAccount(`0x${process.env.MAINNET_DEPLOYER_PRIVATE_KEY}`);
 				break;
 			case "testnet":
-				account = privateKeyToAccount(`0x${process.env.TESTNET_DEPLOYER_PRIVATE_KEY}`);
+				account = privateKeyToAccount(`0x${process.env.TESTNET_DEPLOYER_PRIVATE_KEY}`, {
+					nonceManager: nonceManager,
+				});
 				break;
 			case "localhost":
 				account = privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`);

@@ -3,7 +3,7 @@ import { resolve } from "path";
 
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
-import { conceroNetworks, networkEnvKeys } from "../../constants";
+import { conceroNetworks } from "../../constants";
 import { CLF_DON_HOSTED_SECRETS_SLOT } from "../../constants/clf/secretsConfig";
 import { ConceroNetworkNames } from "../../types/ConceroNetwork";
 import { getEnvVar, getHashSum, updateEnvVariable } from "../../utils";
@@ -27,14 +27,13 @@ export default buildModule("ConceroVerifier", m => {
 	const { type } = conceroNetworks[name as ConceroNetworkNames];
 
 	const constructorArgs = [
-		// getEnvVar(`CONCERO_CHAIN_SELECTOR_${networkEnvKeys[name]}`),
-		getEnvVar(`USDC_${networkEnvKeys[name]}`),
-		getEnvVar(`CLF_ROUTER_${networkEnvKeys[name]}`),
-		getEnvVar(`CLF_DONID_${networkEnvKeys[name]}`),
-		getEnvVar(`CLF_SUBID_${networkEnvKeys[name]}`),
-		getEnvVar(`CLF_DON_SECRETS_VERSION_${networkEnvKeys[name]}`),
+		getEnvVar(`USDC_${getNetworkEnvKey(name)}`),
+		getEnvVar(`CLF_ROUTER_${getNetworkEnvKey(name)}`),
+		getEnvVar(`CLF_DONID_${getNetworkEnvKey(name)}`),
+		getEnvVar(`CLF_SUBID_${getNetworkEnvKey(name)}`),
+		getEnvVar(`CLF_DON_SECRETS_VERSION_${getNetworkEnvKey(name)}`),
 		CLF_DON_HOSTED_SECRETS_SLOT,
-		getEnvVar(`CLF_PREMIUM_FEE_USD_BPS_${networkEnvKeys[name]}`),
+		getEnvVar(`CLF_PREMIUM_FEE_USD_BPS_${getNetworkEnvKey(name)}`),
 		100_000n, // clfCallbackGasLimit
 		getHashSum(requestReportJs),
 		getHashSum(messageReportJs),
@@ -45,7 +44,7 @@ export default buildModule("ConceroVerifier", m => {
 	});
 
 	updateEnvVariable(
-		`CONCERO_VERIFIER_${networkEnvKeys[name]}`,
+		`CONCERO_VERIFIER_${getNetworkEnvKey(name)}`,
 		verifier.address,
 		`deployments.${type}`,
 	);

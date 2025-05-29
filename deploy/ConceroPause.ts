@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { networkEnvKeys } from "../constants";
+import { getNetworkEnvKey } from "@concero/contract-utils";
+
 import { conceroNetworks } from "../constants/conceroNetworks";
 import { getFallbackClients } from "../utils";
 import log from "../utils/log";
@@ -9,8 +10,6 @@ import updateEnvVariable from "../utils/updateEnvVariable";
 const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = async function (
 	hre: HardhatRuntimeEnvironment,
 ) {
-	const { deployer } = await hre.getNamedAccounts();
-	const { deploy } = hre.deployments;
 	const { name, live } = hre.network;
 	const networkType = conceroNetworks[name].type;
 	const conceroNetwork = conceroNetworks[name];
@@ -38,7 +37,7 @@ const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = asyn
 	if (live) {
 		log(`Deployed at: ${deployPauseDummy.address}`, "deployPauseDummy", name);
 		updateEnvVariable(
-			`CONCERO_PAUSE_${networkEnvKeys[name]}`,
+			`CONCERO_PAUSE_${getNetworkEnvKey(name)}`,
 			deployPauseDummy.address,
 			`deployments.${networkType}`,
 		);

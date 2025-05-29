@@ -3,7 +3,9 @@ import { zeroAddress } from "viem";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks, networkEnvKeys } from "../constants";
+import { getNetworkEnvKey } from "@concero/contract-utils";
+
+import { conceroNetworks } from "../constants";
 import { getConceroVerifierNetwork } from "../constants/conceroNetworks";
 import { ConceroNetworkNames, NetworkType } from "../types/ConceroNetwork";
 import { getEnvVar, getGasParameters, log, updateEnvVariable } from "../utils/";
@@ -29,7 +31,7 @@ function getCLFDonSigners(networkType: NetworkType) {
 
 	let clfDonSigners = [];
 	for (let i = 0; i < 4; i++) {
-		clfDonSigners.push(getEnvVar(`CLF_DON_SIGNING_KEY_${i}_${networkEnvKeys[networkName]}`));
+		clfDonSigners.push(getEnvVar(`CLF_DON_SIGNING_KEY_${i}_${getNetworkEnvKey(networkName)}`));
 	}
 	return clfDonSigners;
 }
@@ -56,6 +58,7 @@ const deployRouter: DeploymentFunction = async function (
 	const { name } = hre.network;
 
 	const chain = conceroNetworks[name as ConceroNetworkNames];
+
 	const { type: networkType } = chain;
 
 	const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
@@ -64,14 +67,15 @@ const deployRouter: DeploymentFunction = async function (
 
 	const defaultArgs: DeployArgs = {
 		chainSelector: chain.chainSelector,
-		// usdc: getEnvVar(`USDC_${networkEnvKeys[name]}`),
 		usdc: zeroAddress,
 		conceroVerifier: getEnvVar(
-			`CONCERO_VERIFIER_PROXY_${networkEnvKeys[conceroVerifierNetwork.name]}`,
+			`CONCERO_VERIFIER_PROXY_${getNetworkEnvKey(conceroVerifierNetwork.name)}`,
 		),
-		conceroVerifierSubId: getEnvVar(`CLF_SUBID_${networkEnvKeys[conceroVerifierNetwork.name]}`),
+		conceroVerifierSubId: getEnvVar(
+			`CLF_SUBID_${getNetworkEnvKey(conceroVerifierNetwork.name)}`,
+		),
 		clfSigners: getCLFDonSigners(networkType),
-		feedUpdater: deployer,
+		feedUpdater: process.env.FEED_UPDATER_ADDRESS,
 	};
 
 	const args: DeployArgs = {
@@ -90,13 +94,13 @@ const deployRouter: DeploymentFunction = async function (
 		],
 		log: true,
 		autoMine: true,
-		maxFeePerGas,
-		maxPriorityFeePerGas,
+		// maxFeePerGas,
+		// maxPriorityFeePerGas,
 	});
 
 	log(`Deployed at: ${deployment.address}`, "deployRouter", name);
 	updateEnvVariable(
-		`CONCERO_ROUTER_${networkEnvKeys[name]}`,
+		`CONCERO_ROUTER_${getNetworkEnvKey(name)}`,
 		deployment.address,
 		`deployments.${networkType}`,
 	);

@@ -24,7 +24,7 @@ abstract contract ConceroBaseScript is Script {
     address public constant operator = address(0x4242424242424242424242424242424242424242);
     address public constant user = address(0x0101010101010101010101010101010101010101);
     address constant CONCERO_VERIFIER_ADDRESS = address(0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4);
-
+    address constant feedUpdater = address(0xffff5136020B92553496625644479C7ce4614bE8);
     address public usdc;
 
     uint24 public constant SRC_CHAIN_SELECTOR = 1;

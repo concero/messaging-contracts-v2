@@ -1,3 +1,4 @@
+import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
@@ -17,6 +18,7 @@ import { callContractFunction, changeOwnership, upgradeProxyImplementation } fro
 import { withdrawFees } from "./withdrawFees";
 
 export {
+	ensureNativeBalances,
 	callContractFunction,
 	changeOwnership,
 	upgradeProxyImplementation,

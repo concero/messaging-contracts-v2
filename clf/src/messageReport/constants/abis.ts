@@ -47,6 +47,7 @@ export const messageReportResultParams = [
 			{ type: "bytes", name: "sender" },
 			{ type: "uint24", name: "srcChainSelector" },
 			{ type: "uint24", name: "dstChainSelector" },
+			{ type: "uint256", name: "srcBlockNumber" },
 			{
 				type: "tuple",
 				name: "dstChainData",

@@ -27,9 +27,10 @@ export function packResult(result: MessageReportResult): Uint8Array {
 		{
 			messageId: result.messageId,
 			messageHashSum: result.messageHashSum,
-			sender: encodeAbiParameters([{ type: "address" }], [result.sender]),
+			messageSender: encodeAbiParameters([{ type: "address" }], [result.messageSender]),
 			srcChainSelector: result.srcChainSelector,
 			dstChainSelector: result.dstChainSelector,
+			srcBlockNumber: result.srcBlockNumber,
 			dstChainData: decodedDstChainData[0],
 			allowedOperators: result.allowedOperators,
 		},

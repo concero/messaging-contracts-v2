@@ -32,8 +32,6 @@ export function buildClfJs() {
 			`CONCERO_VERIFIER_PROXY_${getNetworkEnvKey(networkName)}`,
 		);
 
-
-
 		// Base esbuild command with common options
 		const cmdBase =
 			`esbuild --bundle --legal-comments=none --format=esm --global-name=conceromain --target=esnext ` +

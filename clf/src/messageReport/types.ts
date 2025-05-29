@@ -26,6 +26,7 @@ export interface MessageReportResult {
 	messageSender: HexString;
 	srcChainSelector: Number;
 	dstChainSelector: Number;
+	srcBlockNumber: bigint;
 	dstChainData: string;
 	allowedOperators: string[];
 }

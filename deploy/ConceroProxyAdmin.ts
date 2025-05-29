@@ -39,5 +39,5 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 	};
 
 export { deployProxyAdmin };
-export default deployProxyAdmin;
+
 deployProxyAdmin.tags = ["ConceroProxyAdmin"];

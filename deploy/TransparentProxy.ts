@@ -40,5 +40,5 @@ const deployTransparentProxy: (
 };
 
 export { deployTransparentProxy };
-export default deployTransparentProxy;
+
 deployTransparentProxy.tags = ["TransparentProxy"];

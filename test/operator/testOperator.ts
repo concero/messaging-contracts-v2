@@ -2,17 +2,16 @@ import "./utils/configureOperatorEnv";
 
 import { privateKeyToAccount } from "viem/accounts";
 
-import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureDeposit";
-import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureOperatorIsRegistered";
-import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
-import { initializeManagers } from "@concero/v2-operators/src/relayer/common/managers/initializeManagers";
-import { checkGas } from "@concero/v2-operators/src/relayer/common/utils";
+import { checkGas } from "@concero/v2-operators/src/common/utils";
+import { initializeManagers } from "@concero/v2-operators/src/common/utils/initializeManagers";
+import { ensureDeposit } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureDeposit";
+import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureOperatorIsRegistered";
+import { setupEventListeners } from "@concero/v2-operators/src/relayer-a/eventListener/setupEventListeners";
 
-import { deployConceroClientExample } from "../../deploy";
-import { deployMockCLFRouter } from "../../deploy";
-import { deployContracts } from "../../tasks";
-import { getTestClient } from "../../utils";
-import { compileContracts } from "../../utils/compileContracts";
+import { deployConceroClientExample } from "../../deploy/ConceroClientExample";
+import { deployMockCLFRouter } from "../../deploy/MockCLFRouter";
+import { deployContracts } from "../../tasks/deployContracts";
+import { compileContracts, getTestClient } from "../../utils";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
 async function operator() {
@@ -26,7 +25,6 @@ async function operator() {
 
 async function setupChain() {
 	compileContracts({ quiet: true });
-	const hre = require("hardhat");
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
 	);

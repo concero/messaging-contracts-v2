@@ -13,7 +13,7 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-ignition-viem";
 import "@nomicfoundation/hardhat-network-helpers";
-import "@nomicfoundation/hardhat-verify";
+// import "@nomicfoundation/hardhat-verify";
 import "@nomicfoundation/hardhat-viem";
 import "@tenderly/hardhat-tenderly";
 import "@typechain/hardhat";

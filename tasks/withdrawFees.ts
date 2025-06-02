@@ -158,4 +158,4 @@ task("withdraw-fees", "Withdraw native token fees accumulated in Concero contrac
 		await withdrawFees(taskArgs.testnet);
 	});
 
-export { withdrawFees };
+export default {};

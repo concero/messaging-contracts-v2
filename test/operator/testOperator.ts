@@ -8,9 +8,8 @@ import { ensureDeposit } from "@concero/v2-operators/src/relayer-a/businessLogic
 import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureOperatorIsRegistered";
 import { setupEventListeners } from "@concero/v2-operators/src/relayer-a/eventListener/setupEventListeners";
 
-import { deployConceroClientExample } from "../../deploy/ConceroClientExample";
-import { deployMockCLFRouter } from "../../deploy/MockCLFRouter";
-import { deployContracts } from "../../tasks/deployContracts";
+import { deployConceroClientExample, deployMockCLFRouter } from "../../deploy";
+import { deployContracts } from "../../tasks";
 import { compileContracts, getTestClient } from "../../utils";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
@@ -28,6 +27,7 @@ async function setupChain() {
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
 	);
+	const hre = require("hardhat");
 
 	testClient.mine({ blocks: 1000 });
 
@@ -52,28 +52,23 @@ async function main() {
 	const args = process.argv.slice(2);
 	const mode = args[0] ? args[0].toLowerCase() : null;
 
-	switch (mode) {
-		case "chain":
-			await setupChain();
-			break;
-		case "operator":
-			await operator();
-			break;
-		case null:
-			await setupChain();
-			await operator();
-			break;
-		default:
-			console.error(
-				"Please specify a mode: 'chain' (setup chain), 'run' (operator logic), or '' (both)",
-			);
-			process.exit(1);
-	}
+	// switch (mode) {
+	// 	case "chain":
+	// 		await setupChain();
+	// 		break;
+	// 	case "operator":
+	// 		await operator();
+	// 		break;
+	// 	case null:
+	await setupChain();
+	await operator();
+	// break;
+	// default:
+	// 	console.error(
+	// 		"Please specify a mode: 'chain' (setup chain), 'run' (operator logic), or '' (both)",
+	// 	);
+	// 	process.exit(1);
+	// }
 }
 
-if (require.main === module) {
-	main().catch(error => {
-		console.error(error);
-		process.exit(1);
-	});
-}
+main();

@@ -17,10 +17,10 @@ export async function handleOperatorRegistration(
 	const deploymentsManager = DeploymentManager.getInstance();
 	const receipt = await testClient.getTransactionReceipt({ hash: txHash });
 
-	const operatorRegistrationLog = receipt.logs.find(
-		log => log.eventName === "OperatorRegistrationRequested",
-	);
-	if (!operatorRegistrationLog) return;
+	// const operatorRegistrationLog = receipt.logs.find(
+	// 	log => log.eventName === "OperatorRegistrationRequested",
+	// );
+	// if (!operatorRegistrationLog) return;
 
 	const requestSentLog = receipt.logs.find(log => {
 		try {
@@ -55,17 +55,15 @@ export async function handleOperatorRegistration(
 
 	await testClient.impersonateAccount({ address: mockCLFRouter });
 
-	try {
-		await testClient.writeContract({
-			address: conceroVerifierAddress,
-			abi: globalConfig.ABI.CONCERO_VERIFIER,
-			functionName: "handleOracleFulfillment",
-			args: [requestSentLog.topics[1], operatorRegistrationCLFResponseBytes, "0x"],
-			account: mockCLFRouter,
-		});
-	} finally {
-		await testClient.stopImpersonatingAccount({
-			address: mockCLFRouter,
-		});
-	}
+	await testClient.writeContract({
+		address: conceroVerifierAddress,
+		abi: globalConfig.ABI.CONCERO_VERIFIER,
+		functionName: "handleOracleFulfillment",
+		args: [requestSentLog.topics[1], operatorRegistrationCLFResponseBytes, "0x"],
+		account: mockCLFRouter,
+	});
+
+	await testClient.stopImpersonatingAccount({
+		address: mockCLFRouter,
+	});
 }

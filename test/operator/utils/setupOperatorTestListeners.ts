@@ -21,6 +21,7 @@ async function setupOperatorTestListeners({
 	});
 
 	eventEmitter.on("operatorRegistered", async ({ txHash }) => {
+		console.log(`Operator registered with txHash: ${txHash}`);
 		await sendConceroMessage(testClient, testClient, conceroClientExample);
 	});
 

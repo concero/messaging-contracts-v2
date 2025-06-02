@@ -24,10 +24,10 @@ async function operator() {
 
 async function setupChain() {
 	compileContracts({ quiet: true });
+	const hre = require("hardhat");
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
 	);
-	const hre = require("hardhat");
 
 	testClient.mine({ blocks: 1000 });
 

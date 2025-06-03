@@ -37,7 +37,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 		);
 
 		// @dev change this to send message
-		const dstNetwork = conceroNetworks["lineaSepolia"];
+		const dstNetwork = conceroNetworks["sonicBlaze"];
 		const dstChainSelector = dstNetwork.chainSelector;
 
 		const value = parseUnits(taskArgs.value, 18);

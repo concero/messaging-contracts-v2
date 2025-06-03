@@ -12,6 +12,7 @@ import rpc1946 from "@concero/rpcs/output/testnet/1946-soneiumMinato.json";
 import rpc2021 from "@concero/rpcs/output/testnet/2021-roninSaigon.json";
 import rpc3636 from "@concero/rpcs/output/testnet/3636-botanixTestnet.json";
 import rpc5003 from "@concero/rpcs/output/testnet/5003-mantleSepolia.json";
+import rpc5611 from "@concero/rpcs/output/testnet/5611-opbnbTestnet.json";
 import rpc6342 from "@concero/rpcs/output/testnet/6342-megaethTestnet.json";
 import rpc10143 from "@concero/rpcs/output/testnet/10143-monadTestnet.json";
 import rpc10200 from "@concero/rpcs/output/testnet/10200-gnosisChiado.json";
@@ -33,6 +34,7 @@ import rpc763373 from "@concero/rpcs/output/testnet/763373-inkSepolia.json";
 import rpc11155111 from "@concero/rpcs/output/testnet/11155111-ethereumSepolia.json";
 import rpc11155420 from "@concero/rpcs/output/testnet/11155420-optimismSepolia.json";
 import rpc168587773 from "@concero/rpcs/output/testnet/168587773-blastSepolia.json";
+import rpc1313161 from "@concero/rpcs/output/testnet/1313161555-auroraTestnet.json";
 
 import { ChainSelector } from "./types";
 
@@ -78,4 +80,6 @@ export const rpcConfigs: Record<ChainSelector, RpcConfig> = {
 	"919": rpc919 as RpcConfig,
 	"33111": rpc33111 as RpcConfig,
 	"1270": rpc1270 as RpcConfig,
+	"5611": rpc5611 as RpcConfig,
+	"1313161": rpc1313161 as RpcConfig,
 };

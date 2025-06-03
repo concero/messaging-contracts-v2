@@ -14630,6 +14630,14 @@ var mantleSepolia_default = {
   name: "mantleSepolia"
 };
 
+// node_modules/@concero/rpcs/output/testnet/5611-opbnbTestnet.json
+var opbnbTestnet_default = {
+  id: "5611",
+  urls: ["https://opbnb-testnet-rpc.bnbchain.org"],
+  chainSelector: 5611,
+  name: "opbnbTestnet"
+};
+
 // node_modules/@concero/rpcs/output/testnet/6342-megaethTestnet.json
 var megaethTestnet_default = {
   id: "6342",
@@ -14818,6 +14826,14 @@ var blastSepolia_default = {
   name: "blastSepolia"
 };
 
+// node_modules/@concero/rpcs/output/testnet/1313161555-auroraTestnet.json
+var auroraTestnet_default = {
+  id: "1313161555",
+  urls: ["https://testnet.aurora.dev", "https://endpoints.omniatech.io/v1/aurora/testnet/public"],
+  chainSelector: 13131615,
+  name: "auroraTestnet"
+};
+
 // clf/src/common/rpcLoader.ts
 var rpcConfigs = {
   "11155111": ethereumSepolia_default,
@@ -14854,7 +14870,9 @@ var rpcConfigs = {
   "48899": zircuitTestnet_default,
   "919": modeTestnet_default,
   "33111": apechainCurtis_default,
-  "1270": irysTestnet_default
+  "1270": irysTestnet_default,
+  "5611": opbnbTestnet_default,
+  "1313161": auroraTestnet_default
 };
 
 // clf/src/common/viemChains.ts
@@ -14961,7 +14979,10 @@ var conceroRouters = {
   "2358": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "296": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "80069": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "37111": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4"
+  "37111": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4",
+  "1270": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "5611": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "1313161": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
 };
 
 // clf/src/messageReport/constants/config.ts

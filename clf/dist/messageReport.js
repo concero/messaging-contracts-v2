@@ -14837,7 +14837,7 @@ var rpcConfigs = {
   "97": bnbTestnet_default,
   "1946": soneiumMinato_default,
   "200810": bitlayerTestnet_default,
-  "168587773": blastSepolia_default,
+  "1685877": blastSepolia_default,
   "3636": botanixTestnet_default,
   "44787": celoAlfajores_default,
   "1114": coreTestnet_default,

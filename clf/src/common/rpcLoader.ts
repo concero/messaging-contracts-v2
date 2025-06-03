@@ -34,13 +34,15 @@ import rpc11155111 from "@concero/rpcs/output/testnet/11155111-ethereumSepolia.j
 import rpc11155420 from "@concero/rpcs/output/testnet/11155420-optimismSepolia.json";
 import rpc168587773 from "@concero/rpcs/output/testnet/168587773-blastSepolia.json";
 
+import { ChainSelector } from "./types";
+
 export interface RpcConfig {
 	id: string;
 	urls: string[];
 	chainSelector?: number;
 }
 
-export const rpcConfigs: Record<string, RpcConfig> = {
+export const rpcConfigs: Record<ChainSelector, RpcConfig> = {
 	"11155111": rpc11155111 as RpcConfig,
 	"11155420": rpc11155420 as RpcConfig,
 	"42161": rpc42161 as RpcConfig,
@@ -58,7 +60,7 @@ export const rpcConfigs: Record<string, RpcConfig> = {
 	"97": rpc97 as RpcConfig,
 	"1946": rpc1946 as RpcConfig,
 	"200810": rpc200810 as RpcConfig,
-	"168587773": rpc168587773 as RpcConfig,
+	"1685877": rpc168587773 as RpcConfig,
 	"3636": rpc3636 as RpcConfig,
 	"44787": rpc44787 as RpcConfig,
 	"1114": rpc1114 as RpcConfig,

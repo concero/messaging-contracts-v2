@@ -1,6 +1,6 @@
 import { ChainId, ChainSelector } from "../../common/types";
 
-export const chainSelectorToChainId: Record<ChainSelector | ChainId> = {
+export const chainSelectorToChainId: Record<ChainSelector, ChainId> = {
 	"421614": 421614,
 	"84532": 84532,
 	"43113": 43113,

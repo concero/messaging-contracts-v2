@@ -30,11 +30,11 @@ async function operator() {
 }
 
 async function setupChain() {
-	await Promise.all([
-		compileContracts({ quiet: true }),
-		buildClfJs("arbitrumSepolia")
-	]);
+	compileContracts({ quiet: true });
+	buildClfJs("arbitrumSepolia");
+
 	const hre = require("hardhat");
+
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
 	);

@@ -133,8 +133,6 @@ abstract contract CLF is FunctionsClient, Base {
             (CommonTypes.MessagePayloadV1)
         );
 
-        console.logString("CLF fulfillRequest");
-
         emit MessageReport(decodedPayload.messageId);
     }
 

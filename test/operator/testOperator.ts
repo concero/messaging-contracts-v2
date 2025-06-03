@@ -10,7 +10,8 @@ import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer-a/
 import { setupEventListeners } from "@concero/v2-operators/src/relayer-a/eventListener/setupEventListeners";
 
 import { deployConceroClientExample, deployMockCLFRouter } from "../../deploy";
-import { deployContracts } from "../../tasks";
+import { deployContracts, setRouterSupportedChains } from "../../tasks";
+import { buildClfJs } from "../../tasks/clf";
 import { compileContracts, getTestClient } from "../../utils";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
@@ -29,17 +30,19 @@ async function operator() {
 }
 
 async function setupChain() {
-	compileContracts({ quiet: true });
+	await Promise.all([
+		compileContracts({ quiet: true }),
+		buildClfJs("arbitrumSepolia")
+	]);
 	const hre = require("hardhat");
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
 	);
 
-	testClient.mine({ blocks: 1000 });
-
 	const mockCLFRouter = await deployMockCLFRouter(hre);
 
 	const { conceroRouter, conceroVerifier } = await deployContracts(mockCLFRouter.address);
+
 	const conceroClientExample = await deployConceroClientExample(hre, {
 		conceroRouter: conceroRouter.address,
 	});

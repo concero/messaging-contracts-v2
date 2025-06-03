@@ -5,6 +5,7 @@ import { type HardhatRuntimeEnvironment } from "hardhat/types";
 import { conceroNetworks } from "../constants";
 import { deployRouter } from "../deploy/ConceroRouter";
 import { deployVerifier } from "../deploy/ConceroVerifier";
+import { setRouterSupportedChains } from "../tasks/setRouterSupportedChains";
 import { getFallbackClients } from "../utils";
 import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
 import { setVerifierPriceFeeds } from "./setVerifierPriceFeeds";
@@ -22,19 +23,17 @@ async function deployContracts(
 	const conceroNetwork = conceroNetworks[hre.network.name];
 	const { walletClient } = getFallbackClients(conceroNetwork);
 
+	// DEPLOYMENTS
 	const conceroVerifier = await deployVerifier(hre, { clfParams: { router: mockCLFRouter } });
 	const conceroRouter = await deployRouter(hre, { conceroVerifier: conceroVerifier.address });
 
+	// VARIABLE SETTING
 	await setVerifierPriceFeeds(conceroVerifier.address, walletClient);
 	await setRouterPriceFeeds(conceroRouter.address, walletClient);
-
-	await walletClient.writeContract({
-		address: conceroRouter.address,
-		abi: conceroRouterAbi,
-		functionName: "setSupportedChains",
-		args: [[137], [true]],
+	await setRouterSupportedChains(conceroRouter.address, walletClient, {
+		chainSelectors: [1],
+		supportedStates: [true],
 	});
-
 	await walletClient.writeContract({
 		address: mockCLFRouter,
 		abi: mockCLFRouterAbi,

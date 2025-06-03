@@ -16,7 +16,7 @@ export async function sendConceroMessage(
 		address: clientAddress,
 		abi: exampleClientAbi,
 		functionName: "sendConceroMessage",
-		args: [clientAddress],
+		args: [clientAddress, 1n],
 		value: parseUnits("0.01", 18),
 		gas: 10000000n,
 	});

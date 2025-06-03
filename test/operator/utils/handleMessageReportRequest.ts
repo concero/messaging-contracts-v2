@@ -9,6 +9,7 @@ import {
 
 import { globalConfig } from "@concero/v2-operators/src/constants";
 
+import { decodeCLFReport } from "../../../tasks/clf/decodeCLFResponse";
 import { getEnvVar } from "../../../utils";
 import { ExtendedTestClient } from "../../../utils/getViemClients";
 import { getCLFReport } from "../getCLFReport";
@@ -119,7 +120,7 @@ export async function handleMessageReportRequest(
 	const clfRequestId = requestSentLog.log.topics[1];
 	const clfReportBytes = getCLFReport(messageResponseBytes, clfRequestId, conceroVerifier);
 
-	const decoded = decodeAbiParameters(
+	const decodedReportInput = decodeAbiParameters(
 		[
 			{
 				type: "tuple",
@@ -135,9 +136,12 @@ export async function handleMessageReportRequest(
 		clfReportBytes,
 	);
 
-	console.log("decoded", decoded);
+	console.log("decoded report input: ", decodedReportInput);
 
-	const clfDonReportSubmission = decoded[0];
+	const clfDonReportSubmission = decodedReportInput[0];
+
+	const decodedReport = decodeCLFReport(clfDonReportSubmission.report);
+	console.log("decoded report: ", decodedReport);
 
 	try {
 		await testClient.writeContract({

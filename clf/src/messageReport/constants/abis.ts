@@ -44,7 +44,7 @@ export const messageReportResultParams = [
 		components: [
 			{ type: "bytes32", name: "messageId" },
 			{ type: "bytes32", name: "messageHashSum" },
-			{ type: "bytes", name: "sender" },
+			{ type: "bytes", name: "messageSender" },
 			{ type: "uint24", name: "srcChainSelector" },
 			{ type: "uint24", name: "dstChainSelector" },
 			{ type: "uint256", name: "srcBlockNumber" },

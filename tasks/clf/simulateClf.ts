@@ -20,8 +20,6 @@ export async function simulateCLFScript(scriptPath: string, args: string[], secr
 		throw new Error(`File not found: ${scriptPath}`);
 	}
 
-	log(`Simulating ${scriptPath}`, "simulateCLFScript");
-
 	const mergedSecrets = {
 		...secrets,
 		CONCERO_CLF_DEVELOPMENT: "true",
@@ -30,8 +28,6 @@ export async function simulateCLFScript(scriptPath: string, args: string[], secr
 			CONCERO_VERIFIER_LOCALHOST: secretsOverride.CONCERO_VERIFIER_LOCALHOST,
 		}),
 	};
-
-	console.log(args);
 
 	const result = await simulateScript({
 		source: fs.readFileSync(scriptPath, "utf8") + "return await main();",
@@ -51,7 +47,7 @@ export async function simulateCLFScript(scriptPath: string, args: string[], secr
 	}
 
 	if (responseBytesHexstring) {
-		log(responseBytesHexstring, "simulateCLFScript – Response Bytes:");
+		log(responseBytesHexstring, `[simulateCLFScript] – Response Bytes for ${scriptPath}`);
 		// const decodedResponse = decodeCLFResponse(scriptName, responseBytesHexstring);
 		// if (decodedResponse) {
 		//     log(decodedResponse, "simulateCLFScript – Decoded Response:");

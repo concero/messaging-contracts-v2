@@ -20,7 +20,7 @@ async function setupOperatorTestListeners({
 		await handleOperatorRegistration(testClient, txHash, mockCLFRouter);
 	});
 
-	eventEmitter.on("operatorRegistered", async ({ txHash }) => {
+	eventEmitter.on("operatorRegistered", async () => {
 		await sendConceroMessage(testClient, testClient, conceroClientExample);
 	});
 

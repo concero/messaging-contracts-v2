@@ -1117,7 +1117,7 @@
 
 "@concero/v2-operators@https://github.com/concero/v2-operators#feature/stage-updates":
   version "1.0.0"
-  resolved "https://github.com/concero/v2-operators#ec2f6ff46d545b78ed2a995b5553e7217c7940d7"
+  resolved "https://github.com/concero/v2-operators#00c366da2f7e340d97196b9e9001d4ea95e43c9f"
   dependencies:
     "@concero/contract-utils" "github:concero/contract-utils"
     "@concero/v2-networks" "github:concero/v2-networks"

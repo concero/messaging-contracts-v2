@@ -18,6 +18,7 @@ export async function sendConceroMessage(
 		functionName: "sendConceroMessage",
 		args: [clientAddress],
 		value: parseUnits("0.01", 18),
+		gas: 10000000n,
 	});
 
 	const txReceipt = await publicClient.waitForTransactionReceipt({ hash: txHash });

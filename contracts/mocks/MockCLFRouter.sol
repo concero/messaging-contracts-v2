@@ -1,5 +1,7 @@
 pragma solidity 0.8.28;
 
+import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
+
 interface IMockCLFRouter {
     function setConsumer(address _consumer) external;
 
@@ -64,16 +66,8 @@ contract MockCLFRouter {
         bytes memory result = results[0];
         bytes memory err = errors[0];
 
-        (bool success, ) = s_consumer.call(
-            abi.encodeWithSignature(
-                "handleOracleFulfillment(bytes32,bytes,bytes)",
-                requestId,
-                result,
-                err
-            )
-        );
+        FunctionsClient(s_consumer).handleOracleFulfillment(requestId, result, err);
 
-        require(success, CallFailed());
         emit RequestFulfilled(requestId);
     }
 }

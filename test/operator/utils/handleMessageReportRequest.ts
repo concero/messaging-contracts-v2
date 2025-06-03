@@ -48,6 +48,9 @@ export async function handleMessageReportRequest(
 	const { abi: mockCLFRouterAbi } = await import(
 		"../../../artifacts/contracts/mocks/MockCLFRouter.sol/MockCLFRouter.json"
 	);
+	const { abi: conceroVerifierAbi } = await import(
+		"../../../artifacts/contracts/ConceroVerifier/ConceroVerifier.sol/ConceroVerifier.json"
+	);
 
 	const receipt = await testClient.getTransactionReceipt({ hash: txHash });
 
@@ -68,9 +71,7 @@ export async function handleMessageReportRequest(
 			} else if (decoded.eventName === "RequestSent") {
 				requestSentLog = { log, decoded };
 			}
-		} catch {
-			continue;
-		}
+		} catch {}
 	}
 
 	if (!messageReportLog) throw new Error("MessageReportRequested event not found");
@@ -141,7 +142,7 @@ export async function handleMessageReportRequest(
 	try {
 		await testClient.writeContract({
 			address: mockCLFRouter,
-			abi: mockCLFRouterAbi,
+			abi: [...mockCLFRouterAbi, ...conceroVerifierAbi],
 			functionName: "transmit",
 			args: [
 				clfDonReportSubmission.context,
@@ -150,7 +151,6 @@ export async function handleMessageReportRequest(
 				clfDonReportSubmission.ss,
 				clfDonReportSubmission.rawVs,
 			],
-			gasLimit: 1_000_000,
 		});
 	} finally {
 		await testClient.stopImpersonatingAccount({

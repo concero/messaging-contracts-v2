@@ -2,6 +2,7 @@ import "./utils/configureOperatorEnv";
 
 import { privateKeyToAccount } from "viem/accounts";
 
+import { BlockManagerRegistry } from "@concero/v2-operators/src/common/managers/BlockManagerRegistry";
 import { checkGas } from "@concero/v2-operators/src/common/utils";
 import { initializeManagers } from "@concero/v2-operators/src/common/utils/initializeManagers";
 import { ensureDeposit } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureDeposit";
@@ -15,6 +16,11 @@ import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
 async function operator() {
 	await initializeManagers();
+
+	const blockManagerRegistry = BlockManagerRegistry.getInstance();
+	for (const blockManager of blockManagerRegistry.getAllBlockManagers()) {
+		await blockManager.startPolling();
+	}
 
 	await checkGas();
 	await ensureDeposit();

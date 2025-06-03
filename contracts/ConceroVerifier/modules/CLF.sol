@@ -22,6 +22,7 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
+import "hardhat/console.sol";
 
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
@@ -131,6 +132,8 @@ abstract contract CLF is FunctionsClient, Base {
             payload,
             (CommonTypes.MessagePayloadV1)
         );
+
+        console.logString("CLF fulfillRequest");
 
         emit MessageReport(decodedPayload.messageId);
     }

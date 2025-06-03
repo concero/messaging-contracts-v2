@@ -46,6 +46,8 @@ export async function sendConceroMessage(
 		topics: foundMessageSentLog.topics,
 	});
 
+	console.log("[sendConceroMessage]: Message sent: ", decodedEvent);
+
 	return {
 		txHash,
 		blockNumber: txReceipt.blockNumber,

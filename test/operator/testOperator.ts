@@ -2,6 +2,7 @@ import "./utils/configureOperatorEnv";
 
 import { privateKeyToAccount } from "viem/accounts";
 
+import { BlockManagerRegistry } from "@concero/v2-operators/src/common/managers";
 import { checkGas } from "@concero/v2-operators/src/common/utils";
 import { initializeManagers } from "@concero/v2-operators/src/common/utils/initializeManagers";
 import { ensureDeposit } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureDeposit";
@@ -20,6 +21,11 @@ async function operator() {
 	await ensureDeposit();
 	await ensureOperatorIsRegistered();
 	await setupEventListeners();
+
+	const blockManagerRegistry = BlockManagerRegistry.getInstance();
+	for (const blockManager of blockManagerRegistry.getAllBlockManagers()) {
+		await blockManager.startPolling();
+	}
 }
 
 async function setupChain() {
@@ -52,23 +58,23 @@ async function main() {
 	const args = process.argv.slice(2);
 	const mode = args[0] ? args[0].toLowerCase() : null;
 
-	// switch (mode) {
-	// 	case "chain":
-	// 		await setupChain();
-	// 		break;
-	// 	case "operator":
-	// 		await operator();
-	// 		break;
-	// 	case null:
-	await setupChain();
-	await operator();
-	// break;
-	// default:
-	// 	console.error(
-	// 		"Please specify a mode: 'chain' (setup chain), 'run' (operator logic), or '' (both)",
-	// 	);
-	// 	process.exit(1);
-	// }
+	switch (mode) {
+		case "chain":
+			await setupChain();
+			break;
+		case "operator":
+			await operator();
+			break;
+		case null:
+			await setupChain();
+			await operator();
+			break;
+		default:
+			console.error(
+				"Please specify a mode: 'chain' (setup chain), 'run' (operator logic), or '' (both)",
+			);
+			process.exit(1);
+	}
 }
 
 main();

@@ -24,7 +24,7 @@ function processFile(filePath: string, isMinified: boolean = false): void {
 	}
 }
 
-export async function buildClfJs(networkName: string) {
+export function buildClfJs(networkName: string) {
 	try {
 		const conceroVerifier = getEnvVar(
 			`CONCERO_VERIFIER_PROXY_${getNetworkEnvKey(networkName)}`,

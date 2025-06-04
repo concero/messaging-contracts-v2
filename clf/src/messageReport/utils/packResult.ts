@@ -1,4 +1,4 @@
-import { decodeAbiParameters, encodeAbiParameters, hexToBytes } from "viem";
+import { decodeAbiParameters, encodeAbiParameters, hexToBytes, pad } from "viem";
 
 import { hexStringToUint8Array } from "../../common/encoders";
 import { messageReportResultParams } from "../constants/abis";
@@ -32,7 +32,7 @@ export function packResult(result: MessageReportResult): Uint8Array {
 			dstChainSelector: result.dstChainSelector,
 			srcBlockNumber: result.srcBlockNumber,
 			dstChainData: decodedDstChainData[0],
-			allowedOperators: result.allowedOperators,
+			allowedOperators: result.allowedOperators.map(op => pad(op)),
 		},
 	]);
 

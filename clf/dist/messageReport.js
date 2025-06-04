@@ -14452,6 +14452,7 @@ init_decodeAbiParameters();
 init_encodeAbiParameters();
 init_toBytes();
 init_keccak256();
+init_pad();
 
 // clf/src/common/config.ts
 function isDevelopment() {
@@ -15171,7 +15172,7 @@ function packResult(result) {
       dstChainSelector: result.dstChainSelector,
       srcBlockNumber: result.srcBlockNumber,
       dstChainData: decodedDstChainData[0],
-      allowedOperators: result.allowedOperators
+      allowedOperators: result.allowedOperators.map((op) => pad(op))
     }
   ]);
   const encodedResult = encodeAbiParameters(

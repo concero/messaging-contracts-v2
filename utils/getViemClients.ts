@@ -80,6 +80,10 @@ function getFallbackClients(
 
 	const { viemChain, name } = chain;
 
+	if (!urls[name]) {
+		throw new Error(`No URLs configured for chain: ${name}`);
+	}
+
 	const transport = fallback(
 		urls[name].map(url =>
 			http(url, {

@@ -14585,7 +14585,8 @@ var unichainSepolia_default = {
 var seiTestnet_default = {
   id: "1328",
   urls: [
-    "https://evm-rpc-testnet.sei-apis.com"
+    "https://evm-rpc-testnet.sei-apis.com",
+    "https://sei-testnet.drpc.org"
   ],
   chainSelector: 1328,
   name: "seiTestnet"

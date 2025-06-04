@@ -158,14 +158,20 @@ export function decodeMessageResult(resultBytes: string): MessageResult | null {
 		// For message reports (result type 1), decode the payload
 		if (resultConfig.resultType === 1) {
 			try {
-				const decodedPayloadArray = decodeAbiParameters(messageReportPayloadDecoder, payloadBytes);
+				const decodedPayloadArray = decodeAbiParameters(
+					messageReportPayloadDecoder,
+					payloadBytes,
+				);
 				const payloadData = decodedPayloadArray[0] as any;
 
 				// Decode messageSender which is encoded as bytes but represents an address
 				let messageSender = payloadData.messageSender;
 				if (messageSender) {
 					try {
-						messageSender = decodeAbiParameters([{ type: "address" }], messageSender)[0];
+						messageSender = decodeAbiParameters(
+							[{ type: "address" }],
+							messageSender,
+						)[0];
 					} catch (error) {
 						console.warn("Failed to decode messageSender as address:", error);
 					}
@@ -203,12 +209,13 @@ export function decodeMessageResult(resultBytes: string): MessageResult | null {
  * @param reportSubmission - The CLF DON report submission or bytes
  * @returns The decoded message result
  */
-export function extractMessageResult(reportSubmission: ClfDonReportSubmission | string): MessageResult | null {
+export function extractMessageResult(
+	reportSubmission: ClfDonReportSubmission | string,
+): MessageResult | null {
 	try {
 		// Handle either direct bytes or submission object
-		const report = typeof reportSubmission === 'string'
-			? reportSubmission
-			: reportSubmission.report;
+		const report =
+			typeof reportSubmission === "string" ? reportSubmission : reportSubmission.report;
 
 		// Decode the report
 		const clfReport = decodeCLFReport(report);

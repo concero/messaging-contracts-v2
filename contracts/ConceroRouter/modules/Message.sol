@@ -26,6 +26,8 @@ import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, Concero
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
 
+import {console} from "forge-std/src/console.sol";
+
 library Errors {
     error UnsupportedFeeTokenType();
     error MessageAlreadyProcessed(bytes32 messageId);
@@ -102,6 +104,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         _verifyClfReportSignatures(reportSubmission);
 
+
         Types.ClfReport memory clfReport = DecoderLib._decodeCLFReport(reportSubmission.report);
 
         Types.ClfReportOnchainMetadata memory onchainMetadata = abi.decode(
@@ -127,11 +130,13 @@ abstract contract Message is ClfSigner, IConceroRouter {
         bytes memory _messagePayload,
         bytes memory messageBody
     ) internal {
+
         CommonTypes.MessagePayloadV1 memory messagePayload = abi.decode(
             _messagePayload,
             (CommonTypes.MessagePayloadV1)
         );
 
+        console.logBytes(messagePayload.allowedOperators[0]);
         _verifyIsSenderOperator(messagePayload.allowedOperators);
 
         if (messagePayload.dstChainSelector != i_chainSelector) return;

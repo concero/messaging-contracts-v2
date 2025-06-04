@@ -32,7 +32,9 @@ export function packResult(result: MessageReportResult): Uint8Array {
 			dstChainSelector: result.dstChainSelector,
 			srcBlockNumber: result.srcBlockNumber,
 			dstChainData: decodedDstChainData[0],
-			allowedOperators: result.allowedOperators,
+			allowedOperators: result.allowedOperators.map(operatorAddress =>
+				encodeAbiParameters([{ type: "address" }], [operatorAddress]),
+			),
 		},
 	]);
 

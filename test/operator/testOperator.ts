@@ -13,6 +13,7 @@ import { deployConceroClientExample, deployMockCLFRouter } from "../../deploy";
 import { deployContracts, setRouterSupportedChains } from "../../tasks";
 import { buildClfJs } from "../../tasks/clf";
 import { compileContracts, getTestClient } from "../../utils";
+import { deployPseudoRemoteConceroRouter } from "./utils/deployPseudoRemoteConceroRouter";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
 async function operator() {

@@ -31,8 +31,8 @@ async function deployContracts(
 	await setVerifierPriceFeeds(conceroVerifier.address, walletClient);
 	await setRouterPriceFeeds(conceroRouter.address, walletClient);
 	await setRouterSupportedChains(conceroRouter.address, walletClient, {
-		chainSelectors: [1],
-		supportedStates: [true],
+		chainSelectors: [1n, 137n],
+		supportedStates: [true, true],
 	});
 	await walletClient.writeContract({
 		address: mockCLFRouter,

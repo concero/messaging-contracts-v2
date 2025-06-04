@@ -26,8 +26,6 @@ import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, Concero
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
 
-import {console} from "forge-std/src/console.sol";
-
 library Errors {
     error UnsupportedFeeTokenType();
     error MessageAlreadyProcessed(bytes32 messageId);

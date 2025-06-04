@@ -15171,9 +15171,7 @@ function packResult(result) {
       dstChainSelector: result.dstChainSelector,
       srcBlockNumber: result.srcBlockNumber,
       dstChainData: decodedDstChainData[0],
-      allowedOperators: result.allowedOperators.map(
-        (operatorAddress) => encodeAbiParameters([{ type: "address" }], [operatorAddress])
-      )
+      allowedOperators: result.allowedOperators
     }
   ]);
   const encodedResult = encodeAbiParameters(

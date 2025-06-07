@@ -24,9 +24,8 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 			log: true,
 			autoMine: true,
 			skipIfAlreadyDeployed: false,
-			maxFeePerGas,
-			maxPriorityFeePerGas,
-			// gasLimit: writeContractConfig.gas,
+			// maxFeePerGas,
+			// maxPriorityFeePerGas,
 		})) as Deployment;
 
 		log(`Deployed at: ${deployProxyAdmin.address}`, `deployProxyAdmin: ${proxyType}`, name);

@@ -34,9 +34,8 @@ library Errors {
     error InvalidGasLimit();
     error InvalidMessageHashSum();
     error UnauthorizedOperator();
-    error InvalidDstChainSelector(uint24 dstChainSelector);
+    error InvalidDstChainSelector();
     error InvalidClientMessageConfig();
-    error InvalidDstChainData();
     error InvalidSrcChainData();
     error MessageTooLarge();
     error FinalityNotYetSupported();
@@ -134,7 +133,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         _verifyIsSenderOperator(messagePayload.allowedOperators);
 
-        if (messagePayload.dstChainSelector != i_chainSelector) return;
+        require(
+            messagePayload.dstChainSelector == i_chainSelector,
+            Errors.InvalidDstChainSelector()
+        );
 
         require(
             messagePayload.messageHashSum == keccak256(messageBody),
@@ -230,10 +232,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         require(dstChainData.gasLimit > 0, Errors.InvalidGasLimit());
         require(message.length < CommonConstants.MESSAGE_MAX_SIZE, Errors.MessageTooLarge());
         require(!shouldFinaliseSrc, Errors.FinalityNotYetSupported());
-        require(
-            isChainSupported(dstChainSelector),
-            Errors.InvalidDstChainSelector(dstChainSelector)
-        );
+        require(isChainSupported(dstChainSelector), Errors.InvalidDstChainSelector());
     }
 
     function _buildMessageId(uint24 dstChainSelector) private returns (bytes32) {

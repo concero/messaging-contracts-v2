@@ -13,22 +13,26 @@ export async function setSupportedChains(network: ConceroNetwork) {
 	const chainSelectorsToSet = [];
 
 	for (const chainKey in testnetNetworks) {
-		const dstChain = testnetNetworks[chainKey];
-		if (dstChain.name === network.name) continue;
+		try {
+			const dstChain = testnetNetworks[chainKey];
+			if (dstChain.name === network.name) continue;
 
-		const currentIsSupportedChain = (await publicClient.readContract({
-			address: conceroRouterAddress,
-			abi: conceroRouterAbi,
-			functionName: "isChainSupported",
-			args: [dstChain.chainSelector],
-		})) as boolean;
+			const currentIsSupportedChain = (await publicClient.readContract({
+				address: conceroRouterAddress,
+				abi: conceroRouterAbi,
+				functionName: "isChainSupported",
+				args: [dstChain.chainSelector],
+			})) as boolean;
 
-		if (currentIsSupportedChain === true) {
-			log(`[Skip] ${dstChain.name}`, "isChainSupported", network.name);
-			continue;
+			if (currentIsSupportedChain === true) {
+				log(`[Skip] ${dstChain.name}`, "isChainSupported", network.name);
+				continue;
+			}
+
+			chainSelectorsToSet.push(dstChain.chainSelector);
+		} catch (err) {
+			log(`Error setting supported chains: ${err}`, "setSupportedChains", network.name);
 		}
-
-		chainSelectorsToSet.push(dstChain.chainSelector);
 	}
 
 	if (!chainSelectorsToSet.length) {
@@ -36,35 +40,22 @@ export async function setSupportedChains(network: ConceroNetwork) {
 		return;
 	}
 
-	try {
-		const setIsChainSupportedRequest = (
-			await publicClient.simulateContract({
-				account: walletClient.account,
-				address: conceroRouterAddress,
-				abi: conceroRouterAbi,
-				functionName: "setSupportedChains",
-				args: [chainSelectorsToSet, chainSelectorsToSet.map(() => true)],
-			})
-		).request;
-		const setIsChainSupportedHash = await walletClient.writeContract(
-			setIsChainSupportedRequest,
-		);
-		const setIsChainSupportedStatus = (
-			await publicClient.waitForTransactionReceipt({
-				hash: setIsChainSupportedHash,
-			})
-		).status;
+	const setIsChainSupportedHash = await walletClient.writeContract({
+		account: walletClient.account,
+		address: conceroRouterAddress,
+		abi: conceroRouterAbi,
+		functionName: "setSupportedChains",
+		args: [chainSelectorsToSet, chainSelectorsToSet.map(() => true)],
+	});
+	const setIsChainSupportedStatus = (
+		await publicClient.waitForTransactionReceipt({
+			hash: setIsChainSupportedHash,
+		})
+	).status;
 
-		if (setIsChainSupportedStatus === "success") {
-			log(
-				`added new chains: ${chainSelectorsToSet.length}`,
-				"setSupportedChains",
-				network.name,
-			);
-		} else {
-			throw new Error(`set chain reverted ${setIsChainSupportedHash}`);
-		}
-	} catch (err) {
-		log(`Error setting supported chains: ${err}`, "setSupportedChains", network.name);
+	if (setIsChainSupportedStatus === "success") {
+		log(`added new chains: ${chainSelectorsToSet.length}`, "setSupportedChains", network.name);
+	} else {
+		log(`set chain reverted ${setIsChainSupportedHash}`, "setSupportedChains", network.name);
 	}
 }

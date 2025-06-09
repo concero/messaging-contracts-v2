@@ -18,6 +18,3 @@ task("update-all-router-implementations").setAction(async (taskArgs, hre) => {
 });
 
 export default {};
-
-// irys
-// lens

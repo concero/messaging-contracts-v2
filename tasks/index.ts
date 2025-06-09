@@ -1,6 +1,7 @@
 import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
+import deployPauseTask from "./deployPause.task";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
 import updateSupportedChainsForAllRouters from "./deployRouter/updateSupportedChainsForAllRouters.task";
@@ -42,4 +43,5 @@ export {
 	updateSupportedChainsForAllRouters,
 	sendValueTask,
 	updateAllRouterImplementations,
+	deployPauseTask,
 };

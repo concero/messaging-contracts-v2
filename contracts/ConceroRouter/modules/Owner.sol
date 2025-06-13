@@ -128,4 +128,14 @@ abstract contract Owner is Base {
             priceFeedStorage.lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
         }
     }
+
+    function setGasFeeConfig(
+        uint24 baseChainSelector,
+        uint32 gasOverhead,
+        uint32 relayerGasLimit,
+        uint32 verifierGasLimit
+    ) external onlyFeedUpdater {
+        s.priceFeed().gasFeeConfig =
+            s.GasFeeConfig(baseChainSelector, gasOverhead, relayerGasLimit, verifierGasLimit, 0);
+    }
 }

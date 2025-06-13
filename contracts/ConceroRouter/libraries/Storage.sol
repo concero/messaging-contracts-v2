@@ -50,9 +50,18 @@ library Storage {
         mapping(address operator => uint256 feesEarned) feesEarnedNative;
     }
 
+    struct GasFeeConfig {
+        uint24 baseChainSelector;
+        uint32 gasOverhead;
+        uint32 relayerGasLimit;
+        uint32 verifierGasLimit;
+        uint136 __var_gap;
+    }
+
     struct PriceFeed {
         uint256 nativeUsdRate;
-        uint256[50] __var_gap;
+        GasFeeConfig gasFeeConfig;
+        uint256[49] __var_gap;
         uint256[50] __array_gap;
         mapping(uint24 dstChainSelector => uint256) lastGasPrices;
         mapping(uint24 dstChainSelector => uint256) nativeNativeRates;

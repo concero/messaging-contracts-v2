@@ -1,4 +1,3 @@
-import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { getNetworkEnvKey } from "@concero/contract-utils";
@@ -13,8 +12,6 @@ const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = asyn
 	const { deploy } = hre.deployments;
 	const { name, live } = hre.network;
 	const networkType = conceroNetworks[name].type;
-
-	console.log("Deploying...", "deployPauseDummy", name);
 
 	const deployment = await deploy("PauseDummy", {
 		from: deployer,
@@ -32,9 +29,9 @@ const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = asyn
 		);
 	}
 
-	return deployment
+	return deployment;
 };
 
-export { deployPauseDummy };
-
 deployPauseDummy.tags = ["PauseDummy"];
+
+export default deployPauseDummy;

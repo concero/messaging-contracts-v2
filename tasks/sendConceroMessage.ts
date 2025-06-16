@@ -1,4 +1,4 @@
-import { decodeEventLog, parseUnits } from "viem";
+import { decodeEventLog, zeroAddress } from "viem";
 
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -112,7 +112,6 @@ async function sendSingleMessage({
  * Sends a Concero message using the ConceroClientExample contract
  */
 task("send-concero-message", "Send a test Concero message through the client")
-	.addOptionalParam("value", "Amount of native token to send with the message", "0.0001")
 	.addOptionalParam("client", "Address of the ConceroClientExample contract")
 	.addOptionalParam("receiver", "Address of the receiver contract")
 	.addOptionalParam("concurrency", "Number of messages to send concurrently", "1")
@@ -150,10 +149,6 @@ task("send-concero-message", "Send a test Concero message through the client")
 			);
 		}
 		const dstChainSelector = dstNetwork.chainSelector;
-
-		const value = parseUnits(taskArgs.value, 18);
-		log(`Sending with value: ${taskArgs.value} ETH`, "send-concero-message");
-
 		const dstChainClient = getEnvVar(
 			`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(dstNetwork.name)}`,
 		);
@@ -162,6 +157,22 @@ task("send-concero-message", "Send a test Concero message through the client")
 				`Destination chain client address not found for network: ${dstNetwork.name}`,
 			);
 		}
+
+		const srcConceroRouter = getEnvVar(
+			`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(hre.network.name)}`,
+		);
+		const dstChainData = {
+			receiver: dstChainClient,
+			gasLimit: 100000,
+		};
+
+		const value = await publicClient.readContract({
+			address: srcConceroRouter,
+			abi: CONCERO_ROUTER_ABI,
+			functionName: "getMessageFee",
+			args: [Number(dstChainSelector), false, zeroAddress, dstChainData],
+		});
+		log(`Sending with value: ${taskArgs.value} ETH`, "send-concero-message");
 
 		const concurrency = parseInt(taskArgs.concurrency);
 

@@ -14530,6 +14530,14 @@ var xlayerSepolia_default = {
   name: "xlayerSepolia"
 };
 
+// node_modules/@concero/rpcs/output/testnet/300-zksyncSepolia.json
+var zksyncSepolia_default = {
+  id: "300",
+  urls: ["https://sepolia.era.zksync.dev"],
+  chainSelector: 300,
+  name: "zksyncSepolia"
+};
+
 // node_modules/@concero/rpcs/output/testnet/338-cronosTestnet.json
 var cronosTestnet_default = {
   id: "338",
@@ -15057,7 +15065,8 @@ var rpcConfigs = {
   "1234200": campv2Testnet_default,
   "5124": seismicDevnet_default,
   "37111": lensSepolia_default,
-  "80069": berachainBepolia_default
+  "80069": berachainBepolia_default,
+  "300": zksyncSepolia_default
 };
 
 // clf/src/common/viemChains.ts

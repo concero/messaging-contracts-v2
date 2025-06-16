@@ -2,6 +2,7 @@ import rpc97 from "@concero/rpcs/output/testnet/97-bnbTestnet.json";
 import rpc133 from "@concero/rpcs/output/testnet/133-hashkeyTestnet.json";
 import rpc157 from "@concero/rpcs/output/testnet/157-shibariumPuppynet.json";
 import rpc195 from "@concero/rpcs/output/testnet/195-xlayerSepolia.json";
+import rpc300 from "@concero/rpcs/output/testnet/300-zksyncSepolia.json";
 import rpc338 from "@concero/rpcs/output/testnet/338-cronosTestnet.json";
 import rpc545 from "@concero/rpcs/output/testnet/545-flowTestnet.json";
 import rpc919 from "@concero/rpcs/output/testnet/919-modeTestnet.json";
@@ -122,4 +123,5 @@ export const rpcConfigs: Record<ChainSelector, RpcConfig> = {
 	"5124": rpc5124 as RpcConfig,
 	"37111": rpc37111 as RpcConfig,
 	"80069": rpc80069 as RpcConfig,
+	"300": rpc300 as RpcConfig,
 };

@@ -11701,6 +11701,74 @@ async function multicall(client, parameters) {
   return results;
 }
 
+// node_modules/@noble/hashes/esm/utils.js
+function isBytes3(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
+}
+function anumber2(n) {
+  if (!Number.isSafeInteger(n) || n < 0)
+    throw new Error("positive integer expected, got " + n);
+}
+function abytes3(b, ...lengths) {
+  if (!isBytes3(b))
+    throw new Error("Uint8Array expected");
+  if (lengths.length > 0 && !lengths.includes(b.length))
+    throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
+}
+function aexists2(instance, checkFinished = true) {
+  if (instance.destroyed)
+    throw new Error("Hash instance has been destroyed");
+  if (checkFinished && instance.finished)
+    throw new Error("Hash#digest() has already been called");
+}
+function aoutput2(out, instance) {
+  abytes3(out);
+  const min = instance.outputLen;
+  if (out.length < min) {
+    throw new Error("digestInto() expects output buffer of length at least " + min);
+  }
+}
+function u322(arr) {
+  return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
+}
+function clean(...arrays) {
+  for (let i = 0; i < arrays.length; i++) {
+    arrays[i].fill(0);
+  }
+}
+var isLE2 = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
+function byteSwap2(word) {
+  return word << 24 & 4278190080 | word << 8 & 16711680 | word >>> 8 & 65280 | word >>> 24 & 255;
+}
+function byteSwap322(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = byteSwap2(arr[i]);
+  }
+  return arr;
+}
+var swap32IfBE = isLE2 ? (u) => u : byteSwap322;
+function utf8ToBytes3(str) {
+  if (typeof str !== "string")
+    throw new Error("string expected");
+  return new Uint8Array(new TextEncoder().encode(str));
+}
+function toBytes3(data) {
+  if (typeof data === "string")
+    data = utf8ToBytes3(data);
+  abytes3(data);
+  return data;
+}
+var Hash2 = class {
+};
+function createHasher2(hashCons) {
+  const hashC = (msg) => hashCons().update(toBytes3(msg)).digest();
+  const tmp = hashCons();
+  hashC.outputLen = tmp.outputLen;
+  hashC.blockLen = tmp.blockLen;
+  hashC.create = () => hashCons();
+  return hashC;
+}
+
 // node_modules/ox/_esm/core/version.js
 var version3 = "0.1.1";
 
@@ -12274,74 +12342,6 @@ async function simulateBlocks(client, parameters) {
 
 // node_modules/ox/_esm/core/AbiItem.js
 init_exports();
-
-// node_modules/@noble/hashes/esm/utils.js
-function isBytes3(a) {
-  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
-}
-function anumber2(n) {
-  if (!Number.isSafeInteger(n) || n < 0)
-    throw new Error("positive integer expected, got " + n);
-}
-function abytes3(b, ...lengths) {
-  if (!isBytes3(b))
-    throw new Error("Uint8Array expected");
-  if (lengths.length > 0 && !lengths.includes(b.length))
-    throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
-}
-function aexists2(instance, checkFinished = true) {
-  if (instance.destroyed)
-    throw new Error("Hash instance has been destroyed");
-  if (checkFinished && instance.finished)
-    throw new Error("Hash#digest() has already been called");
-}
-function aoutput2(out, instance) {
-  abytes3(out);
-  const min = instance.outputLen;
-  if (out.length < min) {
-    throw new Error("digestInto() expects output buffer of length at least " + min);
-  }
-}
-function u322(arr) {
-  return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
-}
-function clean(...arrays) {
-  for (let i = 0; i < arrays.length; i++) {
-    arrays[i].fill(0);
-  }
-}
-var isLE2 = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
-function byteSwap2(word) {
-  return word << 24 & 4278190080 | word << 8 & 16711680 | word >>> 8 & 65280 | word >>> 24 & 255;
-}
-function byteSwap322(arr) {
-  for (let i = 0; i < arr.length; i++) {
-    arr[i] = byteSwap2(arr[i]);
-  }
-  return arr;
-}
-var swap32IfBE = isLE2 ? (u) => u : byteSwap322;
-function utf8ToBytes3(str) {
-  if (typeof str !== "string")
-    throw new Error("string expected");
-  return new Uint8Array(new TextEncoder().encode(str));
-}
-function toBytes3(data) {
-  if (typeof data === "string")
-    data = utf8ToBytes3(data);
-  abytes3(data);
-  return data;
-}
-var Hash2 = class {
-};
-function createHasher2(hashCons) {
-  const hashC = (msg) => hashCons().update(toBytes3(msg)).digest();
-  const tmp = hashCons();
-  hashC.outputLen = tmp.outputLen;
-  hashC.blockLen = tmp.blockLen;
-  hashC.create = () => hashCons();
-  return hashC;
-}
 
 // node_modules/@noble/hashes/esm/_u64.js
 var U32_MASK642 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
@@ -14542,6 +14542,14 @@ var cronosTestnet_default = {
   name: "cronosTestnet"
 };
 
+// node_modules/@concero/rpcs/output/testnet/545-flowTestnet.json
+var flowTestnet_default = {
+  id: "545",
+  urls: ["https://testnet.evm.nodes.onflow.org", "https://node.histori.xyz/flow-evm-testnet/8ry9f6t9dct1se2hlagxnd9n2a"],
+  chainSelector: 545,
+  name: "flowTestnet"
+};
+
 // node_modules/@concero/rpcs/output/testnet/919-modeTestnet.json
 var modeTestnet_default = {
   id: "919",
@@ -14552,6 +14560,30 @@ var modeTestnet_default = {
   name: "modeTestnet"
 };
 
+// node_modules/@concero/rpcs/output/testnet/943-pulsechainTestnet.json
+var pulsechainTestnet_default = {
+  id: "943",
+  urls: ["https://rpc.v4.testnet.pulsechain.com", "https://pulsechain-testnet-rpc.publicnode.com", "https://rpc-testnet-pulsechain.g4mm4.io"],
+  chainSelector: 943,
+  name: "pulsechainTestnet"
+};
+
+// node_modules/@concero/rpcs/output/testnet/1001-kaiaKairos.json
+var kaiaKairos_default = {
+  id: "1001",
+  urls: ["https://responsive-green-emerald.kaia-kairos.quiknode.pro", "https://public-en-kairos.node.kaia.io", "https://kaia-kairos.blockpi.network/v1/rpc/public", "https://rpc.ankr.com/kaia_testnet"],
+  chainSelector: 1001,
+  name: "kaiaKairos"
+};
+
+// node_modules/@concero/rpcs/output/testnet/1112-wemixTestnet.json
+var wemixTestnet_default = {
+  id: "1112",
+  urls: ["https://api.test.wemix.com", "https://wemix-testnet.drpc.org"],
+  chainSelector: 1112,
+  name: "wemixTestnet"
+};
+
 // node_modules/@concero/rpcs/output/testnet/1114-coreTestnet.json
 var coreTestnet_default = {
   id: "1114",
@@ -14560,6 +14592,14 @@ var coreTestnet_default = {
   ],
   chainSelector: 1114,
   name: "coreTestnet"
+};
+
+// node_modules/@concero/rpcs/output/testnet/1123-b2Testnet.json
+var b2Testnet_default = {
+  id: "1123",
+  urls: ["https://b2-testnet.alt.technology", "https://testnet-rpc.bsquared.network"],
+  chainSelector: 1123,
+  name: "b2Testnet"
 };
 
 // node_modules/@concero/rpcs/output/testnet/1270-irysTestnet.json
@@ -14611,6 +14651,30 @@ var roninSaigon_default = {
   name: "roninSaigon"
 };
 
+// node_modules/@concero/rpcs/output/testnet/2221-kavaTestnet.json
+var kavaTestnet_default = {
+  id: "2221",
+  urls: ["https://evm.testnet.kava.io", "https://kava-testnet.drpc.org"],
+  chainSelector: 2221,
+  name: "kavaTestnet"
+};
+
+// node_modules/@concero/rpcs/output/testnet/2522-fraxtalHolesky.json
+var fraxtalHolesky_default = {
+  id: "2522",
+  urls: ["https://fraxtal-holesky-rpc.publicnode.com", "https://rpc.testnet.frax.com"],
+  chainSelector: 2522,
+  name: "fraxtalHolesky"
+};
+
+// node_modules/@concero/rpcs/output/testnet/2810-morphHolesky.json
+var morphHolesky_default = {
+  id: "2810",
+  urls: ["https://rpc-holesky.morphl2.io", "https://rpc-quicknode-holesky.morphl2.io"],
+  chainSelector: 2810,
+  name: "morphHolesky"
+};
+
 // node_modules/@concero/rpcs/output/testnet/3636-botanixTestnet.json
 var botanixTestnet_default = {
   id: "3636",
@@ -14621,6 +14685,18 @@ var botanixTestnet_default = {
   name: "botanixTestnet"
 };
 
+// node_modules/@concero/rpcs/output/testnet/4801-worldchainTestnet.json
+var worldchainTestnet_default = {
+  id: "4801",
+  urls: [
+    "https://4801.rpc.thirdweb.com",
+    "https://worldchain-sepolia.drpc.org",
+    "https://worldchain-sepolia.g.alchemy.com/public"
+  ],
+  chainSelector: 4801,
+  name: "worldchainTestnet"
+};
+
 // node_modules/@concero/rpcs/output/testnet/5003-mantleSepolia.json
 var mantleSepolia_default = {
   id: "5003",
@@ -14629,6 +14705,14 @@ var mantleSepolia_default = {
   ],
   chainSelector: 5003,
   name: "mantleSepolia"
+};
+
+// node_modules/@concero/rpcs/output/testnet/5124-seismicDevnet.json
+var seismicDevnet_default = {
+  id: "5124",
+  urls: ["https://node-2.seismicdev.net/rpc"],
+  chainSelector: 5124,
+  name: "seismicDevnet"
 };
 
 // node_modules/@concero/rpcs/output/testnet/5611-opbnbTestnet.json
@@ -14667,6 +14751,30 @@ var gnosisChiado_default = {
   name: "gnosisChiado"
 };
 
+// node_modules/@concero/rpcs/output/testnet/11124-abstractSepolia.json
+var abstractSepolia_default = {
+  id: "11124",
+  urls: ["https://api.testnet.abs.xyz"],
+  chainSelector: 11124,
+  name: "abstractSepolia"
+};
+
+// node_modules/@concero/rpcs/output/testnet/18880-expchainTestnet.json
+var expchainTestnet_default = {
+  id: "18880",
+  urls: ["https://rpc1-testnet.expchain.ai"],
+  chainSelector: 18880,
+  name: "expchainTestnet"
+};
+
+// node_modules/@concero/rpcs/output/testnet/23295-oasissapphireTestnet.json
+var oasissapphireTestnet_default = {
+  id: "23295",
+  urls: ["https://testnet.sapphire.oasis.io"],
+  chainSelector: 23295,
+  name: "oasissapphireTestnet"
+};
+
 // node_modules/@concero/rpcs/output/testnet/33111-apechainCurtis.json
 var apechainCurtis_default = {
   id: "33111",
@@ -14676,6 +14784,14 @@ var apechainCurtis_default = {
   ],
   chainSelector: 33111,
   name: "apechainCurtis"
+};
+
+// node_modules/@concero/rpcs/output/testnet/37111-lensSepolia.json
+var lensSepolia_default = {
+  id: "37111",
+  urls: ["https://rpc.testnet.lens.xyz"],
+  chainSelector: 37111,
+  name: "lensSepolia"
 };
 
 // node_modules/@concero/rpcs/output/testnet/43113-avalancheFuji.json
@@ -14739,12 +14855,28 @@ var lineaSepolia_default = {
   name: "lineaSepolia"
 };
 
+// node_modules/@concero/rpcs/output/testnet/59902-metisSepolia.json
+var metisSepolia_default = {
+  id: "59902",
+  urls: ["https://sepolia.metisdevops.link", "https://metis-sepolia-rpc.publicnode.com"],
+  chainSelector: 59902,
+  name: "metisSepolia"
+};
+
 // node_modules/@concero/rpcs/output/testnet/80002-polygonAmoy.json
 var polygonAmoy_default = {
   id: "80002",
   urls: ["https://polygon-amoy-bor-rpc.publicnode.com"],
   chainSelector: 80002,
   name: "polygonAmoy"
+};
+
+// node_modules/@concero/rpcs/output/testnet/80069-berachainBepolia.json
+var berachainBepolia_default = {
+  id: "80069",
+  urls: ["https://bepolia.rpc.berachain.com"],
+  chainSelector: 80069,
+  name: "berachainBepolia"
 };
 
 // node_modules/@concero/rpcs/output/testnet/84532-baseSepolia.json
@@ -14757,6 +14889,14 @@ var baseSepolia_default = {
   ],
   chainSelector: 84532,
   name: "baseSepolia"
+};
+
+// node_modules/@concero/rpcs/output/testnet/167009-taikoTestnet.json
+var taikoTestnet_default = {
+  id: "167009",
+  urls: ["https://taiko-hekla-rpc.publicnode.com", "https://rpc.hekla.taiko.xyz", "https://rpc.ankr.com/taiko_hekla", "https://taiko-hekla.drpc.org"],
+  chainSelector: 167009,
+  name: "taikoTestnet"
 };
 
 // node_modules/@concero/rpcs/output/testnet/200810-bitlayerTestnet.json
@@ -14798,10 +14938,26 @@ var inkSepolia_default = {
   name: "inkSepolia"
 };
 
+// node_modules/@concero/rpcs/output/testnet/808813-bobSepolia.json
+var bobSepolia_default = {
+  id: "808813",
+  urls: ["https://bob-testnet.drpc.org", "https://bob-sepolia.rpc.gobob.xyz"],
+  chainSelector: 808813,
+  name: "bobSepolia"
+};
+
+// node_modules/@concero/rpcs/output/testnet/3441006-mantapacificSepolia.json
+var mantapacificSepolia_default = {
+  id: "3441006",
+  urls: ["https://pacific-rpc.sepolia-testnet.manta.network/http", "https://endpoints.omniatech.io/v1/manta-pacific/sepolia/public"],
+  chainSelector: 3441006,
+  name: "mantapacificSepolia"
+};
+
 // node_modules/@concero/rpcs/output/testnet/11155111-ethereumSepolia.json
 var ethereumSepolia_default = {
   id: "11155111",
-  urls: ["https://ethereum-sepolia-rpc.publicnode.com"],
+  urls: ["https://ethereum-sepolia-rpc.publicnode.com", "https://sepolia.drpc.org", "https://eth-sepolia.public.blastapi.io", "https://sepolia.gateway.tenderly.co"],
   chainSelector: 11155111,
   name: "ethereumSepolia"
 };
@@ -14833,6 +14989,14 @@ var auroraTestnet_default = {
   urls: ["https://testnet.aurora.dev", "https://endpoints.omniatech.io/v1/aurora/testnet/public"],
   chainSelector: 13131615,
   name: "auroraTestnet"
+};
+
+// node_modules/@concero/rpcs/output/testnet/123420001114-campv2Testnet.json
+var campv2Testnet_default = {
+  id: "123420001114",
+  urls: ["https://rpc-campnetwork.xyz"],
+  chainSelector: 1234200,
+  name: "campv2Testnet"
 };
 
 // clf/src/common/rpcLoader.ts
@@ -14873,7 +15037,27 @@ var rpcConfigs = {
   "33111": apechainCurtis_default,
   "1270": irysTestnet_default,
   "5611": opbnbTestnet_default,
-  "1313161": auroraTestnet_default
+  "1313161": auroraTestnet_default,
+  "18880": expchainTestnet_default,
+  "4801": worldchainTestnet_default,
+  "808813": bobSepolia_default,
+  "1123": b2Testnet_default,
+  "545": flowTestnet_default,
+  "2522": fraxtalHolesky_default,
+  "59902": metisSepolia_default,
+  "1112": wemixTestnet_default,
+  "167009": taikoTestnet_default,
+  "2221": kavaTestnet_default,
+  "943": pulsechainTestnet_default,
+  "2810": morphHolesky_default,
+  "1001": kaiaKairos_default,
+  "344100": mantapacificSepolia_default,
+  "11124": abstractSepolia_default,
+  "23295": oasissapphireTestnet_default,
+  "1234200": campv2Testnet_default,
+  "5124": seismicDevnet_default,
+  "37111": lensSepolia_default,
+  "80069": berachainBepolia_default
 };
 
 // clf/src/common/viemChains.ts
@@ -14976,13 +15160,30 @@ var conceroRouters = {
   "48899": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "919": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "300": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "2358": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "296": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "80069": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "37111": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4",
   "1270": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "5611": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "1313161": "0xFc282e2E6ED03583f2ae000C401dC12A86F5F886"
+  "1313161": "0xFc282e2E6ED03583f2ae000C401dC12A86F5F886",
+  "18880": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "4801": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "808813": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "1123": "0xC19D5300E11f71e6eA55941f5B6517FA87B879F4",
+  "545": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "2522": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "59902": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "1112": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "167009": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "2221": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "943": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "2810": CONCERO_ROUTER_MORPHO_HOLESKY,
+  "1001": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "344100": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "11124": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "23295": "0xFc282e2E6ED03583f2ae000C401dC12A86F5F886",
+  "1234200": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "5124": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
 };
 
 // clf/src/messageReport/constants/config.ts

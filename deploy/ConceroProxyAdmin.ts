@@ -1,7 +1,7 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks, writeContractConfig } from "../constants";
+import { conceroNetworks } from "../constants";
 import { IProxyType } from "../types/deploymentVariables";
 import { getGasParameters, getWallet, log, updateEnvAddress } from "../utils";
 
@@ -17,15 +17,14 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 			conceroNetworks[name],
 		);
 
-		// log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
+		log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
 		const deployProxyAdmin = (await deploy("ConceroProxyAdmin", {
 			from: proxyDeployer,
 			args: [initialOwner],
 			log: true,
 			autoMine: true,
 			skipIfAlreadyDeployed: false,
-			// maxFeePerGas,
-			// maxPriorityFeePerGas,
+			gasLimit: 3000000,
 		})) as Deployment;
 
 		log(`Deployed at: ${deployProxyAdmin.address}`, `deployProxyAdmin: ${proxyType}`, name);

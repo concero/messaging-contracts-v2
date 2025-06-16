@@ -3,38 +3,58 @@ import rpc133 from "@concero/rpcs/output/testnet/133-hashkeyTestnet.json";
 import rpc157 from "@concero/rpcs/output/testnet/157-shibariumPuppynet.json";
 import rpc195 from "@concero/rpcs/output/testnet/195-xlayerSepolia.json";
 import rpc338 from "@concero/rpcs/output/testnet/338-cronosTestnet.json";
+import rpc545 from "@concero/rpcs/output/testnet/545-flowTestnet.json";
 import rpc919 from "@concero/rpcs/output/testnet/919-modeTestnet.json";
+import rpc943 from "@concero/rpcs/output/testnet/943-pulsechainTestnet.json";
+import rpc1001 from "@concero/rpcs/output/testnet/1001-kaiaKairos.json";
+import rpc1112 from "@concero/rpcs/output/testnet/1112-wemixTestnet.json";
 import rpc1114 from "@concero/rpcs/output/testnet/1114-coreTestnet.json";
+import rpc1123 from "@concero/rpcs/output/testnet/1123-b2Testnet.json";
 import rpc1270 from "@concero/rpcs/output/testnet/1270-irysTestnet.json";
 import rpc1301 from "@concero/rpcs/output/testnet/1301-unichainSepolia.json";
 import rpc1328 from "@concero/rpcs/output/testnet/1328-seiTestnet.json";
 import rpc1946 from "@concero/rpcs/output/testnet/1946-soneiumMinato.json";
 import rpc2021 from "@concero/rpcs/output/testnet/2021-roninSaigon.json";
+import rpc2221 from "@concero/rpcs/output/testnet/2221-kavaTestnet.json";
+import rpc2522 from "@concero/rpcs/output/testnet/2522-fraxtalHolesky.json";
+import rpc2810 from "@concero/rpcs/output/testnet/2810-morphHolesky.json";
 import rpc3636 from "@concero/rpcs/output/testnet/3636-botanixTestnet.json";
+import rpc4801 from "@concero/rpcs/output/testnet/4801-worldchainTestnet.json";
 import rpc5003 from "@concero/rpcs/output/testnet/5003-mantleSepolia.json";
+import rpc5124 from "@concero/rpcs/output/testnet/5124-seismicDevnet.json";
 import rpc5611 from "@concero/rpcs/output/testnet/5611-opbnbTestnet.json";
 import rpc6342 from "@concero/rpcs/output/testnet/6342-megaethTestnet.json";
 import rpc10143 from "@concero/rpcs/output/testnet/10143-monadTestnet.json";
 import rpc10200 from "@concero/rpcs/output/testnet/10200-gnosisChiado.json";
+import rpc11124 from "@concero/rpcs/output/testnet/11124-abstractSepolia.json";
+import rpc18880 from "@concero/rpcs/output/testnet/18880-expchainTestnet.json";
+import rpc23295 from "@concero/rpcs/output/testnet/23295-oasissapphireTestnet.json";
 import rpc33111 from "@concero/rpcs/output/testnet/33111-apechainCurtis.json";
+import rpc37111 from "@concero/rpcs/output/testnet/37111-lensSepolia.json";
 import rpc43114 from "@concero/rpcs/output/testnet/43113-avalancheFuji.json";
 import rpc43113 from "@concero/rpcs/output/testnet/43113-avalancheFuji.json";
 import rpc44787 from "@concero/rpcs/output/testnet/44787-celoAlfajores.json";
 import rpc48899 from "@concero/rpcs/output/testnet/48899-zircuitTestnet.json";
 import rpc57054 from "@concero/rpcs/output/testnet/57054-sonicBlaze.json";
 import rpc59141 from "@concero/rpcs/output/testnet/59141-lineaSepolia.json";
+import rpc59902 from "@concero/rpcs/output/testnet/59902-metisSepolia.json";
 import rpc80002 from "@concero/rpcs/output/testnet/80002-polygonAmoy.json";
+import rpc80069 from "@concero/rpcs/output/testnet/80069-berachainBepolia.json";
 import rpc8453 from "@concero/rpcs/output/testnet/84532-baseSepolia.json";
 import rpc84532 from "@concero/rpcs/output/testnet/84532-baseSepolia.json";
+import rpc167009 from "@concero/rpcs/output/testnet/167009-taikoTestnet.json";
 import rpc200810 from "@concero/rpcs/output/testnet/200810-bitlayerTestnet.json";
 import rpc42161 from "@concero/rpcs/output/testnet/421614-arbitrumSepolia.json";
 import rpc421614 from "@concero/rpcs/output/testnet/421614-arbitrumSepolia.json";
 import rpc534351 from "@concero/rpcs/output/testnet/534351-scrollSepolia.json";
 import rpc763373 from "@concero/rpcs/output/testnet/763373-inkSepolia.json";
+import rpc808813 from "@concero/rpcs/output/testnet/808813-bobSepolia.json";
+import rpc344100 from "@concero/rpcs/output/testnet/3441006-mantapacificSepolia.json";
 import rpc11155111 from "@concero/rpcs/output/testnet/11155111-ethereumSepolia.json";
 import rpc11155420 from "@concero/rpcs/output/testnet/11155420-optimismSepolia.json";
 import rpc168587773 from "@concero/rpcs/output/testnet/168587773-blastSepolia.json";
 import rpc1313161 from "@concero/rpcs/output/testnet/1313161555-auroraTestnet.json";
+import rpc1234200 from "@concero/rpcs/output/testnet/123420001114-campv2Testnet.json";
 
 import { ChainSelector } from "./types";
 
@@ -82,4 +102,24 @@ export const rpcConfigs: Record<ChainSelector, RpcConfig> = {
 	"1270": rpc1270 as RpcConfig,
 	"5611": rpc5611 as RpcConfig,
 	"1313161": rpc1313161 as RpcConfig,
+	"18880": rpc18880 as RpcConfig,
+	"4801": rpc4801 as RpcConfig,
+	"808813": rpc808813 as RpcConfig,
+	"1123": rpc1123 as RpcConfig,
+	"545": rpc545 as RpcConfig,
+	"2522": rpc2522 as RpcConfig,
+	"59902": rpc59902 as RpcConfig,
+	"1112": rpc1112 as RpcConfig,
+	"167009": rpc167009 as RpcConfig,
+	"2221": rpc2221 as RpcConfig,
+	"943": rpc943 as RpcConfig,
+	"2810": rpc2810 as RpcConfig,
+	"1001": rpc1001 as RpcConfig,
+	"344100": rpc344100 as RpcConfig,
+	"11124": rpc11124 as RpcConfig,
+	"23295": rpc23295 as RpcConfig,
+	"1234200": rpc1234200 as RpcConfig,
+	"5124": rpc5124 as RpcConfig,
+	"37111": rpc37111 as RpcConfig,
+	"80069": rpc80069 as RpcConfig,
 };

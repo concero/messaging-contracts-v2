@@ -34,28 +34,39 @@ export async function setSupportedChains(network: ConceroNetwork) {
 			log(`Error setting supported chains: ${err}`, "setSupportedChains", network.name);
 		}
 	}
+	try {
+		if (!chainSelectorsToSet.length) {
+			log("no new networks to add", "setSupportedChains");
+			return;
+		}
 
-	if (!chainSelectorsToSet.length) {
-		log("no new networks to add", "setSupportedChains");
-		return;
-	}
+		const setIsChainSupportedHash = await walletClient.writeContract({
+			account: walletClient.account,
+			address: conceroRouterAddress,
+			abi: conceroRouterAbi,
+			functionName: "setSupportedChains",
+			args: [chainSelectorsToSet, chainSelectorsToSet.map(() => true)],
+		});
+		const setIsChainSupportedStatus = (
+			await publicClient.waitForTransactionReceipt({
+				hash: setIsChainSupportedHash,
+			})
+		).status;
 
-	const setIsChainSupportedHash = await walletClient.writeContract({
-		account: walletClient.account,
-		address: conceroRouterAddress,
-		abi: conceroRouterAbi,
-		functionName: "setSupportedChains",
-		args: [chainSelectorsToSet, chainSelectorsToSet.map(() => true)],
-	});
-	const setIsChainSupportedStatus = (
-		await publicClient.waitForTransactionReceipt({
-			hash: setIsChainSupportedHash,
-		})
-	).status;
-
-	if (setIsChainSupportedStatus === "success") {
-		log(`added new chains: ${chainSelectorsToSet.length}`, "setSupportedChains", network.name);
-	} else {
-		log(`set chain reverted ${setIsChainSupportedHash}`, "setSupportedChains", network.name);
+		if (setIsChainSupportedStatus === "success") {
+			log(
+				`added new chains: ${chainSelectorsToSet.length}`,
+				"setSupportedChains",
+				network.name,
+			);
+		} else {
+			log(
+				`set chain reverted ${setIsChainSupportedHash}`,
+				"setSupportedChains",
+				network.name,
+			);
+		}
+	} catch (error) {
+		log(error.message, "setSupportedChains", network.name);
 	}
 }

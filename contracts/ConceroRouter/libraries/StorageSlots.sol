@@ -32,12 +32,11 @@ library RouterSlots {
 library PriceFeedSlots {
     uint256 internal constant nativeUsdRate = 0;
     uint256 internal constant gasFeeConfig = 1;
-
-    uint256 private constant _var_gap = 49;
+    uint256 private constant _var_gap = 50;
     uint256 private constant _arr_gap = 50;
 
-    uint256 internal constant lastGasPrices = _var_gap + _arr_gap + 2;
-    uint256 internal constant nativeNativeRates = _var_gap + _arr_gap + 3;
+    uint256 internal constant lastGasPrices = _var_gap + _arr_gap + 1;
+    uint256 internal constant nativeNativeRates = _var_gap + _arr_gap + 2;
 }
 /**
  * @title OperatorSlots

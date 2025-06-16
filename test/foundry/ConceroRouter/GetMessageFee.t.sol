@@ -12,7 +12,6 @@ import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
 import {Utils as CommonUtils} from "contracts/common/libraries/Utils.sol";
 import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
-import {PriceFeedSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 
 contract GetMessageFeeTest is ConceroRouterTest {
     uint24 public constant CHAIN_SELECTOR_A = 1;
@@ -55,9 +54,11 @@ contract GetMessageFeeTest is ConceroRouterTest {
         );
         vm.stopPrank();
 
+        uint8 gasFeeConfigSlotNumber = 1;
+
         // Read the entire slot
         uint256 gasFeeConfigValue =
-            conceroRouter.getStorage(Namespaces.PRICEFEED, PriceFeedSlots.gasFeeConfig, bytes32(0));
+            conceroRouter.getStorage(Namespaces.PRICEFEED, gasFeeConfigSlotNumber, bytes32(0));
 
         // Extract fields in the same order as in the structure
         uint24 baseChainSelector = uint24(gasFeeConfigValue); // lower 24 bits

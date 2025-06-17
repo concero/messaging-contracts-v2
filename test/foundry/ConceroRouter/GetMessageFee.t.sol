@@ -11,6 +11,7 @@ import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
 import {Utils as CommonUtils} from "contracts/common/libraries/Utils.sol";
+import {ConfigSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
 
 contract GetMessageFeeTest is ConceroRouterTest {
@@ -22,8 +23,6 @@ contract GetMessageFeeTest is ConceroRouterTest {
     uint32 public constant RELAYER_GAS_LIMIT = 150_000;
     uint32 public constant VERIFIER_GAS_LIMIT = 200_000;
 
-    uint256 public constant PRECISION = 1e18;
-    uint256 public constant BASE_FEE_NATIVE = 1e13; // Base fee is 0.00001 ETH
     uint256 public constant BASE_NATIVE_NATIVE_RATE = 1e18;
 
     uint256 public constant GAS_PRICE_A = 50 gwei;
@@ -48,17 +47,17 @@ contract GetMessageFeeTest is ConceroRouterTest {
     }
 
     function test_setGasFeeConfig() public {
-        vm.startPrank(feedUpdater);
+        vm.prank(feedUpdater);
         conceroRouter.setGasFeeConfig(
-            CHAIN_SELECTOR_A, GAS_OVERHEAD, RELAYER_GAS_LIMIT, VERIFIER_GAS_LIMIT
+            CHAIN_SELECTOR_A,
+            GAS_OVERHEAD,
+            RELAYER_GAS_LIMIT,
+            VERIFIER_GAS_LIMIT
         );
-        vm.stopPrank();
 
-        uint8 gasFeeConfigSlotNumber = 1;
-
-        // Read the entire slot
+        // Read the entire slot from CONFIG namespace
         uint256 gasFeeConfigValue =
-            conceroRouter.getStorage(Namespaces.PRICEFEED, gasFeeConfigSlotNumber, bytes32(0));
+            conceroRouter.getStorage(Namespaces.CONFIG, ConfigSlots.gasFeeConfig, bytes32(0));
 
         // Extract fields in the same order as in the structure
         uint24 baseChainSelector = uint24(gasFeeConfigValue); // lower 24 bits
@@ -80,19 +79,12 @@ contract GetMessageFeeTest is ConceroRouterTest {
             ConceroTypes.EvmDstChainData({receiver: address(0), gasLimit: 0})
         );
 
-        // 0.01 USD + 0.01 USD = 0.02 USD or 0.00001 ETH (1ETH == 2000 USD)
-        uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
-            CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD
-                + CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
-            NATIVE_USD_RATE
-        );
+        uint256 baseFeeNative = _calculateBaseFeeNative();
 
         assertEq(messageFee, baseFeeNative, "Incorrect base fee native");
     }
 
     function test_getMessageFee_ReturnsGasFeeNative() public {
-        _checkDefaultState();
-
         vm.startPrank(feedUpdater);
         conceroRouter.setGasFeeConfig(CHAIN_SELECTOR_A, GAS_OVERHEAD, 0, 0);
         vm.stopPrank();
@@ -106,19 +98,24 @@ contract GetMessageFeeTest is ConceroRouterTest {
             ConceroTypes.EvmDstChainData({receiver: address(0), gasLimit: GAS_LIMIT})
         );
 
+        uint256 baseFeeNative = _calculateBaseFeeNative();
+
         assertEq(
             messageFee,
-            BASE_FEE_NATIVE
-                + _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, BASE_NATIVE_NATIVE_RATE),
+            baseFeeNative +
+                _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, BASE_NATIVE_NATIVE_RATE),
             "Incorrect gas fee native"
         );
     }
 
     function test_getMessageFee_ReturnsServiceGasFeeNative() public {
-        _checkDefaultState();
-
         vm.startPrank(feedUpdater);
-        conceroRouter.setGasFeeConfig(CHAIN_SELECTOR_A, 0, RELAYER_GAS_LIMIT, VERIFIER_GAS_LIMIT);
+        conceroRouter.setGasFeeConfig(
+            CHAIN_SELECTOR_A,
+            0,
+            RELAYER_GAS_LIMIT,
+            VERIFIER_GAS_LIMIT
+        );
         vm.stopPrank();
 
         _setupPriceFeeds(CHAIN_SELECTOR_A, GAS_PRICE_A, BASE_NATIVE_NATIVE_RATE);
@@ -130,22 +127,27 @@ contract GetMessageFeeTest is ConceroRouterTest {
             ConceroTypes.EvmDstChainData({receiver: address(0), gasLimit: 0})
         );
 
+        uint256 baseFeeNative = _calculateBaseFeeNative();
+
         assertEq(
             messageFee,
-            BASE_FEE_NATIVE
-                + _calculateGasFees(
-                    GAS_PRICE_A, RELAYER_GAS_LIMIT + VERIFIER_GAS_LIMIT, BASE_NATIVE_NATIVE_RATE
+            baseFeeNative +
+                _calculateGasFees(
+                    GAS_PRICE_A,
+                    RELAYER_GAS_LIMIT + VERIFIER_GAS_LIMIT,
+                    BASE_NATIVE_NATIVE_RATE
                 ),
             "Incorrect service gas fee native"
         );
     }
 
     function test_getMessageFee_ReturnsTotalFeeNative() public {
-        _checkDefaultState();
-
         vm.startPrank(feedUpdater);
         conceroRouter.setGasFeeConfig(
-            CHAIN_SELECTOR_A, GAS_OVERHEAD, RELAYER_GAS_LIMIT, VERIFIER_GAS_LIMIT
+            CHAIN_SELECTOR_A,
+            GAS_OVERHEAD,
+            RELAYER_GAS_LIMIT,
+            VERIFIER_GAS_LIMIT
         );
         vm.stopPrank();
 
@@ -158,12 +160,16 @@ contract GetMessageFeeTest is ConceroRouterTest {
             ConceroTypes.EvmDstChainData({receiver: address(0), gasLimit: GAS_LIMIT})
         );
 
+        uint256 baseFeeNative = _calculateBaseFeeNative();
+
         assertEq(
             messageFee,
-            BASE_FEE_NATIVE
-                + _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, BASE_NATIVE_NATIVE_RATE)
-                + _calculateGasFees(
-                    GAS_PRICE_A, RELAYER_GAS_LIMIT + VERIFIER_GAS_LIMIT, BASE_NATIVE_NATIVE_RATE
+            baseFeeNative +
+                _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, BASE_NATIVE_NATIVE_RATE) +
+                _calculateGasFees(
+                    GAS_PRICE_A,
+                    RELAYER_GAS_LIMIT + VERIFIER_GAS_LIMIT,
+                    BASE_NATIVE_NATIVE_RATE
                 ),
             "Incorrect total fee native"
         );
@@ -180,7 +186,10 @@ contract GetMessageFeeTest is ConceroRouterTest {
 
         vm.prank(feedUpdater);
         conceroRouter.setGasFeeConfig(
-            CHAIN_SELECTOR_B, GAS_OVERHEAD, RELAYER_GAS_LIMIT, VERIFIER_GAS_LIMIT
+            CHAIN_SELECTOR_B,
+            GAS_OVERHEAD,
+            RELAYER_GAS_LIMIT,
+            VERIFIER_GAS_LIMIT
         );
 
         uint256 messageFee = conceroRouter.getMessageFee(
@@ -190,26 +199,28 @@ contract GetMessageFeeTest is ConceroRouterTest {
             ConceroTypes.EvmDstChainData({receiver: address(0), gasLimit: GAS_LIMIT})
         );
 
+        uint256 baseFeeNative = _calculateBaseFeeNative();
+
         assertEq(
             messageFee,
-            BASE_FEE_NATIVE
-                + _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, destChainNativeRate)
-                + _calculateGasFees(
-                    GAS_PRICE_B, RELAYER_GAS_LIMIT + VERIFIER_GAS_LIMIT, baseChainNativeRate
+            baseFeeNative +
+                _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, destChainNativeRate) +
+                _calculateGasFees(
+                    GAS_PRICE_B,
+                    RELAYER_GAS_LIMIT + VERIFIER_GAS_LIMIT,
+                    baseChainNativeRate
                 ),
             "Incorrect message fee"
         );
     }
 
-    function _checkDefaultState() internal view {
-        uint256 messageFee = conceroRouter.getMessageFee(
-            CHAIN_SELECTOR_A,
-            false,
-            address(0),
-            ConceroTypes.EvmDstChainData({receiver: address(0), gasLimit: GAS_LIMIT})
-        );
+    function _calculateBaseFeeNative() internal pure returns (uint256) {
+        uint16 totalBps = CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD +
+            CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD +
+            CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD +
+            CommonConstants.CLF_PREMIUM_FEE_BPS_USD;
 
-        assertEq(messageFee, BASE_FEE_NATIVE);
+        return CommonUtils.convertUsdBpsToNative(totalBps, NATIVE_USD_RATE);
     }
 
     function _setupPriceFeeds(uint24 chainSelector, uint256 gasPrice, uint256 nativeNativeRate)
@@ -230,11 +241,11 @@ contract GetMessageFeeTest is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function _calculateGasFees(uint256 gasPrice, uint256 gasLimit, uint256 exchangeRate)
-        private
-        pure
-        returns (uint256)
-    {
-        return (gasPrice * gasLimit * exchangeRate) / PRECISION;
+    function _calculateGasFees(
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 exchangeRate
+    ) private pure returns (uint256) {
+        return (gasPrice * gasLimit * exchangeRate) / CommonConstants.DECIMALS;
     }
 }

@@ -19,6 +19,7 @@ abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.PriceFeed;
     using s for s.Operator;
+    using s for s.Config;
 
     address immutable i_feedUpdater;
 
@@ -135,7 +136,7 @@ abstract contract Owner is Base {
         uint32 relayerGasLimit,
         uint32 verifierGasLimit
     ) external onlyFeedUpdater {
-        s.priceFeed().gasFeeConfig =
+        s.config().gasFeeConfig =
             s.GasFeeConfig(baseChainSelector, gasOverhead, relayerGasLimit, verifierGasLimit, 0);
     }
 }

@@ -14954,6 +14954,14 @@ var bobSepolia_default = {
   name: "bobSepolia"
 };
 
+// node_modules/@concero/rpcs/output/testnet/1000101-xomarketTestnet.json
+var xomarketTestnet_default = {
+  id: "1000101",
+  urls: ["https://dev-testnet-rpc.xo.market"],
+  chainSelector: 1000101,
+  name: "xomarketTestnet"
+};
+
 // node_modules/@concero/rpcs/output/testnet/3441006-mantapacificSepolia.json
 var mantapacificSepolia_default = {
   id: "3441006",
@@ -15066,7 +15074,8 @@ var rpcConfigs = {
   "5124": seismicDevnet_default,
   "37111": lensSepolia_default,
   "80069": berachainBepolia_default,
-  "300": zksyncSepolia_default
+  "300": zksyncSepolia_default,
+  "1000101": xomarketTestnet_default
 };
 
 // clf/src/common/viemChains.ts
@@ -15192,7 +15201,8 @@ var conceroRouters = {
   "11124": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "23295": "0xFc282e2E6ED03583f2ae000C401dC12A86F5F886",
   "1234200": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "5124": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
+  "5124": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "1000101": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
 };
 
 // clf/src/messageReport/constants/config.ts

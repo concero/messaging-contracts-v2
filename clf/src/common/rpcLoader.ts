@@ -50,6 +50,7 @@ import rpc421614 from "@concero/rpcs/output/testnet/421614-arbitrumSepolia.json"
 import rpc534351 from "@concero/rpcs/output/testnet/534351-scrollSepolia.json";
 import rpc763373 from "@concero/rpcs/output/testnet/763373-inkSepolia.json";
 import rpc808813 from "@concero/rpcs/output/testnet/808813-bobSepolia.json";
+import rpc1000101 from "@concero/rpcs/output/testnet/1000101-xomarketTestnet.json";
 import rpc344100 from "@concero/rpcs/output/testnet/3441006-mantapacificSepolia.json";
 import rpc11155111 from "@concero/rpcs/output/testnet/11155111-ethereumSepolia.json";
 import rpc11155420 from "@concero/rpcs/output/testnet/11155420-optimismSepolia.json";
@@ -124,4 +125,5 @@ export const rpcConfigs: Record<ChainSelector, RpcConfig> = {
 	"37111": rpc37111 as RpcConfig,
 	"80069": rpc80069 as RpcConfig,
 	"300": rpc300 as RpcConfig,
+	"1000101": rpc1000101 as RpcConfig,
 };

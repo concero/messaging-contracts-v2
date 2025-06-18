@@ -11,6 +11,7 @@ library CommonConstants {
     uint16 internal constant BPS_DENOMINATOR = 10000;
     uint8 internal constant COHORTS_COUNT = 1;
     uint16 internal constant CONCERO_MESSAGE_BASE_FEE_BPS_USD = 100;
+    uint16 internal constant CLF_PREMIUM_FEE_BPS_USD = 300;
     uint256 internal constant STAKER_FEE = 1e18;
     uint256 internal constant DECIMALS = 1e18;
 

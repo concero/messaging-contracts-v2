@@ -31,7 +31,6 @@ library RouterSlots {
  */
 library PriceFeedSlots {
     uint256 internal constant nativeUsdRate = 0;
-    uint256 internal constant gasFeeConfig = 1;
     uint256 private constant _var_gap = 50;
     uint256 private constant _arr_gap = 50;
 
@@ -49,4 +48,15 @@ library OperatorSlots {
     uint256 private constant _arr_gap = 50;
 
     uint256 internal constant feesEarnedNative = _var_gap + _arr_gap + 1;
+}
+
+/**
+ * @title ConfigSlots
+ * @notice Storage slot definitions for Concero configuration variables
+ * @dev All slots are calculated using standard Solidity storage layout rules
+ */
+library ConfigSlots {
+    uint256 internal constant gasFeeConfig = 0;
+    uint256 private constant _var_gap = 50;
+    uint256 private constant _arr_gap = 50;
 }

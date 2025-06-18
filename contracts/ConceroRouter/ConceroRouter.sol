@@ -19,14 +19,13 @@ import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 contract ConceroRouter is IConceroRouter, Operator, Message, GenericStorage, Owner {
     constructor(
         uint24 chainSelector,
-        address feedUpdater,
+        address conceroPriceFeed,
         address conceroVerifier,
         uint64 conceroVerifierSubId,
         address[4] memory clfSigners
     )
-        Message(conceroVerifier, conceroVerifierSubId, clfSigners)
+        Message(conceroVerifier, conceroVerifierSubId, clfSigners, conceroPriceFeed)
         Base(chainSelector)
-        Owner(feedUpdater)
     {}
 
     receive() external payable {}

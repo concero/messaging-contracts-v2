@@ -22,6 +22,7 @@ import {Types} from "../libraries/Types.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
 import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent} from "../../interfaces/IConceroRouter.sol";
+import {IConceroPriceFeed} from "../../interfaces/IConceroPriceFeed.sol";
 
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
@@ -44,17 +45,22 @@ library Errors {
 abstract contract Message is ClfSigner, IConceroRouter {
     using SafeERC20 for IERC20;
     using s for s.Router;
-    using s for s.PriceFeed;
     using s for s.Operator;
     using s for s.Config;
 
     uint8 private constant MESSAGE_VERSION = 1;
 
+    IConceroPriceFeed internal immutable i_conceroPriceFeed;
+
     constructor(
         address conceroVerifier,
         uint64 conceroVerifierSubId,
-        address[4] memory clfSigners
-    ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {}
+        address[4] memory clfSigners,
+        address conceroPriceFeed
+    ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {
+        require(conceroPriceFeed != address(0), CommonErrors.InvalidAddress());
+        i_conceroPriceFeed = IConceroPriceFeed(conceroPriceFeed);
+    }
 
     function conceroSend(
         uint24 dstChainSelector,
@@ -215,7 +221,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         s.operator().feesEarnedNative[msg.sender] += CommonUtils.convertUsdBpsToNative(
             CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
-            s.priceFeed().nativeUsdRate
+            i_conceroPriceFeed.getNativeUsdRate()
         );
 
         emit ConceroMessageDelivered(messageId);
@@ -270,10 +276,15 @@ abstract contract Message is ClfSigner, IConceroRouter {
         address feeToken,
         ConceroTypes.EvmDstChainData memory dstChainData
     ) internal view returns (uint256) {
-        s.PriceFeed storage priceFeedStorage = s.priceFeed();
         s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
 
-        uint256 nativeUsdRate = priceFeedStorage.nativeUsdRate;
+        (
+            uint256 nativeUsdRate,
+            uint256 dstGasPrice,
+            uint256 dstNativeRate,
+            uint256 baseGasPrice,
+            uint256 baseNativeRate
+        ) = i_conceroPriceFeed.getMessageFeeData(dstChainSelector, gasFeeConfig.baseChainSelector);
 
         uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
             CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD +
@@ -285,17 +296,16 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         // dst chain gas fee
         uint256 gasFeeNative = _calculateGasFees(
-            priceFeedStorage.lastGasPrices[dstChainSelector],
+            dstGasPrice,
             dstChainData.gasLimit + gasFeeConfig.gasOverhead,
-            s.getNativeNativeRate(dstChainSelector)
+            dstNativeRate
         );
 
         // service gas fee
-        uint24 baseChainSelector = gasFeeConfig.baseChainSelector;
         uint256 serviceGasFeeNative = _calculateGasFees(
-            priceFeedStorage.lastGasPrices[baseChainSelector],
+            baseGasPrice,
             gasFeeConfig.relayerGasLimit + gasFeeConfig.verifierGasLimit,
-            s.getNativeNativeRate(baseChainSelector)
+            baseNativeRate
         );
 
         uint256 totalFeeNative = baseFeeNative + gasFeeNative + serviceGasFeeNative;

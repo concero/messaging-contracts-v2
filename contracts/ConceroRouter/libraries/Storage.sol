@@ -17,11 +17,6 @@ library Namespaces {
             abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.operator.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
-    bytes32 internal constant PRICEFEED =
-        keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.pricefeed.storage"))) - 1)
-        ) & ~bytes32(uint256(0xff));
-
     bytes32 internal constant CONFIG =
         keccak256(
             abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.config.storage"))) - 1)
@@ -69,14 +64,6 @@ library Storage {
         uint256[50] __array_gap;
     }
 
-    struct PriceFeed {
-        uint256 nativeUsdRate;
-        uint256[50] __var_gap;
-        uint256[50] __array_gap;
-        mapping(uint24 dstChainSelector => uint256) lastGasPrices;
-        mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
-    }
-
     /* SLOT-BASED STORAGE ACCESS */
     function router() internal pure returns (Router storage s) {
         bytes32 slot = Namespaces.ROUTER;
@@ -92,22 +79,10 @@ library Storage {
         }
     }
 
-    function priceFeed() internal pure returns (PriceFeed storage s) {
-        bytes32 slot = Namespaces.PRICEFEED;
-        assembly {
-            s.slot := slot
-        }
-    }
-
     function config() internal pure returns (Config storage s) {
         bytes32 slot = Namespaces.CONFIG;
         assembly {
             s.slot := slot
         }
-    }
-
-    // @notice wrapper for gas savings
-    function getNativeNativeRate(uint24 chainSelector) internal view returns (uint256) {
-        return priceFeed().nativeNativeRates[chainSelector];
     }
 }

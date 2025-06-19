@@ -16,9 +16,7 @@ import {Base} from "./Base.sol";
 abstract contract GenericStorage is Base {
     function _validateNamespace(bytes32 slot) internal pure {
         require(
-            slot == Namespaces.VERIFIER ||
-                slot == Namespaces.OPERATOR ||
-                slot == Namespaces.PRICEFEED,
+            slot == Namespaces.VERIFIER || slot == Namespaces.OPERATOR || slot == Namespaces.CONFIG,
             gs.InvalidNamespace()
         );
     }

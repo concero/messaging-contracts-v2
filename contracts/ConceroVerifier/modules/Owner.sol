@@ -17,7 +17,7 @@ import {Base} from "./Base.sol";
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.Verifier;
-    using s for s.PriceFeed;
+    using s for s.Config;
 
     /**
      * @notice Calculates the amount of native token fees available for withdrawal
@@ -72,10 +72,6 @@ abstract contract Owner is Base {
         }
     }
 
-    function setNativeUsdRate(uint256 amount) external onlyOwner {
-        s.priceFeed().nativeUsdRate = amount;
-    }
-
     /**
      * @notice Set support status for multiple chains at once
      * @param chainSelectors Array of chain selectors to update
@@ -93,5 +89,20 @@ abstract contract Owner is Base {
 
             s.verifier().isChainSupported[chainSelector] = supported;
         }
+    }
+
+    function setGasFeeConfig(
+        uint24 baseChainSelector,
+        uint32 gasOverhead,
+        uint32 relayerGasLimit,
+        uint32 verifierGasLimit
+    ) external onlyOwner {
+        s.config().gasFeeConfig = s.GasFeeConfig(
+            baseChainSelector,
+            gasOverhead,
+            relayerGasLimit,
+            verifierGasLimit,
+            0
+        );
     }
 }

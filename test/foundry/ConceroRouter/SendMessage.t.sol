@@ -32,8 +32,8 @@ contract SendMessage is ConceroRouterTest {
 
         vm.deal(user, 100 ether);
 
-        vm.prank(deployer);
-        conceroRouter.setNativeUsdRate(NATIVE_USD_RATE);
+        vm.prank(feedUpdater);
+        conceroPriceFeed.setNativeUsdRate(NATIVE_USD_RATE);
         uint24[] memory chainSelectors = new uint24[](1);
         chainSelectors[0] = DST_CHAIN_SELECTOR;
 
@@ -50,8 +50,11 @@ contract SendMessage is ConceroRouterTest {
 
         vm.startPrank(deployer);
         conceroRouter.setSupportedChains(chainselectors, supported);
-        conceroRouter.setNativeNativeRates(chainSelectors, rates);
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        vm.stopPrank();
+
+        vm.startPrank(feedUpdater);
+        conceroPriceFeed.setNativeNativeRates(chainSelectors, rates);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
         vm.stopPrank();
     }
 

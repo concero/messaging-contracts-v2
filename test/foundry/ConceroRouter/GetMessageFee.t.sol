@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
+import {ConceroRouterTest} from "../ConceroRouter/base/ConceroRouterTest.sol";
 
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
@@ -43,11 +43,11 @@ contract GetMessageFeeTest is ConceroRouterTest {
         conceroRouter.setSupportedChains(chainSelectors, isSupported);
 
         vm.prank(feedUpdater);
-        conceroRouter.setNativeUsdRate(NATIVE_USD_RATE);
+        conceroPriceFeed.setNativeUsdRate(NATIVE_USD_RATE);
     }
 
     function test_setGasFeeConfig() public {
-        vm.prank(feedUpdater);
+        vm.prank(deployer);
         conceroRouter.setGasFeeConfig(
             CHAIN_SELECTOR_A,
             GAS_OVERHEAD,
@@ -56,8 +56,11 @@ contract GetMessageFeeTest is ConceroRouterTest {
         );
 
         // Read the entire slot from CONFIG namespace
-        uint256 gasFeeConfigValue =
-            conceroRouter.getStorage(Namespaces.CONFIG, ConfigSlots.gasFeeConfig, bytes32(0));
+        uint256 gasFeeConfigValue = conceroRouter.getStorage(
+            Namespaces.CONFIG,
+            ConfigSlots.gasFeeConfig,
+            bytes32(0)
+        );
 
         // Extract fields in the same order as in the structure
         uint24 baseChainSelector = uint24(gasFeeConfigValue); // lower 24 bits
@@ -85,7 +88,7 @@ contract GetMessageFeeTest is ConceroRouterTest {
     }
 
     function test_getMessageFee_ReturnsGasFeeNative() public {
-        vm.startPrank(feedUpdater);
+        vm.startPrank(deployer);
         conceroRouter.setGasFeeConfig(CHAIN_SELECTOR_A, GAS_OVERHEAD, 0, 0);
         vm.stopPrank();
 
@@ -109,13 +112,8 @@ contract GetMessageFeeTest is ConceroRouterTest {
     }
 
     function test_getMessageFee_ReturnsServiceGasFeeNative() public {
-        vm.startPrank(feedUpdater);
-        conceroRouter.setGasFeeConfig(
-            CHAIN_SELECTOR_A,
-            0,
-            RELAYER_GAS_LIMIT,
-            VERIFIER_GAS_LIMIT
-        );
+        vm.startPrank(deployer);
+        conceroRouter.setGasFeeConfig(CHAIN_SELECTOR_A, 0, RELAYER_GAS_LIMIT, VERIFIER_GAS_LIMIT);
         vm.stopPrank();
 
         _setupPriceFeeds(CHAIN_SELECTOR_A, GAS_PRICE_A, BASE_NATIVE_NATIVE_RATE);
@@ -142,7 +140,7 @@ contract GetMessageFeeTest is ConceroRouterTest {
     }
 
     function test_getMessageFee_ReturnsTotalFeeNative() public {
-        vm.startPrank(feedUpdater);
+        vm.startPrank(deployer);
         conceroRouter.setGasFeeConfig(
             CHAIN_SELECTOR_A,
             GAS_OVERHEAD,
@@ -184,7 +182,7 @@ contract GetMessageFeeTest is ConceroRouterTest {
         _setupPriceFeeds(CHAIN_SELECTOR_A, GAS_PRICE_A, destChainNativeRate);
         _setupPriceFeeds(CHAIN_SELECTOR_B, GAS_PRICE_B, baseChainNativeRate);
 
-        vm.prank(feedUpdater);
+        vm.prank(deployer);
         conceroRouter.setGasFeeConfig(
             CHAIN_SELECTOR_B,
             GAS_OVERHEAD,
@@ -223,9 +221,11 @@ contract GetMessageFeeTest is ConceroRouterTest {
         return CommonUtils.convertUsdBpsToNative(totalBps, NATIVE_USD_RATE);
     }
 
-    function _setupPriceFeeds(uint24 chainSelector, uint256 gasPrice, uint256 nativeNativeRate)
-        internal
-    {
+    function _setupPriceFeeds(
+        uint24 chainSelector,
+        uint256 gasPrice,
+        uint256 nativeNativeRate
+    ) internal {
         uint24[] memory chainSelectors = new uint24[](1);
         chainSelectors[0] = chainSelector;
 
@@ -236,8 +236,8 @@ contract GetMessageFeeTest is ConceroRouterTest {
         nativeNativeRates[0] = nativeNativeRate;
 
         vm.startPrank(feedUpdater);
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
-        conceroRouter.setNativeNativeRates(chainSelectors, nativeNativeRates);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setNativeNativeRates(chainSelectors, nativeNativeRates);
         vm.stopPrank();
     }
 

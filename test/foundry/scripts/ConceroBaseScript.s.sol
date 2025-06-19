@@ -14,9 +14,12 @@ import {DeployMockERC20} from "./deploy/DeployMockERC20.s.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
+import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
 import {console} from "forge-std/src/Console.sol";
 
 abstract contract ConceroBaseScript is Script {
+    ConceroPriceFeed internal conceroPriceFeed;
+
     address public immutable deployer;
     address public immutable proxyDeployer;
     uint64 immutable i_conceroVerifierSubscriptionId;

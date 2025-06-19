@@ -7,13 +7,12 @@
 pragma solidity 0.8.28;
 
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
-import {Errors} from "contracts/ConceroRouter/libraries/Errors.sol";
-import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
-import {RouterSlots, PriceFeedSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {Namespaces} from "contracts/ConceroPriceFeed/libraries/Storage.sol";
+import {PriceFeedSlots} from "contracts/ConceroPriceFeed/libraries/StorageSlots.sol";
 
-import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
+import {ConceroPriceFeedTest} from "./base/ConceroPriceFeedTest.sol";
 
-contract SetLastGasPricesTest is ConceroRouterTest {
+contract SetLastGasPricesTest is ConceroPriceFeedTest {
     uint24 public constant CHAIN_SELECTOR_A = 1;
     uint24 public constant CHAIN_SELECTOR_B = 2;
     uint24 public constant CHAIN_SELECTOR_C = 3;
@@ -41,21 +40,21 @@ contract SetLastGasPricesTest is ConceroRouterTest {
         gasPrices[1] = GAS_PRICE_B;
         gasPrices[2] = GAS_PRICE_C;
 
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
-        uint256 storedGasPriceA = conceroRouter.getStorage(
+        uint256 storedGasPriceA = conceroPriceFeed.getStorage(
             Namespaces.PRICEFEED,
             PriceFeedSlots.lastGasPrices,
             bytes32(uint256(CHAIN_SELECTOR_A))
         );
 
-        uint256 storedGasPriceB = conceroRouter.getStorage(
+        uint256 storedGasPriceB = conceroPriceFeed.getStorage(
             Namespaces.PRICEFEED,
             PriceFeedSlots.lastGasPrices,
             bytes32(uint256(CHAIN_SELECTOR_B))
         );
 
-        uint256 storedGasPriceC = conceroRouter.getStorage(
+        uint256 storedGasPriceC = conceroPriceFeed.getStorage(
             Namespaces.PRICEFEED,
             PriceFeedSlots.lastGasPrices,
             bytes32(uint256(CHAIN_SELECTOR_C))
@@ -77,9 +76,9 @@ contract SetLastGasPricesTest is ConceroRouterTest {
         uint256[] memory gasPrices = new uint256[](1);
         gasPrices[0] = GAS_PRICE_A;
 
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
-        uint256 storedGasPrice = conceroRouter.getStorage(
+        uint256 storedGasPrice = conceroPriceFeed.getStorage(
             Namespaces.PRICEFEED,
             PriceFeedSlots.lastGasPrices,
             bytes32(uint256(CHAIN_SELECTOR_A))
@@ -100,13 +99,13 @@ contract SetLastGasPricesTest is ConceroRouterTest {
         uint256[] memory gasPrices = new uint256[](1);
         gasPrices[0] = GAS_PRICE_A;
 
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
         // Now update it
         gasPrices[0] = UPDATED_GAS_PRICE;
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
-        uint256 storedGasPrice = conceroRouter.getStorage(
+        uint256 storedGasPrice = conceroPriceFeed.getStorage(
             Namespaces.PRICEFEED,
             PriceFeedSlots.lastGasPrices,
             bytes32(uint256(CHAIN_SELECTOR_A))
@@ -130,7 +129,7 @@ contract SetLastGasPricesTest is ConceroRouterTest {
         gasPrices[1] = GAS_PRICE_B;
 
         vm.expectRevert(CommonErrors.LengthMismatch.selector);
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
         vm.stopPrank();
     }
@@ -145,7 +144,7 @@ contract SetLastGasPricesTest is ConceroRouterTest {
         gasPrices[0] = GAS_PRICE_A;
 
         vm.expectRevert(CommonErrors.Unauthorized.selector);
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
         vm.stopPrank();
     }
@@ -156,7 +155,7 @@ contract SetLastGasPricesTest is ConceroRouterTest {
         uint24[] memory chainSelectors = new uint24[](0);
         uint256[] memory gasPrices = new uint256[](0);
 
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
         vm.stopPrank();
     }

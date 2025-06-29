@@ -14610,6 +14610,14 @@ var b2Testnet_default = {
   name: "b2Testnet"
 };
 
+// node_modules/@concero/rpcs/output/testnet/1174-litheumTestnet.json
+var litheumTestnet_default = {
+  id: "1174",
+  urls: ["https://testnet.litheum.com"],
+  chainSelector: 1174,
+  name: "litheumTestnet"
+};
+
 // node_modules/@concero/rpcs/output/testnet/1270-irysTestnet.json
 var irysTestnet_default = {
   id: "1270",
@@ -14621,11 +14629,7 @@ var irysTestnet_default = {
 // node_modules/@concero/rpcs/output/testnet/1301-unichainSepolia.json
 var unichainSepolia_default = {
   id: "1301",
-  urls: [
-    "https://sepolia.unichain.org",
-    "https://unichain-sepolia-rpc.publicnode.com",
-    "https://unichain-sepolia.drpc.org"
-  ],
+  urls: ["https://sepolia.unichain.org", "https://unichain-sepolia-rpc.publicnode.com"],
   chainSelector: 1301,
   name: "unichainSepolia"
 };
@@ -14633,10 +14637,7 @@ var unichainSepolia_default = {
 // node_modules/@concero/rpcs/output/testnet/1328-seiTestnet.json
 var seiTestnet_default = {
   id: "1328",
-  urls: [
-    "https://evm-rpc-testnet.sei-apis.com",
-    "https://sei-testnet.drpc.org"
-  ],
+  urls: ["https://evm-rpc-testnet.sei-apis.com"],
   chainSelector: 1328,
   name: "seiTestnet"
 };
@@ -15075,7 +15076,8 @@ var rpcConfigs = {
   "37111": lensSepolia_default,
   "80069": berachainBepolia_default,
   "300": zksyncSepolia_default,
-  "1000101": xomarketTestnet_default
+  "1000101": xomarketTestnet_default,
+  "1174": litheumTestnet_default
 };
 
 // clf/src/common/viemChains.ts
@@ -15202,7 +15204,8 @@ var conceroRouters = {
   "23295": "0xFc282e2E6ED03583f2ae000C401dC12A86F5F886",
   "1234200": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
   "5124": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
-  "1000101": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01"
+  "1000101": "0x15b599Ca946A34313Bfa20C9249e0FA9C7d2dA01",
+  "1174": CONCERO_ROUTER_LITHEU_TESTNET
 };
 
 // clf/src/messageReport/constants/config.ts

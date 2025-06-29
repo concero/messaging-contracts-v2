@@ -11,6 +11,7 @@ import rpc1001 from "@concero/rpcs/output/testnet/1001-kaiaKairos.json";
 import rpc1112 from "@concero/rpcs/output/testnet/1112-wemixTestnet.json";
 import rpc1114 from "@concero/rpcs/output/testnet/1114-coreTestnet.json";
 import rpc1123 from "@concero/rpcs/output/testnet/1123-b2Testnet.json";
+import rpc1174 from "@concero/rpcs/output/testnet/1174-litheumTestnet.json";
 import rpc1270 from "@concero/rpcs/output/testnet/1270-irysTestnet.json";
 import rpc1301 from "@concero/rpcs/output/testnet/1301-unichainSepolia.json";
 import rpc1328 from "@concero/rpcs/output/testnet/1328-seiTestnet.json";
@@ -126,4 +127,5 @@ export const rpcConfigs: Record<ChainSelector, RpcConfig> = {
 	"80069": rpc80069 as RpcConfig,
 	"300": rpc300 as RpcConfig,
 	"1000101": rpc1000101 as RpcConfig,
+	"1174": rpc1174 as RpcConfig,
 };

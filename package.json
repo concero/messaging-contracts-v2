@@ -33,7 +33,7 @@
         "@concero/contract-utils": "https://github.com/concero/contract-utils",
         "@concero/rpcs": "https://github.com/concero/rpcs",
         "@concero/v2-networks": "https://github.com/concero/v2-networks",
-        "@concero/v2-operators": "https://github.com/concero/v2-operators#feature/stage-updates",
+        "@concero/v2-operators": "https://github.com/concero/v2-operators",
         "@nomicfoundation/hardhat-chai-matchers": "2.0.8",
         "@nomicfoundation/hardhat-ethers": "3.0.8",
         "@nomicfoundation/hardhat-network-helpers": "1.0.12",

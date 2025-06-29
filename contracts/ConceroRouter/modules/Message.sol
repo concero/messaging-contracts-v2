@@ -273,8 +273,8 @@ abstract contract Message is ClfSigner, IConceroRouter {
         uint256 nativeUsdRate = priceFeedStorage.nativeUsdRate;
 
         uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
-            CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD 
-            + CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
+            CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD +
+                CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
             nativeUsdRate
         );
 
@@ -289,7 +289,8 @@ abstract contract Message is ClfSigner, IConceroRouter {
         uint24 baseChainSelector = priceFeedStorage.gasFeeConfig.baseChainSelector;
         uint256 serviceGasFeeNative = _calculateGasFees(
             priceFeedStorage.lastGasPrices[baseChainSelector],
-            priceFeedStorage.gasFeeConfig.relayerGasLimit + priceFeedStorage.gasFeeConfig.verifierGasLimit,
+            priceFeedStorage.gasFeeConfig.relayerGasLimit +
+                priceFeedStorage.gasFeeConfig.verifierGasLimit,
             s.getNativeNativeRate(baseChainSelector)
         );
 
@@ -302,11 +303,11 @@ abstract contract Message is ClfSigner, IConceroRouter {
         return (totalFeeNative * nativeUsdRate) / CommonConstants.DECIMALS;
     }
 
-    function _calculateGasFees(uint256 gasPrice, uint256 gasLimit, uint256 exchangeRate)
-        private
-        pure
-        returns (uint256)
-    {
+    function _calculateGasFees(
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 exchangeRate
+    ) private pure returns (uint256) {
         return (gasPrice * gasLimit * exchangeRate) / CommonConstants.DECIMALS;
     }
 

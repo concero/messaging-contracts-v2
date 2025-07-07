@@ -19,6 +19,8 @@ import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/Fu
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 
+import {IConceroPriceFeed} from "../../interfaces/IConceroPriceFeed.sol";
+
 import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
@@ -40,7 +42,8 @@ abstract contract CLF is FunctionsClient, Base {
         uint16 clfPremiumFeeUsdBps,
         uint32 clfCallbackGasLimit,
         bytes32 requestCLFMessageReportJsCodeHash,
-        bytes32 requestOperatorRegistrationJsCodeHash
+        bytes32 requestOperatorRegistrationJsCodeHash,
+        address conceroPriceFeed
     ) FunctionsClient(clfRouter) {
         i_clfDonId = clfDonId;
         i_clfSubscriptionId = clfSubscriptionId;
@@ -50,9 +53,11 @@ abstract contract CLF is FunctionsClient, Base {
         i_clfCallbackGasLimit = clfCallbackGasLimit;
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
         i_requestOperatorRegistrationJsCodeHash = requestOperatorRegistrationJsCodeHash;
+        i_conceroPriceFeed = IConceroPriceFeed(conceroPriceFeed);
     }
 
     /* IMMUTABLE VARIABLES */
+    IConceroPriceFeed internal immutable i_conceroPriceFeed;
     bytes32 internal immutable i_requestCLFMessageReportJsCodeHash;
     bytes32 internal immutable i_requestOperatorRegistrationJsCodeHash;
     bytes32 internal immutable i_clfDonId;
@@ -181,6 +186,7 @@ abstract contract CLF is FunctionsClient, Base {
         uint24 srcChainSelector,
         bytes memory srcChainData
     ) internal returns (bytes32 clfRequestId) {
+        // TODO: calculate deposit amount
         _witholdOperatorDeposit(
             msg.sender,
             CommonUtils.convertUsdBpsToNative(
@@ -218,6 +224,7 @@ abstract contract CLF is FunctionsClient, Base {
         Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) internal returns (bytes32 clfRequestId) {
+        // TODO: calculate deposit amount
         _witholdOperatorDeposit(
             msg.sender,
             CommonUtils.convertUsdBpsToNative(
@@ -267,6 +274,14 @@ abstract contract CLF is FunctionsClient, Base {
         );
 
         return gasCost + premiumFee;
+    }
+
+    function _calculateGasFees(
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 exchangeRate
+    ) private pure returns (uint256) {
+        return (gasPrice * gasLimit * exchangeRate) / CommonConstants.DECIMALS;
     }
 
     /**

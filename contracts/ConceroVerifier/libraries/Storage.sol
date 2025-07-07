@@ -27,6 +27,11 @@ library Namespaces {
                 uint256(keccak256(abi.encodePacked("conceroverifier.pricefeed.storage"))) - 1
             )
         ) & ~bytes32(uint256(0xff));
+
+    bytes32 internal constant CONFIG =
+        keccak256(
+            abi.encode(uint256(keccak256(abi.encodePacked("conceroverifier.config.storage"))) - 1)
+        ) & ~bytes32(uint256(0xff));
 }
 
 library Storage {
@@ -52,6 +57,20 @@ library Storage {
         mapping(address operator => uint256) feesEarnedNative;
     }
 
+    struct GasFeeConfig {
+        uint24 baseChainSelector;
+        uint32 gasOverhead;
+        uint32 relayerGasLimit;
+        uint32 verifierGasLimit;
+        uint136 __var_gap;
+    }
+
+    struct Config {
+        GasFeeConfig gasFeeConfig;
+        uint256[50] __var_gap;
+        uint256[50] __array_gap;
+    }
+
     struct PriceFeed {
         uint256 nativeUsdRate;
         uint256[50] __var_gap;
@@ -70,6 +89,13 @@ library Storage {
 
     function operator() internal pure returns (Operator storage s) {
         bytes32 slot = Namespaces.OPERATOR;
+        assembly {
+            s.slot := slot
+        }
+    }
+
+    function config() internal pure returns (Config storage s) {
+        bytes32 slot = Namespaces.CONFIG;
         assembly {
             s.slot := slot
         }

@@ -11,18 +11,26 @@ import {console} from "forge-std/src/Console.sol";
 import {OperatorSlots, VerifierSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
 import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
+import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
 import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroVerifier} from "../../scripts/deploy/DeployConceroVerifier.s.sol";
 import {DeployMockCLFRouter} from "../../scripts/deploy/DeployMockCLFRouter.s.sol";
+import {DeployConceroPriceFeed} from "../../scripts/deploy/DeployConceroPriceFeed.s.sol";
 
 import {ConceroVerifierBase} from "./ConceroVerifierBase.sol";
 import {MockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 
 abstract contract ConceroVerifierTest is DeployConceroVerifier, ConceroTest {
+    DeployConceroPriceFeed internal priceFeedDeployer;
+
     function setUp() public virtual override(DeployConceroVerifier, ConceroTest) {
         super.setUp();
+
+        priceFeedDeployer = new DeployConceroPriceFeed();
+        address priceFeed = priceFeedDeployer.deploy();
+        conceroPriceFeed = ConceroPriceFeed(payable(priceFeed));
 
         conceroVerifier = ConceroVerifier(payable(deploy()));
 

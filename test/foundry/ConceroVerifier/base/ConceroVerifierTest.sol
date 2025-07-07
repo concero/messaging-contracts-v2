@@ -10,6 +10,7 @@ import {console} from "forge-std/src/Console.sol";
 
 import {OperatorSlots, VerifierSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
 import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
+import {Namespaces as PriceFeedNamespaces} from "contracts/ConceroPriceFeed/libraries/Storage.sol";
 import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
 import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
 import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
@@ -59,6 +60,22 @@ abstract contract ConceroVerifierTest is DeployConceroVerifier, ConceroTest {
             PriceFeedSlots.nativeNativeRates,
             bytes32(uint256(SRC_CHAIN_SELECTOR)),
             1e18
+        );
+
+        // ------------------------------------------------------------
+
+        conceroPriceFeed.setStorage(
+            PriceFeedNamespaces.PRICEFEED,
+            PriceFeedSlots.nativeUsdRate,
+            bytes32(0),
+            NATIVE_USD_RATE
+        );
+
+        conceroPriceFeed.setStorage(
+            PriceFeedNamespaces.PRICEFEED,
+            PriceFeedSlots.lastGasPrices,
+            bytes32(uint256(SRC_CHAIN_SELECTOR)),
+            LAST_GAS_PRICE
         );
 
         vm.stopPrank();

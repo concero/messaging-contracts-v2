@@ -59,9 +59,9 @@ library Storage {
 
     struct GasFeeConfig {
         uint24 baseChainSelector;
-        uint32 gasOverhead;
-        uint32 relayerGasLimit;
-        uint32 verifierGasLimit;
+        uint32 submitMsgGasOverhead;
+        uint32 vrfMsgReportRequestGasLimit;
+        uint32 vrfCallbackGasLimit;
         uint136 __var_gap;
     }
 

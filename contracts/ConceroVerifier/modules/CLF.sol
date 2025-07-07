@@ -24,12 +24,12 @@ import {IConceroPriceFeed} from "../../interfaces/IConceroPriceFeed.sol";
 import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
-import "hardhat/console.sol";
 
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Verifier;
     using s for s.Operator;
+    using s for s.Config;
 
     error WrongClfResultType();
 
@@ -187,6 +187,7 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory srcChainData
     ) internal returns (bytes32 clfRequestId) {
         // TODO: calculate deposit amount
+
         _witholdOperatorDeposit(
             msg.sender,
             CommonUtils.convertUsdBpsToNative(
@@ -260,17 +261,22 @@ abstract contract CLF is FunctionsClient, Base {
     }
 
     function getCLFCost() public view returns (uint256) {
-        uint256 lastGasPrice = s.priceFeed().lastGasPrices[i_chainSelector];
+        (uint256 nativeUsdRate, uint256 lastGasPrice, , , ) = i_conceroPriceFeed.getMessageFeeData(
+            i_chainSelector,
+            i_chainSelector
+        );
+
         require(
             lastGasPrice > 0,
             CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.lastGasPrice)
         );
 
-        uint256 gasCost = i_clfCallbackGasLimit * lastGasPrice;
+        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
+        uint256 gasCost = gasFeeConfig.vrfCallbackGasLimit * lastGasPrice;
 
         uint256 premiumFee = CommonUtils.convertUsdBpsToNative(
-            i_clfPremiumFeeUsdBps,
-            s.priceFeed().nativeUsdRate
+            CommonConstants.CLF_PREMIUM_FEE_BPS_USD,
+            nativeUsdRate
         );
 
         return gasCost + premiumFee;

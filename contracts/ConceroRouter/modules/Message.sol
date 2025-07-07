@@ -297,14 +297,14 @@ abstract contract Message is ClfSigner, IConceroRouter {
         // dst chain gas fee
         uint256 gasFeeNative = _calculateGasFees(
             dstGasPrice,
-            dstChainData.gasLimit + gasFeeConfig.gasOverhead,
+            gasFeeConfig.submitMsgGasOverhead + dstChainData.gasLimit,
             dstNativeRate
         );
 
         // service gas fee
         uint256 serviceGasFeeNative = _calculateGasFees(
             baseGasPrice,
-            gasFeeConfig.relayerGasLimit + gasFeeConfig.verifierGasLimit,
+            gasFeeConfig.vrfMsgReportRequestGasLimit + gasFeeConfig.vrfCallbackGasLimit,
             baseNativeRate
         );
 

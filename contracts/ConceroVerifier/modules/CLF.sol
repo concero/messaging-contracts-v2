@@ -119,7 +119,7 @@ abstract contract CLF is FunctionsClient, Base {
             revert Errors.InvalidMessageVersion();
         }
 
-        uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
+        uint256 nativeUsdRate = i_conceroPriceFeed.getNativeUsdRate();
 
         s.operator().feesEarnedNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
             CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,

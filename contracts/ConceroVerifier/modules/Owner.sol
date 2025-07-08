@@ -17,7 +17,6 @@ import {Base} from "./Base.sol";
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.Verifier;
-	using s for s.PriceFeed;
     using s for s.Config;
 
     /**
@@ -71,11 +70,6 @@ abstract contract Owner is Base {
                 ++i;
             }
         }
-    }
-
-	// TODO: remove this function (func moved to ConceroPriceFeed contract)
-    function setNativeUsdRate(uint256 amount) external onlyOwner {
-        s.priceFeed().nativeUsdRate = amount;
     }
 
     /**

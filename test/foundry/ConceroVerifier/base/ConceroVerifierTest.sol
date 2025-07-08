@@ -8,8 +8,9 @@ pragma solidity 0.8.28;
 
 import {console} from "forge-std/src/Console.sol";
 
-import {OperatorSlots, VerifierSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
-import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
+import {OperatorSlots, VerifierSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {PriceFeedSlots} from "contracts/ConceroPriceFeed/libraries/StorageSlots.sol";
+import {Namespaces as VerifierNamespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 import {Namespaces as PriceFeedNamespaces} from "contracts/ConceroPriceFeed/libraries/Storage.sol";
 import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
 import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
@@ -41,29 +42,6 @@ abstract contract ConceroVerifierTest is DeployConceroVerifier, ConceroTest {
     function _setPriceFeeds() internal {
         vm.startPrank(deployer);
 
-        conceroVerifier.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.nativeUsdRate,
-            bytes32(0),
-            NATIVE_USD_RATE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(SRC_CHAIN_SELECTOR)),
-            LAST_GAS_PRICE
-        );
-
-        conceroVerifier.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.nativeNativeRates,
-            bytes32(uint256(SRC_CHAIN_SELECTOR)),
-            1e18
-        );
-
-        // ------------------------------------------------------------
-
         conceroPriceFeed.setStorage(
             PriceFeedNamespaces.PRICEFEED,
             PriceFeedSlots.nativeUsdRate,
@@ -85,14 +63,14 @@ abstract contract ConceroVerifierTest is DeployConceroVerifier, ConceroTest {
         vm.startPrank(deployer);
 
         conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
+            VerifierNamespaces.OPERATOR,
             OperatorSlots.feesEarnedNative,
             bytes32(uint256(uint160(operator))),
             OPERATOR_FEES_NATIVE
         );
 
         conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
+            VerifierNamespaces.OPERATOR,
             OperatorSlots.totalFeesEarnedNative,
             bytes32(0),
             OPERATOR_FEES_NATIVE
@@ -105,14 +83,14 @@ abstract contract ConceroVerifierTest is DeployConceroVerifier, ConceroTest {
         vm.startPrank(deployer);
 
         conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
+            VerifierNamespaces.OPERATOR,
             OperatorSlots.totalDepositsNative,
             bytes32(0),
             OPERATOR_DEPOSIT_NATIVE
         );
 
         conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
+            VerifierNamespaces.OPERATOR,
             OperatorSlots.depositsNative,
             bytes32(uint256(uint160(operator))),
             OPERATOR_DEPOSIT_NATIVE
@@ -124,7 +102,7 @@ abstract contract ConceroVerifierTest is DeployConceroVerifier, ConceroTest {
         vm.startPrank(deployer);
 
         conceroVerifier.setStorage(
-            Namespaces.OPERATOR,
+            VerifierNamespaces.OPERATOR,
             OperatorSlots.isRegistered,
             bytes32(uint256(uint160(operator))),
             1

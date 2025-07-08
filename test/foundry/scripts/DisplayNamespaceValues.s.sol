@@ -21,7 +21,6 @@ contract DisplayNamespaceValues is Script {
 
         bytes32 conceroVerifierVerifier = ConceroVerifierNamespaces.VERIFIER;
         bytes32 conceroVerifierOperator = ConceroVerifierNamespaces.OPERATOR;
-        bytes32 conceroVerifierPriceFeed = ConceroVerifierNamespaces.PRICEFEED;
 
         bytes32 conceroPriceFeedPriceFeed = ConceroPriceFeedNamespaces.PRICEFEED;
 
@@ -39,9 +38,6 @@ contract DisplayNamespaceValues is Script {
 
         console.logString("ConceroVerifier::Operator:");
         console.logBytes32(conceroVerifierOperator);
-
-        console.logString("ConceroVerifier::PriceFeed:");
-        console.logBytes32(conceroVerifierPriceFeed);
 
         console.logString("ConceroPriceFeed::PriceFeed:");
         console.logBytes32(conceroPriceFeedPriceFeed);

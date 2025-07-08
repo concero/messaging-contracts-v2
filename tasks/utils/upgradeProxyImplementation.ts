@@ -23,6 +23,8 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
 		implementationKey = "router";
 	} else if (proxyType === ProxyEnum.verifierProxy) {
 		implementationKey = "verifier";
+	} else if (proxyType === ProxyEnum.priceFeedProxy) {
+		implementationKey = "priceFeed";
 	} else {
 		err(`Proxy type ${proxyType} not found`, "upgradeProxyImplementation", chainName);
 		return;

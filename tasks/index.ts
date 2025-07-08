@@ -2,6 +2,7 @@ import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
 import deployPauseTask from "./deployPause.task";
+import { deployPriceFeedTask } from "./deployPriceFeed/deployPriceFeedTask";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
 import updateSupportedChainsForAllRouters from "./deployRouter/updateSupportedChainsForAllRouters.task";
@@ -25,6 +26,7 @@ export {
 	callContractFunction,
 	changeOwnership,
 	upgradeProxyImplementation,
+	deployPriceFeedTask,
 	deployRouterTask,
 	deployVerifierTask,
 	setRouterVariables,

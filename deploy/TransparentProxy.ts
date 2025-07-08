@@ -15,19 +15,15 @@ const deployTransparentProxy: (
 	const chain = conceroNetworks[name];
 	const { type } = chain;
 
-	const [initialImplementation, initialImplementationAlias] = getEnvAddress("router", name);
+	const [initialImplementation, initialImplementationAlias] = getEnvAddress("priceFeed", name);
 	const [proxyAdmin, proxyAdminAlias] = getEnvAddress(`${proxyType}Admin`, name);
 
-	const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
-
-	// log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
+	log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
 	const conceroProxyDeployment = (await deploy("TransparentUpgradeableProxy", {
 		from: proxyDeployer,
 		args: [initialImplementation, proxyAdmin, "0x"],
 		log: true,
-		autoMine: true,
-		// maxFeePerGas,
-		// maxPriorityFeePerGas
+		autoMine: true
 	})) as Deployment;
 
 	log(

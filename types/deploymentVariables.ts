@@ -12,6 +12,9 @@ export type EnvPrefixes = {
 	verifier: string;
 	verifierProxy: string;
 	verifierProxyAdmin: string;
+	priceFeed: string;
+	priceFeedProxy: string;
+	priceFeedProxyAdmin: string;
 	lpToken: string;
 	create3Factory: string;
 	pause: string;

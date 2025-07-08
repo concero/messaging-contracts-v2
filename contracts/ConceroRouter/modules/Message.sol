@@ -22,7 +22,6 @@ import {Types} from "../libraries/Types.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
 import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent} from "../../interfaces/IConceroRouter.sol";
-import {IConceroPriceFeed} from "../../interfaces/IConceroPriceFeed.sol";
 
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
@@ -50,17 +49,11 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
     uint8 private constant MESSAGE_VERSION = 1;
 
-    IConceroPriceFeed internal immutable i_conceroPriceFeed;
-
     constructor(
         address conceroVerifier,
         uint64 conceroVerifierSubId,
-        address[4] memory clfSigners,
-        address conceroPriceFeed
-    ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {
-        require(conceroPriceFeed != address(0), CommonErrors.InvalidAddress());
-        i_conceroPriceFeed = IConceroPriceFeed(conceroPriceFeed);
-    }
+        address[4] memory clfSigners
+    ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {}
 
     function conceroSend(
         uint24 dstChainSelector,

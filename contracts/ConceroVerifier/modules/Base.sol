@@ -6,9 +6,10 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroOwnable} from "../../common/ConceroOwnable.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
+import {CommonErrors} from "../../common/CommonErrors.sol";
+import {ConceroOwnable} from "../../common/ConceroOwnable.sol";
 import {IConceroPriceFeed} from "../../interfaces/IConceroPriceFeed.sol";
 
 abstract contract Base is ConceroOwnable {
@@ -23,6 +24,7 @@ abstract contract Base is ConceroOwnable {
     }
 
     constructor(uint24 chainSelector, address USDC, address conceroPriceFeed) ConceroOwnable() {
+		require(conceroPriceFeed != address(0), CommonErrors.InvalidAddress());
         i_chainSelector = chainSelector;
         i_USDC = USDC;
         i_conceroPriceFeed = IConceroPriceFeed(conceroPriceFeed);

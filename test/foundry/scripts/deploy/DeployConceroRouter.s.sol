@@ -32,6 +32,8 @@ contract DeployConceroRouter is ConceroRouterBase {
 
     function deploy() public returns (address) {
         address implementation = _deployImplementation(
+            SRC_CHAIN_SELECTOR,
+            address(conceroPriceFeed),
             CONCERO_VERIFIER_ADDRESS,
             i_conceroVerifierSubscriptionId,
             [
@@ -47,11 +49,19 @@ contract DeployConceroRouter is ConceroRouterBase {
     }
 
     function deploy(
+        uint24 chainSelector,
+        address conceroPriceFeed,
         address verifier,
         uint64 verifierSubId,
         address[4] memory clfSigners
     ) public returns (address) {
-        address implementation = _deployImplementation(verifier, verifierSubId, clfSigners);
+        address implementation = _deployImplementation(
+            chainSelector,
+            conceroPriceFeed,
+            verifier,
+            verifierSubId,
+            clfSigners
+        );
         _deployProxy(implementation);
         return address(conceroRouterProxy);
     }
@@ -63,6 +73,8 @@ contract DeployConceroRouter is ConceroRouterBase {
     }
 
     function _deployImplementation(
+        uint24 chainSelector,
+        address conceroPriceFeed,
         address verifier,
         uint64 verifierSubId,
         address[4] memory clfSigners
@@ -70,8 +82,8 @@ contract DeployConceroRouter is ConceroRouterBase {
         vm.startPrank(deployer);
 
         conceroRouter = new ConceroRouter(
-            SRC_CHAIN_SELECTOR,
-            address(conceroPriceFeed),
+            chainSelector,
+            conceroPriceFeed,
             verifier,
             verifierSubId,
             clfSigners

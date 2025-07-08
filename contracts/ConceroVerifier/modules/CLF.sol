@@ -19,8 +19,6 @@ import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/Fu
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 
-import {IConceroPriceFeed} from "../../interfaces/IConceroPriceFeed.sol";
-
 import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
@@ -42,8 +40,7 @@ abstract contract CLF is FunctionsClient, Base {
         uint16 clfPremiumFeeUsdBps,
         uint32 clfCallbackGasLimit,
         bytes32 requestCLFMessageReportJsCodeHash,
-        bytes32 requestOperatorRegistrationJsCodeHash,
-        address conceroPriceFeed
+        bytes32 requestOperatorRegistrationJsCodeHash
     ) FunctionsClient(clfRouter) {
         i_clfDonId = clfDonId;
         i_clfSubscriptionId = clfSubscriptionId;
@@ -53,11 +50,9 @@ abstract contract CLF is FunctionsClient, Base {
         i_clfCallbackGasLimit = clfCallbackGasLimit;
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
         i_requestOperatorRegistrationJsCodeHash = requestOperatorRegistrationJsCodeHash;
-        i_conceroPriceFeed = IConceroPriceFeed(conceroPriceFeed);
     }
 
     /* IMMUTABLE VARIABLES */
-    IConceroPriceFeed internal immutable i_conceroPriceFeed;
     bytes32 internal immutable i_requestCLFMessageReportJsCodeHash;
     bytes32 internal immutable i_requestOperatorRegistrationJsCodeHash;
     bytes32 internal immutable i_clfDonId;
@@ -126,7 +121,7 @@ abstract contract CLF is FunctionsClient, Base {
             nativeUsdRate
         );
 
-		uint256 withheldOperatorAmount = getCLFCost();
+        uint256 withheldOperatorAmount = getCLFCost();
         s.operator().depositsNative[resultConfig.requester] += withheldOperatorAmount;
     }
 
@@ -174,7 +169,7 @@ abstract contract CLF is FunctionsClient, Base {
             }
         }
 
-		// TODO: do we need to return the withheld amount?
+        // TODO: do we need to return the withheld amount?
 
         emit OperatorRegistered(requester, result.operatorChains, result.operatorActions);
     }
@@ -248,18 +243,15 @@ abstract contract CLF is FunctionsClient, Base {
     }
 
     function getCLFCost() public view returns (uint256) {
-        (uint256 nativeUsdRate, uint256 lastGasPrice, , , ) = i_conceroPriceFeed.getMessageFeeData(
-            i_chainSelector,
-            i_chainSelector
-        );
+        (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
+            .getNativeUsdRateAndGasPrice();
 
         require(
             lastGasPrice > 0,
             CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.lastGasPrice)
         );
 
-        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
-        uint256 gasCost = gasFeeConfig.vrfCallbackGasLimit * lastGasPrice;
+        uint256 gasCost = s.config().gasFeeConfig.vrfCallbackGasLimit * lastGasPrice;
 
         uint256 premiumFee = CommonUtils.convertUsdBpsToNative(
             CommonConstants.CLF_PREMIUM_FEE_BPS_USD,
@@ -278,13 +270,15 @@ abstract contract CLF is FunctionsClient, Base {
         address operator,
         uint256 depositWithholdable
     ) internal returns (uint256) {
-        uint256 currentDeposit = s.operator().depositsNative[operator];
+        s.Operator storage operatorStorage = s.operator();
+        uint256 currentDeposit = operatorStorage.depositsNative[operator];
+
         require(
-            s.operator().depositsNative[operator] >= depositWithholdable,
+            currentDeposit >= depositWithholdable,
             Errors.InsufficientOperatorDeposit(currentDeposit, depositWithholdable)
         );
 
-        s.operator().depositsNative[operator] -= depositWithholdable;
+        operatorStorage.depositsNative[operator] -= depositWithholdable;
         return depositWithholdable;
     }
 

@@ -25,7 +25,7 @@ contract ConceroPriceFeed is IConceroPriceFeed, GenericStorage {
     address public immutable i_feedUpdater;
 
     modifier onlyFeedUpdater() {
-        require(msg.sender == i_feedUpdater || msg.sender == i_owner, CommonErrors.Unauthorized()); 
+        require(msg.sender == i_feedUpdater || msg.sender == i_owner, CommonErrors.Unauthorized());
         _;
     }
 
@@ -107,6 +107,16 @@ contract ConceroPriceFeed is IConceroPriceFeed, GenericStorage {
      */
     function getLastGasPrice(uint24 chainSelector) external view returns (uint256) {
         return s.priceFeed().lastGasPrices[chainSelector];
+    }
+
+    /**
+     * @notice Gets the native USD rate and the last gas price for the current chain
+     * @return nativeUsdRate The native USD rate in 18 decimals
+     * @return gasPrice The last recorded gas price in wei
+     */
+    function getNativeUsdRateAndGasPrice() external view returns (uint256, uint256) {
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+        return (priceFeedStorage.nativeUsdRate, priceFeedStorage.lastGasPrices[i_chainSelector]);
     }
 
     /**

@@ -174,6 +174,8 @@ abstract contract CLF is FunctionsClient, Base {
             }
         }
 
+		// TODO: do we need to return the withheld amount?
+
         emit OperatorRegistered(requester, result.operatorChains, result.operatorActions);
     }
 

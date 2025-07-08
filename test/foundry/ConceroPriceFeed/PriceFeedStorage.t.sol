@@ -32,6 +32,7 @@ contract PriceFeedStorage is ConceroPriceFeedTest {
             mappingKey,
             gasPrice
         );
+
         assertEq(
             conceroPriceFeed.getStorage(
                 Namespaces.PRICEFEED,
@@ -41,6 +42,8 @@ contract PriceFeedStorage is ConceroPriceFeedTest {
             gasPrice,
             "Storage getter failed for lastGasPrices"
         );
+
+        assertEq(conceroPriceFeed.getLastGasPrice(chainSelector), gasPrice);
         vm.stopPrank();
     }
 

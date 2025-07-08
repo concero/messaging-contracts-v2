@@ -126,10 +126,8 @@ abstract contract CLF is FunctionsClient, Base {
             nativeUsdRate
         );
 
-        s.operator().depositsNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
-            CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
-            nativeUsdRate
-        );
+		uint256 withheldOperatorAmount = getCLFCost();
+        s.operator().depositsNative[resultConfig.requester] += withheldOperatorAmount;
     }
 
     function _handleMessagePayloadV1(bytes memory payload) internal {
@@ -186,15 +184,8 @@ abstract contract CLF is FunctionsClient, Base {
         uint24 srcChainSelector,
         bytes memory srcChainData
     ) internal returns (bytes32 clfRequestId) {
-        // TODO: calculate deposit amount
-
-        _witholdOperatorDeposit(
-            msg.sender,
-            CommonUtils.convertUsdBpsToNative(
-                CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
-                s.priceFeed().nativeUsdRate
-            )
-        );
+        uint256 minOperatorDeposit = getCLFCost();
+        _witholdOperatorDeposit(msg.sender, minOperatorDeposit);
 
         bytes[] memory clfReqArgs = new bytes[](6);
 
@@ -225,14 +216,8 @@ abstract contract CLF is FunctionsClient, Base {
         Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) internal returns (bytes32 clfRequestId) {
-        // TODO: calculate deposit amount
-        _witholdOperatorDeposit(
-            msg.sender,
-            CommonUtils.convertUsdBpsToNative(
-                CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
-                s.priceFeed().nativeUsdRate
-            )
-        );
+        uint256 minOperatorDeposit = getCLFCost();
+        _witholdOperatorDeposit(msg.sender, minOperatorDeposit);
 
         bytes[] memory clfReqArgs = new bytes[](5);
 
@@ -280,14 +265,6 @@ abstract contract CLF is FunctionsClient, Base {
         );
 
         return gasCost + premiumFee;
-    }
-
-    function _calculateGasFees(
-        uint256 gasPrice,
-        uint256 gasLimit,
-        uint256 exchangeRate
-    ) private pure returns (uint256) {
-        return (gasPrice * gasLimit * exchangeRate) / CommonConstants.DECIMALS;
     }
 
     /**

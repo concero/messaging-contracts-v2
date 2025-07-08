@@ -37,6 +37,9 @@ export async function deployPseudoRemoteConceroRouter(
 	const args = {
 		chainSelector: 137n,
 		usdc: zeroAddress,
+		conceroPriceFeed: getEnvVar(
+			`CONCERO_PRICE_FEED_PROXY_${getNetworkEnvKey(conceroVerifierNetwork.name)}`,
+		),
 		conceroVerifier: getEnvVar(
 			`CONCERO_VERIFIER_PROXY_${getNetworkEnvKey(conceroVerifierNetwork.name)}`,
 		),
@@ -51,7 +54,7 @@ export async function deployPseudoRemoteConceroRouter(
 		from: deployer,
 		args: [
 			args.chainSelector,
-			args.feedUpdater,
+			args.conceroPriceFeed,
 			args.conceroVerifier,
 			args.conceroVerifierSubId,
 			args.clfSigners,

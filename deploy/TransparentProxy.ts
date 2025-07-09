@@ -1,8 +1,8 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks } from "../constants";
-import { IProxyType } from "../types/deploymentVariables";
+import { ProxyEnum, conceroNetworks } from "../constants";
+import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
 import { getEnvAddress, getGasParameters, log, updateEnvAddress } from "../utils";
 
 const deployTransparentProxy: (
@@ -15,7 +15,21 @@ const deployTransparentProxy: (
 	const chain = conceroNetworks[name];
 	const { type } = chain;
 
-	const [initialImplementation, initialImplementationAlias] = getEnvAddress("priceFeed", name);
+	let implementationKey: keyof EnvPrefixes;
+	if (proxyType === ProxyEnum.routerProxy) {
+		implementationKey = "router";
+	} else if (proxyType === ProxyEnum.verifierProxy) {
+		implementationKey = "verifier";
+	} else if (proxyType === ProxyEnum.priceFeedProxy) {
+		implementationKey = "priceFeed";
+	} else {
+		throw new Error(`Proxy type ${proxyType} not found`);
+	}
+
+	const [initialImplementation, initialImplementationAlias] = getEnvAddress(
+		implementationKey,
+		name,
+	);
 	const [proxyAdmin, proxyAdminAlias] = getEnvAddress(`${proxyType}Admin`, name);
 
 	log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
@@ -23,7 +37,7 @@ const deployTransparentProxy: (
 		from: proxyDeployer,
 		args: [initialImplementation, proxyAdmin, "0x"],
 		log: true,
-		autoMine: true
+		autoMine: true,
 	})) as Deployment;
 
 	log(

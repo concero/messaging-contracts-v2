@@ -8,8 +8,6 @@ import { deployRouter } from "../deploy/ConceroRouter";
 import { deployVerifier } from "../deploy/ConceroVerifier";
 import { setRouterSupportedChains } from "../tasks/setRouterSupportedChains";
 import { getFallbackClients } from "../utils";
-import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
-import { setVerifierPriceFeeds } from "./setVerifierPriceFeeds";
 
 async function deployContracts(
 	mockCLFRouter: Address,
@@ -41,8 +39,8 @@ async function deployContracts(
 	});
 
 	// VARIABLE SETTING
-	await setVerifierPriceFeeds(conceroVerifier.address, walletClient);
-	await setRouterPriceFeeds(conceroRouter.address, walletClient);
+	// TODO: set gasFeeConfig on ConceroVerifier
+	// TODO: set price feeds on ConceroPriceFeed
 	await setRouterSupportedChains(conceroRouter.address, walletClient, {
 		chainSelectors: [1n, 137n],
 		supportedStates: [true, true],

@@ -14,7 +14,6 @@ import sendConceroMessage from "./sendConceroMessage";
 import sendValueTask from "./sendValue.task";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
 import setOperator from "./setOperator";
-import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
 import { setRouterSupportedChains } from "./setRouterSupportedChains";
 import testScript from "./test";
 import updateAllRouterImplementations from "./updateAllRouterImplementations.task";
@@ -40,7 +39,6 @@ export {
 	setRouterVariables,
 	setVerifierVariables,
 	deployContracts,
-	setRouterPriceFeeds,
 	setRouterSupportedChains,
 	setIsOperatorRegistered,
 	sendConceroMessage,

@@ -32,5 +32,6 @@ export type EnvFileName =
 	| "ccip"
 	| "deployments.mainnet"
 	| "deployments.testnet"
+	| "deployments.localhost"
 	| "apikeys"
 	| "tokens";

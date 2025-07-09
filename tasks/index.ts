@@ -18,7 +18,13 @@ import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
 import { setRouterSupportedChains } from "./setRouterSupportedChains";
 import testScript from "./test";
 import updateAllRouterImplementations from "./updateAllRouterImplementations.task";
-import { callContractFunction, changeOwnership, upgradeProxyImplementation } from "./utils";
+import {
+	callContractFunction,
+	changeOwnership,
+	displayGasFeeConfig,
+	readGasFeeConfig,
+	upgradeProxyImplementation,
+} from "./utils";
 import withdrawFees from "./withdrawFees";
 
 export {
@@ -26,6 +32,8 @@ export {
 	callContractFunction,
 	changeOwnership,
 	upgradeProxyImplementation,
+	readGasFeeConfig,
+	displayGasFeeConfig,
 	deployPriceFeedTask,
 	deployRouterTask,
 	deployVerifierTask,

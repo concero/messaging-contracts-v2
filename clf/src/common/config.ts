@@ -24,13 +24,13 @@ export const networkGasConfig: Record<string, { multiplier: number }> = {
 // Gas fee configuration by network type
 export const gasFeeConfig = {
 	testnet: {
-		baseChainSelector: 421614,
-		submitMsgGasOverhead: 150000,
-		vrfMsgReportRequestGasLimit: 240000,
-		vrfCallbackGasLimit: 330000,
+		baseChainSelector: 421614,  // Arbitrum Sepolia
+		submitMsgGasOverhead: 150000, // ConceroRouter::submitMessageReport (dst)
+		vrfMsgReportRequestGasLimit: 240000, // Operator::requestMessageReport
+		vrfCallbackGasLimit: 330000, // CLF::FunctionCoordinator::transmit + CLF::FunctionRouter::_callback
 	},
 	mainnet: {
-		baseChainSelector: 42161,
+		baseChainSelector: 42161, // Arbitrum One
 		submitMsgGasOverhead: 150000,
 		vrfMsgReportRequestGasLimit: 240000,
 		vrfCallbackGasLimit: 330000,

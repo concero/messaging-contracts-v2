@@ -14,9 +14,34 @@ function getLocalhostRpcUrl() {
 	}
 }
 
+// Network-specific gas configuration
+export const networkGasConfig: Record<string, { multiplier: number }> = {
+	// Mantle networks typically need 1000x more gas
+	"5000": { multiplier: 1000 },
+	"5003": { multiplier: 1000 },
+};
+
+// Gas fee configuration by network type
+export const gasFeeConfig = {
+	testnet: {
+		baseChainSelector: 421614,
+		submitMsgGasOverhead: 150000,
+		vrfMsgReportRequestGasLimit: 240000,
+		vrfCallbackGasLimit: 330000,
+	},
+	mainnet: {
+		baseChainSelector: 42161,
+		submitMsgGasOverhead: 150000,
+		vrfMsgReportRequestGasLimit: 240000,
+		vrfCallbackGasLimit: 330000,
+	},
+};
+
 export const config = {
 	isDevelopment: isDevelopment(),
 	localhostRpcUrl: getLocalhostRpcUrl(),
 	// @dev TODO: remove this hardcoded value. pass chain id to clf to initialize isTestnet variable
 	verifierChainSelector: "421614",
+	gasFeeConfig,
+	networkGasConfig,
 };

@@ -63,19 +63,6 @@ contract SetNativeUsdRateTest is ConceroPriceFeedTest {
         vm.stopPrank();
     }
 
-    function test_setNativeUsdRate_OnlyOwner() public {
-        vm.startPrank(deployer); // deployer is the owner
-
-        conceroPriceFeed.setNativeUsdRate(INITIAL_RATE);
-        assertEq(
-            conceroPriceFeed.getNativeUsdRate(),
-            INITIAL_RATE,
-            "Owner should be able to set rate"
-        );
-
-        vm.stopPrank();
-    }
-
     function test_setNativeUsdRate_WhenUnauthorized_Reverts() public {
         address unauthorizedUser = address(0x1234);
 
@@ -93,11 +80,7 @@ contract SetNativeUsdRateTest is ConceroPriceFeedTest {
         conceroPriceFeed.setNativeUsdRate(INITIAL_RATE);
 
         // Verify storage directly
-        uint256 storedValue = conceroPriceFeed.getStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.nativeUsdRate,
-            bytes32(0)
-        );
+        uint256 storedValue = conceroPriceFeed.getNativeUsdRate();
 
         assertEq(storedValue, INITIAL_RATE, "Storage verification failed");
 

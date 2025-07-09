@@ -37,28 +37,18 @@ abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
     }
 
     function _setPriceFeeds() internal {
-        vm.startPrank(deployer);
+        vm.startPrank(feedUpdater);
 
-        conceroPriceFeed.setStorage(
-            PriceFeedNamespaces.PRICEFEED,
-            PriceFeedSlots.nativeUsdRate,
-            bytes32(0),
-            NATIVE_USD_RATE
-        );
+        uint24[] memory chainSelectors = new uint24[](1);
+        chainSelectors[0] = SRC_CHAIN_SELECTOR;
+        uint256[] memory gasPrices = new uint256[](1);
+        gasPrices[0] = LAST_GAS_PRICE;
+        uint256[] memory rates = new uint256[](1);
+        rates[0] = 1e18;
 
-        conceroPriceFeed.setStorage(
-            PriceFeedNamespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(SRC_CHAIN_SELECTOR)),
-            LAST_GAS_PRICE
-        );
-
-        conceroPriceFeed.setStorage(
-            PriceFeedNamespaces.PRICEFEED,
-            PriceFeedSlots.nativeNativeRates,
-            bytes32(uint256(SRC_CHAIN_SELECTOR)),
-            1e18
-        );
+        conceroPriceFeed.setNativeUsdRate(NATIVE_USD_RATE);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+        conceroPriceFeed.setNativeNativeRates(chainSelectors, rates);
 
         vm.stopPrank();
     }

@@ -6,12 +6,10 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroOwnable} from "../../common/ConceroOwnable.sol";
-
-abstract contract Base is ConceroOwnable {
+abstract contract Base {
     uint24 internal immutable i_chainSelector;
 
-    constructor(uint24 chainSelector) ConceroOwnable() {
+    constructor(uint24 chainSelector) {
         i_chainSelector = chainSelector;
     }
 }

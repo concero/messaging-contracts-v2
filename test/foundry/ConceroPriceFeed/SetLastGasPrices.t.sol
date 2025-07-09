@@ -42,23 +42,9 @@ contract SetLastGasPricesTest is ConceroPriceFeedTest {
 
         conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
-        uint256 storedGasPriceA = conceroPriceFeed.getStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(CHAIN_SELECTOR_A))
-        );
-
-        uint256 storedGasPriceB = conceroPriceFeed.getStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(CHAIN_SELECTOR_B))
-        );
-
-        uint256 storedGasPriceC = conceroPriceFeed.getStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(CHAIN_SELECTOR_C))
-        );
+        uint256 storedGasPriceA = conceroPriceFeed.getLastGasPrice(CHAIN_SELECTOR_A);
+        uint256 storedGasPriceB = conceroPriceFeed.getLastGasPrice(CHAIN_SELECTOR_B);
+        uint256 storedGasPriceC = conceroPriceFeed.getLastGasPrice(CHAIN_SELECTOR_C);
 
         assertEq(storedGasPriceA, GAS_PRICE_A, "Incorrect gas price for chain selector A");
         assertEq(storedGasPriceB, GAS_PRICE_B, "Incorrect gas price for chain selector B");
@@ -78,11 +64,7 @@ contract SetLastGasPricesTest is ConceroPriceFeedTest {
 
         conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
-        uint256 storedGasPrice = conceroPriceFeed.getStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(CHAIN_SELECTOR_A))
-        );
+        uint256 storedGasPrice = conceroPriceFeed.getLastGasPrice(CHAIN_SELECTOR_A);
 
         assertEq(storedGasPrice, GAS_PRICE_A, "Incorrect gas price for chain selector A");
 
@@ -105,11 +87,7 @@ contract SetLastGasPricesTest is ConceroPriceFeedTest {
         gasPrices[0] = UPDATED_GAS_PRICE;
         conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
-        uint256 storedGasPrice = conceroPriceFeed.getStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(CHAIN_SELECTOR_A))
-        );
+        uint256 storedGasPrice = conceroPriceFeed.getLastGasPrice(CHAIN_SELECTOR_A);
 
         assertEq(storedGasPrice, UPDATED_GAS_PRICE, "Gas price was not correctly updated");
 

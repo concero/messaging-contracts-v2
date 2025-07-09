@@ -212,25 +212,6 @@ contract SetNativeNativeRatesTest is ConceroPriceFeedTest {
         vm.stopPrank();
     }
 
-    function test_setNativeNativeRates_OnlyOwner() public {
-        vm.startPrank(deployer); // deployer is the owner
-
-        uint24[] memory chainSelectors = new uint24[](1);
-        chainSelectors[0] = CHAIN_SELECTOR_A;
-
-        uint256[] memory rates = new uint256[](1);
-        rates[0] = RATE_A;
-
-        conceroPriceFeed.setNativeNativeRates(chainSelectors, rates);
-        assertEq(
-            conceroPriceFeed.getNativeNativeRate(CHAIN_SELECTOR_A),
-            RATE_A,
-            "Owner should be able to set rates"
-        );
-
-        vm.stopPrank();
-    }
-
     function test_setNativeNativeRates_StorageVerification() public {
         vm.startPrank(feedUpdater);
 
@@ -243,11 +224,7 @@ contract SetNativeNativeRatesTest is ConceroPriceFeedTest {
         conceroPriceFeed.setNativeNativeRates(chainSelectors, rates);
 
         // Verify storage directly
-        uint256 storedValue = conceroPriceFeed.getStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.nativeNativeRates,
-            bytes32(uint256(CHAIN_SELECTOR_A))
-        );
+        uint256 storedValue = conceroPriceFeed.getNativeNativeRate(CHAIN_SELECTOR_A);
 
         assertEq(storedValue, RATE_A, "Storage verification failed");
 

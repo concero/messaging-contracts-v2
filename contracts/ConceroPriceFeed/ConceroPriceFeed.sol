@@ -8,7 +8,6 @@ pragma solidity 0.8.28;
 
 import {Storage as s} from "./libraries/Storage.sol";
 
-import {GenericStorage} from "./modules/GenericStorage.sol";
 import {Base} from "./modules/Base.sol";
 
 import {IConceroPriceFeed} from "../interfaces/IConceroPriceFeed.sol";
@@ -19,13 +18,13 @@ import {CommonErrors} from "../common/CommonErrors.sol";
  * @notice Manages price feeds for Concero protocol
  * @dev Stores native USD rates, native-native rates, and gas prices for different chains
  */
-contract ConceroPriceFeed is IConceroPriceFeed, GenericStorage {
+contract ConceroPriceFeed is IConceroPriceFeed, Base {
     using s for s.PriceFeed;
 
     address public immutable i_feedUpdater;
 
     modifier onlyFeedUpdater() {
-        require(msg.sender == i_feedUpdater || msg.sender == i_owner, CommonErrors.Unauthorized());
+        require(msg.sender == i_feedUpdater, CommonErrors.Unauthorized());
         _;
     }
 

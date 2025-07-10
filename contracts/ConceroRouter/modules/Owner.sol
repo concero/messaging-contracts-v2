@@ -25,7 +25,14 @@ abstract contract Owner is Base {
      * @return availableFees Amount of native token fees that can be withdrawn
      */
     function getWithdrawableConceroFee() public view returns (uint256) {
-        return address(this).balance - (s.operator().totalFeesEarnedNative);
+        uint256 routerBalance = address(this).balance;
+        uint256 totalFeesEarnedNative = s.operator().totalFeesEarnedNative;
+
+        if (routerBalance > totalFeesEarnedNative) {
+            return routerBalance - totalFeesEarnedNative;
+        }
+
+        return 0;
     }
 
     /**

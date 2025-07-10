@@ -239,6 +239,8 @@ abstract contract Message is ClfSigner, IConceroRouter {
             nativeUsdRate
         );
 
+        require(gasFeeNative > 0, CommonErrors.InvalidAmount());
+
         uint256 operatorFeeMessageRelay = CommonUtils.convertUsdBpsToNative(
             CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
             nativeUsdRate

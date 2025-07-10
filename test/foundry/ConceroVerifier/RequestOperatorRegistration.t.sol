@@ -20,6 +20,7 @@ contract RequestOperatorRegistration is ConceroVerifierTest {
         super.setUp();
 
         _setPriceFeeds();
+		_setGasFeeConfig();
         _setOperatorDeposits();
     }
 

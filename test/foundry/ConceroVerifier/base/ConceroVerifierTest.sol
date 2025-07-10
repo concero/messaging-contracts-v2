@@ -53,6 +53,17 @@ abstract contract ConceroVerifierTest is DeployConceroVerifier, ConceroTest {
         vm.stopPrank();
     }
 
+    function _setGasFeeConfig() internal {
+        vm.startPrank(deployer);
+        conceroVerifier.setGasFeeConfig(
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
+            CLF_GAS_PRICE_OVER_ESTIMATION_BPS,
+            CLF_CALLBACK_GAS_OVERHEAD,
+            CLF_CALLBACK_GAS_LIMIT
+        );
+        vm.stopPrank();
+    }
+
     function _setOperatorFeesEarned() internal {
         vm.startPrank(deployer);
 

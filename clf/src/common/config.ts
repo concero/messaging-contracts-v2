@@ -26,14 +26,14 @@ export const gasFeeConfig = {
 	testnet: {
 		baseChainSelector: 421614,  // Arbitrum Sepolia
 		submitMsgGasOverhead: 150000, // ConceroRouter::submitMessageReport (dst)
-		vrfMsgReportRequestGasLimit: 240000, // Operator::requestMessageReport
-		vrfCallbackGasLimit: 330000, // CLF::FunctionCoordinator::transmit + CLF::FunctionRouter::_callback
+		vrfMsgReportRequestGasLimit: 330000, // Operator::requestMessageReport
+		vrfCallbackGasLimit: 240000, // CLF::FunctionCoordinator::transmit + CLF::FunctionRouter::_callback
 	},
 	mainnet: {
 		baseChainSelector: 42161, // Arbitrum One
 		submitMsgGasOverhead: 150000,
-		vrfMsgReportRequestGasLimit: 240000,
-		vrfCallbackGasLimit: 330000,
+		vrfMsgReportRequestGasLimit: 330000,
+		vrfCallbackGasLimit: 240000,
 	},
 };
 

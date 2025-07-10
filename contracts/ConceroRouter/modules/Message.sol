@@ -327,7 +327,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         // service gas fee
         uint256 serviceGasFeeNative = _calculateGasFees(
             baseGasPrice,
-            gasFeeConfig.vrfMsgReportRequestGasLimit + gasFeeConfig.vrfCallbackGasLimit,
+            gasFeeConfig.vrfMsgReportRequestGasOverhead + gasFeeConfig.clfCallbackGasOverhead,
             baseNativeRate
         );
 

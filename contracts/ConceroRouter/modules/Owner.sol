@@ -90,14 +90,14 @@ abstract contract Owner is Base {
     function setGasFeeConfig(
         uint24 baseChainSelector,
         uint32 submitMsgGasOverhead,
-        uint32 vrfMsgReportRequestGasLimit,
-        uint32 vrfCallbackGasLimit
+        uint32 vrfMsgReportRequestGasOverhead,
+        uint32 clfCallbackGasOverhead
     ) external onlyOwner {
         s.config().gasFeeConfig = s.GasFeeConfig(
             baseChainSelector,
             submitMsgGasOverhead,
-            vrfMsgReportRequestGasLimit,
-            vrfCallbackGasLimit,
+            vrfMsgReportRequestGasOverhead,
+            clfCallbackGasOverhead,
             0
         );
     }

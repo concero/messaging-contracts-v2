@@ -38,11 +38,12 @@ export async function setGasFeeConfig(network: AnyNetwork, proxyType: IProxyType
 		// Apply gas multiplier to the configuration values
 		const baseChainSelectorNum = config.baseChainSelector;
 		const submitMsgGasOverheadNum = config.submitMsgGasOverhead * gasMultiplier;
-		const vrfMsgReportRequestGasLimitNum = config.vrfMsgReportRequestGasLimit * gasMultiplier;
-		const vrfCallbackGasLimitNum = config.vrfCallbackGasLimit * gasMultiplier;
+		const vrfMsgReportRequestGasLimitNum =
+			config.vrfMsgReportRequestGasOverhead * gasMultiplier;
+		const vrfCallbackGasLimitNum = config.clfCallbackGasOverhead * gasMultiplier;
 
 		log(
-			`Setting gas fee config for ${proxyType} on chainId ${network.chainId} (multiplier: ${gasMultiplier}x): baseChainSelector=${baseChainSelectorNum}, submitMsgGasOverhead=${submitMsgGasOverheadNum}, vrfMsgReportRequestGasLimit=${vrfMsgReportRequestGasLimitNum}, vrfCallbackGasLimit=${vrfCallbackGasLimitNum}`,
+			`Setting gas fee config for ${proxyType} on chainId ${network.chainId} (multiplier: ${gasMultiplier}x): baseChainSelector=${baseChainSelectorNum}, submitMsgGasOverhead=${submitMsgGasOverheadNum}, vrfMsgReportRequestGasOverhead=${vrfMsgReportRequestGasLimitNum}, clfCallbackGasOverhead=${vrfCallbackGasLimitNum}`,
 			"setGasFeeConfig",
 			network.name,
 		);

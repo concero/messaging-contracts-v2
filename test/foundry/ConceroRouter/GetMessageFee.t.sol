@@ -65,14 +65,18 @@ contract GetMessageFeeTest is ConceroRouterTest {
         // Extract fields in the same order as in the structure
         uint24 baseChainSelector = uint24(gasFeeConfigValue); // lower 24 bits
         uint32 submitMsgGasOverhead = uint32(gasFeeConfigValue >> 24); // next 32 bits
-        uint32 vrfMsgReportRequestGasLimit = uint32(gasFeeConfigValue >> 56); // next 32 bits (24+32)
-        uint32 vrfCallbackGasLimit = uint32(gasFeeConfigValue >> 88); // next 32 bits (24+32+32)
+        uint32 vrfMsgReportRequestGasOverhead = uint32(gasFeeConfigValue >> 56); // next 32 bits (24+32)
+        uint32 clfCallbackGasOverhead = uint32(gasFeeConfigValue >> 88); // next 32 bits (24+32+32)
 
         assertEq(baseChainSelector, CHAIN_SELECTOR_A, "Incorrect base chain selector");
         assertEq(submitMsgGasOverhead, GAS_OVERHEAD, "Incorrect gas overhead");
-        assertEq(vrfCallbackGasLimit, VERIFIER_CALLBACK_GAS_LIMIT, "Incorrect relayer gas limit");
         assertEq(
-            vrfMsgReportRequestGasLimit,
+            clfCallbackGasOverhead,
+            VERIFIER_CALLBACK_GAS_LIMIT,
+            "Incorrect relayer gas limit"
+        );
+        assertEq(
+            vrfMsgReportRequestGasOverhead,
             VERIFIER_MSG_REPORT_GAS_LIMIT,
             "Incorrect verifier gas limit"
         );

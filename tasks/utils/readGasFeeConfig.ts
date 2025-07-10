@@ -11,8 +11,8 @@ import { getEnvAddress, getFallbackClients, log } from "../../utils";
 interface GasFeeConfig {
 	baseChainSelector: number;
 	submitMsgGasOverhead: number;
-	vrfMsgReportRequestGasLimit: number;
-	vrfCallbackGasLimit: number;
+	vrfMsgReportRequestGasOverhead: number;
+	clfCallbackGasOverhead: number;
 }
 
 export async function readGasFeeConfig(network: ConceroNetwork): Promise<GasFeeConfig | null> {
@@ -44,18 +44,18 @@ export async function readGasFeeConfig(network: ConceroNetwork): Promise<GasFeeC
 		const value = BigInt("0x" + hexValue);
 
 		// Extract fields using bit operations (right-to-left based on actual storage layout)
-		// Storage layout: [padding][vrfCallbackGasLimit][vrfMsgReportRequestGasLimit][submitMsgGasOverhead][baseChainSelector]
+		// Storage layout: [padding][clfCallbackGasOverhead][vrfMsgReportRequestGasOverhead][submitMsgGasOverhead][baseChainSelector]
 		const baseChainSelector = Number(value & 0xffffffn); // Last 24 bits (bits 0-23)
 		const submitMsgGasOverhead = Number((value >> 24n) & 0xffffffffn); // Next 32 bits (bits 24-55)
-		const vrfMsgReportRequestGasLimit = Number((value >> 56n) & 0xffffffffn); // Next 32 bits (bits 56-87)
-		const vrfCallbackGasLimit = Number((value >> 88n) & 0xffffffffn); // Next 32 bits (bits 88-119)
+		const vrfMsgReportRequestGasOverhead = Number((value >> 56n) & 0xffffffffn); // Next 32 bits (bits 56-87)
+		const clfCallbackGasOverhead = Number((value >> 88n) & 0xffffffffn); // Next 32 bits (bits 88-119)
 		// __var_gap and padding occupy the remaining bits
 
 		const gasFeeConfig: GasFeeConfig = {
 			baseChainSelector,
 			submitMsgGasOverhead,
-			vrfMsgReportRequestGasLimit,
-			vrfCallbackGasLimit,
+			vrfMsgReportRequestGasOverhead,
+			clfCallbackGasOverhead,
 		};
 
 		return gasFeeConfig;
@@ -88,8 +88,8 @@ export async function displayGasFeeConfig(hre: HardhatRuntimeEnvironment) {
 	console.log(`\n GasFeeConfig Settings for ${network.name} (chainId: ${network.chainId}):`);
 	console.log(`- baseChainSelector: ${gasFeeConfig.baseChainSelector}`);
 	console.log(`- submitMsgGasOverhead: ${gasFeeConfig.submitMsgGasOverhead}`);
-	console.log(`- vrfMsgReportRequestGasLimit: ${gasFeeConfig.vrfMsgReportRequestGasLimit}`);
-	console.log(`- vrfCallbackGasLimit: ${gasFeeConfig.vrfCallbackGasLimit} \n`);
+	console.log(`- vrfMsgReportRequestGasOverhead: ${gasFeeConfig.vrfMsgReportRequestGasOverhead}`);
+	console.log(`- clfCallbackGasOverhead: ${gasFeeConfig.clfCallbackGasOverhead} \n`);
 
 	log("✅ GasFeeConfig read successfully", "displayGasFeeConfig", network.name);
 }

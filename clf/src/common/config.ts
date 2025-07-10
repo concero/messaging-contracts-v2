@@ -37,6 +37,13 @@ export const gasFeeConfig = {
 	},
 };
 
+export const gasFeeConfigVerifier = {
+	vrfMsgReportRequestGasOverhead: 330000,
+	clfGasPriceOverEstimationBps: 40000,
+	clfCallbackGasOverhead: 240000,
+	clfCallbackGasLimit: 100000,
+};
+
 export const config = {
 	isDevelopment: isDevelopment(),
 	localhostRpcUrl: getLocalhostRpcUrl(),

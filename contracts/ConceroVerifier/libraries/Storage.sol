@@ -51,11 +51,11 @@ library Storage {
     }
 
     struct GasFeeConfig {
-        uint24 baseChainSelector;  // TODO: is it needed in CLF?
-        uint32 submitMsgGasOverhead;  // TODO: is it needed in CLF?
-        uint32 vrfMsgReportRequestGasLimit; // TODO: is it needed in CLF?
-        uint32 vrfCallbackGasLimit;
-        uint136 __var_gap;
+        uint32 vrfMsgReportRequestGasOverhead;
+        uint32 clfGasPriceOverEstimationBps;
+        uint32 clfCallbackGasOverhead;
+        uint32 clfCallbackGasLimit;
+        uint160 __var_gap;
     }
 
     struct Config {

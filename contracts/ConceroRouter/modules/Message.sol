@@ -212,12 +212,42 @@ abstract contract Message is ClfSigner, IConceroRouter {
             revert Errors.MessageDeliveryFailed(messageId);
         }
 
-        s.operator().feesEarnedNative[msg.sender] += CommonUtils.convertUsdBpsToNative(
-            CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
-            i_conceroPriceFeed.getNativeUsdRate()
-        );
+        _payOperatorRelayFee(dstData.gasLimit);
 
         emit ConceroMessageDelivered(messageId);
+    }
+
+    function _payOperatorRelayFee(uint256 gasLimit) internal {
+        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
+        s.Operator storage operator = s.operator();
+
+        (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
+            .getNativeUsdRateAndGasPrice();
+
+        require(
+            nativeUsdRate > 0,
+            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
+        );
+        require(
+            lastGasPrice > 0,
+            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.lastGasPrice)
+        );
+
+        uint256 gasFeeNative = _calculateGasFees(
+            lastGasPrice,
+            gasFeeConfig.submitMsgGasOverhead + gasLimit,
+            nativeUsdRate
+        );
+
+        uint256 operatorFeeMessageRelay = CommonUtils.convertUsdBpsToNative(
+            CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
+            nativeUsdRate
+        );
+
+        uint256 totalFeeNative = operatorFeeMessageRelay + gasFeeNative;
+
+        operator.feesEarnedNative[msg.sender] += totalFeeNative;
+        operator.totalFeesEarnedNative += totalFeeNative;
     }
 
     function _validateMessageParams(

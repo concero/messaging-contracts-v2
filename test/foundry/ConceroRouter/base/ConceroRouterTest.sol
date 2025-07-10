@@ -53,6 +53,17 @@ abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
         vm.stopPrank();
     }
 
+    function _setGasFeeConfig() internal {
+        vm.startPrank(deployer);
+        conceroRouter.setGasFeeConfig(
+            SRC_CHAIN_SELECTOR,
+            SUBMIT_MSG_GAS_OVERHEAD,
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
+            CLF_CALLBACK_GAS_OVERHEAD
+        );
+        vm.stopPrank();
+    }
+
     function _setOperatorFeesEarned() internal {
         vm.startPrank(deployer);
 

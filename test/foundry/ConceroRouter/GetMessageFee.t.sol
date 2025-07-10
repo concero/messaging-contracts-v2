@@ -19,9 +19,6 @@ contract GetMessageFeeTest is ConceroRouterTest {
     uint24 public constant CHAIN_SELECTOR_B = 2;
 
     uint32 public constant GAS_LIMIT = 50_000;
-    uint32 public constant GAS_OVERHEAD = 100_000;
-    uint32 public constant VERIFIER_CALLBACK_GAS_LIMIT = 150_000;
-    uint32 public constant VERIFIER_MSG_REPORT_GAS_LIMIT = 200_000;
 
     uint256 public constant BASE_NATIVE_NATIVE_RATE = 1e18;
 
@@ -50,9 +47,9 @@ contract GetMessageFeeTest is ConceroRouterTest {
         vm.prank(deployer);
         conceroRouter.setGasFeeConfig(
             CHAIN_SELECTOR_A,
-            GAS_OVERHEAD,
-            VERIFIER_MSG_REPORT_GAS_LIMIT,
-            VERIFIER_CALLBACK_GAS_LIMIT
+            SUBMIT_MSG_GAS_OVERHEAD,
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
+            CLF_CALLBACK_GAS_OVERHEAD
         );
 
         // Read the entire slot from CONFIG namespace
@@ -69,16 +66,16 @@ contract GetMessageFeeTest is ConceroRouterTest {
         uint32 clfCallbackGasOverhead = uint32(gasFeeConfigValue >> 88); // next 32 bits (24+32+32)
 
         assertEq(baseChainSelector, CHAIN_SELECTOR_A, "Incorrect base chain selector");
-        assertEq(submitMsgGasOverhead, GAS_OVERHEAD, "Incorrect gas overhead");
+        assertEq(submitMsgGasOverhead, SUBMIT_MSG_GAS_OVERHEAD, "Incorrect gas overhead");
         assertEq(
             clfCallbackGasOverhead,
-            VERIFIER_CALLBACK_GAS_LIMIT,
-            "Incorrect relayer gas limit"
+            CLF_CALLBACK_GAS_OVERHEAD,
+            "Incorrect CLF callback gas overhead"
         );
         assertEq(
             vrfMsgReportRequestGasOverhead,
-            VERIFIER_MSG_REPORT_GAS_LIMIT,
-            "Incorrect verifier gas limit"
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
+            "Incorrect VRF message report request gas overhead"
         );
     }
 
@@ -97,7 +94,7 @@ contract GetMessageFeeTest is ConceroRouterTest {
 
     function test_getMessageFee_ReturnsGasFeeNative() public {
         vm.startPrank(deployer);
-        conceroRouter.setGasFeeConfig(CHAIN_SELECTOR_A, GAS_OVERHEAD, 0, 0);
+        conceroRouter.setGasFeeConfig(CHAIN_SELECTOR_A, SUBMIT_MSG_GAS_OVERHEAD, 0, 0);
         vm.stopPrank();
 
         _setupPriceFeeds(CHAIN_SELECTOR_A, GAS_PRICE_A, BASE_NATIVE_NATIVE_RATE);
@@ -114,7 +111,11 @@ contract GetMessageFeeTest is ConceroRouterTest {
         assertEq(
             messageFee,
             baseFeeNative +
-                _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, BASE_NATIVE_NATIVE_RATE),
+                _calculateGasFees(
+                    GAS_PRICE_A,
+                    GAS_LIMIT + SUBMIT_MSG_GAS_OVERHEAD,
+                    BASE_NATIVE_NATIVE_RATE
+                ),
             "Incorrect gas fee native"
         );
     }
@@ -124,8 +125,8 @@ contract GetMessageFeeTest is ConceroRouterTest {
         conceroRouter.setGasFeeConfig(
             CHAIN_SELECTOR_A,
             0,
-            VERIFIER_CALLBACK_GAS_LIMIT,
-            VERIFIER_MSG_REPORT_GAS_LIMIT
+            CLF_CALLBACK_GAS_OVERHEAD,
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD
         );
         vm.stopPrank();
 
@@ -145,7 +146,7 @@ contract GetMessageFeeTest is ConceroRouterTest {
             baseFeeNative +
                 _calculateGasFees(
                     GAS_PRICE_A,
-                    VERIFIER_CALLBACK_GAS_LIMIT + VERIFIER_MSG_REPORT_GAS_LIMIT,
+                    CLF_CALLBACK_GAS_OVERHEAD + VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
                     BASE_NATIVE_NATIVE_RATE
                 ),
             "Incorrect service gas fee native"
@@ -156,9 +157,9 @@ contract GetMessageFeeTest is ConceroRouterTest {
         vm.startPrank(deployer);
         conceroRouter.setGasFeeConfig(
             CHAIN_SELECTOR_A,
-            GAS_OVERHEAD,
-            VERIFIER_CALLBACK_GAS_LIMIT,
-            VERIFIER_MSG_REPORT_GAS_LIMIT
+            SUBMIT_MSG_GAS_OVERHEAD,
+            CLF_CALLBACK_GAS_OVERHEAD,
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD
         );
         vm.stopPrank();
 
@@ -176,10 +177,14 @@ contract GetMessageFeeTest is ConceroRouterTest {
         assertEq(
             messageFee,
             baseFeeNative +
-                _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, BASE_NATIVE_NATIVE_RATE) +
                 _calculateGasFees(
                     GAS_PRICE_A,
-                    VERIFIER_CALLBACK_GAS_LIMIT + VERIFIER_MSG_REPORT_GAS_LIMIT,
+                    GAS_LIMIT + SUBMIT_MSG_GAS_OVERHEAD,
+                    BASE_NATIVE_NATIVE_RATE
+                ) +
+                _calculateGasFees(
+                    GAS_PRICE_A,
+                    CLF_CALLBACK_GAS_OVERHEAD + VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
                     BASE_NATIVE_NATIVE_RATE
                 ),
             "Incorrect total fee native"
@@ -198,9 +203,9 @@ contract GetMessageFeeTest is ConceroRouterTest {
         vm.prank(deployer);
         conceroRouter.setGasFeeConfig(
             CHAIN_SELECTOR_B,
-            GAS_OVERHEAD,
-            VERIFIER_CALLBACK_GAS_LIMIT,
-            VERIFIER_MSG_REPORT_GAS_LIMIT
+            SUBMIT_MSG_GAS_OVERHEAD,
+            CLF_CALLBACK_GAS_OVERHEAD,
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD
         );
 
         uint256 messageFee = conceroRouter.getMessageFee(
@@ -215,10 +220,14 @@ contract GetMessageFeeTest is ConceroRouterTest {
         assertEq(
             messageFee,
             baseFeeNative +
-                _calculateGasFees(GAS_PRICE_A, GAS_LIMIT + GAS_OVERHEAD, destChainNativeRate) +
+                _calculateGasFees(
+                    GAS_PRICE_A,
+                    GAS_LIMIT + SUBMIT_MSG_GAS_OVERHEAD,
+                    destChainNativeRate
+                ) +
                 _calculateGasFees(
                     GAS_PRICE_B,
-                    VERIFIER_CALLBACK_GAS_LIMIT + VERIFIER_MSG_REPORT_GAS_LIMIT,
+                    CLF_CALLBACK_GAS_OVERHEAD + VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
                     baseChainNativeRate
                 ),
             "Incorrect message fee"

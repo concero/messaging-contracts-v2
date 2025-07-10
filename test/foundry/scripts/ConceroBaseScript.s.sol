@@ -37,6 +37,7 @@ abstract contract ConceroBaseScript is Script {
     uint256 public constant OPERATOR_FEES_NATIVE = 2 ether;
     uint256 public constant OPERATOR_DEPOSIT_NATIVE = 3 ether;
 
+    uint32 public constant SUBMIT_MSG_GAS_OVERHEAD = 150_000;
     uint32 public constant VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD = 330_000;
     uint32 public constant CLF_GAS_PRICE_OVER_ESTIMATION_BPS = 40_000;
     uint32 public constant CLF_CALLBACK_GAS_OVERHEAD = 240_000;

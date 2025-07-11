@@ -15,7 +15,9 @@ interface GasFeeConfig {
 	clfCallbackGasOverhead: number;
 }
 
-export async function readRouterGasFeeConfig(network: ConceroNetwork): Promise<GasFeeConfig | null> {
+export async function readRouterGasFeeConfig(
+	network: ConceroNetwork,
+): Promise<GasFeeConfig | null> {
 	const { publicClient } = getFallbackClients(network);
 	const [conceroRouterAddress] = getEnvAddress(ProxyEnum.routerProxy, network.name);
 
@@ -69,19 +71,19 @@ export async function readRouterGasFeeConfig(network: ConceroNetwork): Promise<G
 	}
 }
 
-export async function displayGasFeeConfig(hre: HardhatRuntimeEnvironment) {
+export async function displayRouterGasFeeConfig(hre: HardhatRuntimeEnvironment) {
 	const { name } = hre.network;
 	const network = conceroNetworks[name as keyof typeof conceroNetworks] as ConceroNetwork;
 
 	if (!network) {
-		log(`Network ${name} not found in conceroNetworks`, "displayGasFeeConfig");
+		log(`Network ${name} not found in conceroNetworks`, "displayRouterGasFeeConfig");
 		return;
 	}
 
 	const gasFeeConfig = await readRouterGasFeeConfig(network);
 
 	if (!gasFeeConfig) {
-		log("❌ GasFeeConfig not found or not set", "displayGasFeeConfig", network.name);
+		log("❌ GasFeeConfig not found or not set", "displayRouterGasFeeConfig", network.name);
 		return;
 	}
 
@@ -91,12 +93,12 @@ export async function displayGasFeeConfig(hre: HardhatRuntimeEnvironment) {
 	console.log(`- vrfMsgReportRequestGasOverhead: ${gasFeeConfig.vrfMsgReportRequestGasOverhead}`);
 	console.log(`- clfCallbackGasOverhead: ${gasFeeConfig.clfCallbackGasOverhead} \n`);
 
-	log("✅ GasFeeConfig read successfully", "displayGasFeeConfig", network.name);
+	log("✅ GasFeeConfig read successfully", "displayRouterGasFeeConfig", network.name);
 }
 
 task(
 	"read-router-gas-fee-config",
 	"Reads and displays the current GasFeeConfig from ConceroRouter contract",
 ).setAction(async (taskArgs, hre) => {
-	await displayGasFeeConfig(hre);
+	await displayRouterGasFeeConfig(hre);
 });

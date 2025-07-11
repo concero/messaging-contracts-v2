@@ -20,7 +20,7 @@ import updateAllRouterImplementations from "./updateAllRouterImplementations.tas
 import {
 	callContractFunction,
 	changeOwnership,
-	displayGasFeeConfig,
+	displayRouterGasFeeConfig,
 	displayVerifierGasFeeConfig,
 	readRouterGasFeeConfig,
 	readVerifierGasFeeConfig,
@@ -37,7 +37,7 @@ export {
 	upgradeProxyImplementation,
 	readRouterGasFeeConfig,
 	readVerifierGasFeeConfig,
-	displayGasFeeConfig,
+	displayRouterGasFeeConfig,
 	displayVerifierGasFeeConfig,
 	setRouterGasFeeConfig,
 	setVerifierGasFeeConfig,

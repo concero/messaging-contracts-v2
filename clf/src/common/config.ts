@@ -14,41 +14,9 @@ function getLocalhostRpcUrl() {
 	}
 }
 
-// Network-specific gas configuration
-export const networkGasConfig: Record<string, { multiplier: number }> = {
-	// Mantle networks typically need 1000x more gas
-	"5000": { multiplier: 1000 },
-	"5003": { multiplier: 1000 },
-};
-
-// Gas fee configuration by network type
-export const gasFeeConfig = {
-	testnet: {
-		baseChainSelector: 421614, // Arbitrum Sepolia
-		submitMsgGasOverhead: 150000, // ConceroRouter::submitMessageReport (dst)
-		vrfMsgReportRequestGasOverhead: 330000, // Operator::requestMessageReport
-		clfCallbackGasOverhead: 240000, // CLF::FunctionCoordinator::transmit + CLF::FunctionRouter::_callback
-	},
-	mainnet: {
-		baseChainSelector: 42161, // Arbitrum One
-		submitMsgGasOverhead: 150000,
-		vrfMsgReportRequestGasOverhead: 330000,
-		clfCallbackGasOverhead: 240000,
-	},
-};
-
-export const gasFeeConfigVerifier = {
-	vrfMsgReportRequestGasOverhead: 330000,
-	clfGasPriceOverEstimationBps: 40000,
-	clfCallbackGasOverhead: 240000,
-	clfCallbackGasLimit: 100000,
-};
-
 export const config = {
 	isDevelopment: isDevelopment(),
 	localhostRpcUrl: getLocalhostRpcUrl(),
 	// @dev TODO: remove this hardcoded value. pass chain id to clf to initialize isTestnet variable
 	verifierChainSelector: "421614",
-	gasFeeConfig,
-	networkGasConfig,
 };

@@ -1,28 +1,24 @@
-import { gasFeeConfig, networkGasConfig } from "../../clf/src/common/config";
 import { ProxyEnum } from "../../constants";
 import { conceroNetworks } from "../../constants";
+import { gasFeeConfig, networkGasConfig } from "../../constants/gasConfig";
 import {
 	ConceroHardhatNetwork,
 	ConceroLocalNetwork,
 	ConceroNetwork,
 } from "../../types/ConceroNetwork";
-import { IProxyType } from "../../types/deploymentVariables";
 import { getEnvAddress, getFallbackClients, log } from "../../utils";
 
 export type AnyNetwork = ConceroNetwork | ConceroLocalNetwork | ConceroHardhatNetwork;
 
-export async function setGasFeeConfig(network: AnyNetwork, proxyType: IProxyType) {
-	// Import the appropriate contract ABI based on type
+export async function setRouterGasFeeConfig(network: AnyNetwork) {
 	const { abi } = await import(
-		proxyType === ProxyEnum.routerProxy
-			? "../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
-			: "../../artifacts/contracts/ConceroVerifier/ConceroVerifier.sol/ConceroVerifier.json"
+		"../../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
 	);
 
 	const { publicClient, walletClient } = getFallbackClients(network);
 
-	// Get the appropriate contract address based on type
-	const [contractAddress] = getEnvAddress(proxyType, network.name);
+	// Get the router contract address
+	const [contractAddress] = getEnvAddress(ProxyEnum.routerProxy, network.name);
 
 	// Get network type from conceroNetworks
 	const chain = conceroNetworks[network.name as keyof typeof conceroNetworks];
@@ -38,13 +34,13 @@ export async function setGasFeeConfig(network: AnyNetwork, proxyType: IProxyType
 		// Apply gas multiplier to the configuration values
 		const baseChainSelectorNum = config.baseChainSelector;
 		const submitMsgGasOverheadNum = config.submitMsgGasOverhead * gasMultiplier;
-		const vrfMsgReportRequestGasLimitNum =
+		const vrfMsgReportRequestGasOverheadNum =
 			config.vrfMsgReportRequestGasOverhead * gasMultiplier;
-		const vrfCallbackGasLimitNum = config.clfCallbackGasOverhead * gasMultiplier;
+		const clfCallbackGasOverheadNum = config.clfCallbackGasOverhead * gasMultiplier;
 
 		log(
-			`Setting gas fee config for ${proxyType} on chainId ${network.chainId} (multiplier: ${gasMultiplier}x): baseChainSelector=${baseChainSelectorNum}, submitMsgGasOverhead=${submitMsgGasOverheadNum}, vrfMsgReportRequestGasOverhead=${vrfMsgReportRequestGasLimitNum}, clfCallbackGasOverhead=${vrfCallbackGasLimitNum}`,
-			"setGasFeeConfig",
+			`Setting router gas fee config on chainId ${network.chainId} (multiplier: ${gasMultiplier}x): baseChainSelector=${baseChainSelectorNum}, submitMsgGasOverhead=${submitMsgGasOverheadNum}, vrfMsgReportRequestGasOverhead=${vrfMsgReportRequestGasOverheadNum}, clfCallbackGasOverhead=${clfCallbackGasOverheadNum}`,
+			"setRouterGasFeeConfig",
 			network.name,
 		);
 
@@ -56,8 +52,8 @@ export async function setGasFeeConfig(network: AnyNetwork, proxyType: IProxyType
 			args: [
 				baseChainSelectorNum,
 				submitMsgGasOverheadNum,
-				vrfMsgReportRequestGasLimitNum,
-				vrfCallbackGasLimitNum,
+				vrfMsgReportRequestGasOverheadNum,
+				clfCallbackGasOverheadNum,
 			],
 			chain: undefined,
 		});
@@ -70,21 +66,21 @@ export async function setGasFeeConfig(network: AnyNetwork, proxyType: IProxyType
 
 		if (setGasFeeConfigStatus === "success") {
 			log(
-				`Gas fee config set successfully for ${proxyType}. Hash: ${setGasFeeConfigHash}`,
-				"setGasFeeConfig",
+				`Router gas fee config set successfully. Hash: ${setGasFeeConfigHash}`,
+				"setRouterGasFeeConfig",
 				network.name,
 			);
 		} else {
 			log(
-				`Set gas fee config reverted for ${proxyType}: ${setGasFeeConfigHash}`,
-				"setGasFeeConfig",
+				`Set router gas fee config reverted: ${setGasFeeConfigHash}`,
+				"setRouterGasFeeConfig",
 				network.name,
 			);
 		}
 	} catch (error) {
 		log(
-			`Error setting gas fee config for ${proxyType}: ${(error as Error).message}`,
-			"setGasFeeConfig",
+			`Error setting router gas fee config: ${(error as Error).message}`,
+			"setRouterGasFeeConfig",
 			network.name,
 		);
 	}

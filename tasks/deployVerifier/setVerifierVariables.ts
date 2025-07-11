@@ -1,13 +1,11 @@
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks, ProxyEnum } from "../../constants";
-import { setGasFeeConfig } from "../utils/setGasFeeConfig";
+import { conceroNetworks } from "../../constants";
+import { setVerifierGasFeeConfig } from "../utils";
 
-async function setVerifierVariables(hre: HardhatRuntimeEnvironment) {
-	const { live, name } = hre.network;
+export async function setVerifierVariables(hre: HardhatRuntimeEnvironment) {
+	const { name } = hre.network;
 	const network = conceroNetworks[name];
 
-	await setGasFeeConfig(network, ProxyEnum.verifierProxy);
+	await setVerifierGasFeeConfig(network);
 }
-
-export { setVerifierVariables };

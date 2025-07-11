@@ -15,7 +15,7 @@ interface GasFeeConfig {
 	clfCallbackGasOverhead: number;
 }
 
-export async function readGasFeeConfig(network: ConceroNetwork): Promise<GasFeeConfig | null> {
+export async function readRouterGasFeeConfig(network: ConceroNetwork): Promise<GasFeeConfig | null> {
 	const { publicClient } = getFallbackClients(network);
 	const [conceroRouterAddress] = getEnvAddress(ProxyEnum.routerProxy, network.name);
 
@@ -78,7 +78,7 @@ export async function displayGasFeeConfig(hre: HardhatRuntimeEnvironment) {
 		return;
 	}
 
-	const gasFeeConfig = await readGasFeeConfig(network);
+	const gasFeeConfig = await readRouterGasFeeConfig(network);
 
 	if (!gasFeeConfig) {
 		log("❌ GasFeeConfig not found or not set", "displayGasFeeConfig", network.name);
@@ -95,7 +95,7 @@ export async function displayGasFeeConfig(hre: HardhatRuntimeEnvironment) {
 }
 
 task(
-	"read-gas-fee-config",
+	"read-router-gas-fee-config",
 	"Reads and displays the current GasFeeConfig from ConceroRouter contract",
 ).setAction(async (taskArgs, hre) => {
 	await displayGasFeeConfig(hre);

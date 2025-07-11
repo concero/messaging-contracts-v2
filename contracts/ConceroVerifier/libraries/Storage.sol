@@ -55,7 +55,7 @@ library Storage {
         uint32 clfGasPriceOverEstimationBps;
         uint32 clfCallbackGasOverhead;
         uint32 clfCallbackGasLimit;
-        uint160 __var_gap;
+        uint128 __var_gap;
     }
 
     struct Config {

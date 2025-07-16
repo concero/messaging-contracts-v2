@@ -1,3 +1,4 @@
+import cancelTxTask from "./cancelTx.task";
 import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
@@ -44,4 +45,5 @@ export {
 	sendValueTask,
 	updateAllRouterImplementations,
 	deployPauseTask,
+	cancelTxTask,
 };

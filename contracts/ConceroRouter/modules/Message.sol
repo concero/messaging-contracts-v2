@@ -55,6 +55,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         address[4] memory clfSigners
     ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {}
 
+    /* @inheritdoc IConceroRouter */
     function conceroSend(
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
@@ -311,6 +312,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         return (gasPrice * gasLimit * exchangeRate) / CommonConstants.DECIMALS;
     }
 
+    /* @inheritdoc IConceroRouter */
     function getMessageFee(
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,

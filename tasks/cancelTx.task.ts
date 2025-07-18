@@ -1,7 +1,9 @@
 import type { Address, Chain, Hash } from "viem";
 import type { PublicClient, Transaction, WalletClient } from "viem";
-import type { HardhatRuntimeEnvironment } from "hardhat/types";
+
 import { task } from "hardhat/config";
+import type { HardhatRuntimeEnvironment } from "hardhat/types";
+
 import { conceroNetworks } from "../constants";
 import { getFallbackClients } from "../utils";
 
@@ -139,7 +141,61 @@ async function processPendingHashes(
 	}
 }
 
-const cancelTransactions = async () => {
+async function cancelSpecificTransaction(
+	client: PublicClient,
+	wallet: WalletClient,
+	chain: Chain,
+	txHash: Hash,
+): Promise<boolean> {
+	try {
+		console.log(`🎯 Attempting to cancel specific transaction: ${txHash}`);
+
+		const tx = await fetchTransaction(client, txHash);
+		if (!tx) {
+			console.error(`❌ Transaction not found: ${txHash}`);
+			return false;
+		}
+
+		// Check if transaction is still pending
+		const receipt = await client.getTransactionReceipt({ hash: txHash });
+		if (receipt) {
+			console.log(`⚠️ Transaction already confirmed in block ${receipt.blockNumber}`);
+			return false;
+		}
+
+		// @ts-ignore Chain type mismatch
+		const cancelHash = await sendCancelTransaction(wallet, client, chain, tx);
+		return cancelHash !== null;
+	} catch (error) {
+		console.error("❌ Error canceling specific transaction:", error);
+		return false;
+	}
+}
+
+async function findPendingNonce(client: PublicClient, target: Address) {
+	try {
+		// Get current nonce and pending nonce
+		const currentNonce = await client.getTransactionCount({
+			address: target,
+			blockTag: "latest",
+		});
+		const pendingNonce = await client.getTransactionCount({
+			address: target,
+			blockTag: "pending",
+		});
+
+		console.log(`📊 Current nonce: ${currentNonce}, pending nonce: ${pendingNonce}`);
+
+		if (currentNonce >= pendingNonce) {
+			console.log(`✅ No pending transactions found`);
+			return [];
+		}
+	} catch (error) {
+		console.error("❌ Error finding pending transactions:", error);
+	}
+}
+
+const cancelTransactions = async (specificTxHash?: Hash) => {
 	const hre: HardhatRuntimeEnvironment = require("hardhat");
 	const network = conceroNetworks[hre.network.name];
 	// @ts-ignore Chain type mismatch
@@ -147,6 +203,26 @@ const cancelTransactions = async () => {
 
 	const myAddress = wallet.account?.address as Address;
 	if (!myAddress) throw new Error("No account found on WalletClient.");
+
+	// If specific transaction hash is provided, cancel only that transaction
+	if (specificTxHash) {
+		const success = await cancelSpecificTransaction(
+			client,
+			wallet,
+			// @ts-ignore Chain type mismatch
+			network.viemChain,
+			specificTxHash,
+		);
+		if (success) {
+			console.log(`✅ Successfully submitted cancel transaction for ${specificTxHash}`);
+		} else {
+			console.log(`❌ Failed to cancel transaction ${specificTxHash}`);
+		}
+		return;
+	}
+
+	// Check for existing pending transactions
+	await findPendingNonce(client, myAddress);
 
 	console.log(`🚀 Listening with WebSocket for pending txs from: ${myAddress}`);
 
@@ -171,13 +247,16 @@ const cancelTransactions = async () => {
 	}
 };
 
-task("cancelTx", "Cancel stuck self transactions in mempool", async () => {
-	try {
-		await cancelTransactions();
-	} catch (e) {
-		console.error(e);
-		process.exit(1);
-	}
-});
+task("cancel-tx", "Cancel stuck self transactions in mempool")
+	.addOptionalParam("hash", "Specific transaction hash to cancel", undefined)
+	.setAction(async taskArgs => {
+		try {
+			const txHash = taskArgs.hash as Hash | undefined;
+			await cancelTransactions(txHash);
+		} catch (e) {
+			console.error(e);
+			process.exit(1);
+		}
+	});
 
 export default {};

@@ -9,7 +9,7 @@ pragma solidity 0.8.28;
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {GenericStorage} from "contracts/common/libraries/GenericStorage.sol";
 
-import {VerifierSlots, OperatorSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {VerifierSlots, OperatorSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
 import {Storage as s, Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";

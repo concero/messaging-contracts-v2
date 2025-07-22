@@ -17,26 +17,22 @@ import {Errors} from "../libraries/Errors.sol";
 
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
-    using s for s.PriceFeed;
     using s for s.Operator;
-
-    address immutable i_feedUpdater;
-
-    constructor(address _feedUpdater) {
-        i_feedUpdater = _feedUpdater;
-    }
-
-    modifier onlyFeedUpdater() {
-        require(msg.sender == i_feedUpdater || msg.sender == i_owner, CommonErrors.Unauthorized());
-        _;
-    }
+    using s for s.Config;
 
     /**
      * @notice Calculates the amount of native token fees available for withdrawal
      * @return availableFees Amount of native token fees that can be withdrawn
      */
     function getWithdrawableConceroFee() public view returns (uint256) {
-        return address(this).balance - (s.operator().totalFeesEarnedNative);
+        uint256 routerBalance = address(this).balance;
+        uint256 totalFeesEarnedNative = s.operator().totalFeesEarnedNative;
+
+        if (routerBalance > totalFeesEarnedNative) {
+            return routerBalance - totalFeesEarnedNative;
+        }
+
+        return 0;
     }
 
     /**
@@ -98,44 +94,18 @@ abstract contract Owner is Base {
         }
     }
 
-    function setNativeUsdRate(uint256 amount) external onlyFeedUpdater {
-        s.priceFeed().nativeUsdRate = amount;
-    }
-
-    function setNativeNativeRates(
-        uint24[] memory dstChainSelectors,
-        uint256[] memory rates
-    ) external onlyFeedUpdater {
-        require(dstChainSelectors.length == rates.length, CommonErrors.LengthMismatch());
-        for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            require(
-                s.router().isChainSupported[dstChainSelectors[i]],
-                Errors.UnsupportedChainSelector(dstChainSelectors[i])
-            );
-            s.priceFeed().nativeNativeRates[dstChainSelectors[i]] = rates[i];
-        }
-    }
-
-    function setLastGasPrices(
-        uint24[] memory dstChainSelectors,
-        uint256[] memory gasPrices
-    ) external onlyFeedUpdater {
-        require(dstChainSelectors.length == gasPrices.length, CommonErrors.LengthMismatch());
-
-        s.PriceFeed storage priceFeedStorage = s.priceFeed();
-
-        for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            priceFeedStorage.lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
-        }
-    }
-
     function setGasFeeConfig(
         uint24 baseChainSelector,
-        uint32 gasOverhead,
-        uint32 relayerGasLimit,
-        uint32 verifierGasLimit
-    ) external onlyFeedUpdater {
-        s.priceFeed().gasFeeConfig =
-            s.GasFeeConfig(baseChainSelector, gasOverhead, relayerGasLimit, verifierGasLimit, 0);
+        uint32 submitMsgGasOverhead,
+        uint32 vrfMsgReportRequestGasOverhead,
+        uint32 clfCallbackGasOverhead
+    ) external onlyOwner {
+        s.config().gasFeeConfig = s.GasFeeConfig(
+            baseChainSelector,
+            submitMsgGasOverhead,
+            vrfMsgReportRequestGasOverhead,
+            clfCallbackGasOverhead,
+            0
+        );
     }
 }

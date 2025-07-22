@@ -7,7 +7,7 @@ import { computeNamespace } from "../../utils/computeNamespace";
 const Namespaces = {
 	ROUTER: computeNamespace("concerorouter.router.storage"),
 	OPERATOR: computeNamespace("concerorouter.operator.storage"),
-	PRICEFEED: computeNamespace("concerorouter.pricefeed.storage"),
+	CONFIG: computeNamespace("concerorouter.config.storage"),
 };
 
 /**
@@ -45,18 +45,17 @@ const OperatorSlots = (() => {
 })();
 
 /**
- * @title PriceFeedSlots
- * @notice Storage slot definitions for ConceroPriceFeed contract
- * @dev All slots are calculated using standard Solidity storage layout rules with namespace isolation
+ * @title ConfigSlots
+ * @notice Storage slot definitions for Concero configuration variables
+ * @dev All slots are calculated using standard Solidity storage layout rules
  */
-const PriceFeedSlots = (() => {
+const ConfigSlots = (() => {
 	const _var_gap = 50;
 	const _arr_gap = 50;
 
 	return Object.freeze({
-		nativeUsdRate: 0,
-		lastGasPrices: _var_gap + _arr_gap + 1,
-		nativeNativeRates: _var_gap + _arr_gap + 2,
+		gasFeeConfig: 0,
 	});
 })();
-export { RouterSlots, OperatorSlots, PriceFeedSlots, Namespaces };
+
+export { RouterSlots, OperatorSlots, ConfigSlots, Namespaces };

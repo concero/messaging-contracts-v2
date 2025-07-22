@@ -2,6 +2,7 @@ import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
 import deployPauseTask from "./deployPause.task";
+import { deployPriceFeedTask } from "./deployPriceFeed/deployPriceFeedTask";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
 import updateSupportedChainsForAllRouters from "./deployRouter/updateSupportedChainsForAllRouters.task";
@@ -13,11 +14,20 @@ import sendConceroMessage from "./sendConceroMessage";
 import sendValueTask from "./sendValue.task";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
 import setOperator from "./setOperator";
-import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
 import { setRouterSupportedChains } from "./setRouterSupportedChains";
 import testScript from "./test";
 import updateAllRouterImplementations from "./updateAllRouterImplementations.task";
-import { callContractFunction, changeOwnership, upgradeProxyImplementation } from "./utils";
+import {
+	callContractFunction,
+	changeOwnership,
+	displayRouterGasFeeConfig,
+	displayVerifierGasFeeConfig,
+	readRouterGasFeeConfig,
+	readVerifierGasFeeConfig,
+	setRouterGasFeeConfig,
+	setVerifierGasFeeConfig,
+	upgradeProxyImplementation,
+} from "./utils";
 import withdrawFees from "./withdrawFees";
 
 export {
@@ -25,12 +35,18 @@ export {
 	callContractFunction,
 	changeOwnership,
 	upgradeProxyImplementation,
+	readRouterGasFeeConfig,
+	readVerifierGasFeeConfig,
+	displayRouterGasFeeConfig,
+	displayVerifierGasFeeConfig,
+	setRouterGasFeeConfig,
+	setVerifierGasFeeConfig,
+	deployPriceFeedTask,
 	deployRouterTask,
 	deployVerifierTask,
 	setRouterVariables,
 	setVerifierVariables,
 	deployContracts,
-	setRouterPriceFeeds,
 	setRouterSupportedChains,
 	setIsOperatorRegistered,
 	sendConceroMessage,

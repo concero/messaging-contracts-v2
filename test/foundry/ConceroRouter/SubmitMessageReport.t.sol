@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
+// solhint-disable func-name-mixedcase
 /**
  * @title Security Reporting
  * @notice If you discover any security vulnerabilities, please report them responsibly.
@@ -23,6 +24,7 @@ import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
 
 import {IConceroClient} from "contracts/interfaces/IConceroClient.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
 
 contract SubmitMessageReport is ConceroRouterTest {
     MessageReport internal messageReport;
@@ -40,6 +42,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         messageReport = new MessageReport();
 
         _setPriceFeeds();
+		_setGasFeeConfig();
     }
 
     function test_SubmitMessageReport() public {
@@ -197,6 +200,178 @@ contract SubmitMessageReport is ConceroRouterTest {
 
         // assertTrue(foundReceivedEvent, "ConceroMessageReceived event not emitted");
         // assertTrue(foundDeliveredEvent, "ConceroMessageDelivered event not emitted");
+    }
+
+    function test_submitMessageReport_RevertsIfNativeUsdRateIsZero() public {
+        // Set nativeUsdRate to 0
+        vm.startPrank(feedUpdater);
+        conceroPriceFeed.setNativeUsdRate(0);
+        vm.stopPrank();
+
+        // Create a basic message report
+        Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
+            receiver: address(conceroClient),
+            gasLimit: GAS_LIMIT
+        });
+
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: CommonTypes.ResultType.Message,
+            payloadVersion: 1,
+            requester: operator
+        });
+
+        bytes[] memory allowedOperators = new bytes[](1);
+        allowedOperators[0] = abi.encode(operator);
+
+        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
+            messageId: TEST_MESSAGE_ID,
+            messageHashSum: keccak256(TEST_MESSAGE),
+            messageSender: abi.encode(address(this)),
+            srcChainSelector: SRC_CHAIN_SELECTOR,
+            dstChainSelector: 1,
+            srcBlockNumber: block.number,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
+        });
+
+        bytes memory payload = abi.encode(messagePayloadV1);
+        Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
+            abi.encode(resultConfig, payload)
+        );
+
+        bytes[] memory messageBodies = new bytes[](1);
+        messageBodies[0] = TEST_MESSAGE;
+        uint256[] memory indexes = new uint256[](1);
+        indexes[0] = 0;
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CommonErrors.RequiredVariableUnset.selector,
+                CommonErrors.RequiredVariableUnsetType.NativeUSDRate
+            )
+        );
+
+        vm.prank(operator);
+        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
+    }
+
+    function test_submitMessageReport_RevertsIfLastGasPriceIsZero() public {
+        // Set lastGasPrice to 0 for current chain
+        vm.startPrank(feedUpdater);
+        uint24[] memory chainSelectors = new uint24[](1);
+        chainSelectors[0] = SRC_CHAIN_SELECTOR;
+        uint256[] memory gasPrices = new uint256[](1);
+        gasPrices[0] = 0;
+
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+        vm.stopPrank();
+
+        // Create a basic message report
+        Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
+            receiver: address(conceroClient),
+            gasLimit: GAS_LIMIT
+        });
+
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: CommonTypes.ResultType.Message,
+            payloadVersion: 1,
+            requester: operator
+        });
+
+        bytes[] memory allowedOperators = new bytes[](1);
+        allowedOperators[0] = abi.encode(operator);
+
+        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
+            messageId: TEST_MESSAGE_ID,
+            messageHashSum: keccak256(TEST_MESSAGE),
+            messageSender: abi.encode(address(this)),
+            srcChainSelector: SRC_CHAIN_SELECTOR,
+            dstChainSelector: 1,
+            srcBlockNumber: block.number,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
+        });
+
+        bytes memory payload = abi.encode(messagePayloadV1);
+        Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
+            abi.encode(resultConfig, payload)
+        );
+
+        bytes[] memory messageBodies = new bytes[](1);
+        messageBodies[0] = TEST_MESSAGE;
+        uint256[] memory indexes = new uint256[](1);
+        indexes[0] = 0;
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CommonErrors.RequiredVariableUnset.selector,
+                CommonErrors.RequiredVariableUnsetType.lastGasPrice
+            )
+        );
+
+        vm.prank(operator);
+        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
+    }
+
+    function test_submitMessageReport_RevertsIfGasFeeNativeIsZero() public {
+        vm.startPrank(deployer);
+        conceroRouter.setGasFeeConfig(
+            SRC_CHAIN_SELECTOR,
+            0, // submitMsgGasOverhead = 0
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
+            CLF_CALLBACK_GAS_OVERHEAD
+        );
+        vm.stopPrank();
+
+        uint24[] memory chainSelectors = new uint24[](1);
+        chainSelectors[0] = SRC_CHAIN_SELECTOR;
+        uint256[] memory gasPrices = new uint256[](1);
+        gasPrices[0] = 1;
+
+		vm.startPrank(feedUpdater);
+        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+		conceroPriceFeed.setNativeUsdRate(1);
+		vm.stopPrank();
+
+        Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
+            receiver: address(conceroClient),
+            gasLimit: 10000
+        });
+
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: CommonTypes.ResultType.Message,
+            payloadVersion: 1,
+            requester: operator
+        });
+
+        bytes[] memory allowedOperators = new bytes[](1);
+        allowedOperators[0] = abi.encode(operator);
+
+        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
+            messageId: TEST_MESSAGE_ID,
+            messageHashSum: keccak256(TEST_MESSAGE),
+            messageSender: abi.encode(address(this)),
+            srcChainSelector: SRC_CHAIN_SELECTOR,
+            dstChainSelector: 1,
+            srcBlockNumber: block.number,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
+        });
+
+        bytes memory payload = abi.encode(messagePayloadV1);
+        Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
+            abi.encode(resultConfig, payload)
+        );
+
+        bytes[] memory messageBodies = new bytes[](1);
+        messageBodies[0] = TEST_MESSAGE;
+        uint256[] memory indexes = new uint256[](1);
+        indexes[0] = 0;
+
+        vm.expectRevert(abi.encodeWithSelector(CommonErrors.InvalidAmount.selector));
+
+        vm.prank(operator);
+        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
     }
 
     // function testRevert_MessageAlreadyProcessed() public {

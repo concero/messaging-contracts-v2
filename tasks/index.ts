@@ -8,6 +8,7 @@ import updateSupportedChainsForAllRouters from "./deployRouter/updateSupportedCh
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
+import measureFinalizationRealTask from "./measureFinalizationReal.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import sendConceroMessage from "./sendConceroMessage";
 import sendValueTask from "./sendValue.task";
@@ -39,6 +40,7 @@ export {
 	withdrawFees,
 	deployConceroPauseToAllChains,
 	fetchTransactionTask,
+	measureFinalizationRealTask,
 	testScript,
 	updateSupportedChainsForAllRouters,
 	sendValueTask,

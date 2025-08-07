@@ -4,4 +4,4 @@ function getHashSum(sourceCode: string) {
 	return `0x${hash.digest("hex")}`;
 }
 
-export default getHashSum;
+export { getHashSum };

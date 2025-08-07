@@ -10,7 +10,7 @@ import { getConceroVerifierNetwork } from "../constants/conceroNetworks";
 import { ConceroNetworkNames, NetworkType } from "../types/ConceroNetwork";
 import { getEnvVar, getGasParameters, log, updateEnvVariable } from "../utils/";
 
-function getCLFDonSigners(networkType: NetworkType) {
+export function getCLFDonSigners(networkType: NetworkType) {
 	let networkName: ConceroNetworkNames;
 	switch (networkType) {
 		case "mainnet":
@@ -108,6 +108,7 @@ const deployRouter: DeploymentFunction = async function (
 	return deployment;
 };
 
-export { deployRouter };
-export default deployRouter;
 deployRouter.tags = ["ConceroRouter"];
+
+export default deployRouter;
+export { deployRouter };

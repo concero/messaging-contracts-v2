@@ -54,6 +54,7 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
 		account: viemAccount,
 		args: [conceroProxy, implementation, "0x"],
 		chain: viemChain,
+		gas: 100000,
 	});
 
 	const { cumulativeGasUsed } = await publicClient.waitForTransactionReceipt({

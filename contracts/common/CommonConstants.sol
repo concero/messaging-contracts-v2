@@ -12,6 +12,7 @@ library CommonConstants {
     uint8 internal constant COHORTS_COUNT = 1;
     uint16 internal constant CONCERO_MESSAGE_BASE_FEE_BPS_USD = 100;
     uint256 internal constant STAKER_FEE = 1e18;
+    uint256 internal constant DECIMALS = 1e18;
 
     /* Operator fees & deposits */
     uint16 internal constant OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD = 100;

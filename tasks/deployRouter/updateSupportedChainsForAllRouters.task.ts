@@ -16,4 +16,4 @@ task("update-supported-chains-for-all-routers", "").setAction(async () => {
 	await updateSupportedChains();
 });
 
-export { updateSupportedChains };
+export default {};

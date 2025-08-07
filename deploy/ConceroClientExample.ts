@@ -55,6 +55,5 @@ const deployConceroClientExample: DeploymentFunction = async function (
 };
 
 export { deployConceroClientExample };
-export default deployConceroClientExample;
 
 deployConceroClientExample.tags = ["ConceroClientExample"];

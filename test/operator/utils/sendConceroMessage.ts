@@ -16,8 +16,9 @@ export async function sendConceroMessage(
 		address: clientAddress,
 		abi: exampleClientAbi,
 		functionName: "sendConceroMessage",
-		args: [clientAddress],
+		args: [clientAddress, 1n],
 		value: parseUnits("0.01", 18),
+		gas: 10000000n,
 	});
 
 	const txReceipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
@@ -45,6 +46,8 @@ export async function sendConceroMessage(
 		data: foundMessageSentLog.data,
 		topics: foundMessageSentLog.topics,
 	});
+
+	console.log("[sendConceroMessage]: Message sent: ", decodedEvent);
 
 	return {
 		txHash,

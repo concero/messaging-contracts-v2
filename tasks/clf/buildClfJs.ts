@@ -2,6 +2,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 
 import { task } from "hardhat/config";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { getNetworkEnvKey } from "@concero/contract-utils";
 import { testnetNetworks } from "@concero/v2-networks";
@@ -23,20 +24,15 @@ function processFile(filePath: string, isMinified: boolean = false): void {
 	}
 }
 
-export function buildClfJs() {
-	const hre = require("hardhat");
-
+export function buildClfJs(networkName: string) {
 	try {
-		const networkName = hre.network.name;
 		const conceroVerifier = getEnvVar(
 			`CONCERO_VERIFIER_PROXY_${getNetworkEnvKey(networkName)}`,
 		);
 
-
-
-		// Base esbuild command with common options
+		// Use npx to ensure esbuild is available from node_modules
 		const cmdBase =
-			`esbuild --bundle --legal-comments=none --format=esm --global-name=conceromain --target=esnext ` +
+			`npx esbuild --bundle --legal-comments=none --format=esm --global-name=conceromain --target=esnext ` +
 			Object.values(testnetNetworks).reduce((acc, e) => {
 				return (
 					acc +
@@ -60,6 +56,7 @@ export function buildClfJs() {
 			// Build standard version
 			execSync(`${cmdBase} --outfile=clf/dist/${dir}.js ./clf/src/${dir}/index.ts`, {
 				stdio: "inherit",
+				shell: true,
 			});
 
 			// Process the standard (unminified) file
@@ -70,6 +67,7 @@ export function buildClfJs() {
 				`${cmdBase} --minify --outfile=clf/dist/${dir}.min.js ./clf/src/${dir}/index.ts`,
 				{
 					stdio: "inherit",
+					shell: true,
 				},
 			);
 
@@ -82,5 +80,6 @@ export function buildClfJs() {
 }
 
 task("clf-build-js", "Build CLF JavaScript files using esbuild").setAction(async (_, __) => {
-	buildClfJs();
+	const hre: HardhatRuntimeEnvironment = require("hardhat");
+	buildClfJs(hre.network.name);
 });

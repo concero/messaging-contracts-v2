@@ -106,5 +106,5 @@ const deployVerifier: DeploymentFunction = async function (
 };
 
 export { deployVerifier };
-export default deployVerifier;
+
 deployVerifier.tags = ["ConceroVerifier"];

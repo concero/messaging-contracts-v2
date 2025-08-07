@@ -1,4 +1,4 @@
-import { config } from "@concero/v2-operators/src/relayer/a/constants";
+import { eventEmitter } from "@concero/v2-operators/src/constants";
 
 import type { ExtendedTestClient } from "../../../utils/getViemClients";
 import { handleMessageReportRequest } from "./handleMessageReportRequest";
@@ -16,15 +16,15 @@ async function setupOperatorTestListeners({
 	conceroClientExample: string;
 	conceroVerifier: string;
 }) {
-	config.eventEmitter.on("requestOperatorRegistration", async ({ txHash }) => {
+	eventEmitter.on("requestOperatorRegistration", async ({ txHash }) => {
 		await handleOperatorRegistration(testClient, txHash, mockCLFRouter);
 	});
 
-	config.eventEmitter.on("operatorRegistered", async ({ txHash }) => {
+	eventEmitter.on("operatorRegistered", async () => {
 		await sendConceroMessage(testClient, testClient, conceroClientExample);
 	});
 
-	config.eventEmitter.on("requestMessageReport", async ({ txHash }) => {
+	eventEmitter.on("requestMessageReport", async ({ txHash }) => {
 		await handleMessageReportRequest(
 			testClient,
 			txHash,

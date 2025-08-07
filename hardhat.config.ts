@@ -11,7 +11,6 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@chainlink/hardhat-chainlink";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-ethers";
-import "@nomicfoundation/hardhat-ignition-viem";
 import "@nomicfoundation/hardhat-network-helpers";
 import "@nomicfoundation/hardhat-verify";
 import "@nomicfoundation/hardhat-viem";
@@ -67,17 +66,17 @@ const config: HardhatUserConfig = {
 	networks: conceroNetworks,
 	etherscan: {
 		apiKey: {
-			arbitrum: process.env.ARBISCAN_API_KEY,
-			arbitrumSepolia: process.env.ARBISCAN_API_KEY,
-			ethereum: process.env.ETHERSCAN_API_KEY,
-			ethereumSepolia: process.env.ETHERSCAN_API_KEY,
-			polygon: process.env.POLYGONSCAN_API_KEY,
-			polygonAmoy: process.env.POLYGONSCAN_API_KEY,
-			optimism: process.env.OPTIMISMSCAN_API_KEY,
-			optimismSepolia: process.env.OPTIMISMSCAN_API_KEY,
-			celo: process.env.CELOSCAN_API_KEY,
-			avalanche: "snowtrace",
-			avalancheFuji: "snowtrace",
+			// arbitrum: process.env.ARBISCAN_API_KEY,
+			// arbitrumSepolia: process.env.ARBISCAN_API_KEY,
+			// ethereum: process.env.ETHERSCAN_API_KEY,
+			// ethereumSepolia: process.env.ETHERSCAN_API_KEY,
+			// polygon: process.env.POLYGONSCAN_API_KEY,
+			// polygonAmoy: process.env.POLYGONSCAN_API_KEY,
+			// optimism: process.env.OPTIMISMSCAN_API_KEY,
+			// optimismSepolia: process.env.OPTIMISMSCAN_API_KEY,
+			// celo: process.env.CELOSCAN_API_KEY,
+			// avalanche: "snowtrace",
+			// avalancheFuji: "snowtrace",
 		},
 	},
 	sourcify: {

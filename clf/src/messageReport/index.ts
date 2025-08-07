@@ -37,9 +37,10 @@ export async function main() {
 		requester: args.operatorAddress,
 		messageId: args.messageId,
 		messageHashSum: args.messageHashSum,
-		sender,
+		messageSender: sender,
 		srcChainSelector: args.srcChainSelector,
 		dstChainSelector,
+		srcBlockNumber: log.blockNumber,
 		dstChainData,
 		allowedOperators,
 	};

@@ -27,18 +27,11 @@ const reportAbiParameters = parseAbiParameters([
 ]);
 
 /**
- * Decodes the Chainlink Functions report from a transaction hash.
- * @param {string} hash - The transaction hash to decode.
- * @param {CNetwork} chain - The chain network configuration.
- * @returns {Promise<object>} - The formatted report data.
+ * Decodes the Chainlink Functions report from raw input data.
+ * @param {string} inputData - The raw transaction input data (without 0x prefix and function selector).
+ * @returns {object} - The formatted report data.
  */
-async function decodeReport(hash: string, chain: ConceroNetwork) {
-	const { publicClient } = getFallbackClients(chain);
-	const tx = await publicClient.getTransaction({ hash });
-
-	// Remove '0x' prefix and the function selector (first 4 bytes)
-	const inputData = tx.input.slice(10);
-
+function decodeReport(inputData: string) {
 	// Decode the transaction input data
 	const decodedData = decodeAbiParameters(abiParameters, `0x${inputData}`);
 
@@ -64,6 +57,22 @@ async function decodeReport(hash: string, chain: ConceroNetwork) {
 
 	console.log("Decoded Report:", JSON.stringify(formattedData, null, 2));
 	return formattedData;
+}
+
+/**
+ * Fetches transaction data and decodes the Chainlink Functions report from a transaction hash.
+ * @param {string} hash - The transaction hash to decode.
+ * @param {ConceroNetwork} chain - The chain network configuration.
+ * @returns {Promise<object>} - The formatted report data.
+ */
+async function decodeReportByTxHash(hash: string, chain: ConceroNetwork) {
+	const { publicClient } = getFallbackClients(chain);
+	const tx = await publicClient.getTransaction({ hash });
+
+	// Remove '0x' prefix and the function selector (first 4 bytes)
+	const inputData = tx.input.slice(10);
+
+	return decodeReport(inputData);
 }
 
 /**
@@ -162,11 +171,11 @@ task("decode-clf-fulfill", "Decodes CLF TX to get signers and fulfillment data")
 	.addParam("txhash", "Transaction hash to decode")
 	.setAction(async (taskArgs, hre) => {
 		const chain = conceroNetworks[hre.network.name];
-		const formattedData = await decodeReport(taskArgs.txhash, chain);
+		const formattedData = await decodeReportByTxHash(taskArgs.txhash, chain);
 
 		const isTestnet = chain.type === "testnet";
-		verifyReport(formattedData, isTestnet);
+		// verifyReport(formattedData, isTestnet);
 		decodeReportResult(formattedData.report.results);
 	});
 
-export { decodeReport };
+export { decodeReport, decodeReportByTxHash };

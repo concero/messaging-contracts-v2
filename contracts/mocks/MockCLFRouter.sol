@@ -20,7 +20,7 @@ interface IMockCLFRouter {
 }
 
 contract MockCLFRouter {
-    error CallFailed();
+    error CallFailed(bytes returnData);
     event RequestSent(bytes32 indexed id);
     event RequestFulfilled(bytes32 indexed id);
     address public s_consumer; // ConceroVerifier
@@ -64,7 +64,7 @@ contract MockCLFRouter {
         bytes memory result = results[0];
         bytes memory err = errors[0];
 
-        (bool success, ) = s_consumer.call(
+        (bool success, bytes memory returnData) = s_consumer.call(
             abi.encodeWithSignature(
                 "handleOracleFulfillment(bytes32,bytes,bytes)",
                 requestId,
@@ -73,7 +73,9 @@ contract MockCLFRouter {
             )
         );
 
-        require(success, CallFailed());
+        if (!success) {
+            revert CallFailed(returnData);
+        }
         emit RequestFulfilled(requestId);
     }
 }

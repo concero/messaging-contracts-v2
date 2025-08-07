@@ -23,6 +23,21 @@ event ConceroMessageDelivered(bytes32 indexed id);
 event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
 
 interface IConceroRouter {
+    /**
+     * @notice Concero allows you to send messages from one blockchain
+     *         to another using the `conceroSend` function. This enables
+     *         cross-chain interactions for a variety of use cases:
+     *         token transfers, governance actions, or any custom
+     *         cross-chain operations.
+     *
+     * @param dstChainSelector   Identifier of the destination chain.
+     * @param shouldFinaliseSrc  Flag for source‐chain finality.
+     * @param feeToken           Token used to pay message fees.
+     * @param dstChainData       Struct containing execution parameters
+     *                           for the destination chain.
+     * @param message            Payload of the message to be sent to
+     *                           the destination chain.
+     */
     function conceroSend(
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
@@ -31,6 +46,17 @@ interface IConceroRouter {
         bytes calldata message
     ) external payable returns (bytes32 messageId);
 
+    /**
+     * @notice Before sending a message, you must call getMessageFee.
+     *         If you choose to pay fees in the native token, pass the
+     *         returned value as msg.value.
+     *
+     * @param dstChainSelector   Identifier of the destination chain.
+     * @param shouldFinaliseSrc  Flag for source‐chain finality.
+     * @param feeToken           Token used to pay message fees.
+     * @param dstChainData       Struct containing execution parameters
+     *                           for the destination chain.
+     */
     function getMessageFee(
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,

@@ -32,6 +32,7 @@ library CommonTypes {
         bytes messageSender;
         uint24 srcChainSelector;
         uint24 dstChainSelector;
+        uint256 srcBlockNumber;
         Types.EvmDstChainData dstChainData;
         bytes[] allowedOperators;
     }

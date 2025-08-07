@@ -1,5 +1,4 @@
-import { type Address } from "viem";
-import { Hash } from "viem";
+import { type Address, Hash } from "viem";
 import { PublicClient } from "viem/clients/createPublicClient";
 
 import { config } from "../../common/config";
@@ -13,7 +12,6 @@ import { getMessageCohortId, getOperatorCohortId } from "./utils";
 
 /**
  * Gets all allowed operators for a given message ID based on cohort assignment
- * @param client - Viem public client instance
  * @param chainType - Type of chain (e.g., EVM)
  * @param messageId - Message identifier
  * @returns Array of operator addresses allowed for the message

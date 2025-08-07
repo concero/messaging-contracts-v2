@@ -92,6 +92,21 @@ const testingNetworks: Record<"localhost", ConceroLocalNetwork> &
 		saveDeployments: true,
 		url: process.env.LOCALHOST_RPC_URL || "http://localhost:8545",
 	},
+	localhostDst: {
+		name: "localhostDst",
+		type: networkTypes.localhost,
+		chainId: 1,
+		viemChain: localhostViemChain,
+		confirmations: 1,
+		chainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
+		accounts: [
+			localhostDeployerPK,
+			localhostProxyDeployerPK,
+			getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
+		],
+		saveDeployments: true,
+		url: process.env.LOCALHOST_RPC_URL || "http://localhost:8545",
+	},
 };
 
 export type ConceroMainnetNetworkNames = keyof typeof v2MainnetNetworks;

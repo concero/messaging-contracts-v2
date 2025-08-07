@@ -2,17 +2,18 @@ import "./utils/configureOperatorEnv";
 
 import { privateKeyToAccount } from "viem/accounts";
 
-import { ensureDeposit } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureDeposit";
-import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer/a/contractCaller/ensureOperatorIsRegistered";
-import { setupEventListeners } from "@concero/v2-operators/src/relayer/a/eventListener/setupEventListeners";
-import { initializeManagers } from "@concero/v2-operators/src/relayer/common/managers/initializeManagers";
-import { checkGas } from "@concero/v2-operators/src/relayer/common/utils";
+import { BlockManagerRegistry } from "@concero/v2-operators/src/common/managers";
+import { checkGas } from "@concero/v2-operators/src/common/utils";
+import { initializeManagers } from "@concero/v2-operators/src/common/utils/initializeManagers";
+import { ensureDeposit } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureDeposit";
+import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureOperatorIsRegistered";
+import { setupEventListeners } from "@concero/v2-operators/src/relayer-a/eventListener/setupEventListeners";
 
-import { deployConceroClientExample } from "../../deploy";
-import { deployMockCLFRouter } from "../../deploy";
-import { deployContracts } from "../../tasks";
-import { getTestClient } from "../../utils";
-import { compileContracts } from "../../utils/compileContracts";
+import { deployConceroClientExample, deployMockCLFRouter } from "../../deploy";
+import { deployContracts, setRouterSupportedChains } from "../../tasks";
+import { buildClfJs } from "../../tasks/clf";
+import { compileContracts, getTestClient } from "../../utils";
+import { deployPseudoRemoteConceroRouter } from "./utils/deployPseudoRemoteConceroRouter";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
 async function operator() {
@@ -22,20 +23,27 @@ async function operator() {
 	await ensureDeposit();
 	await ensureOperatorIsRegistered();
 	await setupEventListeners();
+
+	const blockManagerRegistry = BlockManagerRegistry.getInstance();
+	for (const blockManager of blockManagerRegistry.getAllBlockManagers()) {
+		await blockManager.startPolling();
+	}
 }
 
 async function setupChain() {
 	compileContracts({ quiet: true });
+	buildClfJs("arbitrumSepolia");
+
 	const hre = require("hardhat");
+
 	const testClient = getTestClient(
 		privateKeyToAccount(`0x${process.env.LOCALHOST_DEPLOYER_PRIVATE_KEY}`),
 	);
 
-	testClient.mine({ blocks: 1000 });
-
 	const mockCLFRouter = await deployMockCLFRouter(hre);
 
 	const { conceroRouter, conceroVerifier } = await deployContracts(mockCLFRouter.address);
+
 	const conceroClientExample = await deployConceroClientExample(hre, {
 		conceroRouter: conceroRouter.address,
 	});
@@ -73,9 +81,4 @@ async function main() {
 	}
 }
 
-if (require.main === module) {
-	main().catch(error => {
-		console.error(error);
-		process.exit(1);
-	});
-}
+main();

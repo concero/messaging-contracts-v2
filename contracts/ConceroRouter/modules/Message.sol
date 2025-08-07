@@ -34,9 +34,8 @@ library Errors {
     error InvalidGasLimit();
     error InvalidMessageHashSum();
     error UnauthorizedOperator();
-    error InvalidDstChainSelector(uint24 dstChainSelector);
+    error InvalidDstChainSelector();
     error InvalidClientMessageConfig();
-    error InvalidDstChainData();
     error InvalidSrcChainData();
     error MessageTooLarge();
     error FinalityNotYetSupported();
@@ -56,6 +55,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         address[4] memory clfSigners
     ) ClfSigner(conceroVerifier, conceroVerifierSubId, clfSigners) {}
 
+    /* @inheritdoc IConceroRouter */
     function conceroSend(
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,
@@ -134,7 +134,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         _verifyIsSenderOperator(messagePayload.allowedOperators);
 
-        if (messagePayload.dstChainSelector != i_chainSelector) return;
+        require(
+            messagePayload.dstChainSelector == i_chainSelector,
+            Errors.InvalidDstChainSelector()
+        );
 
         require(
             messagePayload.messageHashSum == keccak256(messageBody),
@@ -230,10 +233,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         require(dstChainData.gasLimit > 0, Errors.InvalidGasLimit());
         require(message.length < CommonConstants.MESSAGE_MAX_SIZE, Errors.MessageTooLarge());
         require(!shouldFinaliseSrc, Errors.FinalityNotYetSupported());
-        require(
-            isChainSupported(dstChainSelector),
-            Errors.InvalidDstChainSelector(dstChainSelector)
-        );
+        require(isChainSupported(dstChainSelector), Errors.InvalidDstChainSelector());
     }
 
     function _buildMessageId(uint24 dstChainSelector) private returns (bytes32) {
@@ -270,28 +270,49 @@ abstract contract Message is ClfSigner, IConceroRouter {
         address feeToken,
         ConceroTypes.EvmDstChainData memory dstChainData
     ) internal view returns (uint256) {
-        uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+        uint256 nativeUsdRate = priceFeedStorage.nativeUsdRate;
 
         uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
-            CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD,
+            CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD +
+                CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
             nativeUsdRate
         );
 
-        uint256 gasPrice = s.priceFeed().lastGasPrices[dstChainSelector];
-        uint256 gasFeeNative = gasPrice * dstChainData.gasLimit;
+        // dst chain gas fee
+        uint256 gasFeeNative = _calculateGasFees(
+            priceFeedStorage.lastGasPrices[dstChainSelector],
+            dstChainData.gasLimit + priceFeedStorage.gasFeeConfig.gasOverhead,
+            s.getNativeNativeRate(dstChainSelector)
+        );
 
-        uint256 nativeNativeRate = s.getNativeNativeRate(dstChainSelector);
-        uint256 adjustedGasFeeNative = (gasFeeNative * nativeNativeRate) / 1e18;
+        // service gas fee
+        uint24 baseChainSelector = priceFeedStorage.gasFeeConfig.baseChainSelector;
+        uint256 serviceGasFeeNative = _calculateGasFees(
+            priceFeedStorage.lastGasPrices[baseChainSelector],
+            priceFeedStorage.gasFeeConfig.relayerGasLimit +
+                priceFeedStorage.gasFeeConfig.verifierGasLimit,
+            s.getNativeNativeRate(baseChainSelector)
+        );
 
-        uint256 totalFeeNative = baseFeeNative + adjustedGasFeeNative;
+        uint256 totalFeeNative = baseFeeNative + gasFeeNative + serviceGasFeeNative;
 
         if (feeToken == address(0)) {
             return totalFeeNative;
         }
 
-        return (totalFeeNative * nativeUsdRate) / 1e18;
+        return (totalFeeNative * nativeUsdRate) / CommonConstants.DECIMALS;
     }
 
+    function _calculateGasFees(
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 exchangeRate
+    ) private pure returns (uint256) {
+        return (gasPrice * gasLimit * exchangeRate) / CommonConstants.DECIMALS;
+    }
+
+    /* @inheritdoc IConceroRouter */
     function getMessageFee(
         uint24 dstChainSelector,
         bool shouldFinaliseSrc,

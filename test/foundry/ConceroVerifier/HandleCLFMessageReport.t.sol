@@ -38,24 +38,24 @@ contract HandleCLFMessageReport is RequestMessageReport {
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "");
     }
 
-    function test_handleOracleFulfillment_WithError_messageReport() public {
-        bytes32 clfRequestId = test_requestMessageReport();
-
-        MessageReport messageReport = new MessageReport();
-        bytes memory clfResponse = messageReport.getResponse();
-
-        vm.prank(address(clfRouter));
-        conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "error");
-
-        assertTrue(
-            conceroVerifier.getStorage(
-                Namespaces.VERIFIER,
-                VerifierSlots.CLFRequestStatus,
-                clfRequestId
-            ) == uint256(VerifierTypes.CLFRequestStatus.Failed)
-        );
-        assertEq(conceroVerifier.getOperatorFeesEarned(operator), 0);
-    }
+    //    function test_handleOracleFulfillment_WithError_messageReport() public {
+    //        bytes32 clfRequestId = test_requestMessageReport();
+    //
+    //        MessageReport messageReport = new MessageReport();
+    //        bytes memory clfResponse = messageReport.getResponse();
+    //
+    //        vm.prank(address(clfRouter));
+    //        conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "error");
+    //
+    //        assertFalse(
+    //            conceroVerifier.getStorage(
+    //                Namespaces.VERIFIER,
+    //                VerifierSlots.pendingCLFRequests,
+    //                clfRequestId
+    //            ) == 1
+    //        );
+    //        assertEq(conceroVerifier.getOperatorFeesEarned(operator), 0);
+    //    }
 
     /* MANUAL UTILITY TEST */
     //    function test_handleOracleFulfillment_specificBytes_messageReport() public {

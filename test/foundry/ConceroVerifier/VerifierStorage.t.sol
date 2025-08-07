@@ -11,6 +11,7 @@ import {GenericStorage} from "contracts/common/libraries/GenericStorage.sol";
 
 import {VerifierSlots, OperatorSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
 import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
+import {VerifierSlots, OperatorSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
 import {Storage as s, Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";

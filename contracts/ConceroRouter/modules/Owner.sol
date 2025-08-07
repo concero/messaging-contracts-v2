@@ -17,26 +17,22 @@ import {Errors} from "../libraries/Errors.sol";
 
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
-    using s for s.PriceFeed;
     using s for s.Operator;
-
-    address immutable i_feedUpdater;
-
-    constructor(address _feedUpdater) {
-        i_feedUpdater = _feedUpdater;
-    }
-
-    modifier onlyFeedUpdater() {
-        require(msg.sender == i_feedUpdater || msg.sender == i_owner, CommonErrors.Unauthorized());
-        _;
-    }
+    using s for s.Config;
 
     /**
      * @notice Calculates the amount of native token fees available for withdrawal
      * @return availableFees Amount of native token fees that can be withdrawn
      */
     function getWithdrawableConceroFee() public view returns (uint256) {
-        return address(this).balance - (s.operator().totalFeesEarnedNative);
+        uint256 routerBalance = address(this).balance;
+        uint256 totalFeesEarnedNative = s.operator().totalFeesEarnedNative;
+
+        if (routerBalance > totalFeesEarnedNative) {
+            return routerBalance - totalFeesEarnedNative;
+        }
+
+        return 0;
     }
 
     /**
@@ -100,7 +96,18 @@ abstract contract Owner is Base {
         }
     }
 
-    function setNativeUsdRate(uint256 amount) external onlyFeedUpdater {
-        s.priceFeed().nativeUsdRate = amount;
+    function setGasFeeConfig(
+        uint24 baseChainSelector,
+        uint32 submitMsgGasOverhead,
+        uint32 vrfMsgReportRequestGasOverhead,
+        uint32 clfCallbackGasOverhead
+    ) external onlyOwner {
+        s.config().gasFeeConfig = s.GasFeeConfig(
+            baseChainSelector,
+            submitMsgGasOverhead,
+            vrfMsgReportRequestGasOverhead,
+            clfCallbackGasOverhead,
+            0
+        );
     }
 }

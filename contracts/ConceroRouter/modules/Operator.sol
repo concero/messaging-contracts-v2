@@ -42,4 +42,8 @@ abstract contract Operator is Base {
     function getCohort(address operator) external pure returns (uint8) {
         return uint8(uint160(operator) % CommonConstants.COHORTS_COUNT);
     }
+
+    function getOperatorFeesEarned(address operator) external view returns (uint256) {
+        return s.operator().feesEarnedNative[operator];
+    }
 }

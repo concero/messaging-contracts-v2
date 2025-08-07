@@ -22,7 +22,6 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 import {Utils} from "../libraries/Utils.sol";
-import "hardhat/console.sol";
 
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
@@ -61,7 +60,7 @@ abstract contract CLF is FunctionsClient, Base {
     uint8 internal immutable i_clfDonHostedSecretsSlotId;
     string internal constant CLF_JS_CODE =
         "var n;((e)=>e[e.H=0]='H')(n||={});var a=await fetch('https://raw.githubusercontent.com/concero/messaging-contracts-v2/refs/heads/master/clf/dist/messageReport.min.js').then((t)=>t.text()),o='0x'+Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(a)))).map((t)=>t.toString(16).padStart(2,'0')).join('');if(o.toLowerCase()!==bytesArgs[0].toLowerCase())throw `${o.toLowerCase()}!==${bytesArgs[0].toLowerCase()}`;return eval(a);";
-    uint32 internal constant CLF_GAS_LIMIT = 100_000;
+
     function fulfillRequest(
         bytes32 clfRequestId,
         bytes memory response,
@@ -114,17 +113,7 @@ abstract contract CLF is FunctionsClient, Base {
             revert Errors.InvalidMessageVersion();
         }
 
-        uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
-
-        s_operator.feesEarnedNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
-            CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
-            nativeUsdRate
-        );
-
-        s_operator.depositsNative[resultConfig.requester] += CommonUtils.convertUsdBpsToNative(
-            CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
-            nativeUsdRate
-        );
+        _payMsgReportRequestFeeAndRefundGas(resultConfig.requester);
     }
 
     function _handleMessagePayloadV1(bytes memory payload) internal {
@@ -134,6 +123,36 @@ abstract contract CLF is FunctionsClient, Base {
         );
 
         emit MessageReport(decodedPayload.messageId);
+    }
+
+    function _payMsgReportRequestFeeAndRefundGas(address requester) internal {
+        s.Operator storage operatorStorage = s.operator();
+
+        (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
+            .getNativeUsdRateAndGasPrice();
+
+        // Calculate the gas cost for the request
+        uint256 vrfMsgReportRequestGasCost = s
+            .config()
+            .gasFeeConfig
+            .vrfMsgReportRequestGasOverhead * lastGasPrice;
+
+        // Calculate the operator fee for the request
+        uint256 operatorFeeMessageReportRequest = CommonUtils.convertUsdBpsToNative(
+            CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
+            nativeUsdRate
+        );
+
+        // Pay operator fee
+        operatorStorage.feesEarnedNative[requester] += operatorFeeMessageReportRequest;
+        operatorStorage.totalFeesEarnedNative += operatorFeeMessageReportRequest;
+
+        uint256 withheldOperatorAmount = getCLFCost();
+        uint256 totalOperatorRefundGasCost = withheldOperatorAmount + vrfMsgReportRequestGasCost;
+
+        // Return the amount withheld and the gas spent on the request
+        operatorStorage.depositsNative[requester] += totalOperatorRefundGasCost;
+        operatorStorage.totalDepositsNative += vrfMsgReportRequestGasCost;
     }
 
     function _handleCLFOperatorRegistrationReport(
@@ -174,6 +193,9 @@ abstract contract CLF is FunctionsClient, Base {
             }
         }
 
+        uint256 withheldOperatorAmount = getCLFCost();
+        s_operator.depositsNative[requester] += withheldOperatorAmount;
+
         emit OperatorRegistered(requester, result.operatorChains, result.operatorActions);
     }
 
@@ -186,13 +208,8 @@ abstract contract CLF is FunctionsClient, Base {
     ) internal returns (bytes32 clfRequestId) {
         s.Verifier storage verifier = s.verifier();
 
-        _witholdOperatorDeposit(
-            msg.sender,
-            CommonUtils.convertUsdBpsToNative(
-                CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
-                s.priceFeed().nativeUsdRate
-            )
-        );
+        uint256 minOperatorDeposit = getCLFCost();
+        _witholdOperatorDeposit(msg.sender, minOperatorDeposit);
 
         bytes[] memory clfReqArgs = new bytes[](6);
 
@@ -223,13 +240,8 @@ abstract contract CLF is FunctionsClient, Base {
         Types.OperatorRegistrationAction[] calldata operatorActions,
         bytes[] calldata operatorAddresses
     ) internal returns (bytes32 clfRequestId) {
-        _witholdOperatorDeposit(
-            msg.sender,
-            CommonUtils.convertUsdBpsToNative(
-                CommonConstants.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD,
-                s.priceFeed().nativeUsdRate
-            )
-        );
+        uint256 minOperatorDeposit = getCLFCost();
+        _witholdOperatorDeposit(msg.sender, minOperatorDeposit);
 
         bytes[] memory clfReqArgs = new bytes[](5);
 
@@ -251,27 +263,53 @@ abstract contract CLF is FunctionsClient, Base {
     }
 
     function _sendCLFRequest(bytes[] memory args) internal returns (bytes32) {
+        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
+
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(CLF_JS_CODE);
         req.setBytesArgs(args);
-        return _sendRequest(req.encodeCBOR(), i_clfSubscriptionId, CLF_GAS_LIMIT, i_clfDonId);
+        return
+            _sendRequest(
+                req.encodeCBOR(),
+                i_clfSubscriptionId,
+                gasFeeConfig.clfCallbackGasLimit,
+                i_clfDonId
+            );
     }
 
-    function getCLFCost() public view returns (uint256) {
-        uint256 lastGasPrice = s.priceFeed().lastGasPrices[i_chainSelector];
+    function getCLFCost() public view returns (uint256 totalClfCost) {
+        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
+
+        (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
+            .getNativeUsdRateAndGasPrice();
+
+        // Validate price feed data is available
+        require(
+            nativeUsdRate > 0,
+            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
+        );
         require(
             lastGasPrice > 0,
             CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.lastGasPrice)
         );
 
-        uint256 gasCost = i_clfCallbackGasLimit * lastGasPrice;
+        // Calculate base gas cost for CLF callback
+        uint256 gasCost = (gasFeeConfig.clfCallbackGasOverhead + gasFeeConfig.clfCallbackGasLimit) *
+            lastGasPrice;
+
+        // Add over-estimation buffer for gas price volatility
+        uint256 overEstimatedGasCost = gasCost +
+            ((gasCost * gasFeeConfig.clfGasPriceOverEstimationBps) /
+                CommonConstants.BPS_DENOMINATOR);
+
+        require(overEstimatedGasCost > 0, CommonErrors.InvalidAmount());
 
         uint256 premiumFee = CommonUtils.convertUsdBpsToNative(
-            i_clfPremiumFeeUsdBps,
-            s.priceFeed().nativeUsdRate
+            CommonConstants.CLF_PREMIUM_FEE_BPS_USD,
+            nativeUsdRate
         );
 
-        return gasCost + premiumFee;
+        totalClfCost = overEstimatedGasCost + premiumFee;
     }
 
     /**
@@ -284,8 +322,8 @@ abstract contract CLF is FunctionsClient, Base {
         uint256 depositWithholdable
     ) internal returns (uint256) {
         s.Operator storage s_operator = s.operator();
-
         uint256 currentDeposit = s_operator.depositsNative[operator];
+
         require(
             currentDeposit >= depositWithholdable,
             Errors.InsufficientOperatorDeposit(currentDeposit, depositWithholdable)

@@ -61,7 +61,12 @@ contract DeployConceroVerifier is ConceroVerifierBase {
             requestOperatorRegistrationJsCodeHash: clfOperatorRegistrationJsHashSum
         });
 
-        conceroVerifier = new ConceroVerifier(SRC_CHAIN_SELECTOR, usdc, clfParams);
+        conceroVerifier = new ConceroVerifier(
+            SRC_CHAIN_SELECTOR,
+            usdc,
+            address(conceroPriceFeed),
+            clfParams
+        );
         vm.stopPrank();
 
         return address(conceroVerifier);

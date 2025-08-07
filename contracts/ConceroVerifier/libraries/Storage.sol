@@ -21,11 +21,9 @@ library Namespaces {
             abi.encode(uint256(keccak256(abi.encodePacked("conceroverifier.operator.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
-    bytes32 internal constant PRICEFEED =
+    bytes32 internal constant CONFIG =
         keccak256(
-            abi.encode(
-                uint256(keccak256(abi.encodePacked("conceroverifier.pricefeed.storage"))) - 1
-            )
+            abi.encode(uint256(keccak256(abi.encodePacked("conceroverifier.config.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 }
 
@@ -51,12 +49,18 @@ library Storage {
         mapping(address operator => uint256) feesEarnedNative;
     }
 
-    struct PriceFeed {
-        uint256 nativeUsdRate;
+    struct GasFeeConfig {
+        uint32 vrfMsgReportRequestGasOverhead;
+        uint32 clfGasPriceOverEstimationBps;
+        uint32 clfCallbackGasOverhead;
+        uint32 clfCallbackGasLimit;
+        uint128 __var_gap;
+    }
+
+    struct Config {
+        GasFeeConfig gasFeeConfig;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
-        mapping(uint24 dstChainSelector => uint256) lastGasPrices;
-        mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
     }
 
     /* SLOT-BASED STORAGE ACCESS */
@@ -74,8 +78,8 @@ library Storage {
         }
     }
 
-    function priceFeed() internal pure returns (PriceFeed storage s) {
-        bytes32 slot = Namespaces.PRICEFEED;
+    function config() internal pure returns (Config storage s) {
+        bytes32 slot = Namespaces.CONFIG;
         assembly {
             s.slot := slot
         }

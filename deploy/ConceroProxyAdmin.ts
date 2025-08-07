@@ -13,9 +13,6 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 		const networkType = conceroNetworks[name].type;
 
 		const initialOwner = getWallet(networkType, "proxyDeployer", "address");
-		const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(
-			conceroNetworks[name],
-		);
 
 		log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
 		const deployProxyAdmin = (await deploy("ConceroProxyAdmin", {

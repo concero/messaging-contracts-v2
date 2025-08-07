@@ -41,7 +41,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         mockClfReport = new MockCLFReport();
 
         _setPriceFeeds();
-		_setGasFeeConfig();
+        _setGasFeeConfig();
     }
     //
     //    function test_SubmitMessageReport() public {
@@ -157,6 +157,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
             messageId: TEST_MESSAGE_ID,
             messageHashSum: keccak256(TEST_MESSAGE),
+            txHash: bytes32("txHash"),
             messageSender: abi.encode(address(this)),
             srcChainSelector: SRC_CHAIN_SELECTOR,
             dstChainSelector: 1,
@@ -166,7 +167,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         });
 
         bytes memory payload = abi.encode(messagePayloadV1);
-        Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
+        Types.ClfDonReportSubmission memory reportSubmission = mockClfReport.createMockClfReport(
             abi.encode(resultConfig, payload)
         );
 
@@ -215,6 +216,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
             messageId: TEST_MESSAGE_ID,
             messageHashSum: keccak256(TEST_MESSAGE),
+            txHash: bytes32("txHash"),
             messageSender: abi.encode(address(this)),
             srcChainSelector: SRC_CHAIN_SELECTOR,
             dstChainSelector: 1,
@@ -224,7 +226,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         });
 
         bytes memory payload = abi.encode(messagePayloadV1);
-        Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
+        Types.ClfDonReportSubmission memory reportSubmission = mockClfReport.createMockClfReport(
             abi.encode(resultConfig, payload)
         );
 
@@ -259,10 +261,10 @@ contract SubmitMessageReport is ConceroRouterTest {
         uint256[] memory gasPrices = new uint256[](1);
         gasPrices[0] = 1;
 
-		vm.startPrank(feedUpdater);
+        vm.startPrank(feedUpdater);
         conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
-		conceroPriceFeed.setNativeUsdRate(1);
-		vm.stopPrank();
+        conceroPriceFeed.setNativeUsdRate(1);
+        vm.stopPrank();
 
         Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
             receiver: address(conceroClient),
@@ -281,6 +283,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
             messageId: TEST_MESSAGE_ID,
             messageHashSum: keccak256(TEST_MESSAGE),
+            txHash: bytes32("txHash"),
             messageSender: abi.encode(address(this)),
             srcChainSelector: SRC_CHAIN_SELECTOR,
             dstChainSelector: 1,
@@ -290,7 +293,7 @@ contract SubmitMessageReport is ConceroRouterTest {
         });
 
         bytes memory payload = abi.encode(messagePayloadV1);
-        Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
+        Types.ClfDonReportSubmission memory reportSubmission = mockClfReport.createMockClfReport(
             abi.encode(resultConfig, payload)
         );
 

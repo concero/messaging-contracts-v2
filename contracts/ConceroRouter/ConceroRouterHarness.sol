@@ -19,11 +19,17 @@ import {Namespaces} from "./libraries/Storage.sol";
 contract ConceroRouterHarness is ConceroRouter, GenericStorage {
     constructor(
         uint24 chainSelector,
-        address feedUpdater,
+        address conceroPriceFeed,
         address conceroVerifier,
         uint64 conceroVerifierSubId,
         address[4] memory clfSigners
     )
-        ConceroRouter(chainSelector, feedUpdater, conceroVerifier, conceroVerifierSubId, clfSigners)
+        ConceroRouter(
+            chainSelector,
+            conceroPriceFeed,
+            conceroVerifier,
+            conceroVerifierSubId,
+            clfSigners
+        )
     {}
 }

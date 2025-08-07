@@ -246,9 +246,11 @@ contract ReorgDetectionTest is ConceroRouterTest {
         address messageSender,
         uint256 srcBlockNumber
     ) internal view returns (bytes memory) {
+        bytes[] memory allowedOperators = new bytes[](1);
+        allowedOperators[0] = abi.encode(operator);
         return
             mockClfReport.getResponse(
-                address(this),
+                operator, // Use operator as requester to match msg.sender
                 messageId,
                 messageHashSum,
                 txHash,
@@ -257,7 +259,7 @@ contract ReorgDetectionTest is ConceroRouterTest {
                 messageSender,
                 srcBlockNumber,
                 Types.EvmDstChainData({receiver: mockReceiver, gasLimit: GAS_LIMIT}),
-                new bytes[](1)
+                allowedOperators
             );
     }
 }

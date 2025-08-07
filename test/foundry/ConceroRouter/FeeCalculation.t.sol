@@ -260,6 +260,7 @@ contract FeeCalculationTest is ConceroRouterTest {
         CommonTypes.MessagePayloadV1 memory messagePayload = CommonTypes.MessagePayloadV1({
             messageId: messageId,
             messageHashSum: keccak256(message),
+            txHash: bytes32("txHash"),
             messageSender: abi.encode(address(this)),
             srcChainSelector: SRC_CHAIN_SELECTOR,
             dstChainSelector: 1,

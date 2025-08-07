@@ -20,6 +20,7 @@ import {PriceFeedSlots} from "contracts/ConceroPriceFeed/libraries/StorageSlots.
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroRouter} from "../../scripts/deploy/DeployConceroRouter.s.sol";
 import {DeployConceroPriceFeed} from "../../scripts/deploy/DeployConceroPriceFeed.s.sol";
+import {console} from "forge-std/src/Console.sol";
 
 abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
     ConceroClientExample internal conceroClient;
@@ -28,11 +29,13 @@ abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
     function setUp() public virtual override(DeployConceroRouter, ConceroTest) {
         super.setUp();
 
-        conceroRouter = ConceroRouterHarness(payable(deploy()));
+        // Deploy ConceroPriceFeed first
         priceFeedDeployer = new DeployConceroPriceFeed();
-
         address priceFeed = priceFeedDeployer.deploy();
         conceroPriceFeed = ConceroPriceFeed(payable(priceFeed));
+
+        // Deploy ConceroRouter with the actual price feed address
+        conceroRouter = ConceroRouterHarness(payable(deploy(SRC_CHAIN_SELECTOR, priceFeed)));
 
         conceroClient = new ConceroClientExample(payable(conceroRouter));
     }

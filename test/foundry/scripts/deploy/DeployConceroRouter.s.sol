@@ -31,9 +31,13 @@ contract DeployConceroRouter is ConceroRouterBase {
     }
 
     function deploy() public returns (address) {
+        return deploy(SRC_CHAIN_SELECTOR, address(conceroPriceFeed));
+    }
+
+    function deploy(uint24 chainSelector, address priceFeed) public returns (address) {
         address implementation = _deployImplementation(
-            SRC_CHAIN_SELECTOR,
-            address(conceroPriceFeed),
+            chainSelector,
+            priceFeed,
             CONCERO_VERIFIER_ADDRESS,
             i_conceroVerifierSubscriptionId,
             [

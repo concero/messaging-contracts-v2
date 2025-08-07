@@ -93,39 +93,14 @@ abstract contract Owner is Base {
     ) external onlyOwner {
         require(chainSelectors.length == isSupported.length, CommonErrors.LengthMismatch());
 
+        s.Router storage s_router = s.router();
+
         for (uint256 index; index < chainSelectors.length; ++index) {
-            s.router().isChainSupported[chainSelectors[index]] = isSupported[index];
+            s_router.isChainSupported[chainSelectors[index]] = isSupported[index];
         }
     }
 
     function setNativeUsdRate(uint256 amount) external onlyFeedUpdater {
         s.priceFeed().nativeUsdRate = amount;
-    }
-
-    function setNativeNativeRates(
-        uint24[] memory dstChainSelectors,
-        uint256[] memory rates
-    ) external onlyFeedUpdater {
-        require(dstChainSelectors.length == rates.length, CommonErrors.LengthMismatch());
-        for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            require(
-                s.router().isChainSupported[dstChainSelectors[i]],
-                Errors.UnsupportedChainSelector(dstChainSelectors[i])
-            );
-            s.priceFeed().nativeNativeRates[dstChainSelectors[i]] = rates[i];
-        }
-    }
-
-    function setLastGasPrices(
-        uint24[] memory dstChainSelectors,
-        uint256[] memory gasPrices
-    ) external onlyFeedUpdater {
-        require(dstChainSelectors.length == gasPrices.length, CommonErrors.LengthMismatch());
-
-        s.PriceFeed storage priceFeedStorage = s.priceFeed();
-
-        for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            priceFeedStorage.lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
-        }
     }
 }

@@ -24,9 +24,11 @@ abstract contract Owner is Base {
      * @return availableFees Amount of native token fees that can be withdrawn
      */
     function getWithdrawableConceroFee() public view returns (uint256 availableFees) {
+        s.Operator storage s_operator = s.operator();
+
         return
             address(this).balance -
-            (s.operator().totalFeesEarnedNative + s.operator().totalDepositsNative);
+            (s_operator.totalFeesEarnedNative + s_operator.totalDepositsNative);
     }
 
     /**
@@ -85,13 +87,12 @@ abstract contract Owner is Base {
         uint24[] calldata chainSelectors,
         bool[] calldata isSupported
     ) external onlyOwner {
+        s.Verifier storage s_verifier = s.verifier();
+
         require(chainSelectors.length == isSupported.length, CommonErrors.LengthMismatch());
 
         for (uint256 index = 0; index < chainSelectors.length; index++) {
-            uint24 chainSelector = chainSelectors[index];
-            bool supported = isSupported[index];
-
-            s.verifier().isChainSupported[chainSelector] = supported;
+            s_verifier.isChainSupported[chainSelectors[index]] = isSupported[index];
         }
     }
 }

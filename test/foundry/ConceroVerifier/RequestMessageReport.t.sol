@@ -13,6 +13,7 @@ import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
 import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 import {VerifierSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
 
 contract RequestMessageReport is ConceroVerifierTest {
@@ -38,13 +39,13 @@ contract RequestMessageReport is ConceroVerifierTest {
             srcChainData
         );
 
-        bool isCLFRequestPending = conceroVerifier.getStorage(
-            Namespaces.VERIFIER,
-            VerifierSlots.pendingCLFRequests,
-            clfRequestId
-        ) == 1;
 
-        assertTrue(isCLFRequestPending);
+
+        assertTrue(conceroVerifier.getStorage(
+            Namespaces.VERIFIER,
+            VerifierSlots.CLFRequestStatus,
+            clfRequestId
+            ) == uint256(VerifierTypes.CLFRequestStatus.Pending));
 
         return clfRequestId;
     }

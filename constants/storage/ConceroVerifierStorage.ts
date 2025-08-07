@@ -22,9 +22,8 @@ const VerifierSlots = (() => {
 	return Object.freeze({
 		nonce: 0,
 		clfRequestStatus: _var_gap + _arr_gap + 1,
-		pendingCLFRequests: _var_gap + _arr_gap + 2,
-		pendingMessageReports: _var_gap + _arr_gap + 3,
-		isChainSupported: _var_gap + _arr_gap + 4,
+		clfRequestIdByMessageId: _var_gap + _arr_gap + 2,
+		isChainSupported: _var_gap + _arr_gap + 3,
 	});
 })();
 

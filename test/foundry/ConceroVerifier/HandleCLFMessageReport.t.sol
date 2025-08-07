@@ -47,12 +47,12 @@ contract HandleCLFMessageReport is RequestMessageReport {
         vm.prank(address(clfRouter));
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "error");
 
-        assertFalse(
+        assertTrue(
             conceroVerifier.getStorage(
                 Namespaces.VERIFIER,
-                VerifierSlots.pendingCLFRequests,
+                VerifierSlots.CLFRequestStatus,
                 clfRequestId
-            ) == 1
+            ) == uint256(VerifierTypes.CLFRequestStatus.Failed)
         );
         assertEq(conceroVerifier.getOperatorFeesEarned(operator), 0);
     }
@@ -77,7 +77,7 @@ contract HandleCLFMessageReport is RequestMessageReport {
     //        assertFalse(
     //            conceroVerifier.getStorage(
     //                Namespaces.VERIFIER,
-    //                VerifierSlots.pendingCLFRequests,
+    //                VerifierSlots.CLFRequestStatus,
     //                clfRequestId
     //            ) == 1
     //        );
@@ -101,12 +101,12 @@ contract HandleCLFMessageReport is RequestMessageReport {
             clfSubmission.rawVs
         );
 
-        assertFalse(
+        assertTrue(
             conceroVerifier.getStorage(
                 Namespaces.VERIFIER,
-                VerifierSlots.pendingCLFRequests,
+                VerifierSlots.CLFRequestStatus,
                 clfRequestId
-            ) == 1
+            ) == uint256(VerifierTypes.CLFRequestStatus.Fulfilled)
         );
     }
 }

@@ -34,9 +34,8 @@ library Storage {
         uint256 nonce;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
-        mapping(bytes32 => Types.CLFRequestStatus) clfRequestStatus;
-        mapping(bytes32 clfRequestId => bool isPending) pendingCLFRequests;
-        mapping(bytes32 messageId => bool isPending) pendingMessageReports;
+        mapping(bytes32 clfRequestId => Types.CLFRequestStatus) clfRequestStatus;
+        mapping(bytes32 messageId => bytes32 clfRequestId) clfRequestIdByMessageId;
         mapping(uint24 chainSelector => bool isSupported) isChainSupported;
     }
 

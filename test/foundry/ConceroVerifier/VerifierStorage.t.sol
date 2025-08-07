@@ -10,6 +10,7 @@ import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {GenericStorage} from "contracts/common/libraries/GenericStorage.sol";
 
 import {VerifierSlots, OperatorSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
 import {Storage as s, Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
@@ -144,23 +145,22 @@ contract VerifierStorage is ConceroVerifierTest {
 
     function test_SetAndGetPendingCLFRequest() public {
         bytes32 requestId = keccak256("request123");
-        bool isPending = true;
 
         vm.startPrank(deployer);
         conceroVerifier.setStorage(
             Namespaces.VERIFIER,
-            VerifierSlots.pendingCLFRequests,
+            VerifierSlots.CLFRequestStatus,
             requestId,
-            isPending ? 1 : 0
+            uint256(VerifierTypes.CLFRequestStatus.Pending)
         );
 
         assertEq(
             conceroVerifier.getStorage(
                 Namespaces.VERIFIER,
-                VerifierSlots.pendingCLFRequests,
+                VerifierSlots.CLFRequestStatus,
                 requestId
             ),
-            isPending ? 1 : 0,
+            uint256(VerifierTypes.CLFRequestStatus.Pending),
             "Pending CLF request status not set"
         );
         vm.stopPrank();

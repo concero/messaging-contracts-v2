@@ -1,4 +1,4 @@
-import { Address, type PublicClient, decodeEventLog } from "viem";
+import { Address, type PublicClient } from "viem";
 
 import { handleError } from "../../common/errorHandler";
 import { ErrorType } from "../../common/errorType";
@@ -19,18 +19,7 @@ export async function fetchConceroMessage(
 
 	if (!logs.length) handleError(ErrorType.EVENT_NOT_FOUND);
 
-	const conceroMessageSentLog = logs.reduce((_, currLog) => {
-		try {
-			const decodedLog = decodeEventLog({
-				abi: ConceroMessageLogParams,
-				data: currLog.data,
-			});
-
-			if (decodedLog.args.messageId.toLowerCase() === messageId.toLowerCase()) {
-				return currLog;
-			}
-		} catch {}
-	});
+	const conceroMessageSentLog = logs.find(log => log.topics[1]?.toLowerCase() === messageId.toLowerCase());
 
 	if (!conceroMessageSentLog) handleError(ErrorType.EVENT_NOT_FOUND);
 

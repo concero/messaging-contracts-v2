@@ -71,7 +71,7 @@ contract DeployConceroRouter is ConceroRouterBase {
 
         conceroRouter = new ConceroRouter(
             SRC_CHAIN_SELECTOR,
-            usdc,
+            feedUpdater,
             verifier,
             verifierSubId,
             clfSigners

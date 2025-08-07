@@ -10,8 +10,7 @@ task("fetch-transaction-info", "")
 		const conceroNetwork = conceroNetworks[hre.network.name];
 
 		const { publicClient } = getFallbackClients(conceroNetwork);
-		console.log(JSON.stringify(publicClient.transport, null, 2));
-		const tx = await publicClient.waitForTransactionReceipt({ hash: taskArgs.hash });
+		const tx = await publicClient.getTransaction({ hash: taskArgs.hash });
 
 		console.log(tx);
 	});

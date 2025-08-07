@@ -25,14 +25,7 @@ export async function main() {
 		getAllowedOperators(ChainType.EVM, args.messageId),
 	]);
 
-	const {
-		version: messageVersion,
-		shouldFinaliseSrc,
-		dstChainSelector,
-		dstChainData,
-		sender,
-		message,
-	} = decodeConceroMessageLog(log);
+	const { dstChainSelector, dstChainData, sender, message } = decodeConceroMessageLog(log);
 
 	verifyMessageHash(message, args.messageHashSum);
 

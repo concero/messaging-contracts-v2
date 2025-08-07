@@ -103,39 +103,4 @@ abstract contract Owner is Base {
     function setNativeUsdRate(uint256 amount) external onlyFeedUpdater {
         s.priceFeed().nativeUsdRate = amount;
     }
-
-    function setNativeNativeRates(
-        uint24[] memory dstChainSelectors,
-        uint256[] memory rates
-    ) external onlyFeedUpdater {
-        require(dstChainSelectors.length == rates.length, CommonErrors.LengthMismatch());
-
-        s.Router storage s_router = s.router();
-
-        for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            require(
-                s_router.isChainSupported[dstChainSelectors[i]],
-                Errors.UnsupportedChainSelector(dstChainSelectors[i])
-            );
-            s.priceFeed().nativeNativeRates[dstChainSelectors[i]] = rates[i];
-        }
-    }
-
-    function setLastGasPrices(
-        uint24[] memory dstChainSelectors,
-        uint256[] memory gasPrices
-    ) external onlyFeedUpdater {
-        require(dstChainSelectors.length == gasPrices.length, CommonErrors.LengthMismatch());
-
-        s.Router storage s_router = s.router();
-        s.PriceFeed storage s_priceFeed = s.priceFeed();
-
-        for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            require(
-                s_router.isChainSupported[dstChainSelectors[i]],
-                Errors.UnsupportedChainSelector(dstChainSelectors[i])
-            );
-            s_priceFeed.lastGasPrices[dstChainSelectors[i]] = gasPrices[i];
-        }
-    }
 }

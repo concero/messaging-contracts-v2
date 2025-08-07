@@ -1,3 +1,4 @@
+import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
@@ -8,6 +9,7 @@ import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import sendConceroMessage from "./sendConceroMessage";
+import sendValueTask from "./sendValue.task";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
 import setOperator from "./setOperator";
 import { setRouterPriceFeeds } from "./setRouterPriceFeeds";
@@ -16,6 +18,7 @@ import { callContractFunction, changeOwnership, upgradeProxyImplementation } fro
 import { withdrawFees } from "./withdrawFees";
 
 export {
+	ensureNativeBalances,
 	callContractFunction,
 	changeOwnership,
 	upgradeProxyImplementation,
@@ -34,4 +37,5 @@ export {
 	fetchTransactionTask,
 	testScript,
 	updateSupportedChainsForAllRouters,
+	sendValueTask,
 };

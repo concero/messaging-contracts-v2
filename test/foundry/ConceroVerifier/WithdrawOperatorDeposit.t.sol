@@ -31,7 +31,7 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
         );
 
         _setPriceFeeds();
-		_setGasFeeConfig();
+        _setGasFeeConfig();
     }
 
     function test_OperatorDeposit() public {

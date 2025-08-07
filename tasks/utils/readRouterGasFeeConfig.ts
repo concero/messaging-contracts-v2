@@ -1,7 +1,7 @@
 import { task } from "hardhat/config";
-import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ConceroNetwork } from "@concero/contract-utils";
+import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ProxyEnum } from "../../constants";
 import { conceroNetworks } from "../../constants";

@@ -127,6 +127,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         bytes memory _messagePayload,
         bytes memory messageBody
     ) internal {
+        s.Router storage s_router = s.router();
         CommonTypes.MessagePayloadV1 memory messagePayload = abi.decode(
             _messagePayload,
             (CommonTypes.MessagePayloadV1)
@@ -145,18 +146,18 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         require(
-            !s.router().isMessageProcessed[messagePayload.messageId],
+            !s_router.isMessageProcessed[messagePayload.messageId],
             Errors.MessageAlreadyProcessed(messagePayload.messageId)
         );
 
         // Check for reorg detection
-        bytes32 lastTxHash = s.router().lastTxHash[messagePayload.srcChainSelector];
+        bytes32 lastTxHash = s_router.lastTxHash[messagePayload.srcChainSelector];
         if (lastTxHash == messagePayload.txHash) {
             emit MessageReorgDetected(messagePayload.txHash, messagePayload.srcChainSelector);
             return; // Don't process the message
         }
 
-        s.router().lastTxHash[messagePayload.srcChainSelector] = messagePayload.txHash;
+        s_router.lastTxHash[messagePayload.srcChainSelector] = messagePayload.txHash;
 
         emit ConceroMessageReceived(messagePayload.messageId);
 

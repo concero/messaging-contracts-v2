@@ -8,9 +8,7 @@ import { deployVerifier } from "../deploy/ConceroVerifier";
 import { setRouterSupportedChains } from "../tasks/setRouterSupportedChains";
 import { getFallbackClients } from "../utils";
 
-async function deployContracts(
-	mockCLFRouter: Address,
-): Promise<{
+async function deployContracts(mockCLFRouter: Address): Promise<{
 	mockCLFRouter: any;
 	conceroVerifier: any;
 	conceroRouter: any;

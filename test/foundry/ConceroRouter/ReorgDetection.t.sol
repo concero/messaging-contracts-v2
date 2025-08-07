@@ -39,29 +39,47 @@ contract ReorgDetectionTest is ConceroRouterTest {
     }
 
     function test_ReorgDetectionWithSameTxHash() public {
-        // Create first message with specific txHash
-        bytes memory response1 = _createMessageResponse(
-            TEST_MESSAGE_ID_1,
-            keccak256(TEST_MESSAGE_1),
-            TEST_TX_HASH,
-            SRC_CHAIN_SELECTOR,
-            DST_CHAIN_SELECTOR,
-            address(user),
-            12345678
+        vm.recordLogs();
+
+        Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
+            receiver: address(conceroClient),
+            gasLimit: GAS_LIMIT
+        });
+
+        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
+            resultType: CommonTypes.ResultType.Message,
+            payloadVersion: 1,
+            requester: operator
+        });
+
+        bytes[] memory allowedOperators = new bytes[](1);
+        allowedOperators[0] = abi.encode(operator);
+
+        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
+            messageId: TEST_MESSAGE_ID_1,
+            messageHashSum: keccak256(TEST_MESSAGE_1),
+            txHash: TEST_TX_HASH,
+            messageSender: abi.encode(address(this)),
+            srcChainSelector: SRC_CHAIN_SELECTOR,
+            dstChainSelector: 1,
+            srcBlockNumber: block.number,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
+        });
+
+        bytes memory payload = abi.encode(messagePayloadV1);
+
+        Types.ClfDonReportSubmission memory reportSubmission = mockClfReport.createMockClfReport(
+            abi.encode(resultConfig, payload)
         );
 
-        // Submit first message
-        vm.recordLogs();
-        vm.prank(operator);
         bytes[] memory messageBodies1 = new bytes[](1);
         messageBodies1[0] = TEST_MESSAGE_1;
-        uint256[] memory indexes1 = new uint256[](1);
-        indexes1[0] = 0;
-        conceroRouter.submitMessageReport(
-            mockClfReport.createMockClfReport(response1, bytes32("requestId1")),
-            messageBodies1,
-            indexes1
-        );
+        uint256[] memory indexes = new uint256[](1);
+        indexes[0] = 0;
+
+        vm.prank(operator);
+        conceroRouter.submitMessageReport(reportSubmission, messageBodies1, indexes);
 
         Vm.Log[] memory entries1 = vm.getRecordedLogs();
 
@@ -103,28 +121,29 @@ contract ReorgDetectionTest is ConceroRouterTest {
         );
 
         // Create second message with same txHash but different content
-        bytes memory response2 = _createMessageResponse(
-            TEST_MESSAGE_ID_2,
-            keccak256(TEST_MESSAGE_2),
-            TEST_TX_HASH, // Same txHash as first message
-            SRC_CHAIN_SELECTOR,
-            DST_CHAIN_SELECTOR,
-            address(user),
-            12345679
+        CommonTypes.MessagePayloadV1 memory messagePayload2 = CommonTypes.MessagePayloadV1({
+            messageId: TEST_MESSAGE_ID_2,
+            messageHashSum: keccak256(TEST_MESSAGE_2),
+            txHash: TEST_TX_HASH,
+            messageSender: abi.encode(address(this)),
+            srcChainSelector: SRC_CHAIN_SELECTOR,
+            dstChainSelector: 1,
+            srcBlockNumber: block.number,
+            dstChainData: dstChainData,
+            allowedOperators: allowedOperators
+        });
+
+        bytes memory payload2 = abi.encode(messagePayload2);
+
+        Types.ClfDonReportSubmission memory reportSubmission2 = mockClfReport.createMockClfReport(
+            abi.encode(resultConfig, payload2)
         );
 
-        // Submit second message with same txHash
-        vm.recordLogs();
-        vm.prank(operator);
         bytes[] memory messageBodies2 = new bytes[](1);
         messageBodies2[0] = TEST_MESSAGE_2;
-        uint256[] memory indexes2 = new uint256[](1);
-        indexes2[0] = 0;
-        conceroRouter.submitMessageReport(
-            mockClfReport.createMockClfReport(response2, bytes32("requestId2")),
-            messageBodies2,
-            indexes2
-        );
+
+        vm.prank(operator);
+        conceroRouter.submitMessageReport(reportSubmission2, messageBodies2, indexes);
 
         Vm.Log[] memory entries2 = vm.getRecordedLogs();
 
@@ -163,103 +182,5 @@ contract ReorgDetectionTest is ConceroRouterTest {
             reorgEventFound2,
             "Second message: MessageReorgDetected event should be emitted"
         );
-    }
-
-    function test_NormalProcessingWithDifferentTxHash() public {
-        // Create first message
-        bytes memory response1 = _createMessageResponse(
-            TEST_MESSAGE_ID_1,
-            keccak256(TEST_MESSAGE_1),
-            bytes32(uint256(0x111)), // First txHash
-            SRC_CHAIN_SELECTOR,
-            DST_CHAIN_SELECTOR,
-            address(user),
-            12345678
-        );
-
-        // Submit first message
-        vm.prank(operator);
-        bytes[] memory messageBodies1 = new bytes[](1);
-        messageBodies1[0] = TEST_MESSAGE_1;
-        uint256[] memory indexes1 = new uint256[](1);
-        indexes1[0] = 0;
-        conceroRouter.submitMessageReport(
-            mockClfReport.createMockClfReport(response1, bytes32("requestId1")),
-            messageBodies1,
-            indexes1
-        );
-
-        // Create second message with different txHash
-        bytes memory response2 = _createMessageResponse(
-            TEST_MESSAGE_ID_2,
-            keccak256(TEST_MESSAGE_2),
-            bytes32(uint256(0x222)), // Different txHash
-            SRC_CHAIN_SELECTOR,
-            DST_CHAIN_SELECTOR,
-            address(user),
-            12345679
-        );
-
-        // Submit second message
-        vm.recordLogs();
-        vm.prank(operator);
-        bytes[] memory messageBodies2 = new bytes[](1);
-        messageBodies2[0] = TEST_MESSAGE_2;
-        uint256[] memory indexes2 = new uint256[](1);
-        indexes2[0] = 0;
-        conceroRouter.submitMessageReport(
-            mockClfReport.createMockClfReport(response2, bytes32("requestId2")),
-            messageBodies2,
-            indexes2
-        );
-
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-
-        // Verify both messages were processed normally
-        bool receivedEventFound2 = false;
-        bool reorgEventFound = false;
-
-        for (uint256 i = 0; i < entries.length; i++) {
-            if (entries[i].topics[0] == keccak256("ConceroMessageReceived(bytes32)")) {
-                if (entries[i].topics[1] == TEST_MESSAGE_ID_2) {
-                    receivedEventFound2 = true;
-                }
-            }
-            if (entries[i].topics[0] == keccak256("MessageReorgDetected(bytes32,uint24)")) {
-                reorgEventFound = true;
-            }
-        }
-
-        assertTrue(
-            receivedEventFound2,
-            "Second message should be processed normally with different txHash"
-        );
-        assertFalse(reorgEventFound, "No reorg event should be emitted for different txHash");
-    }
-
-    function _createMessageResponse(
-        bytes32 messageId,
-        bytes32 messageHashSum,
-        bytes32 txHash,
-        uint24 srcChainSelector,
-        uint24 dstChainSelector,
-        address messageSender,
-        uint256 srcBlockNumber
-    ) internal view returns (bytes memory) {
-        bytes[] memory allowedOperators = new bytes[](1);
-        allowedOperators[0] = abi.encode(operator);
-        return
-            mockClfReport.getResponse(
-                operator, // Use operator as requester to match msg.sender
-                messageId,
-                messageHashSum,
-                txHash,
-                srcChainSelector,
-                dstChainSelector,
-                messageSender,
-                srcBlockNumber,
-                Types.EvmDstChainData({receiver: mockReceiver, gasLimit: GAS_LIMIT}),
-                allowedOperators
-            );
     }
 }

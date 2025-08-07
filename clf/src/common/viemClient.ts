@@ -1,6 +1,7 @@
+import { config } from "./config";
+
 import { Transport, createPublicClient, fallback, http } from "viem";
 
-import { config } from "./config";
 import { handleError } from "./errorHandler";
 import { ErrorType } from "./errorType";
 import { rpcConfigs } from "./rpcLoader";

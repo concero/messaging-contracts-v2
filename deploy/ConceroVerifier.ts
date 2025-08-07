@@ -1,7 +1,6 @@
+import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-
-import { getNetworkEnvKey } from "@concero/contract-utils";
 
 import { CLF_DON_HOSTED_SECRETS_SLOT, conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";

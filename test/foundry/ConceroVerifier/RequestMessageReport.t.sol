@@ -39,13 +39,13 @@ contract RequestMessageReport is ConceroVerifierTest {
             srcChainData
         );
 
-
-
-        assertTrue(conceroVerifier.getStorage(
-            Namespaces.VERIFIER,
-            VerifierSlots.CLFRequestStatus,
-            clfRequestId
-            ) == uint256(VerifierTypes.CLFRequestStatus.Pending));
+        assertTrue(
+            conceroVerifier.getStorage(
+                Namespaces.VERIFIER,
+                VerifierSlots.CLFRequestStatus,
+                clfRequestId
+            ) == uint256(VerifierTypes.CLFRequestStatus.Pending)
+        );
 
         return clfRequestId;
     }

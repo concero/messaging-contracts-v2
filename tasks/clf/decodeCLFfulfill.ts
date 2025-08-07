@@ -1,8 +1,7 @@
-import { ethers } from "ethers-v5";
-
-import { decodeAbiParameters, parseAbiParameters } from "viem";
-
 import { task } from "hardhat/config";
+
+import { ethers } from "ethers-v5";
+import { decodeAbiParameters, parseAbiParameters } from "viem";
 
 import { conceroNetworks } from "../../constants";
 import { type ConceroNetwork } from "../../types/ConceroNetwork";

@@ -1,6 +1,6 @@
-import { parseAbi } from "viem";
-
 import { task } from "hardhat/config";
+
+import { parseAbi } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { getEnvAddress, getFallbackClients } from "../utils";

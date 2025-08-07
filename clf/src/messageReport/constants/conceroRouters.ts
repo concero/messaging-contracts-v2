@@ -1,6 +1,6 @@
-import type { Address } from "viem";
-
 import { config } from "../../common/config";
+
+import type { Address } from "viem";
 
 function getConceroVerifier() {
 	try {

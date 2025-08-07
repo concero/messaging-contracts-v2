@@ -1,7 +1,8 @@
+import { CONFIG } from "./constants/config";
+
 import { ChainType, ResultType } from "../common/enums";
 import { getPublicClient } from "../common/viemClient";
 import { conceroRouters } from "./constants/conceroRouters";
-import { CONFIG } from "./constants/config";
 import { MessageReportResult } from "./types";
 import { decodeConceroMessageLog } from "./utils/decoders";
 import { fetchConceroMessage } from "./utils/fetchConceroMessage";

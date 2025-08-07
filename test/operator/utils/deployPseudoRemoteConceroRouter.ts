@@ -1,8 +1,6 @@
-import { Address, zeroAddress } from "viem";
-
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { Address, zeroAddress } from "viem";
 
 import { conceroNetworks } from "../../../constants";
 import { getConceroVerifierNetwork } from "../../../constants/conceroNetworks";

@@ -1,6 +1,5 @@
-import { Address } from "viem";
-
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
+import { Address } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { deployRouter } from "../deploy/ConceroRouter";

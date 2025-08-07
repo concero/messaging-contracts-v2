@@ -1,6 +1,5 @@
-import { PublicClient, WalletClient, decodeEventLog, parseUnits } from "viem";
-
 import { globalConfig } from "@concero/v2-operators/src/constants";
+import { PublicClient, WalletClient, decodeEventLog, parseUnits } from "viem";
 
 export async function sendConceroMessage(
 	walletClient: WalletClient,

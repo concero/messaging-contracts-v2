@@ -6,7 +6,7 @@
     "plugins": ["prettier-plugin-solidity", "@trivago/prettier-plugin-sort-imports"],
     "overrides": [
         {
-            "files": ["*.ts", "*/**/*.ts"],
+            "files": ["**/*.ts"],
             "options": {
                 "parser": "typescript",
                 "arrowParens": "avoid",
@@ -20,13 +20,15 @@
                 "importOrderSeparation": true,
                 "importOrderSortSpecifiers": true,
                 "importOrder": [
-                    "./utils/configureDotEnv",
-                    "./utils/configureOperatorEnv",
-                    "^viem(.*)$",
-                    "^hardhat(.*)$",
-                    "^@(.*)$",
-                    "^@concero/(.*)$",
+                    "^.*config.*",
+                    "^(node:.*|assert|buffer|child_process|cluster|crypto|dgram|dns|events|fs|http|https|net|os|path|punycode|querystring|readline|stream|string_decoder|tls|url|util|v8|vm|worker_threads|zlib)(/.*)?$",
+                    "^\\u0000",
+                    "^@?\\w",
+                    "^(viem|ethers|hardhat)",
+                    "^@concero(/.*)?$",
+                    "^@lanca(/.*)?$",
                     "^contracts/(.*)$",
+                    "^@(.*)$",
                     "^[./]"
                 ]
             }

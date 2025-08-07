@@ -1,9 +1,8 @@
-import { decodeEventLog, zeroAddress } from "viem";
-
 import { task } from "hardhat/config";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { decodeEventLog, zeroAddress } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { getEnvVar, getFallbackClients, log } from "../utils";

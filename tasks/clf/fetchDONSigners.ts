@@ -1,11 +1,10 @@
-import { decodeEventLog, getAbiItem } from "viem";
-
 import { task } from "hardhat/config";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import functionsCoordinatorAbi from "@chainlink/contracts/abi/v0.8/FunctionsCoordinator.json";
 import functionsRouterAbi from "@chainlink/contracts/abi/v0.8/FunctionsRouter.json";
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { decodeEventLog, getAbiItem } from "viem";
 
 import { conceroNetworks } from "../../constants";
 import { err, getEnvVar, getFallbackClients, log } from "../../utils";

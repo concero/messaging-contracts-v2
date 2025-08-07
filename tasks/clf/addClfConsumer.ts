@@ -1,6 +1,5 @@
-import { Address } from "viem";
-
 import { SubscriptionManager } from "@chainlink/functions-toolkit";
+import { Address } from "viem";
 
 import { ConceroNetwork } from "../../types/ConceroNetwork";
 import { getEnvVar, log } from "../../utils";

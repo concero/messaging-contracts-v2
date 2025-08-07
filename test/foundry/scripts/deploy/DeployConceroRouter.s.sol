@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
+import {ConceroRouterHarness} from "contracts/ConceroRouter/ConceroRouterHarness.sol";
 import {PauseDummy} from "contracts/PauseDummy/PauseDummy.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 
@@ -15,7 +15,7 @@ import {ConceroTest} from "../../utils/ConceroTest.sol";
 
 contract DeployConceroRouter is ConceroRouterBase {
     TransparentUpgradeableProxy internal conceroRouterProxy;
-    ConceroRouter internal conceroRouter;
+    ConceroRouterHarness internal conceroRouter;
 
     function setUp() public virtual override {
         super.setUp();
@@ -69,7 +69,7 @@ contract DeployConceroRouter is ConceroRouterBase {
     ) internal returns (address) {
         vm.startPrank(deployer);
 
-        conceroRouter = new ConceroRouter(
+        conceroRouter = new ConceroRouterHarness(
             SRC_CHAIN_SELECTOR,
             feedUpdater,
             verifier,

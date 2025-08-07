@@ -21,7 +21,7 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
-import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent} from "../../interfaces/IConceroRouter.sol";
+import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent, MessageReorgDetected} from "../../interfaces/IConceroRouter.sol";
 
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
@@ -148,6 +148,15 @@ abstract contract Message is ClfSigner, IConceroRouter {
             !s.router().isMessageProcessed[messagePayload.messageId],
             Errors.MessageAlreadyProcessed(messagePayload.messageId)
         );
+
+        // Check for reorg detection
+        bytes32 lastTxHash = s.router().lastTxHash[messagePayload.srcChainSelector];
+        if (lastTxHash == messagePayload.txHash) {
+            emit MessageReorgDetected(messagePayload.txHash, messagePayload.srcChainSelector);
+            return; // Don't process the message
+        }
+
+        s.router().lastTxHash[messagePayload.srcChainSelector] = messagePayload.txHash;
 
         emit ConceroMessageReceived(messagePayload.messageId);
 

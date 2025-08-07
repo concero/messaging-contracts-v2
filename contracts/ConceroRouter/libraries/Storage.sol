@@ -41,6 +41,7 @@ library Storage {
         mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;
         mapping(bytes32 messageId => mapping(Protocol => bool)) messageConfirmationsByProtocol;
         mapping(uint24 chainSelector => bool isSupported) isChainSupported;
+        mapping(uint24 chainSelector => bytes32 txHash) lastTxHash;
     }
 
     struct Operator {

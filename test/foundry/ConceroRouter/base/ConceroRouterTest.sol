@@ -10,7 +10,7 @@ import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeabl
 
 import {RouterSlots, OperatorSlots, PriceFeedSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
-import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
+import {ConceroRouterHarness} from "contracts/ConceroRouter/ConceroRouterHarness.sol";
 import {ConceroClientExample} from "contracts/ConceroClient/ConceroClientExample.sol";
 
 import {ConceroTest} from "../../utils/ConceroTest.sol";
@@ -22,7 +22,7 @@ abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
     function setUp() public virtual override(DeployConceroRouter, ConceroTest) {
         super.setUp();
 
-        conceroRouter = ConceroRouter(payable(deploy()));
+        conceroRouter = ConceroRouterHarness(payable(deploy()));
         conceroClient = new ConceroClientExample(payable(conceroRouter));
     }
 

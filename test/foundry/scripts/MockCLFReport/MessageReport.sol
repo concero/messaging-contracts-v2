@@ -29,6 +29,7 @@ contract MessageReport is BaseMockCLFReport {
                 address(operator),
                 bytes32("messageId"),
                 bytes32("messageHashSum"),
+                bytes32("txHash"),
                 SRC_CHAIN_SELECTOR,
                 DST_CHAIN_SELECTOR,
                 address(user),
@@ -42,6 +43,7 @@ contract MessageReport is BaseMockCLFReport {
         address requester,
         bytes32 messageId,
         bytes32 messageHashSum,
+        bytes32 txHash,
         uint24 srcChainSelector,
         uint24 dstChainSelector,
         address messageSender,
@@ -58,6 +60,7 @@ contract MessageReport is BaseMockCLFReport {
         CommonTypes.MessagePayloadV1 memory messagePayload = CommonTypes.MessagePayloadV1({
             messageId: messageId,
             messageHashSum: messageHashSum,
+            txHash: txHash,
             messageSender: abi.encode(messageSender),
             srcChainSelector: srcChainSelector,
             dstChainSelector: dstChainSelector,

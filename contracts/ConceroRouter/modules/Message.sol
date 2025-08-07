@@ -150,11 +150,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
             Errors.MessageAlreadyProcessed(messagePayload.messageId)
         );
 
-        // Check for reorg detection
         bytes32 lastTxHash = s_router.lastTxHash[messagePayload.srcChainSelector];
         if (lastTxHash == messagePayload.txHash) {
             emit MessageReorgDetected(messagePayload.txHash, messagePayload.srcChainSelector);
-            return; // Don't process the message
+            return;
         }
 
         s_router.lastTxHash[messagePayload.srcChainSelector] = messagePayload.txHash;

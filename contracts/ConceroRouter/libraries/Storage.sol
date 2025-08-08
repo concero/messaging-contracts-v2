@@ -32,6 +32,12 @@ library Storage {
         ProtocolE
     }
 
+    enum Status {
+        Unknown,
+        Received,
+        Delivered
+    }
+
     struct Router {
         uint256 nonce;
         uint256[50] __var_gap;
@@ -42,6 +48,7 @@ library Storage {
         mapping(bytes32 messageId => mapping(Protocol => bool)) messageConfirmationsByProtocol;
         mapping(uint24 chainSelector => bool isSupported) isChainSupported;
         mapping(uint24 chainSelector => bytes32 txHash) lastTxHash;
+        mapping(bytes32 messageHash => Status) messageStatus;
     }
 
     struct Operator {

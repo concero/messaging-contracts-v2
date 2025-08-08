@@ -23,6 +23,7 @@ library RouterSlots {
     uint256 internal constant messageConfirmationsByProtocol = _var_gap + _arr_gap + 4;
     uint256 internal constant isChainSupported = _var_gap + _arr_gap + 5;
     uint256 internal constant lastTxHash = _var_gap + _arr_gap + 6;
+    uint256 internal constant messageStatus = _var_gap + _arr_gap + 7;
 }
 
 /**

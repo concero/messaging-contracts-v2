@@ -8,7 +8,7 @@ import { rpcConfigs } from "./rpcLoader";
 import { ChainSelector } from "./types";
 import { getViemChain } from "./viemChains";
 
-function getRpcConfigForChain(chainSelector: ChainSelector) {
+export function getRpcConfigForChain(chainSelector: ChainSelector) {
 	if (config.isDevelopment) {
 		return {
 			chainSelector: Number(chainSelector),

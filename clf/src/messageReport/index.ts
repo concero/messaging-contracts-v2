@@ -4,6 +4,7 @@ import { ChainType, ResultType } from "../common/enums";
 import { getPublicClient } from "../common/viemClient";
 import { conceroRouters } from "./constants/conceroRouters";
 import { MessageReportResult } from "./types";
+import { checkFinality } from "./utils/checkFinality";
 import { decodeConceroMessageLog } from "./utils/decoders";
 import { fetchConceroMessage } from "./utils/fetchConceroMessage";
 import { getAllowedOperators } from "./utils/getAllowedOperators";
@@ -26,7 +27,12 @@ export async function main() {
 		getAllowedOperators(ChainType.EVM, args.messageId),
 	]);
 
-	const { dstChainSelector, dstChainData, sender, message } = decodeConceroMessageLog(log);
+	const { shouldFinaliseSrc, dstChainSelector, dstChainData, sender, message } = decodeConceroMessageLog(log);
+
+	if (shouldFinaliseSrc) {
+		const currentBlockNumber = await publicClient.getBlockNumber();
+		checkFinality(args.srcChainSelector.toString(), log.blockNumber, currentBlockNumber);
+	}
 
 	verifyMessageHash(message, args.messageHashSum);
 

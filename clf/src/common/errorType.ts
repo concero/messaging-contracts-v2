@@ -54,4 +54,7 @@ export enum ErrorType {
 	INVALID_UINT256 = "62",
 	INVALID_ETHEREUM_ADDRESS = "63",
 	DECODE_FAILED = "70",
+
+	// Finality Errors
+	FINALITY_NOT_REACHED = "71",
 }

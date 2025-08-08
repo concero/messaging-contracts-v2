@@ -26,9 +26,16 @@ abstract contract Owner is Base {
     function getWithdrawableConceroFee() public view returns (uint256 availableFees) {
         s.Operator storage s_operator = s.operator();
 
-        return
-            address(this).balance -
-            (s_operator.totalFeesEarnedNative + s_operator.totalDepositsNative);
+		uint256 totalNativeDebt = s_operator.totalFeesEarnedNative + s_operator.totalDepositsNative;
+		uint256 verifierBalance = address(this).balance;
+
+		// We charge the operator a fee for successful reports + gas compensation for CLF work,
+		// so the current balance of ConceroVerifier may be less than the total debt amount
+        if (verifierBalance > totalNativeDebt) {
+            return verifierBalance - totalNativeDebt;
+		}
+
+        return 0;
     }
 
     /**

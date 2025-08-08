@@ -21,7 +21,7 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
-import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent, MessageReorgDetected, MessageDeliveryFailedWithError} from "../../interfaces/IConceroRouter.sol";
+import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent, MessageReorgDetected, MessageDeliveryFailed} from "../../interfaces/IConceroRouter.sol";
 
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
@@ -30,12 +30,11 @@ library Errors {
     error UnsupportedFeeTokenType();
     error MessageAlreadyDelivered();
     error MessageAlreadyProcessed(bytes32 messageId);
-    error MessageDeliveryFailed(bytes32 messageId);
+    error ManualMessageDeliveryFailed(bytes32 messageId);
     error InvalidReceiver();
     error InvalidGasLimit();
     error InvalidMessageHashSum();
     error UnauthorizedOperator();
-    error InvalidDstChainSelector();
     error UnknownMessage();
     error InvalidDstChainSelector(uint24 dstChainSelector);
     error InvalidClientMessageConfig();
@@ -138,20 +137,25 @@ abstract contract Message is ClfSigner, IConceroRouter {
         uint256 gasLimit,
         bytes calldata callData
     ) external {
+        s.Router storage s_router = s.router();
+
         bytes32 messageHash = _hash(messageId, receiver, callData);
-        s.Status messageStatus = s.router().messageStatus[messageHash];
 
-        require(messageStatus != s.Status.Delivered, Errors.MessageAlreadyDelivered());
-        require(messageStatus == s.Status.Received, Errors.UnknownMessage());
+        require(
+            s_router.messageStatus[messageId] == s.Status.Received,
+            Errors.MessageAlreadyDelivered()
+        );
+        require(s_router.retryableMessages[messageHash], Errors.UnknownMessage());
 
-        s.router().messageStatus[messageHash] = s.Status.Delivered;
+        s_router.retryableMessages[messageHash] = false;
 
         (bool success, ) = CommonUtils.safeCall(receiver, gasLimit, 0, MAX_RET_BYTES, callData);
-
         if (!success) {
-            revert Errors.MessageDeliveryFailed(messageId);
+            s_router.retryableMessages[messageHash] = true;
+            revert Errors.ManualMessageDeliveryFailed(messageId);
         }
 
+        s_router.messageStatus[messageId] = s.Status.Delivered;
         emit ConceroMessageDelivered(messageId);
     }
 
@@ -171,7 +175,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         require(
             messagePayload.dstChainSelector == i_chainSelector,
-            Errors.InvalidDstChainSelector()
+            Errors.InvalidDstChainSelector(messagePayload.dstChainSelector)
         );
 
         require(
@@ -180,18 +184,18 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         require(
-            !s_router.isMessageProcessed[messagePayload.messageId],
+            s_router.messageStatus[messagePayload.messageId] == s.Status.Unknown,
             Errors.MessageAlreadyProcessed(messagePayload.messageId)
         );
 
-        bytes32 lastTxHash = s_router.lastTxHash[messagePayload.srcChainSelector];
-        if (lastTxHash == messagePayload.txHash) {
+        if (s_router.processedTxHashes[messagePayload.srcChainSelector][messagePayload.txHash]) {
             emit MessageReorgDetected(messagePayload.txHash, messagePayload.srcChainSelector);
             return;
         }
 
-        s_router.lastTxHash[messagePayload.srcChainSelector] = messagePayload.txHash;
+        s_router.processedTxHashes[messagePayload.srcChainSelector][messagePayload.txHash] = true;
 
+        s_router.messageStatus[messagePayload.messageId] = s.Status.Received;
         emit ConceroMessageReceived(messagePayload.messageId);
 
         _deliverMessage(
@@ -231,10 +235,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
         bytes memory sender,
         bytes memory message
     ) internal {
-        s.router().isMessageProcessed[messageId] = true;
-
-        require(dstData.receiver != address(0), Errors.InvalidReceiver());
-        require(CommonUtils.isContract(dstData.receiver), Errors.InvalidReceiver());
+        require(
+            dstData.receiver != address(0) || CommonUtils.isContract(dstData.receiver),
+            Errors.InvalidReceiver()
+        );
 
         bytes memory callData = abi.encodeWithSelector(
             IConceroClient.conceroReceive.selector,
@@ -254,17 +258,13 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         if (!success) {
             bytes32 messageHash = _hash(messageId, dstData.receiver, callData);
-            s.router().messageStatus[messageHash] = s.Status.Received;
-
-            emit ConceroMessageReceived(messageId);
-            emit MessageDeliveryFailedWithError(messageId, returnData);
+            s.router().retryableMessages[messageHash] = true;
+            emit MessageDeliveryFailed(messageId, returnData);
         } else {
+            s.router().messageStatus[messageId] = s.Status.Delivered;
             emit ConceroMessageDelivered(messageId);
         }
-
         _payOperatorRelayFee(dstData.gasLimit);
-
-        emit ConceroMessageDelivered(messageId);
     }
 
     function _payOperatorRelayFee(uint256 gasLimit) internal {
@@ -322,7 +322,10 @@ abstract contract Message is ClfSigner, IConceroRouter {
         require(dstChainData.gasLimit > 0, Errors.InvalidGasLimit());
         require(message.length < CommonConstants.MESSAGE_MAX_SIZE, Errors.MessageTooLarge());
         require(!shouldFinaliseSrc, Errors.FinalityNotYetSupported());
-        require(isChainSupported(dstChainSelector), Errors.InvalidDstChainSelector());
+        require(
+            isChainSupported(dstChainSelector),
+            Errors.InvalidDstChainSelector(dstChainSelector)
+        );
     }
 
     function _buildMessageId(uint24 dstChainSelector) private returns (bytes32) {

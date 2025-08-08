@@ -57,23 +57,45 @@ contract RouterStorage is ConceroRouterTest {
         conceroRouter.setStorageBulk(namespaces, offsets, mappingKeys, values);
     }
 
-    function test_SetAndGetIsMessageProcessed() public {
+    function test_SetAndGetMessageStatus() public {
         bytes32 messageId = keccak256("message123");
-        bool isProcessed = true;
+        uint8 status = uint8(s.Status.Received);
 
         vm.startPrank(deployer);
 
         conceroRouter.setStorage(
             Namespaces.ROUTER,
-            RouterSlots.isMessageProcessed,
+            RouterSlots.messageStatus,
             messageId,
-            isProcessed ? 1 : 0
+            status
         );
 
         assertEq(
-            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.isMessageProcessed, messageId),
-            isProcessed ? 1 : 0,
-            "Message processed status not set"
+            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.messageStatus, messageId),
+            status,
+            "Message status not set"
+        );
+
+        vm.stopPrank();
+    }
+
+    function test_SetAndGetRetryableMessages() public {
+        bytes32 messageHash = keccak256("messageHash123");
+        bool isRetryable = true;
+
+        vm.startPrank(deployer);
+
+        conceroRouter.setStorage(
+            Namespaces.ROUTER,
+            RouterSlots.retryableMessages,
+            messageHash,
+            isRetryable ? 1 : 0
+        );
+
+        assertEq(
+            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.retryableMessages, messageHash),
+            isRetryable ? 1 : 0,
+            "Retryable message status not set"
         );
 
         vm.stopPrank();

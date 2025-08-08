@@ -10,7 +10,7 @@ import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {IConceroClient} from "contracts/interfaces/IConceroClient.sol";
-import {ConceroMessageReceived, ConceroMessageDelivered, MessageDeliveryFailedWithError} from "contracts/interfaces/IConceroRouter.sol";
+import {ConceroMessageReceived, ConceroMessageDelivered, MessageDeliveryFailed} from "contracts/interfaces/IConceroRouter.sol";
 import {ConceroClientRevertMock, ErrorType} from "contracts/mocks/ConceroClientRevertMock.sol";
 
 import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
@@ -24,6 +24,8 @@ contract RetryMessage is ConceroRouterTest {
     bytes32 internal constant TEST_MESSAGE_ID = bytes32(uint256(1));
     uint256 internal constant GAS_LIMIT = 100_000;
 
+    uint256[] public indexes = new uint256[](1);
+
     MessageReport internal messageReport;
     ConceroClientRevertMock internal conceroClientRevert;
 
@@ -33,6 +35,7 @@ contract RetryMessage is ConceroRouterTest {
 
         _setPriceFeeds();
         conceroClientRevert = new ConceroClientRevertMock(address(conceroRouter));
+        indexes[0] = 0; // Only one message in the report
     }
 
     // --- Tests for deliverMessage function ---
@@ -62,8 +65,11 @@ contract RetryMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, false);
         emit ConceroMessageReceived(TEST_MESSAGE_ID);
 
+        bytes[] memory messages = new bytes[](1);
+        messages[0] = message;
+
         vm.prank(operator);
-        conceroRouter.submitMessageReport(reportSubmission, message);
+        conceroRouter.submitMessageReport(reportSubmission, messages, indexes);
     }
 
     function test_deliverMessage_EmitConceroMessageDelivered() public {
@@ -77,11 +83,14 @@ contract RetryMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, false);
         emit ConceroMessageDelivered(TEST_MESSAGE_ID);
 
+        bytes[] memory messages = new bytes[](1);
+        messages[0] = message;
+
         vm.prank(operator);
-        conceroRouter.submitMessageReport(reportSubmission, message);
+        conceroRouter.submitMessageReport(reportSubmission, messages, indexes);
     }
 
-    function test_deliverMessage_EmitMessageDeliveryFailedWithError_EmptyError() public {
+    function test_deliverMessage_EmitMessageDeliveryFailed_EmptyError() public {
         bytes memory message = abi.encode(uint8(ErrorType.EmptyRevert));
 
         Types.ClfDonReportSubmission memory reportSubmission = _receiveMessage(message);
@@ -89,26 +98,32 @@ contract RetryMessage is ConceroRouterTest {
         bytes memory emptyError; // 0x
 
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailedWithError(TEST_MESSAGE_ID, emptyError);
+        emit MessageDeliveryFailed(TEST_MESSAGE_ID, emptyError);
+
+        bytes[] memory messages = new bytes[](1);
+        messages[0] = message;
 
         vm.prank(operator);
-        conceroRouter.submitMessageReport(reportSubmission, message);
+        conceroRouter.submitMessageReport(reportSubmission, messages, indexes);
     }
 
-    function test_deliverMessage_EmitMessageDeliveryFailedWithError_OutOfGas() public {
+    function test_deliverMessage_EmitMessageDeliveryFailed_OutOfGas() public {
         bytes memory message = abi.encode(uint8(ErrorType.OutOfGasRevert));
 
         Types.ClfDonReportSubmission memory reportSubmission = _receiveMessage(message);
 
         bytes memory outOfGasError; // 0x (OutOfGas)
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailedWithError(TEST_MESSAGE_ID, outOfGasError);
+        emit MessageDeliveryFailed(TEST_MESSAGE_ID, outOfGasError);
+
+        bytes[] memory messages = new bytes[](1);
+        messages[0] = message;
 
         vm.prank(operator);
-        conceroRouter.submitMessageReport(reportSubmission, message);
+        conceroRouter.submitMessageReport(reportSubmission, messages, indexes);
     }
 
-    function test_deliverMessage_EmitMessageDeliveryFailedWithError_StringRevert() public {
+    function test_deliverMessage_EmitMessageDeliveryFailed_StringRevert() public {
         bytes memory message = abi.encode(uint8(ErrorType.StringRevert));
 
         Types.ClfDonReportSubmission memory reportSubmission = _receiveMessage(message);
@@ -116,26 +131,32 @@ contract RetryMessage is ConceroRouterTest {
         string memory errorMessage = "ConceroClientRevertMock: String revert message";
         bytes memory stringRevert = abi.encodeWithSignature("Error(string)", errorMessage);
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailedWithError(TEST_MESSAGE_ID, stringRevert);
+        emit MessageDeliveryFailed(TEST_MESSAGE_ID, stringRevert);
+
+        bytes[] memory messages = new bytes[](1);
+        messages[0] = message;
 
         vm.prank(operator);
-        conceroRouter.submitMessageReport(reportSubmission, message);
+        conceroRouter.submitMessageReport(reportSubmission, messages, indexes);
     }
 
-    function test_deliverMessage_EmitMessageDeliveryFailedWithError_PanicRevert() public {
+    function test_deliverMessage_EmitMessageDeliveryFailed_PanicRevert() public {
         bytes memory message = abi.encode(uint8(ErrorType.PanicRevert));
 
         Types.ClfDonReportSubmission memory reportSubmission = _receiveMessage(message);
 
         bytes memory panicRevert = abi.encodeWithSignature("Panic(uint256)", 0x1);
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailedWithError(TEST_MESSAGE_ID, panicRevert);
+        emit MessageDeliveryFailed(TEST_MESSAGE_ID, panicRevert);
+
+        bytes[] memory messages = new bytes[](1);
+        messages[0] = message;
 
         vm.prank(operator);
-        conceroRouter.submitMessageReport(reportSubmission, message);
+        conceroRouter.submitMessageReport(reportSubmission, messages, indexes);
     }
 
-    function test_deliverMessage_EmitMessageDeliveryFailedWithError_CustomErrorRevert() public {
+    function test_deliverMessage_EmitMessageDeliveryFailed_CustomErrorRevert() public {
         bytes memory message = abi.encode(uint8(ErrorType.CustomErrorRevert));
 
         Types.ClfDonReportSubmission memory reportSubmission = _receiveMessage(message);
@@ -148,10 +169,13 @@ contract RetryMessage is ConceroRouterTest {
             errorMessage
         );
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailedWithError(TEST_MESSAGE_ID, customErrorRevert);
+        emit MessageDeliveryFailed(TEST_MESSAGE_ID, customErrorRevert);
+
+        bytes[] memory messages = new bytes[](1);
+        messages[0] = message;
 
         vm.prank(operator);
-        conceroRouter.submitMessageReport(reportSubmission, message);
+        conceroRouter.submitMessageReport(reportSubmission, messages, indexes);
     }
 
     // --- Tests for retry function ---
@@ -207,7 +231,7 @@ contract RetryMessage is ConceroRouterTest {
         _submitMessageReport(message);
 
         vm.expectRevert(
-            abi.encodeWithSelector(Errors.MessageDeliveryFailed.selector, TEST_MESSAGE_ID)
+            abi.encodeWithSelector(Errors.ManualMessageDeliveryFailed.selector, TEST_MESSAGE_ID)
         );
 
         conceroRouter.retry(TEST_MESSAGE_ID, address(conceroClientRevert), GAS_LIMIT, callData);
@@ -250,9 +274,11 @@ contract RetryMessage is ConceroRouterTest {
         CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
             messageId: TEST_MESSAGE_ID,
             messageHashSum: keccak256(receivedMessage),
+            txHash: bytes32(0),
             messageSender: abi.encode(address(this)),
             srcChainSelector: SRC_CHAIN_SELECTOR,
             dstChainSelector: 1,
+            srcBlockNumber: 0,
             dstChainData: dstChainData,
             allowedOperators: allowedOperators
         });
@@ -285,8 +311,11 @@ contract RetryMessage is ConceroRouterTest {
     ) private returns (Types.ClfDonReportSubmission memory reportSubmission) {
         reportSubmission = _receiveMessage(message);
 
+        bytes[] memory messages = new bytes[](1);
+        messages[0] = message;
+
         vm.prank(operator);
-        conceroRouter.submitMessageReport(reportSubmission, message);
+        conceroRouter.submitMessageReport(reportSubmission, messages, indexes);
 
         return reportSubmission;
     }

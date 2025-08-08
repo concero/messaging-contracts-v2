@@ -42,13 +42,10 @@ library Storage {
         uint256 nonce;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
-        mapping(bytes32 messageId => bool isSent) isMessageSent;
-        mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
-        mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;
-        mapping(bytes32 messageId => mapping(Protocol => bool)) messageConfirmationsByProtocol;
+        mapping(bytes32 messageId => Status) messageStatus;
+        mapping(bytes32 messageHash => bool retryableMessages) retryableMessages;
         mapping(uint24 chainSelector => bool isSupported) isChainSupported;
-        mapping(uint24 chainSelector => bytes32 txHash) lastTxHash;
-        mapping(bytes32 messageHash => Status) messageStatus;
+        mapping(uint24 chainSelector => mapping(bytes32 txHash => bool isProcessed)) processedTxHashes;
     }
 
     struct Operator {

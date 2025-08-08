@@ -68,7 +68,7 @@
         "@chainlink/solhint-plugin-chainlink-solidity": "1.0.1",
         "@concero/contract-utils": "github:concero/contract-utils",
         "@concero/rpcs": "github:concero/rpcs",
-        "@concero/v2-networks": "github:concero/v2-networks",
+        "@concero/v2-networks": "github:concero/v2-networks#chore/add-finality-confirmations",
         "@concero/v2-operators": "github:concero/v2-operators",
         "@nomicfoundation/hardhat-ignition-viem": "0.15.9",
         "@nomicfoundation/hardhat-viem": "2.0.6",

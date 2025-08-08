@@ -34,3 +34,4 @@ const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = asyn
 deployPauseDummy.tags = ["PauseDummy"];
 
 export default deployPauseDummy;
+export { deployPauseDummy };

@@ -1,5 +1,6 @@
-import { DeploymentManager } from "@concero/v2-operators/src/common/managers/DeploymentManager";
 import { Address, Hash, encodePacked, zeroHash } from "viem";
+
+import { MessagingDeploymentManager } from "@concero/v2-operators/src/common/managers/MessagingDeploymentManager";
 
 import { EvmSrcChainData } from "../../clf/src/messageReport/types";
 import { simulateCLFScript } from "../../tasks/clf";
@@ -18,7 +19,7 @@ export async function getMessageCLFReportResponse({
 	operatorAddresses: Address;
 }) {
 	try {
-		const deploymentsManager = DeploymentManager.getInstance();
+		const deploymentsManager = MessagingDeploymentManager.getInstance();
 		const res = await simulateCLFScript(
 			__dirname + "/../../clf/dist/messageReport.js",
 			[

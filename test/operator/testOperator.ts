@@ -1,6 +1,8 @@
 import "./utils/configureOperatorEnv";
 
-import { BlockManagerRegistry } from "@concero/v2-operators/src/common/managers";
+import { privateKeyToAccount } from "viem/accounts";
+
+import { BlockManagerRegistry } from "@concero/operator-utils";
 import { checkGas } from "@concero/v2-operators/src/common/utils";
 import { initializeManagers } from "@concero/v2-operators/src/common/utils/initializeManagers";
 import { ensureDeposit } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureDeposit";

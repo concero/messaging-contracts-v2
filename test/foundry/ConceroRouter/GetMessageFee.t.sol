@@ -11,8 +11,7 @@ import {ConceroRouterTest} from "../ConceroRouter/base/ConceroRouterTest.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
 import {Utils as CommonUtils} from "contracts/common/libraries/Utils.sol";
-import {ConfigSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
-import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
+import {Storage as rs} from "contracts/ConceroRouter/libraries/Storage.sol";
 
 contract GetMessageFeeTest is ConceroRouterTest {
     uint24 public constant CHAIN_SELECTOR_A = 1;
@@ -52,28 +51,21 @@ contract GetMessageFeeTest is ConceroRouterTest {
             CLF_CALLBACK_GAS_OVERHEAD
         );
 
-        // Read the entire slot from CONFIG namespace
-        uint256 gasFeeConfigValue = conceroRouter.getStorage(
-            Namespaces.CONFIG,
-            ConfigSlots.gasFeeConfig,
-            bytes32(0)
-        );
+        rs.GasFeeConfig memory gasFeeConfig = conceroRouter.getGasFeeConfig();
 
-        // Extract fields in the same order as in the structure
-        uint24 baseChainSelector = uint24(gasFeeConfigValue); // lower 24 bits
-        uint32 submitMsgGasOverhead = uint32(gasFeeConfigValue >> 24); // next 32 bits
-        uint32 vrfMsgReportRequestGasOverhead = uint32(gasFeeConfigValue >> 56); // next 32 bits (24+32)
-        uint32 clfCallbackGasOverhead = uint32(gasFeeConfigValue >> 88); // next 32 bits (24+32+32)
-
-        assertEq(baseChainSelector, CHAIN_SELECTOR_A, "Incorrect base chain selector");
-        assertEq(submitMsgGasOverhead, SUBMIT_MSG_GAS_OVERHEAD, "Incorrect gas overhead");
+        assertEq(gasFeeConfig.baseChainSelector, CHAIN_SELECTOR_A, "Incorrect base chain selector");
         assertEq(
-            clfCallbackGasOverhead,
+            gasFeeConfig.submitMsgGasOverhead,
+            SUBMIT_MSG_GAS_OVERHEAD,
+            "Incorrect gas overhead"
+        );
+        assertEq(
+            gasFeeConfig.clfCallbackGasOverhead,
             CLF_CALLBACK_GAS_OVERHEAD,
             "Incorrect CLF callback gas overhead"
         );
         assertEq(
-            vrfMsgReportRequestGasOverhead,
+            gasFeeConfig.vrfMsgReportRequestGasOverhead,
             VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
             "Incorrect VRF message report request gas overhead"
         );

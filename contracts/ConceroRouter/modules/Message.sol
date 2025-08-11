@@ -38,7 +38,6 @@ library Errors {
     error InvalidClientMessageConfig();
     error InvalidSrcChainData();
     error MessageTooLarge();
-    error FinalityNotYetSupported();
 }
 
 abstract contract Message is ClfSigner, IConceroRouter {
@@ -273,7 +272,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
         require(dstChainData.receiver != address(0), Errors.InvalidReceiver());
         require(dstChainData.gasLimit > 0, Errors.InvalidGasLimit());
         require(message.length < CommonConstants.MESSAGE_MAX_SIZE, Errors.MessageTooLarge());
-        require(!shouldFinaliseSrc, Errors.FinalityNotYetSupported());
         require(isChainSupported(dstChainSelector), Errors.InvalidDstChainSelector());
     }
 
@@ -363,12 +361,11 @@ abstract contract Message is ClfSigner, IConceroRouter {
     /* @inheritdoc IConceroRouter */
     function getMessageFee(
         uint24 dstChainSelector,
-        bool shouldFinaliseSrc,
+        bool /* shouldFinaliseSrc */,
         address feeToken,
         ConceroTypes.EvmDstChainData calldata dstChainData
     ) external view returns (uint256) {
         require(feeToken == address(0), Errors.UnsupportedFeeTokenType());
-        require(!shouldFinaliseSrc, Errors.FinalityNotYetSupported());
 
         return _calculateMessageFee(dstChainSelector, feeToken, dstChainData);
     }

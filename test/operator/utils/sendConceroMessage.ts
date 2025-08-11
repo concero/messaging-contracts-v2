@@ -15,8 +15,8 @@ export async function sendConceroMessage(
 		address: clientAddress,
 		abi: exampleClientAbi,
 		functionName: "sendConceroMessage",
-		args: [clientAddress, 1n],
-		value: parseUnits("0.01", 18),
+		args: [clientAddress, 1n, true],
+		value: parseUnits("0.06", 18),
 		gas: 10000000n,
 	});
 
@@ -52,7 +52,7 @@ export async function sendConceroMessage(
 		txHash,
 		blockNumber: txReceipt.blockNumber,
 		internalMessageConfig: foundMessageSentLog.topics[1],
-		messageId: foundMessageSentLog.topics[2],
+		messageId: decodedEvent.args.messageId,
 		dstChainData: decodedEvent.args.dstChainData,
 		message: decodedEvent.args.message,
 	};

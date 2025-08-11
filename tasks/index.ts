@@ -13,6 +13,8 @@ import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains
 import sendConceroMessage from "./sendConceroMessage";
 import sendValueTask from "./sendValue.task";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
+import { setLastGasPrices } from "./setLastGasPrices";
+import { setNativeUsdRate } from "./setNativeUsdRate";
 import setOperator from "./setOperator";
 import { setRouterSupportedChains } from "./setRouterSupportedChains";
 import testScript from "./test";
@@ -40,6 +42,8 @@ export {
 	displayRouterGasFeeConfig,
 	displayVerifierGasFeeConfig,
 	setRouterGasFeeConfig,
+	setNativeUsdRate,
+	setLastGasPrices,
 	setVerifierGasFeeConfig,
 	deployPriceFeedTask,
 	deployRouterTask,

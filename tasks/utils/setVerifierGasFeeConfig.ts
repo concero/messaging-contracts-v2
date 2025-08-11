@@ -1,47 +1,60 @@
-import { ProxyEnum } from "../../constants";
 import { gasFeeConfigVerifier } from "../../constants/gasConfig";
 import {
 	ConceroHardhatNetwork,
 	ConceroLocalNetwork,
 	ConceroNetwork,
 } from "../../types/ConceroNetwork";
-import { getEnvAddress, getFallbackClients, log } from "../../utils";
+import { getFallbackClients, log } from "../../utils";
 
 export type AnyNetwork = ConceroNetwork | ConceroLocalNetwork | ConceroHardhatNetwork;
 
-export async function setVerifierGasFeeConfig(network: AnyNetwork) {
+type SetVerifierGasFeeConfigArgs = {
+	vrfMsgReportRequestGasOverhead: number;
+	clfGasPriceOverEstimationBps: number;
+	clfCallbackGasOverhead: number;
+	clfCallbackGasLimit: number;
+};
+
+export async function setVerifierGasFeeConfig(
+	network: AnyNetwork,
+	verifierAddress: string,
+	overrideArgs?: Partial<SetVerifierGasFeeConfigArgs>,
+) {
 	const { abi } = await import(
 		"../../artifacts/contracts/ConceroVerifier/ConceroVerifier.sol/ConceroVerifier.json"
 	);
 
 	const { publicClient, walletClient } = getFallbackClients(network);
 
-	// Get the verifier contract address
-	const [contractAddress] = getEnvAddress(ProxyEnum.verifierProxy, network.name);
-
 	try {
-		const vrfMsgReportRequestGasOverheadNum =
-			gasFeeConfigVerifier.vrfMsgReportRequestGasOverhead;
-		const clfGasPriceOverEstimationBpsNum = gasFeeConfigVerifier.clfGasPriceOverEstimationBps;
-		const clfCallbackGasOverheadNum = gasFeeConfigVerifier.clfCallbackGasOverhead;
-		const clfCallbackGasLimitNum = gasFeeConfigVerifier.clfCallbackGasLimit;
+		const defaultArgs: SetVerifierGasFeeConfigArgs = {
+			vrfMsgReportRequestGasOverhead: gasFeeConfigVerifier.vrfMsgReportRequestGasOverhead,
+			clfGasPriceOverEstimationBps: gasFeeConfigVerifier.clfGasPriceOverEstimationBps,
+			clfCallbackGasOverhead: gasFeeConfigVerifier.clfCallbackGasOverhead,
+			clfCallbackGasLimit: gasFeeConfigVerifier.clfCallbackGasLimit,
+		};
+
+		const args: SetVerifierGasFeeConfigArgs = {
+			...defaultArgs,
+			...overrideArgs,
+		};
 
 		log(
-			`Setting verifier gas fee config on chainId ${network.chainId}: vrfMsgReportRequestGasOverhead=${vrfMsgReportRequestGasOverheadNum}, clfGasPriceOverEstimationBps=${clfGasPriceOverEstimationBpsNum}, clfCallbackGasOverhead=${clfCallbackGasOverheadNum}, clfCallbackGasLimit=${clfCallbackGasLimitNum}`,
+			`Setting verifier gas fee config on chainId ${network.chainId}: vrfMsgReportRequestGasOverhead=${args.vrfMsgReportRequestGasOverhead}, clfGasPriceOverEstimationBps=${args.clfGasPriceOverEstimationBps}, clfCallbackGasOverhead=${args.clfCallbackGasOverhead}, clfCallbackGasLimit=${args.clfCallbackGasLimit}`,
 			"setVerifierGasFeeConfig",
 			network.name,
 		);
 
 		const setGasFeeConfigHash = await walletClient.writeContract({
 			account: walletClient.account!,
-			address: contractAddress,
+			address: verifierAddress as `0x${string}`,
 			abi: abi,
 			functionName: "setGasFeeConfig",
 			args: [
-				vrfMsgReportRequestGasOverheadNum,
-				clfGasPriceOverEstimationBpsNum,
-				clfCallbackGasOverheadNum,
-				clfCallbackGasLimitNum,
+				args.vrfMsgReportRequestGasOverhead,
+				args.clfGasPriceOverEstimationBps,
+				args.clfCallbackGasOverhead,
+				args.clfCallbackGasLimit,
 			],
 			chain: undefined,
 		});

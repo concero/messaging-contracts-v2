@@ -5,8 +5,11 @@ import { conceroNetworks } from "../constants";
 import { deployPriceFeed } from "../deploy/ConceroPriceFeed";
 import { deployRouter } from "../deploy/ConceroRouter";
 import { deployVerifier } from "../deploy/ConceroVerifier";
+import { setLastGasPrices } from "../tasks/setLastGasPrices";
+import { setNativeUsdRate } from "../tasks/setNativeUsdRate";
 import { setRouterSupportedChains } from "../tasks/setRouterSupportedChains";
 import { getFallbackClients } from "../utils";
+import { setVerifierGasFeeConfig } from "./utils/setVerifierGasFeeConfig";
 
 async function deployContracts(mockCLFRouter: Address): Promise<{
 	mockCLFRouter: any;
@@ -25,7 +28,9 @@ async function deployContracts(mockCLFRouter: Address): Promise<{
 	const { walletClient } = getFallbackClients(conceroNetwork);
 
 	// DEPLOYMENTS
-	const conceroPriceFeed = await deployPriceFeed(hre);
+	const conceroPriceFeed = await deployPriceFeed(hre, {
+		feedUpdater: walletClient.account?.address,
+	});
 	const conceroVerifier = await deployVerifier(hre, {
 		clfParams: { router: mockCLFRouter },
 		conceroPriceFeed: conceroPriceFeed.address,
@@ -36,11 +41,20 @@ async function deployContracts(mockCLFRouter: Address): Promise<{
 	});
 
 	// VARIABLE SETTING
-	// TODO: set gasFeeConfig on ConceroVerifier
-	// TODO: set price feeds on ConceroPriceFeed
+	await setNativeUsdRate(conceroPriceFeed.address, walletClient, 1000000000000000000n);
+	await setLastGasPrices(conceroPriceFeed.address, walletClient, {
+		chainSelectors: [1n],
+		lastGasPrices: [1n],
+	});
 	await setRouterSupportedChains(conceroRouter.address, walletClient, {
 		chainSelectors: [1n, 137n],
 		supportedStates: [true, true],
+	});
+	await setVerifierGasFeeConfig(conceroNetwork, conceroVerifier.address, {
+		vrfMsgReportRequestGasOverhead: 1,
+		clfGasPriceOverEstimationBps: 1,
+		clfCallbackGasOverhead: 1,
+		clfCallbackGasLimit: 1,
 	});
 	await walletClient.writeContract({
 		address: mockCLFRouter,

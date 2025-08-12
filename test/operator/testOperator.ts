@@ -1,7 +1,5 @@
 import "./utils/configureOperatorEnv";
 
-import { privateKeyToAccount } from "viem/accounts";
-
 import { BlockManagerRegistry, Logger } from "@concero/operator-utils";
 import { checkGas } from "@concero/v2-operators/src/common/utils";
 import { initializeManagers } from "@concero/v2-operators/src/common/utils/initializeManagers";
@@ -74,7 +72,7 @@ async function clf() {
         enableConsoleTransport: process.env.NODE_ENV !== "production",
     });
     await logger.initialize();
-	
+
 	const messagingDeploymentManager = MessagingDeploymentManager.createInstance(
         logger.getLogger("MessagingDeploymentManager"),
         {

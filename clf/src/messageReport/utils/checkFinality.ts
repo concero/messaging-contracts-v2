@@ -9,9 +9,9 @@ export function checkFinality(chainSelector: ChainSelector, submittedBlockNumber
 	const configFinalityConfirmations = getRpcConfigForChain(chainSelector).finalityConfirmations;
 	const finalityConfirmations =
 		configFinalityConfirmations > 0 ? configFinalityConfirmations : config.defaultFinalityConfirmations;
-	const finalityConfirmationBlock = currentBlockNumber - BigInt(finalityConfirmations);
+	const finalityConfirmationBlock = submittedBlockNumber + BigInt(finalityConfirmations);
 
-	if (submittedBlockNumber < finalityConfirmationBlock) {
+	if (currentBlockNumber < finalityConfirmationBlock) {
 		handleError(ErrorType.FINALITY_NOT_REACHED);
 	}
 }

@@ -14,7 +14,7 @@ export function getRpcConfigForChain(chainSelector: ChainSelector) {
 			chainSelector: Number(chainSelector),
 			chainId: chainSelector,
 			rpcUrls: [config.localhostRpcUrl],
-			finalityConfirmations: 1,
+			finalityConfirmations: 12,
 		};
 	}
 

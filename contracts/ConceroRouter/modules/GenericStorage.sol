@@ -11,6 +11,7 @@ import {GenericStorage as gs} from "../../common/libraries/GenericStorage.sol";
 import {Namespaces} from "../libraries/Storage.sol";
 import {Base} from "./Base.sol";
 
+// TODO: REMOVE IT!
 // @notice External handles for interacting with generic StorageLib
 abstract contract GenericStorage is Base {
     function _validateNamespace(bytes32 slot) internal pure {

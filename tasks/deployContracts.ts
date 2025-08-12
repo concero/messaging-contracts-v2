@@ -4,10 +4,10 @@ import { Address } from "viem";
 import { conceroNetworks } from "../constants";
 import { deployPriceFeed } from "../deploy/ConceroPriceFeed";
 import { deployRouter } from "../deploy/ConceroRouter";
-import { deployVerifier } from "../deploy/ConceroVerifier";
 import { setLastGasPrices } from "../tasks/setLastGasPrices";
 import { setNativeUsdRate } from "../tasks/setNativeUsdRate";
 import { setRouterSupportedChains } from "../tasks/setRouterSupportedChains";
+import { deployVerifierHarness } from "../test/operator/utils/deployConceroVerifierHarness";
 import { getFallbackClients } from "../utils";
 import { setVerifierGasFeeConfig } from "./utils/setVerifierGasFeeConfig";
 
@@ -31,7 +31,7 @@ async function deployContracts(mockCLFRouter: Address): Promise<{
 	const conceroPriceFeed = await deployPriceFeed(hre, {
 		feedUpdater: walletClient.account?.address,
 	});
-	const conceroVerifier = await deployVerifier(hre, {
+	const conceroVerifier = await deployVerifierHarness(hre, {
 		clfParams: { router: mockCLFRouter },
 		conceroPriceFeed: conceroPriceFeed.address,
 	});

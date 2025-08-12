@@ -3,10 +3,6 @@ import { task } from "hardhat/config";
 import { WalletClient } from "viem";
 
 import { conceroNetworks } from "../constants";
-import {
-	OperatorSlots,
-	Namespaces as verifierNamespaces,
-} from "../constants/storage/ConceroVerifierStorage";
 import { getEnvAddress, getFallbackClients, log } from "../utils";
 
 /**
@@ -20,31 +16,37 @@ export async function setIsOperatorRegistered(
 	conceroVerifierAddress: string,
 	operatorAddress: string,
 	walletClient: WalletClient,
-	isRegistered: boolean = true,
+	isRegistered: boolean,
 ) {
-	const { abi: conceroVerifierAbi } = await import(
-		"../artifacts/contracts/ConceroVerifier/ConceroVerifier.sol/ConceroVerifier.json"
+	const { abi: conceroVerifierHarnessAbi } = await import(
+		"../artifacts/contracts/harnesses/ConceroVerifierHarness.sol/ConceroVerifierHarness.json"
 	);
 
-	const operatorAddressBytes32 = `0x${operatorAddress.slice(2).padStart(64, "0")}`;
+	const isAlreadyRegistered = await walletClient.readContract({
+		address: conceroVerifierAddress,
+		abi: conceroVerifierHarnessAbi,
+		functionName: "isOperatorRegistered",
+		args: [operatorAddress],
+	});
+
+	if (isAlreadyRegistered) {
+		return;
+	}
+
+	const chainType = 0n; // EVM
 
 	const txHash = await walletClient.writeContract({
 		address: conceroVerifierAddress,
-		abi: conceroVerifierAbi,
-		functionName: "setStorage",
-		args: [
-			verifierNamespaces.OPERATOR,
-			BigInt(OperatorSlots.isRegistered),
-			operatorAddressBytes32,
-			isRegistered ? 1n : 0n,
-		],
+		abi: conceroVerifierHarnessAbi,
+		functionName: "exposed_operatorRegistration",
+		args: [chainType, operatorAddress, isRegistered],
 		account: walletClient.account,
 	});
 
-	log(`Transaction hash: ${txHash}`, "setOperatorRegistration");
+	log(`Transaction hash: ${txHash}`, "exposed_operatorRegistration");
 	log(
 		`Operator ${operatorAddress} set as ${isRegistered ? "registered" : "unregistered"}`,
-		"setOperatorRegistration",
+		"exposed_operatorRegistration",
 	);
 }
 

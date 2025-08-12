@@ -1,4 +1,5 @@
-import { mainnetChains, testnetChains } from "@concero/rpcs";
+import mainnetChains from "@concero/rpcs/output/mainnet.json";
+import testnetChains from "@concero/rpcs/output/testnet.json";
 import mainnetNetworks from "@concero/v2-networks/networks/mainnet.json";
 import testnetNetworks from "@concero/v2-networks/networks/testnet.json";
 

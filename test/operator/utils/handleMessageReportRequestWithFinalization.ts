@@ -88,12 +88,12 @@ export async function handleMessageReportRequestWithFinalization(
 		operatorAddresses: getEnvVar("OPERATOR_ADDRESS"),
 	});
 
-	const { capturedTerminalOutput, responseBytesHexstring } = result;
+	const { capturedTerminalOutput } = result;
 
 	if (capturedTerminalOutput) {
 		const errorCode = capturedTerminalOutput.match(/"message":"(\d+)"/)?.[1];
 		throw new Error(errorCode);
 	}
 
-	return responseBytesHexstring;
+	return result;
 }

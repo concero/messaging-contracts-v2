@@ -1,5 +1,4 @@
-import mainnetChains from "@concero/rpcs";
-import testnetChains from "@concero/rpcs";
+import { mainnetChains, testnetChains } from "@concero/rpcs";
 import mainnetNetworks from "@concero/v2-networks/networks/mainnet.json";
 import testnetNetworks from "@concero/v2-networks/networks/testnet.json";
 
@@ -11,7 +10,7 @@ export interface RpcConfig {
 }
 
 type ChainData = {
-	rpcUrls: string[];
+	urls: string[];
 	chainSelector: number;
 	chainId: string;
 };
@@ -28,11 +27,11 @@ Object.entries(mainnetNetworks as Record<string, NetworkData>).forEach(([network
 	const chainId = networkData.chainId.toString();
 	const chainData = (mainnetChains as any)[chainId] as ChainData;
 
-	if (chainData && chainData.rpcUrls) {
+	if (chainData && chainData.urls) {
 		rpcConfigs[networkData.chainSelector] = {
 			chainSelector: networkData.chainSelector,
 			chainId: chainId,
-			rpcUrls: chainData.rpcUrls,
+			rpcUrls: chainData.urls,
 			finalityConfirmations: networkData.finalityConfirmations,
 		};
 	}
@@ -42,11 +41,11 @@ Object.entries(testnetNetworks as Record<string, NetworkData>).forEach(([network
 	const chainId = networkData.chainId.toString();
 	const chainData = (testnetChains as any)[chainId] as ChainData;
 
-	if (chainData && chainData.rpcUrls) {
+	if (chainData && chainData.urls) {
 		rpcConfigs[networkData.chainSelector] = {
 			chainSelector: networkData.chainSelector,
 			chainId: chainId,
-			rpcUrls: chainData.rpcUrls,
+			rpcUrls: chainData.urls,
 			finalityConfirmations: networkData.finalityConfirmations,
 		};
 	}

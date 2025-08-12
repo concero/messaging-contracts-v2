@@ -1156,7 +1156,7 @@
 
 "@concero/v2-networks@github:concero/v2-networks":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/19ba5c81ad8bd68c26b0a39003113e7d9fdf83a3"
+  resolved "https://codeload.github.com/concero/v2-networks/tar.gz/cb533a2d7b150581ec0bf3d23aef38d90f2b3a06"
 
 "@concero/v2-operators@https://github.com/concero/v2-operators.git":
   version "1.0.0"

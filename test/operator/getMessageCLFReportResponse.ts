@@ -35,6 +35,10 @@ export async function getMessageCLFReportResponse({
 			},
 		);
 
+		if (res?.errorString) {
+			return res;
+		}
+
 		return res?.responseBytesHexstring;
 	} catch (error) {
 		console.error("Error running MessageReport script:", error);

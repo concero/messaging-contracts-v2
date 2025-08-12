@@ -5,6 +5,7 @@ export async function sendConceroMessage(
 	walletClient: WalletClient,
 	publicClient: PublicClient,
 	clientAddress: string,
+	shouldFiniliseSrc?: boolean,
 ) {
 	const { abi: exampleClientAbi } = await import(
 		"../../../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
@@ -15,7 +16,7 @@ export async function sendConceroMessage(
 		address: clientAddress,
 		abi: exampleClientAbi,
 		functionName: "sendConceroMessage",
-		args: [clientAddress, 1n, true],
+		args: [clientAddress, 1n, shouldFiniliseSrc ?? false],
 		value: parseUnits("0.06", 18),
 		gas: 10000000n,
 	});

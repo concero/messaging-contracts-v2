@@ -24,7 +24,7 @@ contract ConceroVerifierHarness is ConceroVerifier {
         CommonTypes.ChainType chainType,
         address operatorAddress,
         bool isRegistered
-    ) external returns (bytes32 clfRequestId) {
+    ) external {
         if (isRegistered) {
             Utils._addOperator(chainType, abi.encodePacked(operatorAddress));
             s.operator().isRegistered[operatorAddress] = true;

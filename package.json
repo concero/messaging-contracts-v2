@@ -24,7 +24,8 @@
         "size-contracts": "hardhat size-contracts",
         "check-updates": "npx npm-check-updates",
         "prepare": "husky",
-        "operator-setup": "bun test/operator/testOperator.ts"
+        "operator-setup": "bun test/operator/testOperator.ts",
+        "clf-finalize-src-test": "bun test/operator/testOperator.ts finalize-src"
     },
     "devDependencies": {
         "@chainlink/env-enc": "1.0.5",

@@ -44,6 +44,7 @@ export async function main() {
 		requester: args.operatorAddress,
 		messageId: args.messageId,
 		messageHashSum: args.messageHashSum,
+		txHash: log.transactionHash,
 		messageSender: sender,
 		srcChainSelector: args.srcChainSelector,
 		dstChainSelector,

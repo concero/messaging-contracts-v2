@@ -1,19 +1,18 @@
 import "./utils/configureOperatorEnv";
 
-import { privateKeyToAccount } from "viem/accounts";
-
-import { BlockManagerRegistry } from "@concero/v2-operators/src/common/managers";
+import { BlockManagerRegistry } from "@concero/operator-utils";
 import { checkGas } from "@concero/v2-operators/src/common/utils";
 import { initializeManagers } from "@concero/v2-operators/src/common/utils/initializeManagers";
 import { ensureDeposit } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureDeposit";
 import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureOperatorIsRegistered";
 import { setupEventListeners } from "@concero/v2-operators/src/relayer-a/eventListener/setupEventListeners";
+import { privateKeyToAccount } from "viem/accounts";
 
 import { deployConceroClientExample, deployMockCLFRouter } from "../../deploy";
-import { deployContracts, setRouterSupportedChains } from "../../tasks";
+import { deployContracts } from "../../tasks";
 import { buildClfJs } from "../../tasks/clf";
 import { compileContracts, getTestClient } from "../../utils";
-import { deployPseudoRemoteConceroRouter } from "./utils/deployPseudoRemoteConceroRouter";
+import { clfFinalizeSrcTest as clfFinalizeSrcTestLogic } from "./utils/clfFinalizeSrcTest";
 import { setupOperatorTestListeners } from "./utils/setupOperatorTestListeners";
 
 async function operator() {
@@ -42,7 +41,9 @@ async function setupChain() {
 
 	const mockCLFRouter = await deployMockCLFRouter(hre);
 
-	const { conceroRouter, conceroVerifier } = await deployContracts(mockCLFRouter.address);
+	const { conceroRouter, conceroVerifier } = await deployContracts(
+		mockCLFRouter.address as `0x${string}`,
+	);
 
 	const conceroClientExample = await deployConceroClientExample(hre, {
 		conceroRouter: conceroRouter.address,
@@ -58,6 +59,10 @@ async function setupChain() {
 	return { testClient, mockCLFRouter, conceroRouter, conceroVerifier, conceroClientExample };
 }
 
+async function clfFinalizeSrcTest() {
+	await clfFinalizeSrcTestLogic();
+}
+
 async function main() {
 	const args = process.argv.slice(2);
 	const mode = args[0] ? args[0].toLowerCase() : null;
@@ -68,6 +73,10 @@ async function main() {
 			break;
 		case "operator":
 			await operator();
+			break;
+		case "finalize-src":
+			await setupChain();
+			await clfFinalizeSrcTest();
 			break;
 		case null:
 			await setupChain();

@@ -1,6 +1,6 @@
-import { parseEther } from "viem";
-
 import { task } from "hardhat/config";
+
+import { parseEther } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { getFallbackClients } from "../utils";

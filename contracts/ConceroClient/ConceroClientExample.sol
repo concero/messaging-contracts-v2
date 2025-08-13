@@ -46,4 +46,18 @@ contract ConceroClientExample is ConceroClient {
             "Hello from Concero!"
         );
     }
+
+    function sendConceroMessage(
+        address receiver,
+        uint24 dstChainSelector,
+        bool shouldFinaliseSrc
+    ) external payable returns (bytes32 messageId) {
+        messageId = IConceroRouter(i_conceroRouter).conceroSend{value: msg.value}(
+            dstChainSelector,
+            shouldFinaliseSrc,
+            address(0),
+            ConceroTypes.EvmDstChainData({receiver: receiver, gasLimit: 100_000}),
+            "Hello from Concero!"
+        );
+    }
 }

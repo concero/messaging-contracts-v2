@@ -1720,6 +1720,11 @@ var init_decodeAbiParameters = __esm({
   }
 });
 
+// clf/src/operatorRegistration/constants/config.ts
+var CONFIG = {
+  REPORT_VERSION: 1
+};
+
 // clf/src/common/errorHandler.ts
 var CustomErrorHandler = class extends Error {
   constructor(type, data = null) {
@@ -1731,11 +1736,6 @@ var CustomErrorHandler = class extends Error {
 function handleError(type) {
   throw new CustomErrorHandler(type);
 }
-
-// clf/src/operatorRegistration/constants/config.ts
-var CONFIG = {
-  REPORT_VERSION: 1
-};
 
 // node_modules/viem/_esm/index.js
 init_decodeAbiParameters();

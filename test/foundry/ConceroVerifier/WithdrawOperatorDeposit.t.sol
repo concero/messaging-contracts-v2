@@ -12,7 +12,7 @@ import {CommonErrors} from "contracts/common/CommonErrors.sol";
 
 import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 import {Errors} from "contracts/ConceroVerifier/libraries/Errors.sol";
-import {OperatorSlots, PriceFeedSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
+import {OperatorSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";
 
 import {ConceroVerifierTest} from "./base/ConceroVerifierTest.sol";
 
@@ -31,6 +31,7 @@ contract WithdrawOperatorDeposit is ConceroVerifierTest {
         );
 
         _setPriceFeeds();
+        _setGasFeeConfig();
     }
 
     function test_OperatorDeposit() public {

@@ -1,9 +1,9 @@
+import { task } from "hardhat/config";
+
 import { execSync } from "child_process";
 
-import { task } from "hardhat/config";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { testnetNetworks } from "../../constants/conceroNetworks";
 import { getEnvVar } from "../../utils";

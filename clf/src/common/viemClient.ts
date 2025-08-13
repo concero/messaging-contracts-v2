@@ -1,31 +1,34 @@
+import { config } from "./config";
+
 import { Transport, createPublicClient, fallback, http } from "viem";
 
-import { config } from "./config";
 import { handleError } from "./errorHandler";
 import { ErrorType } from "./errorType";
 import { rpcConfigs } from "./rpcLoader";
 import { ChainSelector } from "./types";
 import { getViemChain } from "./viemChains";
 
-function getRpcConfigForChain(chainSelector: ChainSelector) {
+export function getRpcConfigForChain(chainSelector: ChainSelector) {
 	if (config.isDevelopment) {
 		return {
-			id: chainSelector,
-			urls: [config.localhostRpcUrl],
+			chainSelector: Number(chainSelector),
+			chainId: chainSelector,
+			rpcUrls: [config.localhostRpcUrl],
+			finalityConfirmations: 12,
 		};
 	}
 
-	return rpcConfigs[chainSelector];
+	return rpcConfigs[Number(chainSelector)];
 }
 
 export function createFallbackTransport(chainSelector: ChainSelector): Transport {
 	const rpcConfig = getRpcConfigForChain(chainSelector);
 
-	if (!rpcConfig || !rpcConfig.urls || rpcConfig.urls.length === 0) {
+	if (!rpcConfig || !rpcConfig.rpcUrls || rpcConfig.rpcUrls.length === 0) {
 		handleError(ErrorType.NO_RPC_PROVIDERS);
 	}
 
-	const transportFactories = rpcConfig.urls.map(url =>
+	const transportFactories = rpcConfig.rpcUrls.map(url =>
 		http(url.startsWith("http") ? url : `https://${url}`, { batch: true }),
 	);
 	return fallback(transportFactories);

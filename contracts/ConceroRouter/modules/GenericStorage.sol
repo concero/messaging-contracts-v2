@@ -18,7 +18,7 @@ abstract contract GenericStorage is Base {
         require(
             slot == Namespaces.ROUTER ||
                 slot == Namespaces.OPERATOR ||
-                slot == Namespaces.PRICEFEED,
+                slot == Namespaces.CONFIG,
             gs.InvalidNamespace()
         );
     }

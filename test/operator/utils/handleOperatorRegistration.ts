@@ -1,7 +1,8 @@
 import { Address, Hash, decodeEventLog, parseEther } from "viem";
 
-import { DeploymentManager } from "@concero/v2-operators/src/common/managers/DeploymentManager";
+import { MessagingDeploymentManager } from "@concero/v2-operators/src/common/managers/MessagingDeploymentManager";
 import { globalConfig } from "@concero/v2-operators/src/constants";
+import { Address, Hash, decodeEventLog, parseEther } from "viem";
 
 import { ChainType } from "../../../clf/src/common/enums";
 import { OperatorRegistrationAction } from "../../../clf/src/operatorRegistration/types";
@@ -14,7 +15,7 @@ export async function handleOperatorRegistration(
 	txHash: Hash,
 	mockCLFRouter: Address,
 ) {
-	const deploymentsManager = DeploymentManager.getInstance();
+	const deploymentsManager = MessagingDeploymentManager.getInstance();
 	const receipt = await testClient.getTransactionReceipt({ hash: txHash });
 
 	// const operatorRegistrationLog = receipt.logs.find(

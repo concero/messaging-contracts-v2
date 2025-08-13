@@ -1,6 +1,5 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
 import { log, updateEnvVariable } from "../utils";
@@ -35,3 +34,4 @@ const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = asyn
 deployPauseDummy.tags = ["PauseDummy"];
 
 export default deployPauseDummy;
+export { deployPauseDummy };

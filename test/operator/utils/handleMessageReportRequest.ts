@@ -1,3 +1,4 @@
+import { globalConfig } from "@concero/v2-operators/src/constants";
 import {
 	Address,
 	Hash,
@@ -6,8 +7,6 @@ import {
 	encodeAbiParameters,
 	keccak256,
 } from "viem";
-
-import { globalConfig } from "@concero/v2-operators/src/constants";
 
 import { decodeCLFReport, decodeMessageResult } from "../../../tasks/clf/decodeCLFResponse";
 import { getEnvVar } from "../../../utils";

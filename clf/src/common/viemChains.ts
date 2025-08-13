@@ -1,6 +1,7 @@
+import { config } from "./config";
+
 import { type Chain, defineChain } from "viem";
 
-import { config } from "./config";
 import { ChainSelector } from "./types";
 
 const defaultNativeCurrency = {

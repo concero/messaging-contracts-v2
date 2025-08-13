@@ -17,6 +17,8 @@ library Errors {
     error OperatorAddressMismatch();
     error TransferFailed();
     error InsufficientFee(uint256 requiredAmount, uint256 availableAmount);
+    error InvalidClfRequestId(bytes32 clfRequestId);
+    error InvalidClfResultType();
 
     error NoNativeRateAvailable();
     error NoGasPriceAvailable();

@@ -4,7 +4,7 @@
  * @notice If you discover any security vulnerabilities, please report them responsibly.
  * @contact email: security@concero.io
  */
-pragma solidity 0.8.28;
+pragma solidity ^0.8.20;
 
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 

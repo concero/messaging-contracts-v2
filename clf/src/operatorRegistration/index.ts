@@ -1,7 +1,8 @@
+import { CONFIG } from "./constants/config";
+
 import { ChainType, ResultType } from "../common/enums";
 import { handleError } from "../common/errorHandler";
 import { ErrorType } from "../common/errorType";
-import { CONFIG } from "./constants/config";
 import { OperatorRegistrationResult } from "./types";
 import { packResult } from "./utils/packResult";
 import { decodeInputs, validateDecodedArgs } from "./utils/validateInputs";

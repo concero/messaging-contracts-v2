@@ -1,10 +1,9 @@
-import { Address } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-
 import { task } from "hardhat/config";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { abi as ownableAbi } from "@openzeppelin/contracts/build/contracts/Ownable.json";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { Address } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 
 import { conceroNetworks, viemReceiptConfig } from "../../constants";
 import { ConceroNetworkNames } from "../../types/ConceroNetwork";

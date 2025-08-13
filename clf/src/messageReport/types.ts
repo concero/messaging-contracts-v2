@@ -1,5 +1,4 @@
 import { HexString } from "ethers/lib.commonjs/utils/data";
-
 import { type Address, type Hash } from "viem";
 
 export interface EvmSrcChainData {
@@ -23,6 +22,7 @@ export interface MessageReportResult {
 	// payload
 	messageId: Hash;
 	messageHashSum: Hash;
+	txHash: Hash;
 	messageSender: HexString;
 	srcChainSelector: Number;
 	dstChainSelector: Number;

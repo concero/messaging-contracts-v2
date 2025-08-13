@@ -1,5 +1,4 @@
 import { HexString } from "ethers/lib.commonjs/utils/data";
-
 import { decodeAbiParameters } from "viem";
 
 import { handleError } from "../../common/errorHandler";

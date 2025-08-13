@@ -11,22 +11,20 @@ import {Storage as s} from "./libraries/Storage.sol";
 import {Base} from "./modules/Base.sol";
 import {Operator} from "./modules/Operator.sol";
 import {Message} from "./modules/Message.sol";
-import {GenericStorage} from "./modules/GenericStorage.sol";
 import {Owner} from "./modules/Owner.sol";
 
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 
-contract ConceroRouter is IConceroRouter, Operator, Message, GenericStorage, Owner {
+contract ConceroRouter is IConceroRouter, Operator, Message, Owner {
     constructor(
         uint24 chainSelector,
-        address feedUpdater,
+        address conceroPriceFeed,
         address conceroVerifier,
         uint64 conceroVerifierSubId,
         address[4] memory clfSigners
     )
         Message(conceroVerifier, conceroVerifierSubId, clfSigners)
-        Base(chainSelector)
-        Owner(feedUpdater)
+        Base(chainSelector, conceroPriceFeed)
     {}
 
     receive() external payable {}

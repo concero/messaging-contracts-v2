@@ -1,6 +1,6 @@
-import { execSync } from "child_process";
-
 import { task } from "hardhat/config";
+
+import { execSync } from "child_process";
 
 import { conceroNetworks } from "../constants";
 

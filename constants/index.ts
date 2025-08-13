@@ -15,6 +15,7 @@ import {
 	viemReceiptConfig,
 	writeContractConfig,
 } from "./deploymentVariables";
+import { gasFeeConfig, gasFeeConfigVerifier, networkGasConfig } from "./gasConfig";
 // import { liveNetworks } from "./liveNetworks";
 import { urls } from "./rpcUrls";
 
@@ -33,5 +34,8 @@ export {
 	envPrefixes,
 	getViemReceiptConfig,
 	urls,
+	gasFeeConfig,
+	gasFeeConfigVerifier,
+	networkGasConfig,
 	// liveNetworks,
 };

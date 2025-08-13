@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
+import {ConceroRouterHarness} from "contracts/ConceroRouter/ConceroRouterHarness.sol";
 import {PauseDummy} from "contracts/PauseDummy/PauseDummy.sol";
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 
@@ -15,7 +15,7 @@ import {ConceroTest} from "../../utils/ConceroTest.sol";
 
 contract DeployConceroRouter is ConceroRouterBase {
     TransparentUpgradeableProxy internal conceroRouterProxy;
-    ConceroRouter internal conceroRouter;
+    ConceroRouterHarness internal conceroRouter;
 
     function setUp() public virtual override {
         super.setUp();
@@ -31,7 +31,13 @@ contract DeployConceroRouter is ConceroRouterBase {
     }
 
     function deploy() public returns (address) {
+        return deploy(SRC_CHAIN_SELECTOR, address(conceroPriceFeed));
+    }
+
+    function deploy(uint24 chainSelector, address priceFeed) public returns (address) {
         address implementation = _deployImplementation(
+            chainSelector,
+            priceFeed,
             CONCERO_VERIFIER_ADDRESS,
             i_conceroVerifierSubscriptionId,
             [
@@ -47,11 +53,19 @@ contract DeployConceroRouter is ConceroRouterBase {
     }
 
     function deploy(
+        uint24 chainSelector,
+        address conceroPriceFeed,
         address verifier,
         uint64 verifierSubId,
         address[4] memory clfSigners
     ) public returns (address) {
-        address implementation = _deployImplementation(verifier, verifierSubId, clfSigners);
+        address implementation = _deployImplementation(
+            chainSelector,
+            conceroPriceFeed,
+            verifier,
+            verifierSubId,
+            clfSigners
+        );
         _deployProxy(implementation);
         return address(conceroRouterProxy);
     }
@@ -63,15 +77,17 @@ contract DeployConceroRouter is ConceroRouterBase {
     }
 
     function _deployImplementation(
+        uint24 chainSelector,
+        address conceroPriceFeed,
         address verifier,
         uint64 verifierSubId,
         address[4] memory clfSigners
     ) internal returns (address) {
         vm.startPrank(deployer);
 
-        conceroRouter = new ConceroRouter(
-            SRC_CHAIN_SELECTOR,
-            feedUpdater,
+        conceroRouter = new ConceroRouterHarness(
+            chainSelector,
+            conceroPriceFeed,
             verifier,
             verifierSubId,
             clfSigners

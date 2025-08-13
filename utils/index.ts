@@ -1,5 +1,6 @@
-import { compileContracts } from "./compileContracts";
 import { configureDotEnv } from "./configureDotEnv";
+
+import { compileContracts } from "./compileContracts";
 import { formatGas, shorten } from "./formatting";
 import { getEnvAddress, getEnvVar } from "./getEnvVar";
 import {

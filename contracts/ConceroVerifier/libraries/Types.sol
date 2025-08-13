@@ -29,7 +29,8 @@ library Types {
     enum CLFRequestStatus {
         NotStarted, //            0
         Pending, //               1
-        FulFilled //              2
+        Fulfilled, //             2
+        Failed //                 3
     }
 
     enum OperatorRegistrationAction {

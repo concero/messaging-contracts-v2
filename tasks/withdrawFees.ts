@@ -1,8 +1,8 @@
+import { task } from "hardhat/config";
+
 import * as readline from "readline";
 
 import { formatEther, zeroAddress } from "viem";
-
-import { task } from "hardhat/config";
 
 import { ProxyEnum, conceroNetworks, viemReceiptConfig } from "../constants";
 import { getEnvAddress, getFallbackClients, log } from "../utils";

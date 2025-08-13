@@ -1,11 +1,11 @@
-import { PublicClient, WalletClient, decodeEventLog, parseUnits } from "viem";
-
 import { globalConfig } from "@concero/v2-operators/src/constants";
+import { PublicClient, WalletClient, decodeEventLog, parseUnits } from "viem";
 
 export async function sendConceroMessage(
 	walletClient: WalletClient,
 	publicClient: PublicClient,
 	clientAddress: string,
+	shouldFiniliseSrc?: boolean,
 ) {
 	const { abi: exampleClientAbi } = await import(
 		"../../../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
@@ -16,8 +16,8 @@ export async function sendConceroMessage(
 		address: clientAddress,
 		abi: exampleClientAbi,
 		functionName: "sendConceroMessage",
-		args: [clientAddress, 1n],
-		value: parseUnits("0.01", 18),
+		args: [clientAddress, 1n, shouldFiniliseSrc ?? false],
+		value: parseUnits("0.06", 18),
 		gas: 10000000n,
 	});
 
@@ -53,7 +53,7 @@ export async function sendConceroMessage(
 		txHash,
 		blockNumber: txReceipt.blockNumber,
 		internalMessageConfig: foundMessageSentLog.topics[1],
-		messageId: foundMessageSentLog.topics[2],
+		messageId: decodedEvent.args.messageId,
 		dstChainData: decodedEvent.args.dstChainData,
 		message: decodedEvent.args.message,
 	};

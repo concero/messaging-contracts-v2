@@ -75,7 +75,6 @@
         "@openzeppelin/contracts": "5.2.0",
         "@tenderly/hardhat-tenderly": "2.5.2",
         "@typechain/ethers-v6": "0.5.1",
-        "concero-rpcs": "github:concero/rpcs",
         "dotenv": "16.4.7",
         "envfile": "7.1.0",
         "ethers": "6.13.4",

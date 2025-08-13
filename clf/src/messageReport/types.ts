@@ -22,6 +22,7 @@ export interface MessageReportResult {
 	// payload
 	messageId: Hash;
 	messageHashSum: Hash;
+	txHash: Hash;
 	messageSender: HexString;
 	srcChainSelector: Number;
 	dstChainSelector: Number;

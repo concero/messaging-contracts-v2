@@ -47,7 +47,7 @@ export async function main() {
 		txHash: log.transactionHash,
 		messageSender: sender,
 		srcChainSelector: args.srcChainSelector,
-		dstChainSelector,
+		dstChainSelector: Number(dstChainSelector),
 		srcBlockNumber: log.blockNumber,
 		dstChainData,
 		allowedOperators,

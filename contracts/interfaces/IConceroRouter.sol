@@ -18,11 +18,21 @@ event ConceroMessageSent(
     bytes message
 );
 
+enum MessageProcessingError {
+    None,
+    InvalidDstChainSelector,
+    InvalidMessageHashSum,
+    InvalidReceiver,
+    UnauthorizedOperator,
+    DeliveryFailed
+}
+
 event ConceroMessageReceived(bytes32 indexed id);
 event ConceroMessageDelivered(bytes32 indexed id);
 event MessageDeliveryFailed(bytes32 indexed id, bytes returnData);
 event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
 event MessageReorgDetected(bytes32 indexed txHash, uint24 indexed srcChainSelector);
+event MessageProcessingFailed(bytes32 indexed messageId, MessageProcessingError indexed error);
 
 interface IConceroRouter {
     /**

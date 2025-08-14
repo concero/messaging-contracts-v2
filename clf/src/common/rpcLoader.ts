@@ -15,7 +15,7 @@ type ChainData = {
 };
 
 type NetworkData = {
-	chainId: number;
+	chainId: string;
 	chainSelector: number;
 	finalityConfirmations: number;
 };
@@ -23,13 +23,12 @@ type NetworkData = {
 const rpcConfigs: Record<number, RpcConfig> = {};
 
 Object.entries(testnetNetworks as Record<string, NetworkData>).forEach(([networkName, networkData]) => {
-	const chainId = networkData.chainId.toString();
-	const chainData = (testnetChains as any)[chainId] as ChainData;
+	const chainData = (testnetChains as any)[networkName] as ChainData;
 
 	if (chainData && chainData.rpcUrls) {
 		rpcConfigs[networkData.chainSelector] = {
 			chainSelector: networkData.chainSelector,
-			chainId: chainId,
+			chainId: networkData.chainId,
 			rpcUrls: chainData.rpcUrls,
 			finalityConfirmations: networkData.finalityConfirmations,
 		};

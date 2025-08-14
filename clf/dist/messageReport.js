@@ -16043,12 +16043,11 @@ var testnet_default2 = {
 // clf/src/common/rpcLoader.ts
 var rpcConfigs = {};
 Object.entries(testnet_default2).forEach(([networkName, networkData]) => {
-  const chainId = networkData.chainId.toString();
-  const chainData = testnet_default[chainId];
+  const chainData = testnet_default[networkName];
   if (chainData && chainData.rpcUrls) {
     rpcConfigs[networkData.chainSelector] = {
       chainSelector: networkData.chainSelector,
-      chainId,
+      chainId: networkData.chainId,
       rpcUrls: chainData.rpcUrls,
       finalityConfirmations: networkData.finalityConfirmations
     };

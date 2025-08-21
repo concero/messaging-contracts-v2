@@ -18,7 +18,7 @@ import { setRouterSupportedChains } from "./setRouterSupportedChains";
 import testScript from "./test";
 import updateAllRouterImplementations from "./updateAllRouterImplementations.task";
 import { callContractFunction, changeOwnership, upgradeProxyImplementation } from "./utils";
-import withdrawFees from "./withdrawFees";
+import { withdrawMessageFeesTask } from "./withdrawMessageFees.task";
 
 export {
 	ensureNativeBalances,
@@ -36,7 +36,6 @@ export {
 	sendConceroMessage,
 	setOperator,
 	deployExampleClient,
-	withdrawFees,
 	deployConceroPauseToAllChains,
 	fetchTransactionTask,
 	testScript,
@@ -44,4 +43,5 @@ export {
 	sendValueTask,
 	updateAllRouterImplementations,
 	deployPauseTask,
+	withdrawMessageFeesTask,
 };

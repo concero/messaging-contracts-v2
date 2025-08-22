@@ -8,8 +8,6 @@ pragma solidity 0.8.28;
 
 import {Storage as s} from "./libraries/Storage.sol";
 
-import {Base} from "./modules/Base.sol";
-
 import {IConceroPriceFeed} from "../interfaces/IConceroPriceFeed.sol";
 import {CommonErrors} from "../common/CommonErrors.sol";
 
@@ -18,9 +16,10 @@ import {CommonErrors} from "../common/CommonErrors.sol";
  * @notice Manages price feeds for Concero protocol
  * @dev Stores native USD rates, native-native rates, and gas prices for different chains
  */
-contract ConceroPriceFeed is IConceroPriceFeed, Base {
+contract ConceroPriceFeed is IConceroPriceFeed {
     using s for s.PriceFeed;
 
+    uint24 internal immutable i_chainSelector;
     address public immutable i_feedUpdater;
 
     modifier onlyFeedUpdater() {
@@ -32,9 +31,10 @@ contract ConceroPriceFeed is IConceroPriceFeed, Base {
      * @notice Constructor to initialize the contract
      * @param feedUpdater The address that will be allowed to update feeds
      */
-    constructor(uint24 chainSelector, address feedUpdater) Base(chainSelector) {
+    constructor(uint24 chainSelector, address feedUpdater) {
         require(feedUpdater != address(0), CommonErrors.InvalidAddress());
 
+        i_chainSelector = chainSelector;
         i_feedUpdater = feedUpdater;
     }
 

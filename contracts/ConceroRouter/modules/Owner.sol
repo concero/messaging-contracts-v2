@@ -110,4 +110,8 @@ abstract contract Owner is Base {
             0
         );
     }
+
+    function getGasFeeConfig() external view returns (s.GasFeeConfig memory) {
+        return s.config().gasFeeConfig;
+    }
 }

@@ -12,15 +12,15 @@ export const urls: Record<string, string[]> = {
 };
 
 Object.keys(v2MainnetNetworks).forEach(networkName => {
-	const chainId = v2MainnetNetworks[networkName].chainId.toString();
-	if (mainnetChains[chainId]) {
-		urls[networkName] = mainnetChains[chainId].urls;
+	const name = v2MainnetNetworks[networkName].name;
+	if (mainnetChains[name]) {
+		urls[networkName] = mainnetChains[name].rpcUrls;
 	}
 });
 
 Object.keys(v2TestnetNetworks).forEach(networkName => {
-	const chainId = v2TestnetNetworks[networkName].chainId.toString();
-	if (testnetChains[chainId]) {
-		urls[networkName] = testnetChains[chainId].urls;
+	const name = v2TestnetNetworks[networkName].name;
+	if (testnetChains[name]) {
+		urls[networkName] = testnetChains[name].rpcUrls;
 	}
 });

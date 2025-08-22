@@ -9,6 +9,7 @@ import updateSupportedChainsForAllRouters from "./deployRouter/updateSupportedCh
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
+import { getLastGasPriceTask } from "./getLastGasPrice.task";
 import { getNativeUsdRateTask } from "./getNativeUsdRate.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import sendConceroMessage from "./sendConceroMessage";
@@ -62,4 +63,5 @@ export {
 	updateAllRouterImplementations,
 	deployPauseTask,
 	getNativeUsdRateTask,
+	getLastGasPriceTask,
 };

@@ -8,6 +8,7 @@ import updateSupportedChainsForAllRouters from "./deployRouter/updateSupportedCh
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
+import { sendNativeTokensTask } from "./nativeSender/sendNativeTokens.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import sendConceroMessage from "./sendConceroMessage";
 import sendValueTask from "./sendValue.task";
@@ -44,4 +45,5 @@ export {
 	sendValueTask,
 	updateAllRouterImplementations,
 	deployPauseTask,
+	sendNativeTokensTask,
 };

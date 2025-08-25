@@ -47,9 +47,7 @@ export class NativeTokenSender {
 		this.transactionGasLimit = transactionGasLimit;
 		this.isTestnet = isTestnet ?? false;
 		this.config = config ?? {
-			timeout: 10000,
-			retryCount: 1,
-			retryDelay: 250,
+			retryCount: 5,
 		};
 	}
 
@@ -75,13 +73,13 @@ export class NativeTokenSender {
 
 		for (const network of networks) {
 			const { publicClient, walletClient } = this.createClients(network.network);
-			const gasPrice = await publicClient.getGasPrice();
+			const { gasPrice, maxFeePerGas } = await publicClient.estimateFeesPerGas();
 
-			if (gasPrice === 0n) {
-				throw new Error(`Gas price is 0 on ${network.name}`);
-			}
+			const isEIP1559 = !!maxFeePerGas;
 
-			const amount = this.transactionGasLimit * gasPrice * BigInt(txCount);
+			const amount = isEIP1559
+				? this.transactionGasLimit * maxFeePerGas * BigInt(txCount)
+				: this.transactionGasLimit * gasPrice! * BigInt(txCount);
 
 			await this.sendValue(recipient, amount, publicClient, walletClient);
 		}
@@ -136,14 +134,6 @@ export class NativeTokenSender {
 					timeout: this.config.timeout,
 					retryCount: this.config.retryCount,
 					retryDelay: this.config.retryDelay,
-					onFetchResponse: async response => {
-						if (response.status >= 400) {
-							throw new Error(
-								`HTTP error: ${response.status} ${response.statusText}`,
-							);
-						}
-						return response;
-					},
 				}),
 			),
 		);

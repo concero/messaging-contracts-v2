@@ -12,7 +12,7 @@ async function sendNativeTokensTask(taskArgs: any) {
 	const privateKey = getEnvVar("TESTNET_DEPLOYER_PRIVATE_KEY");
 
 	if (!privateKey) {
-		throw new Error("DONOR_PRIVATE_KEY is not set");
+		throw new Error("TESTNET_DEPLOYER_PRIVATE_KEY is not set");
 	}
 	const senderAccount = privateKeyToAccount(`0x${privateKey}`, {
 		nonceManager: nonceManager,
@@ -45,6 +45,7 @@ async function sendNativeTokensTask(taskArgs: any) {
 	}
 }
 
+// yarn hardhat send-native-tokens --testnet --recipient 0x0000000000000000000000000000000000000000 --networks "sepolia,polygonAmoy" --amount 0.001
 task("send-native-tokens", "Send native tokens to specified address on multiple networks")
 	.addFlag("testnet", "Use testnet instead of mainnet")
 	.addParam("recipient", "Recipient address")

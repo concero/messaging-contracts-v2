@@ -73,13 +73,14 @@ export class NativeTokenSender {
 
 		for (const network of networks) {
 			const { publicClient, walletClient } = this.createClients(network.network);
-			const { gasPrice, maxFeePerGas } = await publicClient.estimateFeesPerGas();
 
-			const isEIP1559 = !!maxFeePerGas;
+			const gasPrice = await this.getActualGasPrice(publicClient);
+			const amount = this.transactionGasLimit * gasPrice * BigInt(txCount);
 
-			const amount = isEIP1559
-				? this.transactionGasLimit * maxFeePerGas * BigInt(txCount)
-				: this.transactionGasLimit * gasPrice! * BigInt(txCount);
+			if (amount === 0n) {
+				console.log(`No amount to send on ${network.name}`);
+				continue;
+			}
 
 			await this.sendValue(recipient, amount, publicClient, walletClient);
 		}
@@ -88,6 +89,10 @@ export class NativeTokenSender {
 	async sendByAmount(recipient: string, amount: string, chainNames: string[]): Promise<void> {
 		const networks = this.getFilteredNetworks(chainNames);
 		const amountInWei = parseEther(amount);
+
+		if (amountInWei === 0n) {
+			throw new Error(`Amount should be greater than 0`);
+		}
 
 		for (const network of networks) {
 			const { publicClient, walletClient } = this.createClients(network.network);
@@ -102,6 +107,22 @@ export class NativeTokenSender {
 			)
 			.filter(([name, _]) => !chainNames || chainNames.includes(name))
 			.map(([name, network]) => ({ name, network: network as ConceroNetwork }));
+	}
+
+	private async getActualGasPrice(publicClient: PublicClient): Promise<bigint> {
+		const block = await publicClient.getBlock();
+
+		const isEIP1559 = !!block.baseFeePerGas;
+
+		let gasPrice = 0n;
+		if (isEIP1559) {
+			const { maxFeePerGas } = await publicClient.estimateFeesPerGas();
+			gasPrice = maxFeePerGas;
+		} else {
+			gasPrice = await publicClient.getGasPrice();
+		}
+
+		return gasPrice;
 	}
 
 	private createClients(network: ConceroNetwork): ClientPair {

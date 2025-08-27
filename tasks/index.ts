@@ -1,3 +1,4 @@
+import { changeProxyAdminOwnerTask } from "./changeProxyAdminOwner.task";
 import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
@@ -66,4 +67,5 @@ export {
 	getNativeUsdRateTask,
 	getNativeNativeRateTask,
 	getLastGasPriceTask,
+	changeProxyAdminOwnerTask,
 };

@@ -8,3 +8,4 @@ export { readRouterGasFeeConfig, displayRouterGasFeeConfig } from "./readRouterG
 export { readVerifierGasFeeConfig, displayVerifierGasFeeConfig } from "./readVerifierGasFeeConfig";
 export { setRouterGasFeeConfig } from "./setRouterGasFeeConfig";
 export { setVerifierGasFeeConfig } from "./setVerifierGasFeeConfig";
+export { changeProxyAdminOwner } from "./changeProxyAdminOwner";

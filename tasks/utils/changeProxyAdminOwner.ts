@@ -25,7 +25,7 @@ export async function changeProxyAdminOwner(
 		.map(([name, network]) => ({ name, network: network }));
 
 	for (const { name, network } of networksToCheck) {
-		const viemAccount = getViemAccount(network.type, "deployer"); // TODO: change to proxyDeployer
+		const viemAccount = getViemAccount(network.type, "proxyDeployer");
 		const [proxyAdmin] = getEnvAddress(`${proxyType}Admin`, name);
 		const { walletClient, publicClient } = getFallbackClients(network, viemAccount);
 

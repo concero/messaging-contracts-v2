@@ -116,8 +116,8 @@ export class NativeTokenSender {
 
 		let gasPrice = 0n;
 		if (isEIP1559) {
-			const { maxFeePerGas } = await publicClient.estimateFeesPerGas();
-			gasPrice = maxFeePerGas;
+			const { maxFeePerGas, maxPriorityFeePerGas } = await publicClient.estimateFeesPerGas();
+			gasPrice = maxFeePerGas + maxPriorityFeePerGas;
 		} else {
 			gasPrice = await publicClient.getGasPrice();
 		}
@@ -150,13 +150,8 @@ export class NativeTokenSender {
 		}
 
 		return fallback(
-			rpcUrls.map(url =>
-				http(url, {
-					timeout: this.config.timeout,
-					retryCount: this.config.retryCount,
-					retryDelay: this.config.retryDelay,
-				}),
-			),
+			rpcUrls.map(url => http(url)),
+			{ retryCount: this.config.retryCount },
 		);
 	}
 
@@ -184,6 +179,7 @@ export class NativeTokenSender {
 				value: amount,
 				to: recipient as `0x${string}`,
 				chain: publicClient.chain,
+				gas: 100_000n,
 			});
 
 			const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });

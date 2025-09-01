@@ -1,7 +1,7 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks } from "../constants";
+import { conceroNetworks, DEPLOY_CONFIG_TESTNET } from "../constants";
 import { IProxyType } from "../types/deploymentVariables";
 import { getGasParameters, getWallet, log, updateEnvAddress } from "../utils";
 
@@ -14,14 +14,15 @@ const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) 
 
 		const initialOwner = getWallet(networkType, "proxyDeployer", "address");
 
+		const deployConfig = DEPLOY_CONFIG_TESTNET[name as keyof typeof DEPLOY_CONFIG_TESTNET];
+
 		log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
 		const deployProxyAdmin = (await deploy("ConceroProxyAdmin", {
 			from: proxyDeployer,
 			args: [initialOwner],
 			log: true,
 			autoMine: true,
-			skipIfAlreadyDeployed: false,
-			gasLimit: 3000000,
+			...deployConfig.deployArgs,
 		})) as Deployment;
 
 		log(`Deployed at: ${deployProxyAdmin.address}`, `deployProxyAdmin: ${proxyType}`, name);

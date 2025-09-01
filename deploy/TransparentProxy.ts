@@ -1,7 +1,7 @@
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { ProxyEnum, conceroNetworks } from "../constants";
+import { DEPLOY_CONFIG_TESTNET, ProxyEnum, conceroNetworks } from "../constants";
 import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
 import { getEnvAddress, getGasParameters, log, updateEnvAddress } from "../utils";
 
@@ -32,12 +32,15 @@ const deployTransparentProxy: (
 	);
 	const [proxyAdmin, proxyAdminAlias] = getEnvAddress(`${proxyType}Admin`, name);
 
+	const deployConfig = DEPLOY_CONFIG_TESTNET[name as keyof typeof DEPLOY_CONFIG_TESTNET];
+
 	log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
 	const conceroProxyDeployment = (await deploy("TransparentUpgradeableProxy", {
 		from: proxyDeployer,
 		args: [initialImplementation, proxyAdmin, "0x"],
 		log: true,
 		autoMine: true,
+		...deployConfig.deployArgs,
 	})) as Deployment;
 
 	log(

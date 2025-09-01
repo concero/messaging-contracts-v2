@@ -2,7 +2,7 @@ import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks } from "../constants";
+import { conceroNetworks, DEPLOY_CONFIG_TESTNET } from "../constants";
 import { log, updateEnvVariable } from "../utils";
 
 type DeployArgs = {
@@ -36,11 +36,14 @@ const deployPriceFeed: DeploymentFunction = async function (
 		...overrideArgs,
 	};
 
+	const deployConfig = DEPLOY_CONFIG_TESTNET[name as keyof typeof DEPLOY_CONFIG_TESTNET];
+
 	const deployment = await deploy("ConceroPriceFeed", {
 		from: deployer,
 		args: [args.chainSelector, args.feedUpdater],
 		log: true,
 		autoMine: true,
+		...deployConfig.deployArgs,
 	});
 
 	log(`Deployed at: ${deployment.address}`, "deployPriceFeed", name);

@@ -8,6 +8,7 @@ import {
 } from "./clf/secretsConfig";
 import { simulationConfig } from "./clf/simulationConfig";
 import { conceroNetworks } from "./conceroNetworks";
+import { DEPLOY_CONFIG_TESTNET } from "./deployConfigTestnet";
 import {
 	ProxyEnum,
 	envPrefixes,
@@ -38,4 +39,5 @@ export {
 	gasFeeConfigVerifier,
 	networkGasConfig,
 	// liveNetworks,
+	DEPLOY_CONFIG_TESTNET,
 };

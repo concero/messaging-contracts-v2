@@ -3,7 +3,13 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { DEPLOY_CONFIG_TESTNET, ProxyEnum, conceroNetworks } from "../constants";
 import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
-import { getEnvAddress, getGasParameters, log, updateEnvAddress } from "../utils";
+import {
+	getEnvAddress,
+	getFallbackClients,
+	getViemAccount,
+	log,
+	updateEnvAddress,
+} from "../utils";
 
 const deployTransparentProxy: (
 	hre: HardhatRuntimeEnvironment,
@@ -11,9 +17,9 @@ const deployTransparentProxy: (
 ) => Promise<void> = async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {
 	const { proxyDeployer } = await hre.getNamedAccounts();
 	const { deploy } = hre.deployments;
-	const { name, live } = hre.network;
-	const chain = conceroNetworks[name];
-	const { type } = chain;
+	const { name } = hre.network;
+	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
+	const { type: networkType } = chain;
 
 	let implementationKey: keyof EnvPrefixes;
 	if (proxyType === ProxyEnum.routerProxy) {
@@ -34,12 +40,22 @@ const deployTransparentProxy: (
 
 	const deployConfig = DEPLOY_CONFIG_TESTNET[name as keyof typeof DEPLOY_CONFIG_TESTNET];
 
+	const proxyDeployerViemAccount = getViemAccount(networkType, "proxyDeployer");
+	const { publicClient } = getFallbackClients(chain, proxyDeployerViemAccount);
+
+	const nonce = await proxyDeployerViemAccount.nonceManager?.get({
+		address: proxyDeployer as `0x${string}`,
+		chainId: chain.chainId,
+		client: publicClient,
+	});
+
 	log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
 	const conceroProxyDeployment = (await deploy("TransparentUpgradeableProxy", {
 		from: proxyDeployer,
 		args: [initialImplementation, proxyAdmin, "0x"],
 		log: true,
 		autoMine: true,
+		nonce,
 		...deployConfig.deployArgs,
 	})) as Deployment;
 
@@ -48,7 +64,7 @@ const deployTransparentProxy: (
 		`deployTransparentProxy: ${proxyType}`,
 		name,
 	);
-	updateEnvAddress(proxyType, name, conceroProxyDeployment.address, `deployments.${type}`);
+	updateEnvAddress(proxyType, name, conceroProxyDeployment.address, `deployments.${networkType}`);
 };
 
 export { deployTransparentProxy };

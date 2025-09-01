@@ -2,8 +2,8 @@ import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks, DEPLOY_CONFIG_TESTNET } from "../constants";
-import { log, updateEnvVariable } from "../utils";
+import { DEPLOY_CONFIG_TESTNET, conceroNetworks } from "../constants";
+import { getFallbackClients, getViemAccount, log, updateEnvVariable } from "../utils";
 
 type DeployArgs = {
 	chainSelector: bigint;
@@ -23,7 +23,7 @@ const deployPriceFeed: DeploymentFunction = async function (
 	const { deploy } = hre.deployments;
 	const { name } = hre.network;
 
-	const chain = conceroNetworks[name];
+	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
 	const { type: networkType } = chain;
 
 	const defaultArgs: DeployArgs = {
@@ -37,12 +37,21 @@ const deployPriceFeed: DeploymentFunction = async function (
 	};
 
 	const deployConfig = DEPLOY_CONFIG_TESTNET[name as keyof typeof DEPLOY_CONFIG_TESTNET];
+	const deployerViemAccount = getViemAccount(networkType, "deployer");
+	const { publicClient } = getFallbackClients(chain, deployerViemAccount);
+
+	const nonce = await deployerViemAccount.nonceManager?.get({
+		address: deployer as `0x${string}`,
+		chainId: chain.chainId,
+		client: publicClient,
+	});
 
 	const deployment = await deploy("ConceroPriceFeed", {
 		from: deployer,
 		args: [args.chainSelector, args.feedUpdater],
 		log: true,
 		autoMine: true,
+		nonce,
 		...deployConfig.deployArgs,
 	});
 

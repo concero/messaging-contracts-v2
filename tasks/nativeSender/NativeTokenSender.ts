@@ -100,6 +100,50 @@ export class NativeTokenSender {
 		}
 	}
 
+	async sendByBalancePercent(
+		recipient: string,
+		percent: number,
+		chainNames: string[],
+	): Promise<void> {
+		if (percent <= 0 || percent > 100) {
+			throw new Error(`Percent must be in the range (0, 100]. Got: ${percent}`);
+		}
+
+		const percentBps = Math.round(percent * 100);
+
+		const networks = this.getFilteredNetworks(chainNames);
+
+		for (const network of networks) {
+			const { publicClient, walletClient } = this.createClients(network.network);
+
+			const [balance, gasPrice] = await Promise.all([
+				publicClient.getBalance({ address: this.senderAccount.address }),
+				this.getActualGasPrice(publicClient),
+			]);
+
+			const gasReserve = this.transactionGasLimit * gasPrice;
+
+			if (balance <= gasReserve) {
+				console.log(
+					`Skip ${publicClient.chain?.name}: balance ${formatEther(
+						balance,
+					)} <= gas reserve ${formatEther(gasReserve)}`,
+				);
+				continue;
+			}
+
+			const usable = balance - gasReserve;
+			let amount = (usable * BigInt(percentBps)) / 10_000n;
+
+			if (amount === 0n) {
+				console.log(`Calculated amount is 0 on ${publicClient.chain?.name}, skipping`);
+				continue;
+			}
+
+			await this.sendValue(recipient, amount, publicClient, walletClient);
+		}
+	}
+
 	private getFilteredNetworks(chainNames: string[]): NetworkConfig[] {
 		return Object.entries(conceroNetworks)
 			.filter(([_, network]) =>

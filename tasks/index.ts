@@ -11,7 +11,6 @@ import fetchTransactionTask from "./fetchTransaction.task";
 import { sendNativeTokensTask } from "./nativeSender/sendNativeTokens.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import sendConceroMessage from "./sendConceroMessage";
-import sendValueTask from "./sendValue.task";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
 import setOperator from "./setOperator";
 import { setRouterPriceFeeds } from "./setRouterPriceFeeds";

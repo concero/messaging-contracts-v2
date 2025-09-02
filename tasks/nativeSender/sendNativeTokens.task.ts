@@ -43,6 +43,14 @@ async function sendNativeTokensTask(taskArgs: any) {
 			chainNames,
 		);
 	}
+
+	if (taskArgs.percent) {
+		await nativeSender.sendByBalancePercent(
+			taskArgs.recipient,
+			Number(taskArgs.percent),
+			chainNames,
+		);
+	}
 }
 
 // yarn hardhat send-native-tokens --testnet --recipient 0x0000000000000000000000000000000000000000 --networks "sepolia,polygonAmoy" --amount 0.001
@@ -55,6 +63,7 @@ task("send-native-tokens", "Send native tokens to specified address on multiple 
 		"txcount",
 		"Amount of native tokens that will cover the transaction number cost",
 	)
+	.addOptionalParam("percent", "Percent of account balance to send")
 	.setAction(async taskArgs => {
 		await sendNativeTokensTask(taskArgs);
 	});

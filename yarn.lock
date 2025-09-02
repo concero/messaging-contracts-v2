@@ -932,11 +932,9 @@
   resolved "https://registry.npmjs.org/@colors/colors/-/colors-1.6.0.tgz#ec6cd237440700bc23ca23087f513c75508958b0"
   integrity sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==
 
-"@concero/contract-utils@github:concero/contract-utils":
+"@concero/contract-utils@github:concero/contract-utils#feature/deploy-wrapper":
   version "1.0.0"
-  resolved "https://codeload.github.com/concero/contract-utils/tar.gz/b55118d92571912c681875eb7f722a5c6f76ef7d"
-  dependencies:
-    viem "2.26.2"
+  resolved "https://codeload.github.com/concero/contract-utils/tar.gz/f9b1f34c5242cc9d9f2f02ad13a85f05b5701464"
 
 "@concero/rpcs@github:concero/rpcs":
   version "1.0.0"
@@ -9737,20 +9735,6 @@ viem@2.24.2:
   version "2.24.2"
   resolved "https://registry.npmjs.org/viem/-/viem-2.24.2.tgz#68aac43c35e8d73587bbdab2c547579dd60ebb80"
   integrity sha512-lUGoTHhMYlR4ktQiOrbTPmYvrMn3jKUdn2PSmB9QLICxnsQJxMkSCeGRoJFq7hi7K6PCMQgAyLMR/9J1key5cg==
-  dependencies:
-    "@noble/curves" "1.8.1"
-    "@noble/hashes" "1.7.1"
-    "@scure/bip32" "1.6.2"
-    "@scure/bip39" "1.5.4"
-    abitype "1.0.8"
-    isows "1.0.6"
-    ox "0.6.9"
-    ws "8.18.1"
-
-viem@2.26.2:
-  version "2.26.2"
-  resolved "https://registry.npmjs.org/viem/-/viem-2.26.2.tgz#0095676262ffe44bf5a6c7f8a221a4b81bc766d7"
-  integrity sha512-+yXSl1n+jV/Kn/zpETiNq0WOcINXti29nxdPIONvvNh+Es0VfeusW8bb2okVfa55pmuc8kOCOpB5wq3ZIUCTSA==
   dependencies:
     "@noble/curves" "1.8.1"
     "@noble/hashes" "1.7.1"

@@ -1,4 +1,5 @@
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import { hardhatDeployWrapper } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
@@ -19,8 +20,6 @@ const deployPriceFeed: DeploymentFunction = async function (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
 ): Promise<Deployment> {
-	const { deployer } = await hre.getNamedAccounts();
-	const { deploy } = hre.deployments;
 	const { name } = hre.network;
 
 	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
@@ -36,23 +35,21 @@ const deployPriceFeed: DeploymentFunction = async function (
 		...overrideArgs,
 	};
 
-	const deployConfig = DEPLOY_CONFIG_TESTNET[name as keyof typeof DEPLOY_CONFIG_TESTNET];
 	const deployerViemAccount = getViemAccount(networkType, "deployer");
 	const { publicClient } = getFallbackClients(chain, deployerViemAccount);
 
-	const nonce = await deployerViemAccount.nonceManager?.get({
-		address: deployer as `0x${string}`,
-		chainId: chain.chainId,
-		client: publicClient,
-	});
+	let gasLimit = 0;
+	const config = DEPLOY_CONFIG_TESTNET[name];
+	if (config?.priceFeed) {
+		gasLimit = config.priceFeed.gasLimit;
+	}
 
-	const deployment = await deploy("ConceroPriceFeed", {
-		from: deployer,
+	const deployment = await hardhatDeployWrapper("ConceroPriceFeed", {
+		hre,
 		args: [args.chainSelector, args.feedUpdater],
+		publicClient,
+		gasLimit,
 		log: true,
-		autoMine: true,
-		nonce,
-		...deployConfig.deployArgs,
 	});
 
 	log(`Deployed at: ${deployment.address}`, "deployPriceFeed", name);

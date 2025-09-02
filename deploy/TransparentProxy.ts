@@ -1,22 +1,14 @@
-import { Deployment } from "hardhat-deploy/types";
+import { hardhatDeployWrapper } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { DEPLOY_CONFIG_TESTNET, ProxyEnum, conceroNetworks } from "../constants";
 import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
-import {
-	getEnvAddress,
-	getFallbackClients,
-	getViemAccount,
-	log,
-	updateEnvAddress,
-} from "../utils";
+import { getEnvAddress, getFallbackClients, getViemAccount, log, updateEnvAddress } from "../utils";
 
 const deployTransparentProxy: (
 	hre: HardhatRuntimeEnvironment,
 	proxyType: IProxyType,
 ) => Promise<void> = async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {
-	const { proxyDeployer } = await hre.getNamedAccounts();
-	const { deploy } = hre.deployments;
 	const { name } = hre.network;
 	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
 	const { type: networkType } = chain;
@@ -38,26 +30,22 @@ const deployTransparentProxy: (
 	);
 	const [proxyAdmin, proxyAdminAlias] = getEnvAddress(`${proxyType}Admin`, name);
 
-	const deployConfig = DEPLOY_CONFIG_TESTNET[name as keyof typeof DEPLOY_CONFIG_TESTNET];
-
 	const proxyDeployerViemAccount = getViemAccount(networkType, "proxyDeployer");
 	const { publicClient } = getFallbackClients(chain, proxyDeployerViemAccount);
 
-	const nonce = await proxyDeployerViemAccount.nonceManager?.get({
-		address: proxyDeployer as `0x${string}`,
-		chainId: chain.chainId,
-		client: publicClient,
-	});
+	let gasLimit = 0;
+	const config = DEPLOY_CONFIG_TESTNET[name];
+	if (config?.proxy) {
+		gasLimit = config.proxy.gasLimit;
+	}
 
-	log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
-	const conceroProxyDeployment = (await deploy("TransparentUpgradeableProxy", {
-		from: proxyDeployer,
+	const conceroProxyDeployment = await hardhatDeployWrapper("TransparentUpgradeableProxy", {
+		hre,
 		args: [initialImplementation, proxyAdmin, "0x"],
-		log: true,
-		autoMine: true,
-		nonce,
-		...deployConfig.deployArgs,
-	})) as Deployment;
+		publicClient,
+		proxy: true,
+		gasLimit,
+	});
 
 	log(
 		`Deployed at: ${conceroProxyDeployment.address}. Initial impl: ${initialImplementationAlias}, Proxy admin: ${proxyAdminAlias}`,

@@ -1,8 +1,31 @@
-export const DEPLOY_CONFIG_TESTNET = {
+type DeployConfigTestnet = {
+	[key: string]: {
+		priceFeed?: {
+			gasLimit: number;
+		};
+		proxyAdmin?: {
+			gasLimit: number;
+		};
+		proxy?: {
+			gasLimit: number;
+		};
+	};
+};
+
+export const DEPLOY_CONFIG_TESTNET: DeployConfigTestnet = {
 	inkSepolia: {
-		deployArgs: {
+		priceFeed: {
 			gasLimit: 1000000,
-			maxPriorityFeePerGas: "1000000000",
+		},
+	},
+	b2Testnet: {
+		priceFeed: {
+			gasLimit: 1000000,
+		},
+	},
+	seismicDevnet: {
+		priceFeed: {
+			gasLimit: 500000,
 		},
 	},
 };

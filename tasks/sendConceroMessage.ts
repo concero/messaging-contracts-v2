@@ -171,7 +171,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 			functionName: "getMessageFee",
 			args: [Number(dstChainSelector), false, zeroAddress, dstChainData],
 		});
-		log(`Sending with value: ${taskArgs.value} ETH`, "send-concero-message");
+		log(`Sending with value: ${value} wei`, "send-concero-message");
 
 		const concurrency = parseInt(taskArgs.concurrency);
 

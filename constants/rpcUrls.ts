@@ -13,7 +13,7 @@ export const urls: Record<string, string[]> = {
 
 Object.keys(v2MainnetNetworks).forEach(networkName => {
 	if (mainnetChains[networkName]) {
-		urls[networkName] = mainnetChains[networkName].urls;
+		urls[networkName] = mainnetChains[networkName].rpcUrls;
 	}
 });
 

@@ -93,19 +93,18 @@ contract SendMessage is ConceroRouterTest {
 
         for (uint i = 0; i < entries.length; i++) {
             bytes32 conceroMessageSentEventSig = keccak256(
-                "ConceroMessageSent(bytes32,uint8,bool,uint24,bytes,address,bytes)"
+                "ConceroMessageSent(bytes32,bool,uint24,bytes,address,bytes)"
             );
 
             if (entries[i].topics[0] == conceroMessageSentEventSig) {
                 found = true;
                 (
-                    uint8 versionFromEvent,
                     bool shouldFinaliseSrcFromEvent,
                     uint24 dstChainSelectorFromEvent,
                     bytes memory dstChainDataFromEvent,
                     address senderFromEvent,
                     bytes memory messageFromEvent
-                ) = abi.decode(entries[i].data, (uint8, bool, uint24, bytes, address, bytes));
+                ) = abi.decode(entries[i].data, (bool, uint24, bytes, address, bytes));
 
                 bytes32 messageIdFromEvent = entries[i].topics[1];
 

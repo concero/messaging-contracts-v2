@@ -13,7 +13,7 @@ import {Decoder as DecoderLib} from "../../common/libraries/Decoder.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 
 import {ConceroTypes} from "../../ConceroClient/ConceroTypes.sol";
-import {BitMasks, CommonConstants, MessageConfigBitOffsets as offsets} from "../../common/CommonConstants.sol";
+import {CommonConstants} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 
@@ -21,14 +21,14 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
-import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent, MessageReorgDetected, MessageDeliveryFailed, MessageProcessingFailed, MessageProcessingError} from "../../interfaces/IConceroRouter.sol";
+import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
 
 library Errors {
     error UnsupportedFeeTokenType();
-    error MessageAlreadyDelivered();
+    error NonRetryableMessage();
     error MessageAlreadyProcessed(bytes32 messageId);
     error ManualMessageDeliveryFailed(bytes32 messageId);
     error InvalidReceiver();
@@ -49,7 +49,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
     using s for s.Operator;
     using s for s.Config;
 
-    uint8 private constant MESSAGE_VERSION = 1;
     uint16 private constant MAX_RET_BYTES = 256;
 
     constructor(
@@ -79,7 +78,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
         emit ConceroMessageSent(
             messageId,
-            MESSAGE_VERSION,
             shouldFinaliseSrc,
             dstChainSelector,
             abi.encode(dstChainData),
@@ -139,17 +137,23 @@ abstract contract Message is ClfSigner, IConceroRouter {
     ) external {
         s.Router storage s_router = s.router();
 
-        bytes32 messageHash = _hash(messageId, receiver, callData);
+        bytes32 messageHash = _getMessageHash(messageId, receiver, callData);
 
         require(
             s_router.messageStatus[messageId] == s.Status.Received,
-            Errors.MessageAlreadyDelivered()
+            Errors.NonRetryableMessage()
         );
         require(s_router.retryableMessages[messageHash], Errors.UnknownMessage());
 
         s_router.retryableMessages[messageHash] = false;
 
-        (bool success, ) = CommonUtils.safeCall(receiver, gasLimit, 0, MAX_RET_BYTES, callData);
+        (bool success, bytes memory returnData) = CommonUtils.safeCall(
+            receiver,
+            gasLimit,
+            0,
+            MAX_RET_BYTES,
+            callData
+        );
         if (!success) {
             s_router.retryableMessages[messageHash] = true;
             revert Errors.ManualMessageDeliveryFailed(messageId);
@@ -173,11 +177,12 @@ abstract contract Message is ClfSigner, IConceroRouter {
             return (false, MessageProcessingError.InvalidMessageHashSum);
         }
 
-        if (
-            messagePayload.dstChainData.receiver == address(0) ||
-            !CommonUtils.isContract(messagePayload.dstChainData.receiver)
-        ) {
+        if (!CommonUtils.isContract(messagePayload.dstChainData.receiver)) {
             return (false, MessageProcessingError.InvalidReceiver);
+        }
+
+        if (s.router().messageStatus[messagePayload.messageId] != s.Status.Unknown) {
+            return (false, MessageProcessingError.MessageAlreadyProcessed);
         }
 
         return (true, MessageProcessingError.None);
@@ -212,8 +217,6 @@ abstract contract Message is ClfSigner, IConceroRouter {
             (CommonTypes.MessagePayloadV1)
         );
 
-        s_router.messageStatus[messagePayload.messageId] = s.Status.Received;
-
         (bool operatorValid, MessageProcessingError operatorError) = _validateOperator(
             messagePayload.allowedOperators
         );
@@ -239,6 +242,8 @@ abstract contract Message is ClfSigner, IConceroRouter {
                 messagePayload.txHash
             ] = true;
         }
+
+        s_router.messageStatus[messagePayload.messageId] = s.Status.Received;
         emit ConceroMessageReceived(messagePayload.messageId);
 
         _deliverMessage(
@@ -282,10 +287,9 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         if (!success) {
-            bytes32 messageHash = _hash(messageId, dstData.receiver, callData);
+            bytes32 messageHash = _getMessageHash(messageId, dstData.receiver, callData);
             s_router.retryableMessages[messageHash] = true;
             emit MessageDeliveryFailed(messageId, returnData);
-            emit MessageProcessingFailed(messageId, MessageProcessingError.DeliveryFailed);
         } else {
             s_router.messageStatus[messageId] = s.Status.Delivered;
             emit ConceroMessageDelivered(messageId);
@@ -328,7 +332,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         operator.totalFeesEarnedNative += totalFeeNative;
     }
 
-    function _hash(
+    function _getMessageHash(
         bytes32 messageId,
         address receiver,
         bytes memory data
@@ -452,9 +456,5 @@ abstract contract Message is ClfSigner, IConceroRouter {
 
     function isChainSupported(uint24 chainSelector) public view returns (bool) {
         return s.router().isChainSupported[chainSelector];
-    }
-
-    function getMessageVersion() external pure returns (uint8) {
-        return MESSAGE_VERSION;
     }
 }

@@ -13,11 +13,10 @@ import {CommonConstants} from "../../common/CommonConstants.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 
-import {OperatorFeeWithdrawn} from "../../interfaces/IConceroRouter.sol";
-
 import {Base} from "./Base.sol";
+import {IRouterOperator} from "../../interfaces/IRouterOperator.sol";
 
-abstract contract Operator is Base {
+abstract contract Operator is IRouterOperator, Base {
     using SafeERC20 for IERC20;
     using s for s.Operator;
 

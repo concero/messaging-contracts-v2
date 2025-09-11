@@ -9,7 +9,7 @@ pragma solidity 0.8.28;
 import {console} from "forge-std/src/Console.sol";
 
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
-import {CommonConstants, ReportConfigBitOffsets} from "contracts/common/CommonConstants.sol";
+import {CommonConstants} from "contracts/common/CommonConstants.sol";
 
 import {Namespaces} from "contracts/ConceroVerifier/libraries/Storage.sol";
 import {VerifierSlots} from "contracts/ConceroVerifier/libraries/StorageSlots.sol";

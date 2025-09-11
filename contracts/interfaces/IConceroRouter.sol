@@ -8,33 +8,29 @@ pragma solidity 0.8.28;
 
 import {ConceroTypes} from "../ConceroClient/ConceroTypes.sol";
 
-event ConceroMessageSent(
-    bytes32 indexed messageId,
-    uint8 version,
-    bool shouldFinaliseSrc,
-    uint24 dstChainSelector,
-    bytes dstChainData,
-    address sender,
-    bytes message
-);
-
-enum MessageProcessingError {
-    None,
-    InvalidDstChainSelector,
-    InvalidMessageHashSum,
-    InvalidReceiver,
-    UnauthorizedOperator,
-    DeliveryFailed
-}
-
-event ConceroMessageReceived(bytes32 indexed id);
-event ConceroMessageDelivered(bytes32 indexed id);
-event MessageDeliveryFailed(bytes32 indexed id, bytes returnData);
-event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
-event MessageReorgDetected(bytes32 indexed txHash, uint24 indexed srcChainSelector);
-event MessageProcessingFailed(bytes32 indexed messageId, MessageProcessingError indexed error);
-
 interface IConceroRouter {
+    enum MessageProcessingError {
+        None,
+        InvalidDstChainSelector,
+        InvalidMessageHashSum,
+        InvalidReceiver,
+        UnauthorizedOperator,
+        MessageAlreadyProcessed
+    }
+
+    event ConceroMessageSent(
+        bytes32 indexed messageId,
+        bool shouldFinaliseSrc,
+        uint24 dstChainSelector,
+        bytes dstChainData,
+        address sender,
+        bytes message
+    );
+    event ConceroMessageReceived(bytes32 indexed id);
+    event ConceroMessageDelivered(bytes32 indexed id);
+    event MessageDeliveryFailed(bytes32 indexed id, bytes returnData);
+    event MessageReorgDetected(bytes32 indexed txHash, uint24 indexed srcChainSelector);
+    event MessageProcessingFailed(bytes32 indexed messageId, MessageProcessingError indexed error);
     /**
      * @notice Concero allows you to send messages from one blockchain
      *         to another using the `conceroSend` function. This enables

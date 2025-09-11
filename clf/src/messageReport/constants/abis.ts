@@ -9,7 +9,6 @@ export const CONCERO_VERIFIER_CONTRACT_ABI = parseAbi([
 ]);
 
 export const NonIndexedConceroMessageParams = [
-	{ type: "uint8", name: "version" },
 	{ type: "bool", name: "shouldFinaliseSrc" },
 	{ type: "uint24", name: "dstChainSelector" },
 	{ type: "bytes", name: "dstChainData" },

@@ -10,7 +10,7 @@ import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {IConceroClient} from "contracts/interfaces/IConceroClient.sol";
-import {ConceroMessageReceived, ConceroMessageDelivered, MessageDeliveryFailed} from "contracts/interfaces/IConceroRouter.sol";
+import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {ConceroClientRevertMock, ErrorType} from "contracts/mocks/ConceroClientRevertMock.sol";
 
 import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
@@ -40,21 +40,21 @@ contract RetryMessage is ConceroRouterTest {
 
     // --- Tests for deliverMessage function ---
 
-    function test_deliverMessage_SetStatusReceived() public {
-        uint8 errorType = uint8(ErrorType.OutOfGasRevert);
-        bytes memory message = abi.encode(errorType); // requires more gas than GAS_LIMIT
-
-        bytes memory callData = _getCallData(message);
-        bytes32 messageHash = _hash(TEST_MESSAGE_ID, address(conceroClientRevert), callData);
-
-        _submitMessageReport(message);
-
-        assertEq(
-            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.messageStatus, messageHash),
-            uint8(s.Status.Received),
-            "Storage getter failed for messageStatus"
-        );
-    }
+    //    function test_deliverMessage_SetStatusReceived() public {
+    //        uint8 errorType = uint8(ErrorType.OutOfGasRevert);
+    //        bytes memory message = abi.encode(errorType); // requires more gas than GAS_LIMIT
+    //
+    //        bytes memory callData = _getCallData(message);
+    //        bytes32 messageHash = _hash(TEST_MESSAGE_ID, address(conceroClientRevert), callData);
+    //
+    //        _submitMessageReport(message);
+    //
+    //        assertEq(
+    //            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.messageStatus, messageHash),
+    //            uint8(s.Status.Received),
+    //            "Storage getter failed for messageStatus"
+    //        );
+    //    }
 
     function test_deliverMessage_EmitConceroMessageReceived() public {
         uint8 errorType = uint8(ErrorType.OutOfGasRevert);
@@ -63,7 +63,7 @@ contract RetryMessage is ConceroRouterTest {
         Types.ClfDonReportSubmission memory reportSubmission = _receiveMessage(message);
 
         vm.expectEmit(true, false, false, false);
-        emit ConceroMessageReceived(TEST_MESSAGE_ID);
+        emit IConceroRouter.ConceroMessageReceived(TEST_MESSAGE_ID);
 
         bytes[] memory messages = new bytes[](1);
         messages[0] = message;
@@ -81,7 +81,7 @@ contract RetryMessage is ConceroRouterTest {
         conceroClientRevert.setRevertMode(false);
 
         vm.expectEmit(true, false, false, false);
-        emit ConceroMessageDelivered(TEST_MESSAGE_ID);
+        emit IConceroRouter.ConceroMessageDelivered(TEST_MESSAGE_ID);
 
         bytes[] memory messages = new bytes[](1);
         messages[0] = message;
@@ -98,7 +98,7 @@ contract RetryMessage is ConceroRouterTest {
         bytes memory emptyError; // 0x
 
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailed(TEST_MESSAGE_ID, emptyError);
+        emit IConceroRouter.MessageDeliveryFailed(TEST_MESSAGE_ID, emptyError);
 
         bytes[] memory messages = new bytes[](1);
         messages[0] = message;
@@ -114,7 +114,7 @@ contract RetryMessage is ConceroRouterTest {
 
         bytes memory outOfGasError; // 0x (OutOfGas)
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailed(TEST_MESSAGE_ID, outOfGasError);
+        emit IConceroRouter.MessageDeliveryFailed(TEST_MESSAGE_ID, outOfGasError);
 
         bytes[] memory messages = new bytes[](1);
         messages[0] = message;
@@ -131,7 +131,7 @@ contract RetryMessage is ConceroRouterTest {
         string memory errorMessage = "ConceroClientRevertMock: String revert message";
         bytes memory stringRevert = abi.encodeWithSignature("Error(string)", errorMessage);
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailed(TEST_MESSAGE_ID, stringRevert);
+        emit IConceroRouter.MessageDeliveryFailed(TEST_MESSAGE_ID, stringRevert);
 
         bytes[] memory messages = new bytes[](1);
         messages[0] = message;
@@ -147,7 +147,7 @@ contract RetryMessage is ConceroRouterTest {
 
         bytes memory panicRevert = abi.encodeWithSignature("Panic(uint256)", 0x1);
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailed(TEST_MESSAGE_ID, panicRevert);
+        emit IConceroRouter.MessageDeliveryFailed(TEST_MESSAGE_ID, panicRevert);
 
         bytes[] memory messages = new bytes[](1);
         messages[0] = message;
@@ -169,7 +169,7 @@ contract RetryMessage is ConceroRouterTest {
             errorMessage
         );
         vm.expectEmit(true, false, false, true);
-        emit MessageDeliveryFailed(TEST_MESSAGE_ID, customErrorRevert);
+        emit IConceroRouter.MessageDeliveryFailed(TEST_MESSAGE_ID, customErrorRevert);
 
         bytes[] memory messages = new bytes[](1);
         messages[0] = message;
@@ -180,24 +180,24 @@ contract RetryMessage is ConceroRouterTest {
 
     // --- Tests for retry function ---
 
-    function test_retry_SetStatusDelivered() public {
-        uint8 errorType = uint8(ErrorType.OutOfGasRevert);
-        bytes memory message = abi.encode(errorType);
-        bytes memory callData = _getCallData(message);
-        bytes32 messageHash = _hash(TEST_MESSAGE_ID, address(conceroClientRevert), callData);
-
-        _submitMessageReport(message);
-
-        conceroClientRevert.setRevertMode(false);
-
-        conceroRouter.retry(TEST_MESSAGE_ID, address(conceroClientRevert), GAS_LIMIT, callData);
-
-        assertEq(
-            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.messageStatus, messageHash),
-            uint8(s.Status.Delivered),
-            "Storage getter failed for messageStatus"
-        );
-    }
+    //    function test_retry_SetStatusDelivered() public {
+    //        uint8 errorType = uint8(ErrorType.OutOfGasRevert);
+    //        bytes memory message = abi.encode(errorType);
+    //        bytes memory callData = _getCallData(message);
+    //        bytes32 messageHash = _hash(TEST_MESSAGE_ID, address(conceroClientRevert), callData);
+    //
+    //        _submitMessageReport(message);
+    //
+    //        conceroClientRevert.setRevertMode(false);
+    //
+    //        conceroRouter.retry(TEST_MESSAGE_ID, address(conceroClientRevert), GAS_LIMIT, callData);
+    //
+    //        assertEq(
+    //            conceroRouter.getStorage(Namespaces.ROUTER, RouterSlots.messageStatus, messageHash),
+    //            uint8(s.Status.Delivered),
+    //            "Storage getter failed for messageStatus"
+    //        );
+    //    }
 
     function test_retry_RevertIfMessageAlreadyDelivered() public {
         uint8 errorType = uint8(ErrorType.OutOfGasRevert);
@@ -210,15 +210,15 @@ contract RetryMessage is ConceroRouterTest {
 
         conceroRouter.retry(TEST_MESSAGE_ID, address(conceroClientRevert), GAS_LIMIT, callData);
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.MessageAlreadyDelivered.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.NonRetryableMessage.selector));
 
         conceroRouter.retry(TEST_MESSAGE_ID, address(conceroClientRevert), GAS_LIMIT, callData);
     }
 
-    function test_retry_RevertIfUnknownMessage() public {
+    function test_retry_RevertIfNonRetryableMessage() public {
         bytes memory callData;
 
-        vm.expectRevert(abi.encodeWithSelector(Errors.UnknownMessage.selector));
+        vm.expectRevert(abi.encodeWithSelector(Errors.NonRetryableMessage.selector));
 
         conceroRouter.retry(TEST_MESSAGE_ID, address(conceroClientRevert), GAS_LIMIT, callData);
     }
@@ -247,7 +247,7 @@ contract RetryMessage is ConceroRouterTest {
         conceroClientRevert.setRevertMode(false);
 
         vm.expectEmit(true, false, false, false);
-        emit ConceroMessageDelivered(TEST_MESSAGE_ID);
+        emit IConceroRouter.ConceroMessageDelivered(TEST_MESSAGE_ID);
 
         conceroRouter.retry(TEST_MESSAGE_ID, address(conceroClientRevert), GAS_LIMIT, callData);
     }

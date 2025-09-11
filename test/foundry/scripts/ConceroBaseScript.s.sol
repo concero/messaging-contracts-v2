@@ -8,7 +8,6 @@ pragma solidity 0.8.28;
 
 import {Script} from "forge-std/src/Script.sol";
 
-import {MessageConfigBitOffsets as offsets} from "contracts/common/CommonConstants.sol";
 import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
 import {DeployMockERC20} from "./deploy/DeployMockERC20.s.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";

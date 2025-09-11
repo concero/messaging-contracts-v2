@@ -8,7 +8,7 @@ pragma solidity 0.8.28;
 
 import {Types} from "../../ConceroRouter/libraries/Types.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
-import {CommonConstants, MessageConfigBitOffsets as offsets, ReportByteSizes} from "../../common/CommonConstants.sol";
+import {CommonConstants} from "../../common/CommonConstants.sol";
 
 library Message {
     enum MessageConfigErrorType {

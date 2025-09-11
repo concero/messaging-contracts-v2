@@ -24,14 +24,6 @@ library Namespaces {
 }
 
 library Storage {
-    enum Protocol {
-        ProtocolA,
-        ProtocolB,
-        ProtocolC,
-        ProtocolD,
-        ProtocolE
-    }
-
     enum Status {
         Unknown,
         Received,

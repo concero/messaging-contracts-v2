@@ -11,7 +11,7 @@ import {console} from "forge-std/src/Console.sol";
 import {Vm} from "forge-std/src/Vm.sol";
 
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
-import {CommonConstants, ReportByteSizes} from "contracts/common/CommonConstants.sol";
+import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {Utils as CommonUtils} from "contracts/common/libraries/Utils.sol";
 import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
 

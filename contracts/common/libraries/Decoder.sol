@@ -7,9 +7,6 @@
 pragma solidity 0.8.28;
 
 import {CommonTypes} from "../CommonTypes.sol";
-import {BitMasks, MessageConfigBitOffsets as offsets, ReportConfigBitOffsets, ReportByteSizes} from "../CommonConstants.sol";
-import {ReportByteSizes} from "contracts/common/CommonConstants.sol";
-
 import {Types as RouterTypes} from "../../ConceroRouter/libraries/Types.sol";
 import {Types as VerifierTypes} from "../../ConceroVerifier/libraries/Types.sol";
 

@@ -22,22 +22,9 @@ library RouterSlots {
     uint256 internal constant receivedMessages = _var_gap + _arr_gap + 3;
     uint256 internal constant messageConfirmationsByProtocol = _var_gap + _arr_gap + 4;
     uint256 internal constant isChainSupported = _var_gap + _arr_gap + 5;
+    uint256 internal constant lastTxHash = _var_gap + _arr_gap + 6;
 }
 
-/**
- * @title PriceFeedSlots
- * @notice Storage slot definitions for ConceroPriceFeed contract
- * @dev All slots are calculated using standard Solidity storage layout rules with namespace isolation
- */
-library PriceFeedSlots {
-    uint256 internal constant nativeUsdRate = 0;
-    uint256 internal constant gasFeeConfig = 1;
-    uint256 private constant _var_gap = 50;
-    uint256 private constant _arr_gap = 50;
-
-    uint256 internal constant lastGasPrices = _var_gap + _arr_gap + 1;
-    uint256 internal constant nativeNativeRates = _var_gap + _arr_gap + 2;
-}
 /**
  * @title OperatorSlots
  * @notice Storage slot definitions for ConceroOperator contract
@@ -49,4 +36,15 @@ library OperatorSlots {
     uint256 private constant _arr_gap = 50;
 
     uint256 internal constant feesEarnedNative = _var_gap + _arr_gap + 1;
+}
+
+/**
+ * @title ConfigSlots
+ * @notice Storage slot definitions for Concero configuration variables
+ * @dev All slots are calculated using standard Solidity storage layout rules
+ */
+library ConfigSlots {
+    uint256 internal constant gasFeeConfig = 0;
+    uint256 private constant _var_gap = 50;
+    uint256 private constant _arr_gap = 50;
 }

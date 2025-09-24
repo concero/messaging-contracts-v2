@@ -1,19 +1,23 @@
 import { task } from "hardhat/config";
 
-import { ProxyEnum, conceroNetworks, getViemReceiptConfig } from "../../constants";
-import { EnvPrefixes, IProxyType } from "../../types/deploymentVariables";
-import {
-	err,
-	formatGas,
-	getEnvAddress,
-	getFallbackClients,
-	getViemAccount,
-	log,
-} from "../../utils";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-export async function upgradeProxyImplementation(hre, proxyType: IProxyType, shouldPause: boolean) {
+import {
+	DEPLOY_CONFIG_TESTNET,
+	ProxyEnum,
+	conceroNetworks,
+	getViemReceiptConfig,
+} from "../../constants";
+import { EnvPrefixes, IProxyType } from "../../types/deploymentVariables";
+import { err, getEnvAddress, getFallbackClients, getViemAccount, log } from "../../utils";
+
+export async function upgradeProxyImplementation(
+	hre: HardhatRuntimeEnvironment,
+	proxyType: IProxyType,
+	shouldPause: boolean,
+) {
 	const { name: chainName } = hre.network;
-	const { viemChain, type } = conceroNetworks[chainName];
+	const { viemChain, type } = conceroNetworks[chainName as keyof typeof conceroNetworks];
 
 	let implementationKey: keyof EnvPrefixes;
 
@@ -23,6 +27,8 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
 		implementationKey = "router";
 	} else if (proxyType === ProxyEnum.verifierProxy) {
 		implementationKey = "verifier";
+	} else if (proxyType === ProxyEnum.priceFeedProxy) {
+		implementationKey = "priceFeed";
 	} else {
 		err(`Proxy type ${proxyType} not found`, "upgradeProxyImplementation", chainName);
 		return;
@@ -47,6 +53,12 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
 		? getEnvAddress("pause", chainName)[1]
 		: newImplementationAlias;
 
+	let gasLimit = 0;
+	const config = DEPLOY_CONFIG_TESTNET[chainName];
+	if (config?.priceFeed) {
+		gasLimit = config.priceFeed.gasLimit;
+	}
+
 	const txHash = await walletClient.writeContract({
 		address: proxyAdmin,
 		abi: proxyAdminAbi,
@@ -54,16 +66,16 @@ export async function upgradeProxyImplementation(hre, proxyType: IProxyType, sho
 		account: viemAccount,
 		args: [conceroProxy, implementation, "0x"],
 		chain: viemChain,
-		gas: 100000,
+		...(gasLimit ? { gas: gasLimit } : {}),
 	});
 
-	const { cumulativeGasUsed } = await publicClient.waitForTransactionReceipt({
+	const receipt = await publicClient.waitForTransactionReceipt({
 		...getViemReceiptConfig(conceroNetworks[chainName]),
 		hash: txHash,
 	});
 
 	log(
-		`Upgraded via ${proxyAdminAlias}: ${conceroProxyAlias}.implementation -> ${implementationAlias}. Gas : ${formatGas(cumulativeGasUsed)}, hash: ${txHash}`,
+		`Upgraded via ${proxyAdminAlias}: ${conceroProxyAlias}.implementation -> ${implementationAlias}, hash: ${receipt.transactionHash}`,
 		`setProxyImplementation : ${proxyType}`,
 		chainName,
 	);

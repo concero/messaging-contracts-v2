@@ -1,7 +1,7 @@
-import * as dotenv from "dotenv";
 import fs from "fs";
 
 import * as envEnc from "@chainlink/env-enc";
+import * as dotenv from "dotenv";
 
 const ENV_FILES = [
 	".env",

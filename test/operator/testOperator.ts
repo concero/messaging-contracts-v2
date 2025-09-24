@@ -1,13 +1,12 @@
 import "./utils/configureOperatorEnv";
 
-import { privateKeyToAccount } from "viem/accounts";
-
 import { BlockManagerRegistry } from "@concero/v2-operators/src/common/managers";
 import { checkGas } from "@concero/v2-operators/src/common/utils";
 import { initializeManagers } from "@concero/v2-operators/src/common/utils/initializeManagers";
 import { ensureDeposit } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureDeposit";
 import { ensureOperatorIsRegistered } from "@concero/v2-operators/src/relayer-a/businessLogic/ensureOperatorIsRegistered";
 import { setupEventListeners } from "@concero/v2-operators/src/relayer-a/eventListener/setupEventListeners";
+import { privateKeyToAccount } from "viem/accounts";
 
 import { deployConceroClientExample, deployMockCLFRouter } from "../../deploy";
 import { deployContracts, setRouterSupportedChains } from "../../tasks";

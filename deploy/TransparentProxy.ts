@@ -1,41 +1,58 @@
-import { Deployment } from "hardhat-deploy/types";
+import { hardhatDeployWrapper } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks } from "../constants";
-import { IProxyType } from "../types/deploymentVariables";
-import { getEnvAddress, getGasParameters, log, updateEnvAddress } from "../utils";
+import { DEPLOY_CONFIG_TESTNET, ProxyEnum, conceroNetworks } from "../constants";
+import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
+import { getEnvAddress, getFallbackClients, getViemAccount, log, updateEnvAddress } from "../utils";
 
 const deployTransparentProxy: (
 	hre: HardhatRuntimeEnvironment,
 	proxyType: IProxyType,
 ) => Promise<void> = async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {
-	const { proxyDeployer } = await hre.getNamedAccounts();
-	const { deploy } = hre.deployments;
-	const { name, live } = hre.network;
-	const chain = conceroNetworks[name];
-	const { type } = chain;
+	const { name } = hre.network;
+	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
+	const { type: networkType } = chain;
 
-	const [initialImplementation, initialImplementationAlias] = getEnvAddress("router", name);
+	let implementationKey: keyof EnvPrefixes;
+	if (proxyType === ProxyEnum.routerProxy) {
+		implementationKey = "router";
+	} else if (proxyType === ProxyEnum.verifierProxy) {
+		implementationKey = "verifier";
+	} else if (proxyType === ProxyEnum.priceFeedProxy) {
+		implementationKey = "priceFeed";
+	} else {
+		throw new Error(`Proxy type ${proxyType} not found`);
+	}
+
+	const [initialImplementation, initialImplementationAlias] = getEnvAddress(
+		implementationKey,
+		name,
+	);
 	const [proxyAdmin, proxyAdminAlias] = getEnvAddress(`${proxyType}Admin`, name);
 
-	const { maxFeePerGas, maxPriorityFeePerGas } = await getGasParameters(chain);
+	const proxyDeployerViemAccount = getViemAccount(networkType, "proxyDeployer");
+	const { publicClient } = getFallbackClients(chain, proxyDeployerViemAccount);
 
-	// log("Deploying...", `deployTransparentProxy:${proxyType}`, name);
-	const conceroProxyDeployment = (await deploy("TransparentUpgradeableProxy", {
-		from: proxyDeployer,
+	let gasLimit = 0;
+	const config = DEPLOY_CONFIG_TESTNET[name];
+	if (config?.proxy) {
+		gasLimit = config.proxy.gasLimit;
+	}
+
+	const conceroProxyDeployment = await hardhatDeployWrapper("TransparentUpgradeableProxy", {
+		hre,
 		args: [initialImplementation, proxyAdmin, "0x"],
-		log: true,
-		autoMine: true,
-		// maxFeePerGas,
-		// maxPriorityFeePerGas
-	})) as Deployment;
+		publicClient,
+		proxy: true,
+		gasLimit,
+	});
 
 	log(
 		`Deployed at: ${conceroProxyDeployment.address}. Initial impl: ${initialImplementationAlias}, Proxy admin: ${proxyAdminAlias}`,
 		`deployTransparentProxy: ${proxyType}`,
 		name,
 	);
-	updateEnvAddress(proxyType, name, conceroProxyDeployment.address, `deployments.${type}`);
+	updateEnvAddress(proxyType, name, conceroProxyDeployment.address, `deployments.${networkType}`);
 };
 
 export { deployTransparentProxy };

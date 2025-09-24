@@ -17,16 +17,25 @@ import {Base} from "./Base.sol";
 abstract contract Owner is Base {
     using SafeERC20 for IERC20;
     using s for s.Verifier;
-    using s for s.PriceFeed;
+    using s for s.Config;
 
     /**
      * @notice Calculates the amount of native token fees available for withdrawal
      * @return availableFees Amount of native token fees that can be withdrawn
      */
     function getWithdrawableConceroFee() public view returns (uint256 availableFees) {
-        return
-            address(this).balance -
-            (s.operator().totalFeesEarnedNative + s.operator().totalDepositsNative);
+        s.Operator storage s_operator = s.operator();
+
+		uint256 totalNativeDebt = s_operator.totalFeesEarnedNative + s_operator.totalDepositsNative;
+		uint256 verifierBalance = address(this).balance;
+
+		// We charge the operator a fee for successful reports + gas compensation for CLF work,
+		// so the current balance of ConceroVerifier may be less than the total debt amount
+        if (verifierBalance > totalNativeDebt) {
+            return verifierBalance - totalNativeDebt;
+		}
+
+        return 0;
     }
 
     /**
@@ -72,10 +81,6 @@ abstract contract Owner is Base {
         }
     }
 
-    function setNativeUsdRate(uint256 amount) external onlyOwner {
-        s.priceFeed().nativeUsdRate = amount;
-    }
-
     /**
      * @notice Set support status for multiple chains at once
      * @param chainSelectors Array of chain selectors to update
@@ -85,13 +90,27 @@ abstract contract Owner is Base {
         uint24[] calldata chainSelectors,
         bool[] calldata isSupported
     ) external onlyOwner {
+        s.Verifier storage s_verifier = s.verifier();
+
         require(chainSelectors.length == isSupported.length, CommonErrors.LengthMismatch());
 
         for (uint256 index = 0; index < chainSelectors.length; index++) {
-            uint24 chainSelector = chainSelectors[index];
-            bool supported = isSupported[index];
-
-            s.verifier().isChainSupported[chainSelector] = supported;
+            s_verifier.isChainSupported[chainSelectors[index]] = isSupported[index];
         }
+    }
+
+    function setGasFeeConfig(
+        uint32 vrfMsgReportRequestGasOverhead,
+        uint32 clfGasPriceOverEstimationBps,
+        uint32 clfCallbackGasOverhead,
+        uint32 clfCallbackGasLimit
+    ) external onlyOwner {
+        s.config().gasFeeConfig = s.GasFeeConfig(
+            vrfMsgReportRequestGasOverhead,
+            clfGasPriceOverEstimationBps,
+            clfCallbackGasOverhead,
+            clfCallbackGasLimit,
+            0
+        );
     }
 }

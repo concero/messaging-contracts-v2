@@ -21,6 +21,7 @@ event ConceroMessageSent(
 event ConceroMessageReceived(bytes32 indexed id);
 event ConceroMessageDelivered(bytes32 indexed id);
 event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
+event MessageReorgDetected(bytes32 indexed txHash, uint24 indexed srcChainSelector);
 
 interface IConceroRouter {
     /**

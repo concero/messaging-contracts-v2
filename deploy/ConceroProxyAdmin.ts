@@ -1,28 +1,35 @@
-import { Deployment } from "hardhat-deploy/types";
+import { hardhatDeployWrapper } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { conceroNetworks } from "../constants";
+import { DEPLOY_CONFIG_TESTNET, conceroNetworks } from "../constants";
 import { IProxyType } from "../types/deploymentVariables";
-import { getGasParameters, getWallet, log, updateEnvAddress } from "../utils";
+import { getFallbackClients, getViemAccount, log, updateEnvAddress } from "../utils";
 
 const deployProxyAdmin: (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) => Promise<void> =
 	async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {
-		const { proxyDeployer } = await hre.getNamedAccounts();
-		const { deploy } = hre.deployments;
 		const { name } = hre.network;
-		const networkType = conceroNetworks[name].type;
+		const chain = conceroNetworks[name as keyof typeof conceroNetworks];
+		const { type: networkType } = chain;
 
-		const initialOwner = getWallet(networkType, "proxyDeployer", "address");
+		const proxyDeployerViemAccount = getViemAccount(networkType, "proxyDeployer");
 
-		log("Deploying...", `deployProxyAdmin: ${proxyType}`, name);
-		const deployProxyAdmin = (await deploy("ConceroProxyAdmin", {
-			from: proxyDeployer,
+		const { publicClient } = getFallbackClients(chain, proxyDeployerViemAccount);
+
+		const initialOwner = proxyDeployerViemAccount.address;
+
+		let gasLimit = 0;
+		const config = DEPLOY_CONFIG_TESTNET[name];
+		if (config?.proxyAdmin) {
+			gasLimit = config.proxyAdmin.gasLimit;
+		}
+
+		const deployProxyAdmin = await hardhatDeployWrapper("ConceroProxyAdmin", {
+			hre,
 			args: [initialOwner],
-			log: true,
-			autoMine: true,
-			skipIfAlreadyDeployed: false,
-			gasLimit: 3000000,
-		})) as Deployment;
+			publicClient,
+			proxy: true,
+			gasLimit,
+		});
 
 		log(`Deployed at: ${deployProxyAdmin.address}`, `deployProxyAdmin: ${proxyType}`, name);
 		updateEnvAddress(

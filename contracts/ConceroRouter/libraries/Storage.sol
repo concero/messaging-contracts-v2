@@ -17,9 +17,9 @@ library Namespaces {
             abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.operator.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
-    bytes32 internal constant PRICEFEED =
+    bytes32 internal constant CONFIG =
         keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.pricefeed.storage"))) - 1)
+            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.config.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 }
 
@@ -41,6 +41,7 @@ library Storage {
         mapping(bytes32 messageId => bytes32 hashSum) receivedMessages;
         mapping(bytes32 messageId => mapping(Protocol => bool)) messageConfirmationsByProtocol;
         mapping(uint24 chainSelector => bool isSupported) isChainSupported;
+        mapping(uint24 chainSelector => bytes32 txHash) lastTxHash;
     }
 
     struct Operator {
@@ -52,19 +53,16 @@ library Storage {
 
     struct GasFeeConfig {
         uint24 baseChainSelector;
-        uint32 gasOverhead;
-        uint32 relayerGasLimit;
-        uint32 verifierGasLimit;
+        uint32 submitMsgGasOverhead;
+        uint32 vrfMsgReportRequestGasOverhead;
+        uint32 clfCallbackGasOverhead;
         uint136 __var_gap;
     }
 
-    struct PriceFeed {
-        uint256 nativeUsdRate;
+    struct Config {
         GasFeeConfig gasFeeConfig;
-        uint256[49] __var_gap;
+        uint256[50] __var_gap;
         uint256[50] __array_gap;
-        mapping(uint24 dstChainSelector => uint256) lastGasPrices;
-        mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
     }
 
     /* SLOT-BASED STORAGE ACCESS */
@@ -82,15 +80,10 @@ library Storage {
         }
     }
 
-    function priceFeed() internal pure returns (PriceFeed storage s) {
-        bytes32 slot = Namespaces.PRICEFEED;
+    function config() internal pure returns (Config storage s) {
+        bytes32 slot = Namespaces.CONFIG;
         assembly {
             s.slot := slot
         }
-    }
-
-    // @notice wrapper for gas savings
-    function getNativeNativeRate(uint24 chainSelector) internal view returns (uint256) {
-        return priceFeed().nativeNativeRates[chainSelector];
     }
 }

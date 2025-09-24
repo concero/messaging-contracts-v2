@@ -8,6 +8,7 @@ import {
 } from "./clf/secretsConfig";
 import { simulationConfig } from "./clf/simulationConfig";
 import { conceroNetworks } from "./conceroNetworks";
+import { DEPLOY_CONFIG_TESTNET } from "./deployConfigTestnet";
 import {
 	ProxyEnum,
 	envPrefixes,
@@ -15,6 +16,7 @@ import {
 	viemReceiptConfig,
 	writeContractConfig,
 } from "./deploymentVariables";
+import { gasFeeConfig, gasFeeConfigVerifier, networkGasConfig } from "./gasConfig";
 // import { liveNetworks } from "./liveNetworks";
 import { urls } from "./rpcUrls";
 
@@ -33,5 +35,9 @@ export {
 	envPrefixes,
 	getViemReceiptConfig,
 	urls,
+	gasFeeConfig,
+	gasFeeConfigVerifier,
+	networkGasConfig,
 	// liveNetworks,
+	DEPLOY_CONFIG_TESTNET,
 };

@@ -77,7 +77,7 @@ contract HandleCLFMessageReport is RequestMessageReport {
     //        assertFalse(
     //            conceroVerifier.getStorage(
     //                Namespaces.VERIFIER,
-    //                VerifierSlots.pendingCLFRequests,
+    //                VerifierSlots.CLFRequestStatus,
     //                clfRequestId
     //            ) == 1
     //        );
@@ -101,12 +101,12 @@ contract HandleCLFMessageReport is RequestMessageReport {
             clfSubmission.rawVs
         );
 
-        assertFalse(
+        assertTrue(
             conceroVerifier.getStorage(
                 Namespaces.VERIFIER,
-                VerifierSlots.pendingCLFRequests,
+                VerifierSlots.CLFRequestStatus,
                 clfRequestId
-            ) == 1
+            ) == uint256(VerifierTypes.CLFRequestStatus.Fulfilled)
         );
     }
 }

@@ -1,7 +1,8 @@
+import { config } from "../../common/config";
+
 import { type Address, Hash } from "viem";
 import { PublicClient } from "viem/clients/createPublicClient";
 
-import { config } from "../../common/config";
 import { ChainType } from "../../common/enums";
 import { handleError } from "../../common/errorHandler";
 import { ErrorType } from "../../common/errorType";

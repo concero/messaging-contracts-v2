@@ -6,11 +6,9 @@
  */
 pragma solidity 0.8.28;
 
-import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
-
-import {RouterSlots, OperatorSlots, PriceFeedSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
+import {OperatorSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
 import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
-import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
+import {ConceroRouterHarness} from "contracts/ConceroRouter/ConceroRouterHarness.sol";
 import {ConceroClientExample} from "contracts/ConceroClient/ConceroClientExample.sol";
 
 import {ConceroTest} from "../../utils/ConceroTest.sol";
@@ -22,34 +20,21 @@ abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
     function setUp() public virtual override(DeployConceroRouter, ConceroTest) {
         super.setUp();
 
-        conceroRouter = ConceroRouter(payable(deploy()));
+        conceroRouter = ConceroRouterHarness(
+            payable(deploy(SRC_CHAIN_SELECTOR, address(conceroPriceFeed)))
+        );
+
         conceroClient = new ConceroClientExample(payable(conceroRouter));
     }
 
-    function _setPriceFeeds() internal {
+    function _setGasFeeConfig() internal {
         vm.startPrank(deployer);
-
-        conceroRouter.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.nativeUsdRate,
-            bytes32(0),
-            NATIVE_USD_RATE
+        conceroRouter.setGasFeeConfig(
+            SRC_CHAIN_SELECTOR,
+            SUBMIT_MSG_GAS_OVERHEAD,
+            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
+            CLF_CALLBACK_GAS_OVERHEAD
         );
-
-        conceroRouter.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.lastGasPrices,
-            bytes32(uint256(SRC_CHAIN_SELECTOR)),
-            LAST_GAS_PRICE
-        );
-
-        conceroRouter.setStorage(
-            Namespaces.PRICEFEED,
-            PriceFeedSlots.nativeNativeRates,
-            bytes32(uint256(SRC_CHAIN_SELECTOR)),
-            1e18
-        );
-
         vm.stopPrank();
     }
 

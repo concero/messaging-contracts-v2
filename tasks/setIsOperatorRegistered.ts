@@ -1,6 +1,6 @@
-import { WalletClient } from "viem";
-
 import { task } from "hardhat/config";
+
+import { WalletClient } from "viem";
 
 import { conceroNetworks } from "../constants";
 import {

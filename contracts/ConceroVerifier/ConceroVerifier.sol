@@ -19,9 +19,10 @@ contract ConceroVerifier is IConceroVerifier, CLF, Operator, Owner, GenericStora
     constructor(
         uint24 chainSelector,
         address USDC,
+        address conceroPriceFeed,
         CLFParams memory clfParams
     )
-        Base(chainSelector, USDC)
+        Base(chainSelector, USDC, conceroPriceFeed)
         CLF(
             clfParams.router,
             clfParams.donId,

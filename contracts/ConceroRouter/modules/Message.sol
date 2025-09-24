@@ -21,7 +21,7 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 
 import {IConceroClient} from "../../interfaces/IConceroClient.sol";
-import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent} from "../../interfaces/IConceroRouter.sol";
+import {IConceroRouter, ConceroMessageDelivered, ConceroMessageReceived, ConceroMessageSent, MessageReorgDetected} from "../../interfaces/IConceroRouter.sol";
 
 import {ClfSigner} from "./ClfSigner.sol";
 import {Base} from "./Base.sol";
@@ -44,8 +44,8 @@ library Errors {
 abstract contract Message is ClfSigner, IConceroRouter {
     using SafeERC20 for IERC20;
     using s for s.Router;
-    using s for s.PriceFeed;
     using s for s.Operator;
+    using s for s.Config;
 
     uint8 private constant MESSAGE_VERSION = 1;
 
@@ -127,6 +127,7 @@ abstract contract Message is ClfSigner, IConceroRouter {
         bytes memory _messagePayload,
         bytes memory messageBody
     ) internal {
+        s.Router storage s_router = s.router();
         CommonTypes.MessagePayloadV1 memory messagePayload = abi.decode(
             _messagePayload,
             (CommonTypes.MessagePayloadV1)
@@ -145,9 +146,17 @@ abstract contract Message is ClfSigner, IConceroRouter {
         );
 
         require(
-            !s.router().isMessageProcessed[messagePayload.messageId],
+            !s_router.isMessageProcessed[messagePayload.messageId],
             Errors.MessageAlreadyProcessed(messagePayload.messageId)
         );
+
+        bytes32 lastTxHash = s_router.lastTxHash[messagePayload.srcChainSelector];
+        if (lastTxHash == messagePayload.txHash) {
+            emit MessageReorgDetected(messagePayload.txHash, messagePayload.srcChainSelector);
+            return;
+        }
+
+        s_router.lastTxHash[messagePayload.srcChainSelector] = messagePayload.txHash;
 
         emit ConceroMessageReceived(messagePayload.messageId);
 
@@ -213,12 +222,44 @@ abstract contract Message is ClfSigner, IConceroRouter {
             revert Errors.MessageDeliveryFailed(messageId);
         }
 
-        s.operator().feesEarnedNative[msg.sender] += CommonUtils.convertUsdBpsToNative(
-            CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
-            s.priceFeed().nativeUsdRate
-        );
+        _payOperatorRelayFee(dstData.gasLimit);
 
         emit ConceroMessageDelivered(messageId);
+    }
+
+    function _payOperatorRelayFee(uint256 gasLimit) internal {
+        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
+        s.Operator storage operator = s.operator();
+
+        (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
+            .getNativeUsdRateAndGasPrice();
+
+        require(
+            nativeUsdRate > 0,
+            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
+        );
+        require(
+            lastGasPrice > 0,
+            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.lastGasPrice)
+        );
+
+        uint256 gasFeeNative = _calculateGasFees(
+            lastGasPrice,
+            gasFeeConfig.submitMsgGasOverhead + gasLimit,
+            nativeUsdRate
+        );
+
+        require(gasFeeNative > 0, CommonErrors.InvalidAmount());
+
+        uint256 operatorFeeMessageRelay = CommonUtils.convertUsdBpsToNative(
+            CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
+            nativeUsdRate
+        );
+
+        uint256 totalFeeNative = operatorFeeMessageRelay + gasFeeNative;
+
+        operator.feesEarnedNative[msg.sender] += totalFeeNative;
+        operator.totalFeesEarnedNative += totalFeeNative;
     }
 
     function _validateMessageParams(
@@ -270,29 +311,36 @@ abstract contract Message is ClfSigner, IConceroRouter {
         address feeToken,
         ConceroTypes.EvmDstChainData memory dstChainData
     ) internal view returns (uint256) {
-        s.PriceFeed storage priceFeedStorage = s.priceFeed();
-        uint256 nativeUsdRate = priceFeedStorage.nativeUsdRate;
+        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
+
+        (
+            uint256 nativeUsdRate,
+            uint256 dstGasPrice,
+            uint256 dstNativeRate,
+            uint256 baseGasPrice,
+            uint256 baseNativeRate
+        ) = i_conceroPriceFeed.getMessageFeeData(dstChainSelector, gasFeeConfig.baseChainSelector);
 
         uint256 baseFeeNative = CommonUtils.convertUsdBpsToNative(
             CommonConstants.CONCERO_MESSAGE_BASE_FEE_BPS_USD +
-                CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD,
+                CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD +
+                CommonConstants.OPERATOR_FEE_MESSAGE_RELAY_BPS_USD +
+                CommonConstants.CLF_PREMIUM_FEE_BPS_USD,
             nativeUsdRate
         );
 
         // dst chain gas fee
         uint256 gasFeeNative = _calculateGasFees(
-            priceFeedStorage.lastGasPrices[dstChainSelector],
-            dstChainData.gasLimit + priceFeedStorage.gasFeeConfig.gasOverhead,
-            s.getNativeNativeRate(dstChainSelector)
+            dstGasPrice,
+            gasFeeConfig.submitMsgGasOverhead + dstChainData.gasLimit,
+            dstNativeRate
         );
 
         // service gas fee
-        uint24 baseChainSelector = priceFeedStorage.gasFeeConfig.baseChainSelector;
         uint256 serviceGasFeeNative = _calculateGasFees(
-            priceFeedStorage.lastGasPrices[baseChainSelector],
-            priceFeedStorage.gasFeeConfig.relayerGasLimit +
-                priceFeedStorage.gasFeeConfig.verifierGasLimit,
-            s.getNativeNativeRate(baseChainSelector)
+            baseGasPrice,
+            gasFeeConfig.vrfMsgReportRequestGasOverhead + gasFeeConfig.clfCallbackGasOverhead,
+            baseNativeRate
         );
 
         uint256 totalFeeNative = baseFeeNative + gasFeeNative + serviceGasFeeNative;

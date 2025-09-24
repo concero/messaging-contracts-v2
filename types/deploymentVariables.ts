@@ -12,6 +12,9 @@ export type EnvPrefixes = {
 	verifier: string;
 	verifierProxy: string;
 	verifierProxyAdmin: string;
+	priceFeed: string;
+	priceFeedProxy: string;
+	priceFeedProxyAdmin: string;
 	lpToken: string;
 	create3Factory: string;
 	pause: string;
@@ -29,5 +32,6 @@ export type EnvFileName =
 	| "ccip"
 	| "deployments.mainnet"
 	| "deployments.testnet"
+	| "deployments.localhost"
 	| "apikeys"
 	| "tokens";

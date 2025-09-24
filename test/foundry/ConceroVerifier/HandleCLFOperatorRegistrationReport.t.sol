@@ -25,6 +25,7 @@ contract HandleCLFOperatorRegistrationReport is RequestOperatorRegistration {
         super.setUp();
 
         _setPriceFeeds();
+        _setGasFeeConfig();
         _setOperatorFeesEarned();
         _setOperatorDeposits();
         _setOperatorIsRegistered();
@@ -39,5 +40,34 @@ contract HandleCLFOperatorRegistrationReport is RequestOperatorRegistration {
         conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "");
 
         assertTrue(conceroVerifier.isOperatorRegistered(operator));
+    }
+
+    function test_operatorDepositReturnedAfterRegistration() public {
+        uint256 initialDeposit = conceroVerifier.getOperatorDeposit(operator);
+        uint256 clfCost = conceroVerifier.getCLFCost();
+
+        // Request operator registration (this will withhold the deposit)
+        bytes32 clfRequestId = test_requestOperatorRegistration();
+
+        uint256 depositAfterRequest = conceroVerifier.getOperatorDeposit(operator);
+        assertEq(
+            depositAfterRequest,
+            initialDeposit - clfCost,
+            "Deposit should be withheld after registration request"
+        );
+
+        // Handle the CLF response (simulate successful registration)
+        OperatorRegistrationReport report = new OperatorRegistrationReport();
+        bytes memory clfResponse = report.getResponse();
+
+        vm.prank(address(clfRouter));
+        conceroVerifier.handleOracleFulfillment(clfRequestId, clfResponse, "");
+
+        uint256 depositAfterResponse = conceroVerifier.getOperatorDeposit(operator);
+        assertEq(
+            depositAfterResponse,
+            initialDeposit,
+            "Deposit should be returned after successful registration"
+        );
     }
 }

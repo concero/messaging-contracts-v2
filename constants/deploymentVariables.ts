@@ -7,6 +7,7 @@ import { EnvPrefixes } from "../types/deploymentVariables";
 enum ProxyEnum {
 	routerProxy = "routerProxy",
 	verifierProxy = "verifierProxy",
+	priceFeedProxy = "priceFeedProxy",
 }
 
 const viemReceiptConfig: WaitForTransactionReceiptParameters = {
@@ -32,6 +33,9 @@ const envPrefixes: EnvPrefixes = {
 	verifier: "CONCERO_VERIFIER",
 	verifierProxy: "CONCERO_VERIFIER_PROXY",
 	verifierProxyAdmin: "CONCERO_VERIFIER_PROXY_ADMIN",
+	priceFeed: "CONCERO_PRICE_FEED",
+	priceFeedProxy: "CONCERO_PRICE_FEED_PROXY",
+	priceFeedProxyAdmin: "CONCERO_PRICE_FEED_PROXY_ADMIN",
 	lpToken: "LPTOKEN",
 	create3Factory: "CREATE3_FACTORY",
 	pause: "CONCERO_PAUSE",

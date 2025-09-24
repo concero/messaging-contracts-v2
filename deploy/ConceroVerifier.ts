@@ -1,7 +1,6 @@
+import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-
-import { getNetworkEnvKey } from "@concero/contract-utils";
 
 import { CLF_DON_HOSTED_SECRETS_SLOT, conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
@@ -11,6 +10,7 @@ import { ClfJsCodeType, getClfJsCode } from "../utils/getClfJsCode";
 type DeployArgs = {
 	chainSelector: bigint;
 	usdc: string;
+	conceroPriceFeed: string;
 	clfParams: {
 		router: string;
 		donId: string;
@@ -45,6 +45,7 @@ const deployVerifier: DeploymentFunction = async function (
 	const defaultArgs: DeployArgs = {
 		chainSelector: chain.chainSelector,
 		usdc: getEnvVar(`USDC_${getNetworkEnvKey(name)}`),
+		conceroPriceFeed: getEnvVar(`CONCERO_PRICE_FEED_PROXY_${getNetworkEnvKey(name)}`),
 		clfParams: {
 			router: getEnvVar(`CLF_ROUTER_${getNetworkEnvKey(name)}`),
 			donId: getEnvVar(`CLF_DONID_${getNetworkEnvKey(name)}`),
@@ -76,6 +77,7 @@ const deployVerifier: DeploymentFunction = async function (
 		args: [
 			args.chainSelector,
 			args.usdc,
+			args.conceroPriceFeed,
 			[
 				args.clfParams.router,
 				args.clfParams.donId,

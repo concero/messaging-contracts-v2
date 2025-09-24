@@ -29,6 +29,7 @@ library CommonTypes {
     struct MessagePayloadV1 {
         bytes32 messageId;
         bytes32 messageHashSum;
+        bytes32 txHash;
         bytes messageSender;
         uint24 srcChainSelector;
         uint24 dstChainSelector;

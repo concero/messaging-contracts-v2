@@ -39,9 +39,9 @@ abstract contract ConceroBaseScript is Script {
 
     uint32 public constant SUBMIT_MSG_GAS_OVERHEAD = 150_000;
     uint32 public constant VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD = 330_000;
-    uint32 public constant CLF_GAS_PRICE_OVER_ESTIMATION_BPS = 40_000;
+    uint32 public constant CLF_GAS_PRICE_OVER_ESTIMATION_BPS = 10_000;
     uint32 public constant CLF_CALLBACK_GAS_OVERHEAD = 240_000;
-    uint32 public constant CLF_CALLBACK_GAS_LIMIT = 100_000;
+    uint32 public constant CLF_CALLBACK_GAS_LIMIT = 50_000;
 
     address public constant MOCK_DON_SIGNER_ADDRESS_0 = 0x0004C7EdCF9283D3bc3C1309939b3E887bb9d98b;
     address public constant MOCK_DON_SIGNER_ADDRESS_1 = 0x000437D9bE1C11B748e8B4C349b818eE82682E9f;

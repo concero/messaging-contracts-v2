@@ -24,7 +24,7 @@ export const gasFeeConfig = {
 // Gas fee configuration for ConceroVerifier
 export const gasFeeConfigVerifier = {
 	vrfMsgReportRequestGasOverhead: 330000, // ConceroVerifier::requestMessageReport
-	clfGasPriceOverEstimationBps: 40000, // Over estimation for gas price in bps, taken from CLF
+	clfGasPriceOverEstimationBps: 10000, // Over estimation for gas price in bps (x2), original CLF value is 40000 (x5)
 	clfCallbackGasOverhead: 240000, // CLF::FunctionCoordinator::transmit + CLF::FunctionRouter::_callback
-	clfCallbackGasLimit: 100000, // CLF callback gas limit from our side (actual value about 40k)
+	clfCallbackGasLimit: 50000, // CLF callback gas limit from our side (actual value about 40k)
 };

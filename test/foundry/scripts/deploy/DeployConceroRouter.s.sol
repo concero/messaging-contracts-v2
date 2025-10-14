@@ -38,8 +38,8 @@ contract DeployConceroRouter is ConceroRouterBase {
         address implementation = _deployImplementation(
             chainSelector,
             priceFeed,
-            CONCERO_VERIFIER_ADDRESS,
-            i_conceroVerifierSubscriptionId,
+            CONCERO_VALIDATOR_ADDRESS,
+            i_conceroValidatorSubscriptionId,
             [
                 MOCK_DON_SIGNER_ADDRESS_0,
                 MOCK_DON_SIGNER_ADDRESS_1,

@@ -6,7 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {Namespaces as ValidatorNamespaces} from "contracts/ConceroValidator/libraries/Storage.sol";
 import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
 
 import {ConceroTest} from "../../utils/ConceroTest.sol";

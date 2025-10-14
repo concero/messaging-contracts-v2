@@ -7,8 +7,6 @@
  */
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/Console.sol";
-
 import {Errors} from "contracts/ConceroValidator/libraries/Errors.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
@@ -105,7 +103,7 @@ contract DepositManagementTest is ConceroValidatorTest {
         assertEq(conceroValidator.getDeposit(relayer), depositAmount);
     }
 
-    function test_getMinimumDeposit() public {
+    function test_getMinimumDeposit() public view {
         uint256 minimumDeposit = conceroValidator.getMinimumDeposit();
         uint256 clfCost = conceroValidator.getCLFCost();
 

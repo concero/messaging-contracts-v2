@@ -18,7 +18,6 @@ import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
 import {Types} from "contracts/ConceroRouter/libraries/Types.sol";
 import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
 import {RouterSlots, OperatorSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
-import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
 
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 import {MessageReport as MockCLFReport} from "../scripts/MockCLFReport/MessageReport.sol";

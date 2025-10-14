@@ -42,7 +42,7 @@ contract FeeCalculationTest is ConceroValidatorTest {
         return clfRequestId;
     }
 
-    function test_getCLFCost() public {
+    function test_getCLFCost() public view {
         uint256 clfCost = conceroValidator.getCLFCost();
 
         // Verify CLF cost is greater than zero

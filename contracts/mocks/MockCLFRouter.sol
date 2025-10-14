@@ -34,8 +34,8 @@ contract MockCLFRouter {
     function sendRequest(
         uint64 subscriptionId,
         bytes calldata data,
-        uint16 dataVersion,
-        uint32 callbackGasLimit,
+        uint16 /* dataVersion */,
+        uint32 /* callbackGasLimit */,
         bytes32 donId
     ) external returns (bytes32) {
         bytes32 requestId = keccak256(abi.encodePacked(data, subscriptionId, donId));
@@ -46,11 +46,11 @@ contract MockCLFRouter {
     // From FunctionsCoordinator.sol
     // @notice mocking responses from CLF to ConceroVerifier via HandleOracleFulfillment
     function transmit(
-        bytes32[3] calldata reportContext,
+        bytes32[3] calldata /* reportContext */,
         bytes calldata report,
-        bytes32[] calldata rs,
-        bytes32[] calldata ss,
-        bytes32 rawVs
+        bytes32[] calldata /* rs */,
+        bytes32[] calldata /* ss */,
+        bytes32 /* rawVs */
     ) external {
         (
             bytes32[] memory requestIds,

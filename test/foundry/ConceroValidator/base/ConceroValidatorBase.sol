@@ -23,7 +23,7 @@ contract ConceroValidatorBase is ConceroBaseScript {
         clfRouter = new DeployMockCLFRouter().run();
 
         clfDonId = vm.envBytes32("CLF_DONID_ARBITRUM");
-        clfSubscriptionId = i_conceroVerifierSubscriptionId;
+        clfSubscriptionId = i_conceroValidatorSubscriptionId;
         clfMessageReportRequestJsHashSum = vm.parseBytes32(
             "0x66756e2d657468657265756d2d6d61696e6e65742d3100000000000000000000"
         );

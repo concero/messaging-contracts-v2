@@ -8,7 +8,7 @@ pragma solidity 0.8.28;
 
 import {Base} from "./Base.sol";
 
-import {CLFRequestError, MessageReport, OperatorRegistered, MessageReportRequested} from "../../interfaces/IConceroVerifier.sol";
+import {CLFRequestError, MessageReport, MessageReportRequested} from "../../interfaces/IConceroVerifier.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 import {CommonConstants} from "../../common/CommonConstants.sol";
@@ -32,19 +32,11 @@ abstract contract CLF is FunctionsClient, Base {
         address clfRouter,
         bytes32 clfDonId,
         uint64 clfSubscriptionId,
-        uint64 clfDonHostedSecretsVersion,
-        uint8 clfDonHostedSecretsSlotId,
-        uint16 clfPremiumFeeUsdBps,
-        uint32 clfCallbackGasLimit,
         bytes32 requestCLFMessageReportJsCodeHash,
         bytes32 requestOperatorRegistrationJsCodeHash
     ) FunctionsClient(clfRouter) {
         i_clfDonId = clfDonId;
         i_clfSubscriptionId = clfSubscriptionId;
-        i_clfDonHostedSecretsVersion = clfDonHostedSecretsVersion;
-        i_clfDonHostedSecretsSlotId = clfDonHostedSecretsSlotId;
-        i_clfPremiumFeeUsdBps = clfPremiumFeeUsdBps;
-        i_clfCallbackGasLimit = clfCallbackGasLimit;
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
         i_requestOperatorRegistrationJsCodeHash = requestOperatorRegistrationJsCodeHash;
     }
@@ -54,10 +46,6 @@ abstract contract CLF is FunctionsClient, Base {
     bytes32 internal immutable i_requestOperatorRegistrationJsCodeHash;
     bytes32 internal immutable i_clfDonId;
     uint64 internal immutable i_clfSubscriptionId;
-    uint64 internal immutable i_clfDonHostedSecretsVersion;
-    uint16 internal immutable i_clfPremiumFeeUsdBps;
-    uint32 internal immutable i_clfCallbackGasLimit;
-    uint8 internal immutable i_clfDonHostedSecretsSlotId;
     string internal constant CLF_JS_CODE =
         "var n;((e)=>e[e.H=0]='H')(n||={});var a=await fetch('https://raw.githubusercontent.com/concero/messaging-contracts-v2/refs/heads/master/clf/dist/messageReport.min.js').then((t)=>t.text()),o='0x'+Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(a)))).map((t)=>t.toString(16).padStart(2,'0')).join('');if(o.toLowerCase()!==bytesArgs[0].toLowerCase())throw `${o.toLowerCase()}!==${bytesArgs[0].toLowerCase()}`;return eval(a);";
 
@@ -67,7 +55,10 @@ abstract contract CLF is FunctionsClient, Base {
         bytes memory err
     ) internal override {
         s.Verifier storage s_verifier = s.verifier();
-        require(s_verifier.clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Pending, Errors.InvalidClfRequestId(clfRequestId));
+        require(
+            s_verifier.clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Pending,
+            Errors.InvalidClfRequestId(clfRequestId)
+        );
 
         if (err.length > 0) {
             emit CLFRequestError(err);
@@ -75,20 +66,13 @@ abstract contract CLF is FunctionsClient, Base {
             return;
         }
 
-        (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = abi.decode(
+        (CommonTypes.ResultConfig memory resultConfig, ) = abi.decode(
             response,
             (CommonTypes.ResultConfig, bytes)
         );
 
         if (resultConfig.resultType == CommonTypes.ResultType.Message) {
-            _handleCLFMessageReport(clfRequestId, response, err);
-        } else if (resultConfig.resultType == CommonTypes.ResultType.OperatorRegistration) {
-            _handleCLFOperatorRegistrationReport(
-                clfRequestId,
-                payload,
-                err,
-                resultConfig.requester
-            );
+            _handleCLFMessageReport(response);
         } else {
             revert Errors.InvalidClfResultType();
         }
@@ -97,13 +81,7 @@ abstract contract CLF is FunctionsClient, Base {
     }
 
     /* CLF RESPONSE HANDLING */
-    function _handleCLFMessageReport(
-        bytes32 clfRequestId,
-        bytes memory response,
-        bytes memory err
-    ) internal {
-        s.Operator storage s_operator = s.operator();
-
+    function _handleCLFMessageReport(bytes memory response) internal {
         (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = Decoder
             ._decodeVerifierResult(response);
 
@@ -126,77 +104,26 @@ abstract contract CLF is FunctionsClient, Base {
     }
 
     function _payMsgReportRequestFeeAndRefundGas(address requester) internal {
-        s.Operator storage operatorStorage = s.operator();
-
-        (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
-            .getNativeUsdRateAndGasPrice();
-
+        // s.Operator storage operatorStorage = s.operator();
+        // (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
+        //     .getNativeUsdRateAndGasPrice();
         // Calculate the gas cost for the request
-        uint256 vrfMsgReportRequestGasCost = s
-            .config()
-            .gasFeeConfig
-            .vrfMsgReportRequestGasOverhead * lastGasPrice;
-
+        // uint256 vrfMsgReportRequestGasCost = s
+        //     .config()
+        //     .gasFeeConfig
+        //     .vrfMsgReportRequestGasOverhead * lastGasPrice;
         // Calculate the operator fee for the request
-        uint256 operatorFeeMessageReportRequest = CommonUtils.convertUsdBpsToNative(
-            CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
-            nativeUsdRate
-        );
-
+        // uint256 operatorFeeMessageReportRequest = CommonUtils.convertUsdBpsToNative(
+        //     CommonConstants.OPERATOR_FEE_MESSAGE_REPORT_REQUEST_BPS_USD,
+        //     nativeUsdRate
+        // );
         // Pay operator fee
-        operatorStorage.feesEarnedNative[requester] += operatorFeeMessageReportRequest;
-        operatorStorage.totalFeesEarnedNative += operatorFeeMessageReportRequest;
-
-        uint256 withheldOperatorAmount = getCLFCost();
-        uint256 totalOperatorRefundGasCost = withheldOperatorAmount + vrfMsgReportRequestGasCost;
-
+        // operatorStorage.feesEarnedNative[requester] += operatorFeeMessageReportRequest;
+        // operatorStorage.totalFeesEarnedNative += operatorFeeMessageReportRequest;
+        // uint256 withheldOperatorAmount = getCLFCost();
         // Return the amount withheld and the gas spent on the request
-        operatorStorage.depositsNative[requester] += totalOperatorRefundGasCost;
-        operatorStorage.totalDepositsNative += vrfMsgReportRequestGasCost;
-    }
-
-    function _handleCLFOperatorRegistrationReport(
-        bytes32 clfRequestId,
-        bytes memory payload,
-        bytes memory err,
-        address requester
-    ) internal {
-
-        s.Operator storage s_operator = s.operator();
-
-        Types.OperatorRegistrationResult memory result = abi.decode(
-            payload,
-            (Types.OperatorRegistrationResult)
-        );
-
-        require(
-            result.operatorChains.length == result.operatorAddresses.length &&
-                result.operatorChains.length == result.operatorActions.length,
-            CommonErrors.LengthMismatch()
-        );
-
-        for (uint256 i; i < result.operatorChains.length; ++i) {
-            CommonTypes.ChainType chainType = result.operatorChains[i];
-            Types.OperatorRegistrationAction action = result.operatorActions[i];
-
-            if (chainType == CommonTypes.ChainType.EVM) {
-                address operatorAddress = abi.decode(result.operatorAddresses[i], (address));
-                require(operatorAddress == requester, Errors.OperatorAddressMismatch());
-
-                if (action == Types.OperatorRegistrationAction.Register) {
-                    Utils._addOperator(chainType, abi.encodePacked(operatorAddress));
-                    s_operator.isRegistered[requester] = true;
-                } else if (action == Types.OperatorRegistrationAction.Deregister) {
-                    Utils._removeOperator(chainType, abi.encodePacked(operatorAddress));
-                    s_operator.isRegistered[requester] = false;
-                }
-            }
-        }
-
-        uint256 withheldOperatorAmount = getCLFCost();
-        s_operator.depositsNative[requester] += withheldOperatorAmount;
-
-        emit OperatorRegistered(requester, result.operatorChains, result.operatorActions);
+        // operatorStorage.depositsNative[requester] += totalOperatorRefundGasCost;
+        // operatorStorage.totalDepositsNative += vrfMsgReportRequestGasCost;
     }
 
     /* CLF REQUEST FORMATION */
@@ -226,40 +153,6 @@ abstract contract CLF is FunctionsClient, Base {
 
         emit MessageReportRequested(messageId);
         return clfRequestId;
-    }
-
-    /**
-     * @notice Requests operator registration through CLF
-     * @param chainTypes Array of chain types for operator registration
-     * @param operatorActions Array of registration actions for the operator
-     * @param operatorAddresses Array of operator addresses for registration
-     * @return clfRequestId The unique identifier for the CLF request
-     */
-    function _requestOperatorRegistration(
-        CommonTypes.ChainType[] calldata chainTypes,
-        Types.OperatorRegistrationAction[] calldata operatorActions,
-        bytes[] calldata operatorAddresses
-    ) internal returns (bytes32 clfRequestId) {
-        uint256 minOperatorDeposit = getCLFCost();
-        _witholdOperatorDeposit(msg.sender, minOperatorDeposit);
-
-        bytes[] memory clfReqArgs = new bytes[](5);
-
-        clfReqArgs[0] = abi.encodePacked(i_requestOperatorRegistrationJsCodeHash);
-        clfReqArgs[1] = abi.encode(chainTypes);
-        clfReqArgs[2] = abi.encode(operatorActions);
-        clfReqArgs[3] = abi.encode(operatorAddresses);
-        clfReqArgs[4] = abi.encode(msg.sender);
-
-        clfRequestId = _sendCLFRequest(clfReqArgs);
-        s.verifier().clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
-
-        return clfRequestId;
-    }
-
-    function _requestOperatorDeregistration() internal {
-        // _witholdOperatorDeposit(msg.sender,  Utils.convertUsdBpsToNative(CommonConstants.sol.OPERATOR_DEPOSIT_MESSAGE_REPORT_REQUEST_BPS_USD, s.priceFeed().nativeUsdRate)
-        //        s.verifier().clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
     }
 
     function _sendCLFRequest(bytes[] memory args) internal returns (bytes32) {
@@ -332,18 +225,4 @@ abstract contract CLF is FunctionsClient, Base {
         s_operator.depositsNative[operator] -= depositWithholdable;
         return depositWithholdable;
     }
-
-    //    /**
-    //     * @notice Returns the operator's deposit amount
-    //     * @param operator The operator's address
-    //     * @param depositNative The deposit amount in native value
-    //     * @return The operator's deposit amount
-    //     */
-    //    function _returnOperatorDeposit(
-    //        address operator,
-    //        uint256 depositNative
-    //    ) internal returns (uint256) {
-    //        s.operator().depositNative[operator] += depositNative;
-    //        return depositNative;
-    //    }
 }

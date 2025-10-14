@@ -18,19 +18,14 @@ import {CLFParams} from "./libraries/Types.sol";
 contract ConceroVerifier is IConceroVerifier, CLF, Operator, Owner, GenericStorage {
     constructor(
         uint24 chainSelector,
-        address USDC,
         address conceroPriceFeed,
         CLFParams memory clfParams
     )
-        Base(chainSelector, USDC, conceroPriceFeed)
+        Base(chainSelector, conceroPriceFeed)
         CLF(
             clfParams.router,
             clfParams.donId,
             clfParams.subscriptionId,
-            clfParams.donHostedSecretsVersion,
-            clfParams.donHostedSecretsSlotId,
-            clfParams.premiumFeeUsdBps,
-            clfParams.callbackGasLimit,
             clfParams.requestCLFMessageReportJsCodeHash,
             clfParams.requestOperatorRegistrationJsCodeHash
         )

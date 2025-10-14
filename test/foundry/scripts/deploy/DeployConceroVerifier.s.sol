@@ -53,17 +53,12 @@ contract DeployConceroVerifier is ConceroVerifierBase {
             router: clfRouter,
             donId: clfDonId,
             subscriptionId: clfSubscriptionId,
-            donHostedSecretsVersion: clfSecretsVersion,
-            donHostedSecretsSlotId: clfSecretsSlotId,
-            premiumFeeUsdBps: clfPremiumFeeBpsUsd,
-            callbackGasLimit: clfCallbackGasLimit,
             requestCLFMessageReportJsCodeHash: clfMessageReportRequestJsHashSum,
             requestOperatorRegistrationJsCodeHash: clfOperatorRegistrationJsHashSum
         });
 
         conceroVerifier = new ConceroVerifier(
             SRC_CHAIN_SELECTOR,
-            usdc,
             address(conceroPriceFeed),
             clfParams
         );

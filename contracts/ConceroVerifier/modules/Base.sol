@@ -14,7 +14,6 @@ import {IConceroPriceFeed} from "../../interfaces/IConceroPriceFeed.sol";
 
 abstract contract Base is ConceroOwnable {
     uint24 internal immutable i_chainSelector;
-    address internal immutable i_USDC;
     IConceroPriceFeed internal immutable i_conceroPriceFeed;
 
     using s for s.Operator;
@@ -23,10 +22,9 @@ abstract contract Base is ConceroOwnable {
         _;
     }
 
-    constructor(uint24 chainSelector, address USDC, address conceroPriceFeed) ConceroOwnable() {
-		require(conceroPriceFeed != address(0), CommonErrors.InvalidAddress());
+    constructor(uint24 chainSelector, address conceroPriceFeed) ConceroOwnable() {
+        require(conceroPriceFeed != address(0), CommonErrors.InvalidAddress());
         i_chainSelector = chainSelector;
-        i_USDC = USDC;
         i_conceroPriceFeed = IConceroPriceFeed(conceroPriceFeed);
     }
 }

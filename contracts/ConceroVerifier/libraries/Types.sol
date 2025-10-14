@@ -12,10 +12,6 @@ struct CLFParams {
     address router;
     bytes32 donId;
     uint64 subscriptionId;
-    uint64 donHostedSecretsVersion;
-    uint8 donHostedSecretsSlotId;
-    uint16 premiumFeeUsdBps;
-    uint32 callbackGasLimit;
     bytes32 requestCLFMessageReportJsCodeHash;
     bytes32 requestOperatorRegistrationJsCodeHash;
 }

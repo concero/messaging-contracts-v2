@@ -19,16 +19,4 @@ event OperatorDeposited(address indexed operator, uint256 amount);
 event OperatorFeeWithdrawn(address indexed operator, uint256 amount);
 event OperatorDepositWithdrawn(address indexed operator, uint256 amount);
 
-event OperatorRegistered(
-    address indexed operator,
-    CommonTypes.ChainType[] chainTypes,
-    Types.OperatorRegistrationAction[] operatorActions
-);
-event OperatorRegistrationRequested(
-    address indexed requester,
-    CommonTypes.ChainType[] chainTypes,
-    Types.OperatorRegistrationAction[] operatorActions,
-    bytes[] operatorAddresses
-);
-
 interface IConceroVerifier {}

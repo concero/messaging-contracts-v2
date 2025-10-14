@@ -17,7 +17,7 @@ import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 import {Errors} from "../libraries/Errors.sol";
 
-import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn, OperatorRegistrationRequested} from "../../interfaces/IConceroVerifier.sol";
+import {OperatorFeeWithdrawn, OperatorDeposited, OperatorDepositWithdrawn} from "../../interfaces/IConceroVerifier.sol";
 
 import {CLF} from "./CLF.sol";
 
@@ -38,39 +38,19 @@ abstract contract Operator is CLF {
 
         bytes32 clfRequestId = verifier.clfRequestIdByMessageId[messageId];
         if (clfRequestId != bytes32(0)) {
-            require(verifier.clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Failed, Errors.MessageAlreadyProcessed());
+            require(
+                verifier.clfRequestStatus[clfRequestId] == Types.CLFRequestStatus.Failed,
+                Errors.MessageAlreadyProcessed()
+            );
         }
         return _requestMessageReport(messageId, messageHashSum, srcChainSelector, srcChainData);
-    }
-
-    /**
-     * @dev Registers an operator for specific chain types with the provided addresses.
-     * @param chainTypes The chain types for which the operator is registering.
-     * @param operatorAddresses The corresponding operator addresses.
-     */
-    function requestOperatorRegistration(
-        CommonTypes.ChainType[] calldata chainTypes,
-        Types.OperatorRegistrationAction[] calldata operatorActions,
-        bytes[] calldata operatorAddresses
-    ) external returns (bytes32 clfRequestId) {
-        require(
-            chainTypes.length == operatorActions.length &&
-                chainTypes.length == operatorAddresses.length,
-            CommonErrors.LengthMismatch()
-        );
-
-        clfRequestId = _requestOperatorRegistration(chainTypes, operatorActions, operatorAddresses);
-        emit OperatorRegistrationRequested(
-            msg.sender,
-            chainTypes,
-            operatorActions,
-            operatorAddresses
-        );
     }
 
     /// @notice Allows an operator to withdraw their earned fees
     /// @param amount The amount of native tokens to withdraw
     /// @return success Boolean indicating if the withdrawal was successful
+
+    // withdrawValidatorFee
     function withdrawOperatorFee(uint256 amount) external onlyOperator returns (bool success) {
         s.Operator storage s_operator = s.operator();
         uint256 currentFees = s_operator.feesEarnedNative[msg.sender];
@@ -133,15 +113,6 @@ abstract contract Operator is CLF {
     /* INTERNAL FUNCTIONS */
 
     /* GETTER FUNCTIONS */
-    function getRegisteredOperators(
-        CommonTypes.ChainType chainType
-    ) external view returns (bytes[] memory) {
-        return s.operator().registeredOperators[chainType];
-    }
-
-    function getCohortsCount() external pure returns (uint8) {
-        return CommonConstants.COHORTS_COUNT;
-    }
 
     function getOperatorDeposit(address operator) external view returns (uint256) {
         return s.operator().depositsNative[operator];
@@ -153,10 +124,6 @@ abstract contract Operator is CLF {
 
     function getOperatorFeesEarned(address operator) external view returns (uint256) {
         return s.operator().feesEarnedNative[operator];
-    }
-
-    function isOperatorRegistered(address operator) external view returns (bool) {
-        return s.operator().isRegistered[operator];
     }
 
     function isChainSupported(uint24 chainSelector) public view returns (bool) {

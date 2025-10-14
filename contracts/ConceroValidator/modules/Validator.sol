@@ -6,25 +6,17 @@
  */
 pragma solidity 0.8.28;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
-import {CommonConstants} from "../../common/CommonConstants.sol";
-import {CommonErrors} from "../../common/CommonErrors.sol";
-import {CommonTypes} from "../../common/CommonTypes.sol";
-
+import {Deposited, DepositWithdrawn} from "contracts/interfaces/IConceroValidator.sol";
+import {Errors} from "../libraries/Errors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
-import {Errors} from "../libraries/Errors.sol";
-
-import {Deposited, DepositWithdrawn} from "../../interfaces/IConceroValidator.sol";
 
 import {CLF} from "./CLF.sol";
 
 abstract contract Validator is CLF {
-    using SafeERC20 for IERC20;
     using s for s.Validator;
-    using s for s.Relayer;
+
+	/* Request Message Report */
 
     function requestMessageReport(
         bytes32 messageId,
@@ -43,19 +35,32 @@ abstract contract Validator is CLF {
         return _requestMessageReport(messageId, srcChainSelector, srcChainData);
     }
 
-    function deposit(uint256 amount) external payable {
-        emit Deposited(msg.sender, amount);
+	/* Deposit management */
+
+    function deposit() external payable {
+        uint256 minimumDeposit = getCLFCost();
+        require(msg.value >= minimumDeposit, Errors.InsufficientDeposit(msg.value, minimumDeposit));
+
+        s.validator().depositsNative[msg.sender] += msg.value;
+
+        emit Deposited(msg.sender, msg.value);
     }
 
-    function withdrawDeposit(uint256 amount) external returns (bool success) {
+    function withdrawDeposit(uint256 amount) external {
+        s.Validator storage s_validator = s.validator();
+
+        uint256 currentDeposit = s_validator.depositsNative[msg.sender];
+        require(amount <= currentDeposit, Errors.InsufficientDeposit(currentDeposit, amount));
+
+        s_validator.depositsNative[msg.sender] = currentDeposit - amount;
+
         emit DepositWithdrawn(msg.sender, amount);
-        return true;
     }
 
-    /* GETTER FUNCTIONS */
+    /* Getters */
 
     function getDeposit(address relayer) external view returns (uint256) {
-        return s.relayer().depositsNative[relayer];
+        return s.validator().depositsNative[relayer];
     }
 
     function getMinimumDeposit() external view returns (uint256) {

@@ -6,9 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {Types} from "../ConceroVerifier/libraries/Types.sol";
-import {CommonTypes} from "../common/CommonTypes.sol";
-
 event CLFRequestError(bytes err);
 
 event MessageReport(bytes32 indexed messageId);
@@ -16,6 +13,7 @@ event MessageReportRequested(bytes32 indexed messageId);
 
 event Deposited(address indexed relayer, uint256 amount);
 event DepositWithdrawn(address indexed relayer, uint256 amount);
+
 event ValidatorFeeWithdrawn(address indexed validator, uint256 amount);
 
 interface IConceroValidator {}

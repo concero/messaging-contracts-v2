@@ -8,14 +8,11 @@ pragma solidity 0.8.28;
 
 library Errors {
     error MessageAlreadyProcessed();
-    error InvalidEVMAddress();
-    error InsufficientDeposit(uint256 provided, uint256 required);
     error TransferFailed();
+
+    error InsufficientDeposit(uint256 provided, uint256 required);
     error InsufficientFee(uint256 requiredAmount, uint256 availableAmount);
     error InvalidClfRequestId(bytes32 clfRequestId);
     error InvalidClfResultType();
-
-    error NoNativeRateAvailable();
-    error NoGasPriceAvailable();
     error InvalidMessageVersion();
 }

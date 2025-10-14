@@ -6,8 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
-import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
+import {FunctionsClient, FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 
 import {Base} from "./Base.sol";
 
@@ -26,7 +25,6 @@ import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Validator;
-    using s for s.Relayer;
 
     constructor(
         address clfRouter,
@@ -39,12 +37,13 @@ abstract contract CLF is FunctionsClient, Base {
         i_requestCLFMessageReportJsCodeHash = requestCLFMessageReportJsCodeHash;
     }
 
-    /* IMMUTABLE VARIABLES */
     bytes32 internal immutable i_requestCLFMessageReportJsCodeHash;
     bytes32 internal immutable i_clfDonId;
     uint64 internal immutable i_clfSubscriptionId;
     string internal constant CLF_JS_CODE =
         "var n;((e)=>e[e.H=0]='H')(n||={});var a=await fetch('https://raw.githubusercontent.com/concero/messaging-contracts-v2/refs/heads/master/clf/dist/messageReport.min.js').then((t)=>t.text()),o='0x'+Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(a)))).map((t)=>t.toString(16).padStart(2,'0')).join('');if(o.toLowerCase()!==bytesArgs[0].toLowerCase())throw `${o.toLowerCase()}!==${bytesArgs[0].toLowerCase()}`;return eval(a);";
+
+    /* CLF Response Handling */
 
     function fulfillRequest(
         bytes32 clfRequestId,
@@ -77,8 +76,7 @@ abstract contract CLF is FunctionsClient, Base {
         s_validator.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Fulfilled;
     }
 
-    /* CLF RESPONSE HANDLING */
-    function _handleCLFMessageReport(bytes memory response) internal {
+    function _handleCLFMessageReport(bytes memory response) private {
         (CommonTypes.ResultConfig memory resultConfig, bytes memory payload) = Decoder
             ._decodeVerifierResult(response);
 
@@ -87,11 +85,9 @@ abstract contract CLF is FunctionsClient, Base {
         } else {
             revert Errors.InvalidMessageVersion();
         }
-
-        _chargeMsgReportRequestFee();
     }
 
-    function _handleMessagePayloadV1(bytes memory payload) internal {
+    function _handleMessagePayloadV1(bytes memory payload) private {
         CommonTypes.MessagePayloadV1 memory decodedPayload = abi.decode(
             payload,
             (CommonTypes.MessagePayloadV1)
@@ -100,15 +96,29 @@ abstract contract CLF is FunctionsClient, Base {
         emit MessageReport(decodedPayload.messageId);
     }
 
-    function _chargeMsgReportRequestFee() private {}
+    function _chargeMsgReportRequestFee(address relayer, s.Validator storage validator) private {
+        uint256 reportRequestFee = getCLFCost();
+        uint256 currentDeposit = validator.depositsNative[relayer];
 
-    /* CLF REQUEST FORMATION */
+        require(
+            currentDeposit >= reportRequestFee,
+            Errors.InsufficientDeposit(currentDeposit, reportRequestFee)
+        );
+
+        validator.totalNativeFees += reportRequestFee;
+        validator.depositsNative[relayer] -= reportRequestFee;
+    }
+
+    /* CLF Request Formation */
+
     function _requestMessageReport(
         bytes32 messageId,
         uint24 srcChainSelector,
         bytes memory srcChainData
     ) internal returns (bytes32 clfRequestId) {
-        s.Validator storage validator = s.validator();
+        s.Validator storage s_validator = s.validator();
+
+        _chargeMsgReportRequestFee(msg.sender, s_validator);
 
         bytes[] memory clfReqArgs = new bytes[](6);
 
@@ -119,15 +129,15 @@ abstract contract CLF is FunctionsClient, Base {
         clfReqArgs[4] = abi.encodePacked(msg.sender);
 
         clfRequestId = _sendCLFRequest(clfReqArgs);
-        validator.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
-        validator.clfRequestIdByMessageId[messageId] = clfRequestId;
+        s_validator.clfRequestStatus[clfRequestId] = Types.CLFRequestStatus.Pending;
+        s_validator.clfRequestIdByMessageId[messageId] = clfRequestId;
 
         emit MessageReportRequested(messageId);
         return clfRequestId;
     }
 
-    function _sendCLFRequest(bytes[] memory args) internal returns (bytes32) {
-        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
+    function _sendCLFRequest(bytes[] memory args) private returns (bytes32) {
+        s.GasFeeConfig storage gasFeeConfig = s.validator().gasFeeConfig;
 
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(CLF_JS_CODE);
@@ -141,8 +151,10 @@ abstract contract CLF is FunctionsClient, Base {
             );
     }
 
+    /* Getters */
+
     function getCLFCost() public view returns (uint256 totalClfCost) {
-        s.GasFeeConfig storage gasFeeConfig = s.config().gasFeeConfig;
+        s.GasFeeConfig storage gasFeeConfig = s.validator().gasFeeConfig;
 
         (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
             .getNativeUsdRateAndGasPrice();

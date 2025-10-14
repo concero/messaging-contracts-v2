@@ -187,4 +187,10 @@ abstract contract CLF is FunctionsClient, Base {
 
         totalClfCost = overEstimatedGasCost + premiumFee;
     }
+
+    function getClfRequestIdStatus(
+        bytes32 clfRequestId
+    ) public view returns (Types.CLFRequestStatus) {
+        return s.validator().clfRequestStatus[clfRequestId];
+    }
 }

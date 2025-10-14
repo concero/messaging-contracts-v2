@@ -7,6 +7,7 @@
 pragma solidity 0.8.28;
 
 import {Deposited, DepositWithdrawn} from "contracts/interfaces/IConceroValidator.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
@@ -16,7 +17,7 @@ import {CLF} from "./CLF.sol";
 abstract contract Validator is CLF {
     using s for s.Validator;
 
-	/* Request Message Report */
+    /* Request Message Report */
 
     function requestMessageReport(
         bytes32 messageId,
@@ -35,7 +36,7 @@ abstract contract Validator is CLF {
         return _requestMessageReport(messageId, srcChainSelector, srcChainData);
     }
 
-	/* Deposit management */
+    /* Deposit management */
 
     function deposit() external payable {
         uint256 minimumDeposit = getCLFCost();
@@ -54,6 +55,9 @@ abstract contract Validator is CLF {
 
         s_validator.depositsNative[msg.sender] = currentDeposit - amount;
 
+        (bool success, ) = msg.sender.call{value: amount}("");
+        require(success, CommonErrors.TransferFailed());
+
         emit DepositWithdrawn(msg.sender, amount);
     }
 
@@ -66,4 +70,8 @@ abstract contract Validator is CLF {
     function getMinimumDeposit() external view returns (uint256) {
         return getCLFCost();
     }
+
+	function getWithdrawableValidatorFee() external view returns (uint256) {
+		return s.validator().totalNativeFees;
+	}
 }

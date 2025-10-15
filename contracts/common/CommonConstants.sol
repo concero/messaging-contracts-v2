@@ -22,6 +22,9 @@ library CommonConstants {
     uint16 internal constant OPERATOR_DEPOSIT_REGISTRATION_REPORT_REQUEST_BPS_USD = 200;
     uint256 internal constant OPERATOR_DEPOSIT_MINIMUM_NATIVE = 1_000_000 wei; // 0.001 ETH
 
+    /* Validator fees */
+    uint16 internal constant VALIDATOR_LIB_FEE_BPS_USD = 100;
+
     /* Message */
     uint8 internal constant MESSAGE_VERSION = 1;
     uint256 internal constant MESSAGE_BASE_FEE_USD = 1e18 / 100; // 0.01 USD

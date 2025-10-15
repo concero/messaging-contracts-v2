@@ -11,4 +11,23 @@ library ConceroTypes {
         address receiver;
         uint256 gasLimit;
     }
+
+    struct MessageRequest {
+        bytes sender;
+        uint24 srcChainSelector;
+        uint24 dstChainSelector;
+        EvmDstChainData dstChainData;
+        bytes[] validatorsConfig;
+        bytes relayerConfig;
+        bytes payload;
+    }
+
+    struct MessageHeader {
+        uint64 srcBlockConfirmations;
+        address[] validatorsLibs;
+        address relayerLib;
+        bytes[] validationRPCs;
+        bytes[] deliveryRPCs;
+        address feeToken;
+    }
 }

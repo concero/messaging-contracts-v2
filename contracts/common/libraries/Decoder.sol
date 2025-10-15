@@ -7,11 +7,7 @@
 pragma solidity 0.8.28;
 
 import {CommonTypes} from "../CommonTypes.sol";
-import {BitMasks, MessageConfigBitOffsets as offsets, ReportConfigBitOffsets, ReportByteSizes} from "../CommonConstants.sol";
-import {ReportByteSizes} from "contracts/common/CommonConstants.sol";
-
 import {Types as RouterTypes} from "../../ConceroRouter/libraries/Types.sol";
-import {Types as VerifierTypes} from "../../ConceroVerifier/libraries/Types.sol";
 
 library Decoder {
     /**
@@ -21,6 +17,21 @@ library Decoder {
      */
     function _decodeCLFReport(
         bytes calldata report
+    ) internal pure returns (RouterTypes.ClfReport memory decodedReport) {
+        (
+            decodedReport.requestIds,
+            decodedReport.results,
+            decodedReport.errors,
+            decodedReport.onchainMetadata,
+            decodedReport.offchainMetadata
+        ) = abi.decode(report, (bytes32[], bytes[], bytes[], bytes[], bytes[]));
+
+        return decodedReport;
+    }
+
+    // TODO: Change to _decodeCLFReport after changes ConceroRouter
+    function _decodeCLFReportMemory(
+        bytes memory report
     ) internal pure returns (RouterTypes.ClfReport memory decodedReport) {
         (
             decodedReport.requestIds,

@@ -52,7 +52,7 @@ contract MessageReport is BaseMockCLFReport {
         uint256 srcBlockNumber,
         RouterTypes.EvmDstChainData memory dstChainData,
         bytes[] memory allowedOperators
-    ) public view returns (bytes memory) {
+    ) public pure returns (bytes memory) {
         CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
             resultType: CommonTypes.ResultType.Message,
             payloadVersion: 1,

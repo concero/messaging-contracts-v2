@@ -6,20 +6,15 @@
  */
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/Console.sol";
-
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {PauseDummy} from "contracts/PauseDummy/PauseDummy.sol";
-import {ConceroVerifier} from "contracts/ConceroVerifier/ConceroVerifier.sol";
+import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
+import {ConceroValidatorBase} from "../../ConceroValidator/base/ConceroValidatorBase.sol";
 
-import {ConceroVerifierBase} from "../../ConceroVerifier/base/ConceroVerifierBase.sol";
+import {CLFParams} from "contracts/ConceroValidator/libraries/Types.sol";
 
-import {DeployMockCLFRouter, MockCLFRouter} from "./DeployMockCLFRouter.s.sol";
-import {CLFParams} from "contracts/ConceroVerifier/libraries/Types.sol";
-
-contract DeployConceroVerifier is ConceroVerifierBase {
-    TransparentUpgradeableProxy internal conceroVerifierProxy;
-    ConceroVerifier internal conceroVerifier;
+contract DeployConceroValidator is ConceroValidatorBase {
+    TransparentUpgradeableProxy internal conceroValidatorProxy;
+    ConceroValidator internal conceroValidator;
 
     function setUp() public virtual override {
         super.setUp();
@@ -27,7 +22,7 @@ contract DeployConceroVerifier is ConceroVerifierBase {
 
     function setProxyImplementation(address implementation) public {
         vm.startPrank(proxyDeployer);
-        ITransparentUpgradeableProxy(address(conceroVerifierProxy)).upgradeToAndCall(
+        ITransparentUpgradeableProxy(address(conceroValidatorProxy)).upgradeToAndCall(
             implementation,
             bytes("")
         );
@@ -37,12 +32,12 @@ contract DeployConceroVerifier is ConceroVerifierBase {
     function deploy() public returns (address) {
         address implementation = _deployImplementation();
         _deployProxy(implementation);
-        return address(conceroVerifierProxy);
+        return address(conceroValidatorProxy);
     }
 
     function _deployProxy(address implementation) internal {
         vm.startPrank(proxyDeployer);
-        conceroVerifierProxy = new TransparentUpgradeableProxy(implementation, proxyDeployer, "");
+        conceroValidatorProxy = new TransparentUpgradeableProxy(implementation, proxyDeployer, "");
         vm.stopPrank();
     }
 
@@ -53,22 +48,16 @@ contract DeployConceroVerifier is ConceroVerifierBase {
             router: clfRouter,
             donId: clfDonId,
             subscriptionId: clfSubscriptionId,
-            donHostedSecretsVersion: clfSecretsVersion,
-            donHostedSecretsSlotId: clfSecretsSlotId,
-            premiumFeeUsdBps: clfPremiumFeeBpsUsd,
-            callbackGasLimit: clfCallbackGasLimit,
-            requestCLFMessageReportJsCodeHash: clfMessageReportRequestJsHashSum,
-            requestOperatorRegistrationJsCodeHash: clfOperatorRegistrationJsHashSum
+            requestCLFMessageReportJsCodeHash: clfMessageReportRequestJsHashSum
         });
 
-        conceroVerifier = new ConceroVerifier(
+        conceroValidator = new ConceroValidator(
             SRC_CHAIN_SELECTOR,
-            usdc,
             address(conceroPriceFeed),
             clfParams
         );
         vm.stopPrank();
 
-        return address(conceroVerifier);
+        return address(conceroValidator);
     }
 }

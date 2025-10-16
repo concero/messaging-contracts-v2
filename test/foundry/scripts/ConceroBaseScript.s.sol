@@ -9,7 +9,6 @@ pragma solidity 0.8.28;
 import {Script} from "forge-std/src/Script.sol";
 
 import {MessageConfigBitOffsets as offsets} from "contracts/common/CommonConstants.sol";
-import {Types as VerifierTypes} from "contracts/ConceroVerifier/libraries/Types.sol";
 import {DeployMockERC20} from "./deploy/DeployMockERC20.s.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
@@ -22,11 +21,12 @@ abstract contract ConceroBaseScript is Script {
 
     address public immutable deployer;
     address public immutable proxyDeployer;
-    uint64 immutable i_conceroVerifierSubscriptionId;
+    uint64 immutable i_conceroValidatorSubscriptionId;
 
     address public constant operator = address(0x4242424242424242424242424242424242424242);
     address public constant user = address(0x0101010101010101010101010101010101010101);
-    address constant CONCERO_VERIFIER_ADDRESS = address(0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4);
+	address public constant relayer = address(0x5555555555555555555555555555555555555555);
+    address constant CONCERO_VALIDATOR_ADDRESS = address(0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4);
     address constant feedUpdater = address(0xffff5136020B92553496625644479C7ce4614bE8);
     address public usdc;
 
@@ -39,9 +39,9 @@ abstract contract ConceroBaseScript is Script {
 
     uint32 public constant SUBMIT_MSG_GAS_OVERHEAD = 150_000;
     uint32 public constant VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD = 330_000;
-    uint32 public constant CLF_GAS_PRICE_OVER_ESTIMATION_BPS = 40_000;
+    uint32 public constant CLF_GAS_PRICE_OVER_ESTIMATION_BPS = 10_000;
     uint32 public constant CLF_CALLBACK_GAS_OVERHEAD = 240_000;
-    uint32 public constant CLF_CALLBACK_GAS_LIMIT = 100_000;
+    uint32 public constant CLF_CALLBACK_GAS_LIMIT = 50_000;
 
     address public constant MOCK_DON_SIGNER_ADDRESS_0 = 0x0004C7EdCF9283D3bc3C1309939b3E887bb9d98b;
     address public constant MOCK_DON_SIGNER_ADDRESS_1 = 0x000437D9bE1C11B748e8B4C349b818eE82682E9f;
@@ -60,7 +60,7 @@ abstract contract ConceroBaseScript is Script {
     constructor() {
         deployer = vm.envAddress("DEPLOYER_ADDRESS");
         proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
-        i_conceroVerifierSubscriptionId = uint64(vm.envUint("CLF_SUBID_LOCALHOST"));
+        i_conceroValidatorSubscriptionId = uint64(vm.envUint("CLF_SUBID_LOCALHOST"));
     }
 
     function setUp() public virtual {

@@ -6,10 +6,10 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroVerifierTest} from "../../ConceroVerifier/base/ConceroVerifierTest.sol";
+import {ConceroValidatorTest} from "../../ConceroValidator/base/ConceroValidatorTest.sol";
 import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
 
-contract BaseMockCLFReport is ConceroVerifierTest {
+contract BaseMockCLFReport is ConceroValidatorTest {
     function createMockClfReport(
         bytes memory _response
     ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
@@ -17,8 +17,8 @@ contract BaseMockCLFReport is ConceroVerifierTest {
             createMockClfReport(
                 _response,
                 bytes32("requestId"),
-                CONCERO_VERIFIER_ADDRESS,
-                i_conceroVerifierSubscriptionId
+                CONCERO_VALIDATOR_ADDRESS,
+                i_conceroValidatorSubscriptionId
             );
     }
 
@@ -30,8 +30,8 @@ contract BaseMockCLFReport is ConceroVerifierTest {
             createMockClfReport(
                 _response,
                 requestId,
-                CONCERO_VERIFIER_ADDRESS,
-                i_conceroVerifierSubscriptionId
+                CONCERO_VALIDATOR_ADDRESS,
+                i_conceroValidatorSubscriptionId
             );
     }
 

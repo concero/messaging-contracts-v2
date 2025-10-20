@@ -14,7 +14,7 @@ import {CLFRequestError} from "contracts/interfaces/IConceroValidator.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 
 import {Types as ValidatorTypes} from "contracts/ConceroValidator/libraries/Types.sol";
-import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
+import {Types as RouterTypes} from "../../../contracts/ValidatorLib/libraries/Types.sol";
 
 import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
 import {RequestMessageReportTest} from "./RequestMessageReport.t.sol";

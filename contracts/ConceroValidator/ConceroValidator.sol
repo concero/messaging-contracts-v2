@@ -6,15 +6,13 @@
  */
 pragma solidity 0.8.28;
 
-import {IConceroValidator} from "../interfaces/IConceroValidator.sol";
-
 import {Base} from "./modules/Base.sol";
 import {CLF} from "./modules/CLF.sol";
 import {Owner} from "./modules/Owner.sol";
 import {Validator} from "./modules/Validator.sol";
 import {CLFParams} from "./libraries/Types.sol";
 
-contract ConceroValidator is IConceroValidator, CLF, Validator, Owner {
+contract ConceroValidator is CLF, Validator, Owner {
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed,

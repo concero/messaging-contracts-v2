@@ -10,7 +10,6 @@ import {FunctionsClient, FunctionsRequest} from "@chainlink/contracts/src/v0.8/f
 
 import {Base} from "./Base.sol";
 
-import {CLFRequestError, MessageReport, MessageReportRequested} from "../../interfaces/IConceroValidator.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 import {CommonConstants} from "../../common/CommonConstants.sol";
@@ -25,6 +24,10 @@ import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;
     using s for s.Validator;
+
+    event CLFRequestError(bytes err);
+    event MessageReport(bytes32 indexed messageId);
+    event MessageReportRequested(bytes32 indexed messageId);
 
     constructor(
         address clfRouter,

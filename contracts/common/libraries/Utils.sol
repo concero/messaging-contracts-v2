@@ -93,18 +93,6 @@ library Utils {
 
         uint256 nativeAmount = (usdAmount * 1e18) / nativeUSDRate;
 
-        //        console.logString("BPS USD:");
-        //        console.logUint(bpsUSD);
-        //
-        //        console.logString("Native USD Rate:");
-        //        console.logUint(nativeUSDRate);
-        //
-        //        console.logString("USD Amount:");
-        //        console.logUint(usdAmount);
-        //
-        //        console.logString("Native Amount:");
-        //        console.logUint(nativeAmount);
-
         return nativeAmount;
     }
 }

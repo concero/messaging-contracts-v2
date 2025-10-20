@@ -10,10 +10,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
-
-import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
-import {OperatorSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
-
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 
 contract WithdrawConceroFees is ConceroRouterTest {
@@ -27,30 +23,30 @@ contract WithdrawConceroFees is ConceroRouterTest {
 
         vm.deal(address(conceroRouter), TOTAL_NATIVE_BALANCE);
         deal(usdc, address(conceroRouter), TOTAL_USDC_BALANCE);
-        _setOperatorBalances();
+        //        _setOperatorBalances();
     }
 
-    function _setOperatorBalances() internal {
-        vm.startPrank(deployer);
-
-        // Set total operator fees
-        conceroRouter.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.totalFeesEarnedNative,
-            bytes32(0),
-            OPERATOR_FEES_NATIVE
-        );
-
-        // Set individual operator fees
-        conceroRouter.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(operator))),
-            OPERATOR_FEES_NATIVE
-        );
-
-        vm.stopPrank();
-    }
+    //    function _setOperatorBalances() internal {
+    //        vm.startPrank(deployer);
+    //
+    //        // Set total operator fees
+    //        conceroRouter.setStorage(
+    //            Namespaces.OPERATOR,
+    //            OperatorSlots.totalFeesEarnedNative,
+    //            bytes32(0),
+    //            OPERATOR_FEES_NATIVE
+    //        );
+    //
+    //        // Set individual operator fees
+    //        conceroRouter.setStorage(
+    //            Namespaces.OPERATOR,
+    //            OperatorSlots.feesEarnedNative,
+    //            bytes32(uint256(uint160(operator))),
+    //            OPERATOR_FEES_NATIVE
+    //        );
+    //
+    //        vm.stopPrank();
+    //    }
 
     function test_withdrawConceroFees() public {
         uint256 withdrawableBalance = TOTAL_NATIVE_BALANCE - OPERATOR_FEES_NATIVE;
@@ -74,18 +70,18 @@ contract WithdrawConceroFees is ConceroRouterTest {
         vm.stopPrank();
     }
 
-    function test_withdrawConceroFees_VerifyOperatorFees() public {
-        vm.startPrank(deployer);
-
-        uint256 operatorFees = conceroRouter.getStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(operator)))
-        );
-
-        assertEq(operatorFees, OPERATOR_FEES_NATIVE, "Incorrect operator fees");
-        vm.stopPrank();
-    }
+    //    function test_withdrawConceroFees_VerifyOperatorFees() public {
+    //        vm.startPrank(deployer);
+    //
+    //        uint256 operatorFees = conceroRouter.getStorage(
+    //            Namespaces.OPERATOR,
+    //            OperatorSlots.feesEarnedNative,
+    //            bytes32(uint256(uint160(operator)))
+    //        );
+    //
+    //        assertEq(operatorFees, OPERATOR_FEES_NATIVE, "Incorrect operator fees");
+    //        vm.stopPrank();
+    //    }
 
     function test_withdrawConceroFees_Native() public {
         vm.startPrank(deployer);

@@ -6,10 +6,8 @@
  */
 pragma solidity 0.8.28;
 
-import {OperatorSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
-import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
-import {ConceroRouterHarness} from "contracts/ConceroRouter/ConceroRouterHarness.sol";
-import {ConceroClientExample} from "contracts/ConceroClient/ConceroClientExample.sol";
+import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
+import {ConceroClientExample} from "../../../../contracts/examples/ConceroClientExample.sol";
 
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroRouter} from "../../scripts/deploy/DeployConceroRouter.s.sol";
@@ -27,34 +25,34 @@ abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
         conceroClient = new ConceroClientExample(payable(conceroRouter));
     }
 
-    function _setGasFeeConfig() internal {
-        vm.startPrank(deployer);
-        conceroRouter.setGasFeeConfig(
-            SRC_CHAIN_SELECTOR,
-            SUBMIT_MSG_GAS_OVERHEAD,
-            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
-            CLF_CALLBACK_GAS_OVERHEAD
-        );
-        vm.stopPrank();
-    }
-
-    function _setOperatorFeesEarned() internal {
-        vm.startPrank(deployer);
-
-        conceroRouter.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.feesEarnedNative,
-            bytes32(uint256(uint160(operator))),
-            OPERATOR_FEES_NATIVE
-        );
-
-        conceroRouter.setStorage(
-            Namespaces.OPERATOR,
-            OperatorSlots.totalFeesEarnedNative,
-            bytes32(0),
-            OPERATOR_FEES_NATIVE
-        );
-
-        vm.stopPrank();
-    }
+    //    function _setGasFeeConfig() internal {
+    //        vm.startPrank(deployer);
+    //        conceroRouter.setGasFeeConfig(
+    //            SRC_CHAIN_SELECTOR,
+    //            SUBMIT_MSG_GAS_OVERHEAD,
+    //            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
+    //            CLF_CALLBACK_GAS_OVERHEAD
+    //        );
+    //        vm.stopPrank();
+    //    }
+    //
+    //    function _setOperatorFeesEarned() internal {
+    //        vm.startPrank(deployer);
+    //
+    //        conceroRouter.setStorage(
+    //            Namespaces.OPERATOR,
+    //            OperatorSlots.feesEarnedNative,
+    //            bytes32(uint256(uint160(operator))),
+    //            OPERATOR_FEES_NATIVE
+    //        );
+    //
+    //        conceroRouter.setStorage(
+    //            Namespaces.OPERATOR,
+    //            OperatorSlots.totalFeesEarnedNative,
+    //            bytes32(0),
+    //            OPERATOR_FEES_NATIVE
+    //        );
+    //
+    //        vm.stopPrank();
+    //    }
 }

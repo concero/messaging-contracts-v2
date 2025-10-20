@@ -9,11 +9,11 @@ pragma solidity 0.8.28;
 import {ValidatorLib} from "contracts/ValidatorLib/ValidatorLib.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployValidatorLib} from "../../scripts/deploy/DeployValidatorLib.s.sol";
-import {ConceroClientExample} from "contracts/ConceroClient/ConceroClientExample.sol";
-import {ConceroRouterHarness} from "contracts/ConceroRouter/ConceroRouterHarness.sol";
+import {ConceroClientExample} from "../../../../contracts/examples/ConceroClientExample.sol";
+import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
-import {Types} from "contracts/ConceroRouter/libraries/Types.sol";
+import {Types} from "../../../../contracts/ValidatorLib/libraries/Types.sol";
 
 abstract contract ValidatorLibTest is DeployValidatorLib, ConceroTest {
     ConceroClientExample internal conceroClient;

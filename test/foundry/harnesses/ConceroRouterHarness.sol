@@ -7,16 +7,11 @@
 pragma solidity 0.8.28;
 
 import {ConceroRouter} from "./ConceroRouter.sol";
-import {GenericStorage} from "./modules/GenericStorage.sol";
-import {Namespaces} from "./libraries/Storage.sol";
 
 /**
  * @title ConceroRouterHarness
- * @dev Test harness for ConceroRouter that includes GenericStorage functionality
- * This contract is used only for testing purposes to maintain backward compatibility
- * with tests that rely on GenericStorage functionality.
  */
-contract ConceroRouterHarness is ConceroRouter, GenericStorage {
+contract ConceroRouterHarness is ConceroRouter {
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed,

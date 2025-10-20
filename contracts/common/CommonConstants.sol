@@ -31,15 +31,6 @@ library CommonConstants {
     uint256 internal constant MESSAGE_MAX_SIZE = 1e6; // 1 MB
 }
 
-library BitMasks {
-    // Generic masks for different bit sizes
-    uint256 internal constant MASK_1 = (1 << 1) - 1; //   0x1
-    uint256 internal constant MASK_8 = (1 << 8) - 1; //   0xFF
-    uint256 internal constant MASK_16 = (1 << 16) - 1; // 0xFFFF
-    uint256 internal constant MASK_24 = (1 << 24) - 1; // 0xFFFFFF
-    uint256 internal constant MASK_32 = (1 << 32) - 1; // 0xFFFFFFFF
-}
-
 library MessageConfigBitSizes {
     uint256 internal constant VERSION = 8;
     uint256 internal constant CHAIN_SELECTOR = 24;
@@ -48,27 +39,6 @@ library MessageConfigBitSizes {
     uint256 internal constant RELAYER_CONF = 8;
     uint256 internal constant CALLBACKABLE = 1;
     uint256 internal constant UNUSED = 127;
-}
-
-library MessageConfigBitOffsets {
-    // big-endian bit ordering
-    // most significant bits first, where bit 255 is the leftmost bit and bit 0 is the rightmost bit)
-
-    /* MESSAGE CONFIG BIT OFFSETS */
-    uint256 internal constant OFFSET_VERSION = 256 - MessageConfigBitSizes.VERSION; //                 248
-    uint256 internal constant OFFSET_SRC_CHAIN =
-        OFFSET_VERSION - MessageConfigBitSizes.CHAIN_SELECTOR; //                                      224
-    uint256 internal constant OFFSET_DST_CHAIN =
-        OFFSET_SRC_CHAIN - (MessageConfigBitSizes.RESERVED + MessageConfigBitSizes.CHAIN_SELECTOR); // 168
-    uint256 internal constant OFFSET_MIN_SRC_CONF =
-        OFFSET_DST_CHAIN - MessageConfigBitSizes.MIN_CONFIRMATIONS; //                                 152
-    uint256 internal constant OFFSET_MIN_DST_CONF =
-        OFFSET_MIN_SRC_CONF - MessageConfigBitSizes.MIN_CONFIRMATIONS; //                              136
-    uint256 internal constant OFFSET_RELAYER_CONF =
-        OFFSET_MIN_DST_CONF - MessageConfigBitSizes.RELAYER_CONF; //                                   128
-    uint256 internal constant OFFSET_CALLBACKABLE =
-        OFFSET_RELAYER_CONF - MessageConfigBitSizes.CALLBACKABLE; //                                   127
-    uint256 internal constant OFFSET_FEE_TOKEN = 127 - 8; //                                           119
 }
 
 library ReportConfigBitSizes {

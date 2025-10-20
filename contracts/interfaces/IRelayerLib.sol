@@ -8,18 +8,16 @@ pragma solidity ^0.8.20;
 
 import {IConceroRouter} from "./IConceroRouter.sol";
 
-interface IValidatorLib {
-    error InvalidChainSelector();
-
-    function isValid(
-        bytes32 messageId,
-        IConceroRouter.MessageReceipt calldata message,
-        bytes calldata validation
-    ) external view returns (bool);
-
+interface IRelayerLib {
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
     ) external view returns (uint256);
 
     function getDstLib(uint24 dstChainSelector) external view returns (bytes memory);
+
+    function validate(
+        bytes32 messageId,
+        IConceroRouter.MessageReceipt calldata messageReceipt,
+        address relayer
+    ) external;
 }

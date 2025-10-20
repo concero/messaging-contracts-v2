@@ -8,7 +8,7 @@ pragma solidity 0.8.28;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-import {Types} from "contracts/ConceroRouter/libraries/Types.sol";
+import {Types} from "../libraries/Types.sol";
 
 import {Base} from "./Base.sol";
 

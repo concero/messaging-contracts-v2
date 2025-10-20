@@ -7,7 +7,7 @@
 pragma solidity 0.8.28;
 
 import {ConceroValidatorTest} from "../../ConceroValidator/base/ConceroValidatorTest.sol";
-import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
+import {Types as RouterTypes} from "../../../../contracts/ValidatorLib/libraries/Types.sol";
 
 contract BaseMockCLFReport is ConceroValidatorTest {
     function createMockClfReport(

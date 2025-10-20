@@ -11,10 +11,10 @@ import {Utils as CommonUtils} from "contracts/common/libraries/Utils.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 
-import {IValidatorLib, InvalidChainSelector} from "contracts/interfaces/IValidatorLib.sol";
-import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
-import {Types} from "contracts/ConceroRouter/libraries/Types.sol";
+import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
+import {Types} from "./libraries/Types.sol";
 
 import {Storage as s} from "./libraries/Storage.sol";
 import {Base} from "./modules/Base.sol";
@@ -42,9 +42,10 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
 
     /* Getters */
 
+    // TODO: add messageReceipt hash check!
     function isValid(
         bytes32 messageId,
-        ConceroTypes.MessageRequest calldata /* message */,
+        IConceroRouter.MessageReceipt calldata,
         bytes calldata validation
     ) external view returns (bool) {
         (Types.ClfDonReportSubmission memory reportSubmission, uint256 index) = abi.decode(
@@ -96,10 +97,7 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
         return false;
     }
 
-    function getFee(
-        ConceroTypes.MessageRequest calldata /* message */,
-        ConceroTypes.MessageHeader calldata /* messageHeader */
-    ) external view returns (uint256) {
+    function getFee(IConceroRouter.MessageRequest calldata) external view returns (uint256) {
         (uint256 nativeUsdRate, ) = i_conceroPriceFeed.getNativeUsdRateAndGasPrice();
 
         require(

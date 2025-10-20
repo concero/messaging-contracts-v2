@@ -11,7 +11,7 @@ import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
-import {Types} from "contracts/ConceroRouter/libraries/Types.sol";
+import {Types} from "../../../contracts/ValidatorLib/libraries/Types.sol";
 import {InvalidChainSelector} from "contracts/interfaces/IValidatorLib.sol";
 
 import {ValidatorLibTest} from "./base/ValidatorLibTest.sol";

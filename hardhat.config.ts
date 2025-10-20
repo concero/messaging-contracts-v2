@@ -7,13 +7,13 @@ import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-network-helpers";
 import "@nomicfoundation/hardhat-verify";
 import "@nomicfoundation/hardhat-viem";
+import "@tenderly/hardhat-tenderly";
 import "@typechain/hardhat";
 import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
-import "@tenderly/hardhat-tenderly";
 
 import { conceroNetworks } from "./constants";
 import "./tasks";
@@ -41,6 +41,17 @@ const config: HardhatUserConfig = {
 		compilers: [
 			{
 				version: "0.8.28",
+				settings: {
+					viaIR: false,
+					evmVersion: "paris",
+					optimizer: {
+						enabled: true,
+						runs: 200,
+					},
+				},
+			},
+			{
+				version: "0.8.20",
 				settings: {
 					viaIR: false,
 					evmVersion: "paris",

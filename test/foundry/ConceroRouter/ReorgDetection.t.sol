@@ -12,7 +12,7 @@ import {Vm} from "forge-std/src/Vm.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 
-import {Types} from "contracts/ConceroRouter/libraries/Types.sol";
+import {Types} from "../../../contracts/ValidatorLib/libraries/Types.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 import {MessageReport as MockCLFReport} from "../scripts/MockCLFReport/MessageReport.sol";
 

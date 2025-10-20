@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {Deposited, DepositWithdrawn} from "contracts/interfaces/IConceroValidator.sol";
+import {IConceroValidator} from "contracts/interfaces/IConceroValidator.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
@@ -14,7 +14,7 @@ import {Types} from "../libraries/Types.sol";
 
 import {CLF} from "./CLF.sol";
 
-abstract contract Validator is CLF {
+abstract contract Validator is CLF, IConceroValidator {
     using s for s.Validator;
 
     /* Request Message Report */
@@ -71,7 +71,7 @@ abstract contract Validator is CLF {
         return getCLFCost();
     }
 
-	function getWithdrawableValidatorFee() external view returns (uint256) {
-		return s.validator().totalNativeFees;
-	}
+    function getWithdrawableValidatorFee() external view returns (uint256) {
+        return s.validator().totalNativeFees;
+    }
 }

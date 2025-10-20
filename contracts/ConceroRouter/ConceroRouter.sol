@@ -6,28 +6,226 @@
  */
 pragma solidity 0.8.28;
 
-import {Storage as s} from "./libraries/Storage.sol";
-
+import {Utils} from "../common/libraries/Utils.sol";
 import {Base} from "./modules/Base.sol";
-import {Operator} from "./modules/Operator.sol";
-import {Message} from "./modules/Message.sol";
-import {Owner} from "./modules/Owner.sol";
-
+import {CommonConstants} from "../common/CommonConstants.sol";
+import {CommonErrors} from "../common/CommonErrors.sol";
+import {IConceroClient} from "../interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {IRelayerLib} from "../interfaces/IRelayerLib.sol";
+import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
 
-contract ConceroRouter is IConceroRouter, Operator, Message, Owner {
+import {Storage as s} from "./libraries/Storage.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+contract ConceroRouter is IConceroRouter, Base {
+    using SafeERC20 for IERC20;
+    using s for s.Router;
+
+    error MessageAlreadyProcessed(bytes32 messageId);
+    error MessageDeliveryFailed(bytes32 messageId);
+    error MessageSubmissionAlreadyReceived(bytes32 messageId, bytes32 messageSubmissionHash);
+
+    error InvalidReceiver();
+    error InvalidGasLimit();
+    error InvalidMessageHashSum();
+    error UnauthorizedOperator();
+    error InvalidDstChainSelector();
+    error InvalidSrcChainData();
+    error FinalityNotYetSupported();
+
     constructor(
         uint24 chainSelector,
-        address conceroPriceFeed,
-        address conceroVerifier,
-        uint64 conceroVerifierSubId,
-        address[4] memory clfSigners
-    )
-        Message(conceroVerifier, conceroVerifierSubId, clfSigners)
-        Base(chainSelector, conceroPriceFeed)
-    {}
+        address conceroPriceFeed
+    ) Base(chainSelector, conceroPriceFeed) {}
 
     receive() external payable {}
 
-    fallback() external payable {}
+    /* @inheritdoc IConceroRouter */
+    function conceroSend(
+        MessageRequest calldata messageRequest
+    ) external payable returns (bytes32) {
+        _validateMessageParams(messageRequest);
+        Fee memory fee = _collectMessageFee(messageRequest);
+
+        bytes32 messageId = _buildMessageId(messageRequest.dstChainSelector);
+
+        MessageReceipt memory messageReceipt = _messageRequestToReceipt(messageRequest);
+
+        emit ConceroMessageSent(messageId, messageReceipt);
+        emit ConceroMessageFeePaid(messageId, fee);
+
+        return messageId;
+    }
+
+    /**
+     * @notice Submits a message report, verifies the signatures, and processes the report data.
+     */
+    // TODO: add nonReentrant
+    function submitMessage(
+        bytes32 messageId,
+        MessageReceipt calldata messageReceipt,
+        bytes[] calldata validations
+    ) external {
+        require(messageReceipt.dstChainSelector == i_chainSelector, InvalidDstChainSelector());
+
+        bytes32 messageSubmissionHash = keccak256(
+            abi.encode(messageId, messageReceipt, validations)
+        );
+        s.Router storage s_router = s.router();
+
+        require(
+            s_router.messageStatus[messageSubmissionHash] == MessageStatus.Unknown,
+            MessageSubmissionAlreadyReceived(messageId, messageSubmissionHash)
+        );
+
+        s_router.messageStatus[messageSubmissionHash] = MessageStatus.Received;
+
+        emit ConceroMessageReceived(messageId, messageReceipt, validations);
+
+        IRelayerLib(abi.decode(messageReceipt.dstRelayerLib, (address))).validate(
+            messageId,
+            messageReceipt,
+            msg.sender
+        );
+
+        bool[] memory validationChecks = new bool[](messageReceipt.dstValidatorLibs.length);
+
+        for (uint256 i; i < messageReceipt.dstValidatorLibs.length; ++i) {
+            validationChecks[i] = IValidatorLib(
+                abi.decode(messageReceipt.dstValidatorLibs[i], (address))
+            ).isValid(messageId, messageReceipt, validations[i]);
+        }
+
+        emit ConceroMessageValidationChecks(messageId, validationChecks);
+
+        EvmDstChainData memory dstChainData = abi.decode(
+            messageReceipt.dstChainData,
+            (EvmDstChainData)
+        );
+
+        require(Utils.isContract(dstChainData.receiver), InvalidReceiver());
+
+        bytes memory callData = abi.encodeWithSelector(
+            IConceroClient.conceroReceive.selector,
+            messageId,
+            messageReceipt,
+            validationChecks
+        );
+
+        (bool success, bytes memory result) = Utils.safeCall(
+            dstChainData.receiver,
+            dstChainData.gasLimit,
+            0,
+            256,
+            callData
+        );
+
+        if (success) {
+            s_router.messageStatus[messageSubmissionHash] = MessageStatus.Received;
+            emit ConceroMessageDelivered(messageId);
+        } else {
+            emit ConceroMessageDeliveryFailed(messageId, result);
+        }
+    }
+
+    /* VIEW FUNCTIONS */
+
+    /* @inheritdoc IConceroRouter */
+    function getMessageFee(MessageRequest calldata messageRequest) external view returns (uint256) {
+        _validateMessageParams(messageRequest);
+
+        return 0;
+    }
+
+    function isFeeTokenSupported(address feeToken) public view returns (bool) {
+        return feeToken == address(0) || s.router().isFeeTokenSupported[feeToken];
+    }
+
+    function getConceroFee(address feeToken) public view returns (uint256) {
+        if (feeToken == address(0)) {
+            return i_conceroPriceFeed.getNativeUsdRate() * s.router().conceroMessageFeeInUsd;
+        } else {
+            revert UnsupportedFeeToken();
+        }
+    }
+
+    /* INTERNAL FUNCTIONS */
+
+    function _validateMessageParams(MessageRequest memory messageRequest) internal view {
+        require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
+        require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
+        require(
+            messageRequest.payload.length < CommonConstants.MESSAGE_MAX_SIZE,
+            MessageTooLarge(messageRequest.payload.length, CommonConstants.MESSAGE_MAX_SIZE)
+        );
+    }
+
+    function _buildMessageId(uint24 dstChainSelector) private returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    ++s.router().nonce,
+                    block.number,
+                    msg.sender,
+                    i_chainSelector,
+                    dstChainSelector
+                )
+            );
+    }
+
+    function _collectMessageFee(
+        MessageRequest calldata messageRequest
+    ) internal returns (Fee memory) {
+        if (messageRequest.feeToken == address(0)) {
+            uint256 relayerFee = IRelayerLib(messageRequest.relayerLib).getFee(messageRequest);
+            uint256 conceroFee = getConceroFee(messageRequest.feeToken);
+            uint256 totalFee = relayerFee + conceroFee;
+
+            // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
+            require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
+
+            payable(i_owner).call{value: conceroFee}("");
+            payable(messageRequest.relayerLib).call{value: relayerFee}("");
+
+            return Fee({concero: conceroFee, relayer: relayerFee, token: messageRequest.feeToken});
+        } else {
+            revert UnsupportedFeeToken();
+        }
+    }
+
+    function _messageRequestToReceipt(
+        MessageRequest calldata messageRequest
+    ) internal view returns (MessageReceipt memory) {
+        bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
+
+        for (uint256 i; i < dstValidatorLibs.length; ++i) {
+            dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
+                messageRequest.dstChainSelector
+            );
+        }
+
+        return
+            MessageReceipt({
+                srcChainSelector: i_chainSelector,
+                dstChainSelector: messageRequest.dstChainSelector,
+                srcChainData: abi.encode(
+                    EvmSrcChainData({
+                        blockConfirmations: messageRequest.srcBlockConfirmations,
+                        sender: msg.sender
+                    })
+                ),
+                dstChainData: messageRequest.dstChainData,
+                dstRelayerLib: IRelayerLib(messageRequest.relayerLib).getDstLib(
+                    messageRequest.dstChainSelector
+                ),
+                dstValidatorLibs: dstValidatorLibs,
+                validatorConfigs: messageRequest.validatorConfigs,
+                relayerConfig: messageRequest.relayerConfig,
+                validationRpcs: messageRequest.validationRpcs,
+                deliveryRpcs: messageRequest.deliveryRpcs,
+                payload: messageRequest.payload
+            });
+    }
 }

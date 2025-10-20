@@ -7,7 +7,7 @@
 pragma solidity 0.8.28;
 
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
-import {ValidatorFeeWithdrawn} from "contracts/interfaces/IConceroValidator.sol";
+import {IConceroValidator} from "contracts/interfaces/IConceroValidator.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 import {Base} from "./Base.sol";
@@ -26,7 +26,7 @@ abstract contract Owner is Base {
         (bool success, ) = msg.sender.call{value: amount}("");
         require(success, CommonErrors.TransferFailed());
 
-        emit ValidatorFeeWithdrawn(msg.sender, amount);
+        emit IConceroValidator.ValidatorFeeWithdrawn(msg.sender, amount);
     }
 
     function setGasFeeConfig(

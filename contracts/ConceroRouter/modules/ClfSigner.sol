@@ -7,7 +7,7 @@
 pragma solidity 0.8.28;
 
 import {Base} from "./Base.sol";
-import {Types} from "../libraries/Types.sol";
+import {Types} from "../../ValidatorLib/libraries/Types.sol";
 
 abstract contract ClfSigner is Base {
     error IncorrectNumberOfSignatures();

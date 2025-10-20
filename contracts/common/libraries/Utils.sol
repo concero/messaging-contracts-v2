@@ -75,6 +75,11 @@ library Utils {
         return (_success, _returnData);
     }
 
+    function transferNative(address receiver, uint256 value) internal {
+        (bool success, bytes memory data) = safeCall(receiver, 21000, value, 256, "");
+        require(success, CommonErrors.TransferFailed(data));
+    }
+
     /**
      * @notice Converts a USD basis points amount to native currency
      * @param bpsUSD The amount in USD basis points

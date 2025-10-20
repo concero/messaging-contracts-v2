@@ -11,6 +11,7 @@ import {IConceroValidator} from "contracts/interfaces/IConceroValidator.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 import {Base} from "./Base.sol";
+import {Utils} from "../../common/libraries/Utils.sol";
 
 abstract contract Owner is Base {
     using s for s.Validator;
@@ -23,8 +24,7 @@ abstract contract Owner is Base {
 
         s_validator.totalNativeFees -= amount;
 
-        (bool success, ) = msg.sender.call{value: amount}("");
-        require(success, CommonErrors.TransferFailed());
+        Utils.transferNative(msg.sender, amount);
 
         emit IConceroValidator.ValidatorFeeWithdrawn(msg.sender, amount);
     }

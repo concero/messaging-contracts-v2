@@ -6,34 +6,20 @@
  */
 pragma solidity 0.8.28;
 
-import {Utils} from "../common/libraries/Utils.sol";
+import {IRelayer} from "../interfaces/IRelayer.sol";
 import {Base} from "./modules/Base.sol";
 import {CommonConstants} from "../common/CommonConstants.sol";
 import {CommonErrors} from "../common/CommonErrors.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IRelayerLib} from "../interfaces/IRelayerLib.sol";
 import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
-
 import {Storage as s} from "./libraries/Storage.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Utils} from "../common/libraries/Utils.sol";
 
-contract ConceroRouter is IConceroRouter, Base {
-    using SafeERC20 for IERC20;
+contract ConceroRouter is IConceroRouter, IRelayer, Base {
     using s for s.Router;
-
-    error MessageAlreadyProcessed(bytes32 messageId);
-    error MessageDeliveryFailed(bytes32 messageId);
-    error MessageSubmissionAlreadyReceived(bytes32 messageId, bytes32 messageSubmissionHash);
-
-    error InvalidReceiver();
-    error InvalidGasLimit();
-    error InvalidMessageHashSum();
-    error UnauthorizedOperator();
-    error InvalidDstChainSelector();
-    error InvalidSrcChainData();
-    error FinalityNotYetSupported();
 
     constructor(
         uint24 chainSelector,
@@ -59,16 +45,16 @@ contract ConceroRouter is IConceroRouter, Base {
         return messageId;
     }
 
-    /**
-     * @notice Submits a message report, verifies the signatures, and processes the report data.
-     */
     // TODO: add nonReentrant
     function submitMessage(
         bytes32 messageId,
         MessageReceipt calldata messageReceipt,
         bytes[] calldata validations
     ) external {
-        require(messageReceipt.dstChainSelector == i_chainSelector, InvalidDstChainSelector());
+        require(
+            messageReceipt.dstChainSelector == i_chainSelector,
+            InvalidDstChainSelector(messageReceipt.dstChainSelector, i_chainSelector)
+        );
 
         bytes32 messageSubmissionHash = keccak256(
             abi.encode(messageId, messageReceipt, validations)
@@ -136,7 +122,9 @@ contract ConceroRouter is IConceroRouter, Base {
     function getMessageFee(MessageRequest calldata messageRequest) external view returns (uint256) {
         _validateMessageParams(messageRequest);
 
-        return 0;
+        return
+            getConceroFee(messageRequest.feeToken) +
+            IRelayerLib(messageRequest.relayerLib).getFee(messageRequest);
     }
 
     function isFeeTokenSupported(address feeToken) public view returns (bool) {
@@ -146,9 +134,8 @@ contract ConceroRouter is IConceroRouter, Base {
     function getConceroFee(address feeToken) public view returns (uint256) {
         if (feeToken == address(0)) {
             return i_conceroPriceFeed.getNativeUsdRate() * s.router().conceroMessageFeeInUsd;
-        } else {
-            revert UnsupportedFeeToken();
         }
+        revert UnsupportedFeeToken();
     }
 
     /* INTERNAL FUNCTIONS */
@@ -186,8 +173,8 @@ contract ConceroRouter is IConceroRouter, Base {
             // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
             require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
 
-            payable(i_owner).call{value: conceroFee}("");
-            payable(messageRequest.relayerLib).call{value: relayerFee}("");
+            Utils.transferNative(i_owner, conceroFee);
+            Utils.transferNative(messageRequest.relayerLib, relayerFee);
 
             return Fee({concero: conceroFee, relayer: relayerFee, token: messageRequest.feeToken});
         } else {

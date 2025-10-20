@@ -17,7 +17,7 @@ library CommonErrors {
     error InvalidAmount();
     error InvalidRequest();
     error InvalidAddress();
-    error TransferFailed();
+    error TransferFailed(bytes error);
     error InsufficientFee(uint256 provided, uint256 required);
     error RequiredVariableUnset(RequiredVariableUnsetType variableType);
 }

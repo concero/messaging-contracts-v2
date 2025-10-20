@@ -8,10 +8,10 @@ pragma solidity 0.8.28;
 
 import {IConceroValidator} from "contracts/interfaces/IConceroValidator.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {Utils} from "../../common/libraries/Utils.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
-
 import {CLF} from "./CLF.sol";
 
 abstract contract Validator is CLF, IConceroValidator {
@@ -55,8 +55,7 @@ abstract contract Validator is CLF, IConceroValidator {
 
         s_validator.depositsNative[msg.sender] = currentDeposit - amount;
 
-        (bool success, ) = msg.sender.call{value: amount}("");
-        require(success, CommonErrors.TransferFailed());
+        Utils.transferNative(msg.sender, amount);
 
         emit DepositWithdrawn(msg.sender, amount);
     }

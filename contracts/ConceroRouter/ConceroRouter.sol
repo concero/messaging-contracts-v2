@@ -6,32 +6,33 @@
  */
 pragma solidity 0.8.28;
 
-import {IRelayer} from "../interfaces/IRelayer.sol";
-import {Base} from "./modules/Base.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {CommonConstants} from "../common/CommonConstants.sol";
 import {CommonErrors} from "../common/CommonErrors.sol";
+import {Utils} from "../common/libraries/Utils.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IRelayerLib} from "../interfaces/IRelayerLib.sol";
+import {IRelayer} from "../interfaces/IRelayer.sol";
 import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
 import {Storage as s} from "./libraries/Storage.sol";
-import {Utils} from "../common/libraries/Utils.sol";
+import {Base} from "./modules/Base.sol";
 
-contract ConceroRouter is IConceroRouter, IRelayer, Base {
+contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
 
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed
-    ) Base(chainSelector, conceroPriceFeed) {}
+    ) ReentrancyGuard() Base(chainSelector, conceroPriceFeed) {}
 
     receive() external payable {}
 
     /* @inheritdoc IConceroRouter */
     function conceroSend(
         MessageRequest calldata messageRequest
-    ) external payable returns (bytes32) {
+    ) external payable nonReentrant returns (bytes32) {
         _validateMessageParams(messageRequest);
         Fee memory fee = _collectMessageFee(messageRequest);
 
@@ -45,12 +46,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base {
         return messageId;
     }
 
-    // TODO: add nonReentrant
     function submitMessage(
         bytes32 messageId,
         MessageReceipt calldata messageReceipt,
         bytes[] calldata validations
-    ) external {
+    ) external nonReentrant {
         require(
             messageReceipt.dstChainSelector == i_chainSelector,
             InvalidDstChainSelector(messageReceipt.dstChainSelector, i_chainSelector)

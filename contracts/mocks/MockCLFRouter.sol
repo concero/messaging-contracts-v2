@@ -52,13 +52,8 @@ contract MockCLFRouter {
         bytes32[] calldata /* ss */,
         bytes32 /* rawVs */
     ) external {
-        (
-            bytes32[] memory requestIds,
-            bytes[] memory results,
-            bytes[] memory errors,
-            bytes[] memory onchainMetadata,
-            bytes[] memory offchainMetadata
-        ) = abi.decode(report, (bytes32[], bytes[], bytes[], bytes[], bytes[]));
+        (bytes32[] memory requestIds, bytes[] memory results, bytes[] memory errors, , ) = abi
+            .decode(report, (bytes32[], bytes[], bytes[], bytes[], bytes[]));
 
         bytes32 requestId = requestIds[0];
         bytes memory result = results[0];

@@ -40,4 +40,12 @@ abstract contract ConceroClient is ConceroClientBase {
             );
         }
     }
+
+    function _setIsValidatorAllowed(address validator, bool isAllowed) internal {
+        s.client().isValidatorAllowed[abi.encode(validator)] = isAllowed;
+    }
+
+    function _setRequiredValidatorsCount(uint256 requiredValidatorsCount) internal {
+        s.client().requiredValidatorsCount = requiredValidatorsCount;
+    }
 }

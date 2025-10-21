@@ -122,6 +122,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
                 revert ValidatorsConsensusNotReached();
             }
 
+
+
             emit ConceroMessageDeliveryFailed(messageId, result);
         }
     }

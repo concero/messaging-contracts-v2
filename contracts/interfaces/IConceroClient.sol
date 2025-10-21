@@ -9,11 +9,10 @@ pragma solidity ^0.8.20;
 import {IConceroRouter} from "./IConceroRouter.sol";
 
 interface IConceroClient {
-    error InvalidDstChainData();
-
-    //utils lib
-    //todo: check all errors if they need to be here.
-    error NotAContract(address target);
+    error InvalidConceroRouter(address router);
+    error RelayerNotAllowed(bytes dstRelayerLib);
+    error MessageAlreadyProcessed();
+    error ValidatorsConsensusNotReached();
 
     function conceroReceive(
         bytes32 messageId,

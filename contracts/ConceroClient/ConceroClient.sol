@@ -7,11 +7,11 @@
 pragma solidity ^0.8.20;
 
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 
 abstract contract ConceroClient is IConceroClient {
     error InvalidConceroRouter(address router);
 
-    uint8 internal constant VERSION = 1;
     address internal immutable i_conceroRouter;
 
     constructor(address conceroRouter) {
@@ -21,18 +21,16 @@ abstract contract ConceroClient is IConceroClient {
 
     function conceroReceive(
         bytes32 messageId,
-        uint24 srcChainSelector,
-        bytes calldata sender,
-        bytes calldata message
+        IConceroRouter.MessageReceipt calldata messageReceipt,
+        bool[] calldata validationChecks
     ) external {
         require(msg.sender == i_conceroRouter, InvalidConceroRouter(msg.sender));
-        _conceroReceive(messageId, srcChainSelector, sender, message);
+        _conceroReceive(messageId, messageReceipt, validationChecks);
     }
 
     function _conceroReceive(
         bytes32 messageId,
-        uint24 srcChainSelector,
-        bytes calldata sender,
-        bytes calldata message
+        IConceroRouter.MessageReceipt calldata messageReceipt,
+        bool[] calldata validationChecks
     ) internal virtual;
 }

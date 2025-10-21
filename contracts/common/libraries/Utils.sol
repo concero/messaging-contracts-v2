@@ -76,7 +76,7 @@ library Utils {
     }
 
     function transferNative(address receiver, uint256 value) internal {
-        (bool success, bytes memory data) = safeCall(receiver, 21000, value, 256, "");
+        (bool success, bytes memory data) = safeCall(receiver, 21000, value, 32, "");
         require(success, CommonErrors.TransferFailed(data));
     }
 

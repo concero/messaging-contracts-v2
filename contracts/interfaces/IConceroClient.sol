@@ -14,7 +14,6 @@ interface IConceroClient {
     //utils lib
     //todo: check all errors if they need to be here.
     error NotAContract(address target);
-    error DelegateCallFailed(bytes response);
 
     function conceroReceive(
         bytes32 messageId,

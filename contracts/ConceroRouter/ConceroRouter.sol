@@ -22,6 +22,9 @@ import {Base} from "./modules/Base.sol";
 contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
 
+    error MessageAlreadyProcessed();
+    error ValidatorsConsensusNotReached();
+
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed
@@ -112,6 +115,13 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             s_router.messageStatus[messageSubmissionHash] = MessageStatus.Received;
             emit ConceroMessageDelivered(messageId);
         } else {
+            bytes4 bytesResult = bytes4(result);
+            if (bytesResult == MessageAlreadyProcessed.selector) {
+                revert MessageAlreadyProcessed();
+            } else if (bytesResult == ValidatorsConsensusNotReached.selector) {
+                revert ValidatorsConsensusNotReached();
+            }
+
             emit ConceroMessageDeliveryFailed(messageId, result);
         }
     }

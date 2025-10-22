@@ -20,6 +20,7 @@ library Storage {
         uint256 nonce;
         uint96 conceroMessageFeeInUsd;
         mapping(bytes32 hashSum => IConceroRouter.MessageStatus messageStatus) messageStatus;
+        mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(address feeToken => bool isFeeToken) isFeeTokenSupported;
     }
 

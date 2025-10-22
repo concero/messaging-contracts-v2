@@ -22,6 +22,9 @@ import {Base} from "./modules/Base.sol";
 contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
 
+    error MessageAlreadyProcessed(bytes32 id);
+    error InvalidValidationsCount();
+
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed
@@ -32,7 +35,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     /* @inheritdoc IConceroRouter */
     function conceroSend(
         MessageRequest calldata messageRequest
-    ) external payable nonReentrant returns (bytes32) {
+    ) external payable returns (bytes32) {
         _validateMessageParams(messageRequest);
         Fee memory fee = _collectMessageFee(messageRequest);
 
@@ -56,7 +59,14 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             InvalidDstChainSelector(messageReceipt.dstChainSelector, i_chainSelector)
         );
 
+        require(
+            messageReceipt.dstValidatorLibs.length == validations.length,
+            InvalidValidationsCount()
+        );
+
         s.Router storage s_router = s.router();
+
+        require(!s_router.isMessageProcessed[messageId], MessageAlreadyProcessed(messageId));
 
         bytes32 messageSubmissionHash = keccak256(
             abi.encode(messageId, messageReceipt, validations)
@@ -80,9 +90,27 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         bool[] memory validationChecks = new bool[](messageReceipt.dstValidatorLibs.length);
 
         for (uint256 i; i < messageReceipt.dstValidatorLibs.length; ++i) {
-            validationChecks[i] = IValidatorLib(
-                abi.decode(messageReceipt.dstValidatorLibs[i], (address))
-            ).isValid(messageId, messageReceipt, validations[i]);
+            if (!Utils.isEvmAddressValid(messageReceipt.dstValidatorLibs[i])) {
+                validationChecks[i] = false;
+                continue;
+            }
+
+            bytes memory callData = abi.encodeWithSelector(
+                IValidatorLib.isValid.selector,
+                messageId,
+                messageReceipt,
+                validations[i]
+            );
+
+            (bool success, bytes memory result) = abi
+                .decode(messageReceipt.dstValidatorLibs[i], (address))
+                .staticcall(callData);
+
+            if (success && result.length == 32) {
+                validationChecks[i] = abi.decode(result, (uint256)) == 1;
+            } else {
+                validationChecks[i] = false;
+            }
         }
 
         emit ConceroMessageValidationChecks(messageId, validationChecks);
@@ -142,6 +170,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         if (success) {
             s.router().messageStatus[messageSubmissionHash] = MessageStatus.Delivered;
+            s.router().isMessageProcessed[messageId] = true;
+
             emit ConceroMessageDelivered(messageId);
         } else {
             emit ConceroMessageDeliveryFailed(messageId, result);

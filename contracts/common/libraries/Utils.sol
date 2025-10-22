@@ -13,6 +13,8 @@ library Utils {
     error NotAContract(address target);
     error DelegateCallFailed(bytes response);
 
+    uint256 public constant PRECOMPILE_CONTRACTS_SPACE = 1024;
+
     function safeDelegateCall(address target, bytes memory args) internal returns (bytes memory) {
         require(isContract(target), NotAContract(target));
 
@@ -78,6 +80,17 @@ library Utils {
     function transferNative(address receiver, uint256 value) internal {
         (bool success, bytes memory data) = safeCall(receiver, 21000, value, 32, "");
         require(success, CommonErrors.TransferFailed(data));
+    }
+
+    function isEvmAddressValid(bytes memory encodedAddress) internal pure returns (bool) {
+        if (encodedAddress.length != 32) return false;
+
+        uint256 uintAddress = abi.decode(encodedAddress, (uint256));
+        if (uintAddress > type(uint160).max || uintAddress < PRECOMPILE_CONTRACTS_SPACE) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -22,9 +22,6 @@ import {Base} from "./modules/Base.sol";
 contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
 
-    error MessageAlreadyProcessed();
-    error ValidatorsConsensusNotReached();
-
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed
@@ -59,10 +56,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             InvalidDstChainSelector(messageReceipt.dstChainSelector, i_chainSelector)
         );
 
+        s.Router storage s_router = s.router();
+
         bytes32 messageSubmissionHash = keccak256(
             abi.encode(messageId, messageReceipt, validations)
         );
-        s.Router storage s_router = s.router();
 
         require(
             s_router.messageStatus[messageSubmissionHash] == MessageStatus.Unknown,
@@ -89,43 +87,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         emit ConceroMessageValidationChecks(messageId, validationChecks);
 
-        EvmDstChainData memory dstChainData = abi.decode(
-            messageReceipt.dstChainData,
-            (EvmDstChainData)
-        );
-
-        require(Utils.isContract(dstChainData.receiver), InvalidReceiver());
-
-        bytes memory callData = abi.encodeWithSelector(
-            IConceroClient.conceroReceive.selector,
-            messageId,
-            messageReceipt,
-            validationChecks
-        );
-
-        (bool success, bytes memory result) = Utils.safeCall(
-            dstChainData.receiver,
-            dstChainData.gasLimit,
-            0,
-            256,
-            callData
-        );
-
-        if (success) {
-            s_router.messageStatus[messageSubmissionHash] = MessageStatus.Received;
-            emit ConceroMessageDelivered(messageId);
-        } else {
-            bytes4 bytesResult = bytes4(result);
-            if (bytesResult == MessageAlreadyProcessed.selector) {
-                revert MessageAlreadyProcessed();
-            } else if (bytesResult == ValidatorsConsensusNotReached.selector) {
-                revert ValidatorsConsensusNotReached();
-            }
-
-
-
-            emit ConceroMessageDeliveryFailed(messageId, result);
-        }
+        _deliverMessage(messageId, messageReceipt, validationChecks, messageSubmissionHash);
     }
 
     /* VIEW FUNCTIONS */
@@ -151,6 +113,40 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     /* INTERNAL FUNCTIONS */
+
+    function _deliverMessage(
+        bytes32 messageId,
+        MessageReceipt calldata messageReceipt,
+        bool[] memory validationChecks,
+        bytes32 messageSubmissionHash
+    ) internal {
+        EvmDstChainData memory dstChainData = abi.decode(
+            messageReceipt.dstChainData,
+            (EvmDstChainData)
+        );
+
+        bytes memory callData = abi.encodeWithSelector(
+            IConceroClient.conceroReceive.selector,
+            messageId,
+            messageReceipt,
+            validationChecks
+        );
+
+        (bool success, bytes memory result) = Utils.safeCall(
+            dstChainData.receiver,
+            dstChainData.gasLimit,
+            0,
+            256,
+            callData
+        );
+
+        if (success) {
+            s.router().messageStatus[messageSubmissionHash] = MessageStatus.Delivered;
+            emit ConceroMessageDelivered(messageId);
+        } else {
+            emit ConceroMessageDeliveryFailed(messageId, result);
+        }
+    }
 
     function _validateMessageParams(MessageRequest memory messageRequest) internal view {
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());

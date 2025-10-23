@@ -56,12 +56,6 @@ interface IConceroRouter {
         lastGasPrice
     }
 
-    enum MessageStatus {
-        Unknown,
-        Received,
-        Delivered
-    }
-
     error InsufficientFee(uint256 provided, uint256 required);
     error RequiredVariableUnset(RequiredVariableUnsetType variableType);
     error UnsupportedFeeToken();
@@ -73,9 +67,9 @@ interface IConceroRouter {
     event ConceroMessageReceived(
         bytes32 indexed messageId,
         MessageReceipt messageReceipt,
-        bytes[] validations
+        bytes[] validations,
+        bool[] validationChecks
     );
-    event ConceroMessageValidationChecks(bytes32 indexed messageId, bool[] validationChecks);
     event ConceroMessageDelivered(bytes32 indexed messageId);
     event ConceroMessageDeliveryFailed(bytes32 indexed messageId, bytes error);
 

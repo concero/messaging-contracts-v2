@@ -68,57 +68,21 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         require(!s_router.isMessageProcessed[messageId], MessageAlreadyProcessed(messageId));
 
-        bytes32 messageSubmissionHash = keccak256(
-            abi.encode(messageId, messageReceipt, validations)
-        );
-
-        require(
-            s_router.messageStatus[messageSubmissionHash] == MessageStatus.Unknown,
-            MessageSubmissionAlreadyReceived(messageId, messageSubmissionHash)
-        );
-
-        s_router.messageStatus[messageSubmissionHash] = MessageStatus.Received;
-
-        emit ConceroMessageReceived(messageId, messageReceipt, validations);
-
         IRelayerLib(abi.decode(messageReceipt.dstRelayerLib, (address))).validate(
             messageId,
             messageReceipt,
             msg.sender
         );
 
-        bool[] memory validationChecks = new bool[](messageReceipt.dstValidatorLibs.length);
+        bool[] memory validationChecks = _performValidationChecks(
+            messageId,
+            messageReceipt,
+            validations
+        );
 
-        for (uint256 i; i < messageReceipt.dstValidatorLibs.length; ++i) {
-            if (
-                !Utils.isEvmAddressValid(messageReceipt.dstValidatorLibs[i]) ||
-                validations[i].length == 0
-            ) {
-                validationChecks[i] = false;
-                continue;
-            }
+        emit ConceroMessageReceived(messageId, messageReceipt, validations, validationChecks);
 
-            bytes memory callData = abi.encodeWithSelector(
-                IValidatorLib.isValid.selector,
-                messageId,
-                messageReceipt,
-                validations[i]
-            );
-
-            (bool success, bytes memory result) = abi
-                .decode(messageReceipt.dstValidatorLibs[i], (address))
-                .staticcall(callData);
-
-            if (success && result.length == 32) {
-                validationChecks[i] = abi.decode(result, (uint256)) == 1;
-            } else {
-                validationChecks[i] = false;
-            }
-        }
-
-        emit ConceroMessageValidationChecks(messageId, validationChecks);
-
-        _deliverMessage(messageId, messageReceipt, validationChecks, messageSubmissionHash);
+        _deliverMessage(messageId, messageReceipt, validationChecks);
     }
 
     /* VIEW FUNCTIONS */
@@ -148,8 +112,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     function _deliverMessage(
         bytes32 messageId,
         MessageReceipt calldata messageReceipt,
-        bool[] memory validationChecks,
-        bytes32 messageSubmissionHash
+        bool[] memory validationChecks
     ) internal {
         EvmDstChainData memory dstChainData = abi.decode(
             messageReceipt.dstChainData,
@@ -172,13 +135,52 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         );
 
         if (success) {
-            s.router().messageStatus[messageSubmissionHash] = MessageStatus.Delivered;
             s.router().isMessageProcessed[messageId] = true;
-
             emit ConceroMessageDelivered(messageId);
         } else {
+            bytes32 messageSubmissionHash = keccak256(
+                abi.encode(messageId, messageReceipt, validationChecks)
+            );
+            s.router().isMessageRetryAllowed[messageSubmissionHash] = true;
+
             emit ConceroMessageDeliveryFailed(messageId, result);
         }
+    }
+
+    function _performValidationChecks(
+        bytes32 messageId,
+        MessageReceipt calldata messageReceipt,
+        bytes[] calldata validations
+    ) internal view returns (bool[] memory) {
+        bool[] memory validationChecks = new bool[](messageReceipt.dstValidatorLibs.length);
+
+        for (uint256 i; i < messageReceipt.dstValidatorLibs.length; ++i) {
+            if (
+                !Utils.isEvmAddressValid(messageReceipt.dstValidatorLibs[i]) ||
+                validations[i].length == 0
+            ) {
+                validationChecks[i] = false;
+            } else {
+                bytes memory callData = abi.encodeWithSelector(
+                    IValidatorLib.isValid.selector,
+                    messageId,
+                    messageReceipt,
+                    validations[i]
+                );
+
+                (bool success, bytes memory result) = abi
+                    .decode(messageReceipt.dstValidatorLibs[i], (address))
+                    .staticcall(callData);
+
+                if (success && result.length == 32) {
+                    validationChecks[i] = abi.decode(result, (uint256)) == 1;
+                } else {
+                    validationChecks[i] = false;
+                }
+            }
+        }
+
+        return validationChecks;
     }
 
     function _validateMessageParams(MessageRequest memory messageRequest) internal view {

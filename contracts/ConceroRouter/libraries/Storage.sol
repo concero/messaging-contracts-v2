@@ -8,25 +8,23 @@ pragma solidity 0.8.28;
 
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 
-library Namespaces {
+library Storage {
     bytes32 internal constant ROUTER =
         keccak256(
             abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.router.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
-}
 
-library Storage {
     struct Router {
         uint256 nonce;
         uint96 conceroMessageFeeInUsd;
-        mapping(bytes32 hashSum => IConceroRouter.MessageStatus messageStatus) messageStatus;
-        mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(address feeToken => bool isFeeToken) isFeeTokenSupported;
+        mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
+        mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryAllowed;
     }
 
     /* SLOT-BASED STORAGE ACCESS */
     function router() internal pure returns (Router storage s) {
-        bytes32 slot = Namespaces.ROUTER;
+        bytes32 slot = ROUTER;
         assembly {
             s.slot := slot
         }

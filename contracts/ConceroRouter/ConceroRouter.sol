@@ -90,7 +90,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         bool[] memory validationChecks = new bool[](messageReceipt.dstValidatorLibs.length);
 
         for (uint256 i; i < messageReceipt.dstValidatorLibs.length; ++i) {
-            if (!Utils.isEvmAddressValid(messageReceipt.dstValidatorLibs[i])) {
+            if (
+                !Utils.isEvmAddressValid(messageReceipt.dstValidatorLibs[i]) ||
+                validations[i].length == 0
+            ) {
                 validationChecks[i] = false;
                 continue;
             }

@@ -1,0 +1,14 @@
+{
+  "apiUrl": "https://your-api.example.com/reports",
+  "schedule": "*/2 * * * *",
+  "messageArgs": {
+    "messageId": "0x...",
+    "messageHashSum": "0x...",
+    "srcChainSelector": 11155111,
+    "srcChainData": {
+      "sender": "0x1234...abcd",
+      "blockNumber": "12345678"
+    },
+    "operatorAddress": "0xabc...def"
+  }
+}

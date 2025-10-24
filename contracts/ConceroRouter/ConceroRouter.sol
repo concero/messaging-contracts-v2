@@ -22,8 +22,9 @@ import {Base} from "./modules/Base.sol";
 contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
 
-    error MessageAlreadyProcessed(bytes32 id);
-    error InvalidValidationsCount();
+    error MessageAlreadyProcessed(bytes32 id, bytes32 messageHash);
+    error MessageSubmissionAlreadyProcessed(bytes32 id, bytes32 messageSubmissionHash);
+    error InvalidValidationsCount(uint256 validatorLibsCount, uint256 validationsCount);
 
     constructor(
         uint24 chainSelector,
@@ -51,7 +52,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
     function submitMessage(
         bytes32 messageId,
-        MessageReceipt calldata messageReceipt,
+        MessageReceipt calldata messageReceipt, // bytes
         bytes[] calldata validations
     ) external nonReentrant {
         require(
@@ -61,12 +62,16 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         require(
             messageReceipt.dstValidatorLibs.length == validations.length,
-            InvalidValidationsCount()
+            InvalidValidationsCount(messageReceipt.dstValidatorLibs.length, validations.length)
         );
 
         s.Router storage s_router = s.router();
 
-        require(!s_router.isMessageProcessed[messageId], MessageAlreadyProcessed(messageId));
+        bytes32 messageHash = keccak256(abi.encode(messageId, messageReceipt));
+        require(
+            !s_router.isMessageProcessed[messageHash],
+            MessageAlreadyProcessed(messageId, messageHash)
+        );
 
         IRelayerLib(abi.decode(messageReceipt.dstRelayerLib, (address))).validate(
             messageId,
@@ -80,9 +85,23 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             validations
         );
 
+        bytes32 messageSubmissionHash = keccak256(
+            abi.encode(messageId, messageReceipt, validationChecks)
+        );
+        require(
+            !s_router.isMessageRetryAllowed[messageSubmissionHash],
+            MessageSubmissionAlreadyProcessed(messageId, messageSubmissionHash)
+        );
+
         emit ConceroMessageReceived(messageId, messageReceipt, validations, validationChecks);
 
-        _deliverMessage(messageId, messageReceipt, validationChecks);
+        _deliverMessage(
+            messageId,
+            messageReceipt,
+            validationChecks,
+            messageHash,
+            messageSubmissionHash
+        );
     }
 
     /* VIEW FUNCTIONS */
@@ -112,18 +131,14 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     function _deliverMessage(
         bytes32 messageId,
         MessageReceipt calldata messageReceipt,
-        bool[] memory validationChecks
+        bool[] memory validationChecks,
+        bytes32 messageHash,
+        bytes32 messageSubmissionHash
     ) internal {
+        // TODO: handle this error more granular
         EvmDstChainData memory dstChainData = abi.decode(
             messageReceipt.dstChainData,
             (EvmDstChainData)
-        );
-
-        bytes memory callData = abi.encodeWithSelector(
-            IConceroClient.conceroReceive.selector,
-            messageId,
-            messageReceipt,
-            validationChecks
         );
 
         (bool success, bytes memory result) = Utils.safeCall(
@@ -131,18 +146,20 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             dstChainData.gasLimit,
             0,
             256,
-            callData
+            abi.encodeWithSelector(
+                IConceroClient.conceroReceive.selector,
+                messageId,
+                messageReceipt,
+                validationChecks
+            )
         );
 
         if (success) {
-            s.router().isMessageProcessed[messageId] = true;
+            s.router().isMessageProcessed[messageHash] = true;
             emit ConceroMessageDelivered(messageId);
         } else {
-            bytes32 messageSubmissionHash = keccak256(
-                abi.encode(messageId, messageReceipt, validationChecks)
-            );
+            // TODO: add check if invalid relayer - revert
             s.router().isMessageRetryAllowed[messageSubmissionHash] = true;
-
             emit ConceroMessageDeliveryFailed(messageId, result);
         }
     }

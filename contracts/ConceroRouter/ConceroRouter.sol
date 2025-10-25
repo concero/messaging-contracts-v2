@@ -233,6 +233,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
             require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
 
+            // TODO: store on contract
             Utils.transferNative(i_owner, conceroFee);
             Utils.transferNative(messageRequest.relayerLib, relayerFee);
 

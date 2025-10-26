@@ -9,7 +9,6 @@ pragma solidity 0.8.28;
 import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
 import {ConceroValidatorBase} from "../../ConceroValidator/base/ConceroValidatorBase.sol";
-
 import {CLFParams} from "contracts/ConceroValidator/libraries/Types.sol";
 
 contract DeployConceroValidator is ConceroValidatorBase {

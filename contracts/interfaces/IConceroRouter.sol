@@ -7,11 +7,6 @@
 pragma solidity ^0.8.20;
 
 interface IConceroRouter {
-    struct EvmDstChainData {
-        address receiver;
-        uint256 gasLimit;
-    }
-
     struct MessageRequest {
         uint24 dstChainSelector;
         uint64 srcBlockConfirmations;
@@ -43,6 +38,11 @@ interface IConceroRouter {
     struct EvmSrcChainData {
         uint64 blockConfirmations;
         address sender;
+    }
+
+    struct EvmDstChainData {
+        address receiver;
+        uint256 gasLimit;
     }
 
     struct Fee {

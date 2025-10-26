@@ -7,13 +7,12 @@
 pragma solidity 0.8.28;
 
 import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
-import {ConceroClientExample} from "../../../../contracts/examples/ConceroClientExample.sol";
 
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroRouter} from "../../scripts/deploy/DeployConceroRouter.s.sol";
 
 abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
-    ConceroClientExample internal conceroClient;
+    //    ConceroClientExample internal conceroClient;
 
     function setUp() public virtual override(DeployConceroRouter, ConceroTest) {
         super.setUp();
@@ -22,7 +21,7 @@ abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
             payable(deploy(SRC_CHAIN_SELECTOR, address(conceroPriceFeed)))
         );
 
-        conceroClient = new ConceroClientExample(payable(conceroRouter));
+        //        conceroClient = new ConceroClientExample(payable(conceroRouter));
     }
 
     //    function _setGasFeeConfig() internal {

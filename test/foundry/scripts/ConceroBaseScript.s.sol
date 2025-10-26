@@ -8,11 +8,9 @@ pragma solidity 0.8.28;
 
 import {Script} from "forge-std/src/Script.sol";
 
-import {MessageConfigBitOffsets as offsets} from "contracts/common/CommonConstants.sol";
 import {DeployMockERC20} from "./deploy/DeployMockERC20.s.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {Message as MessageLib} from "contracts/common/libraries/Message.sol";
-import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
 import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
 import {console} from "forge-std/src/Console.sol";
 
@@ -25,8 +23,9 @@ abstract contract ConceroBaseScript is Script {
 
     address public constant operator = address(0x4242424242424242424242424242424242424242);
     address public constant user = address(0x0101010101010101010101010101010101010101);
-	address public constant relayer = address(0x5555555555555555555555555555555555555555);
-    address constant CONCERO_VALIDATOR_ADDRESS = address(0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4);
+    address public constant relayer = address(0x5555555555555555555555555555555555555555);
+    address constant CONCERO_VALIDATOR_ADDRESS =
+        address(0xa45F4A08eCE764a74cE20306d704e7CbD755D8a4);
     address constant feedUpdater = address(0xffff5136020B92553496625644479C7ce4614bE8);
     address public usdc;
 

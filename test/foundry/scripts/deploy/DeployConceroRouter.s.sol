@@ -35,38 +35,9 @@ contract DeployConceroRouter is ConceroRouterBase {
     }
 
     function deploy(uint24 chainSelector, address priceFeed) public returns (address) {
-        address implementation = _deployImplementation(
-            chainSelector,
-            priceFeed,
-            CONCERO_VALIDATOR_ADDRESS,
-            i_conceroValidatorSubscriptionId,
-            [
-                MOCK_DON_SIGNER_ADDRESS_0,
-                MOCK_DON_SIGNER_ADDRESS_1,
-                MOCK_DON_SIGNER_ADDRESS_2,
-                MOCK_DON_SIGNER_ADDRESS_3
-            ]
-        );
+        address implementation = _deployImplementation(chainSelector, priceFeed);
         _deployProxy(implementation);
 
-        return address(conceroRouterProxy);
-    }
-
-    function deploy(
-        uint24 chainSelector,
-        address conceroPriceFeed,
-        address verifier,
-        uint64 verifierSubId,
-        address[4] memory clfSigners
-    ) public returns (address) {
-        address implementation = _deployImplementation(
-            chainSelector,
-            conceroPriceFeed,
-            verifier,
-            verifierSubId,
-            clfSigners
-        );
-        _deployProxy(implementation);
         return address(conceroRouterProxy);
     }
 
@@ -78,20 +49,11 @@ contract DeployConceroRouter is ConceroRouterBase {
 
     function _deployImplementation(
         uint24 chainSelector,
-        address conceroPriceFeed,
-        address verifier,
-        uint64 verifierSubId,
-        address[4] memory clfSigners
+        address conceroPriceFeed
     ) internal returns (address) {
         vm.startPrank(deployer);
 
-        conceroRouter = new ConceroRouterHarness(
-            chainSelector,
-            conceroPriceFeed,
-            verifier,
-            verifierSubId,
-            clfSigners
-        );
+        conceroRouter = new ConceroRouterHarness(chainSelector, conceroPriceFeed);
         vm.stopPrank();
 
         return address(conceroRouter);

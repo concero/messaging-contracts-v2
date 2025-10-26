@@ -31,6 +31,7 @@ library Utils {
      * @param addr The address to check.
      * @return bool True if the address is a contract, false otherwise.
      */
+    // TODO: move to OZ function
     function isContract(address addr) internal view returns (bool) {
         uint256 size;
         assembly {
@@ -77,6 +78,7 @@ library Utils {
         return (_success, _returnData);
     }
 
+    // TODO: move to OZ function
     function transferNative(address receiver, uint256 value) internal {
         (bool success, bytes memory data) = safeCall(receiver, 21000, value, 32, "");
         require(success, CommonErrors.TransferFailed(data));

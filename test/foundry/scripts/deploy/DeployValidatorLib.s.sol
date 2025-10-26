@@ -10,6 +10,10 @@ import {ValidatorLib} from "contracts/ValidatorLib/ValidatorLib.sol";
 import {ValidatorLibBase} from "../../ValidatorLib/base/ValidatorLibBase.sol";
 
 contract DeployValidatorLib is ValidatorLibBase {
+    // TODO: rename to follow conventions
+    address internal constant CONCERO_VERIFIER_ADDRESS = address(0x11);
+    uint64 internal i_conceroVerifierSubscriptionId = 12;
+
     ValidatorLib internal validatorLib;
 
     function setUp() public virtual override {

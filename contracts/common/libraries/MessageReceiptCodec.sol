@@ -11,6 +11,7 @@ import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 library MessageReceiptCodec {
     uint8 internal constant DEFAULT_BYTES_LENGTH = 32;
     uint8 internal constant UINT8_BYTES_LENGTH = 1;
+    uint8 internal constant UINT24_BYTES_LENGTH = 3;
     uint8 internal constant VERSION = 1;
 
     uint24 internal constant FIXED_SIZE_VARIABLES_LENGTH =
@@ -47,6 +48,10 @@ library MessageReceiptCodec {
             32;
 
         bytes memory packedResult = new bytes(totalLength);
+        uint256 offset;
+
+        offset = writeUint8(packedResult, offset, 0xee);
+        offset = writeUint8(packedResult, offset, 0xee);
 
         return packedResult;
     }
@@ -70,29 +75,25 @@ library MessageReceiptCodec {
         return offset + UINT8_BYTES_LENGTH;
     }
 
-    /// @dev записать 3 байта BE (uint24)
-    //    function _writeU24BE(
-    //        bytes memory out,
-    //        uint256 offset,
-    //        uint256 v
-    //    ) private pure returns (uint256) {
-    //        // v максимум 24 бита
-    //        assembly {
-    //            let p := add(add(out, 32), offset)
-    //            mstore8(p, shr(16, v))
-    //            mstore8(add(p, 1), shr(8, v))
-    //            mstore8(add(p, 2), v)
-    //        }
-    //        return offset + U24;
-    //    }
-    //
-    //    /// @dev записать 4-байтовую длину (uint32, BE)
+    function _writeU24BE(
+        bytes memory out,
+        uint256 offset,
+        uint256 v
+    ) private pure returns (uint256) {
+        assembly {
+            let p := add(add(out, 32), offset)
+            mstore8(p, shr(16, v))
+            mstore8(add(p, 1), shr(8, v))
+            mstore8(add(p, 2), v)
+        }
+        return offset + UINT24_BYTES_LENGTH;
+    }
+
     //    function _writeU32BE(
     //        bytes memory out,
     //        uint256 offset,
     //        uint256 v
     //    ) private pure returns (uint256) {
-    //        // при желании можно добавить проверку на overflow: require(v <= type(uint32).max)
     //        assembly {
     //            let p := add(add(out, 32), offset)
     //            mstore8(p, shr(24, v))
@@ -103,7 +104,6 @@ library MessageReceiptCodec {
     //        return offset + LEN4;
     //    }
     //
-    //    /// @dev записать len(4B BE) + bytes data
     //    function _writeLenAndBytes(
     //        bytes memory out,
     //        uint256 offset,
@@ -114,7 +114,6 @@ library MessageReceiptCodec {
     //        return offset;
     //    }
     //
-    //    /// @dev записать массив bytes[]: count(4B BE) + {len(4B BE)+data}*N
     //    function _writeNested(
     //        bytes memory out,
     //        uint256 offset,
@@ -133,7 +132,6 @@ library MessageReceiptCodec {
     //        return offset;
     //    }
     //
-    //    /// @dev быстрый memcpy в уже выделенный буфер out, начиная с смещения offset
     //    function _memcpy(
     //        bytes memory out,
     //        uint256 offset,
@@ -144,7 +142,6 @@ library MessageReceiptCodec {
     //            let dstPtr := add(add(out, 32), offset)
     //            let srcPtr := add(src, 32)
     //
-    //            // копируем полными словами
     //            for {
     //                let end := add(srcPtr, and(not(31), len))
     //            } lt(srcPtr, end) {
@@ -154,7 +151,6 @@ library MessageReceiptCodec {
     //                mstore(dstPtr, mload(srcPtr))
     //            }
     //
-    //            // хвост (0..31 байт)
     //            let rem := and(len, 31)
     //            if rem {
     //                // маска: оставить старшие (32-rem) байт в месте назначения
@@ -164,9 +160,8 @@ library MessageReceiptCodec {
     //                mstore(dstPtr, or(and(dstWord, mask), and(srcWord, not(mask))))
     //                dstPtr := add(dstPtr, rem)
     //            }
-    //            // вернуть новый offset = offset + len
     //            offset := sub(dstPtr, add(out, 32))
     //        }
-    //        return offset + len - 0; // offset уже обновлён в assembly; эта строка только для читабельности
+    //        return offset + len - 0;
     //    }
 }

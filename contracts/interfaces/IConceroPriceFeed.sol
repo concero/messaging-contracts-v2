@@ -11,6 +11,9 @@ interface IConceroPriceFeed {
     function getNativeUsdRateAndGasPrice() external view returns (uint256, uint256);
     function getNativeNativeRate(uint24 chainSelector) external view returns (uint256);
     function getLastGasPrice(uint24 chainSelector) external view returns (uint256);
+
+    function getUsdRate(address token) external view returns (uint256); // TODO: implement it
+
     function getMessageFeeData(
         uint24 dstChainSelector,
         uint24 baseChainSelector

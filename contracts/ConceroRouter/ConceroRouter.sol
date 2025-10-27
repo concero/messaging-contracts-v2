@@ -14,6 +14,7 @@ import {CommonErrors} from "../common/CommonErrors.sol";
 import {Utils} from "../common/libraries/Utils.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {IConceroPriceFeed} from "../interfaces/IConceroPriceFeed.sol";
 import {IRelayerLib} from "../interfaces/IRelayerLib.sol";
 import {IRelayer} from "../interfaces/IRelayer.sol";
 import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
@@ -172,10 +173,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     function getConceroFee(address feeToken) public view returns (uint256) {
-        if (feeToken == address(0)) {
-            return i_conceroPriceFeed.getNativeUsdRate() * s.router().conceroMessageFeeInUsd;
-        }
-        revert UnsupportedFeeToken();
+        s.Router storage s_router = s.router();
+
+        return
+            IConceroPriceFeed(s_router.priceFeeds[feeToken]).getUsdRate(feeToken) *
+            s_router.conceroMessageFeeInUsd;
     }
 
     /* INTERNAL FUNCTIONS */
@@ -298,7 +300,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
             require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
         } else {
-            revert UnsupportedFeeToken();
+            IERC20(messageRequest.feeToken).safeTransferFrom(msg.sender, address(this), totalFee);
         }
 
         uint256 totalRelayerFee = relayerFee + totalValidatorsFee;

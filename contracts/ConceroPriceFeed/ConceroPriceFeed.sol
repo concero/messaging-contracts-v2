@@ -82,6 +82,11 @@ contract ConceroPriceFeed is IConceroPriceFeed {
         }
     }
 
+    // TODO: implement it
+    function getUsdRate(address) external pure returns (uint256) {
+        return 1;
+    }
+
     /**
      * @notice Gets the native USD rate
      * @return The current native USD rate in 18 decimals

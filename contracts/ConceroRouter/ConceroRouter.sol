@@ -8,6 +8,7 @@ pragma solidity 0.8.28;
 
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {CommonConstants} from "../common/CommonConstants.sol";
 import {CommonErrors} from "../common/CommonErrors.sol";
 import {Utils} from "../common/libraries/Utils.sol";
@@ -21,6 +22,7 @@ import {Base} from "./modules/Base.sol";
 
 contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
+    using SafeERC20 for IERC20;
 
     error MessageAlreadyProcessed(bytes32 id, bytes32 messageHash);
     error MessageSubmissionAlreadyProcessed(bytes32 id, bytes32 messageSubmissionHash);
@@ -102,6 +104,56 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             messageHash,
             messageSubmissionHash
         );
+    }
+
+    function withdrawRelayerFee(address[] calldata tokens) external nonReentrant {
+        s.Router storage s_router = s.router();
+
+        for (uint256 i; i < tokens.length; ++i) {
+            uint256 relayerFee = s_router.relayerFeeEarned[msg.sender][tokens[i]];
+            s_router.totalRelayerFeeEarned[tokens[i]] -= relayerFee;
+            s_router.relayerFeeEarned[msg.sender][tokens[i]] = 0;
+
+            if (relayerFee == 0) continue;
+
+            if (tokens[i] == address(0)) {
+                Utils.transferNative(msg.sender, relayerFee);
+            } else {
+                IERC20(tokens[i]).safeTransfer(msg.sender, relayerFee);
+            }
+
+            emit RelayerFeeWithdrawn(msg.sender, tokens[i], relayerFee);
+        }
+    }
+
+    /* ADMIN FUNCTIONS */
+
+    function withdrawConceroFee(address[] calldata tokens) external onlyOwner {
+        s.Router storage s_router = s.router();
+
+        for (uint256 i; i < tokens.length; ++i) {
+            uint256 balance;
+
+            if (tokens[i] == address(0)) {
+                balance = address(this).balance;
+            } else {
+                balance = IERC20(tokens[i]).balanceOf(address(this));
+            }
+
+            if (balance == 0) continue;
+
+            uint256 conceroFee = balance - s_router.totalRelayerFeeEarned[tokens[i]];
+
+            if (conceroFee == 0) continue;
+
+            if (tokens[i] == address(0)) {
+                Utils.transferNative(msg.sender, conceroFee);
+            } else {
+                IERC20(tokens[i]).safeTransfer(msg.sender, conceroFee);
+            }
+
+            // TODO: mb add event
+        }
     }
 
     /* VIEW FUNCTIONS */
@@ -201,6 +253,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     function _validateMessageParams(MessageRequest memory messageRequest) internal view {
+        // TODO: add check validator libs count checks
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
         require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
         require(
@@ -225,22 +278,42 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     function _collectMessageFee(
         MessageRequest calldata messageRequest
     ) internal returns (Fee memory) {
-        if (messageRequest.feeToken == address(0)) {
-            uint256 relayerFee = IRelayerLib(messageRequest.relayerLib).getFee(messageRequest);
-            uint256 conceroFee = getConceroFee(messageRequest.feeToken);
-            uint256 totalFee = relayerFee + conceroFee;
+        s.Router storage s_router = s.router();
 
+        uint256 relayerFee = IRelayerLib(messageRequest.relayerLib).getFee(messageRequest);
+        uint256 totalValidatorsFee;
+        uint256[] memory validatorsFee = new uint256[](messageRequest.validatorLibs.length);
+
+        for (uint256 i; i < messageRequest.validatorLibs.length; ++i) {
+            validatorsFee[i] = IValidatorLib(messageRequest.validatorLibs[i]).getFee(
+                messageRequest
+            );
+            totalValidatorsFee += validatorsFee[i];
+        }
+
+        uint256 conceroFee = getConceroFee(messageRequest.feeToken);
+        uint256 totalFee = relayerFee + conceroFee + totalValidatorsFee;
+
+        if (messageRequest.feeToken == address(0)) {
             // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
             require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
-
-            // TODO: store on contract
-            Utils.transferNative(i_owner, conceroFee);
-            Utils.transferNative(messageRequest.relayerLib, relayerFee);
-
-            return Fee({concero: conceroFee, relayer: relayerFee, token: messageRequest.feeToken});
         } else {
             revert UnsupportedFeeToken();
         }
+
+        uint256 totalRelayerFee = relayerFee + totalValidatorsFee;
+        s_router.relayerFeeEarned[messageRequest.relayerLib][
+            messageRequest.feeToken
+        ] += totalRelayerFee;
+        s_router.totalRelayerFeeEarned[messageRequest.feeToken] += totalRelayerFee;
+
+        return
+            Fee({
+                concero: conceroFee,
+                relayer: relayerFee,
+                validatorsFee: validatorsFee,
+                token: messageRequest.feeToken
+            });
     }
 
     function _messageRequestToReceipt(

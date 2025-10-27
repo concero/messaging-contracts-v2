@@ -78,9 +78,8 @@ library Utils {
         return (_success, _returnData);
     }
 
-    // TODO: move to OZ function
     function transferNative(address receiver, uint256 value) internal {
-        (bool success, bytes memory data) = safeCall(receiver, 21000, value, 32, "");
+        (bool success, bytes memory data) = receiver.call{value: value}("");
         require(success, CommonErrors.TransferFailed(data));
     }
 

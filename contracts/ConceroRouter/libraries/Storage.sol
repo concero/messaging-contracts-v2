@@ -20,6 +20,8 @@ library Storage {
         mapping(address feeToken => bool isFeeToken) isFeeTokenSupported;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryAllowed;
+        mapping(address feeToken => uint256 totalFeeEarned) totalRelayerFeeEarned;
+        mapping(address relayerLib => mapping(address feeToken => uint256 feeEarned)) relayerFeeEarned;
     }
 
     /* SLOT-BASED STORAGE ACCESS */

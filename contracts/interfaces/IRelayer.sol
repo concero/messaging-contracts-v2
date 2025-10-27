@@ -13,6 +13,8 @@ interface IRelayer {
     error InvalidReceiver();
     error InvalidDstChainSelector(uint24 received, uint24 expexted);
 
+    event RelayerFeeWithdrawn(address indexed, address indexed token, uint256 amount);
+
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
      */

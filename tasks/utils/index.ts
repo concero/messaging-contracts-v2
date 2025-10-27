@@ -1,5 +1,6 @@
-import { getNativeUsdRate } from "./getNativeUsdRate";
 import { getLastGasPrice } from "./getLastGasPrice";
+import { getNativeUsdRate } from "./getNativeUsdRate";
+
 export { getNativeNativeRate } from "./getNativeNativeRate";
 export { callContractFunction } from "./callFunction";
 export { changeOwnership } from "./changeOwnership";

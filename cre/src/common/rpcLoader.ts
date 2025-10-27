@@ -1,5 +1,6 @@
-import { mock as testnetChains } from "./MockRpc";
 import testnetNetworks from "@concero/v2-networks/networks/testnet.json";
+
+import { mock as testnetChains } from "./MockRpc";
 
 export interface RpcConfig {
 	rpcUrls: string[];
@@ -22,17 +23,19 @@ type NetworkData = {
 
 const rpcConfigs: Record<number, RpcConfig> = {};
 
-Object.entries(testnetNetworks as Record<string, NetworkData>).forEach(([networkName, networkData]) => {
-	const chainData = (testnetChains as any)[networkName] as ChainData;
+Object.entries(testnetNetworks as Record<string, NetworkData>).forEach(
+	([networkName, networkData]) => {
+		const chainData = (testnetChains as any)[networkName] as ChainData;
 
-	if (chainData && chainData.rpcUrls) {
-		rpcConfigs[networkData.chainSelector] = {
-			chainSelector: networkData.chainSelector,
-			chainId: networkData.chainId,
-			rpcUrls: chainData.rpcUrls,
-			finalityConfirmations: networkData.finalityConfirmations,
-		};
-	}
-});
+		if (chainData && chainData.rpcUrls) {
+			rpcConfigs[networkData.chainSelector] = {
+				chainSelector: networkData.chainSelector,
+				chainId: networkData.chainId,
+				rpcUrls: chainData.rpcUrls,
+				finalityConfirmations: networkData.finalityConfirmations,
+			};
+		}
+	},
+);
 
 export { rpcConfigs };

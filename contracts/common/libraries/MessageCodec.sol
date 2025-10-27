@@ -33,35 +33,6 @@ library MessageCodec {
             32 + // deliveryRpcs length
             32; // payload length
 
-    //    function toBytes(
-    //        IConceroRouter.MessageReceipt memory messageReceipt
-    //    ) internal pure returns (bytes memory) {
-    //        uint256 totalLength = FIXED_SIZE_VARIABLES_LENGTH +
-    //            messageReceipt.srcChainData.length +
-    //            messageReceipt.dstChainData.length +
-    //            messageReceipt.dstRelayerLib.length +
-    //            messageReceipt.relayerConfig.length +
-    //            messageReceipt.payload.length +
-    //            messageReceipt.dstValidatorLibs.length +
-    //            messageReceipt.validatorConfigs.length +
-    //            messageReceipt.validationRpcs.length +
-    //            messageReceipt.deliveryRpcs.length +
-    //            calculateNestedBytesLength(messageReceipt.dstValidatorLibs) +
-    //            calculateNestedBytesLength(messageReceipt.validatorConfigs) +
-    //            calculateNestedBytesLength(messageReceipt.validationRpcs) +
-    //            calculateNestedBytesLength(messageReceipt.deliveryRpcs) -
-    //            32;
-    //
-    //        bytes memory packedResult = new bytes(totalLength);
-    //        uint256 offset = 32;
-    //
-    //        offset = writeUint8(packedResult, offset, VERSION);
-    //        offset = writeUint24(packedResult, offset, messageReceipt.srcChainSelector);
-    //        offset = writeLenAndBytes(packedResult, offset, messageReceipt.srcChainData);
-    //
-    //        return packedResult;
-    //    }
-
     function toMessageReceiptBytes(
         IConceroRouter.MessageRequest memory messageRequest,
         uint24 srcChainSelector,
@@ -89,6 +60,78 @@ library MessageCodec {
         writeLenAndBytes(packedResult, offset, messageRequest.payload);
 
         return packedResult;
+    }
+
+    function toMessageReceiptBytes1(
+        IConceroRouter.MessageRequest memory messageRequest,
+        uint24 srcChainSelector,
+        address msgSender,
+        bytes memory dstRelayerLib,
+        bytes[] memory dstValidatorLibs
+    ) internal pure returns (bytes memory) {
+        bytes memory head = abi.encodePacked(
+            VERSION,
+            srcChainSelector,
+            messageRequest.dstChainSelector,
+            uint64(messageRequest.srcBlockConfirmations),
+            msgSender
+        );
+
+        bytes memory dstChain = abi.encodePacked(
+            uint32(messageRequest.dstChainData.length),
+            messageRequest.dstChainData
+        );
+
+        bytes memory relayer = abi.encodePacked(
+            uint32(dstRelayerLib.length),
+            dstRelayerLib,
+            uint32(messageRequest.relayerConfig.length),
+            messageRequest.relayerConfig
+        );
+
+        bytes memory validators = abi.encodePacked(
+            flatBytes(dstValidatorLibs),
+            flatBytes(messageRequest.validatorConfigs)
+        );
+
+        bytes memory rpcs = abi.encodePacked(
+            flatBytes(messageRequest.validationRpcs),
+            flatBytes(messageRequest.deliveryRpcs)
+        );
+
+        bytes memory payload = abi.encodePacked(
+            uint32(messageRequest.payload.length),
+            messageRequest.payload
+        );
+
+        return abi.encodePacked(head, dstChain, relayer, validators, rpcs, payload);
+    }
+
+    function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
+        uint256 n = data.length;
+
+        uint256 total = 4;
+        for (uint256 i; i < n; ++i) {
+            total += 4 + data[i].length;
+        }
+
+        bytes memory out = new bytes(total);
+        uint256 off = 32;
+
+        off = writeUint32(out, off, uint32(n));
+
+        for (uint256 i; i < n; ++i) {
+            bytes memory b = data[i];
+            uint256 li = b.length;
+            off = writeUint32(out, off, uint32(li));
+
+            for (uint256 j; j < li; ++j) {
+                out[off + j] = b[j];
+            }
+            off += li;
+        }
+
+        return out;
     }
 
     //    function toMessageReceipt(

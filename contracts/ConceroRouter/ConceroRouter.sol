@@ -157,6 +157,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         }
     }
 
+    function setConceroMessageFeeInUsd(uint96 amount) external onlyOwner {
+        s.router().conceroMessageFeeInUsd = amount;
+    }
+
     /* VIEW FUNCTIONS */
 
     /* @inheritdoc IConceroRouter */

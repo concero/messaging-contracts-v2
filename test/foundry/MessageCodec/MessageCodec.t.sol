@@ -16,7 +16,7 @@ contract MessageCodecTest is Test {
 
     function test_encode() public {
         vm.pauseGasMetering();
-        IConceroRouter.MessageRequest memory messageReceipt = IConceroRouter.MessageRequest({
+        IConceroRouter.MessageRequest memory messageRequest = IConceroRouter.MessageRequest({
             dstChainSelector: 0xefacbd,
             srcBlockConfirmations: 590,
             feeToken: makeAddr("feeToken"),
@@ -33,7 +33,7 @@ contract MessageCodecTest is Test {
         bytes[] memory dstValidatorLibs = new bytes[](10);
 
         vm.resumeGasMetering();
-        bytes memory messageBytes = messageReceipt.toMessageReceiptBytes(
+        bytes memory messageBytes = messageRequest.toMessageReceiptBytes1(
             0xd12caf,
             makeAddr("sender"),
             new bytes(10),

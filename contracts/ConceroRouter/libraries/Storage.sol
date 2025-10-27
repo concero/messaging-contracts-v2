@@ -18,6 +18,7 @@ library Storage {
         uint256 nonce;
         uint96 conceroMessageFeeInUsd;
         uint16 maxValidatorsCount;
+        uint64 maxMessageSize;
         mapping(address feeToken => bool isFeeToken) isFeeTokenSupported;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryAllowed;

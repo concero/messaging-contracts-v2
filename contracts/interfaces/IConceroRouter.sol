@@ -24,7 +24,7 @@ interface IConceroRouter {
     struct MessageReceipt {
         uint24 srcChainSelector;
         uint24 dstChainSelector;
-        bytes srcChainData;
+        bytes srcChainData; // sender, block confirmations
         bytes dstChainData;
         bytes dstRelayerLib; // TODO: mb should be bytes32
         bytes relayerConfig;

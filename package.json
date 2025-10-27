@@ -33,7 +33,7 @@
     "@concero/contract-utils": "https://github.com/concero/contract-utils",
     "@concero/rpcs": "https://github.com/concero/rpcs",
     "@concero/v2-networks": "https://github.com/concero/v2-networks",
-    "@concero/v2-operators": "https://github.com/concero/v2-operators",
+    "@concero/v2-operators": "git+ssh://git@github.com/concero/v2-operators.git",
     "@nomicfoundation/hardhat-chai-matchers": "2.0.8",
     "@nomicfoundation/hardhat-ethers": "3.0.8",
     "@nomicfoundation/hardhat-network-helpers": "1.0.12",
@@ -78,6 +78,7 @@
   },
   "dependencies": {
     "@chainlink/contracts": "1.3.0",
+    "@chainlink/cre-sdk": "^0.0.9-alpha",
     "@chainlink/functions-toolkit": "0.3.2",
     "@openzeppelin/contracts": "5.2.0"
   }

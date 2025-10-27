@@ -9,12 +9,13 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/src/Test.sol";
 import {console} from "forge-std/src/console.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
-import {MessageReceiptCodec} from "contracts/common/libraries/MessageReceiptCodec.sol";
+import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
 
-contract MessageReceiptCodecTest is Test {
-    using MessageReceiptCodec for IConceroRouter.MessageRequest;
+contract MessageCodecTest is Test {
+    using MessageCodec for IConceroRouter.MessageRequest;
 
     function test_encode() public {
+        vm.pauseGasMetering();
         IConceroRouter.MessageRequest memory messageReceipt = IConceroRouter.MessageRequest({
             dstChainSelector: 0xefacbd,
             srcBlockConfirmations: 590,
@@ -31,13 +32,18 @@ contract MessageReceiptCodecTest is Test {
 
         bytes[] memory dstValidatorLibs = new bytes[](10);
 
-        console.logBytes(
-            messageReceipt.toMessageReceiptBytes(
-                0xd12caf,
-                makeAddr("sender"),
-                new bytes(10),
-                dstValidatorLibs
-            )
+        vm.resumeGasMetering();
+        bytes memory messageBytes = messageReceipt.toMessageReceiptBytes(
+            0xd12caf,
+            makeAddr("sender"),
+            new bytes(10),
+            dstValidatorLibs
         );
+
+        vm.pauseGasMetering();
+
+        console.logBytes(messageBytes);
+
+        vm.resumeGasMetering();
     }
 }

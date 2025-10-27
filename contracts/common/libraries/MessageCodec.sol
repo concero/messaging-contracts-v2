@@ -9,7 +9,7 @@ pragma solidity ^0.8.20;
 import "forge-std/src/console.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 
-library MessageReceiptCodec {
+library MessageCodec {
     uint8 internal constant DEFAULT_BYTES_LENGTH = 32;
     uint8 internal constant UINT8_BYTES_LENGTH = 1;
     uint8 internal constant UINT24_BYTES_LENGTH = 3;
@@ -33,34 +33,34 @@ library MessageReceiptCodec {
             32 + // deliveryRpcs length
             32; // payload length
 
-    function toBytes(
-        IConceroRouter.MessageReceipt memory messageReceipt
-    ) internal pure returns (bytes memory) {
-        uint256 totalLength = FIXED_SIZE_VARIABLES_LENGTH +
-            messageReceipt.srcChainData.length +
-            messageReceipt.dstChainData.length +
-            messageReceipt.dstRelayerLib.length +
-            messageReceipt.relayerConfig.length +
-            messageReceipt.payload.length +
-            messageReceipt.dstValidatorLibs.length +
-            messageReceipt.validatorConfigs.length +
-            messageReceipt.validationRpcs.length +
-            messageReceipt.deliveryRpcs.length +
-            calculateNestedBytesLength(messageReceipt.dstValidatorLibs) +
-            calculateNestedBytesLength(messageReceipt.validatorConfigs) +
-            calculateNestedBytesLength(messageReceipt.validationRpcs) +
-            calculateNestedBytesLength(messageReceipt.deliveryRpcs) -
-            32;
-
-        bytes memory packedResult = new bytes(totalLength);
-        uint256 offset = 32;
-
-        offset = writeUint8(packedResult, offset, VERSION);
-        offset = writeUint24(packedResult, offset, messageReceipt.srcChainSelector);
-        offset = writeLenAndBytes(packedResult, offset, messageReceipt.srcChainData);
-
-        return packedResult;
-    }
+    //    function toBytes(
+    //        IConceroRouter.MessageReceipt memory messageReceipt
+    //    ) internal pure returns (bytes memory) {
+    //        uint256 totalLength = FIXED_SIZE_VARIABLES_LENGTH +
+    //            messageReceipt.srcChainData.length +
+    //            messageReceipt.dstChainData.length +
+    //            messageReceipt.dstRelayerLib.length +
+    //            messageReceipt.relayerConfig.length +
+    //            messageReceipt.payload.length +
+    //            messageReceipt.dstValidatorLibs.length +
+    //            messageReceipt.validatorConfigs.length +
+    //            messageReceipt.validationRpcs.length +
+    //            messageReceipt.deliveryRpcs.length +
+    //            calculateNestedBytesLength(messageReceipt.dstValidatorLibs) +
+    //            calculateNestedBytesLength(messageReceipt.validatorConfigs) +
+    //            calculateNestedBytesLength(messageReceipt.validationRpcs) +
+    //            calculateNestedBytesLength(messageReceipt.deliveryRpcs) -
+    //            32;
+    //
+    //        bytes memory packedResult = new bytes(totalLength);
+    //        uint256 offset = 32;
+    //
+    //        offset = writeUint8(packedResult, offset, VERSION);
+    //        offset = writeUint24(packedResult, offset, messageReceipt.srcChainSelector);
+    //        offset = writeLenAndBytes(packedResult, offset, messageReceipt.srcChainData);
+    //
+    //        return packedResult;
+    //    }
 
     function toMessageReceiptBytes(
         IConceroRouter.MessageRequest memory messageRequest,
@@ -90,6 +90,22 @@ library MessageReceiptCodec {
 
         return packedResult;
     }
+
+    //    function toMessageReceipt(
+    //        bytes memory packedMessageReceipt
+    //    ) internal pure returns (IConceroRouter.MessageReceipt memory) {
+    //        IConceroRouter.MessageReceipt memory messageReceipt = IConceroRouter.MessageReceipt();
+    //
+    //        uint256 offset = 32;
+    //
+    //        messageReceipt.srcChainSelector = readUint24(packedMessageReceipt, offset);
+    //        offset += UINT24_BYTES_LENGTH;
+    //        messageReceipt.dstChainSelector = readUint24(packedMessageReceipt, offset);
+    //        offset += UINT24_BYTES_LENGTH;
+    //        messageReceipt.srcChainData;
+    //
+    //        return messageReceipt;
+    //    }
 
     function calculateTotalLength(
         IConceroRouter.MessageRequest memory messageRequest,
@@ -283,6 +299,49 @@ library MessageReceiptCodec {
             offset = writeBytes(out, offset, arr[i]);
         }
         return offset;
+    }
+
+    // READ FUNCTIONS
+
+    function readUint24(
+        bytes memory packedMessageReceipt,
+        uint256 offset
+    ) private pure returns (uint24 value) {
+        assembly {
+            let word := mload(add(packedMessageReceipt, offset))
+
+            value := byte(29, word)
+            value := or(shl(8, value), byte(30, word))
+            value := or(shl(8, value), byte(31, word))
+        }
+    }
+
+    function readUint64(
+        bytes memory packedMessageReceipt,
+        uint256 offset
+    ) private pure returns (uint64 value) {
+        assembly {
+            let word := mload(add(packedMessageReceipt, offset))
+            value := or(
+                shl(56, byte(24, word)),
+                or(
+                    shl(48, byte(25, word)),
+                    or(
+                        shl(40, byte(26, word)),
+                        or(
+                            shl(32, byte(27, word)),
+                            or(
+                                shl(24, byte(28, word)),
+                                or(
+                                    shl(16, byte(29, word)),
+                                    or(shl(8, byte(30, word)), byte(31, word))
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        }
     }
 
     function calculateNestedBytesLength(bytes[] memory data) internal pure returns (uint256) {

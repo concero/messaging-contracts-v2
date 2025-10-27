@@ -26,10 +26,10 @@ interface IConceroRouter {
         uint24 dstChainSelector;
         bytes srcChainData;
         bytes dstChainData;
-        bytes dstRelayerLib;
+        bytes dstRelayerLib; // TODO: mb should be bytes32
+        bytes relayerConfig;
         bytes[] dstValidatorLibs;
         bytes[] validatorConfigs;
-        bytes relayerConfig;
         bytes[] validationRpcs;
         bytes[] deliveryRpcs;
         bytes payload;

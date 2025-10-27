@@ -12,23 +12,32 @@ import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {MessageReceiptCodec} from "contracts/common/libraries/MessageReceiptCodec.sol";
 
 contract MessageReceiptCodecTest is Test {
-    using MessageReceiptCodec for IConceroRouter.MessageReceipt;
+    using MessageReceiptCodec for IConceroRouter.MessageRequest;
 
     function test_encode() public {
-        IConceroRouter.MessageReceipt memory messageReceipt = IConceroRouter.MessageReceipt({
-            srcChainSelector: 1,
-            dstChainSelector: 2,
-            srcChainData: new bytes(3),
-            dstChainData: new bytes(4),
-            dstRelayerLib: new bytes(5),
-            dstValidatorLibs: new bytes[](6),
+        IConceroRouter.MessageRequest memory messageReceipt = IConceroRouter.MessageRequest({
+            dstChainSelector: 0xefacbd,
+            srcBlockConfirmations: 590,
+            feeToken: makeAddr("feeToken"),
+            relayerLib: makeAddr("relayerLib"),
+            validatorLibs: new address[](2),
             validatorConfigs: new bytes[](6),
             relayerConfig: new bytes(1),
             validationRpcs: new bytes[](2),
             deliveryRpcs: new bytes[](4),
+            dstChainData: new bytes(4),
             payload: new bytes(3)
         });
 
-        console.logBytes(messageReceipt.toBytes());
+        bytes[] memory dstValidatorLibs = new bytes[](10);
+
+        console.logBytes(
+            messageReceipt.toMessageReceiptBytes(
+                0xd12caf,
+                makeAddr("sender"),
+                new bytes(10),
+                dstValidatorLibs
+            )
+        );
     }
 }

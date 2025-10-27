@@ -17,6 +17,7 @@ library Storage {
     struct Router {
         uint256 nonce;
         uint96 conceroMessageFeeInUsd;
+        uint16 maxValidatorsCount;
         mapping(address feeToken => bool isFeeToken) isFeeTokenSupported;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryAllowed;

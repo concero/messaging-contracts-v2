@@ -62,6 +62,7 @@ interface IConceroRouter {
     error UnsupportedFeeToken();
     error MessageTooLarge(uint256 receviedLength, uint256 expectedLength);
     error EmptyDstChainData();
+    error InvalidValidatorsCount(uint256 validatorsCount, uint256 maxValidatorsCount);
 
     event ConceroMessageSent(bytes32 indexed messageId, MessageReceipt messageReceipt);
     event ConceroMessageFeePaid(bytes32 indexed messageId, Fee fee);

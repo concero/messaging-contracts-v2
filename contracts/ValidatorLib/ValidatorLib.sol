@@ -23,6 +23,8 @@ import {ClfSigner} from "./modules/ClfSigner.sol";
 contract ValidatorLib is IValidatorLib, Base, ClfSigner {
     using s for s.ValidatorLib;
 
+    uint8 internal constant VALIDATOR_LIB_FEE_BPS_USD = 100;
+
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed,
@@ -106,7 +108,7 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
         );
 
         uint256 validatorLibFee = CommonUtils.convertUsdBpsToNative(
-            CommonConstants.VALIDATOR_LIB_FEE_BPS_USD,
+            VALIDATOR_LIB_FEE_BPS_USD,
             nativeUsdRate
         );
 

@@ -262,6 +262,14 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             messageRequest.payload.length < CommonConstants.MESSAGE_MAX_SIZE,
             MessageTooLarge(messageRequest.payload.length, CommonConstants.MESSAGE_MAX_SIZE)
         );
+        require(
+            messageRequest.validatorLibs.length > 0 &&
+                messageRequest.validatorLibs.length < s.router().maxValidatorsCount,
+            InvalidValidatorsCount(
+                messageRequest.validatorLibs.length,
+                s.router().maxValidatorsCount
+            )
+        );
     }
 
     function _buildMessageId(uint24 dstChainSelector) private returns (bytes32) {

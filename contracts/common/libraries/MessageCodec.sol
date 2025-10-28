@@ -10,7 +10,6 @@ import "forge-std/src/console.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 
 library MessageCodec {
-    uint8 internal constant DEFAULT_BYTES_LENGTH = 32;
     uint8 internal constant UINT8_BYTES_LENGTH = 1;
     uint8 internal constant UINT24_BYTES_LENGTH = 3;
     uint8 internal constant UINT32_BYTES_LENGTH = 4;
@@ -19,20 +18,6 @@ library MessageCodec {
     uint8 internal constant ADDRESS_BYTES_LENGTH = 20;
     uint8 internal constant VERSION = 1;
 
-    uint24 internal constant FIXED_SIZE_VARIABLES_LENGTH =
-        8 + // version flag
-            24 + // srcChainSelector
-            24 + // dstChainSelector
-            32 + // srcChainData length
-            32 + // dstChainData length
-            32 + // dstRelayerLib length
-            32 + // dstValidatorLibs length
-            32 + // validatorConfigs length
-            32 + // relayerConfig length
-            32 + // validationRpcs length
-            32 + // deliveryRpcs length
-            32; // payload length
-
     function toMessageReceiptBytes(
         IConceroRouter.MessageRequest memory messageRequest,
         uint24 srcChainSelector,
@@ -40,98 +25,56 @@ library MessageCodec {
         bytes memory dstRelayerLib,
         bytes[] memory dstValidatorLibs
     ) internal pure returns (bytes memory) {
-        uint256 totalLength = calculateTotalLength(messageRequest, dstRelayerLib, dstValidatorLibs);
-
-        bytes memory packedResult = new bytes(totalLength);
-        uint256 offset = 32;
-
-        offset = writeUint8(packedResult, offset, VERSION);
-        offset = writeUint24(packedResult, offset, srcChainSelector);
-        offset = writeUint24(packedResult, offset, messageRequest.dstChainSelector);
-        offset = writeUint64(packedResult, offset, messageRequest.srcBlockConfirmations);
-        offset = writeAddress(packedResult, offset, msgSender);
-        offset = writeLenAndBytes(packedResult, offset, messageRequest.dstChainData);
-        offset = writeLenAndBytes(packedResult, offset, dstRelayerLib);
-        offset = writeLenAndBytes(packedResult, offset, messageRequest.relayerConfig);
-        offset = writeNestedBytes(packedResult, offset, dstValidatorLibs);
-        offset = writeNestedBytes(packedResult, offset, messageRequest.validatorConfigs);
-        offset = writeNestedBytes(packedResult, offset, messageRequest.validationRpcs);
-        offset = writeNestedBytes(packedResult, offset, messageRequest.deliveryRpcs);
-        writeLenAndBytes(packedResult, offset, messageRequest.payload);
-
-        return packedResult;
-    }
-
-    function toMessageReceiptBytes1(
-        IConceroRouter.MessageRequest memory messageRequest,
-        uint24 srcChainSelector,
-        address msgSender,
-        bytes memory dstRelayerLib,
-        bytes[] memory dstValidatorLibs
-    ) internal pure returns (bytes memory) {
-        bytes memory head = abi.encodePacked(
-            VERSION,
-            srcChainSelector,
-            messageRequest.dstChainSelector,
-            uint64(messageRequest.srcBlockConfirmations),
-            msgSender
-        );
-
-        bytes memory dstChain = abi.encodePacked(
-            uint32(messageRequest.dstChainData.length),
-            messageRequest.dstChainData
-        );
-
-        bytes memory relayer = abi.encodePacked(
-            uint32(dstRelayerLib.length),
-            dstRelayerLib,
-            uint32(messageRequest.relayerConfig.length),
-            messageRequest.relayerConfig
-        );
-
-        bytes memory validators = abi.encodePacked(
-            flatBytes(dstValidatorLibs),
-            flatBytes(messageRequest.validatorConfigs)
-        );
-
-        bytes memory rpcs = abi.encodePacked(
-            flatBytes(messageRequest.validationRpcs),
-            flatBytes(messageRequest.deliveryRpcs)
-        );
-
-        bytes memory payload = abi.encodePacked(
-            uint32(messageRequest.payload.length),
-            messageRequest.payload
-        );
-
-        return abi.encodePacked(head, dstChain, relayer, validators, rpcs, payload);
+        return
+            abi.encodePacked(
+                abi.encodePacked(
+                    VERSION,
+                    srcChainSelector,
+                    messageRequest.dstChainSelector,
+                    uint64(messageRequest.srcBlockConfirmations),
+                    bytes32(uint256(uint160(msgSender))),
+                    uint32(messageRequest.dstChainData.length),
+                    messageRequest.dstChainData,
+                    uint32(dstRelayerLib.length),
+                    dstRelayerLib
+                ),
+                abi.encodePacked(
+                    uint32(messageRequest.relayerConfig.length),
+                    messageRequest.relayerConfig,
+                    flatBytes(dstValidatorLibs),
+                    flatBytes(messageRequest.validatorConfigs),
+                    flatBytes(messageRequest.validationRpcs),
+                    flatBytes(messageRequest.deliveryRpcs),
+                    uint32(messageRequest.payload.length),
+                    messageRequest.payload
+                )
+            );
     }
 
     function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
-        uint256 n = data.length;
+        uint256 totalLength = UINT32_BYTES_LENGTH;
 
-        uint256 total = 4;
-        for (uint256 i; i < n; ++i) {
-            total += 4 + data[i].length;
+        for (uint256 i; i < data.length; ++i) {
+            totalLength += data[i].length + UINT32_BYTES_LENGTH;
         }
 
-        bytes memory out = new bytes(total);
-        uint256 off = 32;
+        bytes memory res = new bytes(totalLength);
+        uint256 j;
 
-        off = writeUint32(out, off, uint32(n));
+        writeUint32(res, j, uint32(data.length));
+        j += UINT32_BYTES_LENGTH;
 
-        for (uint256 i; i < n; ++i) {
-            bytes memory b = data[i];
-            uint256 li = b.length;
-            off = writeUint32(out, off, uint32(li));
+        for (uint256 i; i < data.length; ++i) {
+            writeUint32(res, j, uint32(data[i].length));
+            j += UINT32_BYTES_LENGTH;
 
-            for (uint256 j; j < li; ++j) {
-                out[off + j] = b[j];
+            for (uint256 k; k < data[i].length; ++k) {
+                res[j] = data[i][k];
+                ++j;
             }
-            off += li;
         }
 
-        return out;
+        return res;
     }
 
     //    function toMessageReceipt(
@@ -150,74 +93,13 @@ library MessageCodec {
     //        return messageReceipt;
     //    }
 
-    function calculateTotalLength(
-        IConceroRouter.MessageRequest memory messageRequest,
-        bytes memory dstRelayerLib,
-        bytes[] memory dstValidatorLibs
-    ) private pure returns (uint256) {
-        return
-            FIXED_SIZE_VARIABLES_LENGTH +
-            UINT24_BYTES_LENGTH +
-            UINT64_BYTES_LENGTH + // srcChainData
-            messageRequest.dstChainData.length +
-            dstRelayerLib.length +
-            messageRequest.relayerConfig.length +
-            messageRequest.payload.length +
-            dstValidatorLibs.length +
-            messageRequest.validatorConfigs.length +
-            messageRequest.validationRpcs.length +
-            messageRequest.deliveryRpcs.length +
-            calculateNestedBytesLength(dstValidatorLibs) +
-            calculateNestedBytesLength(messageRequest.validatorConfigs) +
-            calculateNestedBytesLength(messageRequest.validationRpcs) +
-            calculateNestedBytesLength(messageRequest.deliveryRpcs) -
-            32;
-    }
-
-    function writeUint8(
-        bytes memory out,
-        uint256 offset,
-        uint8 value
-    ) private pure returns (uint256) {
-        assembly {
-            mstore8(add(out, offset), value)
-        }
-        return offset + UINT8_BYTES_LENGTH;
-
-        //        out[offset] = bytes1(value);
-        //        unchecked {
-        //            return offset + UINT8_BYTES_LENGTH;
-        //        }
-    }
-
-    function writeUint24(
-        bytes memory out,
-        uint256 offset,
-        uint24 value
-    ) private pure returns (uint256) {
-        assembly {
-            let ptr := add(out, offset)
-            mstore8(ptr, shr(16, value))
-            mstore8(add(ptr, 1), shr(8, value))
-            mstore8(add(ptr, 2), value)
-        }
-        return offset + UINT24_BYTES_LENGTH;
-
-        //        out[offset] = bytes1(uint8(value >> 16));
-        //        out[offset + 1] = bytes1(uint8(value >> 8));
-        //        out[offset + 2] = bytes1(uint8(value));
-        //        unchecked {
-        //            return offset + UINT24_BYTES_LENGTH;
-        //        }
-    }
-
     function writeUint32(
         bytes memory out,
         uint256 offset,
         uint32 value
     ) private pure returns (uint256) {
         assembly {
-            let ptr := add(out, offset)
+            let ptr := add(add(out, 32), offset)
             mstore8(ptr, shr(24, value))
             mstore8(add(ptr, 1), shr(16, value))
             mstore8(add(ptr, 2), shr(8, value))
@@ -225,172 +107,12 @@ library MessageCodec {
         }
 
         return offset + UINT32_BYTES_LENGTH;
-
-        //        out[offset] = bytes1(uint8(value >> 24));
-        //        out[offset + 1] = bytes1(uint8(value >> 16));
-        //        out[offset + 2] = bytes1(uint8(value >> 8));
-        //        out[offset + 3] = bytes1(uint8(value));
-        //
-        //        unchecked {
-        //            return offset + UINT32_BYTES_LENGTH;
-        //        }
-    }
-
-    function writeUint64(
-        bytes memory out,
-        uint256 offset,
-        uint64 value
-    ) private pure returns (uint256) {
-        assembly {
-            let ptr := add(out, offset)
-            mstore8(ptr, shr(56, value))
-            mstore8(add(ptr, 1), shr(48, value))
-            mstore8(add(ptr, 2), shr(40, value))
-            mstore8(add(ptr, 3), shr(32, value))
-            mstore8(add(ptr, 4), shr(24, value))
-            mstore8(add(ptr, 5), shr(16, value))
-            mstore8(add(ptr, 6), shr(8, value))
-            mstore8(add(ptr, 7), value)
-        }
-
-        return offset + UINT64_BYTES_LENGTH;
-
-        //        out[offset    ] = bytes1(uint8(value >> 56));
-        //        out[offset + 1] = bytes1(uint8(value >> 48));
-        //        out[offset + 2] = bytes1(uint8(value >> 40));
-        //        out[offset + 3] = bytes1(uint8(value >> 32));
-        //        out[offset + 4] = bytes1(uint8(value >> 24));
-        //        out[offset + 5] = bytes1(uint8(value >> 16));
-        //        out[offset + 6] = bytes1(uint8(value >> 8));
-        //        out[offset + 7] = bytes1(uint8(value));
-        //        unchecked { return offset + UINT64_BYTES_LENGTH; }
-    }
-
-    function writeAddress(
-        bytes memory out,
-        uint256 offset,
-        address value
-    ) private pure returns (uint256) {
-        assembly {
-            mstore(add(out, offset), value)
-        }
-        return offset + BYTES32_BYTES_LENGTH;
-
-        //        for (uint256 i = 0; i < 32; ++i) {
-        //            out[offset + i] = value[i];
-        //        }
-        //        unchecked { return offset + 32; }
-    }
-
-    function writeLenAndBytes(
-        bytes memory out,
-        uint256 offset,
-        bytes memory data
-    ) private pure returns (uint256) {
-        // TODO: validate lengths
-        offset = writeUint32(out, offset, uint32(data.length));
-        return writeBytes(out, offset, data);
-    }
-
-    function writeBytes(
-        bytes memory out,
-        uint256 offset,
-        bytes memory src
-    ) private pure returns (uint256) {
-        uint256 srcLen = src.length;
-        if (srcLen == 0) return offset;
-
-        assembly {
-            let dstPtr := add(out, offset)
-            let srcPtr := add(src, 32)
-
-            for {
-                let end := add(srcPtr, and(not(31), srcLen))
-            } lt(srcPtr, end) {
-                srcPtr := add(srcPtr, 32)
-                dstPtr := add(dstPtr, 32)
-            } {
-                mstore(dstPtr, mload(srcPtr))
-            }
-
-            let rem := and(srcLen, 31)
-            if rem {
-                let mask := sub(shl(mul(8, sub(32, rem)), 1), 1)
-                let srcWord := mload(srcPtr)
-                let dstWord := mload(dstPtr)
-                mstore(dstPtr, or(and(dstWord, mask), and(srcWord, not(mask))))
-                dstPtr := add(dstPtr, rem)
-            }
-            offset := sub(dstPtr, out)
-        }
-        return offset + srcLen;
-
-        //        for (uint256 i; i < src.length;++i) {
-        //            out[i + offset] = src[i];
-        //        }
-        //        return offset + src.length;
-    }
-
-    function writeNestedBytes(
-        bytes memory out,
-        uint256 offset,
-        bytes[] memory arr
-    ) private pure returns (uint256) {
-        offset = writeUint32(out, offset, uint32(arr.length));
-        for (uint256 i; i < arr.length; ++i) {
-            offset = writeUint32(out, offset, uint32(arr[i].length));
-            offset = writeBytes(out, offset, arr[i]);
-        }
-        return offset;
-    }
-
-    // READ FUNCTIONS
-
-    function readUint24(
-        bytes memory packedMessageReceipt,
-        uint256 offset
-    ) private pure returns (uint24 value) {
-        assembly {
-            let word := mload(add(packedMessageReceipt, offset))
-
-            value := byte(29, word)
-            value := or(shl(8, value), byte(30, word))
-            value := or(shl(8, value), byte(31, word))
-        }
-    }
-
-    function readUint64(
-        bytes memory packedMessageReceipt,
-        uint256 offset
-    ) private pure returns (uint64 value) {
-        assembly {
-            let word := mload(add(packedMessageReceipt, offset))
-            value := or(
-                shl(56, byte(24, word)),
-                or(
-                    shl(48, byte(25, word)),
-                    or(
-                        shl(40, byte(26, word)),
-                        or(
-                            shl(32, byte(27, word)),
-                            or(
-                                shl(24, byte(28, word)),
-                                or(
-                                    shl(16, byte(29, word)),
-                                    or(shl(8, byte(30, word)), byte(31, word))
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        }
     }
 
     function calculateNestedBytesLength(bytes[] memory data) internal pure returns (uint256) {
         uint256 length;
         for (uint256 i; i < data.length; ++i) {
-            length += data[i].length + DEFAULT_BYTES_LENGTH;
+            length += data[i].length + UINT32_BYTES_LENGTH;
         }
         return length;
     }

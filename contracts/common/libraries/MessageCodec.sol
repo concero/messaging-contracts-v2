@@ -7,17 +7,30 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/src/console.sol";
+import {Bytes} from "@openzeppelin/contracts/utils/Bytes.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
+import {BytesUtils} from "./BytesUtils.sol";
 
 library MessageCodec {
+    using Bytes for bytes;
+    using BytesUtils for bytes;
+
     uint8 internal constant UINT8_BYTES_LENGTH = 1;
     uint8 internal constant UINT24_BYTES_LENGTH = 3;
     uint8 internal constant UINT32_BYTES_LENGTH = 4;
     uint8 internal constant UINT64_BYTES_LENGTH = 8;
     uint8 internal constant BYTES32_BYTES_LENGTH = 32;
     uint8 internal constant ADDRESS_BYTES_LENGTH = 20;
+    uint8 internal constant LENGTH_BYTES_SIZE = UINT32_BYTES_LENGTH;
+    uint8 internal constant EVM_SRC_CHAIN_DATA_LENGTH = BYTES32_BYTES_LENGTH + UINT64_BYTES_LENGTH;
     uint8 internal constant VERSION = 1;
 
+    uint8 internal constant SRC_CHAIN_SELECTOR_OFFSET = 1;
+    uint8 internal constant DST_CHAIN_SELECTOR_OFFSET =
+        SRC_CHAIN_SELECTOR_OFFSET + UINT24_BYTES_LENGTH; // 4
+    uint8 internal constant SRC_CHAIN_DATA_OFFSET = DST_CHAIN_SELECTOR_OFFSET + UINT24_BYTES_LENGTH; // 7
+
+    // WRITE FUNCTIONS //
     function toMessageReceiptBytes(
         IConceroRouter.MessageRequest memory messageRequest,
         uint24 srcChainSelector,
@@ -25,14 +38,20 @@ library MessageCodec {
         bytes memory dstRelayerLib,
         bytes[] memory dstValidatorLibs
     ) internal pure returns (bytes memory) {
+        // TODO: validate all lengths
+
         return
             abi.encodePacked(
                 abi.encodePacked(
-                    VERSION,
-                    srcChainSelector,
-                    messageRequest.dstChainSelector,
-                    uint64(messageRequest.srcBlockConfirmations),
-                    bytes32(uint256(uint160(msgSender))),
+                    VERSION, // 0
+                    srcChainSelector, // 1
+                    messageRequest.dstChainSelector, // 4
+                    // src chain data
+                    uint32(EVM_SRC_CHAIN_DATA_LENGTH),
+                    abi.encodePacked(
+                        bytes32(bytes20(msgSender)),
+                        messageRequest.srcBlockConfirmations
+                    ),
                     uint32(messageRequest.dstChainData.length),
                     messageRequest.dstChainData,
                     uint32(dstRelayerLib.length),
@@ -61,11 +80,11 @@ library MessageCodec {
         bytes memory res = new bytes(totalLength);
         uint256 j;
 
-        writeUint32(res, j, uint32(data.length));
+        res.writeUint32(j, uint32(data.length));
         j += UINT32_BYTES_LENGTH;
 
         for (uint256 i; i < data.length; ++i) {
-            writeUint32(res, j, uint32(data[i].length));
+            res.writeUint32(j, uint32(data[i].length));
             j += UINT32_BYTES_LENGTH;
 
             for (uint256 k; k < data[i].length; ++k) {
@@ -77,43 +96,65 @@ library MessageCodec {
         return res;
     }
 
-    //    function toMessageReceipt(
-    //        bytes memory packedMessageReceipt
-    //    ) internal pure returns (IConceroRouter.MessageReceipt memory) {
-    //        IConceroRouter.MessageReceipt memory messageReceipt = IConceroRouter.MessageReceipt();
-    //
-    //        uint256 offset = 32;
-    //
-    //        messageReceipt.srcChainSelector = readUint24(packedMessageReceipt, offset);
-    //        offset += UINT24_BYTES_LENGTH;
-    //        messageReceipt.dstChainSelector = readUint24(packedMessageReceipt, offset);
-    //        offset += UINT24_BYTES_LENGTH;
-    //        messageReceipt.srcChainData;
-    //
-    //        return messageReceipt;
-    //    }
-
-    function writeUint32(
-        bytes memory out,
-        uint256 offset,
-        uint32 value
-    ) private pure returns (uint256) {
-        assembly {
-            let ptr := add(add(out, 32), offset)
-            mstore8(ptr, shr(24, value))
-            mstore8(add(ptr, 1), shr(16, value))
-            mstore8(add(ptr, 2), shr(8, value))
-            mstore8(add(ptr, 3), value)
-        }
-
-        return offset + UINT32_BYTES_LENGTH;
+    function encodeEvmDstChainData(
+        address receiver,
+        uint32 dstGasLimit
+    ) internal pure returns (bytes memory) {
+        return abi.encodePacked(bytes32(bytes20(receiver)), dstGasLimit);
     }
 
-    function calculateNestedBytesLength(bytes[] memory data) internal pure returns (uint256) {
-        uint256 length;
-        for (uint256 i; i < data.length; ++i) {
-            length += data[i].length + UINT32_BYTES_LENGTH;
-        }
-        return length;
+    // READ FUNCTIONS //
+
+    function version(bytes memory data) internal pure returns (uint8) {
+        return data.readUint8(0);
+    }
+
+    function srcChainSelector(bytes memory data) internal pure returns (uint24) {
+        return data.readUint24(SRC_CHAIN_SELECTOR_OFFSET);
+    }
+
+    function dstChainSelector(bytes memory data) internal pure returns (uint24) {
+        return data.readUint24(DST_CHAIN_SELECTOR_OFFSET);
+    }
+
+    function evmSrcChainData(bytes memory data) internal pure returns (address, uint64) {
+        uint256 srcChainDataOffset = SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE;
+        return (
+            data.readAddress(srcChainDataOffset),
+            data.readUint64(srcChainDataOffset + BYTES32_BYTES_LENGTH)
+        );
+    }
+
+    function getDstChainDataOffset(bytes memory data) internal pure returns (uint256) {
+        return SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE + data.readUint32(SRC_CHAIN_DATA_OFFSET);
+    }
+
+    function evmDstChainData(bytes memory data) internal pure returns (address, uint32) {
+        uint256 dstChainDataOffset = getDstChainDataOffset(data) + LENGTH_BYTES_SIZE;
+
+        return (
+            data.readAddress(dstChainDataOffset),
+            data.readUint32(dstChainDataOffset + BYTES32_BYTES_LENGTH)
+        );
+    }
+
+    function getDstRelayerLibOffset(bytes memory data) internal pure returns (uint256) {
+        uint256 dstChainDataOffset = getDstChainDataOffset(data);
+        return dstChainDataOffset + data.readUint32(dstChainDataOffset) + LENGTH_BYTES_SIZE;
+    }
+
+    function emvDstRelayerLib(bytes memory data) internal pure returns (address) {
+        return data.readAddress(getDstRelayerLibOffset(data) + LENGTH_BYTES_SIZE);
+    }
+
+    function getRelayerConfigOffset(bytes memory data) internal pure returns (uint256) {
+        uint256 dstRelayerLibOffset = getDstRelayerLibOffset(data);
+        return dstRelayerLibOffset + data.readUint32(dstRelayerLibOffset) + LENGTH_BYTES_SIZE;
+    }
+
+    function relayerConfig(bytes memory data) internal pure returns (bytes memory) {
+        uint256 relayerConfigLengthOffset = getRelayerConfigOffset(data);
+        uint256 start = relayerConfigLengthOffset + LENGTH_BYTES_SIZE;
+        return data.slice(start, start + data.readUint32(relayerConfigLengthOffset));
     }
 }

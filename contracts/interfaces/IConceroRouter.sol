@@ -36,8 +36,8 @@ interface IConceroRouter {
     }
 
     struct EvmSrcChainData {
-        uint64 blockConfirmations;
         address sender;
+        uint64 blockConfirmations;
     }
 
     struct EvmDstChainData {

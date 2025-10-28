@@ -8320,10 +8320,10 @@ socks@^2.8.3:
     ip-address "^10.0.1"
     smart-buffer "^4.2.0"
 
-solady@0.1.19:
-  version "0.1.19"
-  resolved "https://registry.yarnpkg.com/solady/-/solady-0.1.19.tgz#27699bddb45842c284d745aba49f8eb9a6cd9b3e"
-  integrity sha512-G++8xhNVkRaCw7uySX1obmhYLOk7nFjeCc1XcTmA+WQ7cQXqYDca+DoDpWI/N6iWKOcQQXoLwx+5Vkx9LDSABw==
+solady@0.1.26:
+  version "0.1.26"
+  resolved "https://registry.yarnpkg.com/solady/-/solady-0.1.26.tgz#80b4d621cfdbd82b772c5c701877d2f0ca12736f"
+  integrity sha512-dhGr/ptJFdea/1KE6xgqgwEdbMhUiSfRc6A+jLeltPe16zyt9qtED3PElIBVRnzEmUO5aZTjKVAr6SlqXBBcIw==
 
 solc@0.8.26:
   version "0.8.26"

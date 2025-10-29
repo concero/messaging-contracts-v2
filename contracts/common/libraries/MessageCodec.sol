@@ -141,6 +141,16 @@ library MessageCodec {
         return unflatBytes(data, getValidationRpcsOffset(data));
     }
 
+    function deliveryRpcs(bytes memory data) internal pure returns (bytes[] memory) {
+        return unflatBytes(data, getDeliveryRpcsOffset(data));
+    }
+
+    function payload(bytes memory data) internal pure returns (bytes memory) {
+        uint256 payloadLengthOffset = getPayloadOffset(data);
+        uint256 start = payloadLengthOffset + LENGTH_BYTES_SIZE;
+        return data.slice(start, start + data.readUint32(payloadLengthOffset));
+    }
+
     // OFFSETS CALCULATION
 
     function getDstChainDataOffset(bytes memory data) internal pure returns (uint256) {
@@ -168,6 +178,14 @@ library MessageCodec {
 
     function getValidationRpcsOffset(bytes memory data) internal pure returns (uint256) {
         return calculateNestedArrOffset(data, getValidatorConfigsOffset(data));
+    }
+
+    function getDeliveryRpcsOffset(bytes memory data) internal pure returns (uint256) {
+        return calculateNestedArrOffset(data, getValidationRpcsOffset(data));
+    }
+
+    function getPayloadOffset(bytes memory data) internal pure returns (uint256) {
+        return calculateNestedArrOffset(data, getDeliveryRpcsOffset(data));
     }
 
     // GENERIC FUNCTIONS //

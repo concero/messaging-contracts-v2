@@ -86,9 +86,6 @@ contract MessageCodecTest is Test {
 
         (address sender, uint64 srcBlockConfirmations) = messageBytes.evmSrcChainData();
         (address receiver, uint32 gasLimit) = messageBytes.evmDstChainData();
-        address[] memory dstValidatorLibs = messageBytes.evmDstValidatorLibs();
-        bytes[] memory validatorConfigs = messageBytes.validatorConfigs();
-        bytes[] memory validationRpcs = messageBytes.validationRpcs();
 
         vm.pauseGasMetering();
 
@@ -101,9 +98,11 @@ contract MessageCodecTest is Test {
         assertEq(gasLimit, s_gasLimit);
         assertEq(messageBytes.emvDstRelayerLib(), s_dstRelayerLibAddr);
         assertEq(messageRequest.relayerConfig, messageBytes.relayerConfig());
-        assertEq(dstValidatorLibs, s_dstValidatorAddresses);
-        assertEq(validatorConfigs, s_validatorConfigs);
-        assertEq(validationRpcs, s_validationRpcs);
+        assertEq(messageBytes.evmDstValidatorLibs(), s_dstValidatorAddresses);
+        assertEq(messageBytes.validatorConfigs(), s_validatorConfigs);
+        assertEq(messageBytes.validationRpcs(), s_validationRpcs);
+        assertEq(messageBytes.deliveryRpcs(), s_deliveryRpcs);
+        assertEq(messageBytes.payload(), s_payload);
 
         vm.resumeGasMetering();
     }

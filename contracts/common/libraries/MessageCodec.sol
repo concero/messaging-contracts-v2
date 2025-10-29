@@ -70,32 +70,6 @@ library MessageCodec {
             );
     }
 
-    function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
-        uint256 totalLength = UINT32_BYTES_LENGTH;
-
-        for (uint256 i; i < data.length; ++i) {
-            totalLength += data[i].length + UINT32_BYTES_LENGTH;
-        }
-
-        bytes memory res = new bytes(totalLength);
-        uint256 j;
-
-        res.writeUint32(j, uint32(data.length));
-        j += UINT32_BYTES_LENGTH;
-
-        for (uint256 i; i < data.length; ++i) {
-            res.writeUint32(j, uint32(data[i].length));
-            j += UINT32_BYTES_LENGTH;
-
-            for (uint256 k; k < data[i].length; ++k) {
-                res[j] = data[i][k];
-                ++j;
-            }
-        }
-
-        return res;
-    }
-
     function encodeEvmDstChainData(
         address receiver,
         uint32 dstGasLimit
@@ -125,10 +99,6 @@ library MessageCodec {
         );
     }
 
-    function getDstChainDataOffset(bytes memory data) internal pure returns (uint256) {
-        return SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE + data.readUint32(SRC_CHAIN_DATA_OFFSET);
-    }
-
     function evmDstChainData(bytes memory data) internal pure returns (address, uint32) {
         uint256 dstChainDataOffset = getDstChainDataOffset(data) + LENGTH_BYTES_SIZE;
 
@@ -138,13 +108,48 @@ library MessageCodec {
         );
     }
 
+    function emvDstRelayerLib(bytes memory data) internal pure returns (address) {
+        return data.readAddress(getDstRelayerLibOffset(data) + LENGTH_BYTES_SIZE);
+    }
+
+    function relayerConfig(bytes memory data) internal pure returns (bytes memory) {
+        uint256 relayerConfigLengthOffset = getRelayerConfigOffset(data);
+        uint256 start = relayerConfigLengthOffset + LENGTH_BYTES_SIZE;
+        return data.slice(start, start + data.readUint32(relayerConfigLengthOffset));
+    }
+
+    function evmDstValidatorLibs(bytes memory data) internal pure returns (address[] memory) {
+        uint256 dstValidatorLibsOffset = getDstValidatorLibsOffset(data);
+        address[] memory res = new address[](data.readUint32(dstValidatorLibsOffset));
+
+        uint256 offset = dstValidatorLibsOffset + LENGTH_BYTES_SIZE;
+        for (uint256 i; i < res.length; ++i) {
+            uint256 length = data.readUint32(offset);
+            offset += LENGTH_BYTES_SIZE;
+            res[i] = data.readAddress(offset);
+            offset += length;
+        }
+
+        return res;
+    }
+
+    function validatorConfigs(bytes memory data) internal pure returns (bytes[] memory) {
+        return unflatBytes(data, getValidatorConfigsOffset(data));
+    }
+
+    function validationRpcs(bytes memory data) internal pure returns (bytes[] memory) {
+        return unflatBytes(data, getValidationRpcsOffset(data));
+    }
+
+    // OFFSETS CALCULATION
+
+    function getDstChainDataOffset(bytes memory data) internal pure returns (uint256) {
+        return SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE + data.readUint32(SRC_CHAIN_DATA_OFFSET);
+    }
+
     function getDstRelayerLibOffset(bytes memory data) internal pure returns (uint256) {
         uint256 dstChainDataOffset = getDstChainDataOffset(data);
         return dstChainDataOffset + data.readUint32(dstChainDataOffset) + LENGTH_BYTES_SIZE;
-    }
-
-    function emvDstRelayerLib(bytes memory data) internal pure returns (address) {
-        return data.readAddress(getDstRelayerLibOffset(data) + LENGTH_BYTES_SIZE);
     }
 
     function getRelayerConfigOffset(bytes memory data) internal pure returns (uint256) {
@@ -152,9 +157,72 @@ library MessageCodec {
         return dstRelayerLibOffset + data.readUint32(dstRelayerLibOffset) + LENGTH_BYTES_SIZE;
     }
 
-    function relayerConfig(bytes memory data) internal pure returns (bytes memory) {
-        uint256 relayerConfigLengthOffset = getRelayerConfigOffset(data);
-        uint256 start = relayerConfigLengthOffset + LENGTH_BYTES_SIZE;
-        return data.slice(start, start + data.readUint32(relayerConfigLengthOffset));
+    function getDstValidatorLibsOffset(bytes memory data) internal pure returns (uint256) {
+        uint256 relayerConfigOffset = getRelayerConfigOffset(data);
+        return relayerConfigOffset + data.readUint32(relayerConfigOffset) + LENGTH_BYTES_SIZE;
+    }
+
+    function getValidatorConfigsOffset(bytes memory data) internal pure returns (uint256) {
+        return calculateNestedArrOffset(data, getDstValidatorLibsOffset(data));
+    }
+
+    function getValidationRpcsOffset(bytes memory data) internal pure returns (uint256) {
+        return calculateNestedArrOffset(data, getValidatorConfigsOffset(data));
+    }
+
+    // GENERIC FUNCTIONS //
+
+    function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
+        uint256 totalLength = UINT32_BYTES_LENGTH;
+
+        for (uint256 i; i < data.length; ++i) {
+            totalLength += data[i].length + UINT32_BYTES_LENGTH;
+        }
+
+        bytes memory res = new bytes(totalLength);
+        uint256 j;
+
+        res.writeUint32(j, uint32(data.length));
+        j += UINT32_BYTES_LENGTH;
+
+        for (uint256 i; i < data.length; ++i) {
+            res.writeUint32(j, uint32(data[i].length));
+            j += UINT32_BYTES_LENGTH;
+
+            for (uint256 k; k < data[i].length; ++k) {
+                res[j] = data[i][k];
+                ++j;
+            }
+        }
+
+        return res;
+    }
+
+    function calculateNestedArrOffset(
+        bytes memory data,
+        uint256 start
+    ) internal pure returns (uint256) {
+        uint256 nestedArrLength = data.readUint32(start);
+        uint256 offset = start + LENGTH_BYTES_SIZE;
+
+        for (uint256 i; i < nestedArrLength; ++i) {
+            offset += LENGTH_BYTES_SIZE + data.readUint32(offset);
+        }
+
+        return offset;
+    }
+
+    function unflatBytes(bytes memory data, uint256 start) internal pure returns (bytes[] memory) {
+        bytes[] memory res = new bytes[](data.readUint32(start));
+
+        uint256 offset = start + LENGTH_BYTES_SIZE;
+        for (uint256 i; i < res.length; ++i) {
+            uint256 length = data.readUint32(offset);
+            offset += LENGTH_BYTES_SIZE;
+            res[i] = data.slice(offset, offset + length);
+            offset += length;
+        }
+
+        return res;
     }
 }

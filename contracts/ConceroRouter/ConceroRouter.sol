@@ -56,7 +56,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         bytes memory packedMessage = messageRequest.toMessageReceiptBytes(
             i_chainSelector,
             msg.sender,
-            ++s.router().nonce[i_chainSelector][msg.sender],
+            ++s.router().nonce[msg.sender][i_chainSelector][messageRequest.dstChainSelector],
             IRelayerLib(messageRequest.relayerLib).getDstLib(messageRequest.dstChainSelector),
             dstValidatorLibs
         );

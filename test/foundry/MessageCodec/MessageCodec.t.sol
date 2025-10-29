@@ -15,12 +15,11 @@ contract MessageCodecTest is Test {
     using MessageCodec for IConceroRouter.MessageRequest;
     using MessageCodec for bytes;
 
-    uint8 internal constant VERSION = 1;
-
     uint24 internal s_srcChainSelector = 3;
     uint24 internal s_dstChainSelector = 8;
     uint64 internal s_srcBlockConfirmations = 9;
     uint32 internal s_gasLimit = 300_00;
+    uint256 internal s_nonce = 5777982;
 
     address internal s_relayerLib = makeAddr("relayerLib");
     address internal s_sender = makeAddr("sender");
@@ -78,6 +77,7 @@ contract MessageCodecTest is Test {
         bytes memory messageBytes = messageRequest.toMessageReceiptBytes(
             s_srcChainSelector,
             s_sender,
+            s_nonce,
             s_dstRelayer,
             s_dstValidatorLibs
         );
@@ -89,10 +89,11 @@ contract MessageCodecTest is Test {
 
         vm.pauseGasMetering();
 
-        assertEq(messageBytes.version(), VERSION);
+        assertEq(messageBytes.version(), MessageCodec.VERSION);
         assertEq(messageBytes.srcChainSelector(), s_srcChainSelector);
         assertEq(messageBytes.dstChainSelector(), messageRequest.dstChainSelector);
         assertEq(sender, s_sender);
+        assertEq(messageBytes.nonce(), s_nonce);
         assertEq(srcBlockConfirmations, s_srcBlockConfirmations);
         assertEq(receiver, s_receiver);
         assertEq(gasLimit, s_gasLimit);

@@ -20,10 +20,12 @@ import {IRelayer} from "../interfaces/IRelayer.sol";
 import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
 import {Storage as s} from "./libraries/Storage.sol";
 import {Base} from "./modules/Base.sol";
+import {MessageCodec} from "../common/libraries/MessageCodec.sol";
 
 contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
     using SafeERC20 for IERC20;
+    using MessageCodec for MessageRequest;
 
     error MessageAlreadyProcessed(bytes32 id, bytes32 messageHash);
     error MessageSubmissionAlreadyProcessed(bytes32 id, bytes32 messageSubmissionHash);
@@ -43,11 +45,24 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         _validateMessageParams(messageRequest);
         Fee memory fee = _collectMessageFee(messageRequest);
 
-        bytes32 messageId = _buildMessageId(messageRequest.dstChainSelector);
+        bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
+        for (uint256 i; i < dstValidatorLibs.length; ++i) {
+            dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
+                messageRequest.dstChainSelector
+            );
+        }
 
-        MessageReceipt memory messageReceipt = _messageRequestToReceipt(messageRequest);
+        bytes memory packedMessage = messageRequest.toMessageReceiptBytes(
+            i_chainSelector,
+            msg.sender,
+            ++s.router().nonce[i_chainSelector][msg.sender],
+            IRelayerLib(messageRequest.relayerLib).getDstLib(messageRequest.dstChainSelector),
+            dstValidatorLibs
+        );
 
-        emit ConceroMessageSent(messageId, messageReceipt);
+        bytes32 messageId = keccak256(packedMessage);
+
+        emit ConceroMessageSent(messageId, packedMessage);
         emit ConceroMessageFeePaid(messageId, fee);
 
         return messageId;
@@ -276,19 +291,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         );
     }
 
-    function _buildMessageId(uint24 dstChainSelector) private returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    ++s.router().nonce,
-                    block.number,
-                    msg.sender,
-                    i_chainSelector,
-                    dstChainSelector
-                )
-            );
-    }
-
     function _collectMessageFee(
         MessageRequest calldata messageRequest
     ) internal returns (Fee memory) {
@@ -327,40 +329,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
                 relayer: relayerFee,
                 validatorsFee: validatorsFee,
                 token: messageRequest.feeToken
-            });
-    }
-
-    function _messageRequestToReceipt(
-        MessageRequest calldata messageRequest
-    ) internal view returns (MessageReceipt memory) {
-        bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
-
-        for (uint256 i; i < dstValidatorLibs.length; ++i) {
-            dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
-                messageRequest.dstChainSelector
-            );
-        }
-
-        return
-            MessageReceipt({
-                srcChainSelector: i_chainSelector,
-                dstChainSelector: messageRequest.dstChainSelector,
-                srcChainData: abi.encode(
-                    EvmSrcChainData({
-                        blockConfirmations: messageRequest.srcBlockConfirmations,
-                        sender: msg.sender
-                    })
-                ),
-                dstChainData: messageRequest.dstChainData,
-                dstRelayerLib: IRelayerLib(messageRequest.relayerLib).getDstLib(
-                    messageRequest.dstChainSelector
-                ),
-                dstValidatorLibs: dstValidatorLibs,
-                validatorConfigs: messageRequest.validatorConfigs,
-                relayerConfig: messageRequest.relayerConfig,
-                validationRpcs: messageRequest.validationRpcs,
-                deliveryRpcs: messageRequest.deliveryRpcs,
-                payload: messageRequest.payload
             });
     }
 }

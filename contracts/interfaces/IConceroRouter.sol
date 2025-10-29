@@ -64,7 +64,7 @@ interface IConceroRouter {
     error EmptyDstChainData();
     error InvalidValidatorsCount(uint256 validatorsCount, uint256 maxValidatorsCount);
 
-    event ConceroMessageSent(bytes32 indexed messageId, MessageReceipt messageReceipt);
+    event ConceroMessageSent(bytes32 indexed messageId, bytes messageReceipt);
     event ConceroMessageFeePaid(bytes32 indexed messageId, Fee fee);
     event ConceroMessageReceived(
         bytes32 indexed messageId,

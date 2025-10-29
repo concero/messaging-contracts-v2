@@ -44,6 +44,15 @@ library BytesUtils {
         return result;
     }
 
+    function readUint256(bytes memory data, uint256 start) internal pure returns (uint256) {
+        // TODO: add validations
+        uint256 result;
+        assembly {
+            result := mload(add(add(data, 32), start))
+        }
+        return result;
+    }
+
     // @dev implementation: https://etherscan.io/address/0x4bf681894abec828b212c906082b444ceb2f6cf6?#code#F20#L160
     function readAddress(bytes memory data, uint256 start) internal pure returns (address) {
         // TODO: add validations

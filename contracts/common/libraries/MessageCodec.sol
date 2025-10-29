@@ -28,13 +28,15 @@ library MessageCodec {
     uint8 internal constant SRC_CHAIN_SELECTOR_OFFSET = 1;
     uint8 internal constant DST_CHAIN_SELECTOR_OFFSET =
         SRC_CHAIN_SELECTOR_OFFSET + UINT24_BYTES_LENGTH; // 4
-    uint8 internal constant SRC_CHAIN_DATA_OFFSET = DST_CHAIN_SELECTOR_OFFSET + UINT24_BYTES_LENGTH; // 7
+    uint8 internal constant NONCE_OFFSET = DST_CHAIN_SELECTOR_OFFSET + UINT24_BYTES_LENGTH;
+    uint8 internal constant SRC_CHAIN_DATA_OFFSET = NONCE_OFFSET + BYTES32_BYTES_LENGTH;
 
     // WRITE FUNCTIONS //
     function toMessageReceiptBytes(
         IConceroRouter.MessageRequest memory messageRequest,
         uint24 srcChainSelector,
         address msgSender,
+        uint256 nonce,
         bytes memory dstRelayerLib,
         bytes[] memory dstValidatorLibs
     ) internal pure returns (bytes memory) {
@@ -46,6 +48,7 @@ library MessageCodec {
                     VERSION, // 0
                     srcChainSelector, // 1
                     messageRequest.dstChainSelector, // 4
+                    nonce,
                     // src chain data
                     uint32(EVM_SRC_CHAIN_DATA_LENGTH),
                     abi.encodePacked(
@@ -89,6 +92,10 @@ library MessageCodec {
 
     function dstChainSelector(bytes memory data) internal pure returns (uint24) {
         return data.readUint24(DST_CHAIN_SELECTOR_OFFSET);
+    }
+
+    function nonce(bytes memory data) internal pure returns (uint256) {
+        return data.readUint256(NONCE_OFFSET);
     }
 
     function evmSrcChainData(bytes memory data) internal pure returns (address, uint64) {

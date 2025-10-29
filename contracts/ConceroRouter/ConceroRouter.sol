@@ -26,9 +26,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
     using SafeERC20 for IERC20;
     using MessageCodec for MessageRequest;
+    using MessageCodec for bytes;
 
-    error MessageAlreadyProcessed(bytes32 id, bytes32 messageHash);
-    error MessageSubmissionAlreadyProcessed(bytes32 id, bytes32 messageSubmissionHash);
+    error MessageAlreadyProcessed(bytes32 messageHash);
+    error MessageSubmissionAlreadyProcessed(bytes32 messageSubmissionHash);
     error InvalidValidationsCount(uint256 validatorLibsCount, uint256 validationsCount);
 
     constructor(
@@ -69,57 +70,37 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     function submitMessage(
-        bytes32 messageId,
-        MessageReceipt calldata messageReceipt, // bytes
+        bytes calldata messageReceipt,
         bytes[] calldata validations
     ) external nonReentrant {
         require(
-            messageReceipt.dstChainSelector == i_chainSelector,
-            InvalidDstChainSelector(messageReceipt.dstChainSelector, i_chainSelector)
+            messageReceipt.dstChainSelector() == i_chainSelector,
+            InvalidDstChainSelector(messageReceipt.dstChainSelector(), i_chainSelector)
         );
 
         require(
-            messageReceipt.dstValidatorLibs.length == validations.length,
-            InvalidValidationsCount(messageReceipt.dstValidatorLibs.length, validations.length)
+            messageReceipt.evmDstValidatorLibs().length == validations.length,
+            InvalidValidationsCount(messageReceipt.evmDstValidatorLibs().length, validations.length)
         );
 
         s.Router storage s_router = s.router();
 
-        bytes32 messageHash = keccak256(abi.encode(messageId, messageReceipt));
-        require(
-            !s_router.isMessageProcessed[messageHash],
-            MessageAlreadyProcessed(messageId, messageHash)
-        );
+        bytes32 messageHash = keccak256(messageReceipt);
+        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
 
-        IRelayerLib(abi.decode(messageReceipt.dstRelayerLib, (address))).validate(
-            messageId,
-            messageReceipt,
-            msg.sender
-        );
+        IRelayerLib(messageReceipt.emvDstRelayerLib()).validate(messageReceipt, msg.sender);
 
-        bool[] memory validationChecks = _performValidationChecks(
-            messageId,
-            messageReceipt,
-            validations
-        );
+        bool[] memory validationChecks = _performValidationChecks(messageReceipt, validations);
 
-        bytes32 messageSubmissionHash = keccak256(
-            abi.encode(messageId, messageReceipt, validationChecks)
-        );
+        bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
         require(
             !s_router.isMessageRetryAllowed[messageSubmissionHash],
-            MessageSubmissionAlreadyProcessed(messageId, messageSubmissionHash)
+            MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
 
-        emit ConceroMessageReceived(messageId, messageReceipt, validations, validationChecks);
+        emit ConceroMessageReceived(messageHash, messageReceipt, validations, validationChecks);
 
-        _deliverMessage(
-            messageId,
-            messageReceipt,
-            validationChecks,
-            messageHash,
-            messageSubmissionHash
-        );
+        _deliverMessage(messageReceipt, validationChecks, messageHash, messageSubmissionHash);
     }
 
     function withdrawRelayerFee(address[] calldata tokens) external nonReentrant {
@@ -202,26 +183,21 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     /* INTERNAL FUNCTIONS */
 
     function _deliverMessage(
-        bytes32 messageId,
-        MessageReceipt calldata messageReceipt,
+        bytes calldata messageReceipt,
         bool[] memory validationChecks,
         bytes32 messageHash,
         bytes32 messageSubmissionHash
     ) internal {
         // TODO: handle this error more granular
-        EvmDstChainData memory dstChainData = abi.decode(
-            messageReceipt.dstChainData,
-            (EvmDstChainData)
-        );
+        (address receiver, uint32 gasLimit) = messageReceipt.evmDstChainData();
 
         (bool success, bytes memory result) = Utils.safeCall(
-            dstChainData.receiver,
-            dstChainData.gasLimit,
+            receiver,
+            gasLimit,
             0,
             256,
             abi.encodeWithSelector(
                 IConceroClient.conceroReceive.selector,
-                messageId,
                 messageReceipt,
                 validationChecks
             )
@@ -229,38 +205,35 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         if (success) {
             s.router().isMessageProcessed[messageHash] = true;
-            emit ConceroMessageDelivered(messageId);
+            emit ConceroMessageDelivered(messageHash);
         } else {
             // TODO: add check if invalid relayer - revert
             s.router().isMessageRetryAllowed[messageSubmissionHash] = true;
-            emit ConceroMessageDeliveryFailed(messageId, result);
+            emit ConceroMessageDeliveryFailed(messageHash, result);
         }
     }
 
     function _performValidationChecks(
-        bytes32 messageId,
-        MessageReceipt calldata messageReceipt,
+        bytes calldata messageReceipt,
         bytes[] calldata validations
     ) internal view returns (bool[] memory) {
-        bool[] memory validationChecks = new bool[](messageReceipt.dstValidatorLibs.length);
+        bool[] memory validationChecks = new bool[](messageReceipt.evmDstValidatorLibs().length);
 
-        for (uint256 i; i < messageReceipt.dstValidatorLibs.length; ++i) {
+        for (uint256 i; i < validationChecks.length; ++i) {
             if (
-                !Utils.isEvmAddressValid(messageReceipt.dstValidatorLibs[i]) ||
+                //                !Utils.isEvmAddressValid(messageReceipt.evmDstValidatorLibs()[i]) ||
                 validations[i].length == 0
             ) {
                 validationChecks[i] = false;
             } else {
                 bytes memory callData = abi.encodeWithSelector(
                     IValidatorLib.isValid.selector,
-                    messageId,
                     messageReceipt,
                     validations[i]
                 );
 
-                (bool success, bytes memory result) = abi
-                    .decode(messageReceipt.dstValidatorLibs[i], (address))
-                    .staticcall(callData);
+                (bool success, bytes memory result) = messageReceipt
+                .evmDstValidatorLibs()[i].staticcall(callData);
 
                 if (success && result.length == 32) {
                     validationChecks[i] = abi.decode(result, (uint256)) == 1;

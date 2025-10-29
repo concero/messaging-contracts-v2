@@ -14,7 +14,7 @@ library ClientStorage {
             ~bytes32(uint256(0xff));
 
     struct ConceroClient {
-        mapping(bytes validator => bool isAllowed) isValidatorAllowed;
+        mapping(address validator => bool isAllowed) isValidatorAllowed;
         uint256 requiredValidatorsCount;
     }
 

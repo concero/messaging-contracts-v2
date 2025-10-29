@@ -45,11 +45,7 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
     /* Getters */
 
     // TODO: add messageReceipt hash check!
-    function isValid(
-        bytes32 messageId,
-        IConceroRouter.MessageReceipt calldata,
-        bytes calldata validation
-    ) external view returns (bool) {
+    function isValid(bytes calldata, bytes calldata validation) external view returns (bool) {
         (Types.ClfDonReportSubmission memory reportSubmission, uint256 index) = abi.decode(
             validation,
             (Types.ClfDonReportSubmission, uint256)
@@ -89,7 +85,7 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
             (CommonTypes.MessagePayloadV1)
         );
 
-        if (resultConfig.payloadVersion == 1 && messagePayload.messageId == messageId) {
+        if (resultConfig.payloadVersion == 1) {
             if (messagePayload.dstChainSelector != i_chainSelector) {
                 return false;
             }

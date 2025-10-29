@@ -21,29 +21,29 @@ interface IConceroRouter {
         bytes payload;
     }
 
-    struct MessageReceipt {
-        uint24 srcChainSelector;
-        uint24 dstChainSelector;
-        bytes srcChainData; // sender, block confirmations
-        bytes dstChainData;
-        bytes dstRelayerLib; // TODO: mb should be bytes32
-        bytes relayerConfig;
-        bytes[] dstValidatorLibs;
-        bytes[] validatorConfigs;
-        bytes[] validationRpcs;
-        bytes[] deliveryRpcs;
-        bytes payload;
-    }
-
-    struct EvmSrcChainData {
-        address sender;
-        uint64 blockConfirmations;
-    }
-
-    struct EvmDstChainData {
-        address receiver;
-        uint256 gasLimit;
-    }
+    //    struct MessageReceipt {
+    //        uint24 srcChainSelector;
+    //        uint24 dstChainSelector;
+    //        bytes srcChainData;
+    //        bytes dstChainData;
+    //        bytes dstRelayerLib;
+    //        bytes relayerConfig;
+    //        bytes[] dstValidatorLibs;
+    //        bytes[] validatorConfigs;
+    //        bytes[] validationRpcs;
+    //        bytes[] deliveryRpcs;
+    //        bytes payload;
+    //    }
+    //
+    //    struct EvmSrcChainData {
+    //        address sender;
+    //        uint64 blockConfirmations;
+    //    }
+    //
+    //    struct EvmDstChainData {
+    //        address receiver;
+    //        uint256 gasLimit;
+    //    }
 
     struct Fee {
         uint256 concero;
@@ -68,7 +68,7 @@ interface IConceroRouter {
     event ConceroMessageFeePaid(bytes32 indexed messageId, Fee fee);
     event ConceroMessageReceived(
         bytes32 indexed messageId,
-        MessageReceipt messageReceipt,
+        bytes messageReceipt,
         bytes[] validations,
         bool[] validationChecks
     );

@@ -14,7 +14,7 @@ library ClientAdvancedStorage {
             ~bytes32(uint256(0xff));
 
     struct AdvancedClient {
-        mapping(bytes validator => uint256 weight) validatorWeights;
+        mapping(address validator => uint256 weight) validatorWeights;
         uint256 requiredWeight;
     }
 

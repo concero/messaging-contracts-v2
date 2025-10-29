@@ -9,19 +9,21 @@ pragma solidity ^0.8.20;
 import {ConceroClientBase} from "./ConceroClientBase.sol";
 import {ClientAdvancedStorage as s} from "./libraries/ClientAdvancedStorage.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {MessageCodec} from "../common/libraries/MessageCodec.sol";
 
 abstract contract ConceroAdvancedClient is ConceroClientBase {
     using s for s.AdvancedClient;
+    using MessageCodec for bytes;
 
     function _validateMessageReceipt(
-        IConceroRouter.MessageReceipt calldata messageReceipt,
+        bytes calldata messageReceipt,
         bool[] calldata validationChecks
     ) internal view virtual override {
-        _ensureValidationsWeight(messageReceipt.dstValidatorLibs, validationChecks);
+        _ensureValidationsWeight(messageReceipt.evmDstValidatorLibs(), validationChecks);
     }
 
     function _ensureValidationsWeight(
-        bytes[] memory dstValidatorLibs,
+        address[] memory dstValidatorLibs,
         bool[] calldata validationChecks
     ) internal view virtual {
         s.AdvancedClient storage s_advancedClient = s.advancedClient();
@@ -31,7 +33,7 @@ abstract contract ConceroAdvancedClient is ConceroClientBase {
             for (uint256 k; k < dstValidatorLibs.length; ++k) {
                 if (i == k) continue;
                 require(
-                    keccak256(dstValidatorLibs[i]) != keccak256(dstValidatorLibs[k]),
+                    dstValidatorLibs[i] != dstValidatorLibs[k],
                     ValidatorsConsensusNotReached()
                 );
             }

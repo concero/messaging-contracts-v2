@@ -6,12 +6,14 @@
  */
 pragma solidity ^0.8.20;
 
+import {MessageCodec} from "../common/libraries/MessageCodec.sol";
+import {ClientBaseStorage as s} from "./libraries/ClientBaseStorage.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
-import {ClientBaseStorage as s} from "./libraries/ClientBaseStorage.sol";
 
 abstract contract ConceroClientBase is IConceroClient {
     using s for s.ConceroClientBase;
+    using MessageCodec for bytes;
 
     address internal immutable i_conceroRouter;
 
@@ -21,38 +23,34 @@ abstract contract ConceroClientBase is IConceroClient {
     }
 
     function conceroReceive(
-        bytes32 messageId,
-        IConceroRouter.MessageReceipt calldata messageReceipt,
+        bytes calldata messageReceipt,
         bool[] calldata validationChecks
     ) external {
         require(msg.sender == i_conceroRouter, InvalidConceroRouter(msg.sender));
 
         s.ConceroClientBase storage s_conceroClientBase = s.clientBase();
 
-        require(!s_conceroClientBase.isMessageProcessed[messageId], MessageAlreadyProcessed());
-        s_conceroClientBase.isMessageProcessed[messageId] = true;
+        //        require(!s_conceroClientBase.isMessageProcessed[messageId], MessageAlreadyProcessed());
+        //        s_conceroClientBase.isMessageProcessed[messageId] = true;
 
         require(
-            s_conceroClientBase.isRelayerAllowed[messageReceipt.dstRelayerLib],
-            RelayerNotAllowed(messageReceipt.dstRelayerLib)
+            s_conceroClientBase.isRelayerAllowed[messageReceipt.emvDstRelayerLib()],
+            RelayerNotAllowed(messageReceipt.emvDstRelayerLib())
         );
 
         _validateMessageReceipt(messageReceipt, validationChecks);
 
-        _conceroReceive(messageId, messageReceipt);
+        _conceroReceive(messageReceipt);
     }
 
     function _setIsRelayerAllowed(address relayer, bool isAllowed) internal {
-        s.clientBase().isRelayerAllowed[abi.encode(relayer)] = isAllowed;
+        s.clientBase().isRelayerAllowed[relayer] = isAllowed;
     }
 
     function _validateMessageReceipt(
-        IConceroRouter.MessageReceipt calldata messageReceipt,
+        bytes calldata messageReceipt,
         bool[] calldata validationChecks
     ) internal view virtual;
 
-    function _conceroReceive(
-        bytes32 messageId,
-        IConceroRouter.MessageReceipt calldata messageReceipt
-    ) internal virtual;
+    function _conceroReceive(bytes calldata messageReceipt) internal virtual;
 }

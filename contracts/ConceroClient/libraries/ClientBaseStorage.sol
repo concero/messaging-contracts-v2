@@ -12,8 +12,8 @@ library ClientBaseStorage {
             ~bytes32(uint256(0xff));
 
     struct ConceroClientBase {
-        mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
-        mapping(bytes relayer => bool isAllowed) isRelayerAllowed;
+        //        mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
+        mapping(address relayer => bool isAllowed) isRelayerAllowed;
     }
 
     function clientBase() internal pure returns (ConceroClientBase storage s) {

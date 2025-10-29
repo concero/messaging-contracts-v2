@@ -10,13 +10,12 @@ import {IConceroRouter} from "./IConceroRouter.sol";
 
 interface IConceroClient {
     error InvalidConceroRouter(address router);
-    error RelayerNotAllowed(bytes dstRelayerLib);
+    error RelayerNotAllowed(address dstRelayerLib);
     error MessageAlreadyProcessed();
     error ValidatorsConsensusNotReached();
 
     function conceroReceive(
-        bytes32 messageId,
-        IConceroRouter.MessageReceipt calldata messageReceipt,
+        bytes calldata messageReceipt,
         bool[] calldata validationChecks
     ) external;
 }

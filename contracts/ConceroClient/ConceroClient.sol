@@ -9,19 +9,21 @@ pragma solidity ^0.8.20;
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {ConceroClientBase} from "./ConceroClientBase.sol";
 import {ClientStorage as s} from "./libraries/ClientStorage.sol";
+import {MessageCodec} from "../common/libraries/MessageCodec.sol";
 
 abstract contract ConceroClient is ConceroClientBase {
     using s for s.ConceroClient;
+    using MessageCodec for bytes;
 
     function _validateMessageReceipt(
-        IConceroRouter.MessageReceipt calldata messageReceipt,
+        bytes calldata messageReceipt,
         bool[] calldata validationChecks
     ) internal view virtual override {
-        _ensureValidations(messageReceipt.dstValidatorLibs, validationChecks);
+        _ensureValidations(messageReceipt.evmDstValidatorLibs(), validationChecks);
     }
 
     function _ensureValidations(
-        bytes[] memory dstValidatorLibs,
+        address[] memory dstValidatorLibs,
         bool[] calldata validationChecks
     ) internal view virtual {
         s.ConceroClient storage s_conceroClient = s.client();
@@ -42,7 +44,7 @@ abstract contract ConceroClient is ConceroClientBase {
     }
 
     function _setIsValidatorAllowed(address validator, bool isAllowed) internal {
-        s.client().isValidatorAllowed[abi.encode(validator)] = isAllowed;
+        s.client().isValidatorAllowed[validator] = isAllowed;
     }
 
     function _setRequiredValidatorsCount(uint256 requiredValidatorsCount) internal {

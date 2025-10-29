@@ -12,8 +12,7 @@ interface IValidatorLib {
     error InvalidChainSelector();
 
     function isValid(
-        bytes32 messageId,
-        IConceroRouter.MessageReceipt calldata message,
+        bytes calldata message,
         bytes calldata validation
     ) external view returns (bool);
 

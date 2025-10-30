@@ -100,7 +100,40 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         emit ConceroMessageReceived(messageHash, messageReceipt, validations, validationChecks);
 
-        _deliverMessage(messageReceipt, validationChecks, messageHash, messageSubmissionHash);
+        (, uint32 gasLimit) = messageReceipt.evmDstChainData();
+
+        _deliverMessage(
+            messageReceipt,
+            validationChecks,
+            messageHash,
+            messageSubmissionHash,
+            gasLimit
+        );
+    }
+
+    function retryMessageSubmission(
+        bytes calldata messageReceipt,
+        bool[] calldata validationChecks,
+        uint32 gasLimitOverride
+    ) external nonReentrant {
+        s.Router storage s_router = s.router();
+
+        bytes32 messageHash = keccak256(messageReceipt);
+        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
+
+        bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
+        require(
+            !s_router.isMessageRetryAllowed[messageSubmissionHash],
+            MessageSubmissionAlreadyProcessed(messageSubmissionHash)
+        );
+
+        _deliverMessage(
+            messageReceipt,
+            validationChecks,
+            messageHash,
+            messageSubmissionHash,
+            gasLimitOverride
+        );
     }
 
     function withdrawRelayerFee(address[] calldata tokens) external nonReentrant {
@@ -186,10 +219,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         bytes calldata messageReceipt,
         bool[] memory validationChecks,
         bytes32 messageHash,
-        bytes32 messageSubmissionHash
+        bytes32 messageSubmissionHash,
+        uint32 gasLimit
     ) internal {
         // TODO: handle this error more granular
-        (address receiver, uint32 gasLimit) = messageReceipt.evmDstChainData();
+        (address receiver, ) = messageReceipt.evmDstChainData();
 
         (bool success, bytes memory result) = Utils.safeCall(
             receiver,

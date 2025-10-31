@@ -1,15 +1,8 @@
-import { type Address } from "../../../../typechain-types";
-import { handleError } from "../../common/errorHandler";
-import { ErrorType } from "../../common/errorType";
+import { Address } from "viem";
 
-export function getRandomRpc(rpcs: { url: string; chainId: string }[]) {
-	return rpcs[Math.floor(Math.random() * rpcs.length)];
-}
+import { CustomError, ErrorTypes } from "../error";
 
-export function sleep(ms: number) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
-
+// @todo: move to CRE utils
 export function getOperatorCohortId(operator: Address, cohortsCount: number): number {
 	return parseInt(operator.slice(2), 16) % cohortsCount;
 }
@@ -20,7 +13,7 @@ export function getMessageCohortId(messageId: string, cohortsCount: number): num
 
 export function pick<T>(array: T[], n: number): T[] {
 	if (n > array.length) {
-		handleError(ErrorType.INVALID_OPERATOR_COUNT);
+		throw new CustomError(ErrorTypes.Type.INVALID_OPERATOR_COUNT);
 	}
 
 	// @dev TODO: is it correct?

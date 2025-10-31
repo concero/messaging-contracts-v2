@@ -1,5 +1,11 @@
 export type ChainSelector = string;
 export type ChainId = number;
+export type Log = {
+    topics: string[];
+    data: string;
+    transactionHash: string;
+};
+
 export enum ChainType {
     EVM,
     NON_EVM,

@@ -1,14 +1,12 @@
-import { config } from "../../config";
+import { config } from "../config";
 
 import { type Address, Hash } from "viem";
 import { PublicClient } from "viem/clients/createPublicClient";
 
-import { ChainType } from "../../common/enums";
-import { handleError } from "../../common/errorHandler";
-import { ErrorType } from "../../common/errorType";
-import { getPublicClient } from "../../common/viemClient";
-import { CONCERO_VERIFIER_CONTRACT_ABI } from "../../constants/abis";
-import { CONCERO_VERIFIER_CONTRACT_ADDRESS } from "../../constants/conceroRouters";
+import { ChainType } from "../types";
+import { CustomError, ErrorTypes } from "../error";
+import { getPublicClient } from "../client";
+import { CONCERO_VERIFIER_CONTRACT_ABI, CONCERO_VERIFIER_CONTRACT_ADDRESS } from "../constants";
 import { getMessageCohortId, getOperatorCohortId } from "./utils";
 
 /**
@@ -33,12 +31,12 @@ export async function getAllowedOperators(chainType: ChainType, messageId: Hash)
 		);
 
 		if (!allowedOperators.length) {
-			handleError(ErrorType.NO_ALLOWED_OPERATORS);
+            throw new CustomError(ErrorTypes.Type.NO_ALLOWED_OPERATORS);
 		}
 
 		return allowedOperators;
 	} catch (error) {
-		handleError(ErrorType.OPERATOR_SELECTION_FAILED);
+        throw new CustomError(ErrorTypes.Type.OPERATOR_SELECTION_FAILED);
 	}
 }
 
@@ -51,7 +49,7 @@ async function getCohortsCount(client: PublicClient): Promise<number> {
 	})) as number;
 
 	if (cohortsCount <= 0) {
-		handleError(ErrorType.INVALID_COHORTS_COUNT);
+        throw new CustomError(ErrorTypes.Type.INVALID_COHORTS_COUNT);
 	}
 
 	return cohortsCount;
@@ -66,7 +64,7 @@ async function getRegisteredOperators(client: PublicClient, chainType: ChainType
 	})) as Address[];
 
 	if (!registeredOperators.length) {
-		handleError(ErrorType.NO_REGISTERED_OPERATORS);
+        throw new CustomError(ErrorTypes.Type.NO_REGISTERED_OPERATORS);
 	}
 
 	return registeredOperators;

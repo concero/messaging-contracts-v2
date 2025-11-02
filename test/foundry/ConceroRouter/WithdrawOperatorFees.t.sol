@@ -26,11 +26,11 @@
 //    }
 //
 //    function _setOperatorFees() internal {
-//        vm.startPrank(deployer);
+//        vm.startPrank(s_deployer);
 //        conceroRouter.setStorage(
 //            Namespaces.OPERATOR,
 //            OperatorSlots.feesEarnedNative,
-//            bytes32(uint256(uint160(operator))),
+//            bytes32(uint256(uint160(s_operator))),
 //            OPERATOR_FEES_NATIVE
 //        );
 //        conceroRouter.setStorage(
@@ -43,12 +43,12 @@
 //    }
 //
 //    function test_WithdrawOperatorFees_Native() public {
-//        uint256 initialBalance = operator.balance;
-//        vm.prank(operator);
+//        uint256 initialBalance = s_operator.balance;
+//        vm.prank(s_operator);
 //        conceroRouter.withdrawOperatorFee(OPERATOR_FEES_NATIVE);
 //
 //        assertEq(
-//            operator.balance,
+//            s_operator.balance,
 //            initialBalance + OPERATOR_FEES_NATIVE,
 //            "Native balance mismatch"
 //        );
@@ -56,7 +56,7 @@
 //        uint256 remainingFees = conceroRouter.getStorage(
 //            Namespaces.OPERATOR,
 //            OperatorSlots.feesEarnedNative,
-//            bytes32(uint256(uint160(operator)))
+//            bytes32(uint256(uint160(s_operator)))
 //        );
 //        assertEq(remainingFees, 0, "Fees earned not cleared");
 //
@@ -69,14 +69,14 @@
 //    }
 //
 //    function test_WithdrawOperatorFees_WhenZeroAmount_Reverts() public {
-//        vm.prank(operator);
+//        vm.prank(s_operator);
 //        vm.expectRevert(CommonErrors.InvalidAmount.selector);
 //        conceroRouter.withdrawOperatorFee(0);
 //    }
 //
 //    function test_WithdrawOperatorFees_InsufficientFees_Reverts() public {
 //        uint256 excessAmount = OPERATOR_FEES_NATIVE + 1;
-//        vm.prank(operator);
+//        vm.prank(s_operator);
 //        vm.expectRevert(
 //            abi.encodeWithSelector(
 //                CommonErrors.InsufficientFee.selector,

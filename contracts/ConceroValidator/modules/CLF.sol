@@ -126,9 +126,9 @@ abstract contract CLF is FunctionsClient, Base {
         return clfRequestId;
     }
 
-    function _chargeMsgReportRequestFee(address relayer, s.Validator storage validator) private {
+    function _chargeMsgReportRequestFee(address s_relayer, s.Validator storage validator) private {
         uint256 reportRequestFee = getCLFCost();
-        uint256 currentDeposit = validator.depositsNative[relayer];
+        uint256 currentDeposit = validator.depositsNative[s_relayer];
 
         require(
             currentDeposit >= reportRequestFee,
@@ -136,7 +136,7 @@ abstract contract CLF is FunctionsClient, Base {
         );
 
         validator.totalNativeFees += reportRequestFee;
-        validator.depositsNative[relayer] -= reportRequestFee;
+        validator.depositsNative[s_relayer] -= reportRequestFee;
     }
 
     function _sendCLFRequest(bytes[] memory args) private returns (bytes32) {

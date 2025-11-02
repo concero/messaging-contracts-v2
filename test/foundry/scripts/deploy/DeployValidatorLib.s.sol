@@ -7,31 +7,29 @@
 pragma solidity 0.8.28;
 
 import {ValidatorLib} from "contracts/ValidatorLib/ValidatorLib.sol";
-import {ValidatorLibBase} from "../../ValidatorLib/base/ValidatorLibBase.sol";
+import {DeployConceroPriceFeed} from "./DeployConceroPriceFeed.s.sol";
+import {Script} from "forge-std/src/Script.sol";
 
-contract DeployValidatorLib is ValidatorLibBase {
-    // TODO: rename to follow conventions
+contract DeployValidatorLib is Script {
+    address public constant MOCK_DON_SIGNER_ADDRESS_0 = 0x0004C7EdCF9283D3bc3C1309939b3E887bb9d98b;
+    address public constant MOCK_DON_SIGNER_ADDRESS_1 = 0x000437D9bE1C11B748e8B4C349b818eE82682E9f;
+    address public constant MOCK_DON_SIGNER_ADDRESS_2 = 0x000E512Da9116546247eE54Ffef6319E00331E1B;
+    address public constant MOCK_DON_SIGNER_ADDRESS_3 = 0x0001E5818621C01908e989851ECB899Af3d57bDc;
     address internal constant CONCERO_VERIFIER_ADDRESS = address(0x11);
-    uint64 internal i_conceroVerifierSubscriptionId = 12;
+
+    address public s_deployer = vm.envAddress("DEPLOYER_ADDRESS");
+    uint64 internal s_conceroVerifierSubscriptionId = 12;
 
     ValidatorLib internal validatorLib;
 
-    function setUp() public virtual override {
-        super.setUp();
-    }
-
-    function deploy() public returns (address) {
-        return deploy(DST_CHAIN_SELECTOR, address(conceroPriceFeed));
-    }
-
     function deploy(uint24 chainSelector, address priceFeed) public returns (address) {
-        vm.startPrank(deployer);
+        vm.startPrank(s_deployer);
 
         validatorLib = new ValidatorLib(
             chainSelector,
             priceFeed,
             CONCERO_VERIFIER_ADDRESS,
-            i_conceroVerifierSubscriptionId,
+            s_conceroVerifierSubscriptionId,
             [
                 MOCK_DON_SIGNER_ADDRESS_0,
                 MOCK_DON_SIGNER_ADDRESS_1,

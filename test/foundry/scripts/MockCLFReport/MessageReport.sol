@@ -24,16 +24,16 @@ contract MessageReport is BaseMockCLFReport {
 
     function getResponse() public view returns (bytes memory) {
         bytes[] memory allowedOperators = new bytes[](1);
-        allowedOperators[0] = abi.encode(operator);
+        allowedOperators[0] = abi.encode(s_operator);
         return
             getResponse(
-                address(operator),
+                address(s_operator),
                 bytes32("messageId"),
                 bytes32("messageHashSum"),
                 bytes32("txHash"),
                 SRC_CHAIN_SELECTOR,
                 DST_CHAIN_SELECTOR,
-                address(user),
+                address(s_user),
                 12345678, // Default block number
                 RouterTypes.EvmDstChainData({receiver: address(0), gasLimit: 1_000_000}),
                 allowedOperators

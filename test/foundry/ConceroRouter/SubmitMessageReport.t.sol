@@ -54,11 +54,11 @@
 //        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
 //            resultType: CommonTypes.ResultType.Message,
 //            payloadVersion: 1,
-//            requester: operator
+//            requester: s_operator
 //        });
 //
 //        bytes[] memory allowedOperators = new bytes[](1);
-//        allowedOperators[0] = abi.encode(operator);
+//        allowedOperators[0] = abi.encode(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
 //            messageId: TEST_MESSAGE_ID,
@@ -83,7 +83,7 @@
 //        uint256[] memory indexes = new uint256[](1);
 //        indexes[0] = 0;
 //
-//        vm.prank(operator);
+//        vm.prank(s_operator);
 //        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
 //
 //        Vm.Log[] memory entries = vm.getRecordedLogs();
@@ -125,15 +125,15 @@
 //        uint256 actualFees = conceroRouter.getStorage(
 //            Namespaces.OPERATOR,
 //            OperatorSlots.feesEarnedNative,
-//            bytes32(uint256(uint160(operator)))
+//            bytes32(uint256(uint160(s_operator)))
 //        );
 //        assertTrue(actualFees > 0, "Operator should earn some fees");
 //    }
 //
 //    function test_submitMessageReport_RevertsIfNativeUsdRateIsZero() public {
 //        // Set nativeUsdRate to 0
-//        vm.startPrank(feedUpdater);
-//        conceroPriceFeed.setNativeUsdRate(0);
+//        vm.startPrank(s_feedUpdater);
+//        s_conceroPriceFeed.setNativeUsdRate(0);
 //        vm.stopPrank();
 //
 //        // Create a basic message report
@@ -145,11 +145,11 @@
 //        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
 //            resultType: CommonTypes.ResultType.Message,
 //            payloadVersion: 1,
-//            requester: operator
+//            requester: s_operator
 //        });
 //
 //        bytes[] memory allowedOperators = new bytes[](1);
-//        allowedOperators[0] = abi.encode(operator);
+//        allowedOperators[0] = abi.encode(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
 //            messageId: TEST_MESSAGE_ID,
@@ -180,19 +180,19 @@
 //            )
 //        );
 //
-//        vm.prank(operator);
+//        vm.prank(s_operator);
 //        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
 //    }
 //
 //    function test_submitMessageReport_RevertsIfLastGasPriceIsZero() public {
 //        // Set lastGasPrice to 0 for current chain
-//        vm.startPrank(feedUpdater);
+//        vm.startPrank(s_feedUpdater);
 //        uint24[] memory chainSelectors = new uint24[](1);
 //        chainSelectors[0] = SRC_CHAIN_SELECTOR;
 //        uint256[] memory gasPrices = new uint256[](1);
 //        gasPrices[0] = 0;
 //
-//        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+//        s_conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 //        vm.stopPrank();
 //
 //        // Create a basic message report
@@ -204,11 +204,11 @@
 //        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
 //            resultType: CommonTypes.ResultType.Message,
 //            payloadVersion: 1,
-//            requester: operator
+//            requester: s_operator
 //        });
 //
 //        bytes[] memory allowedOperators = new bytes[](1);
-//        allowedOperators[0] = abi.encode(operator);
+//        allowedOperators[0] = abi.encode(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
 //            messageId: TEST_MESSAGE_ID,
@@ -239,12 +239,12 @@
 //            )
 //        );
 //
-//        vm.prank(operator);
+//        vm.prank(s_operator);
 //        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
 //    }
 //
 //    function test_submitMessageReport_RevertsIfGasFeeNativeIsZero() public {
-//        vm.startPrank(deployer);
+//        vm.startPrank(s_deployer);
 //        conceroRouter.setGasFeeConfig(
 //            SRC_CHAIN_SELECTOR,
 //            0, // submitMsgGasOverhead = 0
@@ -258,9 +258,9 @@
 //        uint256[] memory gasPrices = new uint256[](1);
 //        gasPrices[0] = 1;
 //
-//        vm.startPrank(feedUpdater);
-//        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
-//        conceroPriceFeed.setNativeUsdRate(1);
+//        vm.startPrank(s_feedUpdater);
+//        s_conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+//        s_conceroPriceFeed.setNativeUsdRate(1);
 //        vm.stopPrank();
 //
 //        Types.EvmDstChainData memory dstChainData = Types.EvmDstChainData({
@@ -271,11 +271,11 @@
 //        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
 //            resultType: CommonTypes.ResultType.Message,
 //            payloadVersion: 1,
-//            requester: operator
+//            requester: s_operator
 //        });
 //
 //        bytes[] memory allowedOperators = new bytes[](1);
-//        allowedOperators[0] = abi.encode(operator);
+//        allowedOperators[0] = abi.encode(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = CommonTypes.MessagePayloadV1({
 //            messageId: TEST_MESSAGE_ID,
@@ -301,7 +301,7 @@
 //
 //        vm.expectRevert(abi.encodeWithSelector(CommonErrors.InvalidAmount.selector));
 //
-//        vm.prank(operator);
+//        vm.prank(s_operator);
 //        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
 //    }
 //
@@ -310,7 +310,7 @@
 //    //     VerifierTypes.MessageReportResult memory result = VerifierTypes.MessageReportResult({
 //    //         version: 1,
 //    //         reportType: VerifierTypes.CLFReportType.Message,
-//    //         operator: operator,
+//    //         s_operator: s_operator,
 //    //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
 //    //             CLIENT_MESSAGE_CONFIG,
 //    //             SRC_CHAIN_SELECTOR
@@ -340,7 +340,7 @@
 //    //     CommonTypes.MessageReportResult memory result = CommonTypes.MessageReportResult({
 //    //         version: 1,
 //    //         reportType: CommonTypes.CLFReportType.Message,
-//    //         operator: operator,
+//    //         s_operator: s_operator,
 //    //         internalMessageConfig: MessageLib.buildInternalMessageConfig(
 //    //             CLIENT_MESSAGE_CONFIG,
 //    //             SRC_CHAIN_SELECTOR

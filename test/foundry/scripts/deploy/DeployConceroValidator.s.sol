@@ -6,43 +6,67 @@
  */
 pragma solidity 0.8.28;
 
-import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
-import {ConceroValidatorBase} from "../../ConceroValidator/base/ConceroValidatorBase.sol";
+import "../../../../contracts/ConceroValidator/libraries/Types.sol";
 import {CLFParams} from "contracts/ConceroValidator/libraries/Types.sol";
+import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
+import {DeployConceroPriceFeed} from "./DeployConceroPriceFeed.s.sol";
+import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
+import {Script} from "forge-std/src/Script.sol";
 
-contract DeployConceroValidator is ConceroValidatorBase {
-    TransparentUpgradeableProxy internal conceroValidatorProxy;
-    ConceroValidator internal conceroValidator;
+contract DeployConceroValidator is Script {
+    address public s_deployer = vm.envAddress("DEPLOYER_ADDRESS");
+    address public s_proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
+    TransparentUpgradeableProxy internal s_conceroValidatorProxy;
+    ConceroValidator internal s_conceroValidator;
 
-    function setUp() public virtual override {
-        super.setUp();
+    function deploy(
+        bytes32 clfMessageReportRequestJsHashSum,
+        uint24 chainSelector,
+        address clfRouter,
+        bytes32 clfDonId,
+        uint64 clfSubscriptionId,
+        address priceFeed
+    ) public returns (address) {
+        address implementation = _deployImplementation(
+            clfMessageReportRequestJsHashSum,
+            chainSelector,
+            clfRouter,
+            clfDonId,
+            clfSubscriptionId,
+            priceFeed
+        );
+        _deployProxy(implementation);
+        return address(s_conceroValidatorProxy);
     }
 
     function setProxyImplementation(address implementation) public {
-        vm.startPrank(proxyDeployer);
-        ITransparentUpgradeableProxy(address(conceroValidatorProxy)).upgradeToAndCall(
+        vm.startPrank(s_proxyDeployer);
+        ITransparentUpgradeableProxy(address(s_conceroValidatorProxy)).upgradeToAndCall(
             implementation,
             bytes("")
         );
         vm.stopPrank();
     }
 
-    function deploy() public returns (address) {
-        address implementation = _deployImplementation();
-        _deployProxy(implementation);
-        return address(conceroValidatorProxy);
-    }
-
     function _deployProxy(address implementation) internal {
-        vm.startPrank(proxyDeployer);
-        conceroValidatorProxy = new TransparentUpgradeableProxy(implementation, proxyDeployer, "");
+        vm.startPrank(s_proxyDeployer);
+        s_conceroValidatorProxy = new TransparentUpgradeableProxy(
+            implementation,
+            s_proxyDeployer,
+            ""
+        );
         vm.stopPrank();
     }
 
-    function _deployImplementation() internal returns (address) {
-        vm.startPrank(deployer);
-
+    function _deployImplementation(
+        bytes32 clfMessageReportRequestJsHashSum,
+        uint24 chainSelector,
+        address clfRouter,
+        bytes32 clfDonId,
+        uint64 clfSubscriptionId,
+        address priceFeed
+    ) internal returns (address) {
+        vm.startPrank(s_deployer);
         CLFParams memory clfParams = CLFParams({
             router: clfRouter,
             donId: clfDonId,
@@ -50,13 +74,9 @@ contract DeployConceroValidator is ConceroValidatorBase {
             requestCLFMessageReportJsCodeHash: clfMessageReportRequestJsHashSum
         });
 
-        conceroValidator = new ConceroValidator(
-            SRC_CHAIN_SELECTOR,
-            address(conceroPriceFeed),
-            clfParams
-        );
+        s_conceroValidator = new ConceroValidator(chainSelector, priceFeed, clfParams);
         vm.stopPrank();
 
-        return address(conceroValidator);
+        return address(s_conceroValidator);
     }
 }

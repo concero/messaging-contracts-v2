@@ -7,8 +7,8 @@
 pragma solidity ^0.8.20;
 
 interface IConceroValidator {
-    event Deposited(address indexed relayer, uint256 amount);
-    event DepositWithdrawn(address indexed relayer, uint256 amount);
+    event Deposited(address indexed s_relayer, uint256 amount);
+    event DepositWithdrawn(address indexed s_relayer, uint256 amount);
 
     event ValidatorFeeWithdrawn(address indexed validator, uint256 amount);
 }

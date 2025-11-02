@@ -35,7 +35,7 @@
 //        emit FunctionsClient.RequestFulfilled(clfRequestId);
 //
 //        vm.prank(address(clfRouter));
-//        conceroValidator.handleOracleFulfillment(clfRequestId, clfResponse, "");
+//        s_conceroValidator.handleOracleFulfillment(clfRequestId, clfResponse, "");
 //    }
 //
 //    function test_clfRouter_transmit_messageReport() public {
@@ -57,7 +57,7 @@
 //        );
 //
 //        assertTrue(
-//            conceroValidator.getClfRequestIdStatus(clfRequestId) ==
+//            s_conceroValidator.getClfRequestIdStatus(clfRequestId) ==
 //                ValidatorTypes.CLFRequestStatus.Fulfilled
 //        );
 //    }
@@ -71,11 +71,11 @@
 //        emit CLFRequestError(errorMessage);
 //
 //        vm.prank(address(clfRouter));
-//        conceroValidator.handleOracleFulfillment(clfRequestId, "", errorMessage);
+//        s_conceroValidator.handleOracleFulfillment(clfRequestId, "", errorMessage);
 //
 //        // Request status should be Failed
 //        assertEq(
-//            uint256(conceroValidator.getClfRequestIdStatus(clfRequestId)),
+//            uint256(s_conceroValidator.getClfRequestIdStatus(clfRequestId)),
 //            uint256(ValidatorTypes.CLFRequestStatus.Failed)
 //        );
 //    }
@@ -89,7 +89,7 @@
 //        );
 //
 //        vm.prank(address(clfRouter));
-//        conceroValidator.handleOracleFulfillment(invalidClfRequestId, response, "");
+//        s_conceroValidator.handleOracleFulfillment(invalidClfRequestId, response, "");
 //    }
 //
 //    function test_handleOracleFulfillment_InvalidResultType_Unknown() public {
@@ -107,7 +107,7 @@
 //        vm.expectRevert(abi.encodeWithSelector(Errors.InvalidClfResultType.selector));
 //
 //        vm.prank(address(clfRouter));
-//        conceroValidator.handleOracleFulfillment(clfRequestId, invalidResponse, "");
+//        s_conceroValidator.handleOracleFulfillment(clfRequestId, invalidResponse, "");
 //    }
 //
 //    function test_handleOracleFulfillment_InvalidMessageVersion() public {
@@ -125,19 +125,19 @@
 //        vm.expectRevert(abi.encodeWithSelector(Errors.InvalidMessageVersion.selector));
 //
 //        vm.prank(address(clfRouter));
-//        conceroValidator.handleOracleFulfillment(clfRequestId, invalidResponse, "");
+//        s_conceroValidator.handleOracleFulfillment(clfRequestId, invalidResponse, "");
 //    }
 //
 //    function test_requestMessageReport_AfterFailedRequest() public {
-//        uint256 depositAmount = conceroValidator.getMinimumDeposit() * 2;
+//        uint256 depositAmount = s_conceroValidator.getMinimumDeposit() * 2;
 //        _deposit(depositAmount);
 //
 //        bytes32 messageId = bytes32(uint256(1));
 //        bytes memory srcChainData = new bytes(0);
 //
 //        // First request
-//        vm.prank(relayer);
-//        bytes32 clfRequestId = conceroValidator.requestMessageReport(
+//        vm.prank(s_relayer);
+//        bytes32 clfRequestId = s_conceroValidator.requestMessageReport(
 //            messageId,
 //            SRC_CHAIN_SELECTOR,
 //            srcChainData
@@ -145,19 +145,19 @@
 //
 //        // Simulate CLF error
 //        vm.prank(address(clfRouter));
-//        conceroValidator.handleOracleFulfillment(clfRequestId, "", "CLF error");
+//        s_conceroValidator.handleOracleFulfillment(clfRequestId, "", "CLF error");
 //
 //        // Verify status is Failed
 //        assertEq(
-//            uint256(conceroValidator.getClfRequestIdStatus(clfRequestId)),
+//            uint256(s_conceroValidator.getClfRequestIdStatus(clfRequestId)),
 //            uint256(ValidatorTypes.CLFRequestStatus.Failed)
 //        );
 //
 //        // Should be able to retry the same messageId after failure with different data
 //        bytes memory newSrcChainData = abi.encode(uint256(123)); // Different data to get different requestId
 //
-//        vm.prank(relayer);
-//        bytes32 newClfRequestId = conceroValidator.requestMessageReport(
+//        vm.prank(s_relayer);
+//        bytes32 newClfRequestId = s_conceroValidator.requestMessageReport(
 //            messageId,
 //            SRC_CHAIN_SELECTOR,
 //            newSrcChainData
@@ -166,7 +166,7 @@
 //        // Different parameters should produce different requestId
 //        assertTrue(newClfRequestId != clfRequestId);
 //        assertEq(
-//            uint256(conceroValidator.getClfRequestIdStatus(newClfRequestId)),
+//            uint256(s_conceroValidator.getClfRequestIdStatus(newClfRequestId)),
 //            uint256(ValidatorTypes.CLFRequestStatus.Pending)
 //        );
 //    }

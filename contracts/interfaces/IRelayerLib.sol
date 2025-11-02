@@ -15,5 +15,5 @@ interface IRelayerLib {
 
     function getDstLib(uint24 dstChainSelector) external view returns (bytes memory);
 
-    function validate(bytes calldata messageReceipt, address relayer) external;
+    function validate(bytes calldata messageReceipt, address s_relayer) external;
 }

@@ -43,8 +43,8 @@ abstract contract ConceroClientBase is IConceroClient {
         _conceroReceive(messageReceipt);
     }
 
-    function _setIsRelayerAllowed(address relayer, bool isAllowed) internal {
-        s.clientBase().isRelayerAllowed[relayer] = isAllowed;
+    function _setIsRelayerAllowed(address s_relayer, bool isAllowed) internal {
+        s.clientBase().isRelayerAllowed[s_relayer] = isAllowed;
     }
 
     function _validateMessageReceipt(

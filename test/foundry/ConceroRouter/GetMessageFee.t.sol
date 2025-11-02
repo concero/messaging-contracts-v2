@@ -36,12 +36,12 @@
 //        isSupported[0] = true;
 //        isSupported[1] = true;
 //
-//        vm.prank(feedUpdater);
-//        conceroPriceFeed.setNativeUsdRate(NATIVE_USD_RATE);
+//        vm.prank(s_feedUpdater);
+//        s_conceroPriceFeed.setNativeUsdRate(NATIVE_USD_RATE);
 //    }
 //
 //    //    function test_setGasFeeConfig() public {
-//    //        vm.prank(deployer);
+//    //        vm.prank(s_deployer);
 //    //        conceroRouter.setGasFeeConfig(
 //    //            CHAIN_SELECTOR_A,
 //    //            SUBMIT_MSG_GAS_OVERHEAD,
@@ -83,7 +83,7 @@
 //    }
 //
 //    function test_getMessageFee_ReturnsGasFeeNative() public {
-//        vm.startPrank(deployer);
+//        vm.startPrank(s_deployer);
 //        conceroRouter.setGasFeeConfig(CHAIN_SELECTOR_A, SUBMIT_MSG_GAS_OVERHEAD, 0, 0);
 //        vm.stopPrank();
 //
@@ -111,7 +111,7 @@
 //    }
 //
 //    function test_getMessageFee_ReturnsServiceGasFeeNative() public {
-//        vm.startPrank(deployer);
+//        vm.startPrank(s_deployer);
 //        conceroRouter.setGasFeeConfig(
 //            CHAIN_SELECTOR_A,
 //            0,
@@ -144,7 +144,7 @@
 //    }
 //
 //    function test_getMessageFee_ReturnsTotalFeeNative() public {
-//        vm.startPrank(deployer);
+//        vm.startPrank(s_deployer);
 //        conceroRouter.setGasFeeConfig(
 //            CHAIN_SELECTOR_A,
 //            SUBMIT_MSG_GAS_OVERHEAD,
@@ -190,7 +190,7 @@
 //        _setupPriceFeeds(CHAIN_SELECTOR_A, GAS_PRICE_A, destChainNativeRate);
 //        _setupPriceFeeds(CHAIN_SELECTOR_B, GAS_PRICE_B, baseChainNativeRate);
 //
-//        vm.prank(deployer);
+//        vm.prank(s_deployer);
 //        conceroRouter.setGasFeeConfig(
 //            CHAIN_SELECTOR_B,
 //            SUBMIT_MSG_GAS_OVERHEAD,
@@ -247,9 +247,9 @@
 //        uint256[] memory nativeNativeRates = new uint256[](1);
 //        nativeNativeRates[0] = nativeNativeRate;
 //
-//        vm.startPrank(feedUpdater);
-//        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
-//        conceroPriceFeed.setNativeNativeRates(chainSelectors, nativeNativeRates);
+//        vm.startPrank(s_feedUpdater);
+//        s_conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+//        s_conceroPriceFeed.setNativeNativeRates(chainSelectors, nativeNativeRates);
 //        vm.stopPrank();
 //    }
 //

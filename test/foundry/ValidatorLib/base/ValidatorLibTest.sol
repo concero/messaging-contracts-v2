@@ -22,9 +22,9 @@
 //    function setUp() public virtual override(DeployValidatorLib, ConceroTest) {
 //        super.setUp();
 //
-//        validatorLib = ValidatorLib(deploy(DST_CHAIN_SELECTOR, address(conceroPriceFeed)));
+//        validatorLib = ValidatorLib(deploy(DST_CHAIN_SELECTOR, address(s_conceroPriceFeed)));
 //        conceroRouter = ConceroRouterHarness(
-//            payable(deploy(DST_CHAIN_SELECTOR, address(conceroPriceFeed)))
+//            payable(deploy(DST_CHAIN_SELECTOR, address(s_conceroPriceFeed)))
 //        );
 //        conceroClient = new ConceroClientExample(payable(conceroRouter));
 //    }

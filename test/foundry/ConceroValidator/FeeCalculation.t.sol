@@ -18,38 +18,38 @@ contract FeeCalculationTest is ConceroValidatorTest {
     }
 
     function test_ChargeFeeCorrectly() public returns (bytes32) {
-        assertEq(address(conceroValidator).balance, 0);
+        assertEq(address(s_conceroValidator).balance, 0);
 
-        uint256 minimumDeposit = conceroValidator.getCLFCost();
+        uint256 minimumDeposit = s_conceroValidator.getCLFCost();
         _deposit(minimumDeposit);
 
-        assertEq(conceroValidator.getDeposit(relayer), minimumDeposit);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), minimumDeposit);
 
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        vm.prank(relayer);
-        bytes32 clfRequestId = conceroValidator.requestMessageReport(
+        vm.prank(s_relayer);
+        bytes32 clfRequestId = s_conceroValidator.requestMessageReport(
             messageId,
             SRC_CHAIN_SELECTOR,
             srcChainData
         );
 
         // Deposit should be consumed as fee
-        assertEq(conceroValidator.getDeposit(relayer), 0);
-        assertEq(address(conceroValidator).balance, minimumDeposit);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), 0);
+        assertEq(address(s_conceroValidator).balance, minimumDeposit);
 
         return clfRequestId;
     }
 
     function test_getCLFCost() public view {
-        uint256 clfCost = conceroValidator.getCLFCost();
+        uint256 clfCost = s_conceroValidator.getCLFCost();
 
         // Verify CLF cost is greater than zero
         assertTrue(clfCost > 0);
 
         // Verify CLF cost calculation
-        (uint256 nativeUsdRate, uint256 lastGasPrice) = conceroPriceFeed
+        (uint256 nativeUsdRate, uint256 lastGasPrice) = s_conceroPriceFeed
             .getNativeUsdRateAndGasPrice();
 
         uint256 gasCost = (CLF_CALLBACK_GAS_OVERHEAD + CLF_CALLBACK_GAS_LIMIT) * lastGasPrice;
@@ -67,7 +67,7 @@ contract FeeCalculationTest is ConceroValidatorTest {
     }
 
     function test_multipleFeeCharges() public {
-        uint256 clfCost = conceroValidator.getCLFCost();
+        uint256 clfCost = s_conceroValidator.getCLFCost();
         uint256 totalDeposit = clfCost * 10;
 
         _deposit(totalDeposit);
@@ -77,22 +77,22 @@ contract FeeCalculationTest is ConceroValidatorTest {
         bytes32 messageId3 = bytes32(uint256(3));
         bytes memory srcChainData = new bytes(0);
 
-        vm.startPrank(relayer);
+        vm.startPrank(s_relayer);
 
         // First request
-        conceroValidator.requestMessageReport(messageId1, SRC_CHAIN_SELECTOR, srcChainData);
-        assertEq(conceroValidator.getDeposit(relayer), totalDeposit - clfCost);
+        s_conceroValidator.requestMessageReport(messageId1, SRC_CHAIN_SELECTOR, srcChainData);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), totalDeposit - clfCost);
 
         // Second request
-        conceroValidator.requestMessageReport(messageId2, SRC_CHAIN_SELECTOR, srcChainData);
-        assertEq(conceroValidator.getDeposit(relayer), totalDeposit - (clfCost * 2));
+        s_conceroValidator.requestMessageReport(messageId2, SRC_CHAIN_SELECTOR, srcChainData);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), totalDeposit - (clfCost * 2));
 
         // Third request
-        conceroValidator.requestMessageReport(messageId3, SRC_CHAIN_SELECTOR, srcChainData);
-        assertEq(conceroValidator.getDeposit(relayer), totalDeposit - (clfCost * 3));
+        s_conceroValidator.requestMessageReport(messageId3, SRC_CHAIN_SELECTOR, srcChainData);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), totalDeposit - (clfCost * 3));
 
         vm.stopPrank();
 
-        assertEq(address(conceroValidator).balance, totalDeposit);
+        assertEq(address(s_conceroValidator).balance, totalDeposit);
     }
 }

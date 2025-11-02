@@ -6,7 +6,6 @@
  */
 pragma solidity ^0.8.20;
 
-import "forge-std/src/console.sol";
 import {Bytes} from "@openzeppelin/contracts/utils/Bytes.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 import {BytesUtils} from "./BytesUtils.sol";
@@ -34,9 +33,9 @@ library MessageCodec {
     // WRITE FUNCTIONS //
     function toMessageReceiptBytes(
         IConceroRouter.MessageRequest memory messageRequest,
-        uint24 srcChainSelector,
+        uint24 _srcChainSelector,
         address msgSender,
-        uint256 nonce,
+        uint256 _nonce,
         bytes memory dstRelayerLib,
         bytes[] memory dstValidatorLibs
     ) internal pure returns (bytes memory) {
@@ -46,9 +45,9 @@ library MessageCodec {
             abi.encodePacked(
                 abi.encodePacked(
                     VERSION, // 0
-                    srcChainSelector, // 1
+                    _srcChainSelector, // 1
                     messageRequest.dstChainSelector, // 4
-                    nonce,
+                    _nonce,
                     // src chain data
                     uint32(EVM_SRC_CHAIN_DATA_LENGTH),
                     abi.encodePacked(

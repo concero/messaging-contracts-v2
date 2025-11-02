@@ -34,8 +34,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -69,8 +69,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -107,8 +107,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -144,8 +144,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            wrongMessageId,
@@ -179,8 +179,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -214,8 +214,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -255,8 +255,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -296,8 +296,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -336,8 +336,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -374,8 +374,8 @@
 //            address(conceroClient),
 //            GAS_LIMIT
 //        );
-//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(operator);
-//        bytes[] memory allowedOperators = _createAllowedOperators(operator);
+//        CommonTypes.ResultConfig memory resultConfig = _createResultConfig(s_operator);
+//        bytes[] memory allowedOperators = _createAllowedOperators(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayloadV1 = _createMessagePayload(
 //            TEST_MESSAGE_ID,
@@ -430,8 +430,8 @@
 //    }
 //
 //    function test_getFee_RevertsIfNativeUsdRateIsZero() public {
-//        vm.startPrank(feedUpdater);
-//        conceroPriceFeed.setNativeUsdRate(0);
+//        vm.startPrank(s_feedUpdater);
+//        s_conceroPriceFeed.setNativeUsdRate(0);
 //        vm.stopPrank();
 //
 //        IConceroRouter.MessageRequest memory messageRequest = _createMessageRequest(
@@ -458,7 +458,7 @@
 //    function test_setDstLib_Success() public {
 //        address dstLibAddress = address(0x456);
 //
-//        vm.prank(deployer);
+//        vm.prank(s_deployer);
 //        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
 //
 //        bytes memory storedDstLib = validatorLib.getDstLib(SRC_CHAIN_SELECTOR);
@@ -470,7 +470,7 @@
 //    function test_setDstLib_RevertsIfNotOwner() public {
 //        address dstLibAddress = address(0x456);
 //
-//        vm.prank(user);
+//        vm.prank(s_user);
 //        vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector));
 //
 //        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
@@ -479,7 +479,7 @@
 //    function test_setDstLib_RevertsIfSameChain() public {
 //        address dstLibAddress = address(0x456);
 //
-//        vm.prank(deployer);
+//        vm.prank(s_deployer);
 //        vm.expectRevert(abi.encodeWithSelector(InvalidChainSelector.selector));
 //
 //        validatorLib.setDstLib(DST_CHAIN_SELECTOR, dstLibAddress);
@@ -488,7 +488,7 @@
 //    function test_getDstLib_ReturnsCorrectValue() public {
 //        address dstLibAddress = address(0x789);
 //
-//        vm.prank(deployer);
+//        vm.prank(s_deployer);
 //        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
 //
 //        bytes memory storedDstLib = validatorLib.getDstLib(SRC_CHAIN_SELECTOR);

@@ -18,58 +18,58 @@ contract WithdrawValidatorFeesTest is ConceroValidatorTest {
     }
 
     function test_withdrawValidatorFee() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit();
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
         _deposit(depositAmount);
 
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        vm.prank(relayer);
-        conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+        vm.prank(s_relayer);
+        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
 
-        assertEq(conceroValidator.getWithdrawableValidatorFee(), depositAmount);
+        assertEq(s_conceroValidator.getWithdrawableValidatorFee(), depositAmount);
 
-        uint256 ownerBalanceBefore = deployer.balance;
+        uint256 ownerBalanceBefore = s_deployer.balance;
 
-        vm.prank(deployer);
-        conceroValidator.withdrawValidatorFee(depositAmount);
+        vm.prank(s_deployer);
+        s_conceroValidator.withdrawValidatorFee(depositAmount);
 
-        assertEq(deployer.balance, ownerBalanceBefore + depositAmount);
-        assertEq(conceroValidator.getWithdrawableValidatorFee(), 0);
-        assertEq(address(conceroValidator).balance, 0);
+        assertEq(s_deployer.balance, ownerBalanceBefore + depositAmount);
+        assertEq(s_conceroValidator.getWithdrawableValidatorFee(), 0);
+        assertEq(address(s_conceroValidator).balance, 0);
     }
 
     function test_withdrawValidatorFee_partial() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit() * 2;
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit() * 2;
         _deposit(depositAmount);
 
         bytes32 messageId1 = bytes32(uint256(1));
         bytes32 messageId2 = bytes32(uint256(2));
         bytes memory srcChainData = new bytes(0);
 
-        vm.startPrank(relayer);
-        conceroValidator.requestMessageReport(messageId1, SRC_CHAIN_SELECTOR, srcChainData);
-        conceroValidator.requestMessageReport(messageId2, SRC_CHAIN_SELECTOR, srcChainData);
+        vm.startPrank(s_relayer);
+        s_conceroValidator.requestMessageReport(messageId1, SRC_CHAIN_SELECTOR, srcChainData);
+        s_conceroValidator.requestMessageReport(messageId2, SRC_CHAIN_SELECTOR, srcChainData);
         vm.stopPrank();
 
         uint256 totalFees = depositAmount;
         uint256 withdrawAmount = totalFees / 2;
 
-        vm.prank(deployer);
-        conceroValidator.withdrawValidatorFee(withdrawAmount);
+        vm.prank(s_deployer);
+        s_conceroValidator.withdrawValidatorFee(withdrawAmount);
 
-        assertEq(conceroValidator.getWithdrawableValidatorFee(), totalFees - withdrawAmount);
+        assertEq(s_conceroValidator.getWithdrawableValidatorFee(), totalFees - withdrawAmount);
     }
 
     function test_withdrawValidatorFee_RevertsIfInsufficientFees() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit();
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
         _deposit(depositAmount);
 
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        vm.prank(relayer);
-        conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+        vm.prank(s_relayer);
+        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
 
         uint256 withdrawAmount = depositAmount + 1;
 
@@ -77,14 +77,14 @@ contract WithdrawValidatorFeesTest is ConceroValidatorTest {
             abi.encodeWithSelector(Errors.InsufficientFee.selector, withdrawAmount, depositAmount)
         );
 
-        vm.prank(deployer);
-        conceroValidator.withdrawValidatorFee(withdrawAmount);
+        vm.prank(s_deployer);
+        s_conceroValidator.withdrawValidatorFee(withdrawAmount);
     }
 
     function test_withdrawValidatorFee_RevertsIfNotOwner() public {
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector, user));
+        vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector, s_user));
 
-        vm.prank(user);
-        conceroValidator.withdrawValidatorFee(100e18);
+        vm.prank(s_user);
+        s_conceroValidator.withdrawValidatorFee(100e18);
     }
 }

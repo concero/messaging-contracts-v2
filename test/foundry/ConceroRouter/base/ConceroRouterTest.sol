@@ -10,48 +10,19 @@ import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
 
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroRouter} from "../../scripts/deploy/DeployConceroRouter.s.sol";
+import {ConceroTestClient} from "../../ConceroTestClient/ConceroTestClient.sol";
 
-abstract contract ConceroRouterTest is DeployConceroRouter, ConceroTest {
-    //    ConceroClientExample internal conceroClient;
+abstract contract ConceroRouterTest is ConceroTest {
+    ConceroTestClient internal s_conceroClient;
+    ConceroRouterHarness internal s_conceroRouter;
 
-    function setUp() public virtual override(DeployConceroRouter, ConceroTest) {
-        super.setUp();
-
-        conceroRouter = ConceroRouterHarness(
-            payable(deploy(SRC_CHAIN_SELECTOR, address(conceroPriceFeed)))
+    function setUp() public virtual {
+        s_conceroRouter = ConceroRouterHarness(
+            payable(
+                (new DeployConceroRouter()).deploy(SRC_CHAIN_SELECTOR, address(s_conceroPriceFeed))
+            )
         );
 
-        //        conceroClient = new ConceroClientExample(payable(conceroRouter));
+        s_conceroClient = new ConceroTestClient(payable(s_conceroRouter));
     }
-
-    //    function _setGasFeeConfig() internal {
-    //        vm.startPrank(deployer);
-    //        conceroRouter.setGasFeeConfig(
-    //            SRC_CHAIN_SELECTOR,
-    //            SUBMIT_MSG_GAS_OVERHEAD,
-    //            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
-    //            CLF_CALLBACK_GAS_OVERHEAD
-    //        );
-    //        vm.stopPrank();
-    //    }
-    //
-    //    function _setOperatorFeesEarned() internal {
-    //        vm.startPrank(deployer);
-    //
-    //        conceroRouter.setStorage(
-    //            Namespaces.OPERATOR,
-    //            OperatorSlots.feesEarnedNative,
-    //            bytes32(uint256(uint160(operator))),
-    //            OPERATOR_FEES_NATIVE
-    //        );
-    //
-    //        conceroRouter.setStorage(
-    //            Namespaces.OPERATOR,
-    //            OperatorSlots.totalFeesEarnedNative,
-    //            bytes32(0),
-    //            OPERATOR_FEES_NATIVE
-    //        );
-    //
-    //        vm.stopPrank();
-    //    }
 }

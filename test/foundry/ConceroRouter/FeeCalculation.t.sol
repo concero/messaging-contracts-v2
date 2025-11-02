@@ -33,7 +33,7 @@
 //    //        uint256 initialOperatorFee = conceroRouter.getStorage(
 //    //            Namespaces.OPERATOR,
 //    //            OperatorSlots.feesEarnedNative,
-//    //            bytes32(uint256(uint160(operator)))
+//    //            bytes32(uint256(uint160(s_operator)))
 //    //        );
 //    //
 //    //        uint256 initialTotalFees = conceroRouter.getStorage(
@@ -56,11 +56,11 @@
 //    //        );
 //    //        uint256 expectedTotalFee = expectedOperatorFeeMessageRelay + expectedGasFeeNative;
 //    //
-//    //        // Verify operator fees were credited correctly
+//    //        // Verify s_operator fees were credited correctly
 //    //        uint256 finalOperatorFee = conceroRouter.getStorage(
 //    //            Namespaces.OPERATOR,
 //    //            OperatorSlots.feesEarnedNative,
-//    //            bytes32(uint256(uint160(operator)))
+//    //            bytes32(uint256(uint160(s_operator)))
 //    //        );
 //    //
 //    //        uint256 finalTotalFees = conceroRouter.getStorage(
@@ -96,21 +96,21 @@
 //    //        uint256 earnedFees = conceroRouter.getStorage(
 //    //            Namespaces.OPERATOR,
 //    //            OperatorSlots.feesEarnedNative,
-//    //            bytes32(uint256(uint160(operator)))
+//    //            bytes32(uint256(uint160(s_operator)))
 //    //        );
 //    //
 //    //        assertTrue(earnedFees > 0, "No fees earned");
 //    //
-//    //        uint256 initialOperatorBalance = operator.balance;
+//    //        uint256 initialOperatorBalance = s_operator.balance;
 //    //        uint256 initialRouterBalance = address(conceroRouter).balance;
 //    //
 //    //        // Operator withdraws earned fees
-//    //        vm.prank(operator);
+//    //        vm.prank(s_operator);
 //    //        conceroRouter.withdrawOperatorFee(earnedFees);
 //    //
 //    //        // Verify balances after withdrawal
 //    //        assertEq(
-//    //            operator.balance,
+//    //            s_operator.balance,
 //    //            initialOperatorBalance + earnedFees,
 //    //            "Operator balance not updated correctly"
 //    //        );
@@ -125,7 +125,7 @@
 //    //        uint256 remainingFees = conceroRouter.getStorage(
 //    //            Namespaces.OPERATOR,
 //    //            OperatorSlots.feesEarnedNative,
-//    //            bytes32(uint256(uint160(operator)))
+//    //            bytes32(uint256(uint160(s_operator)))
 //    //        );
 //    //
 //    //        assertEq(remainingFees, 0, "Fees not cleared after withdrawal");
@@ -134,7 +134,7 @@
 //    //    function test_ConceroWithdrawableBalanceCalculation() public {
 //    //        uint256 initialRouterBalance = address(conceroRouter).balance;
 //    //
-//    //        // Simulate multiple message deliveries to accumulate operator fees
+//    //        // Simulate multiple message deliveries to accumulate s_operator fees
 //    //        _simulateMessageDelivery();
 //    //        _simulateMessageDelivery();
 //    //
@@ -144,11 +144,11 @@
 //    //            bytes32(0)
 //    //        );
 //    //
-//    //        // Concero's withdrawable balance should be router balance minus operator fees
+//    //        // Concero's withdrawable balance should be router balance minus s_operator fees
 //    //        uint256 expectedWithdrawable = initialRouterBalance - totalOperatorFees;
 //    //
 //    //        // Verify Concero can withdraw the correct amount
-//    //        vm.startPrank(deployer);
+//    //        vm.startPrank(s_deployer);
 //    //
 //    //        address[] memory tokens = new address[](1);
 //    //        tokens[0] = address(0);
@@ -156,12 +156,12 @@
 //    //        uint256[] memory amounts = new uint256[](1);
 //    //        amounts[0] = expectedWithdrawable;
 //    //
-//    //        uint256 deployerInitialBalance = deployer.balance;
+//    //        uint256 deployerInitialBalance = s_deployer.balance;
 //    //
 //    //        conceroRouter.withdrawConceroFees(tokens, amounts);
 //    //
 //    //        assertEq(
-//    //            deployer.balance,
+//    //            s_deployer.balance,
 //    //            deployerInitialBalance + expectedWithdrawable,
 //    //            "Concero withdrawable balance calculation incorrect"
 //    //        );
@@ -173,17 +173,17 @@
 //    //        // Simulate operations from different operators
 //    //        address operator2 = address(0x9999);
 //    //
-//    //        // First operator delivers message
+//    //        // First s_operator delivers message
 //    //        _simulateMessageDelivery();
 //    //
-//    //        // Second operator delivers message
+//    //        // Second s_operator delivers message
 //    //        _simulateMessageDeliveryFromOperator(operator2);
 //    //
-//    //        // Check individual operator balances
+//    //        // Check individual s_operator balances
 //    //        uint256 operator1Fees = conceroRouter.getStorage(
 //    //            Namespaces.OPERATOR,
 //    //            OperatorSlots.feesEarnedNative,
-//    //            bytes32(uint256(uint160(operator)))
+//    //            bytes32(uint256(uint160(s_operator)))
 //    //        );
 //    //
 //    //        uint256 operator2Fees = conceroRouter.getStorage(
@@ -202,11 +202,11 @@
 //    //        assertEq(
 //    //            totalFees,
 //    //            operator1Fees + operator2Fees,
-//    //            "Total fees should equal sum of individual operator fees"
+//    //            "Total fees should equal sum of individual s_operator fees"
 //    //        );
 //    //
-//    //        // Verify each operator can withdraw their own fees
-//    //        vm.prank(operator);
+//    //        // Verify each s_operator can withdraw their own fees
+//    //        vm.prank(s_operator);
 //    //        conceroRouter.withdrawOperatorFee(operator1Fees);
 //    //
 //    //        vm.prank(operator2);
@@ -223,7 +223,7 @@
 //    //    }
 //    //
 //    //    function test_MessageDeliveryFeeCalculation() public {
-//    //        uint256 initialBalance = operator.balance;
+//    //        uint256 initialBalance = s_operator.balance;
 //    //        uint256 routerBalance = address(conceroRouter).balance;
 //    //
 //    //        bytes32 testMessageId = bytes32(uint256(12345));
@@ -253,7 +253,7 @@
 //        MessageReport messageReport = new MessageReport();
 //
 //        bytes[] memory allowedOperators = new bytes[](1);
-//        allowedOperators[0] = abi.encode(operator);
+//        allowedOperators[0] = abi.encode(s_operator);
 //
 //        CommonTypes.MessagePayloadV1 memory messagePayload = CommonTypes.MessagePayloadV1({
 //            messageId: messageId,
@@ -273,7 +273,7 @@
 //        CommonTypes.ResultConfig memory resultConfig = CommonTypes.ResultConfig({
 //            resultType: CommonTypes.ResultType.Message,
 //            payloadVersion: 1,
-//            requester: operator
+//            requester: s_operator
 //        });
 //
 //        Types.ClfDonReportSubmission memory reportSubmission = messageReport.createMockClfReport(
@@ -285,7 +285,7 @@
 //        uint256[] memory indexes = new uint256[](1);
 //        indexes[0] = 0;
 //
-//        vm.prank(operator);
+//        vm.prank(s_operator);
 //        conceroRouter.submitMessageReport(reportSubmission, messageBodies, indexes);
 //    }
 //
@@ -305,8 +305,8 @@
 //        uint256 routerBalance,
 //        uint256 expectedFee
 //    ) internal {
-//        // Check operator fees were credited
-//        uint256 operatorFees = conceroRouter.getOperatorFeesEarned(address(operator));
+//        // Check s_operator fees were credited
+//        uint256 operatorFees = conceroRouter.getOperatorFeesEarned(address(s_operator));
 //
 //        assertEq(operatorFees, expectedFee, "Operator fees not credited correctly");
 //        assertEq(
@@ -316,11 +316,11 @@
 //        );
 //
 //        // Test withdrawal
-//        vm.prank(operator);
+//        vm.prank(s_operator);
 //        conceroRouter.withdrawOperatorFee(expectedFee);
 //
 //        assertEq(
-//            operator.balance,
+//            s_operator.balance,
 //            initialBalance + expectedFee,
 //            "Operator should receive correct fee amount"
 //        );
@@ -331,12 +331,12 @@
 //        );
 //
 //        // Verify fees reset
-//        operatorFees = conceroRouter.getOperatorFeesEarned(address(operator));
+//        operatorFees = conceroRouter.getOperatorFeesEarned(address(s_operator));
 //        assertEq(operatorFees, 0, "Operator fees should be reset after withdrawal");
 //    }
 //
 //    function _simulateMessageDelivery() internal {
-//        _simulateMessageDeliveryFromOperator(operator);
+//        _simulateMessageDeliveryFromOperator(s_operator);
 //    }
 //
 //    //    function _simulateMessageDeliveryFromOperator(address sender) internal {
@@ -349,8 +349,8 @@
 //    //        );
 //    //        uint256 expectedTotalFee = expectedOperatorFeeMessageRelay + expectedGasFeeNative;
 //    //
-//    //        // Manually update the operator fees to simulate fee accrual
-//    //        vm.startPrank(deployer);
+//    //        // Manually update the s_operator fees to simulate fee accrual
+//    //        vm.startPrank(s_deployer);
 //    //
 //    //        uint256 currentOperatorFees = conceroRouter.getStorage(
 //    //            Namespaces.OPERATOR,

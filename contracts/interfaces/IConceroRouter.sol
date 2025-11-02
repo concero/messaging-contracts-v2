@@ -48,7 +48,7 @@ interface IConceroRouter {
 
     struct Fee {
         uint256 concero;
-        uint256 relayer;
+        uint256 s_relayer;
         uint256[] validatorsFee;
         address token;
     }

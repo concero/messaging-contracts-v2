@@ -18,7 +18,7 @@
 //    function test_SetAndGetNonce() public {
 //        uint256 newNonce = 123;
 //
-//        vm.startPrank(deployer);
+//        vm.startPrank(s_deployer);
 //        conceroRouter.setStorage(Namespaces.ROUTER, RouterSlots.nonce, bytes32(0), newNonce);
 //
 //        assertEq(
@@ -40,7 +40,7 @@
 //
 //        vm.expectRevert(CommonErrors.LengthMismatch.selector);
 //
-//        vm.prank(deployer);
+//        vm.prank(s_deployer);
 //        conceroRouter.setStorageBulk(namespaces, offsets, mappingKeys, values);
 //    }
 //
@@ -48,7 +48,7 @@
 //        bytes32 messageId = keccak256("message123");
 //        bool isProcessed = true;
 //
-//        vm.startPrank(deployer);
+//        vm.startPrank(s_deployer);
 //
 //        conceroRouter.setStorage(
 //            Namespaces.ROUTER,

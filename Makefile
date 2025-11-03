@@ -32,17 +32,13 @@ install:
 test:
 	forge test $(args)
 
+gas_snapshot:
+	forge snapshot --mt "_gas"
+
 coverage:
 	forge coverage --report lcov
 	genhtml --ignore-errors inconsistent --ignore-errors corrupt -o ./coverage_report ./lcov.info
 	open ./coverage_report/index.html
 	rm -rf lcov.info
-
-#coverage:
-#	forge coverage --report lcov --skip script
-#	lcov --include lcov.info 'src/**' -o lcov.src.info
-#	genhtml -o ./coverage_report --ignore-errors inconsistent,corrupt lcov.src.info
-#	open ./coverage_report/index.html
-#	rm -f lcov.info lcov.src.info
 
 .PHONY: all test

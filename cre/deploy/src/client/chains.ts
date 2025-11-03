@@ -1,16 +1,14 @@
-import { config } from "./config";
-
 import { type Chain, defineChain } from "viem";
 
-import { ChainSelector } from "../types";
+import { config } from "../config";
+
 
 const defaultNativeCurrency = {
 	decimals: 18,
 	name: "Ether",
 	symbol: "ETH",
 };
-
-const localhostChain = defineChain({
+const defaultLocalChain = defineChain({
 	id: 1,
 	name: "localhost",
 	nativeCurrency: defaultNativeCurrency,
@@ -21,18 +19,18 @@ const localhostChain = defineChain({
 	},
 });
 
-const localhostChains: Partial<Record<ChainSelector, Chain>> = {
-	"1": localhostChain,
-	"10": localhostChain,
+const chainSelectorToChain: Record<string, Chain> = {
+	"1": defaultLocalChain,
+	"10": defaultLocalChain,
 };
 
-export function getViemChain(chainSelector: string) {
+export function findChainBySelector(chainSelector: string): Chain {
 	if (config.isDevelopment) {
-		return localhostChains[chainSelector];
+		return chainSelectorToChain[chainSelector];
 	}
 
 	return defineChain({
 		id: parseInt(chainSelector),
 		nativeCurrency: defaultNativeCurrency,
-	});
+	} as any) as Chain;
 }

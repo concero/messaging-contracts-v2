@@ -1,4 +1,4 @@
-import { ErrorCode } from "./code.ts";
+import { ErrorCode } from "./code";
 
 export class DomainError extends Error  {
 	type: ErrorCode;

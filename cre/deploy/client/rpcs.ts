@@ -4,7 +4,6 @@ import testnetNetworks from "@concero/v2-networks/networks/testnet.json";
 import { config } from "../config";
 
 
-
 export type RpcConfig = {
 	rpcUrls: string[];
 	chainSelector: number;
@@ -24,7 +23,8 @@ type NetworkData = {
 
 export const chainSelectorToRpcConfig: Record<string, RpcConfig> = {};
 
-Object.entries(testnetNetworks as Record<string, NetworkData>).forEach(([networkName, networkData]) => {
+// @todo: fix unknown
+Object.entries(testnetNetworks as unknown as Record<string, NetworkData>).forEach(([networkName, networkData]) => {
 	const chainData = (testnetChains as any)[networkName] as ChainData;
 
 	if (chainData && chainData.rpcUrls) {

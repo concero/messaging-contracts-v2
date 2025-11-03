@@ -8,12 +8,14 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "@chainlink/cre-sdk": "0.0.8-alpha"
+    "@chainlink/cre-sdk": "1.0.0",
+    "viem": "^2.38.6",
+    "@concero/rpcs": "https://github.com/concero/rpcs"
   },
   "devDependencies": {
-    "@types/bun": "1.2.21"
+    "@types/bun": "v1.3.1"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5.4.5"
   }
 }

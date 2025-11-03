@@ -1,2 +1,2 @@
-export * from './error.ts'
-export * from './code.ts'
+export * from './error'
+export * from './code'

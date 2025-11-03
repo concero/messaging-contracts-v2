@@ -1,14 +1,13 @@
 import type { Address } from "viem";
 
-import { config } from "../config";
-
 function getConceroVerifier() {
-	try {
+/*	try {
 		if (config.isDevelopment) return secrets.CONCERO_VERIFIER_LOCALHOST;
 		return CONCERO_VERIFIER;
 	} catch {
 		return CONCERO_VERIFIER;
-	}
+	}*/
+    return undefined
 }
 
 export const CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
@@ -16,7 +15,7 @@ export const CONCERO_VERIFIER_CONTRACT_ADDRESS = getConceroVerifier();
 export const conceroRouters: Record<number, Address> = {
 	// "1": CONCERO_ROUTER_ETHEREUM,
 	// "10": CONCERO_ROUTER_OPTIMISM,
-
+/*
 	// testnet
 	"421614": CONCERO_ROUTER_ARBITRUM_SEPOLIA,
 	"84532": CONCERO_ROUTER_BASE_SEPOLIA,
@@ -75,5 +74,5 @@ export const conceroRouters: Record<number, Address> = {
 	"1174": CONCERO_ROUTER_LITHEUM_TESTNET,
 	"1115593": CONCERO_ROUTER_RISE_TESTNET,
 	"688688": CONCERO_ROUTER_PHAROS_TESTNET,
-	"8408": CONCERO_ROUTER_ZENCHAIN_TESTNET,
+	"8408": CONCERO_ROUTER_ZENCHAIN_TESTNET,*/
 };

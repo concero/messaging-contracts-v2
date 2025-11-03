@@ -1,9 +1,8 @@
-import { Transport, createPublicClient, fallback, http } from "viem";
+import { createPublicClient, fallback, http, Transport } from "viem";
 
-import { ErrorCode, DomainError } from "../error";
+import { DomainError, ErrorCode } from "../error";
 import { findRPCsBySelector } from "./rpcs";
 import { findChainBySelector } from "./chains";
-
 
 
 export function createFallbackTransport(chainSelector: string): Transport {
@@ -20,8 +19,10 @@ export function createFallbackTransport(chainSelector: string): Transport {
 }
 
 export function getPublicClient(chainSelector: string) {
+    const chain = findChainBySelector(chainSelector)
+    if (!chain) throw new DomainError(ErrorCode.INVALID_CHAIN_DATA)
 	return createPublicClient({
 		transport: createFallbackTransport(chainSelector),
-		chain: findChainBySelector(chainSelector),
+        chain,
 	});
 }

@@ -1,4 +1,5 @@
 import { type Address, decodeAbiParameters, type Hex } from "viem";
+import { decodeJson, HTTPPayload } from "@chainlink/cre-sdk";
 
 import { DomainError, ErrorCode } from "../error";
 import { EvmSrcChainDataParams } from "../constants";
@@ -17,26 +18,32 @@ export function decodeEvmSrcChainData(encodedData: Hex): EvmSrcChainData {
     }
 }
 
-export function decodeArgs(bytesArgs: Uint8Array): DecodedArgs {
-    if (bytesArgs.length < 6) {
-        throw new DomainError(ErrorCode.INVALID_BYTES_ARGS_LENGTH);
+export function decodeArgs(payload: HTTPPayload): DecodedArgs {
+    try {
+        const bytesArgs = decodeJson(payload.input)?.args;
+
+        if (!bytesArgs || bytesArgs.length < 6) {
+            throw new DomainError(ErrorCode.INVALID_BYTES_ARGS_LENGTH);
+        }
+
+        const [_, hexSrcChainSelector, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs as unknown as [
+            _: unknown,
+            hexSrcChainSelector: Hex,
+            messageId: Hex,
+            messageHashSum: Hex,
+            srcChainData: Hex,
+            operatorAddress: Address
+        ];
+        const srcChainSelector = Number(hexSrcChainSelector);
+
+        return {
+            srcChainSelector,
+            messageId,
+            messageHashSum,
+            srcChainData: decodeEvmSrcChainData(srcChainData),
+            operatorAddress,
+        };
+    } catch (e) {
+        throw new DomainError(ErrorCode.INVALID_DATA);
     }
-
-    const [, hexSrcChainSelector, messageId, messageHashSum, srcChainData, operatorAddress] = bytesArgs as unknown as [
-        _: unknown,
-        hexSrcChainSelector: Hex,
-        messageId: Hex,
-        messageHashSum: Hex,
-        srcChainData: Hex,
-        operatorAddress: Address
-    ];
-    const srcChainSelector = Number(hexSrcChainSelector);
-
-    return {
-        srcChainSelector,
-        messageId,
-        messageHashSum,
-        srcChainData: decodeEvmSrcChainData(srcChainData),
-        operatorAddress,
-    };
 }

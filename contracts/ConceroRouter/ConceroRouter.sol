@@ -228,6 +228,14 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             s_router.conceroMessageFeeInUsd;
     }
 
+    function getMaxPayloadSize() public view returns (uint256) {
+        return s.router().maxMessageSize;
+    }
+
+    function getMaxValidatorsCount() public view returns (uint256) {
+        return s.router().maxValidatorsCount;
+    }
+
     /* INTERNAL FUNCTIONS */
 
     function _deliverMessage(
@@ -296,19 +304,18 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     function _validateMessageParams(MessageRequest memory messageRequest) internal view {
+        s.Router storage s_router = s.router();
+
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
         require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
         require(
-            messageRequest.payload.length < CommonConstants.MESSAGE_MAX_SIZE,
-            MessageTooLarge(messageRequest.payload.length, CommonConstants.MESSAGE_MAX_SIZE)
+            messageRequest.payload.length < s_router.maxMessageSize,
+            PayloadTooLarge(messageRequest.payload.length, s_router.maxMessageSize)
         );
         require(
             messageRequest.validatorLibs.length > 0 &&
-                messageRequest.validatorLibs.length < s.router().maxValidatorsCount,
-            InvalidValidatorsCount(
-                messageRequest.validatorLibs.length,
-                s.router().maxValidatorsCount
-            )
+                messageRequest.validatorLibs.length < s_router.maxValidatorsCount,
+            InvalidValidatorsCount(messageRequest.validatorLibs.length, s_router.maxValidatorsCount)
         );
     }
 

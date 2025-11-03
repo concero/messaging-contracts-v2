@@ -64,6 +64,39 @@ abstract contract ConceroRouterTest is ConceroTest {
         uint32 dstChainGasLimit,
         uint64 srcBlockConfirmations
     ) internal returns (IConceroRouter.MessageRequest memory) {
+        return _buildMessageRequest(payload, dstChainGasLimit, srcBlockConfirmations, address(0));
+    }
+
+    function _buildMessageRequest(
+        address[] memory validatorLibs
+    ) internal returns (IConceroRouter.MessageRequest memory) {
+        IConceroRouter.MessageRequest memory req = _buildMessageRequest();
+        req.validatorLibs = validatorLibs;
+        return req;
+    }
+
+    function _buildMessageRequest(
+        bytes memory payload
+    ) internal returns (IConceroRouter.MessageRequest memory) {
+        return _buildMessageRequest(payload, 300_000, 10, address(0));
+    }
+
+    function _buildMessageRequest(
+        address feeToken
+    ) internal returns (IConceroRouter.MessageRequest memory) {
+        return _buildMessageRequest("Test message", 300_000, 10, feeToken);
+    }
+
+    function _buildMessageRequest() internal returns (IConceroRouter.MessageRequest memory) {
+        return _buildMessageRequest("Test message", 300_000, 10, address(0));
+    }
+
+    function _buildMessageRequest(
+        bytes memory payload,
+        uint32 dstChainGasLimit,
+        uint64 srcBlockConfirmations,
+        address feeToken
+    ) internal returns (IConceroRouter.MessageRequest memory) {
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = s_validatorLib;
 
@@ -71,7 +104,7 @@ abstract contract ConceroRouterTest is ConceroTest {
             IConceroRouter.MessageRequest({
                 dstChainSelector: DST_CHAIN_SELECTOR,
                 srcBlockConfirmations: srcBlockConfirmations,
-                feeToken: address(0),
+                feeToken: feeToken,
                 dstChainData: MessageCodec.encodeEvmDstChainData(
                     address(s_conceroClient),
                     dstChainGasLimit

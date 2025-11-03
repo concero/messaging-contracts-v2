@@ -18,11 +18,7 @@ contract SendMessage is ConceroRouterTest {
     function test_conceroSendNativeFee_gas() public {
         vm.pauseGasMetering();
 
-        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(
-            "Test message",
-            300_000,
-            10
-        );
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
@@ -44,5 +40,69 @@ contract SendMessage is ConceroRouterTest {
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
+    }
+
+    function testFuzz_feeTokenIsNotSupported_revert(address feeToken) public {
+        vm.assume(feeToken != address(0));
+
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(feeToken);
+
+        vm.expectRevert(IConceroRouter.UnsupportedFeeToken.selector);
+        s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.expectRevert(IConceroRouter.UnsupportedFeeToken.selector);
+        s_conceroRouter.conceroSend(messageRequest);
+    }
+
+    function test_payloadToLarge_revert() public {
+        bytes memory payload = new bytes(s_conceroRouter.getMaxPayloadSize() + 1);
+
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(payload);
+
+        bytes memory error = abi.encodeWithSelector(
+            IConceroRouter.PayloadTooLarge.selector,
+            payload.length,
+            s_conceroRouter.getMaxPayloadSize()
+        );
+
+        vm.expectRevert(error);
+        s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.expectRevert(error);
+        s_conceroRouter.conceroSend(messageRequest);
+    }
+
+    function test_invalidValidatorsCount_revert() public {
+        address[] memory validatorLibs = new address[](s_conceroRouter.getMaxValidatorsCount() + 1);
+
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(validatorLibs);
+
+        bytes memory error = abi.encodeWithSelector(
+            IConceroRouter.InvalidValidatorsCount.selector,
+            validatorLibs.length,
+            s_conceroRouter.getMaxValidatorsCount()
+        );
+
+        vm.expectRevert(error);
+        s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.expectRevert(error);
+        s_conceroRouter.conceroSend(messageRequest);
+
+        validatorLibs = new address[](0);
+
+        messageRequest = _buildMessageRequest(validatorLibs);
+
+        error = abi.encodeWithSelector(
+            IConceroRouter.InvalidValidatorsCount.selector,
+            validatorLibs.length,
+            s_conceroRouter.getMaxValidatorsCount()
+        );
+
+        vm.expectRevert(error);
+        s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.expectRevert(error);
+        s_conceroRouter.conceroSend(messageRequest);
     }
 }

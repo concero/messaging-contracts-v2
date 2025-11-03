@@ -190,15 +190,30 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         s.router().conceroMessageFeeInUsd = amount;
     }
 
+    function setMaxValidatorsCount(uint16 maxCount) external onlyOwner {
+        s.router().maxValidatorsCount = maxCount;
+    }
+
+    function setMaxMessageSize(uint64 maxSize) external onlyOwner {
+        s.router().maxMessageSize = maxSize;
+    }
+
+    function setTokenPriceFeed(address token, address priceFeed) external onlyOwner {
+        s.router().priceFeeds[token] = priceFeed;
+    }
+
     /* VIEW FUNCTIONS */
 
     /* @inheritdoc IConceroRouter */
     function getMessageFee(MessageRequest calldata messageRequest) external view returns (uint256) {
         _validateMessageParams(messageRequest);
 
+        (, uint256 validatorsFee) = _getValidatorsFee(messageRequest);
+
         return
             getConceroFee(messageRequest.feeToken) +
-            IRelayerLib(messageRequest.relayerLib).getFee(messageRequest);
+            IRelayerLib(messageRequest.relayerLib).getFee(messageRequest) +
+            validatorsFee;
     }
 
     function isFeeTokenSupported(address feeToken) public view returns (bool) {
@@ -281,7 +296,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     function _validateMessageParams(MessageRequest memory messageRequest) internal view {
-        // TODO: add check validator libs count checks
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
         require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
         require(
@@ -304,15 +318,9 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         s.Router storage s_router = s.router();
 
         uint256 relayerFee = IRelayerLib(messageRequest.relayerLib).getFee(messageRequest);
-        uint256 totalValidatorsFee;
-        uint256[] memory validatorsFee = new uint256[](messageRequest.validatorLibs.length);
-
-        for (uint256 i; i < messageRequest.validatorLibs.length; ++i) {
-            validatorsFee[i] = IValidatorLib(messageRequest.validatorLibs[i]).getFee(
-                messageRequest
-            );
-            totalValidatorsFee += validatorsFee[i];
-        }
+        (uint256[] memory validatorsFee, uint256 totalValidatorsFee) = _getValidatorsFee(
+            messageRequest
+        );
 
         uint256 conceroFee = getConceroFee(messageRequest.feeToken);
         uint256 totalFee = relayerFee + conceroFee + totalValidatorsFee;
@@ -337,5 +345,21 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
                 validatorsFee: validatorsFee,
                 token: messageRequest.feeToken
             });
+    }
+
+    function _getValidatorsFee(
+        MessageRequest calldata messageRequest
+    ) internal view returns (uint256[] memory, uint256) {
+        uint256[] memory validatorsFee = new uint256[](messageRequest.validatorLibs.length);
+        uint256 totalValidatorsFee;
+
+        for (uint256 i; i < messageRequest.validatorLibs.length; ++i) {
+            validatorsFee[i] = IValidatorLib(messageRequest.validatorLibs[i]).getFee(
+                messageRequest
+            );
+            totalValidatorsFee += validatorsFee[i];
+        }
+
+        return (validatorsFee, totalValidatorsFee);
     }
 }

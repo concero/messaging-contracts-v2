@@ -29,32 +29,20 @@ all: test
 install:
 	grep -E '^\s*url' ./.gitmodules | awk '{print $$3}' | xargs -I {} sh -c 'forge install {}'
 
-run_fork:
-	anvil --fork-url ${BASE_RPC_URL} -p ${BASE_LOCAL_FORK_PORT} $(args)
-
-run_arb_fork:
-	anvil --fork-url ${ARB_RPC_URL} -p ${ARB_LOCAL_FORK_PORT} $(args)
-
-run_polygon_fork:
-	anvil --fork-url ${POLYGON_RPC_URL} -p ${POLYGON_LOCAL_FORK_PORT} $(args)
-
-run_avalanche_fork:
-	anvil --fork-url ${AVALANCHE_RPC_URL} -p ${AVALANCHE_LOCAL_FORK_PORT} $(args)
-
 test:
 	forge test $(args)
 
-script:
-	forge script $(args)
-
-setup_operator_anvil:
-	forge script test/foundry/scripts/SetupOperatorAnvil.s.sol:SetupOperatorAnvil --rpc-url http://localhost:8545 --broadcast
-
 coverage:
 	forge coverage --report lcov
-	genhtml --ignore-errors inconsistent --ignore-errors corrupt --ignore-errors category -o ./coverage_report ./lcov.info
+	genhtml --ignore-errors inconsistent --ignore-errors corrupt -o ./coverage_report ./lcov.info
 	open ./coverage_report/index.html
 	rm -rf lcov.info
 
+#coverage:
+#	forge coverage --report lcov --skip script
+#	lcov --include lcov.info 'src/**' -o lcov.src.info
+#	genhtml -o ./coverage_report --ignore-errors inconsistent,corrupt lcov.src.info
+#	open ./coverage_report/index.html
+#	rm -f lcov.info lcov.src.info
 
 .PHONY: all test

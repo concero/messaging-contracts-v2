@@ -20,8 +20,8 @@ library MessageCodec {
     uint8 internal constant UINT64_BYTES_LENGTH = 8;
     uint8 internal constant BYTES32_BYTES_LENGTH = 32;
     uint8 internal constant ADDRESS_BYTES_LENGTH = 20;
-    uint8 internal constant LENGTH_BYTES_SIZE = UINT32_BYTES_LENGTH;
-    uint8 internal constant EVM_SRC_CHAIN_DATA_LENGTH = BYTES32_BYTES_LENGTH + UINT64_BYTES_LENGTH;
+    uint8 internal constant LENGTH_BYTES_SIZE = UINT24_BYTES_LENGTH;
+    uint8 internal constant EVM_SRC_CHAIN_DATA_LENGTH = ADDRESS_BYTES_LENGTH + UINT64_BYTES_LENGTH;
     uint8 internal constant VERSION = 1;
 
     uint8 internal constant SRC_CHAIN_SELECTOR_OFFSET = 1;
@@ -49,24 +49,21 @@ library MessageCodec {
                     messageRequest.dstChainSelector, // 4
                     _nonce,
                     // src chain data
-                    uint32(EVM_SRC_CHAIN_DATA_LENGTH),
-                    abi.encodePacked(
-                        bytes32(bytes20(msgSender)),
-                        messageRequest.srcBlockConfirmations
-                    ),
-                    uint32(messageRequest.dstChainData.length),
+                    uint24(EVM_SRC_CHAIN_DATA_LENGTH),
+                    abi.encodePacked(msgSender, messageRequest.srcBlockConfirmations),
+                    uint24(messageRequest.dstChainData.length),
                     messageRequest.dstChainData,
-                    uint32(dstRelayerLib.length),
+                    uint24(dstRelayerLib.length),
                     dstRelayerLib
                 ),
                 abi.encodePacked(
-                    uint32(messageRequest.relayerConfig.length),
+                    uint24(messageRequest.relayerConfig.length),
                     messageRequest.relayerConfig,
                     flatBytes(dstValidatorLibs),
                     flatBytes(messageRequest.validatorConfigs),
                     flatBytes(messageRequest.validationRpcs),
                     flatBytes(messageRequest.deliveryRpcs),
-                    uint32(messageRequest.payload.length),
+                    uint24(messageRequest.payload.length),
                     messageRequest.payload
                 )
             );
@@ -76,7 +73,7 @@ library MessageCodec {
         address receiver,
         uint32 dstGasLimit
     ) internal pure returns (bytes memory) {
-        return abi.encodePacked(bytes32(bytes20(receiver)), dstGasLimit);
+        return abi.encodePacked(receiver, dstGasLimit);
     }
 
     // READ FUNCTIONS //
@@ -101,7 +98,7 @@ library MessageCodec {
         uint256 srcChainDataOffset = SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE;
         return (
             data.readAddress(srcChainDataOffset),
-            data.readUint64(srcChainDataOffset + BYTES32_BYTES_LENGTH)
+            data.readUint64(srcChainDataOffset + ADDRESS_BYTES_LENGTH)
         );
     }
 
@@ -110,7 +107,7 @@ library MessageCodec {
 
         return (
             data.readAddress(dstChainDataOffset),
-            data.readUint32(dstChainDataOffset + BYTES32_BYTES_LENGTH)
+            data.readUint32(dstChainDataOffset + ADDRESS_BYTES_LENGTH)
         );
     }
 
@@ -121,16 +118,16 @@ library MessageCodec {
     function relayerConfig(bytes memory data) internal pure returns (bytes memory) {
         uint256 relayerConfigLengthOffset = getRelayerConfigOffset(data);
         uint256 start = relayerConfigLengthOffset + LENGTH_BYTES_SIZE;
-        return data.slice(start, start + data.readUint32(relayerConfigLengthOffset));
+        return data.slice(start, start + data.readUint24(relayerConfigLengthOffset));
     }
 
     function evmDstValidatorLibs(bytes memory data) internal pure returns (address[] memory) {
         uint256 dstValidatorLibsOffset = getDstValidatorLibsOffset(data);
-        address[] memory res = new address[](data.readUint32(dstValidatorLibsOffset));
+        address[] memory res = new address[](data.readUint24(dstValidatorLibsOffset));
 
         uint256 offset = dstValidatorLibsOffset + LENGTH_BYTES_SIZE;
         for (uint256 i; i < res.length; ++i) {
-            uint256 length = data.readUint32(offset);
+            uint256 length = data.readUint24(offset);
             offset += LENGTH_BYTES_SIZE;
             res[i] = data.readAddress(offset);
             offset += length;
@@ -154,28 +151,28 @@ library MessageCodec {
     function payload(bytes memory data) internal pure returns (bytes memory) {
         uint256 payloadLengthOffset = getPayloadOffset(data);
         uint256 start = payloadLengthOffset + LENGTH_BYTES_SIZE;
-        return data.slice(start, start + data.readUint32(payloadLengthOffset));
+        return data.slice(start, start + data.readUint24(payloadLengthOffset));
     }
 
     // OFFSETS CALCULATION
 
     function getDstChainDataOffset(bytes memory data) internal pure returns (uint256) {
-        return SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE + data.readUint32(SRC_CHAIN_DATA_OFFSET);
+        return SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE + data.readUint24(SRC_CHAIN_DATA_OFFSET);
     }
 
     function getDstRelayerLibOffset(bytes memory data) internal pure returns (uint256) {
         uint256 dstChainDataOffset = getDstChainDataOffset(data);
-        return dstChainDataOffset + data.readUint32(dstChainDataOffset) + LENGTH_BYTES_SIZE;
+        return dstChainDataOffset + data.readUint24(dstChainDataOffset) + LENGTH_BYTES_SIZE;
     }
 
     function getRelayerConfigOffset(bytes memory data) internal pure returns (uint256) {
         uint256 dstRelayerLibOffset = getDstRelayerLibOffset(data);
-        return dstRelayerLibOffset + data.readUint32(dstRelayerLibOffset) + LENGTH_BYTES_SIZE;
+        return dstRelayerLibOffset + data.readUint24(dstRelayerLibOffset) + LENGTH_BYTES_SIZE;
     }
 
     function getDstValidatorLibsOffset(bytes memory data) internal pure returns (uint256) {
         uint256 relayerConfigOffset = getRelayerConfigOffset(data);
-        return relayerConfigOffset + data.readUint32(relayerConfigOffset) + LENGTH_BYTES_SIZE;
+        return relayerConfigOffset + data.readUint24(relayerConfigOffset) + LENGTH_BYTES_SIZE;
     }
 
     function getValidatorConfigsOffset(bytes memory data) internal pure returns (uint256) {
@@ -197,21 +194,21 @@ library MessageCodec {
     // GENERIC FUNCTIONS //
 
     function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
-        uint256 totalLength = UINT32_BYTES_LENGTH;
+        uint256 totalLength = LENGTH_BYTES_SIZE;
 
         for (uint256 i; i < data.length; ++i) {
-            totalLength += data[i].length + UINT32_BYTES_LENGTH;
+            totalLength += data[i].length + LENGTH_BYTES_SIZE;
         }
 
         bytes memory res = new bytes(totalLength);
         uint256 j;
 
-        res.writeUint32(j, uint32(data.length));
-        j += UINT32_BYTES_LENGTH;
+        res.writeUint24(j, uint24(data.length));
+        j += LENGTH_BYTES_SIZE;
 
         for (uint256 i; i < data.length; ++i) {
-            res.writeUint32(j, uint32(data[i].length));
-            j += UINT32_BYTES_LENGTH;
+            res.writeUint24(j, uint24(data[i].length));
+            j += LENGTH_BYTES_SIZE;
 
             for (uint256 k; k < data[i].length; ++k) {
                 res[j] = data[i][k];
@@ -226,22 +223,22 @@ library MessageCodec {
         bytes memory data,
         uint256 start
     ) internal pure returns (uint256) {
-        uint256 nestedArrLength = data.readUint32(start);
+        uint256 nestedArrLength = data.readUint24(start);
         uint256 offset = start + LENGTH_BYTES_SIZE;
 
         for (uint256 i; i < nestedArrLength; ++i) {
-            offset += LENGTH_BYTES_SIZE + data.readUint32(offset);
+            offset += LENGTH_BYTES_SIZE + data.readUint24(offset);
         }
 
         return offset;
     }
 
     function unflatBytes(bytes memory data, uint256 start) internal pure returns (bytes[] memory) {
-        bytes[] memory res = new bytes[](data.readUint32(start));
+        bytes[] memory res = new bytes[](data.readUint24(start));
 
         uint256 offset = start + LENGTH_BYTES_SIZE;
         for (uint256 i; i < res.length; ++i) {
-            uint256 length = data.readUint32(offset);
+            uint256 length = data.readUint24(offset);
             offset += LENGTH_BYTES_SIZE;
             res[i] = data.slice(offset, offset + length);
             offset += length;

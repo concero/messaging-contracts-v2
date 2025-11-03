@@ -63,6 +63,15 @@ library BytesUtils {
         return res;
     }
 
+    function writeUint24(bytes memory out, uint256 offset, uint24 value) internal pure {
+        assembly {
+            let ptr := add(add(out, 32), offset)
+            mstore8(ptr, shr(16, value))
+            mstore8(add(ptr, 1), shr(8, value))
+            mstore8(add(ptr, 2), value)
+        }
+    }
+
     function writeUint32(bytes memory out, uint256 offset, uint32 value) internal pure {
         assembly {
             let ptr := add(add(out, 32), offset)

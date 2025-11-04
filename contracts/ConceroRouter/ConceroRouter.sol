@@ -114,6 +114,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     function retryMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,
+        // TODO:mb remove it
         uint32 gasLimitOverride
     ) external nonReentrant {
         s.Router storage s_router = s.router();
@@ -264,7 +265,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             s.router().isMessageProcessed[messageHash] = true;
             emit ConceroMessageDelivered(messageHash);
         } else {
-            // TODO: add check if invalid s_relayer - revert
+            // TODO: add check if invalid relayer - revert
             s.router().isMessageRetryAllowed[messageSubmissionHash] = true;
             emit ConceroMessageDeliveryFailed(messageHash, result);
         }
@@ -312,6 +313,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             messageRequest.payload.length < s_router.maxMessageSize,
             PayloadTooLarge(messageRequest.payload.length, s_router.maxMessageSize)
         );
+        // todo: check validator configs
         require(
             messageRequest.validatorLibs.length > 0 &&
                 messageRequest.validatorLibs.length < s_router.maxValidatorsCount,

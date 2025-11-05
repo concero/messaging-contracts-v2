@@ -22,6 +22,8 @@ library Storage {
         uint256[50] __array_gap;
         mapping(uint24 dstChainSelector => uint256) lastGasPrices;
         mapping(uint24 dstChainSelector => uint256) nativeNativeRates;
+        mapping(address token => uint256 usdRate) tokenUsdRates;
+		mapping(address token => bool isFeeToken) isFeeTokenSupported;
     }
 
     /* SLOT-BASED STORAGE ACCESS */

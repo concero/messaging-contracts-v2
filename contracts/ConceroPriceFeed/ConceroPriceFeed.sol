@@ -102,6 +102,24 @@ contract ConceroPriceFeed is IConceroPriceFeed {
     }
 
     /**
+     * @notice Sets the supported fee tokens
+     * @param tokens Array of tokens to set the supported status for
+     * @param isSupported Array of corresponding supported status
+     */
+    function setFeeTokens(
+        address[] calldata tokens,
+        bool[] calldata isSupported
+    ) external onlyFeedUpdater {
+        require(tokens.length == isSupported.length, CommonErrors.LengthMismatch());
+
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            priceFeedStorage.isFeeTokenSupported[tokens[i]] = isSupported[i];
+        }
+    }
+
+    /**
      * @notice Gets the USD rate
      * @param token The token address to get the USD rate for
      * @dev If zero address is provided, the native USD rate is returned
@@ -114,7 +132,7 @@ contract ConceroPriceFeed is IConceroPriceFeed {
             return priceFeedStorage.nativeUsdRate;
         }
 
-        if (priceFeedStorage.tokenUsdRates[token] == 0) {
+        if (!priceFeedStorage.isFeeTokenSupported[token]) {
             revert IConceroRouter.UnsupportedFeeToken();
         }
 

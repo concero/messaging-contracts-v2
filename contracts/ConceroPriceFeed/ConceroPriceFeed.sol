@@ -9,6 +9,7 @@ pragma solidity 0.8.28;
 import {Storage as s} from "./libraries/Storage.sol";
 
 import {IConceroPriceFeed} from "../interfaces/IConceroPriceFeed.sol";
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {CommonErrors} from "../common/CommonErrors.sol";
 
 /**
@@ -47,6 +48,24 @@ contract ConceroPriceFeed is IConceroPriceFeed {
     }
 
     /**
+     * @notice Sets the USD rate for a specific token
+     * @param tokens Array of tokens to set the USD rate for
+     * @param rates Array of corresponding USD rates in 18 decimals
+     */
+    function setTokenUsdRates(
+        address[] calldata tokens,
+        uint256[] calldata rates
+    ) external onlyFeedUpdater {
+        require(tokens.length == rates.length, CommonErrors.LengthMismatch());
+
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            priceFeedStorage.tokenUsdRates[tokens[i]] = rates[i];
+        }
+    }
+
+    /**
      * @notice Sets native-native rates for multiple chains
      * @param chainSelectors Array of chain selectors to update
      * @param rates Array of corresponding native-native rates in 18 decimals
@@ -82,9 +101,24 @@ contract ConceroPriceFeed is IConceroPriceFeed {
         }
     }
 
-    // TODO: implement it
-    function getUsdRate(address) external pure returns (uint256) {
-        return 1;
+    /**
+     * @notice Gets the USD rate
+     * @param token The token address to get the USD rate for
+     * @dev If zero address is provided, the native USD rate is returned
+     * @return The USD rate in 18 decimals
+     */
+    function getUsdRate(address token) external view returns (uint256) {
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+
+        if (token == address(0)) {
+            return priceFeedStorage.nativeUsdRate;
+        }
+
+        if (priceFeedStorage.tokenUsdRates[token] == 0) {
+            revert IConceroRouter.UnsupportedFeeToken();
+        }
+
+        return priceFeedStorage.tokenUsdRates[token];
     }
 
     /**

@@ -6,10 +6,11 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroValidatorTest} from "../../ConceroValidator/base/ConceroValidatorTest.sol";
+import {Test} from "forge-std/src/Test.sol";
+
 import {Types as RouterTypes} from "../../../../contracts/ValidatorLib/libraries/Types.sol";
 
-contract BaseMockCLFReport is ConceroValidatorTest {
+contract BaseMockCLFReport is Test {
     uint256 public constant MOCK_DON_SIGNER_PRIVATE_KEY_0 =
         0xc4811b8c87ec913b43de310600815ed870bc9984121627252d077c38ab76183d;
     uint256 public constant MOCK_DON_SIGNER_PRIVATE_KEY_1 =
@@ -19,6 +20,14 @@ contract BaseMockCLFReport is ConceroValidatorTest {
     uint256 public constant MOCK_DON_SIGNER_PRIVATE_KEY_3 =
         0x31ec7a7d750fd8fdb2f80d6ba2a426afab415a2000092bcf529e6002697b2e31;
 
+    address internal i_conceroValidator;
+    uint64 internal i_conceroValidatorSubscriptionId;
+
+    constructor(address conceroValidator, uint64 subscriptionId) {
+        i_conceroValidator = conceroValidator;
+        i_conceroValidatorSubscriptionId = subscriptionId;
+    }
+
     function createMockClfReport(
         bytes memory _response
     ) public view returns (RouterTypes.ClfDonReportSubmission memory) {
@@ -26,8 +35,8 @@ contract BaseMockCLFReport is ConceroValidatorTest {
             createMockClfReport(
                 _response,
                 bytes32("requestId"),
-                address(s_conceroValidator),
-                s_conceroValidatorSubscriptionId
+                address(i_conceroValidator),
+                i_conceroValidatorSubscriptionId
             );
     }
 
@@ -39,8 +48,8 @@ contract BaseMockCLFReport is ConceroValidatorTest {
             createMockClfReport(
                 _response,
                 requestId,
-                address(s_conceroValidator),
-                s_conceroValidatorSubscriptionId
+                address(i_conceroValidator),
+                i_conceroValidatorSubscriptionId
             );
     }
 

@@ -5,6 +5,24 @@ import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {Types as RouterTypes} from "../../../../contracts/ValidatorLib/libraries/Types.sol";
 
 contract MessageReport is BaseMockCLFReport {
+    address internal i_operator;
+    uint24 internal i_srcChainSelector;
+    uint24 internal i_dstChainSelector;
+	address internal i_user;
+    constructor(
+        address conceroValidator,
+        uint64 subscriptionId,
+        address operator,
+        uint24 srcChainSelector,
+        uint24 dstChainSelector,
+		address user
+    ) BaseMockCLFReport(conceroValidator, subscriptionId) {
+        i_operator = operator;
+		i_srcChainSelector = srcChainSelector;
+		i_dstChainSelector = dstChainSelector;
+		i_user = user;
+    }
+
     function getReport() public view returns (RouterTypes.ClfDonReportSubmission memory) {
         return getReport(getResponse(), bytes32("requestId"));
     }
@@ -24,16 +42,16 @@ contract MessageReport is BaseMockCLFReport {
 
     function getResponse() public view returns (bytes memory) {
         bytes[] memory allowedOperators = new bytes[](1);
-        allowedOperators[0] = abi.encode(s_operator);
+        allowedOperators[0] = abi.encode(i_operator);
         return
             getResponse(
-                address(s_operator),
+                address(i_operator),
                 bytes32("messageId"),
                 bytes32("messageHashSum"),
                 bytes32("txHash"),
-                SRC_CHAIN_SELECTOR,
-                DST_CHAIN_SELECTOR,
-                address(s_user),
+                i_srcChainSelector,
+                i_dstChainSelector,
+                address(i_user),
                 12345678, // Default block number
                 RouterTypes.EvmDstChainData({receiver: address(0), gasLimit: 1_000_000}),
                 allowedOperators

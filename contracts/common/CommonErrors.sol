@@ -9,7 +9,9 @@ pragma solidity 0.8.28;
 library CommonErrors {
     enum RequiredVariableUnsetType {
         NativeUSDRate, //            0
-        lastGasPrice //              1
+        lastGasPrice, //              1
+		DstGasPrice, //               2
+		DstNativeRate //             3
     }
 
     error Unauthorized();

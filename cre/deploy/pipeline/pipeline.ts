@@ -1,64 +1,64 @@
 import { HTTPPayload, Runtime } from "@chainlink/cre-sdk";
+import { sha256 } from "viem";
 
-import { conceroRouters, CONFIG } from "../constants";
+import { conceroRouters } from "../constants";
 import { getPublicClient } from "../client";
-import { GlobalContext, MessageReportResult, ResultType } from "../types";
+import { GlobalContext } from "../types";
 import { decodeArgs } from "./decodeArgs";
-import { validateDecodedArgs } from "./validateDecodedArgs";
 import { fetchLogByMessageId } from "./fetchLogByMessageId";
-import { decodeMessageLog } from "./decodeLog";
-import { verifyMessageHash } from "./verifyMessageHash";
-import { packResult } from "./packResult";
+import { validateDecodedArgs } from "./validateDecodedArgs";
+import { Utility } from "../utility";
 
 // pipeline stages for each validation request
 export async function pipeline(runtime: Runtime<GlobalContext>, payload: HTTPPayload) {
     try {
         const args = decodeArgs(payload);
-        validateDecodedArgs(args);
+        validateDecodedArgs(args)
+        runtime.log(`Decoded args: ${JSON.stringify(args)}`);
 
-        const publicClient = getPublicClient(args.srcChainSelector.toString());
+        if (!conceroRouters) {
+            runtime.log("⚠️ conceroRouters is undefined");
+            return "0x0";
+        }
 
-        const log = await fetchLogByMessageId(
+        const routerAddress = conceroRouters[args.srcChainSelector] || '0x0';
+        runtime.log(`Got routerAddress=${routerAddress}`);
+
+        if (routerAddress === '0x0') {
+            runtime.log(`⚠️ No known router for srcChainSelector=${args.srcChainSelector}`);
+            return "0x0";
+        }
+
+        const publicClient = getPublicClient(runtime, args.srcChainSelector);
+        runtime.log(`Got publicClient: ${JSON.stringify(publicClient)}`);
+
+        const log = await fetchLogByMessageId(runtime,
             publicClient,
-            conceroRouters[Number(args.srcChainSelector)],
+            routerAddress,
             args.messageId,
-            BigInt(args.srcChainData.blockNumber),
+            BigInt(Number(args.blockNumber))
         );
-        const { dstChainSelector, dstChainData, sender, message } = decodeMessageLog(log);
-        verifyMessageHash(message, args.messageHashSum);
+        runtime.log(`Got Log: ${Utility.safeJSONStringify(log)}`);
 
-        const rawReport: MessageReportResult = {
-            payloadVersion: CONFIG.PAYLOAD_VERSION,
-            resultType: ResultType.MESSAGE,
-            requester: args.operatorAddress,
-            messageId: args.messageId,
-            messageHashSum: args.messageHashSum,
-            messageSender: sender,
-            srcChainSelector: args.srcChainSelector,
-            dstChainSelector: Number(dstChainSelector),
-            srcBlockNumber: log.blockNumber as bigint,
-            dstChainData,
-            allowedOperators: [],
-        };
-        const packedReport = packResult(rawReport);
+        if (!log || !log?.data) {
+            runtime.log(`❌ No log found for messageId=${args.messageId}`);
+            return "0x0";
+        }
 
-        const report = runtime.report({
-            encoderName: 'evm',
-            encodedPayload: String(packedReport),
-            signingAlgo: 'ecdsa',
-            hashingAlgo: 'keccak256'
-        }).result()
+        const report = runtime
+            .report({
+                encoderName: 'evm',
+                encodedPayload: sha256(log.data),
+                signingAlgo: 'ecdsa',
+                hashingAlgo: 'keccak256',
+            })
+            .result();
 
-        return log?.transactionHash?.toString() || '0x0a000';
+        runtime.log(`✅ Report created ${Utility.safeJSONStringify(report)}`);
 
-        // @todo: add sendMessage
-        /*const httpClient = new cre.capabilities.HTTPClient()
-        const sentRequest = httpClient.sendRequest(
-            runtime,
-            (sendRequester) => {sendRequester.}
-        )(); */
+        return sha256(log.data);
     } catch (error) {
-        runtime.log(`Pipeline failed with error ${error?.toString()}`);
-        return "0x0a000";
+        runtime.log(`Pipeline failed with error ${error instanceof Error ? `${error.message} ${error.stack}` : error?.toString()}`);
+        return "0x0";
     }
 }

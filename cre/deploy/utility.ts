@@ -1,4 +1,4 @@
-import { ErrorCode, DomainError } from "./error";
+import { DomainError, ErrorCode } from "./error";
 
 export namespace Utility {
     /**
@@ -44,5 +44,40 @@ export namespace Utility {
     export function packUint8(value: number): Uint8Array {
         return new Uint8Array([value]);
     }
+
+    export const safeJSONStringify = (obj: object) =>
+        JSON.stringify(obj, (_, value) =>
+            typeof value === 'bigint' ? `0x${value.toString(16)}` : value
+        );
+
+    export const safeJSONParse = <T = any>(json: string): T => {
+        if (typeof json !== "string") {
+            json = JSON.stringify(json);
+        }
+
+        const parsed = JSON.parse(json, (key, value) => {
+            if (key === "blockNumber" && typeof value === "string" && /^0x[0-9a-fA-F]+$/.test(value)) {
+                try {
+                    return BigInt(value);
+                } catch {
+                    return value;
+                }
+            }
+            return value;
+        });
+
+        if (
+            parsed &&
+            typeof parsed === "object" &&
+            !Array.isArray(parsed) &&
+            Object.keys(parsed).every(k => /^\d+$/.test(k))
+        ) {
+            return Object.values(parsed) as T;
+        }
+
+        return parsed;
+    };
+
+
 
 }

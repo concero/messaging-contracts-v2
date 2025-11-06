@@ -1,30 +1,58 @@
 import { type Address, type Log, type PublicClient } from "viem";
-
-import { ConceroMessageLogParams, conceroMessageSentEventName } from "../constants";
 import { DomainError, ErrorCode } from "../error";
+import { Runtime } from "@chainlink/cre-sdk";
+import { GlobalContext } from "../types";
+import { ConceroMessageLogParams, conceroMessageSentEventName } from "../constants";
+import { Utility } from "../utility";
+
+const LOG_TAG = 'fetchLogByMessageId'
 
 export async function fetchLogByMessageId(
+    runtime: Runtime<GlobalContext>,
     client: PublicClient,
-    routerAddress: Address,
+    address: Address,
     messageId: string,
     blockNumber: bigint,
 ): Promise<Log> {
-    const logs = await client.getLogs({
-        event: { type: "event", inputs: ConceroMessageLogParams, name: conceroMessageSentEventName },
-        address: routerAddress,
-        fromBlock: blockNumber - 10n,
-        toBlock: blockNumber,
-    });
+    const fromBlock = blockNumber - 10n;
+    const toBlock = blockNumber;
+
+    runtime.log(`${LOG_TAG} Fetching ${JSON.stringify({ address, messageId, fromBlock: String(fromBlock), toBlock: String(toBlock) })}`);
+    let logs: Log[] = [];
+
+    try {
+        logs = await client.getLogs({
+            event: {
+                type: "event",
+                inputs: ConceroMessageLogParams,
+                name: conceroMessageSentEventName,
+            },
+            address,
+            fromBlock,
+            toBlock
+        })
+        runtime.log(`${LOG_TAG} Fetched successfully ${Utility.safeJSONStringify({ logs })})`);
+    } catch (e) {
+        runtime.log(`${LOG_TAG} Fetching failed`);
+        throw e;
+    }
 
     if (!logs.length) {
-        throw new DomainError(ErrorCode.EVENT_NOT_FOUND);
+        runtime.log(`${LOG_TAG} Logs are empty`);
+        throw new DomainError(ErrorCode.EVENT_NOT_FOUND, 'Logs are empty');
     }
 
-    const conceroMessageSentLog = logs.find(log => log.topics[1]?.toLowerCase() === messageId.toLowerCase());
+    const log = logs.find(
+        (log) => {
+            const logMessageId = log?.topics?.[1]?.toLowerCase();
+            return logMessageId === messageId.toLowerCase();
+        }
+    );
 
-    if (!conceroMessageSentLog) {
-        throw new DomainError(ErrorCode.EVENT_NOT_FOUND);
+    if (!log) {
+        runtime.log(`${LOG_TAG} Log not found`);
+        throw new DomainError(ErrorCode.EVENT_NOT_FOUND, '');
     }
 
-    return conceroMessageSentLog;
+    return log;
 }

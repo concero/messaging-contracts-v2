@@ -1,8 +1,6 @@
 import testnetChains from "@concero/rpcs/output/testnet.json";
 import testnetNetworks from "@concero/v2-networks/networks/testnet.json";
 
-import { config } from "../config";
-
 
 export type RpcConfig = {
 	rpcUrls: string[];
@@ -21,10 +19,9 @@ type NetworkData = {
 	finalityConfirmations: number;
 };
 
-export const chainSelectorToRpcConfig: Record<string, RpcConfig> = {};
+export const chainSelectorToRpcConfig: Record<number, RpcConfig> = {};
 
-// @todo: fix unknown
-Object.entries(testnetNetworks as unknown as Record<string, NetworkData>).forEach(([networkName, networkData]) => {
+Object.entries(testnetNetworks as unknown as Record<number, NetworkData>).forEach(([networkName, networkData]) => {
 	const chainData = (testnetChains as any)[networkName] as ChainData;
 
 	if (chainData && chainData.rpcUrls) {
@@ -38,12 +35,6 @@ Object.entries(testnetNetworks as unknown as Record<string, NetworkData>).forEac
 });
 
 
-export function findRPCsBySelector(chainSelector: string): Pick<RpcConfig, 'rpcUrls'> {
-    if (config.isDevelopment) {
-        return {
-            rpcUrls: [config.localhostRpcUrl],
-        };
-    }
-
+export function findRPCsBySelector(chainSelector: number): Pick<RpcConfig, 'rpcUrls'> {
     return chainSelectorToRpcConfig[chainSelector];
 }

@@ -15,6 +15,8 @@ import {MockConceroValidatorLib} from "../../mocks/MockConceroValidatorLib.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
 
+import {console} from "forge-std/src/console.sol";
+
 abstract contract ConceroRouterTest is ConceroTest {
     ConceroTestClient internal s_conceroClient;
     ConceroRouterHarness internal s_conceroRouter;
@@ -117,5 +119,13 @@ abstract contract ConceroRouterTest is ConceroTest {
                 deliveryRpcs: new bytes[](0),
                 payload: payload
             });
+    }
+
+    function _conceroSend() internal returns (bytes32) {
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.prank(s_user);
+        return s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
     }
 }

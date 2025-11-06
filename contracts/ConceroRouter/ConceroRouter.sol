@@ -168,7 +168,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             if (tokens[i] == address(0)) {
                 balance = address(this).balance;
             } else {
-                balance = IERC20(tokens[i]).balanceOf(address(this));
+                revert UnsupportedFeeToken();
             }
 
             if (balance == 0) continue;
@@ -177,11 +177,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
             if (conceroFee == 0) continue;
 
-            if (tokens[i] == address(0)) {
-                Utils.transferNative(msg.sender, conceroFee);
-            } else {
-                revert UnsupportedFeeToken();
-            }
+            Utils.transferNative(msg.sender, conceroFee);
 
             // TODO: mb add event
         }

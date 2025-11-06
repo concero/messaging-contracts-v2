@@ -150,7 +150,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             if (tokens[i] == address(0)) {
                 Utils.transferNative(msg.sender, relayerFee);
             } else {
-                IERC20(tokens[i]).safeTransfer(msg.sender, relayerFee);
+                revert UnsupportedFeeToken();
             }
 
             emit RelayerFeeWithdrawn(msg.sender, tokens[i], relayerFee);
@@ -180,7 +180,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             if (tokens[i] == address(0)) {
                 Utils.transferNative(msg.sender, conceroFee);
             } else {
-                IERC20(tokens[i]).safeTransfer(msg.sender, conceroFee);
+                revert UnsupportedFeeToken();
             }
 
             // TODO: mb add event
@@ -224,9 +224,12 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     function getConceroFee(address feeToken) public view returns (uint256) {
         s.Router storage s_router = s.router();
 
+        // e.g. conceroMessageFeeInUsd = 0.1e6 (0.1 USD)
+        // getUsdRate(feeToken) = 2000e18 (2000 ETH)
+        // $0.1 in ETH = 0.1e6 * 1e12 * 1e18 / 2000e18 = 5e13 ETH
         return
-            IConceroPriceFeed(s_router.priceFeeds[feeToken]).getUsdRate(feeToken) *
-            s_router.conceroMessageFeeInUsd;
+            (uint256(s_router.conceroMessageFeeInUsd) * 1e12 * 1e18) /
+            i_conceroPriceFeed.getUsdRate(feeToken);
     }
 
     function getMaxPayloadSize() public view returns (uint256) {
@@ -338,7 +341,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
             require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
         } else {
-            IERC20(messageRequest.feeToken).safeTransferFrom(msg.sender, address(this), totalFee);
+            revert UnsupportedFeeToken();
         }
 
         uint256 totalRelayerFee = relayerFee + totalValidatorsFee;

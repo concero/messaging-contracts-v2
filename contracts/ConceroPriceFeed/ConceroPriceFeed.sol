@@ -83,8 +83,12 @@ contract ConceroPriceFeed is IConceroPriceFeed {
     }
 
     // TODO: implement it
-    function getUsdRate(address) external pure returns (uint256) {
-        return 1;
+    function getUsdRate(address token) external view returns (uint256) {
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+
+        if (token == address(0)) {
+            return priceFeedStorage.nativeUsdRate;
+        }
     }
 
     /**

@@ -5,9 +5,11 @@ import { conceroRouters } from "../constants";
 import { getPublicClient } from "../client";
 import { GlobalContext } from "../types";
 import { decodeArgs } from "./decodeArgs";
-import { fetchLogByMessageId } from "./fetchLogByMessageId";
 import { validateDecodedArgs } from "./validateDecodedArgs";
+import { fetchLogByMessageId } from "./fetchLogByMessageId";
+import { sendReportToRelayer } from "./sendReportToRelayer";
 import { Utility } from "../utility";
+
 
 // pipeline stages for each validation request
 export async function pipeline(runtime: Runtime<GlobalContext>, payload: HTTPPayload) {
@@ -54,7 +56,7 @@ export async function pipeline(runtime: Runtime<GlobalContext>, payload: HTTPPay
             })
             .result();
 
-        runtime.log(`✅ Report created ${Utility.safeJSONStringify(report)}`);
+        sendReportToRelayer(runtime, report);
 
         return sha256(log.data);
     } catch (error) {

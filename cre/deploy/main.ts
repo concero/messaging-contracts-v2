@@ -1,6 +1,6 @@
 import {cre, type HTTPPayload, Runner, type Runtime} from "@chainlink/cre-sdk";
 
-import {GlobalContext} from "./types";
+import {GlobalContext} from "./helpers/types";
 import {pipeline} from "./pipeline";
 
 

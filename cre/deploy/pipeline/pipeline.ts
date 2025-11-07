@@ -1,20 +1,20 @@
-import { HTTPPayload, Runtime } from "@chainlink/cre-sdk";
-import { sha256 } from "viem";
+import {HTTPPayload, Runtime} from "@chainlink/cre-sdk";
+import {sha256} from "viem";
 
-import { conceroRouters } from "../constants";
-import { getPublicClient, validateConfigs } from "../client";
-import { GlobalContext } from "../types";
-import { decodeArgs } from "./decodeArgs";
-import { validateDecodedArgs } from "./validateDecodedArgs";
-import { fetchLogByMessageId } from "./fetchLogByMessageId";
-import { sendReportToRelayer } from "./sendReportToRelayer";
-import { Utility } from "../utility";
+import {GlobalContext, Utility} from "../helpers";
+import {ChainsManager, PublicClient} from "../systems";
+import {decodeArgs} from "./decodeArgs";
+import {validateDecodedArgs} from "./validateDecodedArgs";
+import {fetchLogByMessageId} from "./fetchLogByMessageId";
+import {sendReportToRelayer} from "./sendReportToRelayer";
+import {conceroRouters} from "../conceroRouters";
 
 
 // pipeline stages for each validation request
 export async function pipeline(runtime: Runtime<GlobalContext>, payload: HTTPPayload) {
     try {
-        validateConfigs(runtime);
+        ChainsManager.enrichOptions();
+        ChainsManager.validateOptions(runtime);
 
         const args = decodeArgs(payload);
         validateDecodedArgs(args)
@@ -33,7 +33,7 @@ export async function pipeline(runtime: Runtime<GlobalContext>, payload: HTTPPay
             return "0x0";
         }
 
-        const publicClient = getPublicClient(runtime, args.srcChainSelector);
+        const publicClient = PublicClient.create(runtime, args.srcChainSelector);
         runtime.log(`Got publicClient: ${JSON.stringify(publicClient)}`);
 
         const log = await fetchLogByMessageId(runtime,

@@ -1,8 +1,8 @@
-import { type Hex } from "viem";
-import { decodeJson, HTTPPayload } from "@chainlink/cre-sdk";
+import {type Hex} from "viem";
+import {decodeJson, HTTPPayload} from "@chainlink/cre-sdk";
 
-import { DomainError, ErrorCode } from "../error";
-import { type DecodedArgs } from "../types";
+import {DomainError, ErrorCode} from "../helpers/error";
+import {type DecodedArgs} from "../helpers/types";
 
 export function decodeArgs(payload: HTTPPayload): DecodedArgs {
     try {

@@ -1,5 +1,4 @@
-import { DomainError, ErrorCode } from "../error";
-import type { DecodedArgs } from "../types";
+import {DecodedArgs, DomainError, ErrorCode} from "../helpers";
 
 
 export function validateDecodedArgs(decodedArgs: DecodedArgs): void {

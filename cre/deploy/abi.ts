@@ -1,4 +1,4 @@
-import { parseAbi } from "viem";
+import {parseAbi} from "viem";
 
 export const ClientMessageRequestBase =
 	"uint8 version, bool shouldFinaliseSrc, uint24 dstChainSelector, bytes dstChainData, bytes sender, bytes message";
@@ -20,16 +20,6 @@ export const NonIndexedConceroMessageParams = [
 export const ConceroMessageLogParams = [
 	{ type: "bytes32", name: "messageId", indexed: true },
 	...NonIndexedConceroMessageParams,
-];
-
-export const EvmSrcChainDataParams = [
-	{
-		type: "tuple",
-		components: [
-			{ name: "blockNumber", type: "uint256" },
-			{ name: "sender", type: "address" },
-		],
-	},
 ];
 
 export const conceroMessageSentEventName = "ConceroMessageSent";

@@ -312,7 +312,13 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             messageRequest.payload.length < s_router.maxMessageSize,
             PayloadTooLarge(messageRequest.payload.length, s_router.maxMessageSize)
         );
-        // todo: check validator configs
+        require(
+            messageRequest.validatorConfigs.length == messageRequest.validatorLibs.length,
+            InvalidValidatorConfigsCount(
+                messageRequest.validatorConfigs.length,
+                messageRequest.validatorLibs.length
+            )
+        );
         require(
             messageRequest.validatorLibs.length > 0 &&
                 messageRequest.validatorLibs.length < s_router.maxValidatorsCount,

@@ -124,9 +124,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
         require(
-            !s_router.isMessageRetryAllowed[messageSubmissionHash],
+            s_router.isMessageRetryAllowed[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
+		s_router.isMessageRetryAllowed[messageSubmissionHash] = false;
 
         _deliverMessage(
             messageReceipt,

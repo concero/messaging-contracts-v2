@@ -6,6 +6,9 @@
  */
 pragma solidity 0.8.28;
 
+import {Vm} from "forge-std/src/Vm.sol";
+import {console} from "forge-std/src/console.sol";
+
 import {MockConceroRelayerLib} from "../../mocks/MockConceroRelayerLib.sol";
 import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
 import {ConceroTestClient} from "../../ConceroTestClient/ConceroTestClient.sol";
@@ -15,11 +18,10 @@ import {MockConceroValidatorLib} from "../../mocks/MockConceroValidatorLib.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
 
-import {console} from "forge-std/src/console.sol";
-
 abstract contract ConceroRouterTest is ConceroTest {
     ConceroTestClient internal s_conceroClient;
     ConceroRouterHarness internal s_conceroRouter;
+    ConceroRouterHarness internal s_dstConceroRouter;
 
     address internal s_validatorLib = address(new MockConceroValidatorLib());
     address internal s_relayerLib = address(new MockConceroRelayerLib());
@@ -31,6 +33,12 @@ abstract contract ConceroRouterTest is ConceroTest {
             )
         );
 
+        s_dstConceroRouter = ConceroRouterHarness(
+            payable(
+                (new DeployConceroRouter()).deploy(DST_CHAIN_SELECTOR, address(s_conceroPriceFeed))
+            )
+        );
+
         vm.startPrank(s_deployer);
         s_conceroRouter.setConceroMessageFeeInUsd(CONCERO_MESSAGE_FEE_IN_USD);
         s_conceroRouter.setMaxMessageSize(MAX_CONCERO_MESSAGE_SIZE);
@@ -38,7 +46,10 @@ abstract contract ConceroRouterTest is ConceroTest {
         s_conceroRouter.setTokenPriceFeed(address(0), address(s_conceroPriceFeed));
         vm.stopPrank();
 
-        s_conceroClient = new ConceroTestClient(payable(s_conceroRouter));
+        s_conceroClient = new ConceroTestClient(payable(s_dstConceroRouter));
+		s_conceroClient.setIsRelayerAllowed(s_relayerLib, true);
+		s_conceroClient.setIsValidatorAllowed(s_validatorLib, true);
+		s_conceroClient.setRequiredValidatorsCount(1);
 
         vm.deal(s_user, 100 ether);
 
@@ -121,11 +132,18 @@ abstract contract ConceroRouterTest is ConceroTest {
             });
     }
 
-    function _conceroSend() internal returns (bytes32) {
+    function _conceroSend() internal returns (bytes32 messageId, bytes memory messageReceipt) {
+        vm.recordLogs();
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
         vm.prank(s_user);
-        return s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
+        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        messageId = bytes32(entries[0].topics[1]);
+        messageReceipt = abi.decode(entries[0].data, (bytes));
+
+        return (messageId, messageReceipt);
     }
 }

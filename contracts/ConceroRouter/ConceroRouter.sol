@@ -264,7 +264,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             s.router().isMessageProcessed[messageHash] = true;
             emit ConceroMessageDelivered(messageHash);
         } else {
-            // TODO: add check if invalid relayer - revert
+            if (bytes4(result) == IConceroClient.RelayerNotAllowed.selector) {
+                revert IConceroClient.RelayerNotAllowed(messageReceipt.emvDstRelayerLib());
+            }
+
             s.router().isMessageRetryAllowed[messageSubmissionHash] = true;
             emit ConceroMessageDeliveryFailed(messageHash, result);
         }

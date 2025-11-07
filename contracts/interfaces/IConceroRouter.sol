@@ -64,6 +64,7 @@ interface IConceroRouter {
     error PayloadTooLarge(uint256 receviedLength, uint256 expectedLength);
     error EmptyDstChainData();
     error InvalidValidatorsCount(uint256 validatorsCount, uint256 maxValidatorsCount);
+    error InvalidGasLimit();
 
     event ConceroMessageSent(bytes32 indexed messageId, bytes messageReceipt);
     event ConceroMessageFeePaid(bytes32 indexed messageId, Fee fee);

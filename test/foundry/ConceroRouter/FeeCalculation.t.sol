@@ -209,13 +209,13 @@ contract FeeCalculation is ConceroRouterTest {
         s_conceroRouter.setConceroMessageFeeInUsd(1e6);
     }
 
-	/* isFeeTokenSupported */
+    /* isFeeTokenSupported */
 
-	function test_isFeeTokenSupported_ReturnsTrueIfSupported() public {
-		assertTrue(s_conceroRouter.isFeeTokenSupported(address(0)));
-	}
+    function test_isFeeTokenSupported_ReturnsTrueIfSupported() public {
+        assertTrue(s_conceroRouter.isFeeTokenSupported(address(0)));
+    }
 
-	function test_isFeeTokenSupported_ReturnsFalseIfNotSupported() public {
-		assertFalse(s_conceroRouter.isFeeTokenSupported(s_usdc));
-	}
+    function test_isFeeTokenSupported_ReturnsFalseIfNotSupported() public {
+        assertFalse(s_conceroRouter.isFeeTokenSupported(s_usdc));
+    }
 }

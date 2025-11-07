@@ -2,7 +2,7 @@ import { HTTPPayload, Runtime } from "@chainlink/cre-sdk";
 import { sha256 } from "viem";
 
 import { conceroRouters } from "../constants";
-import { getPublicClient } from "../client";
+import { getPublicClient, validateConfigs } from "../client";
 import { GlobalContext } from "../types";
 import { decodeArgs } from "./decodeArgs";
 import { validateDecodedArgs } from "./validateDecodedArgs";
@@ -14,6 +14,8 @@ import { Utility } from "../utility";
 // pipeline stages for each validation request
 export async function pipeline(runtime: Runtime<GlobalContext>, payload: HTTPPayload) {
     try {
+        validateConfigs(runtime);
+
         const args = decodeArgs(payload);
         validateDecodedArgs(args)
         runtime.log(`Decoded args: ${JSON.stringify(args)}`);

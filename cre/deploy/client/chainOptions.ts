@@ -5,8 +5,8 @@ import mainnetDataNetworks from "@concero/v2-networks/networks/mainnet.json";
 
 import { DomainError, ErrorCode } from "../error";
 
-export const chainOptions = { ...mainnetChainsRPCs, ...testnetChainsRPCs };
-export const networks = { ...mainnetDataNetworks, ...testnetDataNetworks };
+export const chainsOptions = { ...mainnetChainsRPCs, ...testnetChainsRPCs };
+export const networksOptions = { ...mainnetDataNetworks, ...testnetDataNetworks };
 
 export type ChainOptions = {
     id: number
@@ -23,7 +23,7 @@ export type ChainOptions = {
 
 export const chainSelectorToRpcConfig: Record<number, ChainOptions> = {};
 
-Object.values(chainOptions).forEach((i) => {
+Object.values(chainsOptions).forEach((i) => {
     if (i && i.rpcUrls) {
         chainSelectorToRpcConfig[i.chainSelector] = {
             id: Number(i.chainId),
@@ -34,7 +34,7 @@ Object.values(chainOptions).forEach((i) => {
         };
     }
 });
-Object.values(networks).forEach((i) => {
+Object.values(networksOptions).forEach((i) => {
     if (i && i.rpcUrls) {
         chainSelectorToRpcConfig[i.chainSelector] = {
             ...chainSelectorToRpcConfig?.[i.chainSelector],

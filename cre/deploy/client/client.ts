@@ -2,7 +2,7 @@ import { consensusIdenticalAggregation, cre, type HTTPSendRequester, ok, Runtime
 import { createPublicClient, custom, fallback } from "viem";
 
 import { DomainError, ErrorCode } from "../error";
-import { getChainOptionsByChainSelector } from "./chain-options";
+import { getChainOptionsByChainSelector } from "./chainOptions";
 import { GlobalContext } from "../types";
 import { Utility } from "../utility";
 

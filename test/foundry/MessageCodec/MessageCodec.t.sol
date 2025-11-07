@@ -9,6 +9,7 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/src/Test.sol";
 import {console} from "forge-std/src/console.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
+import {IRelayer} from "contracts/interfaces/IRelayer.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
 
 contract MessageCodecTest is Test {
@@ -106,5 +107,17 @@ contract MessageCodecTest is Test {
         assertEq(messageBytes.payload(), s_payload);
 
         vm.resumeGasMetering();
+    }
+
+    /// forge-config: default.allow_internal_expect_revert = true
+    function test_encode_RevertsIfInvalidGasLimit() public {
+        vm.expectRevert(IConceroRouter.InvalidGasLimit.selector);
+        MessageCodec.encodeEvmDstChainData(s_receiver, 0);
+    }
+
+    /// forge-config: default.allow_internal_expect_revert = true
+    function test_encode_RevertsIfInvalidReceiver() public {
+        vm.expectRevert(IRelayer.InvalidReceiver.selector);
+        MessageCodec.encodeEvmDstChainData(address(0), s_gasLimit);
     }
 }

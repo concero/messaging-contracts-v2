@@ -2,24 +2,29 @@ using MockConceroRelayerLib as relayer;
 using MockConceroValidatorLib as validator;
 using MockPriceFeed as priceFeed;
 
-
 methods {
-    function relayer.getFee(IConceroRouter.MessageRequest) external returns (uint256) envfree;
-    function validator.getFee(IConceroRouter.MessageRequest) external returns (uint256) envfree;
-    function priceFeed.getUsdRate(address) external returns (uint256) envfree => ALWAYS(0) ALL;
+    function relayer.getFee(IConceroRouter.MessageRequest) external returns (uint256) envfree => ALWAYS(0);
+    function validator.getFee(IConceroRouter.MessageRequest) external returns (uint256) envfree => ALWAYS(0);
+    function priceFeed.getUsdRate(address) external returns (uint256) envfree => ALWAYS(0);
 
     function getMessageFee(IConceroRouter.MessageRequest) external returns (uint256) envfree;
-    function setMaxValidatorsCount(uint16) external envfree;
-    function setMaxMessageSize(uint64) external envfree;
+    function exposed_setMaxValidatorsCount(uint16) external envfree;
+    function exposed_setMaxMessageSize(uint64) external envfree;
 }
 
 function setup(IConceroRouter.MessageRequest m) {
+    exposed_setMaxValidatorsCount(1);
+    exposed_setMaxMessageSize(1000000);
+
     address zeroAddress = 0;
 
-    setMaxValidatorsCount(1);
-    setMaxMessageSize(1000000);
+    address relayerLib;
+    address validatorLib;
+    require m.relayerLib == relayerLib;
+    require m.validatorLibs[0] == validatorLib;
 
     require m.feeToken == zeroAddress;
+    require m.validatorLibs.length == 1;
     require m.validatorLibs.length == m.validatorConfigs.length;
 }
 

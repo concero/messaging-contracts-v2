@@ -11,6 +11,9 @@ test = "test/foundry"
 libs = ["node_modules", "./src/contracts/"]
 allow_paths = ["node_modules", "./src/contracts/"]
 
+[fuzz]
+runs = 1000
+
 remappings = [
     "@chainlink/=node_modules/@chainlink/",
     "forge-std/=node_modules/forge-std/"

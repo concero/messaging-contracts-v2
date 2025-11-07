@@ -1,103 +1,68 @@
-import {consensusIdenticalAggregation, cre, HTTPPayload, ok, Runtime} from "@chainlink/cre-sdk";
+import { HTTPPayload, Runtime } from "@chainlink/cre-sdk";
+import { sha256 } from "viem";
 
-import {conceroRouters, CONFIG} from "../constants";
-import {getPublicClient} from "../client";
-import {GlobalContext, MessageReportResult, ResultType} from "../types";
-import {decodeArgs} from "./decodeArgs";
-import {validateDecodedArgs} from "./validateDecodedArgs";
-import {fetchLogByMessageId} from "./fetchLogByMessageId";
-import {decodeMessageLog} from "./decodeLog";
-import {verifyMessageHash} from "./verifyMessageHash";
-import {packResult} from "./packResult";
-import {HTTPSendRequester} from "@chainlink/cre-sdk/dist/sdk/cre";
-import {sha256} from "viem";
+import { conceroRouters } from "../constants";
+import { getPublicClient, validateConfigs } from "../client";
+import { GlobalContext } from "../types";
+import { decodeArgs } from "./decodeArgs";
+import { validateDecodedArgs } from "./validateDecodedArgs";
+import { fetchLogByMessageId } from "./fetchLogByMessageId";
+import { sendReportToRelayer } from "./sendReportToRelayer";
+import { Utility } from "../utility";
+
 
 // pipeline stages for each validation request
 export async function pipeline(runtime: Runtime<GlobalContext>, payload: HTTPPayload) {
     try {
+        validateConfigs(runtime);
+
         const args = decodeArgs(payload);
-        validateDecodedArgs(args);
+        validateDecodedArgs(args)
+        runtime.log(`Decoded args: ${JSON.stringify(args)}`);
 
-        const publicClient = getPublicClient(args.srcChainSelector.toString());
-
-        const log = await fetchLogByMessageId(
-            publicClient,
-            conceroRouters[Number(args.srcChainSelector)],
-            args.messageId,
-            BigInt(args.srcChainData.blockNumber),
-        );
-        const { dstChainSelector, dstChainData, sender, message } = decodeMessageLog(log);
-        verifyMessageHash(message, args.messageHashSum);
-
-        const rawReport: MessageReportResult = {
-            payloadVersion: CONFIG.PAYLOAD_VERSION,
-            resultType: ResultType.MESSAGE,
-            requester: args.operatorAddress,
-            messageId: args.messageId,
-            messageHashSum: args.messageHashSum,
-            messageSender: sender,
-            srcChainSelector: args.srcChainSelector,
-            dstChainSelector: Number(dstChainSelector),
-            srcBlockNumber: log.blockNumber as bigint,
-            dstChainData,
-            allowedOperators: [],
-        };
-        const packedReport = packResult(rawReport);
-
-        const report = runtime
-          .report({
-            encoderName: 'evm',
-            encodedPayload: String(packedReport),
-            signingAlgo: 'ecdsa',
-            hashingAlgo: 'keccak256'
-          })
-          .result()
-          .x_generatedCodeOnly_unwrap();
-
-        console.log(JSON.stringify(report, null, 2));
-
-
-        const postData = (sendRequester: HTTPSendRequester, config: GlobalContext): { statusCode: number } => {
-            const dataToSend = {
-                rawReport: report.rawReport,
-                signs: report.sigs,
-                reportContext: report.reportContext
-            }
-            const bodyBytes = new TextEncoder().encode(JSON.stringify(dataToSend))
-
-            const body = Buffer.from(bodyBytes).toString("base64")
-
-            const req = {
-                url: "https://webhook.site/1c3accdb-1b88-4539-8e35-62ac6efb1e11",
-                method: "POST" as const,
-                body,
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            }
-
-            const resp = sendRequester.sendRequest(req).result()
-
-            if (!ok(resp)) {
-                throw new Error(`HTTP request failed with status: ${resp.statusCode}`)
-            }
-
-            return { statusCode: resp.statusCode }
+        if (!conceroRouters) {
+            runtime.log("⚠️ conceroRouters is undefined");
+            return "0x0";
         }
 
-        const httpClient = new cre.capabilities.HTTPClient()
-        const result = httpClient
-            .sendRequest(
-                runtime,
-                postData,
-                consensusIdenticalAggregation()
-            )(runtime.config) // Call with config
-            .result()
-        console.log(result)
+        const routerAddress = conceroRouters[args.srcChainSelector] || '0x0';
+        runtime.log(`Got routerAddress=${routerAddress}`);
 
-        return sha256(log.transactionHash || '0x00')
+        if (routerAddress === '0x0') {
+            runtime.log(`⚠️ No known router for srcChainSelector=${args.srcChainSelector}`);
+            return "0x0";
+        }
+
+        const publicClient = getPublicClient(runtime, args.srcChainSelector);
+        runtime.log(`Got publicClient: ${JSON.stringify(publicClient)}`);
+
+        const log = await fetchLogByMessageId(runtime,
+            publicClient,
+            routerAddress,
+            args.messageId,
+            BigInt(Number(args.blockNumber))
+        );
+        runtime.log(`Got Log: ${Utility.safeJSONStringify(log)}`);
+
+        if (!log || !log?.data) {
+            runtime.log(`❌ No log found for messageId=${args.messageId}`);
+            return "0x0";
+        }
+
+        const report = runtime
+            .report({
+                encoderName: 'evm',
+                encodedPayload: sha256(log.data),
+                signingAlgo: 'ecdsa',
+                hashingAlgo: 'keccak256',
+            })
+            .result();
+
+        sendReportToRelayer(runtime, report);
+
+        return sha256(log.data);
     } catch (error) {
-        runtime.log(`Pipeline failed with error ${error?.toString()}`);
-        return "0x0a000";
+        runtime.log(`Pipeline failed with error ${error instanceof Error ? `${error.message} ${error.stack}` : error?.toString()}`);
+        return "0x0";
     }
 }

@@ -1,3 +1,3 @@
-export * from './chains'
-export * from './rpcs'
+export * from './chainOptions'
 export * from './client'
+export * from './validateConfigs'

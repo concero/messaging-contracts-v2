@@ -1,4 +1,4 @@
-import { type Address, type Hash, type Hex } from "viem";
+import {type Address, type Hash, type Hex} from "viem";
 
 export type GlobalContext = {}
 

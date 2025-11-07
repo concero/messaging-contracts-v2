@@ -1,11 +1,10 @@
-import { cre, type HTTPPayload, Runner, type Runtime } from "@chainlink/cre-sdk";
+import {cre, type HTTPPayload, Runner, type Runtime} from "@chainlink/cre-sdk";
 
-import { GlobalContext } from "./types";
-import { pipeline } from "./pipeline";
+import {GlobalContext} from "./types";
+import {pipeline} from "./pipeline";
 
 
 const onHttpTrigger = async (runtime: Runtime<GlobalContext>, payload: HTTPPayload) => {
-
     return pipeline(runtime, payload);
 }
 

@@ -9,8 +9,9 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@chainlink/cre-sdk": "1.0.0",
+    "@concero/rpcs": "https://github.com/concero/rpcs",
     "viem": "^2.38.6",
-    "@concero/rpcs": "https://github.com/concero/rpcs"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/bun": "v1.3.1"

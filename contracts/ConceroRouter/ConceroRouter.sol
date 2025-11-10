@@ -46,18 +46,25 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         _validateMessageParams(messageRequest);
         Fee memory fee = _collectMessageFee(messageRequest);
 
+        uint24 dstChainSelector = messageRequest.dstChainSelector;
+
         bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
         for (uint256 i; i < dstValidatorLibs.length; ++i) {
             dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
-                messageRequest.dstChainSelector
+                dstChainSelector
             );
+        }
+
+        uint256 newNonce;
+        unchecked {
+            newNonce = ++s.router().nonce[msg.sender][i_chainSelector][dstChainSelector];
         }
 
         bytes memory packedMessage = messageRequest.toMessageReceiptBytes(
             i_chainSelector,
             msg.sender,
-            ++s.router().nonce[msg.sender][i_chainSelector][messageRequest.dstChainSelector],
-            IRelayerLib(messageRequest.relayerLib).getDstLib(messageRequest.dstChainSelector),
+            newNonce,
+            IRelayerLib(messageRequest.relayerLib).getDstLib(dstChainSelector),
             dstValidatorLibs
         );
 
@@ -127,7 +134,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             s_router.isMessageRetryAllowed[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
-		s_router.isMessageRetryAllowed[messageSubmissionHash] = false;
+        s_router.isMessageRetryAllowed[messageSubmissionHash] = false;
 
         _deliverMessage(
             messageReceipt,
@@ -307,26 +314,31 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         return validationChecks;
     }
 
-    function _validateMessageParams(MessageRequest memory messageRequest) internal view {
+    function _validateMessageParams(MessageRequest calldata messageRequest) internal view {
         s.Router storage s_router = s.router();
 
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
         require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
+
+		uint256 payloadLength = messageRequest.payload.length;
+        uint64 maxMessageSize = s_router.maxMessageSize;
+        uint16 maxValidatorsCount = s_router.maxValidatorsCount;
+
         require(
-            messageRequest.payload.length < s_router.maxMessageSize,
-            PayloadTooLarge(messageRequest.payload.length, s_router.maxMessageSize)
+            payloadLength < maxMessageSize,
+            PayloadTooLarge(payloadLength, maxMessageSize)
+        );
+
+        uint256 validatorConfigsLength = messageRequest.validatorConfigs.length;
+        uint256 validatorLibsLength = messageRequest.validatorLibs.length;
+
+        require(
+            validatorConfigsLength == validatorLibsLength,
+            InvalidValidatorConfigsCount(validatorConfigsLength, validatorLibsLength)
         );
         require(
-            messageRequest.validatorConfigs.length == messageRequest.validatorLibs.length,
-            InvalidValidatorConfigsCount(
-                messageRequest.validatorConfigs.length,
-                messageRequest.validatorLibs.length
-            )
-        );
-        require(
-            messageRequest.validatorLibs.length > 0 &&
-                messageRequest.validatorLibs.length < s_router.maxValidatorsCount,
-            InvalidValidatorsCount(messageRequest.validatorLibs.length, s_router.maxValidatorsCount)
+            validatorLibsLength > 0 && validatorLibsLength < maxValidatorsCount,
+            InvalidValidatorsCount(validatorLibsLength, maxValidatorsCount)
         );
     }
 

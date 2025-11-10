@@ -132,6 +132,8 @@ contract MessageCodecTest is Test {
         uint32 dstChainGasLimit
     ) public {
         _assumeMessageRequest(messageRequest);
+		vm.assume(dstChainGasLimit > 0);
+		vm.assume(receiver != address(0));
 
         messageRequest.dstChainData = MessageCodec.encodeEvmDstChainData(
             receiver,

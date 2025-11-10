@@ -63,13 +63,18 @@ library BytesUtils {
         return res;
     }
 
-    function writeUint24(bytes memory out, uint256 offset, uint24 value) internal pure {
+    function writeUint24(
+        bytes memory out,
+        uint256 offset,
+        uint24 value
+    ) internal pure returns (uint256) {
         assembly {
             let ptr := add(add(out, 32), offset)
             mstore8(ptr, shr(16, value))
             mstore8(add(ptr, 1), shr(8, value))
             mstore8(add(ptr, 2), value)
         }
+        return offset + 3;
     }
 
     function writeUint32(bytes memory out, uint256 offset, uint32 value) internal pure {
@@ -79,6 +84,61 @@ library BytesUtils {
             mstore8(add(ptr, 1), shr(16, value))
             mstore8(add(ptr, 2), shr(8, value))
             mstore8(add(ptr, 3), value)
+        }
+    }
+
+    function writeBytes(
+        bytes memory out,
+        uint256 offset,
+        bytes memory src
+    ) internal pure returns (uint256) {
+        uint256 srcLen = src.length;
+        if (srcLen == 0) return offset;
+
+        assembly {
+            let dstPtr := add(add(out, 32), offset)
+            let srcPtr := add(src, 32)
+
+            for {
+                let end := add(srcPtr, and(not(31), srcLen))
+            } lt(srcPtr, end) {
+                srcPtr := add(srcPtr, 32)
+                dstPtr := add(dstPtr, 32)
+            } {
+                mstore(dstPtr, mload(srcPtr))
+            }
+
+            let rem := and(srcLen, 31)
+            if rem {
+                let mask := sub(shl(mul(8, sub(32, rem)), 1), 1)
+                let srcWord := mload(srcPtr)
+                let dstWord := mload(dstPtr)
+                mstore(dstPtr, or(and(dstWord, mask), and(srcWord, not(mask))))
+            }
+        }
+
+        return offset + srcLen;
+    }
+
+    function calculateTotalFlatBytesArrayLength(
+        bytes[] memory data,
+        uint256 lengthBytesSize
+    ) internal pure returns (uint256 totalLength) {
+        uint256 dataLength = data.length;
+
+        assembly {
+            totalLength := lengthBytesSize
+            let dataPtr := add(data, 0x20)
+
+            for {
+                let i := 0
+            } lt(i, dataLength) {
+                i := add(i, 1)
+            } {
+                let elementPtr := mload(add(dataPtr, mul(i, 0x20)))
+                let elementLength := mload(elementPtr)
+                totalLength := add(totalLength, add(elementLength, lengthBytesSize))
+            }
         }
     }
 }

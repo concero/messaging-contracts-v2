@@ -209,30 +209,15 @@ library MessageCodec {
 
     // GENERIC FUNCTIONS //
 
-    function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
-        uint256 totalLength = LENGTH_BYTES_SIZE;
+    function flatBytes(bytes[] memory data) internal pure returns (bytes memory res) {
+        res = new bytes(BytesUtils.calculateTotalFlatBytesArrayLength(data, LENGTH_BYTES_SIZE));
+
+        uint256 offset = res.writeUint24(0, uint24(data.length));
 
         for (uint256 i; i < data.length; ++i) {
-            totalLength += data[i].length + LENGTH_BYTES_SIZE;
+            offset = res.writeUint24(offset, uint24(data[i].length));
+            offset = res.writeBytes(offset, data[i]);
         }
-
-        bytes memory res = new bytes(totalLength);
-        uint256 j;
-
-        res.writeUint24(j, uint24(data.length));
-        j += LENGTH_BYTES_SIZE;
-
-        for (uint256 i; i < data.length; ++i) {
-            res.writeUint24(j, uint24(data[i].length));
-            j += LENGTH_BYTES_SIZE;
-
-            for (uint256 k; k < data[i].length; ++k) {
-                res[j] = data[i][k];
-                ++j;
-            }
-        }
-
-        return res;
     }
 
     function calculateNestedArrOffset(

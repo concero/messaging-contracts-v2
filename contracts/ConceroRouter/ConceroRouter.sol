@@ -354,43 +354,46 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     ) internal returns (Fee memory) {
         s.Router storage s_router = s.router();
 
-        uint256 relayerFee = IRelayerLib(messageRequest.relayerLib).getFee(messageRequest);
+        address feeToken = messageRequest.feeToken;
+        address relayerLib = messageRequest.relayerLib;
+
+        if (feeToken != address(0)) {
+            revert UnsupportedFeeToken();
+        }
+
+        uint256 relayerFee = IRelayerLib(relayerLib).getFee(messageRequest);
         (uint256[] memory validatorsFee, uint256 totalValidatorsFee) = _getValidatorsFee(
             messageRequest
         );
 
-        uint256 conceroFee = getConceroFee(messageRequest.feeToken);
-        uint256 totalFee = relayerFee + conceroFee + totalValidatorsFee;
-
-        if (messageRequest.feeToken == address(0)) {
-            // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
-            require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
-        } else {
-            revert UnsupportedFeeToken();
-        }
+        uint256 conceroFee = getConceroFee(feeToken);
 
         uint256 totalRelayerFee = relayerFee + totalValidatorsFee;
-        s_router.relayerFeeEarned[messageRequest.relayerLib][
-            messageRequest.feeToken
-        ] += totalRelayerFee;
-        s_router.totalRelayerFeeEarned[messageRequest.feeToken] += totalRelayerFee;
+        uint256 totalFee = totalRelayerFee + conceroFee;
+
+        // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
+        require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
+
+        s_router.relayerFeeEarned[relayerLib][feeToken] += totalRelayerFee;
+        s_router.totalRelayerFeeEarned[feeToken] += totalRelayerFee;
 
         return
             Fee({
                 concero: conceroFee,
                 s_relayer: relayerFee,
                 validatorsFee: validatorsFee,
-                token: messageRequest.feeToken
+                token: feeToken
             });
     }
 
     function _getValidatorsFee(
         MessageRequest calldata messageRequest
     ) internal view returns (uint256[] memory, uint256) {
-        uint256[] memory validatorsFee = new uint256[](messageRequest.validatorLibs.length);
+        uint256 validatorLibsLength = messageRequest.validatorLibs.length;
+        uint256[] memory validatorsFee = new uint256[](validatorLibsLength);
         uint256 totalValidatorsFee;
 
-        for (uint256 i; i < messageRequest.validatorLibs.length; ++i) {
+        for (uint256 i; i < validatorLibsLength; ++i) {
             validatorsFee[i] = IValidatorLib(messageRequest.validatorLibs[i]).getFee(
                 messageRequest
             );

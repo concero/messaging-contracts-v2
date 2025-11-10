@@ -130,8 +130,8 @@ contract MessageCodecTest is Test {
         address[] memory dstValidatorLibs,
         address receiver,
         uint32 dstChainGasLimit
-    ) public {
-        _assumeMessageRequest(messageRequest);
+    ) public view {
+        _assumeMessageRequest(messageRequest, dstChainGasLimit);
 
         messageRequest.dstChainData = MessageCodec.encodeEvmDstChainData(
             receiver,
@@ -171,13 +171,15 @@ contract MessageCodecTest is Test {
     }
 
     function _assumeMessageRequest(
-        IConceroRouter.MessageRequest memory messageRequest
-    ) internal view {
+        IConceroRouter.MessageRequest memory messageRequest,
+        uint32 dstChainGasLimit
+    ) internal pure {
         vm.assume(messageRequest.validatorLibs.length < type(uint24).max);
         vm.assume(messageRequest.validatorConfigs.length < type(uint24).max);
         vm.assume(messageRequest.relayerConfig.length < type(uint24).max);
         vm.assume(messageRequest.validationRpcs.length < type(uint24).max);
         vm.assume(messageRequest.deliveryRpcs.length < type(uint24).max);
         vm.assume(messageRequest.payload.length < type(uint24).max);
+        vm.assume(dstChainGasLimit > 0);
     }
 }

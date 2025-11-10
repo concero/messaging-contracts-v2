@@ -18,16 +18,16 @@
 local-simulation:
   rpcs:
     - chain-name: ethereum-testnet-sepolia
-      url: https://sepolia.infura.io/v3/YOUR_API_KEY
+      url: https://gateway.tenderly.co/public/sepolia
 
 # ==========================================================================
 staging:
   cre-cli:
     don-family: "zone-a"
   account:
-    workflow-owner-address: "(optional) Multi-signature contract address"
+    workflow-owner-address: "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf"
   rpcs:
     - chain-name: ethereum-testnet-sepolia
-      url: https://sepolia.infura.io/v3/YOUR_API_KEY
-    - chain-name: ethereum-testnet-sepolia-base-1
-      url: <select your own rpc url>
+      url: https://gateway.tenderly.co/public/sepolia
+    - chain-name: ethereum-mainnet
+      url: https://mainnet.gateway.tenderly.co

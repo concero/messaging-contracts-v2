@@ -10,6 +10,7 @@
   "dependencies": {
     "@chainlink/cre-sdk": "1.0.0",
     "@concero/rpcs": "https://github.com/concero/rpcs",
+    "@concero/v2-networks": "https://github.com/concero/v2-networks",
     "viem": "^2.38.6"
   },
   "devDependencies": {

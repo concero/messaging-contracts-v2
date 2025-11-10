@@ -6,6 +6,7 @@
       "dependencies": {
         "@chainlink/cre-sdk": "1.0.0",
         "@concero/rpcs": "https://github.com/concero/rpcs",
+        "@concero/v2-networks": "https://github.com/concero/v2-networks",
         "viem": "^2.38.6",
       },
       "devDependencies": {
@@ -32,6 +33,8 @@
     "@colors/colors": ["@colors/colors@1.6.0", "", {}, "sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA=="],
 
     "@concero/rpcs": ["concero-rpcs@github:concero/rpcs#fa0bf1b", { "dependencies": { "acorn": "8.14.0", "acorn-walk": "8.3.4", "node-cron": "3.0.3", "simple-git": "3.27.0", "winston": "3.17.0", "winston-daily-rotate-file": "5.0.0" } }, "concero-rpcs-fa0bf1b"],
+
+    "@concero/v2-networks": ["@concero/v2-networks@github:concero/v2-networks#d60ff6c", {}, "concero-v2-networks-d60ff6c"],
 
     "@dabh/diagnostics": ["@dabh/diagnostics@2.0.8", "", { "dependencies": { "@so-ric/colorspace": "^1.1.6", "enabled": "2.0.x", "kuler": "^2.0.0" } }, "sha512-R4MSXTVnuMzGD7bzHdW2ZhhdPC/igELENcq5IjEverBvq5hn1SXCWcsi6eSsdWP0/Ur+SItRRjAktmdoX/8R/Q=="],
 

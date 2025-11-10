@@ -209,15 +209,90 @@ library MessageCodec {
 
     // GENERIC FUNCTIONS //
 
-    function flatBytes(bytes[] memory data) internal pure returns (bytes memory res) {
-        res = new bytes(BytesUtils.calculateTotalFlatBytesArrayLength(data, LENGTH_BYTES_SIZE));
+    /**
+     * @dev Serializes an array of bytes arrays into a single flat bytes array.
+     * The resulting array layout is:
+     *   [3 bytes: number of elements] [for each element: 3 bytes length + element data]
+     *
+     * - Calculates the total size required.
+     * - Allocates the resulting bytes array.
+     * - For each element, writes its length (3 bytes) followed by its data (efficiently in 32-byte blocks).
+     */
+    function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
+        uint256 totalLength;
+        uint256 dataLength = data.length;
 
-        uint256 offset = res.writeUint24(0, uint24(data.length));
+        assembly {
+            // Calculate total length in assembly
+            totalLength := LENGTH_BYTES_SIZE
+            let dataPtr := add(data, 0x20)
 
-        for (uint256 i; i < data.length; ++i) {
-            offset = res.writeUint24(offset, uint24(data[i].length));
-            offset = res.writeBytes(offset, data[i]);
+            for {
+                let i := 0
+            } lt(i, dataLength) {
+                i := add(i, 1)
+            } {
+                let elementPtr := mload(add(dataPtr, mul(i, 0x20)))
+                let elementLength := mload(elementPtr)
+                totalLength := add(totalLength, add(elementLength, LENGTH_BYTES_SIZE))
+            }
         }
+
+        bytes memory res = new bytes(totalLength);
+
+        assembly {
+            let resPtr := add(res, 0x20)
+            let offset := 0
+
+            // Write array length (uint24)
+            mstore8(add(resPtr, offset), shr(16, dataLength))
+            mstore8(add(resPtr, add(offset, 1)), shr(8, dataLength))
+            mstore8(add(resPtr, add(offset, 2)), dataLength)
+            offset := add(offset, 3)
+
+            let dataPtr := add(data, 0x20)
+
+            for {
+                let i := 0
+            } lt(i, dataLength) {
+                i := add(i, 1)
+            } {
+                let elementPtr := mload(add(dataPtr, mul(i, 0x20)))
+                let elementLength := mload(elementPtr)
+
+                // Write element length (uint24)
+                mstore8(add(resPtr, offset), shr(16, elementLength))
+                mstore8(add(resPtr, add(offset, 1)), shr(8, elementLength))
+                mstore8(add(resPtr, add(offset, 2)), elementLength)
+                offset := add(offset, 3)
+
+                // Copy element data in 32-byte chunks
+                let srcPtr := add(elementPtr, 0x20)
+                let dstPtr := add(resPtr, offset)
+
+                for {
+                    let end := add(srcPtr, and(not(31), elementLength))
+                } lt(srcPtr, end) {
+                    srcPtr := add(srcPtr, 32)
+                    dstPtr := add(dstPtr, 32)
+                } {
+                    mstore(dstPtr, mload(srcPtr))
+                }
+
+                // Handle remaining bytes
+                let rem := and(elementLength, 31)
+                if rem {
+                    let mask := sub(shl(mul(8, sub(32, rem)), 1), 1)
+                    let srcWord := mload(srcPtr)
+                    let dstWord := mload(dstPtr)
+                    mstore(dstPtr, or(and(dstWord, mask), and(srcWord, not(mask))))
+                }
+
+                offset := add(offset, elementLength)
+            }
+        }
+
+        return res;
     }
 
     function calculateNestedArrOffset(

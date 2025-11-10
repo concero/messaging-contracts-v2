@@ -76,14 +76,10 @@ export class ChainsManager {
         return chainOption;
     }
 
-    static getOptionsByName(chainName: string): Options {
+
+    static findOptionsByName(chainName: string): Options | null {
         const chainOption = Object.values(chainSelectorToOptions).find(i => i.name === chainName)
-
-        if (!chainOption) {
-            throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain not found");
-        }
-
-        return chainOption;
+        return chainOption || null;
     }
 
 

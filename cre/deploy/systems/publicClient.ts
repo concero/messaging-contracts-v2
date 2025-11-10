@@ -13,7 +13,14 @@ export class PublicClient {
     static createHttpTransport (runtime: Runtime<GlobalContext>, url: string): Transport {
         return custom({
             async request({ method, params, }) {
-                const body = [{ method, params }]
+                const body = [
+                    {
+                        jsonrpc: "2.0",
+                        id: Date.now(),
+                        method,
+                        params
+                    }
+                ]
                 const fetcher = CRE.buildFetcher(runtime, {
                     url,
                     method: "POST",
@@ -24,7 +31,6 @@ export class PublicClient {
                 })
 
                 const httpClient = new cre.capabilities.HTTPClient()
-
                 const rawResponseBody = httpClient
                     .sendRequest(
                         runtime,
@@ -34,8 +40,8 @@ export class PublicClient {
                     .result()
 
                 const responseBody: Record<number, Record<string, unknown>>[] = Utility.safeJSONParse(rawResponseBody);
-                const result: any = (Object.values(responseBody || {}) as Record<string, unknown>[]).map(i => i?.result)?.[0]
-                console.log(`${LOG_TAG}|request Decoded: ${Utility.safeJSONStringify(result)}`);
+                const result: any = (Object.values(responseBody || {}) as Record<string, unknown>[])?.map(i => i?.result)?.[0]
+                console.log(`${LOG_TAG}|request Decoded: ${Utility.safeJSONStringify({rawResponseBody,responseBody,result})}`);
 
                 return result
             }

@@ -30,7 +30,7 @@ export class DeploymentsManager {
         return envName
             .split("_")
             .map((part, i) =>
-                i === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+                i === 0 ? part.toLowerCase() : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
             )
             .join("");
     }
@@ -39,12 +39,12 @@ export class DeploymentsManager {
 
         for (const line of lines) {
             if (!line || line.startsWith("#")) continue;
-
-            const match = line.match(/^CONCERO_ROUTER_PROXY_([^=\n]+)=(0x[a-fA-F0-9]{40})$/);
+            const match = line.match(/^CONCERO_ROUTER_PROXY_(?!ADMIN_)([^=\n]+)=(0x[a-fA-F0-9]{40})$/);
             if (match) {
                 const [, rawName, address] = match;
                 const name = DeploymentsManager.convertEnvNameToCamelCase(rawName);
-                const chainOptions = ChainsManager.getOptionsByName(name)
+                const chainOptions = ChainsManager.findOptionsByName(name)
+                console.log(JSON.stringify({line, match, rawName, address, name, chainOptions}))
                 if (chainOptions) {
                     chainSelectorToDeployment[chainOptions.id] = address as Address;
                 }
@@ -54,6 +54,7 @@ export class DeploymentsManager {
 
     static enrichDeployments (runtime: Runtime<GlobalContext>) {
         const envs = DeploymentsManager.fetchDeployments(runtime)
+        runtime.log(envs)
         DeploymentsManager.upsertDeploymentsFromEnv(envs)
     }
 

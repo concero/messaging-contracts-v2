@@ -27,7 +27,7 @@ methods {
 }
 
 rule messageCodecLib {
-    // IConceroRouter.MessageRequest m;
+    IConceroRouter.MessageRequest m;
 
     // require m.validatorLibs.length < max_uint24;
     // require m.validatorConfigs.length < max_uint24;
@@ -37,19 +37,18 @@ rule messageCodecLib {
     // require m.dstChainData.length < max_uint24;
     // require m.payload.length < max_uint24;
 
-    // uint24 srcChainSelector;
-    // address sender;
-    // uint256 nonce;
-    // bytes dstRelayerLib;
-    // bytes[] dstValidatorLibs;
+    uint24 srcChainSelector;
+    address sender;
+    uint256 nonce;
+    bytes dstRelayerLib;
+    bytes[] dstValidatorLibs;
 
     // require dstRelayerLib.length < max_uint24;
     // require dstValidatorLibs.length < max_uint24;
 
-    // bytes encodedMessage = toMessageReceiptBytes@withrevert(m, srcChainSelector, sender, nonce, dstRelayerLib, dstValidatorLibs);
-    // require !lastReverted;
+    bytes encodedMessage = toMessageReceiptBytes(m, srcChainSelector, sender, nonce, dstRelayerLib, dstValidatorLibs);
     
-    // assert version(encodedMessage) == 1;
+    assert version(encodedMessage) == 1;
     // assert srcChainSelector(encodedMessage) == srcChainSelector;
     // assert dstChainSelector(encodedMessage) == m.dstChainSelector;
     // assert nonce(encodedMessage) == nonce;
@@ -61,10 +60,4 @@ rule messageCodecLib {
 
     // assert m.relayerConfig == relayerConfig(encodedMessage);
     // assert m.payload == payload(encodedMessage);
-
-
-    address receiver;
-    uint32 dstGasLimit;
-    bytes encodedDstChainData = encodeEvmDstChainData(receiver, dstGasLimit);
-    assert true;
 }

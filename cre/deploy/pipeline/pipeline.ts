@@ -7,7 +7,7 @@ import {decodeArgs} from "./decodeArgs";
 import {validateDecodedArgs} from "./validateDecodedArgs";
 import {fetchLogByMessageId} from "./fetchLogByMessageId";
 import {sendReportToRelayer} from "./sendReportToRelayer";
-import {conceroRouters} from "../conceroRouters";
+import {DeploymentsManager} from "../systems/deploymentsManager";
 
 
 // pipeline stages for each validation request
@@ -15,24 +15,15 @@ export async function pipeline(runtime: Runtime<GlobalContext>, payload: HTTPPay
     try {
         ChainsManager.enrichOptions();
         ChainsManager.validateOptions(runtime);
+        DeploymentsManager.enrichDeployments(runtime);
 
         const args = decodeArgs(payload);
         validateDecodedArgs(args)
         runtime.log(`Decoded args: ${JSON.stringify(args)}`);
 
-        if (!conceroRouters) {
-            runtime.log("⚠️ conceroRouters is undefined");
-            return "0x0";
-        }
-
-        const routerAddress = conceroRouters[args.srcChainSelector] || '0x0';
+        const routerAddress = DeploymentsManager.getDeploymentByChainSelector(args.srcChainSelector);
         runtime.log(`Got routerAddress=${routerAddress}`);
-
-        if (routerAddress === '0x0') {
-            runtime.log(`⚠️ No known router for srcChainSelector=${args.srcChainSelector}`);
-            return "0x0";
-        }
-
+    
         const publicClient = PublicClient.create(runtime, args.srcChainSelector);
         runtime.log(`Got publicClient: ${JSON.stringify(publicClient)}`);
 

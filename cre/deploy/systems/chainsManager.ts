@@ -28,13 +28,13 @@ type Options = {
     finalityConfirmations: number;
 }
 
-export const chainSelectorToChainOptions: Record<number, Options> = {};
+export const chainSelectorToOptions: Record<number, Options> = {};
 
 export class ChainsManager {
     static enrichOptions() {
         Object.values(chainsOptions).forEach((i) => {
             if (i && i.rpcUrls) {
-                chainSelectorToChainOptions[i.chainSelector] = {
+                chainSelectorToOptions[i.chainSelector] = {
                     id: Number(i.chainId),
                     name: 'unknown chain',
                     selector: i.chainSelector,
@@ -45,8 +45,8 @@ export class ChainsManager {
         });
         Object.values(networksOptions).forEach((i) => {
             if (i && i.rpcUrls) {
-                chainSelectorToChainOptions[i.chainSelector] = {
-                    ...chainSelectorToChainOptions?.[i.chainSelector],
+                chainSelectorToOptions[i.chainSelector] = {
+                    ...chainSelectorToOptions?.[i.chainSelector],
                     name: i.name,
                     nativeCurrency: i.nativeCurrency,
                     finalityConfirmations: i.finalityConfirmations,
@@ -67,7 +67,17 @@ export class ChainsManager {
     }
 
     static getOptionsBySelector(chainSelector: number): Options {
-        const chainOption = chainSelectorToChainOptions[chainSelector]
+        const chainOption = chainSelectorToOptions[chainSelector]
+
+        if (!chainOption) {
+            throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain not found");
+        }
+
+        return chainOption;
+    }
+
+    static getOptionsByName(chainName: string): Options {
+        const chainOption = Object.values(chainSelectorToOptions).find(i => i.name === chainName)
 
         if (!chainOption) {
             throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain not found");

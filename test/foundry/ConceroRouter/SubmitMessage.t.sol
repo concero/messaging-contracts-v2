@@ -22,6 +22,18 @@ contract SubmitMessage is ConceroRouterTest {
         super.setUp();
     }
 
+    function test_submitMessage_gas() public {
+        vm.pauseGasMetering();
+
+        (, bytes memory messageReceipt) = _conceroSend();
+
+        bytes[] memory validations = new bytes[](1);
+        validations[0] = abi.encode(true);
+
+        vm.resumeGasMetering();
+        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+    }
+
     function test_submitMessage_Success() public {
         (bytes32 messageId, bytes memory messageReceipt) = _conceroSend();
 

@@ -80,6 +80,18 @@ library MessageCodec {
         return abi.encodePacked(receiver, dstGasLimit);
     }
 
+    function encodeEvmDstValidatorLibs(
+        address[] memory libs
+    ) internal pure returns (bytes[] memory) {
+        bytes[] memory res = new bytes[](libs.length);
+
+        for (uint256 i; i < res.length; ++i) {
+            res[i] = abi.encodePacked(libs[i]);
+        }
+
+        return res;
+    }
+
     // READ FUNCTIONS //
 
     function version(bytes memory data) internal pure returns (uint8) {

@@ -254,6 +254,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         return s.router().maxValidatorsCount;
     }
 
+    function getConceroPriceFeed(address feeToken) public view returns (address) {
+        return s.router().priceFeeds[feeToken];
+    }
+
     /* INTERNAL FUNCTIONS */
 
     function _deliverMessage(

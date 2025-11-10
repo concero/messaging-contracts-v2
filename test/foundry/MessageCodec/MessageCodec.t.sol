@@ -18,7 +18,7 @@ contract MessageCodecTest is Test {
 
     uint24 internal s_srcChainSelector = 3;
     uint24 internal s_dstChainSelector = 8;
-    uint64 internal s_srcBlockConfirmations = 9;
+    uint64 internal s_srcBlockConfirmations = 2233625729;
     uint32 internal s_gasLimit = 300_00;
     uint256 internal s_nonce = 5777982;
 
@@ -119,5 +119,65 @@ contract MessageCodecTest is Test {
     function test_encode_RevertsIfInvalidReceiver() public {
         vm.expectRevert(IRelayer.InvalidReceiver.selector);
         MessageCodec.encodeEvmDstChainData(address(0), s_gasLimit);
+    }
+
+    function testFuzz_encodeDecode(
+        IConceroRouter.MessageRequest memory messageRequest,
+        uint24 srcChainSelector,
+        address sender,
+        uint256 nonce,
+        address dstRelayer,
+        address[] memory dstValidatorLibs,
+        address receiver,
+        uint32 dstChainGasLimit
+    ) public {
+        _assumeMessageRequest(messageRequest);
+
+        messageRequest.dstChainData = MessageCodec.encodeEvmDstChainData(
+            receiver,
+            dstChainGasLimit
+        );
+
+        bytes memory messageBytes = messageRequest.toMessageReceiptBytes(
+            srcChainSelector,
+            sender,
+            nonce,
+            abi.encodePacked(dstRelayer),
+            MessageCodec.encodeEvmDstValidatorLibs(dstValidatorLibs)
+        );
+
+        (address decodedSender, uint64 srcBlockConfirmations) = messageBytes.evmSrcChainData();
+        (address decodedReceiver, uint32 decodedGasLimit) = messageBytes.evmDstChainData();
+
+        assertEq(messageBytes.version(), MessageCodec.VERSION, "version");
+        assertEq(messageBytes.srcChainSelector(), srcChainSelector);
+        assertEq(messageBytes.dstChainSelector(), messageRequest.dstChainSelector);
+        assertEq(decodedSender, sender);
+        assertEq(messageBytes.nonce(), nonce);
+        assertEq(
+            srcBlockConfirmations,
+            messageRequest.srcBlockConfirmations,
+            "srcBlockConfirmations"
+        );
+        assertEq(decodedReceiver, receiver);
+        assertEq(decodedGasLimit, dstChainGasLimit);
+        assertEq(messageBytes.emvDstRelayerLib(), dstRelayer);
+        assertEq(messageRequest.relayerConfig, messageBytes.relayerConfig());
+        assertEq(messageBytes.evmDstValidatorLibs(), dstValidatorLibs);
+        assertEq(messageBytes.validatorConfigs(), messageRequest.validatorConfigs);
+        assertEq(messageBytes.validationRpcs(), messageRequest.validationRpcs);
+        assertEq(messageBytes.deliveryRpcs(), messageRequest.deliveryRpcs);
+        assertEq(messageBytes.payload(), messageRequest.payload);
+    }
+
+    function _assumeMessageRequest(
+        IConceroRouter.MessageRequest memory messageRequest
+    ) internal view {
+        vm.assume(messageRequest.validatorLibs.length < type(uint24).max);
+        vm.assume(messageRequest.validatorConfigs.length < type(uint24).max);
+        vm.assume(messageRequest.relayerConfig.length < type(uint24).max);
+        vm.assume(messageRequest.validationRpcs.length < type(uint24).max);
+        vm.assume(messageRequest.deliveryRpcs.length < type(uint24).max);
+        vm.assume(messageRequest.payload.length < type(uint24).max);
     }
 }

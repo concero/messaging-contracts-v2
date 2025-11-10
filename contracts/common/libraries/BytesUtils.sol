@@ -28,7 +28,7 @@ library BytesUtils {
 
     function readUint32(bytes memory data, uint256 start) internal pure returns (uint32) {
         // TODO: add validations
-        uint24 result;
+        uint32 result;
         assembly {
             result := mload(add(add(data, 4), start))
         }
@@ -37,7 +37,7 @@ library BytesUtils {
 
     function readUint64(bytes memory data, uint256 start) internal pure returns (uint64) {
         // TODO: add validations
-        uint24 result;
+        uint64 result;
         assembly {
             result := mload(add(add(data, 8), start))
         }

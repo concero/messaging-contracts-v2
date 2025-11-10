@@ -25,4 +25,6 @@ contract MockConceroRelayerLib is IRelayerLib {
     function setRelayerFeeInNative(uint256 fee) external {
         s_relayerFeeInNative = fee;
     }
+
+    receive() external payable {}
 }

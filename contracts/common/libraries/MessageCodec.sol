@@ -8,6 +8,7 @@ pragma solidity ^0.8.20;
 
 import {Bytes} from "@openzeppelin/contracts/utils/Bytes.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
+import {IRelayer} from "../../interfaces/IRelayer.sol";
 import {BytesUtils} from "./BytesUtils.sol";
 
 library MessageCodec {
@@ -73,6 +74,9 @@ library MessageCodec {
         address receiver,
         uint32 dstGasLimit
     ) internal pure returns (bytes memory) {
+        require(receiver != address(0), IRelayer.InvalidReceiver());
+        require(dstGasLimit > 0, IConceroRouter.InvalidGasLimit());
+
         return abi.encodePacked(receiver, dstGasLimit);
     }
 

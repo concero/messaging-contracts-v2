@@ -17,12 +17,17 @@ import {Types as RouterTypes} from "../../../contracts/ValidatorLib/libraries/Ty
 
 import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
 import {RequestMessageReportTest} from "./RequestMessageReport.t.sol";
+import {DeployConceroValidator} from "../scripts/deploy/DeployConceroValidator.s.sol";
 import {IMockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 import {CLF} from "contracts/ConceroValidator/modules/CLF.sol";
 
 contract HandleCLFMessageReportTest is RequestMessageReportTest {
+    DeployConceroValidator deployConceroValidator;
+
     function setUp() public override {
         super.setUp();
+
+        deployConceroValidator = new DeployConceroValidator();
     }
 
     function test_handleOracleFulfillment_EmitsRequestFulfilled() public {
@@ -30,7 +35,7 @@ contract HandleCLFMessageReportTest is RequestMessageReportTest {
 
         MessageReport messageReport = new MessageReport(
             address(s_conceroValidator),
-            s_conceroValidatorSubscriptionId,
+            deployConceroValidator.s_conceroValidatorSubscriptionId(),
             s_operator,
             SRC_CHAIN_SELECTOR,
             DST_CHAIN_SELECTOR,
@@ -52,7 +57,7 @@ contract HandleCLFMessageReportTest is RequestMessageReportTest {
         // Create a message report
         MessageReport messageReport = new MessageReport(
             address(s_conceroValidator),
-            s_conceroValidatorSubscriptionId,
+            deployConceroValidator.s_conceroValidatorSubscriptionId(),
             s_operator,
             SRC_CHAIN_SELECTOR,
             DST_CHAIN_SELECTOR,

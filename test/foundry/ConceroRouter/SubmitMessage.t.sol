@@ -31,7 +31,7 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, false);
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -47,7 +47,7 @@ contract SubmitMessage is ConceroRouterTest {
             )
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_conceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -63,7 +63,7 @@ contract SubmitMessage is ConceroRouterTest {
             )
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -72,7 +72,7 @@ contract SubmitMessage is ConceroRouterTest {
         bytes[] memory validations = new bytes[](1);
         validations[0] = abi.encode(true);
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
 
         vm.expectRevert(
@@ -82,7 +82,7 @@ contract SubmitMessage is ConceroRouterTest {
             )
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -99,7 +99,7 @@ contract SubmitMessage is ConceroRouterTest {
 
         s_conceroClient.setRevertFlag(true);
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
 
         vm.expectRevert(
@@ -109,7 +109,7 @@ contract SubmitMessage is ConceroRouterTest {
             )
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -128,7 +128,7 @@ contract SubmitMessage is ConceroRouterTest {
             validationChecks
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -140,7 +140,7 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, false);
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -161,7 +161,7 @@ contract SubmitMessage is ConceroRouterTest {
             abi.encodeWithSelector(ConceroTestClient.TestRevert.selector)
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -176,7 +176,7 @@ contract SubmitMessage is ConceroRouterTest {
             abi.encodeWithSelector(IConceroClient.RelayerNotAllowed.selector, s_relayerLib)
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -196,7 +196,7 @@ contract SubmitMessage is ConceroRouterTest {
             expectedValidationChecks
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -220,7 +220,7 @@ contract SubmitMessage is ConceroRouterTest {
             expectedValidationChecks
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -244,7 +244,7 @@ contract SubmitMessage is ConceroRouterTest {
             expectedValidationChecks
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 
@@ -268,7 +268,7 @@ contract SubmitMessage is ConceroRouterTest {
             expectedValidationChecks
         );
 
-        vm.prank(s_relayerLib);
+        vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations);
     }
 }

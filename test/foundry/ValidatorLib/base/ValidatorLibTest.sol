@@ -14,6 +14,8 @@ import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {Types} from "contracts/ValidatorLib/libraries/Types.sol";
 import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
+import {MessageReport as MockCLFReport} from "../../scripts/MockCLFReport/MessageReport.sol";
+import {DeployValidatorLib} from "../../scripts/deploy/DeployValidatorLib.s.sol";
 
 abstract contract ValidatorLibTest is ConceroTest {
     address public constant MOCK_DON_SIGNER_ADDRESS_0 = 0x0004C7EdCF9283D3bc3C1309939b3E887bb9d98b;
@@ -25,19 +27,31 @@ abstract contract ValidatorLibTest is ConceroTest {
     ValidatorLib internal validatorLib;
     ConceroClientExample internal conceroClient;
     ConceroRouterHarness internal conceroRouter;
+    MockCLFReport internal mockClfReport;
+    DeployValidatorLib deployValidatorLib;
 
     function setUp() public virtual {
+        deployValidatorLib = new DeployValidatorLib();
+
         validatorLib = new ValidatorLib(
             DST_CHAIN_SELECTOR,
             address(s_conceroPriceFeed),
             address(s_conceroValidator),
-            s_conceroValidatorSubscriptionId,
+            deployValidatorLib.s_conceroValidatorSubscriptionId(),
             [
                 MOCK_DON_SIGNER_ADDRESS_0,
                 MOCK_DON_SIGNER_ADDRESS_1,
                 MOCK_DON_SIGNER_ADDRESS_2,
                 MOCK_DON_SIGNER_ADDRESS_3
             ]
+        );
+        mockClfReport = new MockCLFReport(
+            address(s_conceroValidator),
+            deployValidatorLib.s_conceroValidatorSubscriptionId(),
+            s_operator,
+            SRC_CHAIN_SELECTOR,
+            DST_CHAIN_SELECTOR,
+            s_user
         );
         conceroRouter = ConceroRouterHarness(
             payable(new ConceroRouter(DST_CHAIN_SELECTOR, address(s_conceroPriceFeed)))

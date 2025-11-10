@@ -18,7 +18,7 @@ contract DeployValidatorLib is Script {
     address internal constant CONCERO_VERIFIER_ADDRESS = address(0x11);
 
     address public s_deployer = vm.envAddress("DEPLOYER_ADDRESS");
-    uint64 internal s_conceroVerifierSubscriptionId = 12;
+    uint64 public s_conceroValidatorSubscriptionId = 12;
 
     ValidatorLib internal validatorLib;
 
@@ -29,7 +29,7 @@ contract DeployValidatorLib is Script {
             chainSelector,
             priceFeed,
             CONCERO_VERIFIER_ADDRESS,
-            s_conceroVerifierSubscriptionId,
+            s_conceroValidatorSubscriptionId,
             [
                 MOCK_DON_SIGNER_ADDRESS_0,
                 MOCK_DON_SIGNER_ADDRESS_1,

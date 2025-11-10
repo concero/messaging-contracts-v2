@@ -57,14 +57,13 @@ contract ConceroRouterBase is ConceroRouterTest {
 
     /* getMaxPayloadSize */
 
-    function test_getMaxPayloadSize_ReturnsCorrectValue() public {
+    function test_getMaxPayloadSize_ReturnsCorrectValue() public view {
         assertEq(s_conceroRouter.getMaxPayloadSize(), MAX_CONCERO_MESSAGE_SIZE);
     }
 
     /* getMaxValidatorsCount */
 
-    function test_getMaxValidatorsCount_ReturnsCorrectValue() public {
+    function test_getMaxValidatorsCount_ReturnsCorrectValue() public view {
         assertEq(s_conceroRouter.getMaxValidatorsCount(), MAX_CONCERO_VALIDATORS_COUNT);
     }
 }
-

@@ -46,7 +46,7 @@ contract FeeCalculation is ConceroRouterTest {
 
     /* getConceroFee */
 
-    function test_getConceroFee_CalculatesCorrectly() public {
+    function test_getConceroFee_CalculatesCorrectly() public view {
         address feeToken = address(0);
         uint256 conceroFee = s_conceroRouter.getConceroFee(feeToken);
 
@@ -58,7 +58,7 @@ contract FeeCalculation is ConceroRouterTest {
 
     /* getMessageFee */
 
-    function test_getMessageFee_CalculatesCorrectly() public {
+    function test_getMessageFee_CalculatesCorrectly() public view {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 
         uint256 relayerFee = MockConceroRelayerLib(payable(s_relayerLib)).getFee(messageRequest);
@@ -211,11 +211,11 @@ contract FeeCalculation is ConceroRouterTest {
 
     /* isFeeTokenSupported */
 
-    function test_isFeeTokenSupported_ReturnsTrueIfSupported() public {
+    function test_isFeeTokenSupported_ReturnsTrueIfSupported() public view {
         assertTrue(s_conceroRouter.isFeeTokenSupported(address(0)));
     }
 
-    function test_isFeeTokenSupported_ReturnsFalseIfNotSupported() public {
+    function test_isFeeTokenSupported_ReturnsFalseIfNotSupported() public view {
         assertFalse(s_conceroRouter.isFeeTokenSupported(s_usdc));
     }
 }

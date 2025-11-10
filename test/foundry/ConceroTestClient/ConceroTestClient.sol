@@ -15,7 +15,7 @@ contract ConceroTestClient is ConceroClient {
 
     constructor(address conceroRouter) ConceroClient(conceroRouter) {}
 
-    function _conceroReceive(bytes calldata) internal override {
+    function _conceroReceive(bytes calldata) internal view override {
         if (s_revertFlag) {
             revert TestRevert();
         }

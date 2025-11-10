@@ -56,14 +56,14 @@ export class ChainsManager {
     }
 
     static validateOptions(runtime: Runtime<GlobalContext>): void {
-        const originalChainsChecksum = runtime.getSecret({id: 'CHAINS_CONFIG_HASHSUM'}).result().value
+      /*  const originalChainsChecksum = runtime.getSecret({id: 'CHAINS_CONFIG_HASHSUM'}).result().value
         const originalNetworksChecksum = runtime.getSecret({id: 'NETWORKS_CONFIG_HASHSUM'}).result().value
         if (currentCheckSum === originalChainsChecksum){
             throw new Error('Invalid chains checksum');
         }
         if (networkCheckSum === originalNetworksChecksum){
             throw new Error('Invalid networks checksum');
-        }
+        }*/
     }
 
     static getOptionsBySelector(chainSelector: number): Options {

@@ -124,6 +124,22 @@ contract ConceroPriceFeed is IConceroPriceFeed {
     }
 
     /**
+     * @notice Gets the native-native rate and the last gas price for a specific chain
+     * @param chainSelector The chain selector to get the rate and gas price for
+     * @return nativeNativeRate The native-native rate in 18 decimals
+     * @return gasPrice The last recorded gas price in wei
+     */
+    function getNativeNativeRateAndGasPrice(
+        uint24 chainSelector
+    ) external view returns (uint256, uint256) {
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+        return (
+            priceFeedStorage.nativeNativeRates[chainSelector],
+            priceFeedStorage.lastGasPrices[chainSelector]
+        );
+    }
+
+    /**
      * @notice Gets all price feed data needed for message fee calculation in one call
      * @param dstChainSelector The destination chain selector
      * @param baseChainSelector The base chain selector

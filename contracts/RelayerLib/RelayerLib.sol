@@ -24,10 +24,8 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
     ) external view returns (uint256) {
-        (, uint256 dstGasPrice, uint256 dstNativeRate, , ) = i_conceroPriceFeed.getMessageFeeData(
-            messageRequest.dstChainSelector,
-            0
-        );
+        (uint256 dstNativeRate, uint256 dstGasPrice) = i_conceroPriceFeed
+            .getNativeNativeRateAndGasPrice(messageRequest.dstChainSelector);
 
         require(
             dstGasPrice > 0,

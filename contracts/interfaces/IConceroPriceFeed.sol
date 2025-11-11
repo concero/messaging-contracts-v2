@@ -9,6 +9,9 @@ pragma solidity 0.8.28;
 interface IConceroPriceFeed {
     function getNativeUsdRate() external view returns (uint256);
     function getNativeUsdRateAndGasPrice() external view returns (uint256, uint256);
+    function getNativeNativeRateAndGasPrice(
+        uint24 chainSelector
+    ) external view returns (uint256, uint256);
     function getNativeNativeRate(uint24 chainSelector) external view returns (uint256);
     function getLastGasPrice(uint24 chainSelector) external view returns (uint256);
 

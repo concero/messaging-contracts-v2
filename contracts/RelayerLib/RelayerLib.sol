@@ -6,20 +6,31 @@
  */
 pragma solidity 0.8.28;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import {BytesUtils} from "contracts/common/libraries/BytesUtils.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {Utils} from "contracts/common/libraries/Utils.sol";
 import {Base} from "contracts/common/Base.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
 import {RelayerLibStorage} from "./RelayerLibStorage.sol";
 
 contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
+    using SafeERC20 for IERC20;
+
     uint256 internal constant DECIMALS = 1e18;
+
+    IConceroRouter internal immutable i_conceroRouter;
 
     constructor(
         uint24 chainSelector,
-        address conceroPriceFeed
-    ) Base(chainSelector, conceroPriceFeed) {}
+        address conceroPriceFeed,
+        address conceroRouter
+    ) Base(chainSelector, conceroPriceFeed) {
+        i_conceroRouter = IConceroRouter(conceroRouter);
+    }
 
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
@@ -75,4 +86,24 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
         require(submitMsgGasOverhead > 0, CommonErrors.InvalidAmount());
         s_submitMsgGasOverhead = submitMsgGasOverhead;
     }
+
+    /* Withdraw fees */
+
+    function withdrawRelayerFee(address[] calldata tokens) external onlyOwner {
+        i_conceroRouter.withdrawRelayerFee(tokens);
+
+        for (uint256 i = 0; i < tokens.length; ++i) {
+            if (tokens[i] == address(0)) {
+                Utils.transferNative(msg.sender, address(this).balance);
+            } else {
+                uint256 tokenBalance = IERC20(tokens[i]).balanceOf(address(this));
+
+                if (tokenBalance > 0) {
+                    IERC20(tokens[i]).safeTransfer(msg.sender, tokenBalance);
+                }
+            }
+        }
+    }
+
+    receive() external payable {}
 }

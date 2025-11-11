@@ -17,12 +17,10 @@ import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 import {Types} from "./libraries/Types.sol";
 
-import {Storage as s} from "./libraries/Storage.sol";
+import {ValidatorLibStorage} from "./ValidatorLibStorage.sol";
 import {ClfSigner} from "./modules/ClfSigner.sol";
 
-contract ValidatorLib is IValidatorLib, Base, ClfSigner {
-    using s for s.ValidatorLib;
-
+contract ValidatorLib is IValidatorLib, ValidatorLibStorage, Base, ClfSigner {
     uint8 internal constant VALIDATOR_LIB_FEE_BPS_USD = 100;
 
     constructor(
@@ -39,7 +37,7 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
     function setDstLib(uint24 dstChainSelector, address dstLib) external onlyOwner {
         require(dstChainSelector != i_chainSelector, InvalidChainSelector());
 
-        s.validatorLib().dstLibs[dstChainSelector] = abi.encode(dstLib);
+        s_dstLibs[dstChainSelector] = abi.encode(dstLib);
     }
 
     /* Getters */
@@ -112,6 +110,6 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
     }
 
     function getDstLib(uint24 dstChainSelector) external view returns (bytes memory) {
-        return s.validatorLib().dstLibs[dstChainSelector];
+        return s_dstLibs[dstChainSelector];
     }
 }

@@ -20,8 +20,6 @@ contract RelayerLib is IRelayerLib, Base {
     uint256 internal constant DECIMALS = 1e18;
     uint32 internal s_submitMsgGasOverhead;
 
-    error InvalidRelayer();
-
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed,

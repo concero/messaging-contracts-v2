@@ -10,7 +10,7 @@ pragma solidity 0.8.28;
 import {RelayerLibTest} from "./base/RelayerLibTest.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
-import {RelayerLib} from "contracts/RelayerLib/RelayerLib.sol";
+import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
 
 contract RelayerLibTests is RelayerLibTest {
     uint32 internal constant GAS_LIMIT = 300_000;
@@ -115,7 +115,7 @@ contract RelayerLibTests is RelayerLibTest {
     }
 
     function test_validate_RevertsIfRelayerNotAllowed() public {
-        vm.expectRevert(abi.encodeWithSelector(RelayerLib.InvalidRelayer.selector));
+        vm.expectRevert(abi.encodeWithSelector(IRelayerLib.InvalidRelayer.selector));
         relayerLib.validate(new bytes(0), s_relayer);
     }
 

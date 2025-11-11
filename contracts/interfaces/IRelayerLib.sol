@@ -9,6 +9,8 @@ pragma solidity ^0.8.20;
 import {IConceroRouter} from "./IConceroRouter.sol";
 
 interface IRelayerLib {
+    error InvalidRelayer();
+
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
     ) external view returns (uint256);

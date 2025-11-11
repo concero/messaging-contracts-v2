@@ -6,43 +6,17 @@
  */
 pragma solidity 0.8.28;
 
+import {Script} from "forge-std/src/Script.sol";
 import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
-import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 
-import {ConceroPriceFeedBase} from "../../ConceroPriceFeed/base/ConceroPriceFeedBase.sol";
+contract DeployConceroPriceFeed is Script {
+    address internal s_conceroPriceFeed;
+    address public s_deployer = vm.envAddress("DEPLOYER_ADDRESS");
 
-contract DeployConceroPriceFeed is ConceroPriceFeedBase {
-    TransparentUpgradeableProxy internal conceroPriceFeedProxy;
+    function deploy(uint24 srcChainSelector, address feedUpdater) public returns (address) {
+        vm.prank(s_deployer);
+        s_conceroPriceFeed = address(new ConceroPriceFeed(srcChainSelector, feedUpdater));
 
-    function setProxyImplementation(address implementation) public {
-        vm.startPrank(proxyDeployer);
-        ITransparentUpgradeableProxy(address(conceroPriceFeedProxy)).upgradeToAndCall(
-            implementation,
-            bytes("")
-        );
-        vm.stopPrank();
-    }
-
-    function deploy() public returns (address) {
-        address implementation = _deployImplementation(SRC_CHAIN_SELECTOR, feedUpdater);
-        _deployProxy(implementation);
-        return address(conceroPriceFeedProxy);
-    }
-
-    function _deployProxy(address implementation) internal {
-        vm.startPrank(proxyDeployer);
-        conceroPriceFeedProxy = new TransparentUpgradeableProxy(implementation, proxyDeployer, "");
-        vm.stopPrank();
-    }
-
-    function _deployImplementation(
-        uint24 srcChainSelector,
-        address _feedUpdater
-    ) internal returns (address) {
-        vm.startPrank(deployer);
-        conceroPriceFeed = new ConceroPriceFeed(srcChainSelector, _feedUpdater);
-        vm.stopPrank();
-
-        return address(conceroPriceFeed);
+        return s_conceroPriceFeed;
     }
 }

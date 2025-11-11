@@ -6,57 +6,34 @@
  */
 pragma solidity 0.8.28;
 
-import {TransparentUpgradeableProxy, ITransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
-import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
-import {ConceroValidatorBase} from "../../ConceroValidator/base/ConceroValidatorBase.sol";
+import {Script} from "forge-std/src/Script.sol";
+
 import {CLFParams} from "contracts/ConceroValidator/libraries/Types.sol";
+import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
+import {DeployConceroPriceFeed} from "./DeployConceroPriceFeed.s.sol";
 
-contract DeployConceroValidator is ConceroValidatorBase {
-    TransparentUpgradeableProxy internal conceroValidatorProxy;
-    ConceroValidator internal conceroValidator;
+contract DeployConceroValidator is Script {
+    ConceroValidator internal s_conceroValidator;
 
-    function setUp() public virtual override {
-        super.setUp();
-    }
+    address public s_deployer = vm.envAddress("DEPLOYER_ADDRESS");
+    address public s_proxyDeployer = vm.envAddress("PROXY_DEPLOYER_ADDRESS");
+    bytes32 public s_clfDonId = vm.envBytes32("CLF_DONID_ARBITRUM");
 
-    function setProxyImplementation(address implementation) public {
-        vm.startPrank(proxyDeployer);
-        ITransparentUpgradeableProxy(address(conceroValidatorProxy)).upgradeToAndCall(
-            implementation,
-            bytes("")
-        );
-        vm.stopPrank();
-    }
+    bytes32 public s_clfMessageReportRequestJsHashSum =
+        vm.parseBytes32("0x66756e2d657468657265756d2d6d61696e6e65742d3100000000000000000000");
+    uint64 public s_conceroValidatorSubscriptionId = uint64(vm.envUint("CLF_SUBID_LOCALHOST"));
 
-    function deploy() public returns (address) {
-        address implementation = _deployImplementation();
-        _deployProxy(implementation);
-        return address(conceroValidatorProxy);
-    }
-
-    function _deployProxy(address implementation) internal {
-        vm.startPrank(proxyDeployer);
-        conceroValidatorProxy = new TransparentUpgradeableProxy(implementation, proxyDeployer, "");
-        vm.stopPrank();
-    }
-
-    function _deployImplementation() internal returns (address) {
-        vm.startPrank(deployer);
-
+    function deploy(uint24 chainSelector, address priceFeed, address clfRouter) public returns (address) {
         CLFParams memory clfParams = CLFParams({
             router: clfRouter,
-            donId: clfDonId,
-            subscriptionId: clfSubscriptionId,
-            requestCLFMessageReportJsCodeHash: clfMessageReportRequestJsHashSum
+            donId: s_clfDonId,
+            subscriptionId: s_conceroValidatorSubscriptionId,
+            requestCLFMessageReportJsCodeHash: s_clfMessageReportRequestJsHashSum
         });
 
-        conceroValidator = new ConceroValidator(
-            SRC_CHAIN_SELECTOR,
-            address(conceroPriceFeed),
-            clfParams
-        );
-        vm.stopPrank();
+        vm.prank(s_deployer);
+        s_conceroValidator = new ConceroValidator(chainSelector, priceFeed, clfParams);
 
-        return address(conceroValidator);
+        return address(s_conceroValidator);
     }
 }

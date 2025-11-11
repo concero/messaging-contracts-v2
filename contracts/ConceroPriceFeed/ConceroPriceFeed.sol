@@ -29,13 +29,13 @@ contract ConceroPriceFeed is IConceroPriceFeed {
 
     /**
      * @notice Constructor to initialize the contract
-     * @param feedUpdater The address that will be allowed to update feeds
+     * @param s_feedUpdater The address that will be allowed to update feeds
      */
-    constructor(uint24 chainSelector, address feedUpdater) {
-        require(feedUpdater != address(0), CommonErrors.InvalidAddress());
+    constructor(uint24 chainSelector, address s_feedUpdater) {
+        require(s_feedUpdater != address(0), CommonErrors.InvalidAddress());
 
         i_chainSelector = chainSelector;
-        i_feedUpdater = feedUpdater;
+        i_feedUpdater = s_feedUpdater;
     }
 
     /**
@@ -83,8 +83,12 @@ contract ConceroPriceFeed is IConceroPriceFeed {
     }
 
     // TODO: implement it
-    function getUsdRate(address) external pure returns (uint256) {
-        return 1;
+    function getUsdRate(address token) external view returns (uint256) {
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+
+        if (token == address(0)) {
+            return priceFeedStorage.nativeUsdRate;
+        }
     }
 
     /**

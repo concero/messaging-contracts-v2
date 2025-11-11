@@ -15,6 +15,8 @@ abstract contract ConceroClient is ConceroClientBase {
     using s for s.ConceroClient;
     using MessageCodec for bytes;
 
+    constructor(address conceroRouter) ConceroClientBase(conceroRouter) {}
+
     function _validateMessageReceipt(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks

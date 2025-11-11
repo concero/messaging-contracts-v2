@@ -28,7 +28,7 @@ library BytesUtils {
 
     function readUint32(bytes memory data, uint256 start) internal pure returns (uint32) {
         // TODO: add validations
-        uint24 result;
+        uint32 result;
         assembly {
             result := mload(add(add(data, 4), start))
         }
@@ -37,7 +37,7 @@ library BytesUtils {
 
     function readUint64(bytes memory data, uint256 start) internal pure returns (uint64) {
         // TODO: add validations
-        uint24 result;
+        uint64 result;
         assembly {
             result := mload(add(add(data, 8), start))
         }
@@ -61,6 +61,15 @@ library BytesUtils {
             res := div(mload(add(add(data, 0x20), start)), 0x1000000000000000000000000)
         }
         return res;
+    }
+
+    function writeUint24(bytes memory out, uint256 offset, uint24 value) internal pure {
+        assembly {
+            let ptr := add(add(out, 32), offset)
+            mstore8(ptr, shr(16, value))
+            mstore8(add(ptr, 1), shr(8, value))
+            mstore8(add(ptr, 2), value)
+        }
     }
 
     function writeUint32(bytes memory out, uint256 offset, uint32 value) internal pure {

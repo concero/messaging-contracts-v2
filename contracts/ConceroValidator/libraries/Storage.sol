@@ -21,7 +21,7 @@ library Storage {
         GasFeeConfig gasFeeConfig;
         uint256[50] __var_gap;
         uint256[50] __array_gap;
-        mapping(address relayer => uint256 depositAmount) depositsNative;
+        mapping(address s_relayer => uint256 depositAmount) depositsNative;
         mapping(bytes32 clfRequestId => Types.CLFRequestStatus) clfRequestStatus;
         mapping(bytes32 messageId => bytes32 clfRequestId) clfRequestIdByMessageId;
         mapping(uint24 chainSelector => bool isSupported) isChainSupported;

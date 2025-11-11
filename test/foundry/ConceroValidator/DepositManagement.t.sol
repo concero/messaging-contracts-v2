@@ -11,8 +11,8 @@ import {Errors} from "contracts/ConceroValidator/libraries/Errors.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
 import {CLFParams} from "contracts/ConceroValidator/libraries/Types.sol";
-
 import {ConceroValidatorTest} from "./base/ConceroValidatorTest.sol";
+import {DeployConceroValidator} from "../scripts/deploy/DeployConceroValidator.s.sol";
 
 contract DepositManagementTest is ConceroValidatorTest {
     function setUp() public override {
@@ -20,23 +20,23 @@ contract DepositManagementTest is ConceroValidatorTest {
     }
 
     function test_deposit() public {
-        uint256 minimumDeposit = conceroValidator.getMinimumDeposit();
+        uint256 minimumDeposit = s_conceroValidator.getMinimumDeposit();
 
-        vm.deal(relayer, minimumDeposit);
-        assertEq(conceroValidator.getDeposit(relayer), 0);
+        vm.deal(s_relayer, minimumDeposit);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), 0);
 
-        vm.prank(relayer);
-        conceroValidator.deposit{value: minimumDeposit}();
+        vm.prank(s_relayer);
+        s_conceroValidator.deposit{value: minimumDeposit}();
 
-        assertEq(conceroValidator.getDeposit(relayer), minimumDeposit);
-        assertEq(address(conceroValidator).balance, minimumDeposit);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), minimumDeposit);
+        assertEq(address(s_conceroValidator).balance, minimumDeposit);
     }
 
     function test_deposit_RevertsIfInsufficientDeposit() public {
-        uint256 minimumDeposit = conceroValidator.getMinimumDeposit();
+        uint256 minimumDeposit = s_conceroValidator.getMinimumDeposit();
         uint256 insufficientAmount = minimumDeposit - 1;
 
-        vm.deal(relayer, insufficientAmount);
+        vm.deal(s_relayer, insufficientAmount);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -46,36 +46,36 @@ contract DepositManagementTest is ConceroValidatorTest {
             )
         );
 
-        vm.prank(relayer);
-        conceroValidator.deposit{value: insufficientAmount}();
+        vm.prank(s_relayer);
+        s_conceroValidator.deposit{value: insufficientAmount}();
     }
 
     function test_withdrawDeposit() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit() * 2;
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit() * 2;
 
-        vm.deal(relayer, depositAmount);
+        vm.deal(s_relayer, depositAmount);
 
-        vm.prank(relayer);
-        conceroValidator.deposit{value: depositAmount}();
+        vm.prank(s_relayer);
+        s_conceroValidator.deposit{value: depositAmount}();
 
-        assertEq(conceroValidator.getDeposit(relayer), depositAmount);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), depositAmount);
 
         uint256 withdrawAmount = depositAmount / 2;
 
-        vm.prank(relayer);
-        conceroValidator.withdrawDeposit(withdrawAmount);
+        vm.prank(s_relayer);
+        s_conceroValidator.withdrawDeposit(withdrawAmount);
 
-        assertEq(conceroValidator.getDeposit(relayer), depositAmount - withdrawAmount);
-        assertEq(address(relayer).balance, withdrawAmount);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), depositAmount - withdrawAmount);
+        assertEq(address(s_relayer).balance, withdrawAmount);
     }
 
     function test_withdrawDeposit_RevertsIfInsufficientDeposit() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit();
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
 
-        vm.deal(relayer, depositAmount);
+        vm.deal(s_relayer, depositAmount);
 
-        vm.prank(relayer);
-        conceroValidator.deposit{value: depositAmount}();
+        vm.prank(s_relayer);
+        s_conceroValidator.deposit{value: depositAmount}();
 
         uint256 withdrawAmount = depositAmount + 1;
 
@@ -87,36 +87,38 @@ contract DepositManagementTest is ConceroValidatorTest {
             )
         );
 
-        vm.prank(relayer);
-        conceroValidator.withdrawDeposit(withdrawAmount);
+        vm.prank(s_relayer);
+        s_conceroValidator.withdrawDeposit(withdrawAmount);
     }
 
     function test_getDeposit() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit();
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
 
-        assertEq(conceroValidator.getDeposit(relayer), 0);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), 0);
 
-        vm.deal(relayer, depositAmount);
-        vm.prank(relayer);
-        conceroValidator.deposit{value: depositAmount}();
+        vm.deal(s_relayer, depositAmount);
+        vm.prank(s_relayer);
+        s_conceroValidator.deposit{value: depositAmount}();
 
-        assertEq(conceroValidator.getDeposit(relayer), depositAmount);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), depositAmount);
     }
 
     function test_getMinimumDeposit() public view {
-        uint256 minimumDeposit = conceroValidator.getMinimumDeposit();
-        uint256 clfCost = conceroValidator.getCLFCost();
+        uint256 minimumDeposit = s_conceroValidator.getMinimumDeposit();
+        uint256 clfCost = s_conceroValidator.getCLFCost();
 
         assertEq(minimumDeposit, clfCost);
         assertTrue(minimumDeposit > 0);
     }
 
     function test_constructor_RevertsIfPriceFeedIsZero() public {
+        DeployConceroValidator deployConceroValidator = new DeployConceroValidator();
+
         CLFParams memory clfParams = CLFParams({
-            router: clfRouter,
-            donId: clfDonId,
-            subscriptionId: clfSubscriptionId,
-            requestCLFMessageReportJsCodeHash: clfMessageReportRequestJsHashSum
+            router: s_clfRouter,
+            donId: deployConceroValidator.s_clfDonId(),
+            subscriptionId: deployConceroValidator.s_conceroValidatorSubscriptionId(),
+            requestCLFMessageReportJsCodeHash: deployConceroValidator.s_clfMessageReportRequestJsHashSum()
         });
 
         vm.expectRevert(abi.encodeWithSelector(CommonErrors.InvalidAddress.selector));

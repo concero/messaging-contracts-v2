@@ -62,8 +62,8 @@ abstract contract Validator is CLF, IConceroValidator {
 
     /* Getters */
 
-    function getDeposit(address relayer) external view returns (uint256) {
-        return s.validator().depositsNative[relayer];
+    function getDeposit(address s_relayer) external view returns (uint256) {
+        return s.validator().depositsNative[s_relayer];
     }
 
     function getMinimumDeposit() external view returns (uint256) {

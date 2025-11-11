@@ -6,9 +6,9 @@
  */
 pragma solidity 0.8.28;
 
-import {ConceroPriceFeedTest} from "./base/ConceroPriceFeedTest.sol";
+import {ConceroTest} from "../utils/ConceroTest.sol";
 
-contract GetMessageFeeDataTest is ConceroPriceFeedTest {
+contract GetMessageFeeDataTest is ConceroTest {
     uint24 public constant BASE_CHAIN_SELECTOR = 2;
     uint24 public constant NONEXISTENT_CHAIN = 999;
 
@@ -17,11 +17,9 @@ contract GetMessageFeeDataTest is ConceroPriceFeedTest {
     uint256 public constant DST_GAS_PRICE = 50 gwei;
     uint256 public constant BASE_GAS_PRICE = 75 gwei;
 
-    function setUp() public override {
-        super.setUp();
-
-        vm.startPrank(feedUpdater);
-        conceroPriceFeed.setNativeUsdRate(NATIVE_USD_RATE);
+    function setUp() public {
+        vm.startPrank(s_feedUpdater);
+        s_conceroPriceFeed.setNativeUsdRate(NATIVE_USD_RATE);
 
         // Set native-native rates
         uint24[] memory chainSelectors = new uint24[](2);
@@ -32,14 +30,14 @@ contract GetMessageFeeDataTest is ConceroPriceFeedTest {
         nativeRates[0] = DST_NATIVE_RATE;
         nativeRates[1] = BASE_NATIVE_RATE;
 
-        conceroPriceFeed.setNativeNativeRates(chainSelectors, nativeRates);
+        s_conceroPriceFeed.setNativeNativeRates(chainSelectors, nativeRates);
 
         // Set gas prices
         uint256[] memory gasPrices = new uint256[](2);
         gasPrices[0] = DST_GAS_PRICE;
         gasPrices[1] = BASE_GAS_PRICE;
 
-        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+        s_conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
         vm.stopPrank();
     }
@@ -51,7 +49,7 @@ contract GetMessageFeeDataTest is ConceroPriceFeedTest {
             uint256 dstNativeRate,
             uint256 baseGasPrice,
             uint256 baseNativeRate
-        ) = conceroPriceFeed.getMessageFeeData(DST_CHAIN_SELECTOR, BASE_CHAIN_SELECTOR);
+        ) = s_conceroPriceFeed.getMessageFeeData(DST_CHAIN_SELECTOR, BASE_CHAIN_SELECTOR);
 
         assertEq(nativeUsdRate, NATIVE_USD_RATE, "Native USD rate should match");
         assertEq(dstGasPrice, DST_GAS_PRICE, "Destination gas price should match");
@@ -67,7 +65,7 @@ contract GetMessageFeeDataTest is ConceroPriceFeedTest {
             uint256 dstNativeRate,
             uint256 baseGasPrice,
             uint256 baseNativeRate
-        ) = conceroPriceFeed.getMessageFeeData(NONEXISTENT_CHAIN, NONEXISTENT_CHAIN);
+        ) = s_conceroPriceFeed.getMessageFeeData(NONEXISTENT_CHAIN, NONEXISTENT_CHAIN);
 
         assertEq(nativeUsdRate, NATIVE_USD_RATE, "Native USD rate should still be returned");
         assertEq(dstGasPrice, 0, "Nonexistent destination gas price should be zero");
@@ -81,10 +79,10 @@ contract GetMessageFeeDataTest is ConceroPriceFeedTest {
         uint256 newDstGasPrice = 100 gwei;
         uint256 newBaseNativeRate = 15 * 1e17;
 
-        vm.startPrank(feedUpdater);
+        vm.startPrank(s_feedUpdater);
 
         // Update some values
-        conceroPriceFeed.setNativeUsdRate(newNativeUsdRate);
+        s_conceroPriceFeed.setNativeUsdRate(newNativeUsdRate);
 
         uint24[] memory chainSelectors = new uint24[](2);
         chainSelectors[0] = DST_CHAIN_SELECTOR;
@@ -93,12 +91,12 @@ contract GetMessageFeeDataTest is ConceroPriceFeedTest {
         uint256[] memory gasPrices = new uint256[](2);
         gasPrices[0] = newDstGasPrice;
         gasPrices[1] = BASE_GAS_PRICE; // Keep base gas price unchanged
-        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+        s_conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
         uint256[] memory nativeRates = new uint256[](2);
         nativeRates[0] = DST_NATIVE_RATE; // Keep dst native rate unchanged
         nativeRates[1] = newBaseNativeRate;
-        conceroPriceFeed.setNativeNativeRates(chainSelectors, nativeRates);
+        s_conceroPriceFeed.setNativeNativeRates(chainSelectors, nativeRates);
 
         vm.stopPrank();
 
@@ -108,7 +106,7 @@ contract GetMessageFeeDataTest is ConceroPriceFeedTest {
             uint256 dstNativeRate,
             uint256 baseGasPrice,
             uint256 baseNativeRate
-        ) = conceroPriceFeed.getMessageFeeData(DST_CHAIN_SELECTOR, BASE_CHAIN_SELECTOR);
+        ) = s_conceroPriceFeed.getMessageFeeData(DST_CHAIN_SELECTOR, BASE_CHAIN_SELECTOR);
 
         assertEq(nativeUsdRate, newNativeUsdRate, "Native USD rate should be updated");
         assertEq(dstGasPrice, newDstGasPrice, "Destination gas price should be updated");

@@ -14,17 +14,18 @@ import {ConceroValidatorTest} from "./base/ConceroValidatorTest.sol";
 contract RequestMessageReportTest is ConceroValidatorTest {
     function setUp() public virtual override {
         super.setUp();
+        _setPriceFeeds();
     }
 
     function test_requestMessageReport() public returns (bytes32) {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit();
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
         _deposit(depositAmount);
 
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        vm.prank(relayer);
-        bytes32 clfRequestId = conceroValidator.requestMessageReport(
+        vm.prank(s_relayer);
+        bytes32 clfRequestId = s_conceroValidator.requestMessageReport(
             messageId,
             SRC_CHAIN_SELECTOR,
             srcChainData
@@ -33,8 +34,8 @@ contract RequestMessageReportTest is ConceroValidatorTest {
         assertTrue(clfRequestId != bytes32(0));
 
         // Deposit should be consumed
-        assertEq(conceroValidator.getDeposit(relayer), 0);
-        assertEq(address(conceroValidator).balance, depositAmount);
+        assertEq(s_conceroValidator.getDeposit(s_relayer), 0);
+        assertEq(address(s_conceroValidator).balance, depositAmount);
 
         return clfRequestId;
     }
@@ -43,25 +44,25 @@ contract RequestMessageReportTest is ConceroValidatorTest {
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        uint256 depositAmount = conceroValidator.getCLFCost();
+        uint256 depositAmount = s_conceroValidator.getCLFCost();
 
         vm.expectRevert(
             abi.encodeWithSelector(Errors.InsufficientDeposit.selector, 0, depositAmount)
         );
 
-        vm.prank(relayer);
-        conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+        vm.prank(s_relayer);
+        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
     }
 
     function test_requestMessageReport_RevertsIfNativeUsdRateIsZero() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit();
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
         _deposit(depositAmount);
 
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        vm.startPrank(feedUpdater);
-        conceroPriceFeed.setNativeUsdRate(0);
+        vm.startPrank(s_feedUpdater);
+        s_conceroPriceFeed.setNativeUsdRate(0);
         vm.stopPrank();
 
         vm.expectRevert(
@@ -71,24 +72,24 @@ contract RequestMessageReportTest is ConceroValidatorTest {
             )
         );
 
-        vm.prank(relayer);
-        conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+        vm.prank(s_relayer);
+        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
     }
 
     function test_requestMessageReport_RevertsIfLastGasPriceIsZero() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit();
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
         _deposit(depositAmount);
 
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        vm.startPrank(feedUpdater);
+        vm.startPrank(s_feedUpdater);
         uint24[] memory chainSelectors = new uint24[](1);
         chainSelectors[0] = SRC_CHAIN_SELECTOR;
         uint256[] memory gasPrices = new uint256[](1);
         gasPrices[0] = 0;
 
-        conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
+        s_conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
         vm.stopPrank();
 
         vm.expectRevert(
@@ -98,19 +99,19 @@ contract RequestMessageReportTest is ConceroValidatorTest {
             )
         );
 
-        vm.prank(relayer);
-        conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+        vm.prank(s_relayer);
+        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
     }
 
     function test_requestMessageReport_RevertsIfOverEstimatedGasCostIsZero() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit();
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
         _deposit(depositAmount);
 
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        vm.startPrank(deployer);
-        conceroValidator.setGasFeeConfig(
+        vm.prank(s_deployer);
+        s_conceroValidator.setGasFeeConfig(
             VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
             CLF_GAS_PRICE_OVER_ESTIMATION_BPS,
             0, // clfCallbackGasOverhead = 0
@@ -120,26 +121,26 @@ contract RequestMessageReportTest is ConceroValidatorTest {
 
         vm.expectRevert(abi.encodeWithSelector(CommonErrors.InvalidAmount.selector));
 
-        vm.prank(relayer);
-        conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+        vm.prank(s_relayer);
+        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
     }
 
     function test_requestMessageReport_RevertsIfMessageAlreadyProcessed() public {
-        uint256 depositAmount = conceroValidator.getMinimumDeposit() * 2;
+        uint256 depositAmount = s_conceroValidator.getMinimumDeposit() * 2;
         _deposit(depositAmount);
 
         bytes32 messageId = bytes32(uint256(1));
         bytes memory srcChainData = new bytes(0);
 
-        vm.startPrank(relayer);
+        vm.startPrank(s_relayer);
 
         // First request should succeed
-        conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
 
         // Second request with same messageId should revert
         vm.expectRevert(abi.encodeWithSelector(Errors.MessageAlreadyProcessed.selector));
 
-        conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
 
         vm.stopPrank();
     }

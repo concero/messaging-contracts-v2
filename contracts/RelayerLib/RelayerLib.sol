@@ -8,11 +8,10 @@ pragma solidity 0.8.28;
 
 import {BytesUtils} from "contracts/common/libraries/BytesUtils.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {Base} from "contracts/common/Base.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
-
 import {RelayerLibStorage} from "./RelayerLibStorage.sol";
-import {Base} from "./modules/Base.sol";
 
 contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
     uint256 internal constant DECIMALS = 1e18;

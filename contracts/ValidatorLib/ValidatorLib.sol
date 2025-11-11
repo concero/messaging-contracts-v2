@@ -11,13 +11,13 @@ import {Utils as CommonUtils} from "contracts/common/libraries/Utils.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
+import {Base} from "contracts/common/Base.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 import {Types} from "./libraries/Types.sol";
 
 import {Storage as s} from "./libraries/Storage.sol";
-import {Base} from "./modules/Base.sol";
 import {ClfSigner} from "./modules/ClfSigner.sol";
 
 contract ValidatorLib is IValidatorLib, Base, ClfSigner {

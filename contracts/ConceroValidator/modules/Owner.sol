@@ -7,10 +7,10 @@
 pragma solidity 0.8.28;
 
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
+import {Base} from "contracts/common/Base.sol";
 import {IConceroValidator} from "contracts/interfaces/IConceroValidator.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {Storage as s} from "../libraries/Storage.sol";
-import {Base} from "./Base.sol";
 import {Utils} from "../../common/libraries/Utils.sol";
 
 abstract contract Owner is Base {

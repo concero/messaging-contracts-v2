@@ -10,9 +10,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import {Types} from "../libraries/Types.sol";
 
-import {Base} from "./Base.sol";
-
-abstract contract ClfSigner is Base {
+abstract contract ClfSigner {
     address internal immutable i_clfSigner0;
     address internal immutable i_clfSigner1;
     address internal immutable i_clfSigner2;

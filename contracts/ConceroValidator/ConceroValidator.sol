@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {Base} from "./modules/Base.sol";
+import {Base} from "../common/Base.sol";
 import {CLF} from "./modules/CLF.sol";
 import {Owner} from "./modules/Owner.sol";
 import {Validator} from "./modules/Validator.sol";

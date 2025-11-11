@@ -27,15 +27,6 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
         (uint256 dstNativeRate, uint256 dstGasPrice) = i_conceroPriceFeed
             .getNativeNativeRateAndGasPrice(messageRequest.dstChainSelector);
 
-        require(
-            dstGasPrice > 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.DstGasPrice)
-        );
-        require(
-            dstNativeRate > 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.DstNativeRate)
-        );
-
         uint32 gasLimit = BytesUtils.readUint32(messageRequest.dstChainData, 20);
 
         return

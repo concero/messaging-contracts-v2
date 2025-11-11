@@ -7,6 +7,14 @@
 pragma solidity 0.8.28;
 
 interface IConceroPriceFeed {
+    enum RequiredVariableUnsetType {
+        NativeUSDRate, //            0
+        LastGasPrice, //              1
+        DstGasPrice, //               2
+        DstNativeRate //             3
+    }
+    error RequiredVariableUnset(RequiredVariableUnsetType variableType);
+
     function getNativeUsdRate() external view returns (uint256);
     function getNativeUsdRateAndGasPrice() external view returns (uint256, uint256);
     function getNativeNativeRateAndGasPrice(

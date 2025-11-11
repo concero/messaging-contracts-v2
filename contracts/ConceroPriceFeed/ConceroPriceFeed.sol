@@ -84,6 +84,7 @@ contract ConceroPriceFeed is IConceroPriceFeed {
 
     // TODO: implement it
     function getUsdRate(address) external pure returns (uint256) {
+		// TODO: add check for rate is set
         return 1;
     }
 
@@ -92,7 +93,11 @@ contract ConceroPriceFeed is IConceroPriceFeed {
      * @return The current native USD rate in 18 decimals
      */
     function getNativeUsdRate() external view returns (uint256) {
-        return s.priceFeed().nativeUsdRate;
+        uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
+
+        require(nativeUsdRate > 0, RequiredVariableUnset(RequiredVariableUnsetType.NativeUSDRate));
+
+        return nativeUsdRate;
     }
 
     /**
@@ -101,7 +106,14 @@ contract ConceroPriceFeed is IConceroPriceFeed {
      * @return The native-native exchange rate in 18 decimals
      */
     function getNativeNativeRate(uint24 chainSelector) external view returns (uint256) {
-        return s.priceFeed().nativeNativeRates[chainSelector];
+        uint256 nativeNativeRate = s.priceFeed().nativeNativeRates[chainSelector];
+
+        require(
+            nativeNativeRate > 0,
+            RequiredVariableUnset(RequiredVariableUnsetType.DstNativeRate)
+        );
+
+        return nativeNativeRate;
     }
 
     /**
@@ -110,7 +122,11 @@ contract ConceroPriceFeed is IConceroPriceFeed {
      * @return The last recorded gas price in wei
      */
     function getLastGasPrice(uint24 chainSelector) external view returns (uint256) {
-        return s.priceFeed().lastGasPrices[chainSelector];
+        uint256 lastGasPrice = s.priceFeed().lastGasPrices[chainSelector];
+
+        require(lastGasPrice > 0, RequiredVariableUnset(RequiredVariableUnsetType.LastGasPrice));
+
+        return lastGasPrice;
     }
 
     /**
@@ -120,7 +136,14 @@ contract ConceroPriceFeed is IConceroPriceFeed {
      */
     function getNativeUsdRateAndGasPrice() external view returns (uint256, uint256) {
         s.PriceFeed storage priceFeedStorage = s.priceFeed();
-        return (priceFeedStorage.nativeUsdRate, priceFeedStorage.lastGasPrices[i_chainSelector]);
+
+        uint256 nativeUsdRate = priceFeedStorage.nativeUsdRate;
+        uint256 lastGasPrice = priceFeedStorage.lastGasPrices[i_chainSelector];
+
+        require(nativeUsdRate > 0, RequiredVariableUnset(RequiredVariableUnsetType.NativeUSDRate));
+        require(lastGasPrice > 0, RequiredVariableUnset(RequiredVariableUnsetType.LastGasPrice));
+
+        return (nativeUsdRate, lastGasPrice);
     }
 
     /**
@@ -133,10 +156,14 @@ contract ConceroPriceFeed is IConceroPriceFeed {
         uint24 chainSelector
     ) external view returns (uint256, uint256) {
         s.PriceFeed storage priceFeedStorage = s.priceFeed();
-        return (
-            priceFeedStorage.nativeNativeRates[chainSelector],
-            priceFeedStorage.lastGasPrices[chainSelector]
-        );
+
+        uint256 dstNativeRate = priceFeedStorage.nativeNativeRates[chainSelector];
+        uint256 dstGasPrice = priceFeedStorage.lastGasPrices[chainSelector];
+
+        require(dstGasPrice > 0, RequiredVariableUnset(RequiredVariableUnsetType.DstGasPrice));
+        require(dstNativeRate > 0, RequiredVariableUnset(RequiredVariableUnsetType.DstNativeRate));
+
+        return (dstNativeRate, dstGasPrice);
     }
 
     /**
@@ -170,5 +197,17 @@ contract ConceroPriceFeed is IConceroPriceFeed {
         dstNativeRate = priceFeedStorage.nativeNativeRates[dstChainSelector];
         baseGasPrice = priceFeedStorage.lastGasPrices[baseChainSelector];
         baseNativeRate = priceFeedStorage.nativeNativeRates[baseChainSelector];
+
+        require(nativeUsdRate > 0, RequiredVariableUnset(RequiredVariableUnsetType.NativeUSDRate));
+        require(
+            dstNativeRate > 0 || baseNativeRate > 0,
+            RequiredVariableUnset(RequiredVariableUnsetType.DstNativeRate)
+        );
+        require(
+            dstGasPrice > 0 || baseGasPrice > 0,
+            RequiredVariableUnset(RequiredVariableUnsetType.DstGasPrice)
+        );
+
+        return (nativeUsdRate, dstGasPrice, dstNativeRate, baseGasPrice, baseNativeRate);
     }
 }

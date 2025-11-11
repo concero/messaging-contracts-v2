@@ -160,16 +160,6 @@ abstract contract CLF is FunctionsClient, Base {
         (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
             .getNativeUsdRateAndGasPrice();
 
-        // Validate price feed data is available
-        require(
-            nativeUsdRate > 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
-        );
-        require(
-            lastGasPrice > 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.lastGasPrice)
-        );
-
         // Calculate base gas cost for CLF callback
         uint256 gasCost = (gasFeeConfig.clfCallbackGasOverhead + gasFeeConfig.clfCallbackGasLimit) *
             lastGasPrice;

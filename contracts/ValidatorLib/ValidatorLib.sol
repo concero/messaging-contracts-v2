@@ -94,12 +94,7 @@ contract ValidatorLib is IValidatorLib, ValidatorLibStorage, Base, ClfSigner {
     }
 
     function getFee(IConceroRouter.MessageRequest calldata) external view returns (uint256) {
-        (uint256 nativeUsdRate, ) = i_conceroPriceFeed.getNativeUsdRateAndGasPrice();
-
-        require(
-            nativeUsdRate > 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
-        );
+        uint256 nativeUsdRate = i_conceroPriceFeed.getNativeUsdRate();
 
         uint256 validatorLibFee = CommonUtils.convertUsdBpsToNative(
             VALIDATOR_LIB_FEE_BPS_USD,

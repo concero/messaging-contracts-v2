@@ -53,13 +53,7 @@ interface IConceroRouter {
         address token;
     }
 
-    enum RequiredVariableUnsetType {
-        NativeUSDRate,
-        lastGasPrice
-    }
-
     error InsufficientFee(uint256 provided, uint256 required);
-    error RequiredVariableUnset(RequiredVariableUnsetType variableType);
     error UnsupportedFeeToken();
     error PayloadTooLarge(uint256 receviedLength, uint256 expectedLength);
     error EmptyDstChainData();

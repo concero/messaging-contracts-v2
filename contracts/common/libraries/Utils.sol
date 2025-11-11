@@ -103,11 +103,6 @@ library Utils {
         uint16 bpsUSD,
         uint256 nativeUSDRate
     ) internal pure returns (uint256) {
-        require(
-            nativeUSDRate != 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
-        );
-
         uint256 usdAmount = (uint256(bpsUSD) * 1e18) / CommonConstants.BPS_DENOMINATOR;
 
         uint256 nativeAmount = (usdAmount * 1e18) / nativeUSDRate;

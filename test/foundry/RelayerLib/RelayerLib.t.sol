@@ -11,6 +11,7 @@ import {RelayerLibTest} from "./base/RelayerLibTest.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
+import {IConceroPriceFeed} from "contracts/interfaces/IConceroPriceFeed.sol";
 
 contract RelayerLibTests is RelayerLibTest {
     uint32 internal constant GAS_LIMIT = 300_000;
@@ -69,8 +70,8 @@ contract RelayerLibTests is RelayerLibTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                CommonErrors.RequiredVariableUnset.selector,
-                CommonErrors.RequiredVariableUnsetType.DstGasPrice
+                IConceroPriceFeed.RequiredVariableUnset.selector,
+                IConceroPriceFeed.RequiredVariableUnsetType.DstGasPrice
             )
         );
 
@@ -93,8 +94,8 @@ contract RelayerLibTests is RelayerLibTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                CommonErrors.RequiredVariableUnset.selector,
-                CommonErrors.RequiredVariableUnsetType.DstNativeRate
+                IConceroPriceFeed.RequiredVariableUnset.selector,
+                IConceroPriceFeed.RequiredVariableUnsetType.DstNativeRate
             )
         );
 

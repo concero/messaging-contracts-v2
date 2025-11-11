@@ -58,22 +58,6 @@ contract GetMessageFeeDataTest is ConceroTest {
         assertEq(baseNativeRate, BASE_NATIVE_RATE, "Base native rate should match");
     }
 
-    function test_getMessageFeeData_WithNonexistentChains() public view {
-        (
-            uint256 nativeUsdRate,
-            uint256 dstGasPrice,
-            uint256 dstNativeRate,
-            uint256 baseGasPrice,
-            uint256 baseNativeRate
-        ) = s_conceroPriceFeed.getMessageFeeData(NONEXISTENT_CHAIN, NONEXISTENT_CHAIN);
-
-        assertEq(nativeUsdRate, NATIVE_USD_RATE, "Native USD rate should still be returned");
-        assertEq(dstGasPrice, 0, "Nonexistent destination gas price should be zero");
-        assertEq(dstNativeRate, 0, "Nonexistent destination native rate should be zero");
-        assertEq(baseGasPrice, 0, "Nonexistent base gas price should be zero");
-        assertEq(baseNativeRate, 0, "Nonexistent base native rate should be zero");
-    }
-
     function test_getMessageFeeData_AfterUpdates() public {
         uint256 newNativeUsdRate = 2500 * 1e18;
         uint256 newDstGasPrice = 100 gwei;

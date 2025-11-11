@@ -13,6 +13,7 @@ import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
+import {IConceroPriceFeed} from "contracts/interfaces/IConceroPriceFeed.sol";
 import {ValidatorLibTest} from "./base/ValidatorLibTest.sol";
 import {MessageReport as MockCLFReport} from "../scripts/MockCLFReport/MessageReport.sol";
 
@@ -348,8 +349,8 @@ contract ValidatorLibTests is ValidatorLibTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                CommonErrors.RequiredVariableUnset.selector,
-                CommonErrors.RequiredVariableUnsetType.NativeUSDRate
+                IConceroPriceFeed.RequiredVariableUnset.selector,
+                IConceroPriceFeed.RequiredVariableUnsetType.NativeUSDRate
             )
         );
 

@@ -17,18 +17,17 @@
 # ==========================================================================
 local-simulation:
   user-workflow:
-    workflow-name: "deploy"
+    workflow-name: "message-report"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.json"
     secrets-path: "../secrets.yaml"
 
 # ==========================================================================
-staging:
+production-testnet:
   user-workflow:
-    workflow-name: "deploy"
+    workflow-name: "message-report"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.json"
     secrets-path: "../secrets.yaml"
-    

@@ -33,7 +33,7 @@ deployments/
 temp
 tmp.js
 tmp.wasm
-
+*.b64
 
 packages/foundry/out
 packages/foundry/node_modules

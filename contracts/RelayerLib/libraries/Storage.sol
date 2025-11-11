@@ -14,6 +14,7 @@ library Namespaces {
 
 library Storage {
     struct RelayerLib {
+		uint32 submitMsgGasOverhead;
         mapping(uint24 dstChainSelector => address dstLib) dstLibs;
         mapping(address relayer => bool isAllowed) isAllowedRelayer;
     }

@@ -18,17 +18,11 @@ contract RelayerLib is IRelayerLib, Base {
     using s for s.RelayerLib;
 
     uint256 internal constant DECIMALS = 1e18;
-    uint32 internal s_submitMsgGasOverhead;
 
     constructor(
         uint24 chainSelector,
-        address conceroPriceFeed,
-        uint32 submitMsgGasOverhead
-    ) Base(chainSelector, conceroPriceFeed) {
-        require(submitMsgGasOverhead > 0, CommonErrors.InvalidAmount());
-
-        s_submitMsgGasOverhead = submitMsgGasOverhead;
-    }
+        address conceroPriceFeed
+    ) Base(chainSelector, conceroPriceFeed) {}
 
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
@@ -50,7 +44,9 @@ contract RelayerLib is IRelayerLib, Base {
         uint32 gasLimit = BytesUtils.readUint32(messageRequest.dstChainData, 20);
 
         return
-            (dstGasPrice * uint256(s_submitMsgGasOverhead + gasLimit) * dstNativeRate) / DECIMALS;
+            (dstGasPrice *
+                uint256(s.relayerLib().submitMsgGasOverhead + gasLimit) *
+                dstNativeRate) / DECIMALS;
     }
 
     function getDstLib(uint24 dstChainSelector) external view returns (bytes memory) {
@@ -97,6 +93,6 @@ contract RelayerLib is IRelayerLib, Base {
 
     function setSubmitMsgGasOverhead(uint32 submitMsgGasOverhead) external onlyOwner {
         require(submitMsgGasOverhead > 0, CommonErrors.InvalidAmount());
-        s_submitMsgGasOverhead = submitMsgGasOverhead;
+        s.relayerLib().submitMsgGasOverhead = submitMsgGasOverhead;
     }
 }

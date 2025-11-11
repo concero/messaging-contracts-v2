@@ -15,11 +15,8 @@ abstract contract RelayerLibTest is ConceroTest {
     RelayerLib internal relayerLib;
 
     function setUp() public virtual {
-        relayerLib = new RelayerLib(
-            SRC_CHAIN_SELECTOR,
-            address(s_conceroPriceFeed),
-            SUBMIT_MSG_GAS_OVERHEAD
-        );
+        relayerLib = new RelayerLib(SRC_CHAIN_SELECTOR, address(s_conceroPriceFeed));
+		relayerLib.setSubmitMsgGasOverhead(SUBMIT_MSG_GAS_OVERHEAD);
     }
 
     function _createMessageRequest(

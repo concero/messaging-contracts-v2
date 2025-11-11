@@ -210,26 +210,10 @@ library MessageCodec {
     // GENERIC FUNCTIONS //
 
     function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
-        uint256 totalLength = LENGTH_BYTES_SIZE;
+        bytes memory res = abi.encodePacked(uint24(data.length));
 
         for (uint256 i; i < data.length; ++i) {
-            totalLength += data[i].length + LENGTH_BYTES_SIZE;
-        }
-
-        bytes memory res = new bytes(totalLength);
-        uint256 j;
-
-        res.writeUint24(j, uint24(data.length));
-        j += LENGTH_BYTES_SIZE;
-
-        for (uint256 i; i < data.length; ++i) {
-            res.writeUint24(j, uint24(data[i].length));
-            j += LENGTH_BYTES_SIZE;
-
-            for (uint256 k; k < data[i].length; ++k) {
-                res[j] = data[i][k];
-                ++j;
-            }
+            res = abi.encodePacked(res, uint24(data[i].length), data[i]);
         }
 
         return res;

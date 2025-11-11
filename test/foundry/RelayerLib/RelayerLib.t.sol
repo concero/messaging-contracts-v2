@@ -7,6 +7,8 @@
  */
 pragma solidity 0.8.28;
 
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import {RelayerLibTest} from "./base/RelayerLibTest.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
@@ -276,4 +278,32 @@ contract RelayerLibTests is RelayerLibTest {
 
         relayerLib.setSubmitMsgGasOverhead(0);
     }
+
+    /* withdrawRelayerFee */
+
+    function test_withdrawRelayerFee_Native_Success() public {
+        mockConceroRouterWithFee.setRelayerFee(address(relayerLib), 1 ether, address(0));
+        deal(address(mockConceroRouterWithFee), 1 ether);
+
+        uint256 balanceBefore = address(this).balance;
+
+        relayerLib.withdrawRelayerFee(new address[](1));
+
+        uint256 balanceAfter = address(this).balance;
+        assertEq(balanceAfter, balanceBefore + 1 ether, "Balance should be increased by 1 ether");
+    }
+
+	function test_withdrawRelayerFee_USDC_Success() public {
+		mockConceroRouterWithFee.setRelayerFee(address(relayerLib), 1 ether, address(s_usdc));
+		deal(s_usdc, address(mockConceroRouterWithFee), 1 ether);
+
+		uint256 balanceBefore = IERC20(s_usdc).balanceOf(address(this));
+
+		address[] memory tokens = new address[](1);
+		tokens[0] = address(s_usdc);
+		relayerLib.withdrawRelayerFee(tokens);
+
+		uint256 balanceAfter = IERC20(s_usdc).balanceOf(address(this));
+		assertEq(balanceAfter, balanceBefore + 1 ether, "Balance should be increased by 1 ether");
+	}
 }

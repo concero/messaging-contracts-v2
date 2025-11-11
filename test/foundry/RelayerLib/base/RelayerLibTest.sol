@@ -10,13 +10,39 @@ import {RelayerLib} from "contracts/RelayerLib/RelayerLib.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
+import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
+import {Storage as s} from "contracts/ConceroRouter/libraries/Storage.sol";
+
+contract MockConceroRouterWithFee is ConceroRouter {
+    using s for s.Router;
+
+    constructor(
+        uint24 chainSelector,
+        address conceroPriceFeed
+    ) ConceroRouter(chainSelector, conceroPriceFeed) {}
+
+    function setRelayerFee(address relayerLib, uint256 relayerFee, address feeToken) external {
+        s.router().relayerFeeEarned[relayerLib][feeToken] = relayerFee;
+        s.router().totalRelayerFeeEarned[feeToken] = relayerFee;
+    }
+}
 
 abstract contract RelayerLibTest is ConceroTest {
     RelayerLib internal relayerLib;
+    MockConceroRouterWithFee internal mockConceroRouterWithFee;
 
     function setUp() public virtual {
-        relayerLib = new RelayerLib(SRC_CHAIN_SELECTOR, address(s_conceroPriceFeed));
-		relayerLib.setSubmitMsgGasOverhead(SUBMIT_MSG_GAS_OVERHEAD);
+        mockConceroRouterWithFee = new MockConceroRouterWithFee(
+            SRC_CHAIN_SELECTOR,
+            address(s_conceroPriceFeed)
+        );
+
+        relayerLib = new RelayerLib(
+            SRC_CHAIN_SELECTOR,
+            address(s_conceroPriceFeed),
+            address(mockConceroRouterWithFee)
+        );
+        relayerLib.setSubmitMsgGasOverhead(SUBMIT_MSG_GAS_OVERHEAD);
     }
 
     function _createMessageRequest(

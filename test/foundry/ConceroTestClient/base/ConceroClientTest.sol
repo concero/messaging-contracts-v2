@@ -13,23 +13,30 @@ import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {ConceroTestClient} from "../../ConceroTestClient/ConceroTestClient.sol";
 import {MockConceroValidatorLib} from "../../mocks/MockConceroValidatorLib.sol";
-import {MockConceroRouter} from "../../mocks/MockConceroRouter.sol"; // TODO: Remove this
 import {MockConceroRelayerLib} from "../../mocks/MockConceroRelayerLib.sol";
+import {ConceroTestClientAdvanced} from "../../ConceroTestClient/ConceroTestClientAdvanced.sol";
 
 contract ConceroClientTest is ConceroTest {
     ConceroTestClient internal s_conceroClient;
-    MockConceroRouter internal s_mockConceroRouter;
+    ConceroTestClientAdvanced internal s_conceroClientAdvanced;
+
+    address internal s_mockConceroRouter;
 
     address internal s_validatorLib = address(new MockConceroValidatorLib());
     address internal s_relayerLib = address(new MockConceroRelayerLib());
 
     function setUp() public virtual {
-        s_mockConceroRouter = new MockConceroRouter();
-        s_conceroClient = new ConceroTestClient(payable(address(s_mockConceroRouter)));
+        s_mockConceroRouter = makeAddr("mockConceroRouter");
 
+        s_conceroClient = new ConceroTestClient(payable(address(s_mockConceroRouter)));
         s_conceroClient.setIsRelayerAllowed(s_relayerLib, true);
         s_conceroClient.setIsValidatorAllowed(s_validatorLib, true);
         s_conceroClient.setRequiredValidatorsCount(1);
+
+        s_conceroClientAdvanced = new ConceroTestClientAdvanced(
+            payable(address(s_mockConceroRouter))
+        );
+        s_conceroClientAdvanced.setIsRelayerAllowed(s_relayerLib, true);
     }
 
     function _buildMessageRequest() internal view returns (IConceroRouter.MessageRequest memory) {

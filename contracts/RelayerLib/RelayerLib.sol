@@ -46,7 +46,7 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
     }
 
     function getDstLib(uint24 dstChainSelector) external view returns (bytes memory) {
-        return abi.encode(s_dstLibs[dstChainSelector]);
+        return s_dstLibs[dstChainSelector];
     }
 
     function validate(bytes calldata /* messageReceipt */, address relayer) external {
@@ -79,7 +79,7 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
         require(dstChainSelectors.length == dstLibs.length, CommonErrors.LengthMismatch());
 
         for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            s_dstLibs[dstChainSelectors[i]] = dstLibs[i];
+            s_dstLibs[dstChainSelectors[i]] = abi.encode(dstLibs[i]);
         }
     }
 

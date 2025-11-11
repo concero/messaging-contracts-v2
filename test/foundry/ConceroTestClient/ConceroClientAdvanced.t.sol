@@ -14,10 +14,6 @@ import {ConceroClientTest} from "./base/ConceroClientTest.sol";
 import {ConceroTestClientAdvanced} from "./ConceroTestClientAdvanced.sol";
 
 contract ConceroClientAdvancedTest is ConceroClientTest {
-    function setUp() public override {
-        super.setUp();
-    }
-
     function test_conceroReceive_Success() public {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 

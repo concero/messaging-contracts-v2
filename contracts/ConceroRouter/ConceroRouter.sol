@@ -80,12 +80,12 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         bytes calldata messageReceipt,
         bytes[] calldata validations
     ) external nonReentrant {
-        address[] memory dstValidatorLibs = messageReceipt.evmDstValidatorLibs();
-
         require(
             messageReceipt.dstChainSelector() == i_chainSelector,
             InvalidDstChainSelector(messageReceipt.dstChainSelector(), i_chainSelector)
         );
+
+        address[] memory dstValidatorLibs = messageReceipt.evmDstValidatorLibs();
 
         require(
             dstValidatorLibs.length == validations.length,
@@ -268,8 +268,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         address receiver,
         uint32 gasLimit
     ) internal {
-        // TODO: handle this error more granular
-
         (bool success, bytes memory result) = Utils.safeCall(
             receiver,
             gasLimit,

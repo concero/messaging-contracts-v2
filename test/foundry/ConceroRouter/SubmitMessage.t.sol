@@ -157,7 +157,9 @@ contract SubmitMessage is ConceroRouterTest {
             messageId,
             messageReceipt,
             validations,
-            validationChecks
+            validatorLibs,
+            validationChecks,
+            s_relayerLib
         );
 
         vm.prank(s_relayer);
@@ -170,7 +172,7 @@ contract SubmitMessage is ConceroRouterTest {
         validations[0] = abi.encode(true);
 
         address[] memory validatorLibs = new address[](1);
-        validatorLibs[0] = s_relayerLib;
+        validatorLibs[0] = s_validatorLib;
 
         vm.expectEmit(true, false, false, false);
         emit IConceroRouter.ConceroMessageDelivered(messageId);
@@ -229,21 +231,21 @@ contract SubmitMessage is ConceroRouterTest {
         bool[] memory expectedValidationChecks = new bool[](1);
         expectedValidationChecks[0] = false;
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
             messageReceipt,
             validations,
-            expectedValidationChecks
+            validatorLibs,
+            expectedValidationChecks,
+            s_relayerLib
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(
-            messageReceipt,
-            validations,
-            new address[](0),
-            s_relayerLib
-        );
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_validationChecks_ValidatorReturnsZero() public {
@@ -258,21 +260,21 @@ contract SubmitMessage is ConceroRouterTest {
         bool[] memory expectedValidationChecks = new bool[](1);
         expectedValidationChecks[0] = false;
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
             messageReceipt,
             validations,
-            expectedValidationChecks
+            validatorLibs,
+            expectedValidationChecks,
+            s_relayerLib
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(
-            messageReceipt,
-            validations,
-            new address[](0),
-            s_relayerLib
-        );
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_validationChecks_ValidatorReverts() public {
@@ -292,7 +294,9 @@ contract SubmitMessage is ConceroRouterTest {
             messageId,
             messageReceipt,
             validations,
-            expectedValidationChecks
+            new address[](1),
+            expectedValidationChecks,
+            s_relayerLib
         );
 
         vm.prank(s_relayer);
@@ -321,14 +325,16 @@ contract SubmitMessage is ConceroRouterTest {
             messageId,
             messageReceipt,
             validations,
-            expectedValidationChecks
+            new address[](1),
+            expectedValidationChecks,
+            s_relayerLib
         );
 
         vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(
             messageReceipt,
             validations,
-            new address[](0),
+            new address[](1),
             s_relayerLib
         );
     }

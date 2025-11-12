@@ -46,21 +46,21 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         _validateMessageParams(messageRequest);
         Fee memory fee = _collectMessageFee(messageRequest);
 
-        bytes memory packedMessage = messageRequest.toMessageReceiptBytes(
+        bytes memory packedMessageReceipt = messageRequest.toMessageReceiptBytes(
             i_chainSelector,
             msg.sender,
             ++s.router().nonce[msg.sender][i_chainSelector][messageRequest.dstChainSelector]
         );
 
-        bytes32 messageId = keccak256(packedMessage);
+        bytes32 messageId = keccak256(packedMessageReceipt);
 
-        emit ConceroMessageSent(messageId, packedMessage);
-        emit ConceroOperators(
+        emit ConceroMessageSent(
             messageId,
-            messageRequest.relayerLib,
+            packedMessageReceipt,
             messageRequest.validatorLibs,
-            fee
+            messageRequest.relayerLib
         );
+        emit ConceroMessageFeePaid(messageId, fee);
 
         return messageId;
     }
@@ -217,10 +217,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         s.router().maxMessageSize = maxSize;
     }
 
-    function setTokenPriceFeed(address token, address priceFeed) external onlyOwner {
-        s.router().priceFeeds[token] = priceFeed;
-    }
-
     /* VIEW FUNCTIONS */
 
     /* @inheritdoc IConceroRouter */
@@ -256,10 +252,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
     function getMaxValidatorsCount() public view returns (uint256) {
         return s.router().maxValidatorsCount;
-    }
-
-    function getConceroPriceFeed(address feeToken) public view returns (address) {
-        return s.router().priceFeeds[feeToken];
     }
 
     /* INTERNAL FUNCTIONS */
@@ -373,7 +365,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         uint256 totalFee = totalRelayerFee + conceroFee;
 
         // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
-        require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
+        require(msg.value >= totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
 
         s_router.relayerFeeEarned[relayerLib][feeToken] += totalRelayerFee;
         s_router.totalRelayerFeeEarned[feeToken] += totalRelayerFee;
@@ -381,7 +373,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         return
             Fee({
                 concero: conceroFee,
-                s_relayer: relayerFee,
+                relayer: relayerFee,
                 validatorsFee: validatorsFee,
                 token: feeToken
             });

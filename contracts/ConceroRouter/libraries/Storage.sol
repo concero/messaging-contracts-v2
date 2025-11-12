@@ -24,8 +24,6 @@ library Storage {
         mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryAllowed;
         mapping(address feeToken => uint256 totalFeeEarned) totalRelayerFeeEarned;
         mapping(address relayerLib => mapping(address feeToken => uint256 feeEarned)) relayerFeeEarned;
-        // TODO: remove it
-        mapping(address feeToken => address priceFeed) priceFeeds;
     }
 
     /* SLOT-BASED STORAGE ACCESS */

@@ -43,7 +43,7 @@ abstract contract ConceroRouterTest is ConceroTest {
         s_conceroRouter.setConceroMessageFeeInUsd(CONCERO_MESSAGE_FEE_IN_USD);
         s_conceroRouter.setMaxMessageSize(MAX_CONCERO_MESSAGE_SIZE);
         s_conceroRouter.setMaxValidatorsCount(MAX_CONCERO_VALIDATORS_COUNT);
-        s_conceroRouter.setTokenPriceFeed(address(0), address(s_conceroPriceFeed));
+        //        s_conceroRouter.setTokenPriceFeed(address(0), address(s_conceroPriceFeed));
         vm.stopPrank();
 
         s_conceroClient = new ConceroTestClient(payable(s_dstConceroRouter));

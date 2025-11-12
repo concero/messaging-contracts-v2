@@ -192,7 +192,12 @@ contract SendMessage is ConceroRouterTest {
         bytes32 expectedMessageId = keccak256(packedMessage);
 
         vm.expectEmit(true, false, false, true);
-        emit IConceroRouter.ConceroMessageSent(expectedMessageId, packedMessage);
+        emit IConceroRouter.ConceroMessageSent(
+            expectedMessageId,
+            packedMessage,
+            messageRequest.validatorLibs,
+            s_relayerLib
+        );
 
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
     }

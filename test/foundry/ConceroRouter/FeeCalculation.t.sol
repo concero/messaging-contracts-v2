@@ -85,7 +85,7 @@ contract FeeCalculation is ConceroRouterTest {
 
         IConceroRouter.Fee memory fee = IConceroRouter.Fee({
             concero: conceroFee,
-            s_relayer: relayerFee,
+            relayer: relayerFee,
             validatorsFee: validatorsFee,
             token: address(0)
         });

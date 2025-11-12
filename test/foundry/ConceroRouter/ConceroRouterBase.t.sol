@@ -49,11 +49,11 @@ contract ConceroRouterBase is ConceroRouterTest {
 
     /* setTokenPriceFeed */
 
-    function test_setTokenPriceFeed_RevertsIfNotOwner() public {
-        vm.expectRevert();
-        vm.prank(s_user);
-        s_conceroRouter.setTokenPriceFeed(address(0), makeAddr("newPriceFeed"));
-    }
+    //    function test_setTokenPriceFeed_RevertsIfNotOwner() public {
+    //        vm.expectRevert();
+    //        vm.prank(s_user);
+    //        s_conceroRouter.setTokenPriceFeed(address(0), makeAddr("newPriceFeed"));
+    //    }
 
     /* getMaxPayloadSize */
 

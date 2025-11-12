@@ -18,10 +18,6 @@ import {ConceroTestClient} from "../ConceroTestClient/ConceroTestClient.sol";
 import {MockConceroValidatorLib} from "../mocks/MockConceroValidatorLib.sol";
 
 contract SubmitMessage is ConceroRouterTest {
-    function setUp() public override {
-        super.setUp();
-    }
-
     function test_submitMessage_gas() public {
         vm.pauseGasMetering();
 
@@ -60,7 +56,7 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IRelayer.InvalidDstChainSelector.selector,
-                MessageCodec.dstChainSelector(messageReceipt),
+                this.decodeDstChainSelector(messageReceipt),
                 SRC_CHAIN_SELECTOR
             )
         );
@@ -337,5 +333,9 @@ contract SubmitMessage is ConceroRouterTest {
             new address[](1),
             s_relayerLib
         );
+    }
+
+    function decodeDstChainSelector(bytes calldata messageReceipt) external pure returns (uint24) {
+        return MessageCodec.dstChainSelector(messageReceipt);
     }
 }

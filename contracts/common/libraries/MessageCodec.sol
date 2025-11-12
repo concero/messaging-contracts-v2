@@ -6,13 +6,11 @@
  */
 pragma solidity ^0.8.20;
 
-import {Bytes} from "@openzeppelin/contracts/utils/Bytes.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 import {IRelayer} from "../../interfaces/IRelayer.sol";
 import {BytesUtils} from "./BytesUtils.sol";
 
 library MessageCodec {
-    using Bytes for bytes;
     using BytesUtils for bytes;
 
     error InvalidLength();
@@ -89,53 +87,66 @@ library MessageCodec {
 
     // READ FUNCTIONS //
 
-    function version(bytes memory data) internal pure returns (uint8) {
-        return data.readUint8(0);
+    function version(bytes calldata data) internal pure returns (uint8) {
+        return uint8(bytes1(data[0:SRC_CHAIN_SELECTOR_OFFSET]));
     }
 
-    function srcChainSelector(bytes memory data) internal pure returns (uint24) {
-        return data.readUint24(SRC_CHAIN_SELECTOR_OFFSET);
+    function srcChainSelector(bytes calldata data) internal pure returns (uint24) {
+        return uint24(bytes3(data[SRC_CHAIN_SELECTOR_OFFSET:DST_CHAIN_SELECTOR_OFFSET]));
     }
 
-    function dstChainSelector(bytes memory data) internal pure returns (uint24) {
-        return data.readUint24(DST_CHAIN_SELECTOR_OFFSET);
+    function dstChainSelector(bytes calldata data) internal pure returns (uint24) {
+        return uint24(bytes3(data[DST_CHAIN_SELECTOR_OFFSET:NONCE_OFFSET]));
     }
 
-    function nonce(bytes memory data) internal pure returns (uint256) {
-        return data.readUint256(NONCE_OFFSET);
+    function nonce(bytes calldata data) internal pure returns (uint256) {
+        return uint256(bytes32(data[NONCE_OFFSET:SRC_CHAIN_DATA_OFFSET]));
     }
 
-    function evmSrcChainData(bytes memory data) internal pure returns (address, uint64) {
+    function evmSrcChainData(bytes calldata data) internal pure returns (address, uint64) {
         uint256 srcChainDataOffset = SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE;
+        uint256 start = srcChainDataOffset + ADDRESS_BYTES_LENGTH;
+
         return (
-            data.readAddress(srcChainDataOffset),
-            data.readUint64(srcChainDataOffset + ADDRESS_BYTES_LENGTH)
+            address(bytes20(data[srcChainDataOffset:start])),
+            uint64(
+                bytes8(data[start:srcChainDataOffset + ADDRESS_BYTES_LENGTH + UINT64_BYTES_LENGTH])
+            )
         );
     }
 
-    function evmDstChainData(bytes memory data) internal pure returns (address, uint32) {
+    function evmDstChainData(bytes calldata data) internal pure returns (address, uint32) {
         uint256 dstChainDataOffset = getDstChainDataOffset(data) + LENGTH_BYTES_SIZE;
+        uint256 addressEnd = dstChainDataOffset + ADDRESS_BYTES_LENGTH;
 
         return (
-            data.readAddress(dstChainDataOffset),
-            data.readUint32(dstChainDataOffset + ADDRESS_BYTES_LENGTH)
+            address(bytes20(data[dstChainDataOffset:addressEnd])),
+            uint32(bytes4(data[addressEnd:addressEnd + UINT32_BYTES_LENGTH]))
         );
     }
 
-    function relayerConfig(bytes memory data) internal pure returns (bytes memory) {
+    function relayerConfig(bytes calldata data) internal pure returns (bytes memory) {
         uint256 relayerConfigLengthOffset = getRelayerConfigOffset(data);
         uint256 start = relayerConfigLengthOffset + LENGTH_BYTES_SIZE;
-        return data.slice(start, start + data.readUint24(relayerConfigLengthOffset));
+        return
+            data[start:start +
+                uint24(
+                    bytes3(
+                        data[relayerConfigLengthOffset:relayerConfigLengthOffset +
+                            UINT24_BYTES_LENGTH]
+                    )
+                )];
     }
 
-    function validatorConfigs(bytes memory data) internal pure returns (bytes[] memory) {
+    function validatorConfigs(bytes calldata data) internal pure returns (bytes[] memory) {
         return unflatBytes(data, getValidatorConfigsOffset(data));
     }
 
-    function payload(bytes memory data) internal pure returns (bytes memory) {
+    function payload(bytes calldata data) internal pure returns (bytes memory) {
         uint256 payloadLengthOffset = getPayloadOffset(data);
         uint256 start = payloadLengthOffset + LENGTH_BYTES_SIZE;
-        return data.slice(start, start + data.readUint24(payloadLengthOffset));
+
+        return data[start:start + uint24(bytes3(data[payloadLengthOffset:start]))];
     }
 
     // OFFSETS CALCULATION
@@ -184,14 +195,17 @@ library MessageCodec {
         return offset;
     }
 
-    function unflatBytes(bytes memory data, uint256 start) internal pure returns (bytes[] memory) {
+    function unflatBytes(
+        bytes calldata data,
+        uint256 start
+    ) internal pure returns (bytes[] memory) {
         bytes[] memory res = new bytes[](data.readUint24(start));
 
         uint256 offset = start + LENGTH_BYTES_SIZE;
         for (uint256 i; i < res.length; ++i) {
             uint256 length = data.readUint24(offset);
             offset += LENGTH_BYTES_SIZE;
-            res[i] = data.slice(offset, offset + length);
+            res[i] = data[offset:offset + length];
             offset += length;
         }
 

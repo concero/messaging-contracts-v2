@@ -15,10 +15,6 @@ import {ConceroTestClient} from "../ConceroTestClient/ConceroTestClient.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
 
 contract RetryMessageSubmission is ConceroRouterTest {
-    function setUp() public override {
-        super.setUp();
-    }
-
     function test_retryMessageSubmission_Success() public {
         (bytes32 messageId, bytes memory messageReceipt) = _conceroSend();
 
@@ -28,7 +24,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = s_validatorLib;
 
-        (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
+        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
 
         s_conceroClient.setRevertFlag(true);
 
@@ -68,7 +64,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
         vm.prank(s_relayerLib);
         s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
-        (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
+        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -96,7 +92,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = s_validatorLib;
 
-        (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
+        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
         bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
 
         vm.expectRevert(
@@ -134,7 +130,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
         vm.prank(s_relayerLib);
         s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
-        (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
+        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
 
         // First retry
         vm.expectEmit(true, false, false, true);
@@ -196,7 +192,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = s_validatorLib;
 
-        (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
+        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
 
         s_conceroClient.setRevertFlag(true);
         vm.prank(s_relayerLib);
@@ -215,5 +211,13 @@ contract RetryMessageSubmission is ConceroRouterTest {
             s_relayerLib,
             gasLimit
         );
+    }
+
+    // HELPERS
+
+    function decodeEvmDstChainData(
+        bytes calldata messageReceipt
+    ) external pure returns (address, uint32) {
+        return MessageCodec.evmDstChainData(messageReceipt);
     }
 }

@@ -16,6 +16,8 @@ interface IConceroClient {
 
     function conceroReceive(
         bytes calldata messageReceipt,
-        bool[] calldata validationChecks
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs,
+        address relayerLib
     ) external;
 }

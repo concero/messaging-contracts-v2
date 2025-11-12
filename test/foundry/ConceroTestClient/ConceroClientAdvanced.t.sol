@@ -17,15 +17,11 @@ contract ConceroClientAdvancedTest is ConceroClientTest {
     function test_conceroReceive_Success() public {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 
-        bytes[] memory dstValidatorLibs = new bytes[](2);
-        dstValidatorLibs[0] = IValidatorLib(s_validatorLib).getDstLib(DST_CHAIN_SELECTOR);
-        dstValidatorLibs[1] = abi.encodePacked(makeAddr("dstValidatorLib2"));
+        address[] memory dstValidatorLibs = new address[](2);
+        dstValidatorLibs[0] = s_validatorLib;
+        dstValidatorLibs[1] = makeAddr("dstValidatorLib2");
 
-        bytes memory messageReceipt = _buildMessageReceipt(
-            messageRequest,
-            IRelayerLib(s_relayerLib).getDstLib(DST_CHAIN_SELECTOR),
-            dstValidatorLibs
-        );
+        bytes memory messageReceipt = _buildMessageReceipt(messageRequest);
 
         bool[] memory validationChecks = new bool[](2);
         validationChecks[0] = true;
@@ -36,21 +32,22 @@ contract ConceroClientAdvancedTest is ConceroClientTest {
         s_conceroClientAdvanced.setRequiredWeight(2);
 
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClientAdvanced.conceroReceive(messageReceipt, validationChecks);
+        s_conceroClientAdvanced.conceroReceive(
+            messageReceipt,
+            validationChecks,
+            dstValidatorLibs,
+            s_relayerLib
+        );
     }
 
     function test_TwoSameValidators_RevertsValidatorsConsensusNotReached() public {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 
-        bytes[] memory dstValidatorLibs = new bytes[](2);
-        dstValidatorLibs[0] = IValidatorLib(s_validatorLib).getDstLib(DST_CHAIN_SELECTOR);
-        dstValidatorLibs[1] = IValidatorLib(s_validatorLib).getDstLib(DST_CHAIN_SELECTOR);
+        address[] memory dstValidatorLibs = new address[](2);
+        dstValidatorLibs[0] = s_validatorLib;
+        dstValidatorLibs[1] = s_validatorLib;
 
-        bytes memory messageReceipt = _buildMessageReceipt(
-            messageRequest,
-            IRelayerLib(s_relayerLib).getDstLib(DST_CHAIN_SELECTOR),
-            dstValidatorLibs
-        );
+        bytes memory messageReceipt = _buildMessageReceipt(messageRequest);
 
         bool[] memory validationChecks = new bool[](2);
         validationChecks[0] = true;
@@ -61,21 +58,22 @@ contract ConceroClientAdvancedTest is ConceroClientTest {
         );
 
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClientAdvanced.conceroReceive(messageReceipt, validationChecks);
+        s_conceroClientAdvanced.conceroReceive(
+            messageReceipt,
+            validationChecks,
+            dstValidatorLibs,
+            s_relayerLib
+        );
     }
 
     function test_NotEnoughWeight_RevertsValidatorsConsensusNotReached() public {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 
-        bytes[] memory dstValidatorLibs = new bytes[](2);
-        dstValidatorLibs[0] = IValidatorLib(s_validatorLib).getDstLib(DST_CHAIN_SELECTOR);
-        dstValidatorLibs[1] = abi.encodePacked(makeAddr("dstValidatorLib2"));
+        address[] memory dstValidatorLibs = new address[](2);
+        dstValidatorLibs[0] = s_validatorLib;
+        dstValidatorLibs[1] = makeAddr("dstValidatorLib2");
 
-        bytes memory messageReceipt = _buildMessageReceipt(
-            messageRequest,
-            IRelayerLib(s_relayerLib).getDstLib(DST_CHAIN_SELECTOR),
-            dstValidatorLibs
-        );
+        bytes memory messageReceipt = _buildMessageReceipt(messageRequest);
 
         bool[] memory validationChecks = new bool[](2);
         validationChecks[0] = true;
@@ -89,6 +87,11 @@ contract ConceroClientAdvancedTest is ConceroClientTest {
         );
 
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClientAdvanced.conceroReceive(messageReceipt, validationChecks);
+        s_conceroClientAdvanced.conceroReceive(
+            messageReceipt,
+            validationChecks,
+            dstValidatorLibs,
+            s_relayerLib
+        );
     }
 }

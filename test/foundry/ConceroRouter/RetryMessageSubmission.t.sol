@@ -25,12 +25,15 @@ contract RetryMessageSubmission is ConceroRouterTest {
         bytes[] memory validations = new bytes[](1);
         validations[0] = abi.encode(true);
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
 
         s_conceroClient.setRevertFlag(true);
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
@@ -41,7 +44,13 @@ contract RetryMessageSubmission is ConceroRouterTest {
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.retryMessageSubmission(messageReceipt, validationChecks, gasLimit);
+        s_dstConceroRouter.retryMessageSubmission(
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib,
+            gasLimit
+        );
     }
 
     function test_retryMessageSubmission_RevertsIfMessageAlreadyProcessed() public {
@@ -53,8 +62,11 @@ contract RetryMessageSubmission is ConceroRouterTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
         (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
 
@@ -66,7 +78,13 @@ contract RetryMessageSubmission is ConceroRouterTest {
         );
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.retryMessageSubmission(messageReceipt, validationChecks, gasLimit);
+        s_dstConceroRouter.retryMessageSubmission(
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib,
+            gasLimit
+        );
     }
 
     function test_retryMessageSubmission_RevertsIfMessageSubmissionAlreadyProcessed() public {
@@ -74,6 +92,9 @@ contract RetryMessageSubmission is ConceroRouterTest {
 
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
+
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
 
         (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
         bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
@@ -86,7 +107,13 @@ contract RetryMessageSubmission is ConceroRouterTest {
         );
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.retryMessageSubmission(messageReceipt, validationChecks, gasLimit);
+        s_dstConceroRouter.retryMessageSubmission(
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib,
+            gasLimit
+        );
     }
 
     function test_retryMessageSubmission_SequenceOfRetries() public {
@@ -98,11 +125,14 @@ contract RetryMessageSubmission is ConceroRouterTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         // Set revert flag
         s_conceroClient.setRevertFlag(true);
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
         (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
 
@@ -114,7 +144,13 @@ contract RetryMessageSubmission is ConceroRouterTest {
         );
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.retryMessageSubmission(messageReceipt, validationChecks, gasLimit);
+        s_dstConceroRouter.retryMessageSubmission(
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib,
+            gasLimit
+        );
 
         // Second retry
         vm.expectEmit(true, false, false, true);
@@ -124,7 +160,13 @@ contract RetryMessageSubmission is ConceroRouterTest {
         );
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.retryMessageSubmission(messageReceipt, validationChecks, gasLimit);
+        s_dstConceroRouter.retryMessageSubmission(
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib,
+            gasLimit
+        );
 
         s_conceroClient.setRevertFlag(false);
 
@@ -133,31 +175,45 @@ contract RetryMessageSubmission is ConceroRouterTest {
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.retryMessageSubmission(messageReceipt, validationChecks, gasLimit);
+        s_dstConceroRouter.retryMessageSubmission(
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib,
+            gasLimit
+        );
     }
-
 
     function test_retryMessageSubmission_EmitsConceroMessageDelivered() public {
         (bytes32 messageId, bytes memory messageReceipt) = _conceroSend();
 
-		bytes[] memory validations = new bytes[](1);
-		validations[0] = abi.encode(true);
+        bytes[] memory validations = new bytes[](1);
+        validations[0] = abi.encode(true);
 
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         (, uint32 gasLimit) = MessageCodec.evmDstChainData(messageReceipt);
 
-		s_conceroClient.setRevertFlag(true);
-		vm.prank(s_relayerLib);
-		s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_conceroClient.setRevertFlag(true);
+        vm.prank(s_relayerLib);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
-		s_conceroClient.setRevertFlag(false);
+        s_conceroClient.setRevertFlag(false);
 
         vm.expectEmit(true, false, false, false);
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
         vm.prank(s_relayerLib);
-        s_dstConceroRouter.retryMessageSubmission(messageReceipt, validationChecks, gasLimit);
+        s_dstConceroRouter.retryMessageSubmission(
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib,
+            gasLimit
+        );
     }
 }

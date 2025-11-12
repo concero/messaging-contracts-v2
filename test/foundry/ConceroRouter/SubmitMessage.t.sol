@@ -30,8 +30,11 @@ contract SubmitMessage is ConceroRouterTest {
         bytes[] memory validations = new bytes[](1);
         validations[0] = abi.encode(true);
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         vm.resumeGasMetering();
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_Success() public {
@@ -40,11 +43,14 @@ contract SubmitMessage is ConceroRouterTest {
         bytes[] memory validations = new bytes[](1);
         validations[0] = abi.encode(true);
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         vm.expectEmit(true, false, false, false);
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_RevertsIfInvalidDstChainSelector() public {
@@ -60,7 +66,7 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_conceroRouter.submitMessage(messageReceipt, validations);
+        s_conceroRouter.submitMessage(messageReceipt, validations, new address[](0), s_relayerLib);
     }
 
     function test_submitMessage_RevertsIfInvalidValidationsCount() public {
@@ -76,7 +82,12 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(
+            messageReceipt,
+            validations,
+            new address[](1),
+            s_relayerLib
+        );
     }
 
     function test_submitMessage_RevertsIfMessageAlreadyProcessed() public {
@@ -84,8 +95,11 @@ contract SubmitMessage is ConceroRouterTest {
         bytes[] memory validations = new bytes[](1);
         validations[0] = abi.encode(true);
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -95,7 +109,7 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_RevertsIfMessageSubmissionAlreadyProcessed() public {
@@ -103,6 +117,9 @@ contract SubmitMessage is ConceroRouterTest {
 
         bytes[] memory validations = new bytes[](1);
         validations[0] = abi.encode(true);
+
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
 
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
@@ -112,7 +129,7 @@ contract SubmitMessage is ConceroRouterTest {
         s_conceroClient.setRevertFlag(true);
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -122,7 +139,7 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_EmitsConceroMessageReceived() public {
@@ -131,6 +148,9 @@ contract SubmitMessage is ConceroRouterTest {
         validations[0] = abi.encode(true);
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
+
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
 
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
@@ -141,7 +161,7 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_EmitsConceroMessageDelivered() public {
@@ -149,11 +169,14 @@ contract SubmitMessage is ConceroRouterTest {
         bytes[] memory validations = new bytes[](1);
         validations[0] = abi.encode(true);
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_relayerLib;
+
         vm.expectEmit(true, false, false, false);
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_EmitsConceroMessageDeliveryFailed() public {
@@ -165,6 +188,9 @@ contract SubmitMessage is ConceroRouterTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         s_conceroClient.setRevertFlag(true);
 
         vm.expectEmit(true, false, false, true);
@@ -174,13 +200,16 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_RevertsIfRelayerNotAllowed() public {
         (, bytes memory messageReceipt) = _conceroSend();
         bytes[] memory validations = new bytes[](1);
         validations[0] = abi.encode(true);
+
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
 
         s_conceroClient.setIsRelayerAllowed(s_relayerLib, false);
 
@@ -189,7 +218,7 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_validationChecks_EmptyValidation() public {
@@ -209,7 +238,12 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(
+            messageReceipt,
+            validations,
+            new address[](0),
+            s_relayerLib
+        );
     }
 
     function test_submitMessage_validationChecks_ValidatorReturnsZero() public {
@@ -233,7 +267,12 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(
+            messageReceipt,
+            validations,
+            new address[](0),
+            s_relayerLib
+        );
     }
 
     function test_submitMessage_validationChecks_ValidatorReverts() public {
@@ -257,7 +296,12 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(
+            messageReceipt,
+            validations,
+            new address[](1),
+            s_relayerLib
+        );
     }
 
     function test_submitMessage_validationChecks_ValidatorInvalidReturnLength() public {
@@ -281,6 +325,11 @@ contract SubmitMessage is ConceroRouterTest {
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations);
+        s_dstConceroRouter.submitMessage(
+            messageReceipt,
+            validations,
+            new address[](0),
+            s_relayerLib
+        );
     }
 }

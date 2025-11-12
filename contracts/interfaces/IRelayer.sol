@@ -18,5 +18,10 @@ interface IRelayer {
     /**
      * @notice Submits a message report, verifies the signatures, and processes the report data.
      */
-    function submitMessage(bytes calldata messageReceipt, bytes[] calldata validations) external;
+    function submitMessage(
+        bytes calldata messageReceipt,
+        bytes[] calldata validations,
+        address[] calldata validatorLibs,
+        address relayerLib
+    ) external;
 }

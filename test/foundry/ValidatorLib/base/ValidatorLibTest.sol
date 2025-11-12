@@ -121,8 +121,6 @@ abstract contract ValidatorLibTest is ConceroTest {
                 validatorLibs: new address[](0),
                 validatorConfigs: new bytes[](0),
                 relayerConfig: new bytes(0),
-                validationRpcs: new bytes[](0),
-                deliveryRpcs: new bytes[](0),
                 dstChainData: abi.encode(dstChainData),
                 payload: payload
             });

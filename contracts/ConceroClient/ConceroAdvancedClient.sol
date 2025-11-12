@@ -15,15 +15,15 @@ abstract contract ConceroAdvancedClient is ConceroClientBase {
     using s for s.AdvancedClient;
     using MessageCodec for bytes;
 
-    function _validateMessageReceipt(
-        bytes calldata messageReceipt,
-        bool[] calldata validationChecks
+    function _validateMessageSubmission(
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs
     ) internal view virtual override {
-        _ensureValidationsWeight(messageReceipt.evmDstValidatorLibs(), validationChecks);
+        _ensureValidationsWeight(validatorLibs, validationChecks);
     }
 
     function _ensureValidationsWeight(
-        address[] memory dstValidatorLibs,
+        address[] calldata dstValidatorLibs,
         bool[] calldata validationChecks
     ) internal view virtual {
         s.AdvancedClient storage s_advancedClient = s.advancedClient();

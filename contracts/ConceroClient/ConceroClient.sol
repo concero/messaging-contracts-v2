@@ -17,11 +17,11 @@ abstract contract ConceroClient is ConceroClientBase {
 
     constructor(address conceroRouter) ConceroClientBase(conceroRouter) {}
 
-    function _validateMessageReceipt(
-        bytes calldata messageReceipt,
-        bool[] calldata validationChecks
+    function _validateMessageSubmission(
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs
     ) internal view virtual override {
-        _ensureValidations(messageReceipt.evmDstValidatorLibs(), validationChecks);
+        _ensureValidations(validatorLibs, validationChecks);
     }
 
     function _ensureValidations(

@@ -15,8 +15,6 @@ interface IConceroRouter {
         address[] validatorLibs;
         bytes[] validatorConfigs;
         bytes relayerConfig;
-        bytes[] validationRpcs;
-        bytes[] deliveryRpcs;
         bytes dstChainData;
         bytes payload;
     }
@@ -68,12 +66,19 @@ interface IConceroRouter {
     error InvalidGasLimit();
 
     event ConceroMessageSent(bytes32 indexed messageId, bytes messageReceipt);
-    event ConceroMessageFeePaid(bytes32 indexed messageId, Fee fee);
+    event ConceroOperators(
+        bytes32 indexed messageId,
+        address relayer,
+        address[] validators,
+        Fee fee
+    );
     event ConceroMessageReceived(
         bytes32 indexed messageId,
         bytes messageReceipt,
         bytes[] validations,
-        bool[] validationChecks
+        address[] validatorLibs,
+        bool[] validationChecks,
+        address relayerLib
     );
     event ConceroMessageDelivered(bytes32 indexed messageId);
     event ConceroMessageDeliveryFailed(bytes32 indexed messageId, bytes error);

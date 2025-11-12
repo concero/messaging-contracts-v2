@@ -36,9 +36,7 @@ library MessageCodec {
         IConceroRouter.MessageRequest memory messageRequest,
         uint24 _srcChainSelector,
         address msgSender,
-        uint256 _nonce,
-        bytes memory dstRelayerLib,
-        bytes[] memory dstValidatorLibs
+        uint256 _nonce
     ) internal pure returns (bytes memory) {
         // TODO: validate all lengths
 
@@ -51,19 +49,14 @@ library MessageCodec {
                     _nonce,
                     // src chain data
                     uint24(EVM_SRC_CHAIN_DATA_LENGTH),
-                    abi.encodePacked(msgSender, messageRequest.srcBlockConfirmations),
-                    uint24(messageRequest.dstChainData.length),
-                    messageRequest.dstChainData,
-                    uint24(dstRelayerLib.length),
-                    dstRelayerLib
+                    abi.encodePacked(msgSender, messageRequest.srcBlockConfirmations)
                 ),
                 abi.encodePacked(
+                    uint24(messageRequest.dstChainData.length),
+                    messageRequest.dstChainData,
                     uint24(messageRequest.relayerConfig.length),
                     messageRequest.relayerConfig,
-                    flatBytes(dstValidatorLibs),
                     flatBytes(messageRequest.validatorConfigs),
-                    flatBytes(messageRequest.validationRpcs),
-                    flatBytes(messageRequest.deliveryRpcs),
                     uint24(messageRequest.payload.length),
                     messageRequest.payload
                 )
@@ -127,41 +120,14 @@ library MessageCodec {
         );
     }
 
-    function emvDstRelayerLib(bytes memory data) internal pure returns (address) {
-        return data.readAddress(getDstRelayerLibOffset(data) + LENGTH_BYTES_SIZE);
-    }
-
     function relayerConfig(bytes memory data) internal pure returns (bytes memory) {
         uint256 relayerConfigLengthOffset = getRelayerConfigOffset(data);
         uint256 start = relayerConfigLengthOffset + LENGTH_BYTES_SIZE;
         return data.slice(start, start + data.readUint24(relayerConfigLengthOffset));
     }
 
-    function evmDstValidatorLibs(bytes memory data) internal pure returns (address[] memory) {
-        uint256 dstValidatorLibsOffset = getDstValidatorLibsOffset(data);
-        address[] memory res = new address[](data.readUint24(dstValidatorLibsOffset));
-
-        uint256 offset = dstValidatorLibsOffset + LENGTH_BYTES_SIZE;
-        for (uint256 i; i < res.length; ++i) {
-            uint256 length = data.readUint24(offset);
-            offset += LENGTH_BYTES_SIZE;
-            res[i] = data.readAddress(offset);
-            offset += length;
-        }
-
-        return res;
-    }
-
     function validatorConfigs(bytes memory data) internal pure returns (bytes[] memory) {
         return unflatBytes(data, getValidatorConfigsOffset(data));
-    }
-
-    function validationRpcs(bytes memory data) internal pure returns (bytes[] memory) {
-        return unflatBytes(data, getValidationRpcsOffset(data));
-    }
-
-    function deliveryRpcs(bytes memory data) internal pure returns (bytes[] memory) {
-        return unflatBytes(data, getDeliveryRpcsOffset(data));
     }
 
     function payload(bytes memory data) internal pure returns (bytes memory) {
@@ -176,38 +142,21 @@ library MessageCodec {
         return SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE + data.readUint24(SRC_CHAIN_DATA_OFFSET);
     }
 
-    function getDstRelayerLibOffset(bytes memory data) internal pure returns (uint256) {
-        uint256 dstChainDataOffset = getDstChainDataOffset(data);
-        return dstChainDataOffset + data.readUint24(dstChainDataOffset) + LENGTH_BYTES_SIZE;
-    }
-
     function getRelayerConfigOffset(bytes memory data) internal pure returns (uint256) {
-        uint256 dstRelayerLibOffset = getDstRelayerLibOffset(data);
+        uint256 dstRelayerLibOffset = getDstChainDataOffset(data);
         return dstRelayerLibOffset + data.readUint24(dstRelayerLibOffset) + LENGTH_BYTES_SIZE;
     }
 
-    function getDstValidatorLibsOffset(bytes memory data) internal pure returns (uint256) {
+    function getValidatorConfigsOffset(bytes memory data) internal pure returns (uint256) {
         uint256 relayerConfigOffset = getRelayerConfigOffset(data);
         return relayerConfigOffset + data.readUint24(relayerConfigOffset) + LENGTH_BYTES_SIZE;
     }
 
-    function getValidatorConfigsOffset(bytes memory data) internal pure returns (uint256) {
-        return calculateNestedArrOffset(data, getDstValidatorLibsOffset(data));
-    }
-
-    function getValidationRpcsOffset(bytes memory data) internal pure returns (uint256) {
+    function getPayloadOffset(bytes memory data) internal pure returns (uint256) {
         return calculateNestedArrOffset(data, getValidatorConfigsOffset(data));
     }
 
-    function getDeliveryRpcsOffset(bytes memory data) internal pure returns (uint256) {
-        return calculateNestedArrOffset(data, getValidationRpcsOffset(data));
-    }
-
-    function getPayloadOffset(bytes memory data) internal pure returns (uint256) {
-        return calculateNestedArrOffset(data, getDeliveryRpcsOffset(data));
-    }
-
-    // GENERIC FUNCTIONS //
+    // GENERIC FUNCTIONS
 
     function flatBytes(bytes[] memory data) internal pure returns (bytes memory) {
         bytes memory res = abi.encodePacked(uint24(data.length));

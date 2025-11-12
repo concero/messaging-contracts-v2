@@ -91,7 +91,7 @@ contract SendMessage is ConceroRouterTest {
         address[] memory validatorLibs = new address[](s_conceroRouter.getMaxValidatorsCount() + 1);
 
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(validatorLibs);
-		messageRequest.validatorConfigs = new bytes[](s_conceroRouter.getMaxValidatorsCount() + 1);
+        messageRequest.validatorConfigs = new bytes[](s_conceroRouter.getMaxValidatorsCount() + 1);
 
         bytes memory error = abi.encodeWithSelector(
             IConceroRouter.InvalidValidatorsCount.selector,
@@ -108,7 +108,7 @@ contract SendMessage is ConceroRouterTest {
         validatorLibs = new address[](0);
 
         messageRequest = _buildMessageRequest(validatorLibs);
-		messageRequest.validatorConfigs = new bytes[](0);
+        messageRequest.validatorConfigs = new bytes[](0);
 
         error = abi.encodeWithSelector(
             IConceroRouter.InvalidValidatorsCount.selector,
@@ -123,25 +123,25 @@ contract SendMessage is ConceroRouterTest {
         s_conceroRouter.conceroSend(messageRequest);
     }
 
-	function test_conceroSend_RevertsIfInvalidValidatorConfigsCount() public {
-		address[] memory validatorLibs = new address[](1);
-		validatorLibs[0] = s_validatorLib;
+    function test_conceroSend_RevertsIfInvalidValidatorConfigsCount() public {
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
 
-		IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(validatorLibs);
-		messageRequest.validatorConfigs = new bytes[](2);
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(validatorLibs);
+        messageRequest.validatorConfigs = new bytes[](2);
 
-		bytes memory error = abi.encodeWithSelector(
-			IConceroRouter.InvalidValidatorConfigsCount.selector,
-			messageRequest.validatorConfigs.length,
-			validatorLibs.length
-		);
+        bytes memory error = abi.encodeWithSelector(
+            IConceroRouter.InvalidValidatorConfigsCount.selector,
+            messageRequest.validatorConfigs.length,
+            validatorLibs.length
+        );
 
-		vm.expectRevert(error);
-		s_conceroRouter.getMessageFee(messageRequest);
+        vm.expectRevert(error);
+        s_conceroRouter.getMessageFee(messageRequest);
 
-		vm.expectRevert(error);
-		s_conceroRouter.conceroSend(messageRequest);
-	}
+        vm.expectRevert(error);
+        s_conceroRouter.conceroSend(messageRequest);
+    }
 
     function test_conceroSend_messageIdIsCorrect() public {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
@@ -161,9 +161,7 @@ contract SendMessage is ConceroRouterTest {
             messageRequest,
             SRC_CHAIN_SELECTOR,
             address(this),
-            nonce,
-            IRelayerLib(messageRequest.relayerLib).getDstLib(messageRequest.dstChainSelector),
-            dstValidatorLibs
+            nonce
         );
 
         bytes32 expectedMessageId = keccak256(packedMessage);
@@ -188,9 +186,7 @@ contract SendMessage is ConceroRouterTest {
             messageRequest,
             SRC_CHAIN_SELECTOR,
             address(this),
-            nonce,
-            IRelayerLib(messageRequest.relayerLib).getDstLib(messageRequest.dstChainSelector),
-            dstValidatorLibs
+            nonce
         );
 
         bytes32 expectedMessageId = keccak256(packedMessage);

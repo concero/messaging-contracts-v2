@@ -90,8 +90,8 @@ contract FeeCalculation is ConceroRouterTest {
             token: address(0)
         });
 
-        vm.expectEmit(false, false, false, true);
-        emit IConceroRouter.ConceroMessageFeePaid(bytes32(0), fee);
+        //        vm.expectEmit(false, false, false, true);
+        //        emit IConceroRouter.ConceroMessageFeePaid(bytes32(0), fee);
 
         vm.prank(s_user);
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);

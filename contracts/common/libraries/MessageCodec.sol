@@ -15,6 +15,8 @@ library MessageCodec {
     using Bytes for bytes;
     using BytesUtils for bytes;
 
+    error InvalidLength();
+
     uint8 internal constant UINT8_BYTES_LENGTH = 1;
     uint8 internal constant UINT24_BYTES_LENGTH = 3;
     uint8 internal constant UINT32_BYTES_LENGTH = 4;
@@ -22,7 +24,7 @@ library MessageCodec {
     uint8 internal constant BYTES32_BYTES_LENGTH = 32;
     uint8 internal constant ADDRESS_BYTES_LENGTH = 20;
     uint8 internal constant LENGTH_BYTES_SIZE = UINT24_BYTES_LENGTH;
-    uint8 internal constant EVM_SRC_CHAIN_DATA_LENGTH = ADDRESS_BYTES_LENGTH + UINT64_BYTES_LENGTH;
+    uint24 internal constant EVM_SRC_CHAIN_DATA_LENGTH = ADDRESS_BYTES_LENGTH + UINT64_BYTES_LENGTH;
     uint8 internal constant VERSION = 1;
 
     uint8 internal constant SRC_CHAIN_SELECTOR_OFFSET = 1;
@@ -48,7 +50,7 @@ library MessageCodec {
                     messageRequest.dstChainSelector, // 4
                     _nonce,
                     // src chain data
-                    uint24(EVM_SRC_CHAIN_DATA_LENGTH),
+                    EVM_SRC_CHAIN_DATA_LENGTH,
                     abi.encodePacked(msgSender, messageRequest.srcBlockConfirmations)
                 ),
                 abi.encodePacked(

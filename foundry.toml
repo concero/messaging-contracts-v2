@@ -12,7 +12,7 @@ libs = ["node_modules", "./src/contracts/"]
 allow_paths = ["node_modules", "./src/contracts/"]
 
 [fuzz]
-runs = 2000
+runs = 10000
 depth = 5000
 
 remappings = [

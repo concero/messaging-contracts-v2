@@ -332,11 +332,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
         require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
 
-        uint256 payloadLength = messageRequest.payload.length;
-        uint64 maxMessageSize = s_router.maxMessageSize;
-        uint16 maxValidatorsCount = s_router.maxValidatorsCount;
-
-        require(payloadLength < maxMessageSize, PayloadTooLarge(payloadLength, maxMessageSize));
+        require(
+            messageRequest.payload.length < s_router.maxMessageSize,
+            PayloadTooLarge(messageRequest.payload.length, s_router.maxMessageSize)
+        );
 
         uint256 validatorConfigsLength = messageRequest.validatorConfigs.length;
         uint256 validatorLibsLength = messageRequest.validatorLibs.length;
@@ -346,8 +345,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             InvalidValidatorConfigsCount(validatorConfigsLength, validatorLibsLength)
         );
         require(
-            validatorLibsLength > 0 && validatorLibsLength < maxValidatorsCount,
-            InvalidValidatorsCount(validatorLibsLength, maxValidatorsCount)
+            validatorLibsLength > 0 && validatorLibsLength < s_router.maxValidatorsCount,
+            InvalidValidatorsCount(validatorLibsLength, s_router.maxValidatorsCount)
         );
     }
 

@@ -8,13 +8,8 @@ pragma solidity ^0.8.20;
 
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 import {IRelayer} from "../../interfaces/IRelayer.sol";
-import {BytesUtils} from "./BytesUtils.sol";
 
 library MessageCodec {
-    using BytesUtils for bytes;
-
-    error InvalidLength();
-
     uint8 internal constant UINT8_BYTES_LENGTH = 1;
     uint8 internal constant UINT24_BYTES_LENGTH = 3;
     uint8 internal constant UINT32_BYTES_LENGTH = 4;
@@ -151,21 +146,30 @@ library MessageCodec {
 
     // OFFSETS CALCULATION
 
-    function getDstChainDataOffset(bytes memory data) internal pure returns (uint256) {
-        return SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE + data.readUint24(SRC_CHAIN_DATA_OFFSET);
+    function getDstChainDataOffset(bytes calldata data) internal pure returns (uint256) {
+        return
+            SRC_CHAIN_DATA_OFFSET +
+            LENGTH_BYTES_SIZE +
+            uint24(bytes3(data[SRC_CHAIN_DATA_OFFSET:SRC_CHAIN_DATA_OFFSET + LENGTH_BYTES_SIZE]));
     }
 
-    function getRelayerConfigOffset(bytes memory data) internal pure returns (uint256) {
+    function getRelayerConfigOffset(bytes calldata data) internal pure returns (uint256) {
         uint256 dstRelayerLibOffset = getDstChainDataOffset(data);
-        return dstRelayerLibOffset + data.readUint24(dstRelayerLibOffset) + LENGTH_BYTES_SIZE;
+        return
+            dstRelayerLibOffset +
+            uint24(bytes3(data[dstRelayerLibOffset:dstRelayerLibOffset + LENGTH_BYTES_SIZE])) +
+            LENGTH_BYTES_SIZE;
     }
 
-    function getValidatorConfigsOffset(bytes memory data) internal pure returns (uint256) {
+    function getValidatorConfigsOffset(bytes calldata data) internal pure returns (uint256) {
         uint256 relayerConfigOffset = getRelayerConfigOffset(data);
-        return relayerConfigOffset + data.readUint24(relayerConfigOffset) + LENGTH_BYTES_SIZE;
+        return
+            relayerConfigOffset +
+            uint24(bytes3(data[relayerConfigOffset:relayerConfigOffset + LENGTH_BYTES_SIZE])) +
+            LENGTH_BYTES_SIZE;
     }
 
-    function getPayloadOffset(bytes memory data) internal pure returns (uint256) {
+    function getPayloadOffset(bytes calldata data) internal pure returns (uint256) {
         return calculateNestedArrOffset(data, getValidatorConfigsOffset(data));
     }
 
@@ -182,14 +186,14 @@ library MessageCodec {
     }
 
     function calculateNestedArrOffset(
-        bytes memory data,
+        bytes calldata data,
         uint256 start
     ) internal pure returns (uint256) {
-        uint256 nestedArrLength = data.readUint24(start);
+        uint256 nestedArrLength = uint24(bytes3(data[start:start + LENGTH_BYTES_SIZE]));
         uint256 offset = start + LENGTH_BYTES_SIZE;
 
         for (uint256 i; i < nestedArrLength; ++i) {
-            offset += LENGTH_BYTES_SIZE + data.readUint24(offset);
+            offset += LENGTH_BYTES_SIZE + uint24(bytes3(data[offset:offset + LENGTH_BYTES_SIZE]));
         }
 
         return offset;
@@ -199,11 +203,11 @@ library MessageCodec {
         bytes calldata data,
         uint256 start
     ) internal pure returns (bytes[] memory) {
-        bytes[] memory res = new bytes[](data.readUint24(start));
+        bytes[] memory res = new bytes[](uint24(bytes3(data[start:start + LENGTH_BYTES_SIZE])));
 
         uint256 offset = start + LENGTH_BYTES_SIZE;
         for (uint256 i; i < res.length; ++i) {
-            uint256 length = data.readUint24(offset);
+            uint256 length = uint24(bytes3(data[offset:offset + LENGTH_BYTES_SIZE]));
             offset += LENGTH_BYTES_SIZE;
             res[i] = data[offset:offset + length];
             offset += length;

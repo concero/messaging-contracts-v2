@@ -7,7 +7,6 @@
 pragma solidity 0.8.28;
 
 import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
-import {PauseDummy} from "contracts/PauseDummy/PauseDummy.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {DeployConceroPriceFeed} from "../deploy/DeployConceroPriceFeed.s.sol";
 import {Script} from "forge-std/src/Script.sol";

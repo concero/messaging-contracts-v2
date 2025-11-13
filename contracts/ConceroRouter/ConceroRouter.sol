@@ -34,6 +34,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
     event ConceroFeeWithdrawn(address indexed token, uint256 amount);
 
+    uint8 internal constant NATIVE_DECIMALS = 18;
+
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed
@@ -236,18 +238,23 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     function isFeeTokenSupported(address feeToken) public view returns (bool) {
-        return feeToken == address(0) || s.router().isFeeTokenSupported[feeToken];
+        return feeToken == address(0) || s.router().feeTokenConfigs[feeToken].isSupported;
     }
 
     function getConceroFee(address feeToken) public view returns (uint256) {
         s.Router storage s_router = s.router();
 
-        // e.g. conceroMessageFeeInUsd = 0.1e6 (0.1 USD)
-        // getUsdRate(feeToken) = 2000e18 (2000 ETH)
-        // $0.1 in ETH = 0.1e6 * 1e12 * 1e18 / 2000e18 = 5e13 ETH
+        if (feeToken == address(0)) {
+            return ((s_router.conceroMessageFeeInUsd * (10 ** NATIVE_DECIMALS)) /
+                i_conceroPriceFeed.getUsdRate(feeToken));
+        }
+
         return
-            (uint256(s_router.conceroMessageFeeInUsd) * 1e12 * 1e18) /
-            i_conceroPriceFeed.getUsdRate(feeToken);
+            (Utils.toDecimals(
+                s_router.conceroMessageFeeInUsd,
+                NATIVE_DECIMALS,
+                s_router.feeTokenConfigs[feeToken].decimals
+            ) * (10 ** NATIVE_DECIMALS)) / i_conceroPriceFeed.getUsdRate(feeToken);
     }
 
     function getMaxPayloadSize() public view returns (uint256) {
@@ -351,46 +358,39 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     ) internal returns (Fee memory) {
         s.Router storage s_router = s.router();
 
-        address feeToken = messageRequest.feeToken;
-        address relayerLib = messageRequest.relayerLib;
-
-        if (feeToken != address(0)) {
-            revert UnsupportedFeeToken();
-        }
-
-        uint256 relayerFee = IRelayerLib(relayerLib).getFee(messageRequest);
+        uint256 relayerFee = IRelayerLib(messageRequest.relayerLib).getFee(messageRequest);
         (uint256[] memory validatorsFee, uint256 totalValidatorsFee) = _getValidatorsFee(
             messageRequest
         );
 
-        uint256 conceroFee = getConceroFee(feeToken);
-
+        uint256 conceroFee = getConceroFee(messageRequest.feeToken);
         uint256 totalRelayerFee = relayerFee + totalValidatorsFee;
         uint256 totalFee = totalRelayerFee + conceroFee;
 
         // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
         require(msg.value >= totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
 
-        s_router.relayerFeeEarned[relayerLib][feeToken] += totalRelayerFee;
-        s_router.totalRelayerFeeEarned[feeToken] += totalRelayerFee;
+        s_router.relayerFeeEarned[messageRequest.relayerLib][
+            messageRequest.feeToken
+        ] += totalRelayerFee;
+        s_router.totalRelayerFeeEarned[messageRequest.feeToken] += totalRelayerFee;
 
         return
             Fee({
                 concero: conceroFee,
                 relayer: relayerFee,
                 validatorsFee: validatorsFee,
-                token: feeToken
+                token: messageRequest.feeToken
             });
     }
 
     function _getValidatorsFee(
         MessageRequest calldata messageRequest
     ) internal view returns (uint256[] memory, uint256) {
-        uint256 validatorLibsLength = messageRequest.validatorLibs.length;
-        uint256[] memory validatorsFee = new uint256[](validatorLibsLength);
+        uint256[] memory validatorsFee = new uint256[](messageRequest.validatorLibs.length);
         uint256 totalValidatorsFee;
 
-        for (uint256 i; i < validatorLibsLength; ++i) {
+        for (uint256 i; i < messageRequest.validatorLibs.length; ++i) {
             validatorsFee[i] = IValidatorLib(messageRequest.validatorLibs[i]).getFee(
                 messageRequest
             );

@@ -82,13 +82,15 @@ contract ConceroPriceFeed is IConceroPriceFeed {
         }
     }
 
-    // TODO: implement it
+    // @dev always returns value with 18 decimals
     function getUsdRate(address token) external view returns (uint256) {
         s.PriceFeed storage priceFeedStorage = s.priceFeed();
 
         if (token == address(0)) {
             return priceFeedStorage.nativeUsdRate;
         }
+
+        revert TokenIsNotSupported(token);
     }
 
     /**

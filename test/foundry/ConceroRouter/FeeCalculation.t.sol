@@ -50,7 +50,7 @@ contract FeeCalculation is ConceroRouterTest {
         address feeToken = address(0);
         uint256 conceroFee = s_conceroRouter.getConceroFee(feeToken);
 
-        uint256 expectedConceroFee = (uint256(CONCERO_MESSAGE_FEE_IN_USD) * 1e12 * 1e18) /
+        uint256 expectedConceroFee = (uint256(CONCERO_MESSAGE_FEE_IN_USD) * 1e18) /
             s_conceroPriceFeed.getUsdRate(feeToken);
 
         assertEq(conceroFee, expectedConceroFee);
@@ -182,14 +182,13 @@ contract FeeCalculation is ConceroRouterTest {
     /* setConceroMessageFeeInUsd */
 
     function test_setConceroMessageFeeInUsd_Success() public {
-        uint96 newFee = 2e6;
+        uint96 newFee = 2e18;
 
         vm.prank(s_deployer);
         s_conceroRouter.setConceroMessageFeeInUsd(newFee);
 
         uint256 conceroFee = s_conceroRouter.getConceroFee(address(0));
-        uint256 expectedFee = (uint256(newFee) * 1e12 * 1e18) /
-            s_conceroPriceFeed.getUsdRate(address(0));
+        uint256 expectedFee = (uint256(newFee) * 1e18) / s_conceroPriceFeed.getUsdRate(address(0));
 
         assertEq(conceroFee, expectedFee);
     }

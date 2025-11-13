@@ -14,12 +14,17 @@ library Storage {
             abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.router.storage"))) - 1)
         ) & ~bytes32(uint256(0xff));
 
+    struct FeeTokenConfig {
+        bool isSupported;
+        uint8 decimals;
+    }
+
     struct Router {
-        uint96 conceroMessageFeeInUsd;
+        uint96 conceroMessageFeeInUsd; // @dev always has NATIVE_DECIMALS decimals
         uint16 maxValidatorsCount;
         uint64 maxMessageSize;
+        mapping(address feeToken => FeeTokenConfig feeTokenConfig) feeTokenConfigs;
         mapping(address sender => mapping(uint24 srcChainSelector => mapping(uint24 dstChainSelector => uint256 nonce))) nonce;
-        mapping(address feeToken => bool isFeeToken) isFeeTokenSupported;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryAllowed;
         mapping(address feeToken => uint256 totalFeeEarned) totalRelayerFeeEarned;

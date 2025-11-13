@@ -29,7 +29,7 @@ abstract contract ConceroTest is Test {
     uint24 public constant DST_CHAIN_SELECTOR = 8453;
     uint256 internal constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
     uint256 internal constant LAST_GAS_PRICE = 1e9;
-    uint96 internal constant CONCERO_MESSAGE_FEE_IN_USD = 0.1e6; // $0.1
+    uint96 internal constant CONCERO_MESSAGE_FEE_IN_USD = 0.1e18; // $0.1
     uint64 internal MAX_CONCERO_MESSAGE_SIZE = 1000000; // 1 mb
     uint8 internal MAX_CONCERO_VALIDATORS_COUNT = 20;
 

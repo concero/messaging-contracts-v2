@@ -179,15 +179,6 @@ contract FeeCalculation is ConceroRouterTest {
         s_conceroRouter.withdrawConceroFee(tokens);
     }
 
-    function test_withdrawConceroFee_RevertsIfUnsupportedFeeToken() public {
-        address[] memory tokens = new address[](1);
-        tokens[0] = s_usdc;
-
-        vm.expectRevert(abi.encodeWithSelector(IConceroRouter.UnsupportedFeeToken.selector));
-        vm.prank(s_deployer);
-        s_conceroRouter.withdrawConceroFee(tokens);
-    }
-
     /* setConceroMessageFeeInUsd */
 
     function test_setConceroMessageFeeInUsd_Success() public {

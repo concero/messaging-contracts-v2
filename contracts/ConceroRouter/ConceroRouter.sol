@@ -32,6 +32,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     error MessageSubmissionAlreadyProcessed(bytes32 messageSubmissionHash);
     error InvalidValidationsCount(uint256 validatorLibsCount, uint256 validationsCount);
 
+    event ConceroFeeWithdrawn(address indexed token, uint256 amount);
+
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed
@@ -170,8 +172,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             if (tokens[i] == address(0)) {
                 Utils.transferNative(msg.sender, relayerFee);
             } else {
-                // TODO: add erc20 support
-                revert UnsupportedFeeToken();
+                IERC20(tokens[i]).safeTransfer(msg.sender, relayerFee);
             }
 
             emit RelayerFeeWithdrawn(msg.sender, tokens[i], relayerFee);
@@ -189,8 +190,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             if (tokens[i] == address(0)) {
                 balance = address(this).balance;
             } else {
-                // TODO: add erc20 support
-                revert UnsupportedFeeToken();
+                balance = IERC20(tokens[i]).balanceOf(address(this));
             }
 
             if (balance == 0) continue;
@@ -199,9 +199,13 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
             if (conceroFee == 0) continue;
 
-            Utils.transferNative(msg.sender, conceroFee);
+            if (tokens[i] == address(0)) {
+                Utils.transferNative(msg.sender, conceroFee);
+            } else {
+                IERC20(tokens[i]).safeTransfer(msg.sender, balance);
+            }
 
-            // TODO: mb add event
+            emit ConceroFeeWithdrawn(tokens[i], balance);
         }
     }
 
@@ -329,16 +333,16 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             PayloadTooLarge(messageRequest.payload.length, s_router.maxMessageSize)
         );
 
-        uint256 validatorConfigsLength = messageRequest.validatorConfigs.length;
-        uint256 validatorLibsLength = messageRequest.validatorLibs.length;
-
         require(
-            validatorConfigsLength == validatorLibsLength,
-            InvalidValidatorConfigsCount(validatorConfigsLength, validatorLibsLength)
+            messageRequest.validatorConfigs.length == messageRequest.validatorLibs.length,
+            InvalidValidatorConfigsCount(
+                messageRequest.validatorConfigs.length,
+                messageRequest.validatorLibs.length
+            )
         );
         require(
-            validatorLibsLength > 0 && validatorLibsLength < s_router.maxValidatorsCount,
-            InvalidValidatorsCount(validatorLibsLength, s_router.maxValidatorsCount)
+            messageRequest.validatorLibs.length < s_router.maxValidatorsCount,
+            InvalidValidatorsCount(messageRequest.validatorLibs.length, s_router.maxValidatorsCount)
         );
     }
 

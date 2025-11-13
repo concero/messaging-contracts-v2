@@ -104,23 +104,6 @@ contract SendMessage is ConceroRouterTest {
 
         vm.expectRevert(error);
         s_conceroRouter.conceroSend(messageRequest);
-
-        validatorLibs = new address[](0);
-
-        messageRequest = _buildMessageRequest(validatorLibs);
-        messageRequest.validatorConfigs = new bytes[](0);
-
-        error = abi.encodeWithSelector(
-            IConceroRouter.InvalidValidatorsCount.selector,
-            validatorLibs.length,
-            s_conceroRouter.getMaxValidatorsCount()
-        );
-
-        vm.expectRevert(error);
-        s_conceroRouter.getMessageFee(messageRequest);
-
-        vm.expectRevert(error);
-        s_conceroRouter.conceroSend(messageRequest);
     }
 
     function test_conceroSend_RevertsIfInvalidValidatorConfigsCount() public {

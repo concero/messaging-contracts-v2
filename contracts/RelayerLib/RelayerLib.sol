@@ -28,9 +28,11 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
         uint24 chainSelector,
         address conceroPriceFeed,
         address conceroRouter
-    ) Base(chainSelector, conceroPriceFeed) {
+    ) RelayerLibStorage() Base(chainSelector, conceroPriceFeed) {
         i_conceroRouter = IConceroRouter(conceroRouter);
     }
+
+    receive() external payable {}
 
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
@@ -42,10 +44,6 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
 
         return
             (dstGasPrice * uint256(s_submitMsgGasOverhead + gasLimit) * dstNativeRate) / DECIMALS;
-    }
-
-    function getDstLib(uint24 dstChainSelector) external view returns (bytes memory) {
-        return s_dstLibs[dstChainSelector];
     }
 
     function validate(bytes calldata /* messageReceipt */, address relayer) external {
@@ -71,17 +69,6 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
         }
     }
 
-    function setDstLibs(
-        uint24[] calldata dstChainSelectors,
-        address[] calldata dstLibs
-    ) external onlyOwner {
-        require(dstChainSelectors.length == dstLibs.length, CommonErrors.LengthMismatch());
-
-        for (uint256 i = 0; i < dstChainSelectors.length; i++) {
-            s_dstLibs[dstChainSelectors[i]] = abi.encode(dstLibs[i]);
-        }
-    }
-
     function setSubmitMsgGasOverhead(uint32 submitMsgGasOverhead) external onlyOwner {
         require(submitMsgGasOverhead > 0, CommonErrors.InvalidAmount());
         s_submitMsgGasOverhead = submitMsgGasOverhead;
@@ -104,6 +91,4 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
             }
         }
     }
-
-    receive() external payable {}
 }

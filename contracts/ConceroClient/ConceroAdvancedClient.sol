@@ -15,19 +15,22 @@ abstract contract ConceroAdvancedClient is ConceroClientBase {
     using s for s.AdvancedClient;
     using MessageCodec for bytes;
 
-    function _validateMessageReceipt(
-        bytes calldata messageReceipt,
-        bool[] calldata validationChecks
+    function _validateMessageSubmission(
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs
     ) internal view virtual override {
-        _ensureValidationsWeight(messageReceipt.evmDstValidatorLibs(), validationChecks);
+        _ensureValidationsWeight(validatorLibs, validationChecks);
     }
 
     function _ensureValidationsWeight(
-        address[] memory dstValidatorLibs,
+        address[] calldata dstValidatorLibs,
         bool[] calldata validationChecks
     ) internal view virtual {
         s.AdvancedClient storage s_advancedClient = s.advancedClient();
         uint256 totalWeight;
+
+        // TODO: think about requiredWeight setting check, because it can be 0
+        // when requiredWeight is 0, validation checks are not required
 
         for (uint256 i; i < dstValidatorLibs.length && i < validationChecks.length; ++i) {
             for (uint256 k; k < dstValidatorLibs.length; ++k) {

@@ -2,25 +2,25 @@ pragma solidity 0.8.28;
 
 import {BaseMockCLFReport} from "./BaseMockCLFReport.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
-import {Types as RouterTypes} from "../../../../contracts/ValidatorLib/libraries/Types.sol";
+import {Types as RouterTypes} from "../../../../contracts/ClfValidatorLib/libraries/Types.sol";
 
 contract MessageReport is BaseMockCLFReport {
     address internal i_operator;
     uint24 internal i_srcChainSelector;
     uint24 internal i_dstChainSelector;
-	address internal i_user;
+    address internal i_user;
     constructor(
         address conceroValidator,
         uint64 subscriptionId,
         address operator,
         uint24 srcChainSelector,
         uint24 dstChainSelector,
-		address user
+        address user
     ) BaseMockCLFReport(conceroValidator, subscriptionId) {
         i_operator = operator;
-		i_srcChainSelector = srcChainSelector;
-		i_dstChainSelector = dstChainSelector;
-		i_user = user;
+        i_srcChainSelector = srcChainSelector;
+        i_dstChainSelector = dstChainSelector;
+        i_user = user;
     }
 
     function getReport() public view returns (RouterTypes.ClfDonReportSubmission memory) {

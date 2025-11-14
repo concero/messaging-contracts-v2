@@ -15,6 +15,8 @@ interface IConceroPriceFeed {
     }
     error RequiredVariableUnset(RequiredVariableUnsetType variableType);
 
+    error TokenIsNotSupported(address);
+
     function getNativeUsdRate() external view returns (uint256);
     function getNativeUsdRateAndGasPrice() external view returns (uint256, uint256);
     function getNativeNativeRateAndGasPrice(

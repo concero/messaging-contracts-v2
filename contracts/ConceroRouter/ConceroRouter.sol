@@ -6,21 +6,21 @@
  */
 pragma solidity 0.8.28;
 
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Base} from "../common/Base.sol";
 import {CommonConstants} from "../common/CommonConstants.sol";
 import {CommonErrors} from "../common/CommonErrors.sol";
-import {Utils} from "../common/libraries/Utils.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
-import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {IConceroPriceFeed} from "../interfaces/IConceroPriceFeed.sol";
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IRelayerLib} from "../interfaces/IRelayerLib.sol";
 import {IRelayer} from "../interfaces/IRelayer.sol";
 import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
-import {Storage as s} from "./libraries/Storage.sol";
 import {MessageCodec} from "../common/libraries/MessageCodec.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Storage as s} from "./libraries/Storage.sol";
+import {Utils} from "../common/libraries/Utils.sol";
 
 contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
@@ -31,6 +31,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     error MessageAlreadyProcessed(bytes32 messageHash);
     error MessageSubmissionAlreadyProcessed(bytes32 messageSubmissionHash);
     error InvalidValidationsCount(uint256 validatorLibsCount, uint256 validationsCount);
+
+    event ConceroFeeWithdrawn(address indexed token, uint256 amount);
+
+    uint8 internal constant NATIVE_DECIMALS = 18;
 
     constructor(
         uint24 chainSelector,
@@ -46,24 +50,20 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         _validateMessageParams(messageRequest);
         Fee memory fee = _collectMessageFee(messageRequest);
 
-        bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
-        for (uint256 i; i < dstValidatorLibs.length; ++i) {
-            dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
-                messageRequest.dstChainSelector
-            );
-        }
-
-        bytes memory packedMessage = messageRequest.toMessageReceiptBytes(
+        bytes memory packedMessageReceipt = messageRequest.toMessageReceiptBytes(
             i_chainSelector,
             msg.sender,
-            ++s.router().nonce[msg.sender][i_chainSelector][messageRequest.dstChainSelector],
-            IRelayerLib(messageRequest.relayerLib).getDstLib(messageRequest.dstChainSelector),
-            dstValidatorLibs
+            ++s.router().nonce[msg.sender][i_chainSelector][messageRequest.dstChainSelector]
         );
 
-        bytes32 messageId = keccak256(packedMessage);
+        bytes32 messageId = keccak256(packedMessageReceipt);
 
-        emit ConceroMessageSent(messageId, packedMessage);
+        emit ConceroMessageSent(
+            messageId,
+            packedMessageReceipt,
+            messageRequest.validatorLibs,
+            messageRequest.relayerLib
+        );
         emit ConceroMessageFeePaid(messageId, fee);
 
         return messageId;
@@ -71,7 +71,9 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
     function submitMessage(
         bytes calldata messageReceipt,
-        bytes[] calldata validations
+        bytes[] calldata validations,
+        address[] calldata validatorLibs,
+        address relayerLib
     ) external nonReentrant {
         require(
             messageReceipt.dstChainSelector() == i_chainSelector,
@@ -79,8 +81,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         );
 
         require(
-            messageReceipt.evmDstValidatorLibs().length == validations.length,
-            InvalidValidationsCount(messageReceipt.evmDstValidatorLibs().length, validations.length)
+            validatorLibs.length == validations.length,
+            InvalidValidationsCount(validatorLibs.length, validations.length)
         );
 
         s.Router storage s_router = s.router();
@@ -88,9 +90,13 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         bytes32 messageHash = keccak256(messageReceipt);
         require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
 
-        IRelayerLib(messageReceipt.emvDstRelayerLib()).validate(messageReceipt, msg.sender);
+        IRelayerLib(relayerLib).validate(messageReceipt, msg.sender);
 
-        bool[] memory validationChecks = _performValidationChecks(messageReceipt, validations);
+        bool[] memory validationChecks = _performValidationChecks(
+            messageReceipt,
+            validations,
+            validatorLibs
+        );
 
         bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
         require(
@@ -98,15 +104,25 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
 
-        emit ConceroMessageReceived(messageHash, messageReceipt, validations, validationChecks);
+        emit ConceroMessageReceived(
+            messageHash,
+            messageReceipt,
+            validations,
+            validatorLibs,
+            validationChecks,
+            relayerLib
+        );
 
-        (, uint32 gasLimit) = messageReceipt.evmDstChainData();
+        (address receiver, uint32 gasLimit) = messageReceipt.evmDstChainData();
 
         _deliverMessage(
             messageReceipt,
+            validatorLibs,
             validationChecks,
             messageHash,
             messageSubmissionHash,
+            receiver,
+            relayerLib,
             gasLimit
         );
     }
@@ -114,6 +130,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     function retryMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,
+        address[] calldata validatorLibs,
+        address relayerLib,
         // TODO:mb remove it
         uint32 gasLimitOverride
     ) external nonReentrant {
@@ -124,15 +142,21 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
         require(
-            !s_router.isMessageRetryAllowed[messageSubmissionHash],
+            s_router.isMessageRetryAllowed[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
+        s_router.isMessageRetryAllowed[messageSubmissionHash] = false;
+
+        (address receiver, ) = messageReceipt.evmDstChainData();
 
         _deliverMessage(
             messageReceipt,
+            validatorLibs,
             validationChecks,
             messageHash,
             messageSubmissionHash,
+            receiver,
+            relayerLib,
             gasLimitOverride
         );
     }
@@ -160,20 +184,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     /* ADMIN FUNCTIONS */
 
     function withdrawConceroFee(address[] calldata tokens) external onlyOwner {
-        s.Router storage s_router = s.router();
-
         for (uint256 i; i < tokens.length; ++i) {
-            uint256 balance;
-
-            if (tokens[i] == address(0)) {
-                balance = address(this).balance;
-            } else {
-                balance = IERC20(tokens[i]).balanceOf(address(this));
-            }
-
-            if (balance == 0) continue;
-
-            uint256 conceroFee = balance - s_router.totalRelayerFeeEarned[tokens[i]];
+            uint256 conceroFee = getConceroFeeEarned(tokens[i]);
 
             if (conceroFee == 0) continue;
 
@@ -183,7 +195,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
                 IERC20(tokens[i]).safeTransfer(msg.sender, conceroFee);
             }
 
-            // TODO: mb add event
+            emit ConceroFeeWithdrawn(tokens[i], conceroFee);
         }
     }
 
@@ -197,10 +209,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
     function setMaxMessageSize(uint64 maxSize) external onlyOwner {
         s.router().maxMessageSize = maxSize;
-    }
-
-    function setTokenPriceFeed(address token, address priceFeed) external onlyOwner {
-        s.router().priceFeeds[token] = priceFeed;
     }
 
     /* VIEW FUNCTIONS */
@@ -218,15 +226,23 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     function isFeeTokenSupported(address feeToken) public view returns (bool) {
-        return feeToken == address(0) || s.router().isFeeTokenSupported[feeToken];
+        return feeToken == address(0) || s.router().feeTokenConfigs[feeToken].isSupported;
     }
 
     function getConceroFee(address feeToken) public view returns (uint256) {
         s.Router storage s_router = s.router();
 
+        if (feeToken == address(0)) {
+            return ((s_router.conceroMessageFeeInUsd * (10 ** NATIVE_DECIMALS)) /
+                i_conceroPriceFeed.getUsdRate(feeToken));
+        }
+
         return
-            IConceroPriceFeed(s_router.priceFeeds[feeToken]).getUsdRate(feeToken) *
-            s_router.conceroMessageFeeInUsd;
+            (Utils.toDecimals(
+                s_router.conceroMessageFeeInUsd,
+                NATIVE_DECIMALS,
+                s_router.feeTokenConfigs[feeToken].decimals
+            ) * (10 ** NATIVE_DECIMALS)) / i_conceroPriceFeed.getUsdRate(feeToken);
     }
 
     function getMaxPayloadSize() public view returns (uint256) {
@@ -237,51 +253,66 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         return s.router().maxValidatorsCount;
     }
 
+    function getRelayerFeeEarned(
+        address relayerLib,
+        address feeToken
+    ) public view returns (uint256) {
+        return s.router().relayerFeeEarned[relayerLib][feeToken];
+    }
+
+    function getConceroFeeEarned(address feeToken) public view returns (uint256) {
+        uint256 balance = feeToken == address(0)
+            ? address(this).balance
+            : IERC20(feeToken).balanceOf(address(this));
+
+        if (balance == 0) return 0;
+
+        return balance - s.router().totalRelayerFeeEarned[feeToken];
+    }
+
     /* INTERNAL FUNCTIONS */
 
     function _deliverMessage(
         bytes calldata messageReceipt,
+        address[] calldata validatorLibs,
         bool[] memory validationChecks,
         bytes32 messageHash,
         bytes32 messageSubmissionHash,
+        address receiver,
+        address relayerLib,
         uint32 gasLimit
     ) internal {
-        // TODO: handle this error more granular
-        (address receiver, ) = messageReceipt.evmDstChainData();
-
-        (bool success, bytes memory result) = Utils.safeCall(
-            receiver,
-            gasLimit,
-            0,
-            256,
-            abi.encodeWithSelector(
-                IConceroClient.conceroReceive.selector,
+        try
+            IConceroClient(receiver).conceroReceive{gas: gasLimit}(
                 messageReceipt,
-                validationChecks
+                validationChecks,
+                validatorLibs,
+                relayerLib
             )
-        );
-
-        if (success) {
+        {
             s.router().isMessageProcessed[messageHash] = true;
             emit ConceroMessageDelivered(messageHash);
-        } else {
-            // TODO: add check if invalid relayer - revert
+        } catch (bytes memory error) {
+            /* @dev This check has been added to prevent malicious relayers
+                    from launching spam attacks on the dst chain. */
+            if (bytes4(error) == IConceroClient.RelayerNotAllowed.selector) {
+                revert IConceroClient.RelayerNotAllowed(relayerLib);
+            }
+
             s.router().isMessageRetryAllowed[messageSubmissionHash] = true;
-            emit ConceroMessageDeliveryFailed(messageHash, result);
+            emit ConceroMessageDeliveryFailed(messageHash, error);
         }
     }
 
     function _performValidationChecks(
         bytes calldata messageReceipt,
-        bytes[] calldata validations
+        bytes[] calldata validations,
+        address[] memory dstValidatorLibs
     ) internal view returns (bool[] memory) {
-        bool[] memory validationChecks = new bool[](messageReceipt.evmDstValidatorLibs().length);
+        bool[] memory validationChecks = new bool[](dstValidatorLibs.length);
 
         for (uint256 i; i < validationChecks.length; ++i) {
-            if (
-                //                !Utils.isEvmAddressValid(messageReceipt.evmDstValidatorLibs()[i]) ||
-                validations[i].length == 0
-            ) {
+            if (validations[i].length == 0) {
                 validationChecks[i] = false;
             } else {
                 bytes memory callData = abi.encodeWithSelector(
@@ -290,8 +321,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
                     validations[i]
                 );
 
-                (bool success, bytes memory result) = messageReceipt
-                .evmDstValidatorLibs()[i].staticcall(callData);
+                (bool success, bytes memory result) = dstValidatorLibs[i].staticcall(callData);
 
                 if (success && result.length == 32) {
                     validationChecks[i] = abi.decode(result, (uint256)) == 1;
@@ -304,19 +334,26 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         return validationChecks;
     }
 
-    function _validateMessageParams(MessageRequest memory messageRequest) internal view {
+    function _validateMessageParams(MessageRequest calldata messageRequest) internal view {
         s.Router storage s_router = s.router();
 
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
         require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
+
         require(
             messageRequest.payload.length < s_router.maxMessageSize,
             PayloadTooLarge(messageRequest.payload.length, s_router.maxMessageSize)
         );
-        // todo: check validator configs
+
         require(
-            messageRequest.validatorLibs.length > 0 &&
-                messageRequest.validatorLibs.length < s_router.maxValidatorsCount,
+            messageRequest.validatorConfigs.length == messageRequest.validatorLibs.length,
+            InvalidValidatorConfigsCount(
+                messageRequest.validatorConfigs.length,
+                messageRequest.validatorLibs.length
+            )
+        );
+        require(
+            messageRequest.validatorLibs.length < s_router.maxValidatorsCount,
             InvalidValidatorsCount(messageRequest.validatorLibs.length, s_router.maxValidatorsCount)
         );
     }
@@ -332,16 +369,12 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         );
 
         uint256 conceroFee = getConceroFee(messageRequest.feeToken);
-        uint256 totalFee = relayerFee + conceroFee + totalValidatorsFee;
-
-        if (messageRequest.feeToken == address(0)) {
-            // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
-            require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
-        } else {
-            IERC20(messageRequest.feeToken).safeTransferFrom(msg.sender, address(this), totalFee);
-        }
-
         uint256 totalRelayerFee = relayerFee + totalValidatorsFee;
+        uint256 totalFee = totalRelayerFee + conceroFee;
+
+        // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
+        require(msg.value >= totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
+
         s_router.relayerFeeEarned[messageRequest.relayerLib][
             messageRequest.feeToken
         ] += totalRelayerFee;
@@ -350,7 +383,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         return
             Fee({
                 concero: conceroFee,
-                s_relayer: relayerFee,
+                relayer: relayerFee,
                 validatorsFee: validatorsFee,
                 token: messageRequest.feeToken
             });

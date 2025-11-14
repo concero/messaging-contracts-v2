@@ -15,57 +15,39 @@ interface IConceroRouter {
         address[] validatorLibs;
         bytes[] validatorConfigs;
         bytes relayerConfig;
-        bytes[] validationRpcs;
-        bytes[] deliveryRpcs;
         bytes dstChainData;
         bytes payload;
     }
 
-    //    struct MessageReceipt {
-    //        uint24 srcChainSelector;
-    //        uint24 dstChainSelector;
-    //        bytes srcChainData;
-    //        bytes dstChainData;
-    //        bytes dstRelayerLib;
-    //        bytes relayerConfig;
-    //        bytes[] dstValidatorLibs;
-    //        bytes[] validatorConfigs;
-    //        bytes[] validationRpcs;
-    //        bytes[] deliveryRpcs;
-    //        bytes payload;
-    //    }
-
-    //
-    //    struct EvmSrcChainData {
-    //        address sender;
-    //        uint64 blockConfirmations;
-    //    }
-    //
-    //    struct EvmDstChainData {
-    //        address receiver;
-    //        uint256 gasLimit;
-    //    }
-
     struct Fee {
         uint256 concero;
-        uint256 s_relayer;
+        uint256 relayer;
         uint256[] validatorsFee;
         address token;
     }
 
     error InsufficientFee(uint256 provided, uint256 required);
     error UnsupportedFeeToken();
-    error PayloadTooLarge(uint256 receviedLength, uint256 expectedLength);
+    error PayloadTooLarge(uint256 receivedLength, uint256 expectedLength);
     error EmptyDstChainData();
     error InvalidValidatorsCount(uint256 validatorsCount, uint256 maxValidatorsCount);
+    error InvalidValidatorConfigsCount(uint256 validatorConfigsCount, uint256 validatorLibsCount);
+    error InvalidGasLimit();
 
-    event ConceroMessageSent(bytes32 indexed messageId, bytes messageReceipt);
+    event ConceroMessageSent(
+        bytes32 indexed messageId,
+        bytes messageReceipt,
+        address[] validatorLibs,
+        address relayerLib
+    );
     event ConceroMessageFeePaid(bytes32 indexed messageId, Fee fee);
     event ConceroMessageReceived(
         bytes32 indexed messageId,
         bytes messageReceipt,
         bytes[] validations,
-        bool[] validationChecks
+        address[] validatorLibs,
+        bool[] validationChecks,
+        address relayerLib
     );
     event ConceroMessageDelivered(bytes32 indexed messageId);
     event ConceroMessageDeliveryFailed(bytes32 indexed messageId, bytes error);

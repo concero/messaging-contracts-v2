@@ -17,10 +17,11 @@ import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 import {Types} from "./libraries/Types.sol";
 
-import {ValidatorLibStorage} from "./ValidatorLibStorage.sol";
+import {Storage as s} from "./libraries/Storage.sol";
+import {Base} from "../common/Base.sol";
 import {ClfSigner} from "./modules/ClfSigner.sol";
 
-contract ValidatorLib is IValidatorLib, ValidatorLibStorage, Base, ClfSigner {
+contract ClfValidatorLib is IValidatorLib, ValidatorLibStorage, Base, ClfSigner {
     uint8 internal constant VALIDATOR_LIB_FEE_BPS_USD = 100;
 
     constructor(

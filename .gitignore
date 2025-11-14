@@ -44,3 +44,4 @@ logs/
 .vscode
 .DS_Store
 coverage_report
+.certora_internal

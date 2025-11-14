@@ -1,1 +1,2 @@
-SendMessage:test_conceroSendNativeFee_gas() (gas: 128645)
+SendMessage:test_conceroSend_NativeFee_gas() (gas: 110350)
+SubmitMessage:test_submitMessage_gas() (gas: 73804)

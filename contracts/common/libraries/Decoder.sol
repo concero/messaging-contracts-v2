@@ -7,7 +7,7 @@
 pragma solidity 0.8.28;
 
 import {CommonTypes} from "../CommonTypes.sol";
-import {Types as RouterTypes} from "../../ValidatorLib/libraries/Types.sol";
+import {Types as RouterTypes} from "../../ClfValidatorLib/libraries/Types.sol";
 
 library Decoder {
     /**

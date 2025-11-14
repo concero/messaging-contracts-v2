@@ -8,10 +8,10 @@ pragma solidity 0.8.28;
 
 import {Test} from "forge-std/src/Test.sol";
 import {DeployConceroPriceFeed} from "../scripts/deploy/DeployConceroPriceFeed.s.sol";
+import {DeployConceroValidator} from "../scripts/deploy/DeployConceroValidator.s.sol";
 import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
 import {DeployMockERC20} from "../scripts/deploy/DeployMockERC20.s.sol";
 import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
-import {CLFParams} from "contracts/ConceroValidator/libraries/Types.sol";
 import {MockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 
 abstract contract ConceroTest is Test {
@@ -23,25 +23,13 @@ abstract contract ConceroTest is Test {
     address public s_relayer = makeAddr("relayer");
     address internal s_feedUpdater = makeAddr("feedUpdater");
     address public s_usdc = address(new DeployMockERC20().deployERC20("USD Coin", "USDC", 6));
-
-    bytes32 public s_clfMessageReportRequestJsHashSum =
-        vm.parseBytes32("0x66756e2d657468657265756d2d6d61696e6e65742d3100000000000000000000");
-    uint64 internal s_conceroValidatorSubscriptionId = uint64(vm.envUint("CLF_SUBID_LOCALHOST"));
-    bytes32 public s_clfDonId = vm.envBytes32("CLF_DONID_ARBITRUM");
     address public s_clfRouter = address(new MockCLFRouter());
-    CLFParams internal clfParams =
-        CLFParams({
-            router: s_clfRouter,
-            donId: s_clfDonId,
-            subscriptionId: s_conceroValidatorSubscriptionId,
-            requestCLFMessageReportJsCodeHash: s_clfMessageReportRequestJsHashSum
-        });
 
     uint24 public constant SRC_CHAIN_SELECTOR = 1;
     uint24 public constant DST_CHAIN_SELECTOR = 8453;
     uint256 internal constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
     uint256 internal constant LAST_GAS_PRICE = 1e9;
-    uint96 internal CONCERO_MESSAGE_FEE_IN_USD = 0.1e6;
+    uint96 internal constant CONCERO_MESSAGE_FEE_IN_USD = 0.1e18; // $0.1
     uint64 internal MAX_CONCERO_MESSAGE_SIZE = 1000000; // 1 mb
     uint8 internal MAX_CONCERO_VALIDATORS_COUNT = 20;
 
@@ -58,7 +46,11 @@ abstract contract ConceroTest is Test {
     ConceroValidator internal s_conceroValidator =
         ConceroValidator(
             payable(
-                (new ConceroValidator(SRC_CHAIN_SELECTOR, address(s_conceroPriceFeed), clfParams))
+                (new DeployConceroValidator()).deploy(
+                    SRC_CHAIN_SELECTOR,
+                    address(s_conceroPriceFeed),
+                    s_clfRouter
+                )
             )
         );
 

@@ -10,9 +10,31 @@ import {IValidatorLib} from "../../../contracts/interfaces/IValidatorLib.sol";
 import {IConceroRouter} from "../../../contracts/interfaces/IConceroRouter.sol";
 
 contract MockConceroValidatorLib is IValidatorLib {
+    enum ValidationBehavior {
+        ReturnTrue, // returns true (default)
+        ReturnFalse, // returns 0 (false)
+        Revert, // reverts
+        InvalidLength // returns data with length != 32 bytes
+    }
+
     uint256 internal s_validationFeeInNative = 0.01 ether;
+    ValidationBehavior public behavior = ValidationBehavior.ReturnTrue;
+
+    error ValidationRevert();
 
     function isValid(bytes calldata, bytes calldata) external view returns (bool) {
+        if (behavior == ValidationBehavior.Revert) {
+            revert ValidationRevert();
+        } else if (behavior == ValidationBehavior.InvalidLength) {
+            // Return data with an invalid length (16 bytes instead of 32)
+            assembly {
+                let ptr := mload(0x40)
+                mstore(ptr, 0x1234567890abcdef)
+                return(ptr, 16)
+            }
+        } else if (behavior == ValidationBehavior.ReturnFalse) {
+            return false;
+        }
         return true;
     }
 
@@ -26,5 +48,9 @@ contract MockConceroValidatorLib is IValidatorLib {
 
     function setValidationFeeInNative(uint256 feeInNative) external {
         s_validationFeeInNative = feeInNative;
+    }
+
+    function setBehavior(ValidationBehavior _behavior) external {
+        behavior = _behavior;
     }
 }

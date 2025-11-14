@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {ValidatorLib} from "contracts/ValidatorLib/ValidatorLib.sol";
+import {ClfValidatorLib} from "contracts/ClfValidatorLib/ClfValidatorLib.sol";
 import {DeployConceroPriceFeed} from "./DeployConceroPriceFeed.s.sol";
 import {Script} from "forge-std/src/Script.sol";
 
@@ -18,18 +18,18 @@ contract DeployValidatorLib is Script {
     address internal constant CONCERO_VERIFIER_ADDRESS = address(0x11);
 
     address public s_deployer = vm.envAddress("DEPLOYER_ADDRESS");
-    uint64 internal s_conceroVerifierSubscriptionId = 12;
+    uint64 public s_conceroValidatorSubscriptionId = 12;
 
-    ValidatorLib internal validatorLib;
+    ClfValidatorLib internal validatorLib;
 
     function deploy(uint24 chainSelector, address priceFeed) public returns (address) {
         vm.startPrank(s_deployer);
 
-        validatorLib = new ValidatorLib(
+        validatorLib = new ClfValidatorLib(
             chainSelector,
             priceFeed,
             CONCERO_VERIFIER_ADDRESS,
-            s_conceroVerifierSubscriptionId,
+            s_conceroValidatorSubscriptionId,
             [
                 MOCK_DON_SIGNER_ADDRESS_0,
                 MOCK_DON_SIGNER_ADDRESS_1,

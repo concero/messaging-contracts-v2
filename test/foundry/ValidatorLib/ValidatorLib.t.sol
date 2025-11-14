@@ -7,7 +7,7 @@
  */
 pragma solidity 0.8.28;
 
-import {Types} from "contracts/ValidatorLib/libraries/Types.sol";
+import {Types} from "contracts/ClfValidatorLib/libraries/Types.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
@@ -15,10 +15,8 @@ import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 import {IConceroPriceFeed} from "contracts/interfaces/IConceroPriceFeed.sol";
 import {ValidatorLibTest} from "./base/ValidatorLibTest.sol";
-import {MessageReport as MockCLFReport} from "../scripts/MockCLFReport/MessageReport.sol";
 
 contract ValidatorLibTests is ValidatorLibTest {
-    MockCLFReport internal mockClfReport;
     bytes32 internal constant TEST_MESSAGE_ID = bytes32(uint256(1));
     bytes internal constant TEST_MESSAGE = "Test message";
     uint256 internal constant GAS_LIMIT = 1_000_000;
@@ -26,14 +24,6 @@ contract ValidatorLibTests is ValidatorLibTest {
     function setUp() public override {
         super.setUp();
 
-        mockClfReport = new MockCLFReport(
-            address(s_conceroValidator),
-            s_conceroValidatorSubscriptionId,
-            s_operator,
-            SRC_CHAIN_SELECTOR,
-            DST_CHAIN_SELECTOR,
-            s_user
-        );
         _setPriceFeeds();
     }
 
@@ -178,7 +168,7 @@ contract ValidatorLibTests is ValidatorLibTest {
             abi.encode(resultConfig, payload),
             bytes32("requestId"),
             address(0x999), // Invalid client
-            s_conceroValidatorSubscriptionId
+            deployValidatorLib.s_conceroValidatorSubscriptionId()
         );
 
         bytes memory validation = abi.encode(reportSubmission, uint256(0));

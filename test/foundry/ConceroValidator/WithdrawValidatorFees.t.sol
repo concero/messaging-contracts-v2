@@ -29,11 +29,12 @@ contract WithdrawValidatorFeesTest is ConceroValidatorTest {
 
         assertEq(s_conceroValidator.getWithdrawableValidatorFee(), depositAmount);
 
-        uint256 ownerBalanceBefore = address(this).balance;
+        uint256 ownerBalanceBefore = s_deployer.balance;
 
+		vm.prank(s_deployer);
         s_conceroValidator.withdrawValidatorFee(depositAmount);
 
-        assertEq(address(this).balance, ownerBalanceBefore + depositAmount);
+        assertEq(s_deployer.balance, ownerBalanceBefore + depositAmount);
         assertEq(s_conceroValidator.getWithdrawableValidatorFee(), 0);
         assertEq(address(s_conceroValidator).balance, 0);
     }
@@ -54,6 +55,7 @@ contract WithdrawValidatorFeesTest is ConceroValidatorTest {
         uint256 totalFees = depositAmount;
         uint256 withdrawAmount = totalFees / 2;
 
+		vm.prank(s_deployer);
         s_conceroValidator.withdrawValidatorFee(withdrawAmount);
 
         assertEq(s_conceroValidator.getWithdrawableValidatorFee(), totalFees - withdrawAmount);
@@ -75,6 +77,7 @@ contract WithdrawValidatorFeesTest is ConceroValidatorTest {
             abi.encodeWithSelector(Errors.InsufficientFee.selector, withdrawAmount, depositAmount)
         );
 
+		vm.prank(s_deployer);
         s_conceroValidator.withdrawValidatorFee(withdrawAmount);
     }
 

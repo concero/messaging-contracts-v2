@@ -9,13 +9,12 @@ pragma solidity 0.8.28;
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
+import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
+import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
+import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 
 contract SendMessage is ConceroRouterTest {
-    function setUp() public override {
-        super.setUp();
-    }
-
-    function test_conceroSendNativeFee_gas() public {
+    function test_conceroSend_NativeFee_gas() public {
         vm.pauseGasMetering();
 
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
@@ -26,11 +25,12 @@ contract SendMessage is ConceroRouterTest {
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
     }
 
-    function testFuzz_conceroSendNativeFee(
+    function testFuzz_conceroSend_NativeFee(
         bytes memory payload,
         uint32 gasLimit,
         uint64 srcChainConfirmations
     ) public {
+        vm.assume(gasLimit > 0);
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(
             payload,
             gasLimit,
@@ -42,7 +42,7 @@ contract SendMessage is ConceroRouterTest {
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
     }
 
-    function testFuzz_feeTokenIsNotSupported_revert(address feeToken) public {
+    function testFuzz_conceroSend_RevertsIfUnsupportedFeeToken(address feeToken) public {
         vm.assume(feeToken != address(0));
 
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(feeToken);
@@ -54,7 +54,18 @@ contract SendMessage is ConceroRouterTest {
         s_conceroRouter.conceroSend(messageRequest);
     }
 
-    function test_payloadToLarge_revert() public {
+    function test_conceroSend_RevertIfEmptyDstChainData() public {
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+        messageRequest.dstChainData = bytes("");
+
+        vm.expectRevert(IConceroRouter.EmptyDstChainData.selector);
+        s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.expectRevert(IConceroRouter.EmptyDstChainData.selector);
+        s_conceroRouter.conceroSend(messageRequest);
+    }
+
+    function test_conceroSend_RevertsIfPayloadTooLarge() public {
         bytes memory payload = new bytes(s_conceroRouter.getMaxPayloadSize() + 1);
 
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(payload);
@@ -72,10 +83,11 @@ contract SendMessage is ConceroRouterTest {
         s_conceroRouter.conceroSend(messageRequest);
     }
 
-    function test_invalidValidatorsCount_revert() public {
+    function test_conceroSend_RevertsIfInvalidValidatorsCount() public {
         address[] memory validatorLibs = new address[](s_conceroRouter.getMaxValidatorsCount() + 1);
 
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(validatorLibs);
+        messageRequest.validatorConfigs = new bytes[](s_conceroRouter.getMaxValidatorsCount() + 1);
 
         bytes memory error = abi.encodeWithSelector(
             IConceroRouter.InvalidValidatorsCount.selector,
@@ -88,15 +100,19 @@ contract SendMessage is ConceroRouterTest {
 
         vm.expectRevert(error);
         s_conceroRouter.conceroSend(messageRequest);
+    }
 
-        validatorLibs = new address[](0);
+    function test_conceroSend_RevertsIfInvalidValidatorConfigsCount() public {
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
 
-        messageRequest = _buildMessageRequest(validatorLibs);
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(validatorLibs);
+        messageRequest.validatorConfigs = new bytes[](2);
 
-        error = abi.encodeWithSelector(
-            IConceroRouter.InvalidValidatorsCount.selector,
-            validatorLibs.length,
-            s_conceroRouter.getMaxValidatorsCount()
+        bytes memory error = abi.encodeWithSelector(
+            IConceroRouter.InvalidValidatorConfigsCount.selector,
+            messageRequest.validatorConfigs.length,
+            validatorLibs.length
         );
 
         vm.expectRevert(error);
@@ -104,5 +120,64 @@ contract SendMessage is ConceroRouterTest {
 
         vm.expectRevert(error);
         s_conceroRouter.conceroSend(messageRequest);
+    }
+
+    function test_conceroSend_messageIdIsCorrect() public {
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
+        bytes32 messageId = s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
+
+        uint256 nonce = 1;
+        bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
+        for (uint256 i; i < dstValidatorLibs.length; ++i) {
+            dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
+                messageRequest.dstChainSelector
+            );
+        }
+
+        bytes memory packedMessage = MessageCodec.toMessageReceiptBytes(
+            messageRequest,
+            SRC_CHAIN_SELECTOR,
+            address(this),
+            nonce
+        );
+
+        bytes32 expectedMessageId = keccak256(packedMessage);
+
+        assertEq(messageId, expectedMessageId);
+    }
+
+    function test_conceroSend_EmitsConceroMessageSent() public {
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
+
+        uint256 nonce = 1;
+        bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
+        for (uint256 i; i < dstValidatorLibs.length; ++i) {
+            dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
+                messageRequest.dstChainSelector
+            );
+        }
+
+        bytes memory packedMessage = MessageCodec.toMessageReceiptBytes(
+            messageRequest,
+            SRC_CHAIN_SELECTOR,
+            address(this),
+            nonce
+        );
+
+        bytes32 expectedMessageId = keccak256(packedMessage);
+
+        vm.expectEmit(true, false, false, true);
+        emit IConceroRouter.ConceroMessageSent(
+            expectedMessageId,
+            packedMessage,
+            messageRequest.validatorLibs,
+            s_relayerLib
+        );
+
+        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
     }
 }

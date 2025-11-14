@@ -15,7 +15,5 @@ interface IRelayerLib {
         IConceroRouter.MessageRequest calldata messageRequest
     ) external view returns (uint256);
 
-    function getDstLib(uint24 dstChainSelector) external view returns (bytes memory);
-
     function validate(bytes calldata messageReceipt, address s_relayer) external;
 }

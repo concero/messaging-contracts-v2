@@ -16,9 +16,9 @@ contract ConceroClientExample is ConceroClient {
 
     function _conceroReceive(bytes calldata messageReceipt) internal override {}
 
-    function _validateMessageReceipt(
-        bytes calldata messageReceipt,
-        bool[] calldata validationChecks
+    function _validateMessageSubmission(
+        bool[] calldata,
+        address[] calldata
     ) internal view override {}
 
     function _ensureValidations(

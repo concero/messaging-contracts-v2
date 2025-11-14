@@ -65,24 +65,6 @@ contract SendMessage is ConceroRouterTest {
         s_conceroRouter.conceroSend(messageRequest);
     }
 
-    function test_conceroSend_RevertsIfPayloadTooLarge() public {
-        bytes memory payload = new bytes(s_conceroRouter.getMaxPayloadSize() + 1);
-
-        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(payload);
-
-        bytes memory error = abi.encodeWithSelector(
-            IConceroRouter.PayloadTooLarge.selector,
-            payload.length,
-            s_conceroRouter.getMaxPayloadSize()
-        );
-
-        vm.expectRevert(error);
-        s_conceroRouter.getMessageFee(messageRequest);
-
-        vm.expectRevert(error);
-        s_conceroRouter.conceroSend(messageRequest);
-    }
-
     function test_conceroSend_RevertsIfInvalidValidatorsCount() public {
         address[] memory validatorLibs = new address[](s_conceroRouter.getMaxValidatorsCount() + 1);
 

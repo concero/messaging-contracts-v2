@@ -207,10 +207,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         s.router().maxValidatorsCount = maxCount;
     }
 
-    function setMaxMessageSize(uint64 maxSize) external onlyOwner {
-        s.router().maxMessageSize = maxSize;
-    }
-
     /* VIEW FUNCTIONS */
 
     /* @inheritdoc IConceroRouter */
@@ -243,10 +239,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
                 NATIVE_DECIMALS,
                 s_router.feeTokenConfigs[feeToken].decimals
             ) * (10 ** NATIVE_DECIMALS)) / i_conceroPriceFeed.getUsdRate(feeToken);
-    }
-
-    function getMaxPayloadSize() public view returns (uint256) {
-        return s.router().maxMessageSize;
     }
 
     function getMaxValidatorsCount() public view returns (uint256) {
@@ -339,11 +331,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
         require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
-
-        require(
-            messageRequest.payload.length < s_router.maxMessageSize,
-            PayloadTooLarge(messageRequest.payload.length, s_router.maxMessageSize)
-        );
 
         require(
             messageRequest.validatorConfigs.length == messageRequest.validatorLibs.length,

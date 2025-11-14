@@ -6,21 +6,21 @@
  */
 pragma solidity 0.8.28;
 
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Base} from "../common/Base.sol";
 import {CommonConstants} from "../common/CommonConstants.sol";
 import {CommonErrors} from "../common/CommonErrors.sol";
-import {Utils} from "../common/libraries/Utils.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
-import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {IConceroPriceFeed} from "../interfaces/IConceroPriceFeed.sol";
+import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IRelayerLib} from "../interfaces/IRelayerLib.sol";
 import {IRelayer} from "../interfaces/IRelayer.sol";
 import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
-import {Storage as s} from "./libraries/Storage.sol";
-import {Base} from "./modules/Base.sol";
 import {MessageCodec} from "../common/libraries/MessageCodec.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Storage as s} from "./libraries/Storage.sol";
+import {Utils} from "../common/libraries/Utils.sol";
 
 contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using s for s.Router;
@@ -184,30 +184,18 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     /* ADMIN FUNCTIONS */
 
     function withdrawConceroFee(address[] calldata tokens) external onlyOwner {
-        s.Router storage s_router = s.router();
-
         for (uint256 i; i < tokens.length; ++i) {
-            uint256 balance;
-
-            if (tokens[i] == address(0)) {
-                balance = address(this).balance;
-            } else {
-                balance = IERC20(tokens[i]).balanceOf(address(this));
-            }
-
-            if (balance == 0) continue;
-
-            uint256 conceroFee = balance - s_router.totalRelayerFeeEarned[tokens[i]];
+            uint256 conceroFee = getConceroFeeEarned(tokens[i]);
 
             if (conceroFee == 0) continue;
 
             if (tokens[i] == address(0)) {
                 Utils.transferNative(msg.sender, conceroFee);
             } else {
-                IERC20(tokens[i]).safeTransfer(msg.sender, balance);
+                IERC20(tokens[i]).safeTransfer(msg.sender, conceroFee);
             }
 
-            emit ConceroFeeWithdrawn(tokens[i], balance);
+            emit ConceroFeeWithdrawn(tokens[i], conceroFee);
         }
     }
 
@@ -263,6 +251,23 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
     function getMaxValidatorsCount() public view returns (uint256) {
         return s.router().maxValidatorsCount;
+    }
+
+    function getRelayerFeeEarned(
+        address relayerLib,
+        address feeToken
+    ) public view returns (uint256) {
+        return s.router().relayerFeeEarned[relayerLib][feeToken];
+    }
+
+    function getConceroFeeEarned(address feeToken) public view returns (uint256) {
+        uint256 balance = feeToken == address(0)
+            ? address(this).balance
+            : IERC20(feeToken).balanceOf(address(this));
+
+        if (balance == 0) return 0;
+
+        return balance - s.router().totalRelayerFeeEarned[feeToken];
     }
 
     /* INTERNAL FUNCTIONS */

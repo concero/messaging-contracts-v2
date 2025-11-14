@@ -16,12 +16,8 @@ contract FeeCalculation is ConceroRouterTest {
     uint256 internal VALIDATOR_FEE = 0.01 ether;
     uint256 internal RELAYER_FEE = 0.001 ether;
 
-    function setUp() public override {
-        super.setUp();
-    }
-
     function test_ChargeFeeCorrectly() public {
-        assertEq(address(s_conceroRouter).balance, 0);
+        uint256 routerBalanceBefore = address(s_conceroRouter).balance;
 
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
@@ -31,7 +27,7 @@ contract FeeCalculation is ConceroRouterTest {
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
 
         uint256 routerBalanceAfter = address(s_conceroRouter).balance;
-        uint256 relayerFeeEarned = s_conceroRouter.exposed_getRelayerFeeEarned(
+        uint256 relayerFeeEarned = s_conceroRouter.getRelayerFeeEarned(
             s_relayerLib,
             messageRequest.feeToken
         );
@@ -39,7 +35,7 @@ contract FeeCalculation is ConceroRouterTest {
             messageRequest.feeToken
         );
 
-        assertEq(routerBalanceAfter, messageFee);
+        assertEq(routerBalanceAfter - routerBalanceBefore, messageFee);
         assertEq(relayerFeeEarned, messageFee - conceroFee);
         assertEq(totalRelayerFeeEarned, messageFee - conceroFee);
     }
@@ -87,11 +83,11 @@ contract FeeCalculation is ConceroRouterTest {
             concero: conceroFee,
             relayer: relayerFee,
             validatorsFee: validatorsFee,
-            token: address(0)
+            token: messageRequest.feeToken
         });
 
-        //        vm.expectEmit(false, false, false, true);
-        //        emit IConceroRouter.ConceroMessageFeePaid(bytes32(0), fee);
+        vm.expectEmit(false, false, false, true);
+        emit IConceroRouter.ConceroMessageFeePaid(bytes32(0), fee);
 
         vm.prank(s_user);
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
@@ -125,23 +121,20 @@ contract FeeCalculation is ConceroRouterTest {
     function test_withdrawRelayerFee_Success() public {
         _conceroSend();
 
-        assertEq(address(s_relayerLib).balance, 0);
+        uint256 relayerBalanceBefore = address(s_relayerLib).balance;
 
         address[] memory tokens = new address[](1);
 
         vm.prank(address(s_relayerLib));
         s_conceroRouter.withdrawRelayerFee(tokens);
 
-        assertEq(address(s_relayerLib).balance, RELAYER_FEE + VALIDATOR_FEE);
+        assertEq(address(s_relayerLib).balance - relayerBalanceBefore, RELAYER_FEE + VALIDATOR_FEE);
     }
 
     function test_withdrawRelayerFee_EmitsRelayerFeeWithdrawn() public {
         _conceroSend();
 
-        uint256 relayerFeeEarned = s_conceroRouter.exposed_getRelayerFeeEarned(
-            s_relayerLib,
-            address(0)
-        );
+        uint256 relayerFeeEarned = s_conceroRouter.getRelayerFeeEarned(s_relayerLib, address(0));
 
         address[] memory tokens = new address[](1);
 
@@ -157,8 +150,7 @@ contract FeeCalculation is ConceroRouterTest {
     function test_withdrawConceroFee_Success() public {
         _conceroSend();
 
-        uint256 expectedConceroFee = address(s_conceroRouter).balance -
-            s_conceroRouter.exposed_getTotalRelayerFeeEarned(address(0));
+        uint256 expectedConceroFee = s_conceroRouter.getConceroFeeEarned(address(0));
 
         uint256 balanceBefore = s_deployer.balance;
         address[] memory tokens = new address[](1);

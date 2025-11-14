@@ -68,22 +68,18 @@ contract SubmitMessage is ConceroRouterTest {
     function test_submitMessage_RevertsIfInvalidValidationsCount() public {
         (, bytes memory messageReceipt) = _conceroSend();
         bytes[] memory validations = new bytes[](0);
+        address[] memory validatorLibs = new address[](1);
 
         vm.expectRevert(
             abi.encodeWithSelector(
                 ConceroRouter.InvalidValidationsCount.selector,
-                1,
+                validatorLibs.length,
                 validations.length
             )
         );
 
         vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(
-            messageReceipt,
-            validations,
-            new address[](1),
-            s_relayerLib
-        );
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
     function test_submitMessage_RevertsIfMessageAlreadyProcessed() public {

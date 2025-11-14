@@ -17,10 +17,10 @@ import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 import {Types} from "./libraries/Types.sol";
 
 import {Storage as s} from "./libraries/Storage.sol";
-import {Base} from "./modules/Base.sol";
+import {Base} from "../common/Base.sol";
 import {ClfSigner} from "./modules/ClfSigner.sol";
 
-contract ValidatorLib is IValidatorLib, Base, ClfSigner {
+contract ClfValidatorLib is IValidatorLib, Base, ClfSigner {
     using s for s.ValidatorLib;
 
     uint8 internal constant VALIDATOR_LIB_FEE_BPS_USD = 100;

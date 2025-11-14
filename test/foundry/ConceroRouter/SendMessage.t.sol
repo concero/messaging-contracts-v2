@@ -14,10 +14,6 @@ import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 
 contract SendMessage is ConceroRouterTest {
-    function setUp() public override {
-        super.setUp();
-    }
-
     function test_conceroSend_NativeFee_gas() public {
         vm.pauseGasMetering();
 

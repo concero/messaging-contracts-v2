@@ -5,6 +5,7 @@
   "bugs": "security@concero.io",
   "homepage": "https://concero.io",
   "description": "Concero V2 Contracts. If you discover any security vulnerabilities, report them responsibly to security@concero.io. Thank you!",
+  "packageManager": "yarn",
   "scripts": {
     "chain": "hardhat node --network hardhat --no-deploy",
     "fork": "ETHEREUM_FORKING_ENABLED=true hardhat node --network hardhat --no-deploy",

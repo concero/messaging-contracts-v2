@@ -7,7 +7,7 @@
  */
 pragma solidity 0.8.28;
 
-import {Types} from "contracts/ValidatorLib/libraries/Types.sol";
+import {Types} from "contracts/ClfValidatorLib/libraries/Types.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";

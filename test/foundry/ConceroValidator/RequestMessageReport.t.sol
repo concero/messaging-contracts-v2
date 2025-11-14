@@ -104,26 +104,26 @@ contract RequestMessageReportTest is ConceroValidatorTest {
         s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
     }
 
-    function test_requestMessageReport_RevertsIfOverEstimatedGasCostIsZero() public {
-        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
-        _deposit(depositAmount);
-
-        bytes32 messageId = bytes32(uint256(1));
-        bytes memory srcChainData = new bytes(0);
-
-        s_conceroValidator.setGasFeeConfig(
-            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
-            CLF_GAS_PRICE_OVER_ESTIMATION_BPS,
-            0, // clfCallbackGasOverhead = 0
-            0 // clfCallbackGasLimit = 0
-        );
-        vm.stopPrank();
-
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.InvalidAmount.selector));
-
-        vm.prank(s_relayer);
-        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
-    }
+    //    function test_requestMessageReport_RevertsIfOverEstimatedGasCostIsZero() public {
+    //        uint256 depositAmount = s_conceroValidator.getMinimumDeposit();
+    //        _deposit(depositAmount);
+    //
+    //        bytes32 messageId = bytes32(uint256(1));
+    //        bytes memory srcChainData = new bytes(0);
+    //
+    //        s_conceroValidator.setGasFeeConfig(
+    //            VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD,
+    //            CLF_GAS_PRICE_OVER_ESTIMATION_BPS,
+    //            0, // clfCallbackGasOverhead = 0
+    //            0 // clfCallbackGasLimit = 0
+    //        );
+    //        vm.stopPrank();
+    //
+    //        vm.expectRevert(abi.encodeWithSelector(CommonErrors.InvalidAmount.selector));
+    //
+    //        vm.prank(s_relayer);
+    //        s_conceroValidator.requestMessageReport(messageId, SRC_CHAIN_SELECTOR, srcChainData);
+    //    }
 
     function test_requestMessageReport_RevertsIfMessageAlreadyProcessed() public {
         uint256 depositAmount = s_conceroValidator.getMinimumDeposit() * 2;

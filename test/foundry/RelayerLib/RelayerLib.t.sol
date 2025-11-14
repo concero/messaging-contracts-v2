@@ -44,7 +44,7 @@ contract RelayerLibTests is RelayerLibTest {
             GAS_LIMIT
         );
 
-        uint256 fee = relayerLib.getFee(messageRequest);
+        uint256 fee = s_relayerLib.getFee(messageRequest);
 
         uint256 dstGasPrice = LAST_GAS_PRICE;
         uint256 dstNativeRate = 1e18; // 1:1 rate
@@ -77,7 +77,7 @@ contract RelayerLibTests is RelayerLibTest {
             )
         );
 
-        relayerLib.getFee(messageRequest);
+        s_relayerLib.getFee(messageRequest);
     }
 
     function test_getFee_RevertsIfDstNativeRateIsZero() public {
@@ -101,7 +101,7 @@ contract RelayerLibTests is RelayerLibTest {
             )
         );
 
-        relayerLib.getFee(messageRequest);
+        s_relayerLib.getFee(messageRequest);
     }
 
     /* validate */
@@ -112,31 +112,14 @@ contract RelayerLibTests is RelayerLibTest {
         bool[] memory isAllowed = new bool[](1);
         isAllowed[0] = true;
 
-        relayerLib.setRelayers(relayers, isAllowed);
+        s_relayerLib.setRelayers(relayers, isAllowed);
 
-        relayerLib.validate(new bytes(0), s_relayer);
+        s_relayerLib.validate(new bytes(0), s_relayer);
     }
 
     function test_validate_RevertsIfRelayerNotAllowed() public {
         vm.expectRevert(abi.encodeWithSelector(IRelayerLib.InvalidRelayer.selector));
-        relayerLib.validate(new bytes(0), s_relayer);
-    }
-
-    /* getDstLib */
-
-    function test_getDstLib_ReturnsCorrectValue() public {
-        address dstLibAddress = address(0x456);
-        uint24[] memory dstChainSelectors = new uint24[](1);
-        dstChainSelectors[0] = DST_CHAIN_SELECTOR;
-        address[] memory dstLibs = new address[](1);
-        dstLibs[0] = dstLibAddress;
-
-        relayerLib.setDstLibs(dstChainSelectors, dstLibs);
-
-        bytes memory storedDstLib = relayerLib.getDstLib(DST_CHAIN_SELECTOR);
-        address decodedAddress = abi.decode(storedDstLib, (address));
-
-        assertEq(decodedAddress, dstLibAddress, "getDstLib should return correct value");
+        s_relayerLib.validate(new bytes(0), s_relayer);
     }
 
     /* isAllowedRelayer */
@@ -147,14 +130,14 @@ contract RelayerLibTests is RelayerLibTest {
         bool[] memory isAllowed = new bool[](1);
         isAllowed[0] = true;
 
-        relayerLib.setRelayers(relayers, isAllowed);
+        s_relayerLib.setRelayers(relayers, isAllowed);
 
-        bool result = relayerLib.isAllowedRelayer(s_relayer);
+        bool result = s_relayerLib.isAllowedRelayer(s_relayer);
         assertTrue(result, "Should return true for allowed relayer");
     }
 
     function test_isAllowedRelayer_ReturnsFalse() public view {
-        bool result = relayerLib.isAllowedRelayer(s_relayer);
+        bool result = s_relayerLib.isAllowedRelayer(s_relayer);
         assertFalse(result, "Should return false for not allowed relayer");
     }
 
@@ -168,10 +151,10 @@ contract RelayerLibTests is RelayerLibTest {
         isAllowed[0] = true;
         isAllowed[1] = true;
 
-        relayerLib.setRelayers(relayers, isAllowed);
+        s_relayerLib.setRelayers(relayers, isAllowed);
 
-        assertTrue(relayerLib.isAllowedRelayer(s_relayer), "Relayer should be allowed");
-        assertTrue(relayerLib.isAllowedRelayer(s_operator), "Operator should be allowed");
+        assertTrue(s_relayerLib.isAllowedRelayer(s_relayer), "Relayer should be allowed");
+        assertTrue(s_relayerLib.isAllowedRelayer(s_operator), "Operator should be allowed");
     }
 
     function test_setRelayers_RevertsIfNotOwner() public {
@@ -183,7 +166,7 @@ contract RelayerLibTests is RelayerLibTest {
         vm.prank(s_user);
         vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector));
 
-        relayerLib.setRelayers(relayers, isAllowed);
+        s_relayerLib.setRelayers(relayers, isAllowed);
     }
 
     function test_setRelayers_RevertsIfLengthMismatch() public {
@@ -195,52 +178,7 @@ contract RelayerLibTests is RelayerLibTest {
 
         vm.expectRevert(abi.encodeWithSelector(CommonErrors.LengthMismatch.selector));
 
-        relayerLib.setRelayers(relayers, isAllowed);
-    }
-
-    /* setDstLibs */
-
-    function test_setDstLibs_Success() public {
-        address dstLib1 = address(0x123);
-        address dstLib2 = address(0x456);
-        uint24[] memory dstChainSelectors = new uint24[](2);
-        dstChainSelectors[0] = DST_CHAIN_SELECTOR;
-        dstChainSelectors[1] = uint24(999);
-        address[] memory dstLibs = new address[](2);
-        dstLibs[0] = dstLib1;
-        dstLibs[1] = dstLib2;
-
-        relayerLib.setDstLibs(dstChainSelectors, dstLibs);
-
-        bytes memory storedDstLib1 = relayerLib.getDstLib(DST_CHAIN_SELECTOR);
-        bytes memory storedDstLib2 = relayerLib.getDstLib(uint24(999));
-
-        assertEq(abi.decode(storedDstLib1, (address)), dstLib1, "First dst lib should be set");
-        assertEq(abi.decode(storedDstLib2, (address)), dstLib2, "Second dst lib should be set");
-    }
-
-    function test_setDstLibs_RevertsIfNotOwner() public {
-        uint24[] memory dstChainSelectors = new uint24[](1);
-        dstChainSelectors[0] = DST_CHAIN_SELECTOR;
-        address[] memory dstLibs = new address[](1);
-        dstLibs[0] = address(0x123);
-
-        vm.prank(s_user);
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector));
-
-        relayerLib.setDstLibs(dstChainSelectors, dstLibs);
-    }
-
-    function test_setDstLibs_RevertsIfLengthMismatch() public {
-        uint24[] memory dstChainSelectors = new uint24[](2);
-        dstChainSelectors[0] = DST_CHAIN_SELECTOR;
-        dstChainSelectors[1] = uint24(999);
-        address[] memory dstLibs = new address[](1);
-        dstLibs[0] = address(0x123);
-
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.LengthMismatch.selector));
-
-        relayerLib.setDstLibs(dstChainSelectors, dstLibs);
+        s_relayerLib.setRelayers(relayers, isAllowed);
     }
 
     /* setSubmitMsgGasOverhead */
@@ -248,14 +186,14 @@ contract RelayerLibTests is RelayerLibTest {
     function test_setSubmitMsgGasOverhead_Success() public {
         uint32 newOverhead = 200_000;
 
-        relayerLib.setSubmitMsgGasOverhead(newOverhead);
+        s_relayerLib.setSubmitMsgGasOverhead(newOverhead);
 
         IConceroRouter.MessageRequest memory messageRequest = _createMessageRequest(
             DST_CHAIN_SELECTOR,
             GAS_LIMIT
         );
 
-        uint256 fee = relayerLib.getFee(messageRequest);
+        uint256 fee = s_relayerLib.getFee(messageRequest);
         uint256 dstGasPrice = LAST_GAS_PRICE;
         uint256 dstNativeRate = 1e18;
         uint256 expectedFee = (dstGasPrice * uint256(newOverhead + GAS_LIMIT) * dstNativeRate) /
@@ -270,40 +208,40 @@ contract RelayerLibTests is RelayerLibTest {
         vm.prank(s_user);
         vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector));
 
-        relayerLib.setSubmitMsgGasOverhead(newOverhead);
+        s_relayerLib.setSubmitMsgGasOverhead(newOverhead);
     }
 
     function test_setSubmitMsgGasOverhead_RevertsIfZero() public {
         vm.expectRevert(abi.encodeWithSelector(CommonErrors.InvalidAmount.selector));
 
-        relayerLib.setSubmitMsgGasOverhead(0);
+        s_relayerLib.setSubmitMsgGasOverhead(0);
     }
 
     /* withdrawRelayerFee */
 
     function test_withdrawRelayerFee_Native_Success() public {
-        mockConceroRouterWithFee.setRelayerFee(address(relayerLib), 1 ether, address(0));
+        mockConceroRouterWithFee.setRelayerFee(address(s_relayerLib), 1 ether, address(0));
         deal(address(mockConceroRouterWithFee), 1 ether);
 
         uint256 balanceBefore = address(this).balance;
 
-        relayerLib.withdrawRelayerFee(new address[](1));
+        s_relayerLib.withdrawRelayerFee(new address[](1));
 
         uint256 balanceAfter = address(this).balance;
         assertEq(balanceAfter, balanceBefore + 1 ether, "Balance should be increased by 1 ether");
     }
 
-	function test_withdrawRelayerFee_USDC_Success() public {
-		mockConceroRouterWithFee.setRelayerFee(address(relayerLib), 1 ether, address(s_usdc));
-		deal(s_usdc, address(mockConceroRouterWithFee), 1 ether);
+    function test_withdrawRelayerFee_USDC_Success() public {
+        mockConceroRouterWithFee.setRelayerFee(address(s_relayerLib), 1 ether, address(s_usdc));
+        deal(s_usdc, address(mockConceroRouterWithFee), 1 ether);
 
-		uint256 balanceBefore = IERC20(s_usdc).balanceOf(address(this));
+        uint256 balanceBefore = IERC20(s_usdc).balanceOf(address(this));
 
-		address[] memory tokens = new address[](1);
-		tokens[0] = address(s_usdc);
-		relayerLib.withdrawRelayerFee(tokens);
+        address[] memory tokens = new address[](1);
+        tokens[0] = address(s_usdc);
+        s_relayerLib.withdrawRelayerFee(tokens);
 
-		uint256 balanceAfter = IERC20(s_usdc).balanceOf(address(this));
-		assertEq(balanceAfter, balanceBefore + 1 ether, "Balance should be increased by 1 ether");
-	}
+        uint256 balanceAfter = IERC20(s_usdc).balanceOf(address(this));
+        assertEq(balanceAfter, balanceBefore + 1 ether, "Balance should be increased by 1 ether");
+    }
 }

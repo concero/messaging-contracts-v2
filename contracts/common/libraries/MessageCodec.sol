@@ -10,6 +10,8 @@ import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 import {IRelayer} from "../../interfaces/IRelayer.sol";
 
 library MessageCodec {
+    uint8 internal constant VERSION = 1;
+
     uint8 internal constant UINT8_BYTES_LENGTH = 1;
     uint8 internal constant UINT24_BYTES_LENGTH = 3;
     uint8 internal constant UINT32_BYTES_LENGTH = 4;
@@ -18,9 +20,8 @@ library MessageCodec {
     uint8 internal constant ADDRESS_BYTES_LENGTH = 20;
     uint8 internal constant LENGTH_BYTES_SIZE = UINT24_BYTES_LENGTH;
     uint24 internal constant EVM_SRC_CHAIN_DATA_LENGTH = ADDRESS_BYTES_LENGTH + UINT64_BYTES_LENGTH;
-    uint8 internal constant VERSION = 1;
 
-    uint8 internal constant SRC_CHAIN_SELECTOR_OFFSET = 1;
+    uint8 internal constant SRC_CHAIN_SELECTOR_OFFSET = UINT8_BYTES_LENGTH;
     uint8 internal constant DST_CHAIN_SELECTOR_OFFSET =
         SRC_CHAIN_SELECTOR_OFFSET + UINT24_BYTES_LENGTH; // 4
     uint8 internal constant NONCE_OFFSET = DST_CHAIN_SELECTOR_OFFSET + UINT24_BYTES_LENGTH;
@@ -142,6 +143,21 @@ library MessageCodec {
         uint256 start = payloadLengthOffset + LENGTH_BYTES_SIZE;
 
         return data[start:start + uint24(bytes3(data[payloadLengthOffset:start]))];
+    }
+
+    // DECODERS
+
+    function decodeEvmDstChainData(
+        bytes calldata dstChainData
+    ) internal pure returns (address, uint32) {
+        return (
+            address(bytes20(dstChainData[0:ADDRESS_BYTES_LENGTH])),
+            uint32(
+                bytes4(
+                    dstChainData[ADDRESS_BYTES_LENGTH:ADDRESS_BYTES_LENGTH + UINT32_BYTES_LENGTH]
+                )
+            )
+        );
     }
 
     // OFFSETS CALCULATION

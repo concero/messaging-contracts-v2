@@ -28,7 +28,7 @@ contract MockConceroRouterWithFee is ConceroRouter {
 }
 
 abstract contract RelayerLibTest is ConceroTest {
-    RelayerLib internal relayerLib;
+    RelayerLib internal s_relayerLib;
     MockConceroRouterWithFee internal mockConceroRouterWithFee;
 
     function setUp() public virtual {
@@ -37,18 +37,18 @@ abstract contract RelayerLibTest is ConceroTest {
             address(s_conceroPriceFeed)
         );
 
-        relayerLib = new RelayerLib(
+        s_relayerLib = new RelayerLib(
             SRC_CHAIN_SELECTOR,
             address(s_conceroPriceFeed),
             address(mockConceroRouterWithFee)
         );
-        relayerLib.setSubmitMsgGasOverhead(SUBMIT_MSG_GAS_OVERHEAD);
+        s_relayerLib.setSubmitMsgGasOverhead(SUBMIT_MSG_GAS_OVERHEAD);
     }
 
     function _createMessageRequest(
         uint24 dstChainSelector,
         uint32 gasLimit
-    ) internal pure returns (IConceroRouter.MessageRequest memory) {
+    ) internal view returns (IConceroRouter.MessageRequest memory) {
         return
             IConceroRouter.MessageRequest({
                 dstChainSelector: dstChainSelector,
@@ -58,9 +58,7 @@ abstract contract RelayerLibTest is ConceroTest {
                 validatorLibs: new address[](0),
                 validatorConfigs: new bytes[](0),
                 relayerConfig: new bytes(0),
-                validationRpcs: new bytes[](0),
-                deliveryRpcs: new bytes[](0),
-                dstChainData: MessageCodec.encodeEvmDstChainData(address(0), gasLimit),
+                dstChainData: MessageCodec.encodeEvmDstChainData(address(s_relayerLib), gasLimit),
                 payload: "Test message"
             });
     }

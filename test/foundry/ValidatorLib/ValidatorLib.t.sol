@@ -346,45 +346,4 @@ contract ValidatorLibTests is ValidatorLibTest {
 
         validatorLib.getFee(messageRequest);
     }
-
-    /* setDstLib */
-
-    function test_setDstLib_Success() public {
-        address dstLibAddress = address(0x456);
-
-        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
-
-        bytes memory storedDstLib = validatorLib.getDstLib(SRC_CHAIN_SELECTOR);
-        address decodedAddress = abi.decode(storedDstLib, (address));
-
-        assertEq(decodedAddress, dstLibAddress, "Dst lib should be set correctly");
-    }
-
-    function test_setDstLib_RevertsIfNotOwner() public {
-        address dstLibAddress = address(0x456);
-
-        vm.prank(s_user);
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector));
-
-        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
-    }
-
-    function test_setDstLib_RevertsIfSameChain() public {
-        address dstLibAddress = address(0x456);
-
-        vm.expectRevert(abi.encodeWithSelector(IValidatorLib.InvalidChainSelector.selector));
-
-        validatorLib.setDstLib(DST_CHAIN_SELECTOR, dstLibAddress);
-    }
-
-    function test_getDstLib_ReturnsCorrectValue() public {
-        address dstLibAddress = address(0x789);
-
-        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
-
-        bytes memory storedDstLib = validatorLib.getDstLib(SRC_CHAIN_SELECTOR);
-        address decodedAddress = abi.decode(storedDstLib, (address));
-
-        assertEq(decodedAddress, dstLibAddress, "getDstLib should return correct value");
-    }
 }

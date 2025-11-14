@@ -129,12 +129,6 @@ contract SendMessage is ConceroRouterTest {
         bytes32 messageId = s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
 
         uint256 nonce = 1;
-        bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
-        for (uint256 i; i < dstValidatorLibs.length; ++i) {
-            dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
-                messageRequest.dstChainSelector
-            );
-        }
 
         bytes memory packedMessage = MessageCodec.toMessageReceiptBytes(
             messageRequest,
@@ -154,12 +148,6 @@ contract SendMessage is ConceroRouterTest {
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
         uint256 nonce = 1;
-        bytes[] memory dstValidatorLibs = new bytes[](messageRequest.validatorLibs.length);
-        for (uint256 i; i < dstValidatorLibs.length; ++i) {
-            dstValidatorLibs[i] = IValidatorLib(messageRequest.validatorLibs[i]).getDstLib(
-                messageRequest.dstChainSelector
-            );
-        }
 
         bytes memory packedMessage = MessageCodec.toMessageReceiptBytes(
             messageRequest,

@@ -32,7 +32,8 @@ import {
 	setVerifierGasFeeConfig,
 	upgradeProxyImplementation,
 } from "./utils";
-import withdrawFees from "./withdrawFees";
+import withdrawFees from "./withdrawFees"
+import triggerCreTask from "./cre/triggerCre.task";
 
 export {
 	ensureNativeBalances,
@@ -69,4 +70,5 @@ export {
 	getLastGasPriceTask,
 	changeProxyAdminOwnerTask,
 	sendNativeTokensTask,
+	triggerCreTask
 };

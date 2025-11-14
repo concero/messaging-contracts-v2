@@ -20,7 +20,7 @@ local-simulation:
     workflow-name: "message-report"
   workflow-artifacts:
     workflow-path: "./main.ts"
-    config-path: "./config.json"
+    config-path: "./config.testnet.json"
     secrets-path: "../secrets.yaml"
 
 # ==========================================================================
@@ -29,5 +29,5 @@ production-testnet:
     workflow-name: "message-report"
   workflow-artifacts:
     workflow-path: "./main.ts"
-    config-path: "./config.json"
+    config-path: "./config.testnet.json"
     secrets-path: "../secrets.yaml"

@@ -1,9 +1,12 @@
 import { type Hash } from "viem";
 
-export type GlobalContext = {}
+export type GlobalConfig = {
+	authorizedPublicKey: string;
+	deploymentsUrl: string;
+};
 
 export type DecodedArgs = {
-    messageId: Hash;
-    srcChainSelector: number;
-    blockNumber: string;
-}
+	messageId: Hash;
+	srcChainSelector: number;
+	blockNumber: string;
+};

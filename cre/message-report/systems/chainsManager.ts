@@ -1,62 +1,60 @@
-import {Runtime} from "@chainlink/cre-sdk";
-import {sha256} from "viem";
-
-import testnetChainsRPCs from "@concero/rpcs/output/testnet.json";
+import { Runtime } from "@chainlink/cre-sdk";
 import mainnetChainsRPCs from "@concero/rpcs/output/mainnet.json";
-import testnetDataNetworks from "@concero/v2-networks/networks/testnet.json";
+import testnetChainsRPCs from "@concero/rpcs/output/testnet.json";
 import mainnetDataNetworks from "@concero/v2-networks/networks/mainnet.json";
+import testnetDataNetworks from "@concero/v2-networks/networks/testnet.json";
+import { sha256 } from "viem";
 
-import {DomainError, ErrorCode, GlobalContext} from "../helpers";
+import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
 
 const chainsOptions = { ...mainnetChainsRPCs, ...testnetChainsRPCs };
-const currentCheckSum = sha256(Buffer.from(JSON.stringify(chainsOptions)))
+const currentCheckSum = sha256(Buffer.from(JSON.stringify(chainsOptions)));
 
 const networksOptions = { ...mainnetDataNetworks, ...testnetDataNetworks };
-const networkCheckSum = sha256(Buffer.from(JSON.stringify(networksOptions)))
-
+const networkCheckSum = sha256(Buffer.from(JSON.stringify(networksOptions)));
 
 type Options = {
-    id: number
-    name: string
-    selector: number
-    rpcUrls: string[];
-    nativeCurrency?: {
-        name: string,
-        symbol: string,
-        decimals: number
-    }
-    finalityConfirmations: number;
-}
+	id: number;
+	name: string;
+	selector: number;
+	rpcUrls: string[];
+	nativeCurrency?: {
+		name: string;
+		symbol: string;
+		decimals: number;
+	};
+	finalityConfirmations: number;
+};
 
 export const chainSelectorToOptions: Record<number, Options> = {};
 
 export class ChainsManager {
-    static enrichOptions() {
-        Object.values(chainsOptions).forEach((i) => {
-            if (i && i.rpcUrls) {
-                chainSelectorToOptions[i.chainSelector] = {
-                    id: Number(i.chainId),
-                    name: 'unknown chain',
-                    selector: i.chainSelector,
-                    rpcUrls: i.rpcUrls,
-                    finalityConfirmations: 0,
-                };
-            }
-        });
-        Object.values(networksOptions).forEach((i) => {
-            if (i && i.rpcUrls) {
-                chainSelectorToOptions[i.chainSelector] = {
-                    ...chainSelectorToOptions?.[i.chainSelector],
-                    name: i.name,
-                    nativeCurrency: i.nativeCurrency,
-                    finalityConfirmations: i.finalityConfirmations,
-                };
-            }
-        });
-    }
+	static enrichOptions() {
+		Object.values(chainsOptions).forEach(i => {
+			if (i && i.rpcUrls) {
+				chainSelectorToOptions[i.chainSelector] = {
+					id: Number(i.chainId),
+					name: "unknown chain",
+					selector: i.chainSelector,
+					rpcUrls: i.rpcUrls,
+					finalityConfirmations: 0,
+				};
+			}
+		});
+		Object.values(networksOptions).forEach(i => {
+			if (i && i.rpcUrls) {
+				chainSelectorToOptions[i.chainSelector] = {
+					...chainSelectorToOptions?.[i.chainSelector],
+					name: i.name,
+					nativeCurrency: i.nativeCurrency,
+					finalityConfirmations: i.finalityConfirmations,
+				};
+			}
+		});
+	}
 
-    static validateOptions(runtime: Runtime<GlobalContext>): void {
-      /*  const originalChainsChecksum = runtime.getSecret({id: 'CHAINS_CONFIG_HASHSUM'}).result().value
+	static validateOptions(runtime: Runtime<GlobalConfig>): void {
+		/*  const originalChainsChecksum = runtime.getSecret({id: 'CHAINS_CONFIG_HASHSUM'}).result().value
         const originalNetworksChecksum = runtime.getSecret({id: 'NETWORKS_CONFIG_HASHSUM'}).result().value
         if (currentCheckSum === originalChainsChecksum){
             throw new Error('Invalid chains checksum');
@@ -64,23 +62,20 @@ export class ChainsManager {
         if (networkCheckSum === originalNetworksChecksum){
             throw new Error('Invalid networks checksum');
         }*/
-    }
+	}
 
-    static getOptionsBySelector(chainSelector: number): Options {
-        const chainOption = chainSelectorToOptions[chainSelector]
+	static getOptionsBySelector(chainSelector: number): Options {
+		const chainOption = chainSelectorToOptions[chainSelector];
 
-        if (!chainOption) {
-            throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain not found");
-        }
+		if (!chainOption) {
+			throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain not found");
+		}
 
-        return chainOption;
-    }
+		return chainOption;
+	}
 
-
-    static findOptionsByName(chainName: string): Options | null {
-        const chainOption = Object.values(chainSelectorToOptions).find(i => i.name === chainName)
-        return chainOption || null;
-    }
-
-
+	static findOptionsByName(chainName: string): Options | null {
+		const chainOption = Object.values(chainSelectorToOptions).find(i => i.name === chainName);
+		return chainOption || null;
+	}
 }

@@ -274,25 +274,28 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         address relayerLib,
         uint32 gasLimit
     ) internal {
-        try
-            IConceroClient(receiver).conceroReceive{gas: gasLimit}(
-                messageReceipt,
-                validationChecks,
-                validatorLibs,
-                relayerLib
-            )
-        {
+        bytes memory callData = abi.encodeWithSelector(
+            IConceroClient.conceroReceive.selector,
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            relayerLib
+        );
+
+        (bool success, bytes memory res) = receiver.call{gas: gasLimit}(callData);
+
+        if (success) {
             s.router().isMessageProcessed[messageHash] = true;
             emit ConceroMessageDelivered(messageHash);
-        } catch (bytes memory error) {
+        } else {
             /* @dev This check has been added to prevent malicious relayers
                     from launching spam attacks on the dst chain. */
-            if (bytes4(error) == IConceroClient.RelayerNotAllowed.selector) {
+            if (bytes4(res) == IConceroClient.RelayerNotAllowed.selector) {
                 revert IConceroClient.RelayerNotAllowed(relayerLib);
             }
 
             s.router().isMessageRetryAllowed[messageSubmissionHash] = true;
-            emit ConceroMessageDeliveryFailed(messageHash, error);
+            emit ConceroMessageDeliveryFailed(messageHash, res);
         }
     }
 
@@ -327,11 +330,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     }
 
     function _validateMessageParams(MessageRequest calldata messageRequest) internal view {
-        s.Router storage s_router = s.router();
-
         require(isFeeTokenSupported(messageRequest.feeToken), UnsupportedFeeToken());
         require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
-
         require(
             messageRequest.validatorConfigs.length == messageRequest.validatorLibs.length,
             InvalidValidatorConfigsCount(
@@ -340,8 +340,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             )
         );
         require(
-            messageRequest.validatorLibs.length < s_router.maxValidatorsCount,
-            InvalidValidatorsCount(messageRequest.validatorLibs.length, s_router.maxValidatorsCount)
+            messageRequest.validatorLibs.length < s.router().maxValidatorsCount,
+            InvalidValidatorsCount(
+                messageRequest.validatorLibs.length,
+                s.router().maxValidatorsCount
+            )
         );
     }
 
@@ -359,8 +362,12 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         uint256 totalRelayerFee = relayerFee + totalValidatorsFee;
         uint256 totalFee = totalRelayerFee + conceroFee;
 
-        // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
-        require(msg.value >= totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
+        if (messageRequest.feeToken == address(0)) {
+            // TODO: mb change to msg.value >= (relayerFee + conceroFee) and send the surplus back to the sender
+            require(msg.value == totalFee, CommonErrors.InsufficientFee(msg.value, totalFee));
+        } else {
+            IERC20(messageRequest.feeToken).safeTransferFrom(msg.sender, address(this), totalFee);
+        }
 
         s_router.relayerFeeEarned[messageRequest.relayerLib][
             messageRequest.feeToken

@@ -42,7 +42,6 @@ abstract contract ConceroRouterTest is ConceroTest {
         vm.startPrank(s_deployer);
         s_conceroRouter.setConceroMessageFeeInUsd(CONCERO_MESSAGE_FEE_IN_USD);
         s_conceroRouter.setMaxValidatorsCount(MAX_CONCERO_VALIDATORS_COUNT);
-        //        s_conceroRouter.setTokenPriceFeed(address(0), address(s_conceroPriceFeed));
         vm.stopPrank();
 
         s_conceroClient = new ConceroTestClient(payable(s_dstConceroRouter));
@@ -132,6 +131,22 @@ abstract contract ConceroRouterTest is ConceroTest {
     function _conceroSend() internal returns (bytes32 messageId, bytes memory messageReceipt) {
         vm.recordLogs();
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.prank(s_user);
+        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        messageId = bytes32(entries[0].topics[1]);
+        messageReceipt = abi.decode(entries[0].data, (bytes));
+
+        return (messageId, messageReceipt);
+    }
+
+    function _conceroSend(
+        IConceroRouter.MessageRequest memory messageRequest
+    ) internal returns (bytes32 messageId, bytes memory messageReceipt) {
+        vm.recordLogs();
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
         vm.prank(s_user);

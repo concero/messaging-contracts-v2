@@ -207,6 +207,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         s.router().maxValidatorsCount = maxCount;
     }
 
+    function setTokenConfig(address feeToken, bool isSupported, uint8 decimals) external onlyOwner {
+        s.router().feeTokenConfigs[feeToken].isSupported = isSupported;
+        s.router().feeTokenConfigs[feeToken].decimals = decimals;
+    }
+
     /* VIEW FUNCTIONS */
 
     /* @inheritdoc IConceroRouter */

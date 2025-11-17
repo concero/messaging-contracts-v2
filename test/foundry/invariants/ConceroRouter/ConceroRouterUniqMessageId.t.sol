@@ -9,7 +9,7 @@ pragma solidity 0.8.28;
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
-import {ConceroRouterTest} from "../ConceroRouter/base/ConceroRouterTest.sol";
+import {ConceroRouterTest} from "../../ConceroRouter/base/ConceroRouterTest.sol";
 import {console} from "forge-std/src/console.sol";
 
 contract RouterHandler {
@@ -57,7 +57,7 @@ contract RouterHandler {
     }
 }
 
-contract ConceroRouterInvariants is ConceroRouterTest {
+contract ConceroRouterUniqMessageId is ConceroRouterTest {
     RouterHandler internal s_routerHandler;
 
     function setUp() public override {

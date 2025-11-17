@@ -67,12 +67,12 @@ contract SubmitMessage is ConceroRouterTest {
 
     function test_submitMessage_RevertsIfInvalidValidationsCount() public {
         (, bytes memory messageReceipt) = _conceroSend();
-        bytes[] memory validations = new bytes[](0);
-        address[] memory validatorLibs = new address[](1);
+        bytes[] memory validations = new bytes[](1);
+        address[] memory validatorLibs = new address[](0);
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ConceroRouter.InvalidValidationsCount.selector,
+                IRelayer.InvalidValidationsCount.selector,
                 validatorLibs.length,
                 validations.length
             )
@@ -95,7 +95,7 @@ contract SubmitMessage is ConceroRouterTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ConceroRouter.MessageAlreadyProcessed.selector,
+                IRelayer.MessageAlreadyProcessed.selector,
                 keccak256(messageReceipt)
             )
         );
@@ -125,7 +125,7 @@ contract SubmitMessage is ConceroRouterTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ConceroRouter.MessageSubmissionAlreadyProcessed.selector,
+                IRelayer.MessageSubmissionAlreadyProcessed.selector,
                 messageSubmissionHash
             )
         );

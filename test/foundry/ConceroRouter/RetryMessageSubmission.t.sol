@@ -10,6 +10,7 @@ import {console} from "forge-std/src/console.sol";
 
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
+import {IRelayer} from "contracts/interfaces/IRelayer.sol";
 import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 import {ConceroTestClient} from "../ConceroTestClient/ConceroTestClient.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
@@ -65,7 +66,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ConceroRouter.MessageAlreadyProcessed.selector,
+                IRelayer.MessageAlreadyProcessed.selector,
                 keccak256(messageReceipt)
             )
         );
@@ -97,7 +98,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                ConceroRouter.MessageSubmissionAlreadyProcessed.selector,
+                IRelayer.MessageSubmissionAlreadyProcessed.selector,
                 messageSubmissionHash
             )
         );

@@ -12,6 +12,9 @@ interface IRelayer {
     error MessageSubmissionAlreadyReceived(bytes32 messageId, bytes32 messageSubmissionHash);
     error InvalidReceiver();
     error InvalidDstChainSelector(uint24 received, uint24 expexted);
+    error MessageAlreadyProcessed(bytes32 messageHash);
+    error MessageSubmissionAlreadyProcessed(bytes32 messageSubmissionHash);
+    error InvalidValidationsCount(uint256 validatorLibsCount, uint256 validationsCount);
 
     event RelayerFeeWithdrawn(address indexed realayer, address indexed token, uint256 amount);
 

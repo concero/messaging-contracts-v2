@@ -28,6 +28,7 @@ library MessageCodec {
     uint8 internal constant SRC_CHAIN_DATA_OFFSET = NONCE_OFFSET + BYTES32_BYTES_LENGTH;
 
     // WRITE FUNCTIONS //
+
     function toMessageReceiptBytes(
         IConceroRouter.MessageRequest memory messageRequest,
         uint24 _srcChainSelector,

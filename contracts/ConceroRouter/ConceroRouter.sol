@@ -28,10 +28,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
     using MessageCodec for MessageRequest;
     using MessageCodec for bytes;
 
-    error MessageAlreadyProcessed(bytes32 messageHash);
-    error MessageSubmissionAlreadyProcessed(bytes32 messageSubmissionHash);
-    error InvalidValidationsCount(uint256 validatorLibsCount, uint256 validationsCount);
-
     event ConceroFeeWithdrawn(address indexed token, uint256 amount);
 
     uint8 internal constant NATIVE_DECIMALS = 18;
@@ -265,6 +261,14 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         if (balance == 0) return 0;
 
         return balance - s.router().totalRelayerFeeEarned[feeToken];
+    }
+
+    function isMessageProcessed(bytes32 messageId) public view returns (bool) {
+        return s.router().isMessageProcessed[messageId];
+    }
+
+    function isMessageRetryAllowed(bytes32 messageId) public view returns (bool) {
+        return s.router().isMessageRetryAllowed[messageId];
     }
 
     /* INTERNAL FUNCTIONS */

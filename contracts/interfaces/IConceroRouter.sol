@@ -63,6 +63,14 @@ interface IConceroRouter {
         MessageRequest calldata messageRequest
     ) external payable returns (bytes32 messageId);
 
+    function retryMessageSubmission(
+        bytes calldata messageReceipt,
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs,
+        address relayerLib,
+        uint32 gasLimitOverride
+    ) external;
+
     /**
      * @notice Before sending a message, you must call getMessageFee.
      *         If you choose to pay fees in the native token, pass the

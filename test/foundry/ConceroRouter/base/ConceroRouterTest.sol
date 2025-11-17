@@ -25,8 +25,12 @@ abstract contract ConceroRouterTest is ConceroTest {
 
     address internal s_validatorLib = address(new MockConceroValidatorLib());
     address internal s_relayerLib = address(new MockConceroRelayerLib());
+    address[] internal s_validatorLibs = new address[](1);
+    bytes[] internal s_validatorConfigs = new bytes[](s_validatorLibs.length);
 
     function setUp() public virtual {
+        s_validatorLibs[0] = s_validatorLib;
+
         s_conceroRouter = ConceroRouterHarness(
             payable(
                 (new DeployConceroRouter()).deploy(SRC_CHAIN_SELECTOR, address(s_conceroPriceFeed))

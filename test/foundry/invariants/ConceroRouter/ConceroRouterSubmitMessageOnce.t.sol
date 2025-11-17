@@ -25,7 +25,6 @@ contract ConceroRouterSubmitMessageHandler {
     uint24 public immutable i_dstChainSelector;
 
     bytes[] public s_receipts;
-    bytes32[] public s_submissionHashes;
     mapping(bytes32 => uint256) public s_processedCount;
 
     bool public isReverted;

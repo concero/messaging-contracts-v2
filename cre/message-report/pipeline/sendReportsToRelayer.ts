@@ -3,14 +3,17 @@ import {consensusIdenticalAggregation, cre, Report, Runtime} from "@chainlink/cr
 import {CRE, GlobalConfig} from "../helpers";
 
 
-type ReportBatch = {
-  rawReport: string
-    reportContext: string
-  signs: {signature: string, signerId: number}[]
+type ResponseItem = {
+    rawReport: string
+    reportContext: string,
+    signs: {
+        signature: string,
+        signerId: number
+    }[]
 }
 
 export const sendReportsToRelayer = (runtime: Runtime<GlobalConfig>, reports: Report[]): void => {
-    const batches: ReportBatch[] = reports.map(report => {
+    const batch: ResponseItem[] = reports.map(report => {
         const reportResult = report.x_generatedCodeOnly_unwrap();
         return {
             rawReport: Buffer.from(reportResult.rawReport).toString("hex"),
@@ -26,8 +29,8 @@ export const sendReportsToRelayer = (runtime: Runtime<GlobalConfig>, reports: Re
 		url: "https://webhook.site/1bf744e6-fb89-4ed5-ba57-912675a433a7",
 		method: "POST",
 		body: {
-             batches
-        }, 
+            batch
+        },
 		headers: {
 			"Content-Type": "application/json",
 		},

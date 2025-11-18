@@ -6,7 +6,7 @@ export type GlobalConfig = {
 };
 
 export type DecodedArgs = {
-	batches: {
+	batch: {
         messageId: Hash;
         srcChainSelector: number;
         blockNumber: string;

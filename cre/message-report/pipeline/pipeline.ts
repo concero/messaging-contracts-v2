@@ -9,24 +9,24 @@ import {fetchLogByMessageId} from "./fetchLogByMessageId";
 import {sendReportsToRelayer,} from "./sendReportsToRelayer";
 import {validateDecodedArgs} from "./validateDecodedArgs";
 
-async function fetchReport (runtime: Runtime<GlobalConfig>, batch: DecodedArgs['batches'][number]): Promise<Report> {
+async function fetchReport (runtime: Runtime<GlobalConfig>, item: DecodedArgs['batch'][number]): Promise<Report> {
     const routerAddress = DeploymentsManager.getDeploymentByChainSelector(
-        batch.srcChainSelector,
+        item.srcChainSelector,
     );
     runtime.log(`Got routerAddress=${routerAddress}`);
-    const publicClient = PublicClient.create(runtime, batch.srcChainSelector);
+    const publicClient = PublicClient.create(runtime, item.srcChainSelector);
 
     const log = await fetchLogByMessageId(
         runtime,
         publicClient,
         routerAddress,
-        batch.messageId,
-        BigInt(Number(batch.blockNumber)),
+        item.messageId,
+        BigInt(Number(item.blockNumber)),
     );
     runtime.log(`Got ConceroMessageSent Log`);
 
     if (!log || !log?.data) {
-        runtime.log(`No log found for messageId=${batch.messageId}`);
+        runtime.log(`No log found for messageId=${item.messageId}`);
         throw new DomainError(ErrorCode.EVENT_NOT_FOUND);
     }
 
@@ -51,7 +51,7 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 		validateDecodedArgs(args);
 		runtime.log(`Decoded args: ${JSON.stringify(args)}`);
 
-        const fetchReportPromises = args.batches.map(batch => fetchReport(runtime, batch))
+        const fetchReportPromises = args.batch.map(item => fetchReport(runtime, item))
         const reports = await Promise.all(fetchReportPromises)
 		sendReportsToRelayer(runtime, reports);
 

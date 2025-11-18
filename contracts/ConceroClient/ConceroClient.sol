@@ -30,8 +30,12 @@ abstract contract ConceroClient is ConceroClientBase {
     ) internal view virtual {
         s.ConceroClient storage s_conceroClient = s.client();
 
+        uint256 requiredValidatorsCount = s_conceroClient.requiredValidatorsCount;
+
+        require(requiredValidatorsCount != 0, RequiredValidatorsCountUnset());
+
         require(
-            (s_conceroClient.requiredValidatorsCount == validationChecks.length) &&
+            (requiredValidatorsCount == validationChecks.length) &&
                 (validationChecks.length == dstValidatorLibs.length),
             ValidatorsConsensusNotReached()
         );

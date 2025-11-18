@@ -12,6 +12,7 @@ interface IConceroClient {
     error InvalidConceroRouter(address router);
     error RelayerNotAllowed(address dstRelayerLib);
     error ValidatorsConsensusNotReached();
+    error RequiredValidatorsCountUnset();
 
     function conceroReceive(
         bytes calldata messageReceipt,

@@ -45,6 +45,7 @@ library MessageCodec {
                     messageRequest.dstChainSelector, // 4
                     _nonce,
                     // src chain data
+                    // TODO: add src chain data type byte
                     EVM_SRC_CHAIN_DATA_LENGTH,
                     abi.encodePacked(msgSender, messageRequest.srcBlockConfirmations)
                 ),

@@ -27,4 +27,9 @@ interface IRelayer {
         address[] calldata validatorLibs,
         address relayerLib
     ) external;
+
+    /**
+     * @notice Withdraws the Relayer fees earned by the router.
+     */
+    function withdrawRelayerFee(address[] calldata tokens) external;
 }

@@ -13,6 +13,7 @@ import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {Utils} from "contracts/common/libraries/Utils.sol";
 import {Base} from "contracts/common/Base.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
+import {IRelayer} from "contracts/interfaces/IRelayer.sol";
 import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
 import {RelayerLibStorage} from "./RelayerLibStorage.sol";
 import {MessageCodec} from "../common/libraries/MessageCodec.sol";
@@ -22,14 +23,14 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
 
     uint256 internal constant DECIMALS = 1e18;
 
-    IConceroRouter internal immutable i_conceroRouter;
+    IRelayer internal immutable i_conceroRouter;
 
     constructor(
         uint24 chainSelector,
         address conceroPriceFeed,
         address conceroRouter
     ) RelayerLibStorage() Base(chainSelector, conceroPriceFeed) {
-        i_conceroRouter = IConceroRouter(conceroRouter);
+        i_conceroRouter = IRelayer(conceroRouter);
     }
 
     receive() external payable {}

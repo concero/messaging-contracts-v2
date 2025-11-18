@@ -77,9 +77,4 @@ interface IConceroRouter {
      *         returned value as msg.value.
      */
     function getMessageFee(MessageRequest calldata messageRequest) external view returns (uint256);
-
-    /**
-     * @notice Withdraws the Relayer fees earned by the router.
-     */
-    function withdrawRelayerFee(address[] calldata tokens) external;
 }

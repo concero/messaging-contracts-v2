@@ -1,4 +1,4 @@
-import { type Hash } from "viem";
+import {type Hash} from "viem";
 
 export type GlobalConfig = {
 	authorizedPublicKey: string;
@@ -6,7 +6,9 @@ export type GlobalConfig = {
 };
 
 export type DecodedArgs = {
-	messageId: Hash;
-	srcChainSelector: number;
-	blockNumber: string;
+	batches: {
+        messageId: Hash;
+        srcChainSelector: number;
+        blockNumber: string;
+    }[]
 };

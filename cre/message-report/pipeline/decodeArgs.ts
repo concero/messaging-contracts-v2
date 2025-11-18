@@ -1,21 +1,21 @@
 import {type Hex} from "viem";
 import {decodeJson, HTTPPayload} from "@chainlink/cre-sdk";
 
-import {DomainError, ErrorCode} from "../helpers/error";
-import {type DecodedArgs} from "../helpers/types";
+import {type DecodedArgs, DomainError, ErrorCode} from "../helpers";
 
 export function decodeArgs(payload: HTTPPayload): DecodedArgs {
     try {
         const data: Record<string, unknown> = decodeJson(payload.input);
+        const rawList = (data?.batches || []) as DecodedArgs['batches'];
 
-        const messageId = data.messageId as Hex;
-        const srcChainSelector = Number(data.srcChainSelector)
-        const blockNumber = data.blockNumber as string
+        const batches = rawList.map((batch) => ({
+            messageId: batch.messageId as Hex,
+            srcChainSelector: Number(batch.srcChainSelector),
+            blockNumber: batch.blockNumber
+        }))
 
         return {
-            srcChainSelector, 
-            messageId,
-            blockNumber,
+            batches,
         };
     } catch (e) {
         throw new DomainError(ErrorCode.INVALID_DATA);

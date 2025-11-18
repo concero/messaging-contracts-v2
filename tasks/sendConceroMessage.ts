@@ -135,7 +135,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 		log(`Client address: ${clientAddress}`, "send-concero-message");
 
 		const { abi: exampleClientAbi } = await import(
-			"../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
+			"../artifacts/contracts/examples/ConceroClientExample.sol/ConceroClientExample.json"
 		);
 		const { abi: CONCERO_ROUTER_ABI } = await import(
 			"../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
@@ -165,13 +165,14 @@ task("send-concero-message", "Send a test Concero message through the client")
 			gasLimit: 100000,
 		};
 
-		const value = await publicClient.readContract({
-			address: srcConceroRouter,
-			abi: CONCERO_ROUTER_ABI,
+		const value = (await publicClient.readContract({
+			address: clientAddress,
+			abi: exampleClientAbi,
 			functionName: "getMessageFee",
-			args: [Number(dstChainSelector), false, zeroAddress, dstChainData],
-		});
-		log(`Sending with value: ${taskArgs.value} ETH`, "send-concero-message");
+			args: [dstChainData.receiver, Number(dstChainSelector)],
+		})) as bigint;
+
+		log(`Sending with value: ${value} ETH`, "send-concero-message");
 
 		const concurrency = parseInt(taskArgs.concurrency);
 

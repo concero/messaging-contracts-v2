@@ -6,19 +6,14 @@ import { conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { getEnvVar, log, updateEnvVariable } from "../utils";
 
-type DeployArgs = {
-	conceroRouter: string;
-	chainSelector: string;
-};
-
 type DeploymentFunction = (
 	hre: HardhatRuntimeEnvironment,
-	overrideArgs?: Partial<DeployArgs>,
+	overrideArgs?: any,
 ) => Promise<Deployment>;
 
-const deployConceroClientExample: DeploymentFunction = async function (
+const deployRelayerLib: DeploymentFunction = async function (
 	hre: HardhatRuntimeEnvironment,
-	overrideArgs?: Partial<DeployArgs>,
+	overrideArgs?: any,
 ): Promise<Deployment> {
 	const { deployer } = await hre.getNamedAccounts();
 	const { deploy } = hre.deployments;
@@ -28,25 +23,22 @@ const deployConceroClientExample: DeploymentFunction = async function (
 
 	const defaultArgs = {
 		conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
-		relayerLib: getEnvVar(`CONCERO_RELAYER_LIB_${getNetworkEnvKey(name)}`),
+		conceroPriceFeed: getEnvVar(`CONCERO_PRICE_FEED_PROXY_${getNetworkEnvKey(name)}`),
 		chainSelector: chain.chainSelector,
 	};
 
-	const args = {
-		...defaultArgs,
-		...overrideArgs,
-	};
+	const args = { ...defaultArgs, ...overrideArgs };
 
-	const deployment = await deploy("ConceroClientExample", {
+	const deployment = await deploy("RelayerLib", {
 		from: deployer,
-		args: [args.conceroRouter, args.relayerLib],
+		args: [args.chainSelector, args.conceroPriceFeed, args.conceroRouter],
 		log: true,
 		autoMine: true,
 	});
 
-	log(`Deployed at: ${deployment.address}`, "ConceroClientExample", name);
+	log(`Deployed at: ${deployment.address}`, "RelayerLib", name);
 	updateEnvVariable(
-		`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(name)}`,
+		`CONCERO_RELAYER_LIB_${getNetworkEnvKey(name)}`,
 		deployment.address,
 		`deployments.${networkType}`,
 	);
@@ -54,7 +46,7 @@ const deployConceroClientExample: DeploymentFunction = async function (
 	return deployment;
 };
 
-deployConceroClientExample.tags = ["ConceroClientExample"];
+deployRelayerLib.tags = ["RelayerLib"];
 
-export { deployConceroClientExample };
-export default deployConceroClientExample;
+export { deployRelayerLib };
+export default deployRelayerLib;

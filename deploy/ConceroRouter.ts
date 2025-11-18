@@ -82,13 +82,7 @@ const deployRouter: DeploymentFunction = async function (
 
 	const deployment = await deploy("ConceroRouter", {
 		from: deployer,
-		args: [
-			args.chainSelector,
-			args.conceroPriceFeed,
-			args.conceroVerifier,
-			args.conceroVerifierSubId,
-			args.clfSigners,
-		],
+		args: [args.chainSelector, args.conceroPriceFeed],
 		log: true,
 		autoMine: true,
 		// maxFeePerGas,

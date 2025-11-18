@@ -63,10 +63,6 @@ const testingNetworks: Record<"localhost", ConceroLocalNetwork> &
 				privateKey: getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
 				balance: "10000000000000000000000",
 			},
-			{
-				privateKey: getEnvVar("TESTNET_USER_PRIVATE_KEY"),
-				balance: "10000000000000000000000",
-			},
 		],
 		chainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
 		confirmations: 1,

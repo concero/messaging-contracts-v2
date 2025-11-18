@@ -47,7 +47,7 @@ contract RelayerLib is IRelayerLib, RelayerLibStorage, Base {
             (dstGasPrice * uint256(s_submitMsgGasOverhead + gasLimit) * dstNativeRate) / DECIMALS;
     }
 
-    function validate(bytes calldata /* messageReceipt */, address relayer) external {
+    function validate(bytes calldata /* messageReceipt */, address relayer) external view {
         if (!s_isAllowedRelayer[relayer]) {
             revert InvalidRelayer();
         }

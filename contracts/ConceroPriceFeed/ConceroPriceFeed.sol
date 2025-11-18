@@ -29,13 +29,13 @@ contract ConceroPriceFeed is IConceroPriceFeed {
 
     /**
      * @notice Constructor to initialize the contract
-     * @param s_feedUpdater The address that will be allowed to update feeds
+     * @param feedUpdater The address that will be allowed to update feeds
      */
-    constructor(uint24 chainSelector, address s_feedUpdater) {
-        require(s_feedUpdater != address(0), CommonErrors.InvalidAddress());
+    constructor(uint24 chainSelector, address feedUpdater) {
+        require(feedUpdater != address(0), CommonErrors.InvalidAddress());
 
         i_chainSelector = chainSelector;
-        i_feedUpdater = s_feedUpdater;
+        i_feedUpdater = feedUpdater;
     }
 
     /**

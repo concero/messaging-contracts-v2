@@ -147,6 +147,13 @@ library MessageCodec {
         return data[start:start + uint24(bytes3(data[payloadLengthOffset:start]))];
     }
 
+    function calldataPayload(bytes calldata data) internal pure returns (bytes calldata) {
+        uint256 payloadLengthOffset = getPayloadOffset(data);
+        uint256 start = payloadLengthOffset + LENGTH_BYTES_SIZE;
+
+        return data[start:start + uint24(bytes3(data[payloadLengthOffset:start]))];
+    }
+
     // DECODERS
 
     function decodeEvmDstChainData(

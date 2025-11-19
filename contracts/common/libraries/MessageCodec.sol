@@ -66,7 +66,6 @@ library MessageCodec {
         uint32 dstGasLimit
     ) internal pure returns (bytes memory) {
         require(receiver != address(0), IRelayer.InvalidReceiver());
-        require(dstGasLimit > 0, IConceroRouter.InvalidGasLimit());
 
         return abi.encodePacked(receiver, dstGasLimit);
     }

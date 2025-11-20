@@ -7,9 +7,11 @@ import { sha256 } from "viem";
 
 import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
 
+// TODO: fetch rpcs from github
 const chainsOptions = { ...mainnetChainsRPCs, ...testnetChainsRPCs };
 const currentCheckSum = sha256(Buffer.from(JSON.stringify(chainsOptions)));
 
+// TODO: fetch networks from github
 const networksOptions = { ...mainnetDataNetworks, ...testnetDataNetworks };
 const networkCheckSum = sha256(Buffer.from(JSON.stringify(networksOptions)));
 

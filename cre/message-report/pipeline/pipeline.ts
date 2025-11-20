@@ -39,7 +39,7 @@ async function fetchReport(
 	return runtime
 		.report({
 			encoderName: "evm",
-			encodedPayload: sha256(log.data),
+			encodedPayload: sha256(log.data[0]),
 			signingAlgo: "ecdsa",
 			hashingAlgo: "keccak256",
 		})

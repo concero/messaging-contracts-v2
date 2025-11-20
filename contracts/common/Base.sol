@@ -14,9 +14,9 @@ abstract contract Base is ConceroOwnable {
     uint24 internal immutable i_chainSelector;
     IConceroPriceFeed internal immutable i_conceroPriceFeed;
 
-    constructor(uint24 chainSelector, address conceroPriceFeed) {
+    constructor(uint24 chainSelector, address conceroPriceFeed) ConceroOwnable() {
         require(conceroPriceFeed != address(0), CommonErrors.InvalidAddress());
-        i_conceroPriceFeed = IConceroPriceFeed(conceroPriceFeed);
         i_chainSelector = chainSelector;
+        i_conceroPriceFeed = IConceroPriceFeed(conceroPriceFeed);
     }
 }

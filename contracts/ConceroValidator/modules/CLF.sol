@@ -6,18 +6,15 @@
  */
 pragma solidity 0.8.28;
 
-import {FunctionsClient, FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
-
-import {Base} from "./Base.sol";
-
+import {Base} from "../../common/Base.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
 import {CommonTypes} from "../../common/CommonTypes.sol";
 import {CommonConstants} from "../../common/CommonConstants.sol";
-
 import {Decoder} from "../../common/libraries/Decoder.sol";
 import {Errors} from "../libraries/Errors.sol";
-import {Storage as s} from "../libraries/Storage.sol";
+import {FunctionsClient, FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
 
+import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
 import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
 
@@ -161,16 +158,6 @@ abstract contract CLF is FunctionsClient, Base {
 
         (uint256 nativeUsdRate, uint256 lastGasPrice) = i_conceroPriceFeed
             .getNativeUsdRateAndGasPrice();
-
-        // Validate price feed data is available
-        require(
-            nativeUsdRate > 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
-        );
-        require(
-            lastGasPrice > 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.lastGasPrice)
-        );
 
         // Calculate base gas cost for CLF callback
         uint256 gasCost = (gasFeeConfig.clfCallbackGasOverhead + gasFeeConfig.clfCallbackGasLimit) *

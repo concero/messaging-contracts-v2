@@ -29,13 +29,13 @@ contract ConceroPriceFeed is IConceroPriceFeed {
 
     /**
      * @notice Constructor to initialize the contract
-     * @param s_feedUpdater The address that will be allowed to update feeds
+     * @param feedUpdater The address that will be allowed to update feeds
      */
-    constructor(uint24 chainSelector, address s_feedUpdater) {
-        require(s_feedUpdater != address(0), CommonErrors.InvalidAddress());
+    constructor(uint24 chainSelector, address feedUpdater) {
+        require(feedUpdater != address(0), CommonErrors.InvalidAddress());
 
         i_chainSelector = chainSelector;
-        i_feedUpdater = s_feedUpdater;
+        i_feedUpdater = feedUpdater;
     }
 
     /**
@@ -82,13 +82,15 @@ contract ConceroPriceFeed is IConceroPriceFeed {
         }
     }
 
-    // TODO: implement it
+    // @dev always returns value with 18 decimals
     function getUsdRate(address token) external view returns (uint256) {
         s.PriceFeed storage priceFeedStorage = s.priceFeed();
 
         if (token == address(0)) {
             return priceFeedStorage.nativeUsdRate;
         }
+
+        revert TokenIsNotSupported(token);
     }
 
     /**
@@ -96,7 +98,11 @@ contract ConceroPriceFeed is IConceroPriceFeed {
      * @return The current native USD rate in 18 decimals
      */
     function getNativeUsdRate() external view returns (uint256) {
-        return s.priceFeed().nativeUsdRate;
+        uint256 nativeUsdRate = s.priceFeed().nativeUsdRate;
+
+        require(nativeUsdRate > 0, RequiredVariableUnset(RequiredVariableUnsetType.NativeUSDRate));
+
+        return nativeUsdRate;
     }
 
     /**
@@ -105,7 +111,14 @@ contract ConceroPriceFeed is IConceroPriceFeed {
      * @return The native-native exchange rate in 18 decimals
      */
     function getNativeNativeRate(uint24 chainSelector) external view returns (uint256) {
-        return s.priceFeed().nativeNativeRates[chainSelector];
+        uint256 nativeNativeRate = s.priceFeed().nativeNativeRates[chainSelector];
+
+        require(
+            nativeNativeRate > 0,
+            RequiredVariableUnset(RequiredVariableUnsetType.DstNativeRate)
+        );
+
+        return nativeNativeRate;
     }
 
     /**
@@ -114,7 +127,11 @@ contract ConceroPriceFeed is IConceroPriceFeed {
      * @return The last recorded gas price in wei
      */
     function getLastGasPrice(uint24 chainSelector) external view returns (uint256) {
-        return s.priceFeed().lastGasPrices[chainSelector];
+        uint256 lastGasPrice = s.priceFeed().lastGasPrices[chainSelector];
+
+        require(lastGasPrice > 0, RequiredVariableUnset(RequiredVariableUnsetType.LastGasPrice));
+
+        return lastGasPrice;
     }
 
     /**
@@ -124,7 +141,34 @@ contract ConceroPriceFeed is IConceroPriceFeed {
      */
     function getNativeUsdRateAndGasPrice() external view returns (uint256, uint256) {
         s.PriceFeed storage priceFeedStorage = s.priceFeed();
-        return (priceFeedStorage.nativeUsdRate, priceFeedStorage.lastGasPrices[i_chainSelector]);
+
+        uint256 nativeUsdRate = priceFeedStorage.nativeUsdRate;
+        uint256 lastGasPrice = priceFeedStorage.lastGasPrices[i_chainSelector];
+
+        require(nativeUsdRate > 0, RequiredVariableUnset(RequiredVariableUnsetType.NativeUSDRate));
+        require(lastGasPrice > 0, RequiredVariableUnset(RequiredVariableUnsetType.LastGasPrice));
+
+        return (nativeUsdRate, lastGasPrice);
+    }
+
+    /**
+     * @notice Gets the native-native rate and the last gas price for a specific chain
+     * @param chainSelector The chain selector to get the rate and gas price for
+     * @return nativeNativeRate The native-native rate in 18 decimals
+     * @return gasPrice The last recorded gas price in wei
+     */
+    function getNativeNativeRateAndGasPrice(
+        uint24 chainSelector
+    ) external view returns (uint256, uint256) {
+        s.PriceFeed storage priceFeedStorage = s.priceFeed();
+
+        uint256 dstNativeRate = priceFeedStorage.nativeNativeRates[chainSelector];
+        uint256 dstGasPrice = priceFeedStorage.lastGasPrices[chainSelector];
+
+        require(dstGasPrice > 0, RequiredVariableUnset(RequiredVariableUnsetType.DstGasPrice));
+        require(dstNativeRate > 0, RequiredVariableUnset(RequiredVariableUnsetType.DstNativeRate));
+
+        return (dstNativeRate, dstGasPrice);
     }
 
     /**
@@ -158,5 +202,17 @@ contract ConceroPriceFeed is IConceroPriceFeed {
         dstNativeRate = priceFeedStorage.nativeNativeRates[dstChainSelector];
         baseGasPrice = priceFeedStorage.lastGasPrices[baseChainSelector];
         baseNativeRate = priceFeedStorage.nativeNativeRates[baseChainSelector];
+
+        require(nativeUsdRate > 0, RequiredVariableUnset(RequiredVariableUnsetType.NativeUSDRate));
+        require(
+            dstNativeRate > 0 || baseNativeRate > 0,
+            RequiredVariableUnset(RequiredVariableUnsetType.DstNativeRate)
+        );
+        require(
+            dstGasPrice > 0 || baseGasPrice > 0,
+            RequiredVariableUnset(RequiredVariableUnsetType.DstGasPrice)
+        );
+
+        return (nativeUsdRate, dstGasPrice, dstNativeRate, baseGasPrice, baseNativeRate);
     }
 }

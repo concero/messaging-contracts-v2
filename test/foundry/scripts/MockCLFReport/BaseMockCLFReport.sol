@@ -8,7 +8,7 @@ pragma solidity 0.8.28;
 
 import {Test} from "forge-std/src/Test.sol";
 
-import {Types as RouterTypes} from "../../../../contracts/ValidatorLib/libraries/Types.sol";
+import {Types as RouterTypes} from "../../../../contracts/ClfValidatorLib/libraries/Types.sol";
 
 contract BaseMockCLFReport is Test {
     uint256 public constant MOCK_DON_SIGNER_PRIVATE_KEY_0 =

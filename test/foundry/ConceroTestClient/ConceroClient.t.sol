@@ -24,8 +24,16 @@ contract ConceroClientTestBase is ConceroClientTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClient.conceroReceive(messageReceipt, validationChecks);
+        s_conceroClient.conceroReceive(
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib
+        );
     }
 
     function test_constructor_RevertsIfInvalidConceroRouter() public {
@@ -39,7 +47,7 @@ contract ConceroClientTestBase is ConceroClientTest {
         vm.expectRevert(
             abi.encodeWithSelector(IConceroClient.InvalidConceroRouter.selector, address(this))
         );
-        s_conceroClient.conceroReceive(new bytes(0), new bool[](0));
+        s_conceroClient.conceroReceive(new bytes(0), new bool[](0), new address[](0), s_relayerLib);
     }
 
     function test_conceroReceive_RevertsIfRelayerNotAllowed() public {
@@ -55,7 +63,12 @@ contract ConceroClientTestBase is ConceroClientTest {
         );
 
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClient.conceroReceive(messageReceipt, validationChecks);
+        s_conceroClient.conceroReceive(
+            messageReceipt,
+            validationChecks,
+            new address[](1),
+            s_relayerLib
+        );
     }
 
     function test_RequiredMoreValidatorsCount_RevertsIfValidatorsConsensusNotReached() public {
@@ -71,7 +84,12 @@ contract ConceroClientTestBase is ConceroClientTest {
         );
 
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClient.conceroReceive(messageReceipt, validationChecks);
+        s_conceroClient.conceroReceive(
+            messageReceipt,
+            validationChecks,
+            new address[](0),
+            s_relayerLib
+        );
     }
 
     function test_ValidationChecksNotEqualToValidatorsCount_RevertsIfValidatorsConsensusNotReached()
@@ -82,23 +100,23 @@ contract ConceroClientTestBase is ConceroClientTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
-        bytes memory dstRelayerLib = IRelayerLib(s_relayerLib).getDstLib(DST_CHAIN_SELECTOR);
-        bytes[] memory dstValidatorLibs = new bytes[](2);
-        dstValidatorLibs[0] = IValidatorLib(s_validatorLib).getDstLib(DST_CHAIN_SELECTOR);
-        dstValidatorLibs[1] = IValidatorLib(s_validatorLib).getDstLib(DST_CHAIN_SELECTOR);
+        address[] memory dstValidatorLibs = new address[](2);
+        dstValidatorLibs[0] = s_validatorLib;
+        dstValidatorLibs[1] = s_validatorLib;
 
-        bytes memory messageReceipt = _buildMessageReceipt(
-            messageRequest,
-            dstRelayerLib,
-            dstValidatorLibs
-        );
+        bytes memory messageReceipt = _buildMessageReceipt(messageRequest);
 
         vm.expectRevert(
             abi.encodeWithSelector(IConceroClient.ValidatorsConsensusNotReached.selector)
         );
 
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClient.conceroReceive(messageReceipt, validationChecks);
+        s_conceroClient.conceroReceive(
+            messageReceipt,
+            validationChecks,
+            dstValidatorLibs,
+            s_relayerLib
+        );
     }
 
     function test_ValidationCheckIsFalse_RevertsIfValidatorsConsensusNotReached() public {
@@ -112,7 +130,12 @@ contract ConceroClientTestBase is ConceroClientTest {
         );
 
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClient.conceroReceive(messageReceipt, validationChecks);
+        s_conceroClient.conceroReceive(
+            messageReceipt,
+            validationChecks,
+            new address[](1),
+            s_relayerLib
+        );
     }
 
     function test_ValidatorNotAllowed_RevertsIfValidatorsConsensusNotReached() public {
@@ -125,6 +148,11 @@ contract ConceroClientTestBase is ConceroClientTest {
         );
 
         vm.prank(address(s_mockConceroRouter));
-        s_conceroClient.conceroReceive(messageReceipt, new bool[](0));
+        s_conceroClient.conceroReceive(
+            messageReceipt,
+            new bool[](0),
+            new address[](0),
+            s_relayerLib
+        );
     }
 }

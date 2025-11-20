@@ -19,6 +19,4 @@ interface IValidatorLib {
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
     ) external view returns (uint256);
-
-    function getDstLib(uint24 dstChainSelector) external view returns (bytes memory);
 }

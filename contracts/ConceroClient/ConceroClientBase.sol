@@ -24,21 +24,17 @@ abstract contract ConceroClientBase is IConceroClient {
 
     function conceroReceive(
         bytes calldata messageReceipt,
-        bool[] calldata validationChecks
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs,
+        address relayerLib
     ) external {
         require(msg.sender == i_conceroRouter, InvalidConceroRouter(msg.sender));
 
         s.ConceroClientBase storage s_conceroClientBase = s.clientBase();
 
-        //        require(!s_conceroClientBase.isMessageProcessed[messageId], MessageAlreadyProcessed());
-        //        s_conceroClientBase.isMessageProcessed[messageId] = true;
+        require(s_conceroClientBase.isRelayerAllowed[relayerLib], RelayerNotAllowed(relayerLib));
 
-        require(
-            s_conceroClientBase.isRelayerAllowed[messageReceipt.emvDstRelayerLib()],
-            RelayerNotAllowed(messageReceipt.emvDstRelayerLib())
-        );
-
-        _validateMessageReceipt(messageReceipt, validationChecks);
+        _validateMessageSubmission(validationChecks, validatorLibs);
 
         _conceroReceive(messageReceipt);
     }
@@ -47,9 +43,9 @@ abstract contract ConceroClientBase is IConceroClient {
         s.clientBase().isRelayerAllowed[s_relayer] = isAllowed;
     }
 
-    function _validateMessageReceipt(
-        bytes calldata messageReceipt,
-        bool[] calldata validationChecks
+    function _validateMessageSubmission(
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs
     ) internal view virtual;
 
     function _conceroReceive(bytes calldata messageReceipt) internal virtual;

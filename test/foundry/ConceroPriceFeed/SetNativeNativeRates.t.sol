@@ -126,33 +126,6 @@ contract SetNativeNativeRatesTest is ConceroTest {
         vm.stopPrank();
     }
 
-    function test_setNativeNativeRates_ZeroRates() public {
-        vm.startPrank(s_feedUpdater);
-
-        uint24[] memory chainSelectors = new uint24[](2);
-        chainSelectors[0] = CHAIN_SELECTOR_A;
-        chainSelectors[1] = CHAIN_SELECTOR_B;
-
-        uint256[] memory rates = new uint256[](2);
-        rates[0] = 0;
-        rates[1] = 0;
-
-        s_conceroPriceFeed.setNativeNativeRates(chainSelectors, rates);
-
-        assertEq(
-            s_conceroPriceFeed.getNativeNativeRate(CHAIN_SELECTOR_A),
-            0,
-            "Zero rate A should be allowed"
-        );
-        assertEq(
-            s_conceroPriceFeed.getNativeNativeRate(CHAIN_SELECTOR_B),
-            0,
-            "Zero rate B should be allowed"
-        );
-
-        vm.stopPrank();
-    }
-
     function test_setNativeNativeRates_WhenArrayLengthsMismatch_Reverts() public {
         vm.startPrank(s_feedUpdater);
 

@@ -11,18 +11,14 @@ import {Utils as CommonUtils} from "contracts/common/libraries/Utils.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
+import {Base} from "contracts/common/Base.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
-
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 import {Types} from "./libraries/Types.sol";
-
-import {Storage as s} from "./libraries/Storage.sol";
-import {Base} from "./modules/Base.sol";
+import {Base} from "../common/Base.sol";
 import {ClfSigner} from "./modules/ClfSigner.sol";
 
-contract ValidatorLib is IValidatorLib, Base, ClfSigner {
-    using s for s.ValidatorLib;
-
+contract ClfValidatorLib is IValidatorLib, Base, ClfSigner {
     uint8 internal constant VALIDATOR_LIB_FEE_BPS_USD = 100;
 
     constructor(
@@ -35,12 +31,6 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
         Base(chainSelector, conceroPriceFeed)
         ClfSigner(conceroValidator, conceroValidatorSubId, clfSigners)
     {}
-
-    function setDstLib(uint24 dstChainSelector, address dstLib) external onlyOwner {
-        require(dstChainSelector != i_chainSelector, InvalidChainSelector());
-
-        s.validatorLib().dstLibs[dstChainSelector] = abi.encode(dstLib);
-    }
 
     /* Getters */
 
@@ -96,12 +86,7 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
     }
 
     function getFee(IConceroRouter.MessageRequest calldata) external view returns (uint256) {
-        (uint256 nativeUsdRate, ) = i_conceroPriceFeed.getNativeUsdRateAndGasPrice();
-
-        require(
-            nativeUsdRate > 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
-        );
+        uint256 nativeUsdRate = i_conceroPriceFeed.getNativeUsdRate();
 
         uint256 validatorLibFee = CommonUtils.convertUsdBpsToNative(
             VALIDATOR_LIB_FEE_BPS_USD,
@@ -109,9 +94,5 @@ contract ValidatorLib is IValidatorLib, Base, ClfSigner {
         );
 
         return validatorLibFee;
-    }
-
-    function getDstLib(uint24 dstChainSelector) external view returns (bytes memory) {
-        return s.validatorLib().dstLibs[dstChainSelector];
     }
 }

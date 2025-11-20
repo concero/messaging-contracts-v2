@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {Types} from "../ValidatorLib/libraries/Types.sol";
+import {Types} from "../ClfValidatorLib/libraries/Types.sol";
 
 library CommonTypes {
     enum ChainType {

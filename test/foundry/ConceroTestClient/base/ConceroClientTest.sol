@@ -65,37 +65,17 @@ contract ConceroClientTest is ConceroTest {
                 relayerLib: s_relayerLib,
                 validatorConfigs: new bytes[](1),
                 relayerConfig: new bytes(1),
-                validationRpcs: new bytes[](0),
-                deliveryRpcs: new bytes[](0),
                 payload: payload
             });
     }
 
     function _buildMessageReceipt() internal view returns (bytes memory) {
-        bytes[] memory dstValidatorLibs = new bytes[](1);
-        dstValidatorLibs[0] = IValidatorLib(s_validatorLib).getDstLib(DST_CHAIN_SELECTOR);
-
-        return
-            _buildMessageReceipt(
-                _buildMessageRequest(),
-                IRelayerLib(s_relayerLib).getDstLib(DST_CHAIN_SELECTOR),
-                dstValidatorLibs
-            );
+        return _buildMessageReceipt(_buildMessageRequest());
     }
 
     function _buildMessageReceipt(
-        IConceroRouter.MessageRequest memory messageRequest,
-        bytes memory dstRelayerLib,
-        bytes[] memory dstValidatorLibs
+        IConceroRouter.MessageRequest memory messageRequest
     ) internal view returns (bytes memory) {
-        return
-            MessageCodec.toMessageReceiptBytes(
-                messageRequest,
-                SRC_CHAIN_SELECTOR,
-                s_user,
-                1,
-                dstRelayerLib,
-                dstValidatorLibs
-            );
+        return MessageCodec.toMessageReceiptBytes(messageRequest, SRC_CHAIN_SELECTOR, s_user, 1);
     }
 }

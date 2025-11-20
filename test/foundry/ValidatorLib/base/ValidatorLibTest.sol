@@ -6,13 +6,13 @@
  */
 pragma solidity 0.8.28;
 
-import {ValidatorLib} from "contracts/ValidatorLib/ValidatorLib.sol";
+import {ClfValidatorLib} from "contracts/ClfValidatorLib/ClfValidatorLib.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {ConceroClientExample} from "contracts/examples/ConceroClientExample.sol";
 import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
-import {Types} from "contracts/ValidatorLib/libraries/Types.sol";
+import {Types} from "contracts/ClfValidatorLib/libraries/Types.sol";
 import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 import {MessageReport as MockCLFReport} from "../../scripts/MockCLFReport/MessageReport.sol";
 import {DeployValidatorLib} from "../../scripts/deploy/DeployValidatorLib.s.sol";
@@ -24,7 +24,7 @@ abstract contract ValidatorLibTest is ConceroTest {
     address public constant MOCK_DON_SIGNER_ADDRESS_3 = 0x0001E5818621C01908e989851ECB899Af3d57bDc;
     uint8 internal constant VALIDATOR_LIB_FEE_BPS_USD = 100;
 
-    ValidatorLib internal validatorLib;
+    ClfValidatorLib internal validatorLib;
     ConceroClientExample internal conceroClient;
     ConceroRouterHarness internal conceroRouter;
     MockCLFReport internal mockClfReport;
@@ -33,7 +33,7 @@ abstract contract ValidatorLibTest is ConceroTest {
     function setUp() public virtual {
         deployValidatorLib = new DeployValidatorLib();
 
-        validatorLib = new ValidatorLib(
+        validatorLib = new ClfValidatorLib(
             DST_CHAIN_SELECTOR,
             address(s_conceroPriceFeed),
             address(s_conceroValidator),
@@ -121,8 +121,6 @@ abstract contract ValidatorLibTest is ConceroTest {
                 validatorLibs: new address[](0),
                 validatorConfigs: new bytes[](0),
                 relayerConfig: new bytes(0),
-                validationRpcs: new bytes[](0),
-                deliveryRpcs: new bytes[](0),
                 dstChainData: abi.encode(dstChainData),
                 payload: payload
             });

@@ -13,7 +13,7 @@ import {Errors} from "contracts/ConceroValidator/libraries/Errors.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 
 import {Types as ValidatorTypes} from "contracts/ConceroValidator/libraries/Types.sol";
-import {Types as RouterTypes} from "../../../contracts/ValidatorLib/libraries/Types.sol";
+import {Types as RouterTypes} from "../../../contracts/ClfValidatorLib/libraries/Types.sol";
 
 import {MessageReport} from "../scripts/MockCLFReport/MessageReport.sol";
 import {RequestMessageReportTest} from "./RequestMessageReport.t.sol";

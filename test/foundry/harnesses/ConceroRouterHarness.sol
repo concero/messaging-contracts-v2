@@ -20,13 +20,6 @@ contract ConceroRouterHarness is ConceroRouter {
         address conceroPriceFeed
     ) ConceroRouter(chainSelector, conceroPriceFeed) {}
 
-    function exposed_getRelayerFeeEarned(
-        address relayerLib,
-        address feeToken
-    ) external view returns (uint256) {
-        return s.router().relayerFeeEarned[relayerLib][feeToken];
-    }
-
     function exposed_getTotalRelayerFeeEarned(address feeToken) external view returns (uint256) {
         return s.router().totalRelayerFeeEarned[feeToken];
     }

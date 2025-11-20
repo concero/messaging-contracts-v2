@@ -7,12 +7,13 @@
  */
 pragma solidity 0.8.28;
 
-import {Types} from "contracts/ValidatorLib/libraries/Types.sol";
+import {Types} from "contracts/ClfValidatorLib/libraries/Types.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
+import {IConceroPriceFeed} from "contracts/interfaces/IConceroPriceFeed.sol";
 import {ValidatorLibTest} from "./base/ValidatorLibTest.sol";
 
 contract ValidatorLibTests is ValidatorLibTest {
@@ -338,52 +339,11 @@ contract ValidatorLibTests is ValidatorLibTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                CommonErrors.RequiredVariableUnset.selector,
-                CommonErrors.RequiredVariableUnsetType.NativeUSDRate
+                IConceroPriceFeed.RequiredVariableUnset.selector,
+                IConceroPriceFeed.RequiredVariableUnsetType.NativeUSDRate
             )
         );
 
         validatorLib.getFee(messageRequest);
-    }
-
-    /* setDstLib */
-
-    function test_setDstLib_Success() public {
-        address dstLibAddress = address(0x456);
-
-        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
-
-        bytes memory storedDstLib = validatorLib.getDstLib(SRC_CHAIN_SELECTOR);
-        address decodedAddress = abi.decode(storedDstLib, (address));
-
-        assertEq(decodedAddress, dstLibAddress, "Dst lib should be set correctly");
-    }
-
-    function test_setDstLib_RevertsIfNotOwner() public {
-        address dstLibAddress = address(0x456);
-
-        vm.prank(s_user);
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector));
-
-        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
-    }
-
-    function test_setDstLib_RevertsIfSameChain() public {
-        address dstLibAddress = address(0x456);
-
-        vm.expectRevert(abi.encodeWithSelector(IValidatorLib.InvalidChainSelector.selector));
-
-        validatorLib.setDstLib(DST_CHAIN_SELECTOR, dstLibAddress);
-    }
-
-    function test_getDstLib_ReturnsCorrectValue() public {
-        address dstLibAddress = address(0x789);
-
-        validatorLib.setDstLib(SRC_CHAIN_SELECTOR, dstLibAddress);
-
-        bytes memory storedDstLib = validatorLib.getDstLib(SRC_CHAIN_SELECTOR);
-        address decodedAddress = abi.decode(storedDstLib, (address));
-
-        assertEq(decodedAddress, dstLibAddress, "getDstLib should return correct value");
     }
 }

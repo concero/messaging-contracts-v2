@@ -6,7 +6,6 @@ import deployPauseTask from "./deployPause.task";
 import { deployPriceFeedTask } from "./deployPriceFeed/deployPriceFeedTask";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
-import updateSupportedChainsForAllRouters from "./deployRouter/updateSupportedChainsForAllRouters.task";
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
@@ -61,8 +60,7 @@ export {
 	deployConceroPauseToAllChains,
 	fetchTransactionTask,
 	testScript,
-	updateSupportedChainsForAllRouters,
-	sendValueTask,
+	// sendValueTask,
 	updateAllRouterImplementations,
 	deployPauseTask,
 	getNativeUsdRateTask,

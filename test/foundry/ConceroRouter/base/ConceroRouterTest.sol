@@ -25,8 +25,12 @@ abstract contract ConceroRouterTest is ConceroTest {
 
     address internal s_validatorLib = address(new MockConceroValidatorLib());
     address internal s_relayerLib = address(new MockConceroRelayerLib());
+    address[] internal s_validatorLibs = new address[](1);
+    bytes[] internal s_validatorConfigs = new bytes[](s_validatorLibs.length);
 
     function setUp() public virtual {
+        s_validatorLibs[0] = s_validatorLib;
+
         s_conceroRouter = ConceroRouterHarness(
             payable(
                 (new DeployConceroRouter()).deploy(SRC_CHAIN_SELECTOR, address(s_conceroPriceFeed))
@@ -41,15 +45,13 @@ abstract contract ConceroRouterTest is ConceroTest {
 
         vm.startPrank(s_deployer);
         s_conceroRouter.setConceroMessageFeeInUsd(CONCERO_MESSAGE_FEE_IN_USD);
-        s_conceroRouter.setMaxMessageSize(MAX_CONCERO_MESSAGE_SIZE);
         s_conceroRouter.setMaxValidatorsCount(MAX_CONCERO_VALIDATORS_COUNT);
-        s_conceroRouter.setTokenPriceFeed(address(0), address(s_conceroPriceFeed));
         vm.stopPrank();
 
         s_conceroClient = new ConceroTestClient(payable(s_dstConceroRouter));
-		s_conceroClient.setIsRelayerAllowed(s_relayerLib, true);
-		s_conceroClient.setIsValidatorAllowed(s_validatorLib, true);
-		s_conceroClient.setRequiredValidatorsCount(1);
+        s_conceroClient.setIsRelayerAllowed(s_relayerLib, true);
+        s_conceroClient.setIsValidatorAllowed(s_validatorLib, true);
+        s_conceroClient.setRequiredValidatorsCount(1);
 
         vm.deal(s_user, 100 ether);
 
@@ -126,8 +128,6 @@ abstract contract ConceroRouterTest is ConceroTest {
                 relayerLib: s_relayerLib,
                 validatorConfigs: new bytes[](1),
                 relayerConfig: new bytes(1),
-                validationRpcs: new bytes[](0),
-                deliveryRpcs: new bytes[](0),
                 payload: payload
             });
     }
@@ -135,6 +135,22 @@ abstract contract ConceroRouterTest is ConceroTest {
     function _conceroSend() internal returns (bytes32 messageId, bytes memory messageReceipt) {
         vm.recordLogs();
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.prank(s_user);
+        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        messageId = bytes32(entries[0].topics[1]);
+        messageReceipt = abi.decode(entries[0].data, (bytes));
+
+        return (messageId, messageReceipt);
+    }
+
+    function _conceroSend(
+        IConceroRouter.MessageRequest memory messageRequest
+    ) internal returns (bytes32 messageId, bytes memory messageReceipt) {
+        vm.recordLogs();
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
         vm.prank(s_user);

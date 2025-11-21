@@ -1,6 +1,4 @@
-import { Report, Runtime } from "@chainlink/cre-sdk";
-
-import { GlobalConfig } from "../helpers";
+import { Report } from "@chainlink/cre-sdk";
 
 type ResponseItem = {
 	rawReport: string;
@@ -12,7 +10,6 @@ type ResponseItem = {
 };
 
 export const buildResponseFromBatches = (
-	runtime: Runtime<GlobalConfig>,
 	batches: { report: ReturnType<Report["x_generatedCodeOnly_unwrap"]>; messageId: string }[],
 ): Record<string, ResponseItem> => {
 	const responseBody: { [messageId: string]: ResponseItem } = {};

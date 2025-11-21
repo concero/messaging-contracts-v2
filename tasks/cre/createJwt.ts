@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { type Hex, parseSignature } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
@@ -38,7 +37,7 @@ export const createJWT = async (request: JSONRPCRequest, privateKey: Hex): Promi
 		iss: address,
 		iat: now,
 		exp: now + 300, // 5 minutes expiration
-		jti: uuidv4(),
+		jti: crypto.randomUUID(),
 	};
 
 	// Encode header and payload to base64url

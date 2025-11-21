@@ -1,18 +1,18 @@
 import { HTTPPayload, Report, Runtime } from "@chainlink/cre-sdk";
 import { sha256 } from "viem";
 
-import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { DecodedArgs, GlobalConfig } from "../helpers";
 import { ChainsManager, PublicClient } from "../systems";
 import { DeploymentsManager } from "../systems/deploymentsManager";
+import { buildResponseFromBatches } from "./buildResponseFromBatches";
 import { decodeArgs } from "./decodeArgs";
 import { fetchLogByMessageId } from "./fetchLogByMessageId";
-import { sendReportsToRelayer } from "./sendReportsToRelayer";
 import { validateDecodedArgs } from "./validateDecodedArgs";
 
 async function fetchReport(
 	runtime: Runtime<GlobalConfig>,
 	item: DecodedArgs["batch"][number],
-): Promise<Report> {
+): Promise<{ report: ReturnType<Report["x_generatedCodeOnly_unwrap"]>; messageId: string }> {
 	const routerAddress = DeploymentsManager.getDeploymentByChainSelector(item.srcChainSelector);
 	runtime.log(`Got routerAddress=${routerAddress}`);
 	const publicClient = PublicClient.create(runtime, item.srcChainSelector);
@@ -31,19 +31,21 @@ async function fetchReport(
 
 	// TODO: Validate which validator library is specified in the event. If it is not a CRE validator library, do not create a report
 	if (!log || !log?.data) {
-		runtime.log(`No log found for messageId=${item.messageId}`);
-		// TODO: We are batching, so we should not throw an error if we did not find 1 event from the batch.
-		throw new DomainError(ErrorCode.EVENT_NOT_FOUND);
+		runtime.log(`Log where messageId=${item.messageId} not found`);
 	}
 
-	return runtime
-		.report({
-			encoderName: "evm",
-			encodedPayload: sha256(log.data),
-			signingAlgo: "ecdsa",
-			hashingAlgo: "keccak256",
-		})
-		.result();
+	return {
+		messageId: item.messageId,
+		report: runtime
+			.report({
+				encoderName: "evm",
+				encodedPayload: sha256(log.data),
+				signingAlgo: "ecdsa",
+				hashingAlgo: "keccak256",
+			})
+			.result()
+			.x_generatedCodeOnly_unwrap(),
+	};
 }
 
 // pipeline stages for each validation request
@@ -59,10 +61,8 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 
 		const fetchReportPromises = args.batch.map(item => fetchReport(runtime, item));
 		const reports = await Promise.all(fetchReportPromises);
-		sendReportsToRelayer(runtime, reports);
 
-		// @todo: check that should respond with batches
-		return sha256(payload.input);
+		return buildResponseFromBatches(runtime, reports);
 	} catch (error) {
 		runtime.log(
 			`Pipeline failed with error ${error instanceof Error ? `${error.message} ${error.stack}` : error?.toString()}`,

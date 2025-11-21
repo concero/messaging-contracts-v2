@@ -1,7 +1,5 @@
 import { task } from "hardhat/config";
 
-import { uuidV4 } from "ethers";
-
 import { getEnvVar } from "../../utils";
 import { createJWT } from "./createJwt";
 
@@ -15,9 +13,14 @@ task("trigger-cre", "").setAction(async taskArgs => {
 		method: "workflows.execute",
 		params: {
 			input: {
-				messageId: "0x7c3d926037fd649729267301986eabcd3517c34dcb97c484656e93b16e9bec51",
-				srcChainSelector: 80002,
-				blockNumber: 29002698,
+				batch: [
+					{
+						messageId:
+							"0x7c3d926037fd649729267301986eabcd3517c34dcb97c484656e93b16e9bec51",
+						srcChainSelector: 80002,
+						blockNumber: 29002698,
+					},
+				],
 			},
 			workflow: {
 				workflowID: workflowId,

@@ -6,12 +6,12 @@ import { type DecodedArgs, DomainError, ErrorCode } from "../helpers";
 export function decodeArgs(payload: HTTPPayload): DecodedArgs {
 	try {
 		const data: Record<string, unknown> = decodeJson(payload.input);
-		const rawList = (data?.batches || []) as DecodedArgs["batch"];
+		const rawList = (data?.batch || []) as DecodedArgs["batch"];
 
 		const batch = rawList.map(batch => ({
 			messageId: batch.messageId as Hex,
 			srcChainSelector: Number(batch.srcChainSelector),
-			blockNumber: batch.blockNumber,
+			blockNumber: String(batch.blockNumber),
 		}));
 
 		return {

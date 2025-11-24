@@ -37,9 +37,9 @@ library Utils {
         if (decimalsFrom == decimalsTo) return amount;
 
         if (decimalsTo > decimalsFrom) {
-            return amount * (10 ** decimalsTo - decimalsFrom);
+            return amount * (10 ** (decimalsTo - decimalsFrom));
         } else {
-            return amount / (10 ** decimalsFrom - decimalsTo);
+            return amount / (10 ** (decimalsFrom - decimalsTo));
         }
     }
 

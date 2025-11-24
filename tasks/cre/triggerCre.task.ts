@@ -4,7 +4,7 @@ import { getEnvVar } from "../../utils";
 import { createJWT } from "./createJwt";
 
 const creUrl = "https://01.gateway.zone-a.cre.chain.link";
-const workflowId = "003b442fa73b2ada2eb6bf20a0f25441ae579f0b2ca5d9e85cea0ce8cedc20f5";
+const workflowId = "003c08c89f2915b8beb21edfa5e5366f2ed5cb7bd18e893c7d09e5f0ef8944b0";
 
 task("trigger-cre", "").setAction(async taskArgs => {
 	const body = {

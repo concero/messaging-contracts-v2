@@ -8,8 +8,11 @@ pragma solidity ^0.8.20;
 
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 import {IRelayer} from "../../interfaces/IRelayer.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 library MessageCodec {
+    using SafeCast for uint256;
+
     uint8 internal constant VERSION = 1;
 
     uint8 internal constant UINT8_BYTES_LENGTH = 1;
@@ -35,8 +38,6 @@ library MessageCodec {
         address msgSender,
         uint256 _nonce
     ) internal pure returns (bytes memory) {
-        // TODO: validate all lengths
-
         return
             abi.encodePacked(
                 abi.encodePacked(
@@ -44,18 +45,16 @@ library MessageCodec {
                     _srcChainSelector, // 1
                     messageRequest.dstChainSelector, // 4
                     _nonce,
-                    // src chain data
-                    // TODO: add src chain data type byte
                     EVM_SRC_CHAIN_DATA_LENGTH,
                     abi.encodePacked(msgSender, messageRequest.srcBlockConfirmations)
                 ),
                 abi.encodePacked(
-                    uint24(messageRequest.dstChainData.length),
+                    messageRequest.dstChainData.length.toUint24(),
                     messageRequest.dstChainData,
-                    uint24(messageRequest.relayerConfig.length),
+                    messageRequest.relayerConfig.length.toUint24(),
                     messageRequest.relayerConfig,
                     flatBytes(messageRequest.validatorConfigs),
-                    uint24(messageRequest.payload.length),
+                    messageRequest.payload.length.toUint24(),
                     messageRequest.payload
                 )
             );

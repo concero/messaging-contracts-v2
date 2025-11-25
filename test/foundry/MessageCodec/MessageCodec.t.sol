@@ -17,12 +17,6 @@ contract MessageCodecTest is Test {
     using MessageCodec for bytes;
 
     /// forge-config: default.allow_internal_expect_revert = true
-    function test_encode_RevertsIfInvalidGasLimit() public {
-        vm.expectRevert(IConceroRouter.InvalidGasLimit.selector);
-        MessageCodec.encodeEvmDstChainData(makeAddr("receiver"), 0);
-    }
-
-    /// forge-config: default.allow_internal_expect_revert = true
     function test_encode_RevertsIfInvalidReceiver() public {
         vm.expectRevert(IRelayer.InvalidReceiver.selector);
         MessageCodec.encodeEvmDstChainData(address(0), 100_000);

@@ -28,7 +28,7 @@ abstract contract ValidatorLibTest is ConceroTest {
     ConceroClientExample internal conceroClient;
     ConceroRouterHarness internal conceroRouter;
     MockCLFReport internal mockClfReport;
-    DeployValidatorLib deployValidatorLib;
+    DeployValidatorLib internal deployValidatorLib;
 
     function setUp() public virtual {
         deployValidatorLib = new DeployValidatorLib();
@@ -56,7 +56,7 @@ abstract contract ValidatorLibTest is ConceroTest {
         conceroRouter = ConceroRouterHarness(
             payable(new ConceroRouter(DST_CHAIN_SELECTOR, address(s_conceroPriceFeed)))
         );
-        conceroClient = new ConceroClientExample(payable(conceroRouter));
+        conceroClient = new ConceroClientExample(payable(conceroRouter), address(validatorLib));
     }
 
     function _createDstChainData(

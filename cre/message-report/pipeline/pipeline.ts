@@ -64,6 +64,8 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 		const reports = await Promise.all(fetchReportPromises);
 		const response = buildResponseFromBatches(reports);
 		sendReportsToRelayer(runtime, response);
+
+		return "success";
 	} catch (error) {
 		runtime.log(
 			`Pipeline failed with error ${error instanceof Error ? `${error.message} ${error.stack}` : error?.toString()}`,

@@ -1,5 +1,4 @@
 import { Runtime, consensusIdenticalAggregation, cre } from "@chainlink/cre-sdk";
-import type { ReportResponse } from "@chainlink/cre-sdk/dist/generated/sdk/v1alpha/sdk_pb";
 
 import { CRE, GlobalConfig } from "../helpers";
 import { type buildResponseFromBatches } from "./buildResponseFromBatches";
@@ -19,9 +18,7 @@ export const sendReportsToRelayer = (
 	});
 	const httpClient = new cre.capabilities.HTTPClient();
 
-	httpClient.sendReport(response, (res: ReportResponse) => res).result();
-
-	// httpClient
-	// 	.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(runtime.config)
-	// 	.result();
+	httpClient
+		.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(runtime.config)
+		.result();
 };

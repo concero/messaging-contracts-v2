@@ -16,9 +16,9 @@ task("trigger-cre", "").setAction(async taskArgs => {
 				batch: [
 					{
 						messageId:
-							"0x7c3d926037fd649729267301986eabcd3517c34dcb97c484656e93b16e9bec51",
+							"0xddbb3a30d56ea7bf809cb7f71940b01004e0025a0149e2ffe88f154c67d2e8c4",
 						srcChainSelector: 80002,
-						blockNumber: 29002698,
+						blockNumber: 29546068,
 					},
 				],
 			},
@@ -50,4 +50,4 @@ task("trigger-cre", "").setAction(async taskArgs => {
 
 export default {};
 
-// const c = { "messageId": "0x7c3d926037fd649729267301986eabcd3517c34dcb97c484656e93b16e9bec51", "srcChainSelector": 80002, "blockNumber": "29002698" }
+// const c ={"batch": [ { "messageId": "0xddbb3a30d56ea7bf809cb7f71940b01004e0025a0149e2ffe88f154c67d2e8c4", "srcChainSelector": 80002, "blockNumber": "29546068" } ]}

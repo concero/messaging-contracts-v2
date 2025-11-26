@@ -15,5 +15,5 @@ interface IRelayerLib {
         IConceroRouter.MessageRequest calldata messageRequest
     ) external view returns (uint256);
 
-    function validate(bytes calldata messageReceipt, address s_relayer) external;
+    function validate(bytes calldata messageReceipt, address relayer) external;
 }

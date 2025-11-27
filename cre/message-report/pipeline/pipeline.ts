@@ -6,6 +6,7 @@ import { ChainsManager, PublicClient } from "../systems";
 import { buildResponseFromBatches } from "./buildResponseFromBatches";
 import { decodeArgs } from "./decodeArgs";
 import { fetchLogByMessageId } from "./fetchLogByMessageId";
+import { parseMessageSentLog } from "./parseMessageSentLog";
 import { sendReportsToRelayer } from "./sendReportsToRelayer";
 import { validateBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
@@ -35,10 +36,10 @@ async function fetchReport(
 		),
 		publicClient.getBlockNumber(),
 	]);
+	const parsedLog = parseMessageSentLog(log);
 	runtime.log(`Got ConceroMessageSent Log`);
-
-	validateBlockConfirmations(log, currentBlockNumber);
-	validateValidatorLib(log);
+	validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, currentBlockNumber);
+	validateValidatorLib(parsedLog.receipt);
 
 	if (!log || !log?.data) {
 		runtime.log(`Log where messageId=${item.messageId} not found`);

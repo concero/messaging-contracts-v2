@@ -1,3 +1,5 @@
+import { AbiEvent } from "viem";
+
 export namespace ConceroMessageSentEvent {
 	export const name = "ConceroMessageSent";
 	export const inputs = [
@@ -26,4 +28,11 @@ export namespace ConceroMessageSentEvent {
 			type: "address",
 		},
 	];
+
+	export const eventAbi: AbiEvent = {
+		anonymous: false,
+		inputs: inputs,
+		name: name,
+		type: "event",
+	};
 }

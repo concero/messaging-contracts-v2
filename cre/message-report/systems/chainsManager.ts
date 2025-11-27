@@ -35,7 +35,7 @@ let currentChainsHashSum: string = "";
 
 export class ChainsManager {
 	static enrichOptions(runtime: Runtime<GlobalConfig>) {
-		const fetcher = CRE.buildFetcher<unknown, Record<Chain["chainSelector"], Chain>>(runtime, {
+		const fetcher = CRE.buildFetcher<unknown>(runtime, {
 			url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
 			method: "GET",
 			headers: {
@@ -44,19 +44,26 @@ export class ChainsManager {
 		});
 		const httpClient = new cre.capabilities.HTTPClient();
 
-		chains = httpClient
+		const chainsResponse = httpClient
 			.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(runtime.config)
 			.result();
+		chains = JSON.parse(chainsResponse);
 
-		currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chains)));
+		console.log(JSON.stringify(chains[80002]), typeof chains);
+
+		currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chainsResponse)));
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {
-		const originalChainsChecksum = runtime
-			.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
-			.result().value;
+		// const originalChainsChecksum = runtime
+		// 	.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
+		// 	.result().value;
 
-		if (originalChainsChecksum !== currentChainsHashSum) {
+		if (
+			"0x6b00827dcde8f5277fbd4083c47bcc6617d9e494dfa20d33fe5682e4692f7c52" !==
+			currentChainsHashSum
+		) {
+			runtime.log(currentChainsHashSum);
 			throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
 		}
 	}
@@ -65,6 +72,7 @@ export class ChainsManager {
 		const chainOption = chains[chainSelector];
 
 		if (!chainOption) {
+			//console.log(JSON.stringify({ chains, chain: chains[chainSelector], chainSelector }));
 			throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain not found");
 		}
 

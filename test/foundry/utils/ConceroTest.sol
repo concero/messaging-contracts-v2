@@ -8,10 +8,8 @@ pragma solidity 0.8.28;
 
 import {Test} from "forge-std/src/Test.sol";
 import {DeployConceroPriceFeed} from "../scripts/deploy/DeployConceroPriceFeed.s.sol";
-import {DeployConceroValidator} from "../scripts/deploy/DeployConceroValidator.s.sol";
 import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
 import {DeployMockERC20} from "../scripts/deploy/DeployMockERC20.s.sol";
-import {ConceroValidator} from "contracts/ConceroValidator/ConceroValidator.sol";
 import {MockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 
 abstract contract ConceroTest is Test {
@@ -41,17 +39,6 @@ abstract contract ConceroTest is Test {
     ConceroPriceFeed internal s_conceroPriceFeed =
         ConceroPriceFeed(
             payable(new DeployConceroPriceFeed().deploy(SRC_CHAIN_SELECTOR, s_feedUpdater))
-        );
-
-    ConceroValidator internal s_conceroValidator =
-        ConceroValidator(
-            payable(
-                (new DeployConceroValidator()).deploy(
-                    SRC_CHAIN_SELECTOR,
-                    address(s_conceroPriceFeed),
-                    s_clfRouter
-                )
-            )
         );
 
     function _setPriceFeeds() internal {

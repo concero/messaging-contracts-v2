@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {RelayerLib} from "contracts/RelayerLib/RelayerLib.sol";
+import {RelayerLib} from "contracts/relayers/RelayerLib/RelayerLib.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";

@@ -10,7 +10,7 @@ import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/acce
 import {EcdsaValidatorLib} from "./EcdsaValidatorLib.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 
-contract CreValidatorLib is EcdsaValidatorLib, AccessControlUpgradeable {
+contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
     error InvalidCreWorkflowId(bytes32 receivedWorkflowId);
     error MessageReceiptHashMismatch(
         bytes32 messageReceiptHash,
@@ -25,6 +25,8 @@ contract CreValidatorLib is EcdsaValidatorLib, AccessControlUpgradeable {
     uint16 internal constant SIGNATURES_OFFSET = RAW_REPORT_LENGTH + REPORT_CONTEXT_LENGTH;
 
     mapping(bytes32 workflowId => bool isAllowed) internal s_isCreWorkflowIdAllowed;
+
+    constructor() AccessControlUpgradeable() EcdsaValidatorLib() {}
 
     // @dev we expect bytes calldata validation = abi.encodePacked(rawReport, reportContext, abi.encode(signatures));
     // @dev (first 32 bytes of memory contain length of the rawReport)

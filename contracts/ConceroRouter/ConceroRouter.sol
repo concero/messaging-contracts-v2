@@ -7,7 +7,6 @@
 pragma solidity 0.8.28;
 
 import {Base} from "../common/Base.sol";
-import {CommonConstants} from "../common/CommonConstants.sol";
 import {CommonErrors} from "../common/CommonErrors.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 import {IConceroPriceFeed} from "../interfaces/IConceroPriceFeed.sol";

@@ -9,7 +9,7 @@ import { fetchLogByMessageId } from "./fetchLogByMessageId";
 import { sendReportsToRelayer } from "./sendReportsToRelayer";
 import { validateBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
-import { validateRelayerLib } from "./validateRelayerLib";
+import { validateValidatorLib } from "./validateValidatorLib";
 
 async function fetchReport(
 	runtime: Runtime<GlobalConfig>,
@@ -38,9 +38,8 @@ async function fetchReport(
 	runtime.log(`Got ConceroMessageSent Log`);
 
 	validateBlockConfirmations(log, currentBlockNumber);
-	validateRelayerLib(log);
+	validateValidatorLib(log);
 
-	// TODO: Validate which validator library is specified in the event. If it is not a CRE validator library, do not create a report
 	if (!log || !log?.data) {
 		runtime.log(`Log where messageId=${item.messageId} not found`);
 	}

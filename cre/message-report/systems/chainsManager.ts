@@ -55,14 +55,11 @@ export class ChainsManager {
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {
-		// const originalChainsChecksum = runtime
-		// 	.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
-		// 	.result().value;
+		const originalChainsChecksum = runtime
+			.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
+			.result().value;
 
-		if (
-			"0x6b00827dcde8f5277fbd4083c47bcc6617d9e494dfa20d33fe5682e4692f7c52" !==
-			currentChainsHashSum
-		) {
+		if (originalChainsChecksum !== currentChainsHashSum) {
 			runtime.log(currentChainsHashSum);
 			throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
 		}

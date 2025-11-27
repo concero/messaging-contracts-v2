@@ -12,7 +12,7 @@ import {IConceroValidator} from "contracts/interfaces/IConceroValidator.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {IConceroValidator} from "contracts/interfaces/IConceroValidator.sol";
 import {Storage as s} from "../libraries/Storage.sol";
-import {Utils} from "../../common/libraries/Utils.sol";
+import {Utils} from "../../../common/libraries/Utils.sol";
 
 abstract contract Owner is Base {
     using s for s.Validator;

@@ -6,7 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {Base} from "../common/Base.sol";
+import {Base} from "../../common/Base.sol";
 import {CLFParams} from "./libraries/Types.sol";
 import {CLF} from "./modules/CLF.sol";
 import {Owner} from "./modules/Owner.sol";

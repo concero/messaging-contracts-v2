@@ -12,7 +12,7 @@ interface IValidatorLib {
     error InvalidChainSelector();
 
     function isValid(
-        bytes calldata message,
+        bytes calldata messageReceipt,
         bytes calldata validation
     ) external view returns (bool);
 

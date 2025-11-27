@@ -6,17 +6,16 @@
  */
 pragma solidity 0.8.28;
 
-import {Base} from "../../common/Base.sol";
-import {CommonErrors} from "../../common/CommonErrors.sol";
-import {CommonTypes} from "../../common/CommonTypes.sol";
-import {CommonConstants} from "../../common/CommonConstants.sol";
-import {Decoder} from "../../common/libraries/Decoder.sol";
+import {Base} from "../../../common/Base.sol";
+import {CommonErrors} from "../../../common/CommonErrors.sol";
+import {CommonTypes} from "../../../common/CommonTypes.sol";
+import {CommonConstants} from "../../../common/CommonConstants.sol";
+import {Decoder} from "../../../common/libraries/Decoder.sol";
 import {Errors} from "../libraries/Errors.sol";
 import {FunctionsClient, FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol";
-
 import {Storage as s} from "../libraries/Storage.sol";
 import {Types} from "../libraries/Types.sol";
-import {Utils as CommonUtils} from "../../common/libraries/Utils.sol";
+import {Utils as CommonUtils} from "../../../common/libraries/Utils.sol";
 
 abstract contract CLF is FunctionsClient, Base {
     using FunctionsRequest for FunctionsRequest.Request;

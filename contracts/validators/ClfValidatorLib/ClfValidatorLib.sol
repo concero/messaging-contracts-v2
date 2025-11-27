@@ -12,10 +12,10 @@ import {CommonConstants} from "contracts/common/CommonConstants.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {CommonTypes} from "contracts/common/CommonTypes.sol";
 import {Base} from "contracts/common/Base.sol";
-import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
+import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 import {Types} from "./libraries/Types.sol";
-import {Base} from "../common/Base.sol";
+import {Base} from "../../common/Base.sol";
 import {ClfSigner} from "./modules/ClfSigner.sol";
 
 contract ClfValidatorLib is IValidatorLib, Base, ClfSigner {

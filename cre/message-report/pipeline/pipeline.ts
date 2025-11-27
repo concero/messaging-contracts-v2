@@ -7,7 +7,9 @@ import { buildResponseFromBatches } from "./buildResponseFromBatches";
 import { decodeArgs } from "./decodeArgs";
 import { fetchLogByMessageId } from "./fetchLogByMessageId";
 import { sendReportsToRelayer } from "./sendReportsToRelayer";
+import { validateBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
+import { validateRelayerLib } from "./validateRelayerLib";
 
 async function fetchReport(
 	runtime: Runtime<GlobalConfig>,
@@ -23,17 +25,20 @@ async function fetchReport(
 	if (!routerAddress) throw new Error("Router");
 	const publicClient = PublicClient.create(runtime, item.srcChainSelector);
 
-	const log = await fetchLogByMessageId(
-		runtime,
-		publicClient,
-		routerAddress,
-		item.messageId,
-		BigInt(Number(item.blockNumber)),
-	);
+	const [log, currentBlockNumber] = await Promise.all([
+		fetchLogByMessageId(
+			runtime,
+			publicClient,
+			routerAddress,
+			item.messageId,
+			BigInt(Number(item.blockNumber)),
+		),
+		publicClient.getBlockNumber(),
+	]);
 	runtime.log(`Got ConceroMessageSent Log`);
 
-	// TODO: In order to support the wait for a certain
-	//  number of block confirmations, we need to make a parallel request for the current block number and see if there are enough block confirmations.
+	validateBlockConfirmations(log, currentBlockNumber);
+	validateRelayerLib(log);
 
 	// TODO: Validate which validator library is specified in the event. If it is not a CRE validator library, do not create a report
 	if (!log || !log?.data) {
@@ -45,7 +50,7 @@ async function fetchReport(
 		report: runtime
 			.report({
 				encoderName: "evm",
-				encodedPayload: sha256(log.data),
+				encodedPayload: sha256(Buffer.from(JSON.stringify(log.data))),
 				signingAlgo: "ecdsa",
 				hashingAlgo: "keccak256",
 			})

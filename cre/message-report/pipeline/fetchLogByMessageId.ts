@@ -2,7 +2,7 @@ import { Runtime } from "@chainlink/cre-sdk";
 import { type Address, type Log, type PublicClient } from "viem";
 
 import { ConceroMessageSentEvent } from "../abi";
-import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { DomainError, ErrorCode, GlobalConfig, MessageSentLogData } from "../helpers";
 
 const LOG_TAG = "fetchLogByMessageId";
 
@@ -12,7 +12,7 @@ export async function fetchLogByMessageId(
 	address: Address,
 	messageId: string,
 	blockNumber: bigint,
-): Promise<Log> {
+): Promise<Omit<Log, "data"> & { data: MessageSentLogData }> {
 	const fromBlock = blockNumber - 10n;
 	const toBlock = blockNumber;
 
@@ -54,5 +54,5 @@ export async function fetchLogByMessageId(
 		throw new DomainError(ErrorCode.EVENT_NOT_FOUND, "");
 	}
 
-	return log;
+	return log as unknown as Omit<Log, "data"> & { data: MessageSentLogData };
 }

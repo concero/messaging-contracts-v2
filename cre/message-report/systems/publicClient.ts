@@ -61,12 +61,15 @@ export class PublicClient {
 		if (!chain) {
 			throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain not found");
 		}
+		if (!chain.rpcUrls.length) {
+			throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain RPCs not found");
+		}
 
 		const client = createPublicClient({
 			chain: {
-				id: chain.id,
+				id: Number(chain.id),
 				name: chain.name,
-				nativeCurrency: chain.nativeCurrency as any,
+				nativeCurrency: chain.nativeCurrency,
 				rpcUrls: {
 					default: {
 						http: chain.rpcUrls,

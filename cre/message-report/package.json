@@ -1,5 +1,5 @@
 {
-  "name": "typescript-simple-template",
+  "name": "concero-cre-validator",
   "version": "1.0.0",
   "main": "dist/main.js",
   "private": true,
@@ -9,8 +9,6 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@chainlink/cre-sdk": "1.0.0",
-    "@concero/rpcs": "https://github.com/concero/rpcs",
-    "@concero/v2-networks": "https://github.com/concero/v2-networks",
     "json-stable-stringify": "1.3.0",
     "viem": "2.40.3"
   },

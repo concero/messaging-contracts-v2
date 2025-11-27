@@ -1,9 +1,8 @@
 import { HTTPPayload, Report, Runtime } from "@chainlink/cre-sdk";
 import { sha256 } from "viem";
 
-import { DecodedArgs, GlobalConfig } from "../helpers";
+import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { ChainsManager, PublicClient } from "../systems";
-import { DeploymentsManager } from "../systems/deploymentsManager";
 import { buildResponseFromBatches } from "./buildResponseFromBatches";
 import { decodeArgs } from "./decodeArgs";
 import { fetchLogByMessageId } from "./fetchLogByMessageId";
@@ -14,8 +13,14 @@ async function fetchReport(
 	runtime: Runtime<GlobalConfig>,
 	item: DecodedArgs["batch"][number],
 ): Promise<{ report: ReturnType<Report["x_generatedCodeOnly_unwrap"]>; messageId: string }> {
-	const routerAddress = DeploymentsManager.getDeploymentByChainSelector(item.srcChainSelector);
+	const routerAddress = ChainsManager.getOptionsBySelector(item.srcChainSelector).deployments
+		.router;
+	if (!routerAddress) {
+		throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Router deployment not found");
+	}
+
 	runtime.log(`Got routerAddress=${routerAddress}`);
+	if (!routerAddress) throw new Error("Router");
 	const publicClient = PublicClient.create(runtime, item.srcChainSelector);
 
 	const log = await fetchLogByMessageId(
@@ -52,9 +57,8 @@ async function fetchReport(
 // pipeline stages for each validation request
 export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayload) {
 	try {
-		ChainsManager.enrichOptions();
+		ChainsManager.enrichOptions(runtime);
 		ChainsManager.validateOptions(runtime);
-		DeploymentsManager.enrichDeployments(runtime);
 
 		const args = decodeArgs(payload);
 		validateDecodedArgs(args);

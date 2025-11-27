@@ -4,7 +4,7 @@ import { getEnvVar } from "../../utils";
 import { createJWT } from "./createJwt";
 
 const creUrl = "https://01.gateway.zone-a.cre.chain.link";
-const workflowId = "003c08c89f2915b8beb21edfa5e5366f2ed5cb7bd18e893c7d09e5f0ef8944b0";
+const workflowId = "00cdf0f2204462c5341f1e57e34a3515ed6af128fc947930592faa482a92e475";
 
 task("trigger-cre", "").setAction(async taskArgs => {
 	const body = {
@@ -16,9 +16,9 @@ task("trigger-cre", "").setAction(async taskArgs => {
 				batch: [
 					{
 						messageId:
-							"0x7c3d926037fd649729267301986eabcd3517c34dcb97c484656e93b16e9bec51",
+							"0x94cb3ea0ec03a65a6430b5162b6de9cb01c4a3a4e2f5f7fe4f6cbf7beb1f66d5",
 						srcChainSelector: 80002,
-						blockNumber: 29002698,
+						blockNumber: 29613654,
 					},
 				],
 			},

@@ -1,12 +1,17 @@
-import { DecodedMessageSentReceipt, DomainError, ErrorCode } from "../helpers";
+import { Address } from "viem";
+
+import { DomainError, ErrorCode } from "../helpers";
 import { ChainsManager } from "../systems";
 
-export const validateValidatorLib = (logParsedReceipt: DecodedMessageSentReceipt): void => {
-	const srcChain = ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector);
+export const validateValidatorLib = (
+	srcChainSelector: number,
+	logValidatorLibs: Address[],
+): void => {
+	const srcChain = ChainsManager.getOptionsBySelector(srcChainSelector);
 
 	if (
 		!srcChain.deployments.validatorLib ||
-		!logParsedReceipt.validatorLibs
+		!logValidatorLibs
 			.map(i => i.toLowerCase())
 			.includes(srcChain.deployments.validatorLib.toLowerCase())
 	) {

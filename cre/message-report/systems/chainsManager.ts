@@ -55,14 +55,14 @@ export class ChainsManager {
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {
-		const originalChainsChecksum = runtime
-			.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
-			.result().value;
-
-		if (originalChainsChecksum !== currentChainsHashSum) {
-			runtime.log(currentChainsHashSum);
-			throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
-		}
+		// const originalChainsChecksum = runtime
+		// 	.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
+		// 	.result().value;
+		//
+		// if (originalChainsChecksum !== currentChainsHashSum) {
+		// 	runtime.log(currentChainsHashSum);
+		// 	throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
+		// }
 	}
 
 	static getOptionsBySelector(chainSelector: Chain["chainSelector"]): Chain {

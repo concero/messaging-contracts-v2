@@ -1,7 +1,7 @@
 import { HTTPPayload, Report, Runtime } from "@chainlink/cre-sdk";
 import { keccak256 } from "viem";
 
-import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { DecodedArgs, DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
 import { ChainsManager, PublicClient } from "../systems";
 import { buildResponseFromBatches } from "./buildResponseFromBatches";
 import { decodeArgs } from "./decodeArgs";
@@ -37,9 +37,10 @@ async function fetchReport(
 		publicClient.getBlockNumber(),
 	]);
 	const parsedLog = parseMessageSentLog(log);
+
 	runtime.log(`Got ConceroMessageSent Log`);
 	validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, currentBlockNumber);
-	validateValidatorLib(parsedLog.receipt);
+	validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
 
 	if (!log || !log?.data) {
 		runtime.log(`Log where messageId=${item.messageId} not found`);

@@ -11,6 +11,7 @@ export const parseMessageSentLog = (
 	transactionHash: Hex;
 	data: MessageSentLogData;
 	receipt: DecodedMessageSentReceipt;
+	rawMessageReceipt: Hex;
 } => {
 	try {
 		const decodedLog = decodeEventLog({
@@ -28,6 +29,7 @@ export const parseMessageSentLog = (
 			transactionHash: log.transactionHash!,
 			data,
 			receipt,
+			rawMessageReceipt: data.messageReceipt,
 		};
 	} catch (e) {
 		throw new DomainError(ErrorCode.UNKNOWN_ERROR, e?.toString());

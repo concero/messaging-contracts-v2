@@ -1,5 +1,7 @@
 import { changeProxyAdminOwnerTask } from "./changeProxyAdminOwner.task";
 import ensureNativeBalances from "./concero/ensureNativeBalances";
+import { deployCreValidatorLibTask } from "./cre/deployCreValidatorLib.task";
+import triggerCreTask from "./cre/triggerCre.task";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
 import deployPauseTask from "./deployPause.task";
@@ -31,8 +33,7 @@ import {
 	setVerifierGasFeeConfig,
 	upgradeProxyImplementation,
 } from "./utils";
-import withdrawFees from "./withdrawFees"
-import triggerCreTask from "./cre/triggerCre.task";
+import withdrawFees from "./withdrawFees";
 
 export {
 	ensureNativeBalances,
@@ -68,5 +69,6 @@ export {
 	getLastGasPriceTask,
 	changeProxyAdminOwnerTask,
 	sendNativeTokensTask,
-	triggerCreTask
+	triggerCreTask,
+	deployCreValidatorLibTask,
 };

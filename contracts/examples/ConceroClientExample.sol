@@ -16,9 +16,15 @@ contract ConceroClientExample is ConceroClientBase {
     event MessageReceived(bytes32 messageId, bytes message);
 
     address internal immutable i_relayerLib;
+    address internal immutable i_validatorLib;
 
-    constructor(address conceroRouter, address relayerLib) ConceroClientBase(conceroRouter) {
+    constructor(
+        address conceroRouter,
+        address relayerLib,
+        address validatorLib
+    ) ConceroClientBase(conceroRouter) {
         i_relayerLib = relayerLib;
+        i_validatorLib = validatorLib;
 
         _setIsRelayerAllowed(relayerLib, true);
     }
@@ -32,9 +38,13 @@ contract ConceroClientExample is ConceroClientBase {
         address[] calldata validatorLibs
     ) internal view override {}
 
-    function sendConceroMessage(address receiver, uint24 dstChainSelector) external payable {
+    function sendConceroMessage(
+        address receiver,
+        uint24 dstChainSelector,
+        uint64 blockConfirmations
+    ) external payable {
         IConceroRouter(i_conceroRouter).conceroSend{value: msg.value}(
-            _buildMessageRequest(receiver, dstChainSelector)
+            _buildMessageRequest(receiver, dstChainSelector, blockConfirmations)
         );
     }
 
@@ -44,21 +54,25 @@ contract ConceroClientExample is ConceroClientBase {
     ) external view returns (uint256) {
         return
             IConceroRouter(i_conceroRouter).getMessageFee(
-                _buildMessageRequest(receiver, dstChainSelector)
+                _buildMessageRequest(receiver, dstChainSelector, 0)
             );
     }
 
     function _buildMessageRequest(
         address receiver,
-        uint24 dstChainSelector
+        uint24 dstChainSelector,
+        uint64 blockConfirmations
     ) internal view returns (IConceroRouter.MessageRequest memory) {
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = i_validatorLib;
+
         return
             IConceroRouter.MessageRequest({
                 dstChainSelector: dstChainSelector,
-                srcBlockConfirmations: 0,
+                srcBlockConfirmations: blockConfirmations,
                 feeToken: address(0),
                 relayerLib: i_relayerLib,
-                validatorLibs: new address[](0),
+                validatorLibs: validatorLibs,
                 validatorConfigs: new bytes[](0),
                 relayerConfig: new bytes(1),
                 dstChainData: MessageCodec.encodeEvmDstChainData(receiver, 300_000),

@@ -18,6 +18,9 @@ export type EnvPrefixes = {
 	lpToken: string;
 	create3Factory: string;
 	pause: string;
+	creValidatorLib: string;
+	creValidatorLibProxy: string;
+	creValidatorLibProxyAdmin: string;
 };
 /**
  * Update an environment variable in the .env file

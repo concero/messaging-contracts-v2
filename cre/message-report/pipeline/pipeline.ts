@@ -1,5 +1,5 @@
 import { HTTPPayload, Report, Runtime } from "@chainlink/cre-sdk";
-import { sha256 } from "viem";
+import { keccak256 } from "viem";
 
 import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { ChainsManager, PublicClient } from "../systems";
@@ -50,7 +50,7 @@ async function fetchReport(
 		report: runtime
 			.report({
 				encoderName: "evm",
-				encodedPayload: sha256(Buffer.from(JSON.stringify(log.data))),
+				encodedPayload: keccak256(parsedLog.rawMessageReceipt),
 				signingAlgo: "ecdsa",
 				hashingAlgo: "keccak256",
 			})

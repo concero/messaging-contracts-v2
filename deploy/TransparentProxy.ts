@@ -1,5 +1,6 @@
 import { hardhatDeployWrapper } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { Hex } from "viem";
 
 import { DEPLOY_CONFIG_TESTNET, ProxyEnum, conceroNetworks } from "../constants";
 import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
@@ -8,7 +9,12 @@ import { getEnvAddress, getFallbackClients, getViemAccount, log, updateEnvAddres
 const deployTransparentProxy: (
 	hre: HardhatRuntimeEnvironment,
 	proxyType: IProxyType,
-) => Promise<void> = async function (hre: HardhatRuntimeEnvironment, proxyType: IProxyType) {
+	callData?: Hex,
+) => Promise<void> = async function (
+	hre: HardhatRuntimeEnvironment,
+	proxyType: IProxyType,
+	callData: Hex,
+) {
 	const { name } = hre.network;
 	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
 	const { type: networkType } = chain;
@@ -20,6 +26,8 @@ const deployTransparentProxy: (
 		implementationKey = "verifier";
 	} else if (proxyType === ProxyEnum.priceFeedProxy) {
 		implementationKey = "priceFeed";
+	} else if (proxyType === ProxyEnum.creValidatorLibProxy) {
+		implementationKey = "creValidatorLib";
 	} else {
 		throw new Error(`Proxy type ${proxyType} not found`);
 	}
@@ -28,6 +36,7 @@ const deployTransparentProxy: (
 		implementationKey,
 		name,
 	);
+
 	const [proxyAdmin, proxyAdminAlias] = getEnvAddress(`${proxyType}Admin`, name);
 
 	const proxyDeployerViemAccount = getViemAccount(networkType, "proxyDeployer");
@@ -41,7 +50,7 @@ const deployTransparentProxy: (
 
 	const conceroProxyDeployment = await hardhatDeployWrapper("TransparentUpgradeableProxy", {
 		hre,
-		args: [initialImplementation, proxyAdmin, "0x"],
+		args: [initialImplementation, proxyAdmin, callData ?? "0x"],
 		publicClient,
 		proxy: true,
 		gasLimit,

@@ -8,6 +8,6 @@ export const validateValidatorLib = (logParsedReceipt: DecodedMessageSentReceipt
 		!srcChain.deployments.validatorLib ||
 		!logParsedReceipt.validatorLibs.includes(srcChain.deployments.validatorLib)
 	) {
-		throw new DomainError(ErrorCode.UNKNOWN_ERROR, "ValidatorLib is not valid");
+		throw new DomainError(ErrorCode.INVALID_VALIDATOR, "ValidatorLib is not valid");
 	}
 };

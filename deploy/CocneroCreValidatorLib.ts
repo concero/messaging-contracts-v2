@@ -16,7 +16,7 @@ type DeploymentFunction = (
 	overrideArgs?: Partial<DeployArgs>,
 ) => Promise<Deployment>;
 
-const deployConceroClientExample: DeploymentFunction = async function (
+const deployConceroCreValidatorLib: DeploymentFunction = async function (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
 ): Promise<Deployment> {
@@ -27,10 +27,9 @@ const deployConceroClientExample: DeploymentFunction = async function (
 	const { type: networkType } = chain;
 
 	const defaultArgs = {
-		conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
-		relayerLib: getEnvVar(`CONCERO_RELAYER_LIB_${getNetworkEnvKey(name)}`),
-		validatorLib: getEnvVar(`CONCERO_CRE_VALIDATOR_LIB_PROXY_${getNetworkEnvKey(name)}`),
-		chainSelector: chain.chainSelector,
+		// conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
+		// relayerLib: getEnvVar(`CONCERO_RELAYER_LIB_${getNetworkEnvKey(name)}`),
+		// chainSelector: chain.chainSelector,
 	};
 
 	const args = {
@@ -38,16 +37,16 @@ const deployConceroClientExample: DeploymentFunction = async function (
 		...overrideArgs,
 	};
 
-	const deployment = await deploy("ConceroClientExample", {
+	const deployment = await deploy("CreValidatorLib", {
 		from: deployer,
-		args: [args.conceroRouter, args.relayerLib, args.validatorLib],
+		args: [],
 		log: true,
 		autoMine: true,
 	});
 
-	log(`Deployed at: ${deployment.address}`, "ConceroClientExample", name);
+	log(`Deployed at: ${deployment.address}`, "CreValidatorLib", name);
 	updateEnvVariable(
-		`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(name)}`,
+		`CONCERO_CRE_VALIDATOR_LIB_${getNetworkEnvKey(name)}`,
 		deployment.address,
 		`deployments.${networkType}`,
 	);
@@ -55,7 +54,7 @@ const deployConceroClientExample: DeploymentFunction = async function (
 	return deployment;
 };
 
-deployConceroClientExample.tags = ["ConceroClientExample"];
+deployConceroCreValidatorLib.tags = ["CreValidatorLib"];
 
-export { deployConceroClientExample };
-export default deployConceroClientExample;
+export { deployConceroCreValidatorLib };
+export default deployConceroCreValidatorLib;

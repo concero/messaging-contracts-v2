@@ -16,6 +16,7 @@ import { getNativeNativeRateTask } from "./getNativeNativeRate.task";
 import { getNativeUsdRateTask } from "./getNativeUsdRate.task";
 import { sendNativeTokensTask } from "./nativeSender/sendNativeTokens.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
+import { deployRelayerLib } from "./relayer/deployRelayer.task";
 import sendConceroMessage from "./sendConceroMessage";
 import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
 import setOperator from "./setOperator";
@@ -71,4 +72,5 @@ export {
 	sendNativeTokensTask,
 	triggerCreTask,
 	deployCreValidatorLibTask,
+	deployRelayerLib,
 };

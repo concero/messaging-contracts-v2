@@ -3,7 +3,7 @@ import { HTTPSendRequester, Runtime, ok } from "@chainlink/cre-sdk";
 import { GlobalConfig } from "./types";
 
 export namespace CRE {
-	export function buildFetcher<RequestBody = unknown>(
+	export function buildFetcher<RequestBody = unknown, ResponseBody = string>(
 		runtime: Runtime<GlobalConfig>,
 		options: {
 			url: string;
@@ -11,8 +11,8 @@ export namespace CRE {
 			body?: RequestBody;
 			headers?: Record<string, string>;
 		},
-	): (sendRequester: HTTPSendRequester, config: GlobalConfig) => string {
-		return (sendRequester: HTTPSendRequester, config: GlobalConfig): string => {
+	): (sendRequester: HTTPSendRequester, config: GlobalConfig) => ResponseBody {
+		return (sendRequester: HTTPSendRequester, config: GlobalConfig): ResponseBody => {
 			const rawRequestBody =
 				typeof options.body === "string" ? options.body : JSON.stringify(options.body);
 			const bodyRequestBytes = options.body ? new TextEncoder().encode(rawRequestBody) : null;
@@ -32,7 +32,7 @@ export namespace CRE {
 				throw new Error(`HTTP request failed with status: ${response.statusCode}`);
 			}
 
-			return new TextDecoder().decode(response.body);
+			return new TextDecoder().decode(response.body) as ResponseBody;
 		};
 	}
 }

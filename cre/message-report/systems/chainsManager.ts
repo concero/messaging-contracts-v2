@@ -1,83 +1,78 @@
-import { Runtime } from "@chainlink/cre-sdk";
-import mainnetChainsRPCs from "@concero/rpcs/output/mainnet.json";
-import testnetChainsRPCs from "@concero/rpcs/output/testnet.json";
-import mainnetDataNetworks from "@concero/v2-networks/networks/mainnet.json";
-import testnetDataNetworks from "@concero/v2-networks/networks/testnet.json";
+import { Runtime, consensusIdenticalAggregation, cre } from "@chainlink/cre-sdk";
 import { sha256 } from "viem";
 
-import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { CRE, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 
-// TODO: fetch rpcs from github
-const chainsOptions = { ...mainnetChainsRPCs, ...testnetChainsRPCs };
-const currentCheckSum = sha256(Buffer.from(JSON.stringify(chainsOptions)));
+export enum DeploymentType {
+	Router = "router",
+	ValidatorLib = "validatorLib",
+	RelayerLib = "relayerLib",
+}
+export type DeploymentAddress = `0x${string}`;
 
-// TODO: fetch networks from github
-const networksOptions = { ...mainnetDataNetworks, ...testnetDataNetworks };
-const networkCheckSum = sha256(Buffer.from(JSON.stringify(networksOptions)));
-
-type Options = {
-	id: number;
+export type Chain = {
+	id: string;
+	chainSelector: number;
 	name: string;
-	selector: number;
+	isTestnet: boolean;
+	finalityConfirmations: number;
 	rpcUrls: string[];
-	nativeCurrency?: {
+	blockExplorers: {
+		name: string;
+		url: string;
+		apiUrl: string;
+	}[];
+	nativeCurrency: {
 		name: string;
 		symbol: string;
 		decimals: number;
 	};
-	finalityConfirmations: number;
+	deployments: Partial<Record<DeploymentType, DeploymentAddress>>;
 };
 
-export const chainSelectorToOptions: Record<number, Options> = {};
+let chains: Record<Chain["chainSelector"], Chain> = {};
+let currentChainsHashSum: string = "";
 
 export class ChainsManager {
-	static enrichOptions() {
-		Object.values(chainsOptions).forEach(i => {
-			if (i && i.rpcUrls) {
-				chainSelectorToOptions[i.chainSelector] = {
-					id: Number(i.chainId),
-					name: "unknown chain",
-					selector: i.chainSelector,
-					rpcUrls: i.rpcUrls,
-					finalityConfirmations: 0,
-				};
-			}
+	static enrichOptions(runtime: Runtime<GlobalConfig>) {
+		const fetcher = CRE.buildFetcher<unknown>(runtime, {
+			url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
 		});
-		Object.values(networksOptions).forEach(i => {
-			if (i && i.rpcUrls) {
-				chainSelectorToOptions[i.chainSelector] = {
-					...chainSelectorToOptions?.[i.chainSelector],
-					name: i.name,
-					nativeCurrency: i.nativeCurrency,
-					finalityConfirmations: i.finalityConfirmations,
-				};
-			}
-		});
+		const httpClient = new cre.capabilities.HTTPClient();
+
+		const chainsResponse = httpClient
+			.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(runtime.config)
+			.result();
+		chains = JSON.parse(chainsResponse);
+
+		console.log(JSON.stringify(chains[80002]), typeof chains);
+
+		currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chainsResponse)));
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {
-		/*  const originalChainsChecksum = runtime.getSecret({id: 'CHAINS_CONFIG_HASHSUM'}).result().value
-        const originalNetworksChecksum = runtime.getSecret({id: 'NETWORKS_CONFIG_HASHSUM'}).result().value
-        if (currentCheckSum === originalChainsChecksum){
-            throw new Error('Invalid chains checksum');
-        }
-        if (networkCheckSum === originalNetworksChecksum){
-            throw new Error('Invalid networks checksum');
-        }*/
+		const originalChainsChecksum = runtime
+			.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
+			.result().value;
+
+		if (originalChainsChecksum !== currentChainsHashSum) {
+			runtime.log(currentChainsHashSum);
+			throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
+		}
 	}
 
-	static getOptionsBySelector(chainSelector: number): Options {
-		const chainOption = chainSelectorToOptions[chainSelector];
+	static getOptionsBySelector(chainSelector: Chain["chainSelector"]): Chain {
+		const chainOption = chains[chainSelector];
 
 		if (!chainOption) {
+			//console.log(JSON.stringify({ chains, chain: chains[chainSelector], chainSelector }));
 			throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Chain not found");
 		}
 
 		return chainOption;
-	}
-
-	static findOptionsByName(chainName: string): Options | null {
-		const chainOption = Object.values(chainSelectorToOptions).find(i => i.name === chainName);
-		return chainOption || null;
 	}
 }

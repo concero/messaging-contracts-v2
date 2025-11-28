@@ -1,8 +1,8 @@
 import { Runtime } from "@chainlink/cre-sdk";
 import { type Address, type Log, type PublicClient } from "viem";
 
-import { ConceroMessageLogParams, conceroMessageSentEventName } from "../abi";
-import { DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
+import { ConceroMessageSentEvent } from "../abi";
+import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
 
 const LOG_TAG = "fetchLogByMessageId";
 
@@ -25,22 +25,22 @@ export async function fetchLogByMessageId(
 		logs = await client.getLogs({
 			event: {
 				type: "event",
-				inputs: ConceroMessageLogParams,
-				name: conceroMessageSentEventName,
+				inputs: ConceroMessageSentEvent.inputs,
+				name: ConceroMessageSentEvent.name,
 			},
 			address,
 			fromBlock,
 			toBlock,
 		});
 		// runtime.log(`${LOG_TAG} Fetched successfully ${Utility.safeJSONStringify({ logs })})`);
-		runtime.log(`${LOG_TAG} Fetched successfully)`);
+		runtime.log(`${LOG_TAG} Fetched successfully`);
 	} catch (e) {
 		runtime.log(`${LOG_TAG} Fetching failed`);
 		throw e;
 	}
 
 	if (!logs.length) {
-		runtime.log(`${LOG_TAG} Logs are empty`);
+		runtime.log(`${LOG_TAG} Logs are empty (length=${logs.length})`);
 		throw new DomainError(ErrorCode.EVENT_NOT_FOUND, "Logs are empty");
 	}
 
@@ -51,7 +51,7 @@ export async function fetchLogByMessageId(
 
 	if (!log) {
 		runtime.log(`${LOG_TAG} Log not found`);
-		throw new DomainError(ErrorCode.EVENT_NOT_FOUND, "");
+		throw new DomainError(ErrorCode.EVENT_NOT_FOUND);
 	}
 
 	return log;

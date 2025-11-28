@@ -1,36 +1,46 @@
 import { HTTPPayload, Report, Runtime } from "@chainlink/cre-sdk";
 import { sha256 } from "viem";
 
-import { DecodedArgs, GlobalConfig } from "../helpers";
+import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { ChainsManager, PublicClient } from "../systems";
-import { DeploymentsManager } from "../systems/deploymentsManager";
 import { buildResponseFromBatches } from "./buildResponseFromBatches";
 import { decodeArgs } from "./decodeArgs";
 import { fetchLogByMessageId } from "./fetchLogByMessageId";
+import { parseMessageSentLog } from "./parseMessageSentLog";
 import { sendReportsToRelayer } from "./sendReportsToRelayer";
+import { validateBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
+import { validateValidatorLib } from "./validateValidatorLib";
 
 async function fetchReport(
 	runtime: Runtime<GlobalConfig>,
 	item: DecodedArgs["batch"][number],
 ): Promise<{ report: ReturnType<Report["x_generatedCodeOnly_unwrap"]>; messageId: string }> {
-	const routerAddress = DeploymentsManager.getDeploymentByChainSelector(item.srcChainSelector);
+	const routerAddress = ChainsManager.getOptionsBySelector(item.srcChainSelector).deployments
+		.router;
+	if (!routerAddress) {
+		throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Router deployment not found");
+	}
+
 	runtime.log(`Got routerAddress=${routerAddress}`);
+	if (!routerAddress) throw new Error("Router");
 	const publicClient = PublicClient.create(runtime, item.srcChainSelector);
 
-	const log = await fetchLogByMessageId(
-		runtime,
-		publicClient,
-		routerAddress,
-		item.messageId,
-		BigInt(Number(item.blockNumber)),
-	);
+	const [log, currentBlockNumber] = await Promise.all([
+		fetchLogByMessageId(
+			runtime,
+			publicClient,
+			routerAddress,
+			item.messageId,
+			BigInt(Number(item.blockNumber)),
+		),
+		publicClient.getBlockNumber(),
+	]);
+	const parsedLog = parseMessageSentLog(log);
 	runtime.log(`Got ConceroMessageSent Log`);
+	validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, currentBlockNumber);
+	validateValidatorLib(parsedLog.receipt);
 
-	// TODO: In order to support the wait for a certain
-	//  number of block confirmations, we need to make a parallel request for the current block number and see if there are enough block confirmations.
-
-	// TODO: Validate which validator library is specified in the event. If it is not a CRE validator library, do not create a report
 	if (!log || !log?.data) {
 		runtime.log(`Log where messageId=${item.messageId} not found`);
 	}
@@ -40,7 +50,7 @@ async function fetchReport(
 		report: runtime
 			.report({
 				encoderName: "evm",
-				encodedPayload: sha256(log.data),
+				encodedPayload: sha256(Buffer.from(JSON.stringify(log.data))),
 				signingAlgo: "ecdsa",
 				hashingAlgo: "keccak256",
 			})
@@ -52,9 +62,8 @@ async function fetchReport(
 // pipeline stages for each validation request
 export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayload) {
 	try {
-		ChainsManager.enrichOptions();
+		ChainsManager.enrichOptions(runtime);
 		ChainsManager.validateOptions(runtime);
-		DeploymentsManager.enrichDeployments(runtime);
 
 		const args = decodeArgs(payload);
 		validateDecodedArgs(args);
@@ -64,6 +73,8 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 		const reports = await Promise.all(fetchReportPromises);
 		const response = buildResponseFromBatches(reports);
 		sendReportsToRelayer(runtime, response);
+
+		return "success";
 	} catch (error) {
 		runtime.log(
 			`Pipeline failed with error ${error instanceof Error ? `${error.message} ${error.stack}` : error?.toString()}`,

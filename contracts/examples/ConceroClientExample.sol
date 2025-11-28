@@ -73,7 +73,7 @@ contract ConceroClientExample is ConceroClientBase {
                 feeToken: address(0),
                 relayerLib: i_relayerLib,
                 validatorLibs: validatorLibs,
-                validatorConfigs: new bytes[](0),
+                validatorConfigs: new bytes[](1),
                 relayerConfig: new bytes(1),
                 dstChainData: MessageCodec.encodeEvmDstChainData(receiver, 300_000),
                 payload: "Hello world!"

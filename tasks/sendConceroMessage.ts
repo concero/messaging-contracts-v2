@@ -53,7 +53,7 @@ async function sendSingleMessage({
 			address: clientAddress,
 			abi: [...exampleClientAbi, ...routerAbi],
 			functionName: "sendConceroMessage",
-			args: [dstChainClient, dstChainSelector],
+			args: [dstChainClient, dstChainSelector, 0],
 			account: walletClient.account,
 			value,
 		});
@@ -167,7 +167,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 
 		const value = (await publicClient.readContract({
 			address: clientAddress,
-			abi: exampleClientAbi,
+			abi: [...exampleClientAbi, ...CONCERO_ROUTER_ABI],
 			functionName: "getMessageFee",
 			args: [dstChainData.receiver, Number(dstChainSelector)],
 		})) as bigint;

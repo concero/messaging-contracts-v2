@@ -51,7 +51,9 @@ async function fetchReport(
 		report: runtime
 			.report({
 				encoderName: "evm",
-				encodedPayload: keccak256(parsedLog.rawMessageReceipt),
+				encodedPayload: Buffer.from(
+					keccak256(parsedLog.rawMessageReceipt, "bytes"),
+				).toString("base64"),
 				signingAlgo: "ecdsa",
 				hashingAlgo: "keccak256",
 			})

@@ -29,6 +29,8 @@ export async function upgradeProxyImplementation(
 		implementationKey = "verifier";
 	} else if (proxyType === ProxyEnum.priceFeedProxy) {
 		implementationKey = "priceFeed";
+	} else if (proxyType === ProxyEnum.creValidatorLibProxy) {
+		implementationKey = "creValidatorLib";
 	} else {
 		err(`Proxy type ${proxyType} not found`, "upgradeProxyImplementation", chainName);
 		return;

@@ -46,6 +46,10 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
         return 0;
     }
 
+    function isWorkflowIdAllowed(bytes32 workflowId) external view returns (bool) {
+        return s_isCreWorkflowIdAllowed[workflowId];
+    }
+
     // INITIALIZER
 
     function initialize(address admin) public initializer {
@@ -80,7 +84,7 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
             keccak256(
                 abi.encodePacked(
                     keccak256(validation[:RAW_REPORT_LENGTH]),
-                    validation[RAW_REPORT_LENGTH:REPORT_CONTEXT_LENGTH]
+                    validation[RAW_REPORT_LENGTH:SIGNATURES_OFFSET]
                 )
             )
         );

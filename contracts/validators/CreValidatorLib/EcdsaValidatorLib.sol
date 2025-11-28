@@ -42,6 +42,7 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
 
     function _verifySignatures(bytes calldata validation) internal view {
         (bytes[] memory signatures, bytes32 hash) = _extractSignaturesAndHash(validation);
+
         require(
             signatures.length == s_expectedSignersCount,
             InvalidSignaturesCount(signatures.length, s_expectedSignersCount)
@@ -50,13 +51,21 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
         address[] memory signers = new address[](signatures.length);
 
         for (uint256 i; i < signatures.length; ++i) {
-            address signer = hash.recover(signatures[i]);
+            address signer = _recoverSignature(signatures[i], hash);
             require(s_isSignerAllowed[signer], InvalidSigner(signer));
             for (uint256 k; k < signers.length; ++k) {
                 require(signer != signers[k], DuplicateSigner(signer));
             }
             signers[i] = signer;
         }
+    }
+
+    function _recoverSignature(
+        bytes memory signature,
+        bytes32 hash
+    ) internal pure virtual returns (address) {
+        signature[signature.length - 1] = bytes1(uint8(signature[signature.length - 1]) + 27);
+        return hash.recover(signature);
     }
 
     function _setAllowedSigners(address[] calldata signers, bool[] calldata isAllowedArr) internal {

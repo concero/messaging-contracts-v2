@@ -19,13 +19,9 @@ library Storage {
     }
 
     struct Router {
-        uint96 conceroMessageFeeInUsd; // @dev always has NATIVE_DECIMALS decimals
-        uint16 maxValidatorsCount;
-        mapping(address feeToken => FeeTokenConfig feeTokenConfig) feeTokenConfigs;
         mapping(address sender => mapping(uint24 srcChainSelector => mapping(uint24 dstChainSelector => uint256 nonce))) nonce;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
         mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryable;
-        mapping(address feeToken => uint256 totalFeeEarned) totalRelayerFeeEarned;
         mapping(address relayerLib => mapping(address feeToken => uint256 feeEarned)) relayerFeeEarned;
     }
 

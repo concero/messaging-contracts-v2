@@ -28,7 +28,8 @@ contract MessageCodecTest is Test {
         address sender,
         uint256 nonce,
         address receiver,
-        uint32 dstChainGasLimit
+        uint32 dstChainGasLimit,
+        bytes[] calldata validatorConfigs
     ) public view {
         _assumeMessageRequest(messageRequest, dstChainGasLimit, receiver);
 
@@ -40,7 +41,8 @@ contract MessageCodecTest is Test {
         bytes memory messageReceipt = messageRequest.toMessageReceiptBytes(
             srcChainSelector,
             sender,
-            nonce
+            nonce,
+            validatorConfigs
         );
 
         this.decodeAndCheck(
@@ -50,7 +52,8 @@ contract MessageCodecTest is Test {
             sender,
             nonce,
             receiver,
-            dstChainGasLimit
+            dstChainGasLimit,
+            validatorConfigs
         );
     }
 
@@ -61,26 +64,27 @@ contract MessageCodecTest is Test {
         address sender,
         uint256 nonce,
         address receiver,
-        uint32 dstChainGasLimit
+        uint32 dstChainGasLimit,
+        bytes[] calldata validatorConfigs
     ) external pure {
-        (address decodedSender, uint64 srcBlockConfirmations) = messageReceipt.evmSrcChainData();
-        (address decodedReceiver, uint32 decodedGasLimit) = messageReceipt.evmDstChainData();
+        {
+            (address decodedSender, uint64 srcBlockConfirmations) = messageReceipt
+                .evmSrcChainData();
+            (address decodedReceiver, uint32 decodedGasLimit) = messageReceipt.evmDstChainData();
+            assertEq(decodedSender, sender);
+            assertEq(srcBlockConfirmations, messageRequest.srcBlockConfirmations);
+            assertEq(decodedGasLimit, dstChainGasLimit);
+            assertEq(decodedReceiver, receiver);
+        }
 
-        assertEq(messageReceipt.version(), MessageCodec.VERSION, "version");
+        assertEq(messageReceipt.version(), MessageCodec.VERSION);
         assertEq(messageReceipt.srcChainSelector(), srcChainSelector);
         assertEq(messageReceipt.dstChainSelector(), messageRequest.dstChainSelector);
-        assertEq(decodedSender, sender);
         assertEq(messageReceipt.nonce(), nonce);
-        assertEq(
-            srcBlockConfirmations,
-            messageRequest.srcBlockConfirmations,
-            "srcBlockConfirmations"
-        );
-        assertEq(decodedReceiver, receiver);
-        assertEq(decodedGasLimit, dstChainGasLimit);
         assertEq(messageRequest.relayerConfig, messageReceipt.relayerConfig());
         assertEq(messageReceipt.validatorConfigs(), messageRequest.validatorConfigs);
         assertEq(messageReceipt.payload(), messageRequest.payload);
+        assertEq(messageReceipt.internalValidatorsConfig(), validatorConfigs);
     }
 
     function _assumeMessageRequest(

@@ -10,20 +10,17 @@ import {RelayerLib} from "contracts/relayers/RelayerLib/RelayerLib.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
+import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
 import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 import {Storage as s} from "contracts/ConceroRouter/libraries/Storage.sol";
 
 contract MockConceroRouterWithFee is ConceroRouter {
     using s for s.Router;
 
-    constructor(
-        uint24 chainSelector,
-        address conceroPriceFeed
-    ) ConceroRouter(chainSelector, conceroPriceFeed) {}
+    constructor(uint24 chainSelector) ConceroRouter(chainSelector) {}
 
     function setRelayerFee(address relayerLib, uint256 relayerFee, address feeToken) external {
         s.router().relayerFeeEarned[relayerLib][feeToken] = relayerFee;
-        s.router().totalRelayerFeeEarned[feeToken] = relayerFee;
     }
 }
 
@@ -31,17 +28,19 @@ abstract contract RelayerLibTest is ConceroTest {
     RelayerLib internal s_relayerLib;
     MockConceroRouterWithFee internal mockConceroRouterWithFee;
 
+    bytes[] internal s_internalValidatorConfigs = new bytes[](1);
+
     function setUp() public virtual {
-        mockConceroRouterWithFee = new MockConceroRouterWithFee(
-            SRC_CHAIN_SELECTOR,
-            address(s_conceroPriceFeed)
-        );
+        mockConceroRouterWithFee = new MockConceroRouterWithFee(SRC_CHAIN_SELECTOR);
+        s_internalValidatorConfigs[0] = ValidatorCodec.encodeEvmConfig(VALIDATION_GAS_LIMIT);
 
         s_relayerLib = new RelayerLib(
             SRC_CHAIN_SELECTOR,
             address(s_conceroPriceFeed),
             address(mockConceroRouterWithFee)
         );
+        s_relayerLib.initialize(address(this));
+
         s_relayerLib.setSubmitMsgGasOverhead(SUBMIT_MSG_GAS_OVERHEAD);
     }
 

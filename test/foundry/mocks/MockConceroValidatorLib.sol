@@ -8,6 +8,7 @@ pragma solidity 0.8.28;
 
 import {IValidatorLib} from "../../../contracts/interfaces/IValidatorLib.sol";
 import {IConceroRouter} from "../../../contracts/interfaces/IConceroRouter.sol";
+import {ValidatorCodec} from "../../../contracts/common/libraries/ValidatorCodec.sol";
 
 contract MockConceroValidatorLib is IValidatorLib {
     enum ValidationBehavior {
@@ -38,7 +39,23 @@ contract MockConceroValidatorLib is IValidatorLib {
         return true;
     }
 
-    function getFee(IConceroRouter.MessageRequest calldata) external view returns (uint256) {
+    function getFeeAndValidatorConfig(
+        IConceroRouter.MessageRequest calldata messageRequest
+    ) external view returns (uint256, bytes memory) {
+        return (getFee(messageRequest), getValidatorConfig(messageRequest));
+    }
+
+    function getValidatorConfig(
+        IConceroRouter.MessageRequest calldata
+    ) public view virtual returns (bytes memory) {
+        return ValidatorCodec.encodeEvmConfig(100_000);
+    }
+
+    function isFeeTokenSupported(address) public pure returns (bool) {
+        return true;
+    }
+
+    function getFee(IConceroRouter.MessageRequest calldata) public view returns (uint256) {
         return s_validationFeeInNative;
     }
 

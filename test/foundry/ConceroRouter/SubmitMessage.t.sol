@@ -197,24 +197,6 @@ contract SubmitMessage is ConceroRouterTest {
         s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
     }
 
-    function test_submitMessage_RevertsIfUnauthorizedRelayerLib() public {
-        (, bytes memory messageReceipt) = _conceroSend();
-        bytes[] memory validations = new bytes[](1);
-        validations[0] = abi.encode(true);
-
-        address[] memory validatorLibs = new address[](1);
-        validatorLibs[0] = s_validatorLib;
-
-        s_conceroClient.setIsRelayerLibAllowed(s_relayerLib, false);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(IConceroClient.UnauthorizedRelayerLib.selector, s_relayerLib)
-        );
-
-        vm.prank(s_relayer);
-        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
-    }
-
     function test_submitMessage_validationChecks_EmptyValidation() public {
         (bytes32 messageId, bytes memory messageReceipt) = _conceroSend();
         bytes[] memory validations = new bytes[](1);

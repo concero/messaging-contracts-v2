@@ -15,6 +15,7 @@ import {MockConceroValidatorLib} from "../mocks/MockConceroValidatorLib.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MockPriceFeed} from "../mocks/MockPriceFeed.sol";
 import {ConceroRouterHarness} from "../harnesses/ConceroRouterHarness.sol";
+import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
 
 contract FeeCalculation is ConceroRouterTest {
     uint256 internal VALIDATOR_FEE = 0.01 ether;
@@ -25,7 +26,6 @@ contract FeeCalculation is ConceroRouterTest {
 
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
-        uint256 conceroFee = s_conceroRouter.getConceroFee(messageRequest.feeToken);
 
         vm.prank(s_user);
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
@@ -35,24 +35,14 @@ contract FeeCalculation is ConceroRouterTest {
             s_relayerLib,
             messageRequest.feeToken
         );
-        uint256 totalRelayerFeeEarned = s_conceroRouter.exposed_getTotalRelayerFeeEarned(
-            messageRequest.feeToken
-        );
 
         assertEq(routerBalanceAfter - routerBalanceBefore, messageFee);
-        assertEq(relayerFeeEarned, messageFee - conceroFee);
-        assertEq(totalRelayerFeeEarned, messageFee - conceroFee);
+        assertEq(relayerFeeEarned, messageFee);
     }
 
     function test_chargeFeeInErc20() public {
         vm.startPrank(s_deployer);
-        s_conceroRouter = new ConceroRouterHarness(
-            SRC_CHAIN_SELECTOR,
-            address(new MockPriceFeed())
-        );
-        s_conceroRouter.setTokenConfig(address(s_usdc), true, uint8(6));
-        s_conceroRouter.setMaxValidatorsCount(MAX_CONCERO_VALIDATORS_COUNT);
-        vm.stopPrank();
+        s_conceroRouter = new ConceroRouterHarness(SRC_CHAIN_SELECTOR);
 
         deal(address(s_usdc), s_user, 100 ether);
 
@@ -61,7 +51,6 @@ contract FeeCalculation is ConceroRouterTest {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(address(s_usdc));
 
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
-        uint256 conceroFee = s_conceroRouter.getConceroFee(messageRequest.feeToken);
 
         vm.startPrank(s_user);
         IERC20(s_usdc).approve(address(s_conceroRouter), messageFee);
@@ -73,25 +62,9 @@ contract FeeCalculation is ConceroRouterTest {
             s_relayerLib,
             messageRequest.feeToken
         );
-        uint256 totalRelayerFeeEarned = s_conceroRouter.exposed_getTotalRelayerFeeEarned(
-            messageRequest.feeToken
-        );
 
         assertEq(routerBalanceAfter - routerBalanceBefore, messageFee);
-        assertEq(relayerFeeEarned, messageFee - conceroFee);
-        assertEq(totalRelayerFeeEarned, messageFee - conceroFee);
-    }
-
-    /* getConceroFee */
-
-    function test_getConceroFee_CalculatesCorrectly() public view {
-        address feeToken = address(0);
-        uint256 conceroFee = s_conceroRouter.getConceroFee(feeToken);
-
-        uint256 expectedConceroFee = (uint256(CONCERO_MESSAGE_FEE_IN_USD) * 1e18) /
-            s_conceroPriceFeed.getUsdRate(feeToken);
-
-        assertEq(conceroFee, expectedConceroFee);
+        assertEq(relayerFeeEarned, messageFee);
     }
 
     /* getMessageFee */
@@ -99,13 +72,18 @@ contract FeeCalculation is ConceroRouterTest {
     function test_getMessageFee_CalculatesCorrectly() public view {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 
-        uint256 relayerFee = MockConceroRelayerLib(payable(s_relayerLib)).getFee(messageRequest);
+        bytes[] memory validatorConfigs = new bytes[](1);
+        validatorConfigs[0] = ValidatorCodec.encodeEvmConfig(10_000);
+
+        uint256 relayerFee = MockConceroRelayerLib(payable(s_relayerLib)).getFee(
+            messageRequest,
+            validatorConfigs
+        );
         uint256 validatorFee = MockConceroValidatorLib(s_validatorLib).getFee(messageRequest);
-        uint256 conceroFee = s_conceroRouter.getConceroFee(messageRequest.feeToken);
 
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
-        uint256 totalFee = relayerFee + validatorFee + conceroFee;
+        uint256 totalFee = relayerFee + validatorFee;
         assertEq(messageFee, totalFee);
     }
 
@@ -115,14 +93,12 @@ contract FeeCalculation is ConceroRouterTest {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 
         uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
-        uint256 conceroFee = s_conceroRouter.getConceroFee(messageRequest.feeToken);
-        uint256 relayerFee = messageFee - conceroFee - VALIDATOR_FEE;
+        uint256 relayerFee = messageFee - VALIDATOR_FEE;
 
         uint256[] memory validatorsFee = new uint256[](1);
         validatorsFee[0] = VALIDATOR_FEE;
 
         IConceroRouter.Fee memory fee = IConceroRouter.Fee({
-            concero: conceroFee,
             relayer: relayerFee,
             validatorsFee: validatorsFee,
             token: messageRequest.feeToken
@@ -148,14 +124,6 @@ contract FeeCalculation is ConceroRouterTest {
         );
         vm.prank(s_user);
         s_conceroRouter.conceroSend{value: messageFee - 1}(messageRequest);
-    }
-
-    function test_conceroSend_RevertsIfUnsupportedFeeToken() public {
-        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(s_usdc);
-
-        vm.expectRevert(abi.encodeWithSelector(IConceroRouter.UnsupportedFeeToken.selector));
-        vm.prank(s_user);
-        s_conceroRouter.conceroSend(messageRequest);
     }
 
     /* withdrawRelayerFee */
@@ -185,78 +153,5 @@ contract FeeCalculation is ConceroRouterTest {
 
         vm.prank(address(s_relayerLib));
         s_conceroRouter.withdrawRelayerFee(tokens);
-    }
-
-    /* withdrawConceroFee */
-
-    function test_withdrawConceroFee_Success() public {
-        _conceroSend();
-
-        uint256 expectedConceroFee = s_conceroRouter.getConceroFeeEarned(address(0));
-
-        uint256 balanceBefore = s_deployer.balance;
-        address[] memory tokens = new address[](1);
-
-        vm.prank(s_deployer);
-        s_conceroRouter.withdrawConceroFee(tokens);
-
-        assertEq(s_deployer.balance, balanceBefore + expectedConceroFee);
-    }
-
-    function test_withdrawConceroFee_RevertsIfNotOwner() public {
-        _conceroSend();
-
-        address[] memory tokens = new address[](1);
-
-        vm.expectRevert();
-        vm.prank(s_user);
-        s_conceroRouter.withdrawConceroFee(tokens);
-    }
-
-    function testFuzz_withdrawErc20ConceroFeeToken(uint256 earnedFee) public {
-        deal(s_usdc, address(s_conceroRouter), earnedFee);
-
-        uint256 conceroFeeEarned = s_conceroRouter.getConceroFeeEarned(s_usdc);
-        uint256 deployerBalanceBefore = IERC20(s_usdc).balanceOf(s_deployer);
-        address[] memory tokens = new address[](1);
-        tokens[0] = s_usdc;
-
-        if (earnedFee > 0) {
-            vm.expectEmit(true, true, false, true);
-            emit ConceroRouter.ConceroFeeWithdrawn(s_usdc, conceroFeeEarned);
-        }
-
-        vm.prank(s_deployer);
-        s_conceroRouter.withdrawConceroFee(tokens);
-
-        assertEq(IERC20(s_usdc).balanceOf(s_deployer) - deployerBalanceBefore, conceroFeeEarned);
-    }
-
-    /* setConceroMessageFeeInUsd */
-
-    function testFuzz_setConceroMessageFeeInUsd_Success(uint96 newFee) public {
-        vm.prank(s_deployer);
-        s_conceroRouter.setConceroMessageFeeInUsd(newFee);
-
-        uint256 conceroFee = s_conceroRouter.getConceroFee(address(0));
-        uint256 expectedFee = (uint256(newFee) * 1e18) / s_conceroPriceFeed.getUsdRate(address(0));
-
-        assertEq(conceroFee, expectedFee);
-    }
-
-    function test_setConceroMessageFeeInUsd_RevertsIfNotOwner() public {
-        vm.expectRevert();
-        vm.prank(s_user);
-        s_conceroRouter.setConceroMessageFeeInUsd(1e6);
-    }
-
-    /* isFeeTokenSupported */
-
-    function test_isFeeTokenSupported_ReturnsTrueIfSupported() public view {
-        assertTrue(s_conceroRouter.isFeeTokenSupported(address(0)));
-    }
-
-    function test_isFeeTokenSupported_ReturnsFalseIfNotSupported() public view {
-        assertFalse(s_conceroRouter.isFeeTokenSupported(s_usdc));
     }
 }

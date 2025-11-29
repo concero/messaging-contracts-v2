@@ -8,6 +8,8 @@ pragma solidity 0.8.28;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IValidatorLib} from "../../interfaces/IValidatorLib.sol";
+import {ValidatorCodec} from "../../common/libraries/ValidatorCodec.sol";
+import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 
 abstract contract EcdsaValidatorLib is IValidatorLib {
     using ECDSA for bytes32;
@@ -18,8 +20,17 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
     error InvalidSignersCount(uint256 signersCount, uint256 isAllowedArrLength);
 
     mapping(address signer => bool isAllowed) internal s_isSignerAllowed;
+    mapping(uint24 => uint32 dstChainGasLimit) internal s_dstChainGasLimits;
     uint8 internal s_minSignersCount;
     uint256[50] private __gap;
+
+    // VIEW FUNCTION //
+
+    function getValidatorConfig(
+        IConceroRouter.MessageRequest calldata messageRequest
+    ) public view virtual returns (bytes memory) {
+        return ValidatorCodec.encodeEvmConfig(s_dstChainGasLimits[messageRequest.dstChainSelector]);
+    }
 
     function isValid(
         bytes calldata messageReceipt,

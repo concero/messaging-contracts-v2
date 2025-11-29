@@ -19,6 +19,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Vm} from "forge-std/src/Vm.sol";
 import {MockPriceFeed} from "../mocks/MockPriceFeed.sol";
 import {ConceroRouterHarness} from "../harnesses/ConceroRouterHarness.sol";
+import {ValidatorCodec} from "../../../contracts/common/libraries/ValidatorCodec.sol";
 
 /**
  * @title MaliciousERC20Token
@@ -105,7 +106,7 @@ contract MaliciousERC20Token is IERC20 {
         return _transfer(from, to, amount);
     }
 
-    function _attemptReentrancyAttack(address attacker, uint256 amount) internal returns (bool) {
+    function _attemptReentrancyAttack(address attacker, uint256) internal returns (bool) {
         // Build a VALID message request to re-enter conceroSend - must pass _validateMessageParams
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = s_validatorLib; // Use actual configured validator
@@ -125,7 +126,7 @@ contract MaliciousERC20Token is IERC20 {
         // This is the actual reentrancy attempt - call conceroSend during transferFrom
         // The attacker would try to send a message with the same parameters to corrupt state
 
-        try i_router.conceroSend(attackRequest) returns (bytes32 messageId) {
+        try i_router.conceroSend(attackRequest) returns (bytes32) {
             // If this succeeds, it indicates the reentrancy attack worked
             // This should NOT happen due to the atomic nonce increment
             emit AttackFailed("ATTACK SUCCEEDED - This would be a critical vulnerability!");
@@ -244,6 +245,10 @@ contract MaliciousValidatorLib is IValidatorLib {
         i_conceroRouter = conceroRouter;
     }
 
+    function isFeeTokenSupported(address) public pure returns (bool) {
+        return true;
+    }
+
     /**
      * @notice getFee function - note: interface requires view but EVM doesn't enforce this
      * @dev This demonstrates that a malicious validator could theoretically attempt reentrancy
@@ -252,7 +257,7 @@ contract MaliciousValidatorLib is IValidatorLib {
      */
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
-    ) external view returns (uint256) {
+    ) public view returns (uint256) {
         // Simulate attack consideration (we can't actually execute it due to view modifier)
         // In a real attack, this would be a non-view function that attempts reentrancy
         uint256 attackNonce = uint256(
@@ -268,6 +273,18 @@ contract MaliciousValidatorLib is IValidatorLib {
         // Return a fee that reflects the attack was considered
         // The slight variation shows we're testing the reentrancy vector conceptually
         return 0.001 ether + attackNonce * 1 wei;
+    }
+
+    function getFeeAndValidatorConfig(
+        IConceroRouter.MessageRequest calldata messageRequest
+    ) external view returns (uint256, bytes memory) {
+        return (getFee(messageRequest), getValidatorConfig(messageRequest));
+    }
+
+    function getValidatorConfig(
+        IConceroRouter.MessageRequest calldata
+    ) public view virtual returns (bytes memory) {
+        return ValidatorCodec.encodeEvmConfig(80_000);
     }
 
     function isValid(bytes calldata, bytes calldata) external pure returns (bool) {
@@ -338,7 +355,8 @@ contract MaliciousRelayerLib is IRelayerLib {
      *      during the fee calculation phase
      */
     function getFee(
-        IConceroRouter.MessageRequest calldata messageRequest
+        IConceroRouter.MessageRequest calldata messageRequest,
+        bytes[] calldata
     ) external view returns (uint256) {
         // In a real attack, this would attempt to call conceroSend again during fee calculation
         // Since this is a view function, we cannot actually attempt the reentrancy
@@ -364,6 +382,10 @@ contract MaliciousRelayerLib is IRelayerLib {
         // Return a fee that reflects the attack was considered
         // The slight variation shows we're testing the reentrancy vector
         return 0.001 ether + attackNonce * 1 wei;
+    }
+
+    function isFeeTokenSupported(address) public pure returns (bool) {
+        return true;
     }
 
     function validate(bytes calldata, address) external {}
@@ -395,14 +417,6 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
             s_validatorLib,
             s_relayerLib
         );
-
-        // Configure the malicious token as supported by the router
-        vm.prank(s_deployer);
-        s_conceroRouter.setTokenConfig(address(s_maliciousToken), true, 18);
-
-        // Note: The price feed only supports native tokens (address(0)) in the current implementation
-        // For testing purposes, we'll use the existing USDC token which should be configured
-        // or modify the test to demonstrate the vulnerability concept without actual execution
     }
 
     function test_reentrantSubmitMessage() public {
@@ -548,13 +562,8 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
      *      The attack attempts to call conceroSend() during the token transfer to corrupt state
      */
     function test_tokenTransferReentrancyVulnerability() public {
-        // Create a new router with mock price feed that supports tokens
         vm.startPrank(s_deployer);
-        ConceroRouterHarness maliciousRouter = new ConceroRouterHarness(
-            SRC_CHAIN_SELECTOR,
-            address(new MockPriceFeed())
-        );
-        maliciousRouter.setMaxValidatorsCount(MAX_CONCERO_VALIDATORS_COUNT);
+        ConceroRouterHarness maliciousRouter = new ConceroRouterHarness(SRC_CHAIN_SELECTOR);
         vm.stopPrank();
 
         // Deploy a new malicious token for this specific test
@@ -563,10 +572,6 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
             s_validatorLib,
             s_relayerLib
         );
-
-        // Configure the malicious token as supported by the router
-        vm.prank(s_deployer);
-        maliciousRouter.setTokenConfig(address(testMaliciousToken), true, 18);
 
         // Mint tokens to the user
         testMaliciousToken.mint(s_user, 10 ether);
@@ -594,7 +599,7 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
 
         // Approve the router to spend tokens
         vm.prank(s_user);
-        testMaliciousToken.approve(address(maliciousRouter), messageFee);
+        testMaliciousToken.approve(address(maliciousRouter), messageFee * 3);
 
         // Record logs to capture attack events
         vm.recordLogs();
@@ -718,7 +723,8 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
         );
     }
 
-    // Helper function - use existing one from base contract
+    // HELPERS
+
     function _buildMaliciousMessageRequest()
         internal
         view
@@ -729,11 +735,9 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
         return request;
     }
 
-    // HELPERS
-
     function _buildMessageSubmission(
         bytes memory payload
-    ) internal returns (bytes memory, bytes[] memory) {
+    ) internal view returns (bytes memory, bytes[] memory) {
         IConceroRouter.MessageRequest memory messageRequest = IConceroRouter.MessageRequest({
             dstChainSelector: SRC_CHAIN_SELECTOR,
             srcBlockConfirmations: 3,
@@ -752,7 +756,8 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
         bytes memory messageReceipt = messageRequest.toMessageReceiptBytes(
             DST_CHAIN_SELECTOR,
             address(this),
-            1
+            1,
+            s_internalValidatorConfigs
         );
 
         bytes[] memory validations = new bytes[](1);

@@ -19,4 +19,14 @@ interface IValidatorLib {
     function getFee(
         IConceroRouter.MessageRequest calldata messageRequest
     ) external view returns (uint256);
+
+    function getValidatorConfig(
+        IConceroRouter.MessageRequest calldata messageRequest
+    ) external view returns (bytes memory);
+
+    function getFeeAndValidatorConfig(
+        IConceroRouter.MessageRequest calldata messageRequest
+    ) external view returns (uint256, bytes memory);
+
+    function isFeeTokenSupported(address feeToken) external view returns (bool);
 }

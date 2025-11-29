@@ -10,7 +10,6 @@ import {Test} from "forge-std/src/Test.sol";
 import {DeployConceroPriceFeed} from "../scripts/deploy/DeployConceroPriceFeed.s.sol";
 import {ConceroPriceFeed} from "contracts/ConceroPriceFeed/ConceroPriceFeed.sol";
 import {DeployMockERC20} from "../scripts/deploy/DeployMockERC20.s.sol";
-import {MockCLFRouter} from "contracts/mocks/MockCLFRouter.sol";
 
 abstract contract ConceroTest is Test {
     address public s_deployer = vm.envAddress("DEPLOYER_ADDRESS");
@@ -21,15 +20,15 @@ abstract contract ConceroTest is Test {
     address public s_relayer = makeAddr("relayer");
     address internal s_feedUpdater = makeAddr("feedUpdater");
     address public s_usdc = address(new DeployMockERC20().deployERC20("USD Coin", "USDC", 6));
-    address public s_clfRouter = address(new MockCLFRouter());
 
     uint24 public constant SRC_CHAIN_SELECTOR = 1;
     uint24 public constant DST_CHAIN_SELECTOR = 8453;
     uint256 internal constant NATIVE_USD_RATE = 2000e18; // Assuming 1 ETH = $2000
     uint256 internal constant LAST_GAS_PRICE = 1e9;
     uint96 internal constant CONCERO_MESSAGE_FEE_IN_USD = 0.1e18; // $0.1
-    uint64 internal MAX_CONCERO_MESSAGE_SIZE = 1000000; // 1 mb
-    uint8 internal MAX_CONCERO_VALIDATORS_COUNT = 20;
+    uint64 internal constant MAX_CONCERO_MESSAGE_SIZE = 1000000; // 1 mb
+    uint8 internal constant MAX_CONCERO_VALIDATORS_COUNT = 20;
+    uint32 internal constant VALIDATION_GAS_LIMIT = 100_000;
 
     uint32 public constant SUBMIT_MSG_GAS_OVERHEAD = 150_000;
     uint32 public constant VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD = 330_000;

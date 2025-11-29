@@ -20,7 +20,6 @@ interface IConceroRouter {
     }
 
     struct Fee {
-        uint256 concero;
         uint256 relayer;
         uint256[] validatorsFee;
         address token;
@@ -30,7 +29,7 @@ interface IConceroRouter {
     error UnsupportedFeeToken();
     error PayloadTooLarge(uint256 receivedLength, uint256 expectedLength);
     error EmptyDstChainData();
-    error InvalidValidatorsCount(uint256 validatorsCount, uint256 maxValidatorsCount);
+
     error InvalidValidatorConfigsCount(uint256 validatorConfigsCount, uint256 validatorLibsCount);
     error InvalidGasLimit();
 

@@ -9,11 +9,15 @@ pragma solidity ^0.8.20;
 import {IConceroRouter} from "./IConceroRouter.sol";
 
 interface IRelayerLib {
-    error InvalidRelayer();
+    error InvalidRelayer(address relayer);
+    error InvalidOperatorConfigType(uint8);
 
     function getFee(
-        IConceroRouter.MessageRequest calldata messageRequest
+        IConceroRouter.MessageRequest calldata messageRequest,
+        bytes[] calldata operatorConfig
     ) external view returns (uint256);
 
     function validate(bytes calldata messageReceipt, address relayer) external;
+
+    function isFeeTokenSupported(address feeToken) external view returns (bool);
 }

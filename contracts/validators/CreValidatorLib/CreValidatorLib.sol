@@ -9,6 +9,7 @@ pragma solidity 0.8.28;
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {EcdsaValidatorLib} from "./EcdsaValidatorLib.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
+import {ValidatorCodec} from "../../common/libraries/ValidatorCodec.sol";
 
 contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
     error InvalidCreWorkflowId(bytes32 receivedWorkflowId);
@@ -42,12 +43,22 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
 
     // VIEW FUNCTIONS
 
-    function getFee(IConceroRouter.MessageRequest calldata) external pure returns (uint256) {
+    function getFee(IConceroRouter.MessageRequest calldata) public pure returns (uint256) {
         return 0;
+    }
+
+    function getFeeAndValidatorConfig(
+        IConceroRouter.MessageRequest calldata messageRequest
+    ) external view returns (uint256, bytes memory) {
+        return (getFee(messageRequest), getValidatorConfig(messageRequest));
     }
 
     function isWorkflowIdAllowed(bytes32 workflowId) external view returns (bool) {
         return s_isCreWorkflowIdAllowed[workflowId];
+    }
+
+    function isFeeTokenSupported(address feeToken) public pure returns (bool) {
+        return feeToken == address(0);
     }
 
     // INITIALIZER

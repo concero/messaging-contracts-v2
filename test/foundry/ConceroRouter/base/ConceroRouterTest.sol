@@ -7,16 +7,14 @@
 pragma solidity 0.8.28;
 
 import {Vm} from "forge-std/src/Vm.sol";
-import {console} from "forge-std/src/console.sol";
-
 import {MockConceroRelayerLib} from "../../mocks/MockConceroRelayerLib.sol";
 import {ConceroRouterHarness} from "../../harnesses/ConceroRouterHarness.sol";
 import {ConceroTestClient} from "../../ConceroTestClient/ConceroTestClient.sol";
 import {ConceroTest} from "../../utils/ConceroTest.sol";
-import {DeployConceroRouter} from "../../scripts/deploy/DeployConceroRouter.s.sol";
 import {MockConceroValidatorLib} from "../../mocks/MockConceroValidatorLib.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
+import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
 
 abstract contract ConceroRouterTest is ConceroTest {
     ConceroTestClient internal s_conceroClient;
@@ -27,26 +25,15 @@ abstract contract ConceroRouterTest is ConceroTest {
     address internal s_relayerLib = address(new MockConceroRelayerLib());
     address[] internal s_validatorLibs = new address[](1);
     bytes[] internal s_validatorConfigs = new bytes[](s_validatorLibs.length);
+    bytes[] internal s_internalValidatorConfigs = new bytes[](s_validatorLibs.length);
 
     function setUp() public virtual {
         s_validatorLibs[0] = s_validatorLib;
+        s_internalValidatorConfigs[0] = ValidatorCodec.encodeEvmConfig(100_000);
 
-        s_conceroRouter = ConceroRouterHarness(
-            payable(
-                (new DeployConceroRouter()).deploy(SRC_CHAIN_SELECTOR, address(s_conceroPriceFeed))
-            )
-        );
+        s_conceroRouter = new ConceroRouterHarness(SRC_CHAIN_SELECTOR);
 
-        s_dstConceroRouter = ConceroRouterHarness(
-            payable(
-                (new DeployConceroRouter()).deploy(DST_CHAIN_SELECTOR, address(s_conceroPriceFeed))
-            )
-        );
-
-        vm.startPrank(s_deployer);
-        s_conceroRouter.setConceroMessageFeeInUsd(CONCERO_MESSAGE_FEE_IN_USD);
-        s_conceroRouter.setMaxValidatorsCount(MAX_CONCERO_VALIDATORS_COUNT);
-        vm.stopPrank();
+        s_dstConceroRouter = new ConceroRouterHarness(DST_CHAIN_SELECTOR);
 
         s_conceroClient = new ConceroTestClient(payable(s_dstConceroRouter));
         s_conceroClient.setIsRelayerLibAllowed(s_relayerLib, true);

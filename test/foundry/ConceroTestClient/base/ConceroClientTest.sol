@@ -15,6 +15,7 @@ import {ConceroTestClient} from "../../ConceroTestClient/ConceroTestClient.sol";
 import {MockConceroValidatorLib} from "../../mocks/MockConceroValidatorLib.sol";
 import {MockConceroRelayerLib} from "../../mocks/MockConceroRelayerLib.sol";
 import {ConceroTestClientAdvanced} from "../../ConceroTestClient/ConceroTestClientAdvanced.sol";
+import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
 
 contract ConceroClientTest is ConceroTest {
     ConceroTestClient internal s_conceroClient;
@@ -76,6 +77,16 @@ contract ConceroClientTest is ConceroTest {
     function _buildMessageReceipt(
         IConceroRouter.MessageRequest memory messageRequest
     ) internal view returns (bytes memory) {
-        return MessageCodec.toMessageReceiptBytes(messageRequest, SRC_CHAIN_SELECTOR, s_user, 1);
+        bytes[] memory internalValidatorConfigs = new bytes[](1);
+        internalValidatorConfigs[0] = ValidatorCodec.encodeEvmConfig(100_000);
+
+        return
+            MessageCodec.toMessageReceiptBytes(
+                messageRequest,
+                SRC_CHAIN_SELECTOR,
+                s_user,
+                1,
+                internalValidatorConfigs
+            );
     }
 }

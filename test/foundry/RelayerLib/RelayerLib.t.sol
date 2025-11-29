@@ -44,12 +44,12 @@ contract RelayerLibTests is RelayerLibTest {
             GAS_LIMIT
         );
 
-        uint256 fee = s_relayerLib.getFee(messageRequest);
+        uint256 fee = s_relayerLib.getFee(messageRequest, s_internalValidatorConfigs);
 
         uint256 dstGasPrice = LAST_GAS_PRICE;
         uint256 dstNativeRate = 1e18; // 1:1 rate
         uint256 expectedFee = (dstGasPrice *
-            uint256(SUBMIT_MSG_GAS_OVERHEAD + GAS_LIMIT) *
+            uint256(SUBMIT_MSG_GAS_OVERHEAD + GAS_LIMIT + VALIDATION_GAS_LIMIT) *
             dstNativeRate) / 1e18;
 
         assertEq(fee, expectedFee, "Fee should match expected amount");
@@ -77,7 +77,7 @@ contract RelayerLibTests is RelayerLibTest {
             )
         );
 
-        s_relayerLib.getFee(messageRequest);
+        s_relayerLib.getFee(messageRequest, s_internalValidatorConfigs);
     }
 
     function test_getFee_RevertsIfDstNativeRateIsZero() public {
@@ -101,7 +101,7 @@ contract RelayerLibTests is RelayerLibTest {
             )
         );
 
-        s_relayerLib.getFee(messageRequest);
+        s_relayerLib.getFee(messageRequest, s_internalValidatorConfigs);
     }
 
     /* validate */
@@ -118,7 +118,7 @@ contract RelayerLibTests is RelayerLibTest {
     }
 
     function test_validate_RevertsIfUnauthorizedRelayerLib() public {
-        vm.expectRevert(abi.encodeWithSelector(IRelayerLib.InvalidRelayer.selector));
+        vm.expectRevert(abi.encodeWithSelector(IRelayerLib.InvalidRelayer.selector, s_relayer));
         s_relayerLib.validate(new bytes(0), s_relayer);
     }
 
@@ -164,7 +164,9 @@ contract RelayerLibTests is RelayerLibTest {
         isAllowed[0] = true;
 
         vm.prank(s_user);
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector));
+        vm.expectRevert(
+            "AccessControl: account 0x6ca6d1e2d5347bfab1d91e883f1915560e09129d is missing role 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42"
+        );
 
         s_relayerLib.setRelayers(relayers, isAllowed);
     }
@@ -193,11 +195,12 @@ contract RelayerLibTests is RelayerLibTest {
             GAS_LIMIT
         );
 
-        uint256 fee = s_relayerLib.getFee(messageRequest);
+        uint256 fee = s_relayerLib.getFee(messageRequest, s_internalValidatorConfigs);
         uint256 dstGasPrice = LAST_GAS_PRICE;
         uint256 dstNativeRate = 1e18;
-        uint256 expectedFee = (dstGasPrice * uint256(newOverhead + GAS_LIMIT) * dstNativeRate) /
-            1e18;
+        uint256 expectedFee = (dstGasPrice *
+            uint256(newOverhead + GAS_LIMIT + VALIDATION_GAS_LIMIT) *
+            dstNativeRate) / 1e18;
 
         assertEq(fee, expectedFee, "Fee should reflect new gas overhead");
     }
@@ -206,7 +209,9 @@ contract RelayerLibTests is RelayerLibTest {
         uint32 newOverhead = 200_000;
 
         vm.prank(s_user);
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.Unauthorized.selector));
+        vm.expectRevert(
+            "AccessControl: account 0x6ca6d1e2d5347bfab1d91e883f1915560e09129d is missing role 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42"
+        );
 
         s_relayerLib.setSubmitMsgGasOverhead(newOverhead);
     }

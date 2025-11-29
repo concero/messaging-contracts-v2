@@ -15,16 +15,13 @@ import {Storage as s} from "contracts/ConceroRouter/libraries/Storage.sol";
 contract ConceroRouterHarness is ConceroRouter {
     using s for s.Router;
 
-    constructor(
-        uint24 chainSelector,
-        address conceroPriceFeed
-    ) ConceroRouter(chainSelector, conceroPriceFeed) {}
+    constructor(uint24 chainSelector) ConceroRouter(chainSelector) {}
 
-    function exposed_getTotalRelayerFeeEarned(address feeToken) external view returns (uint256) {
-        return s.router().totalRelayerFeeEarned[feeToken];
-    }
-
-    function getNonce(address sender, uint24 srcChainSelector, uint24 dstChainSelector) external view returns (uint256) {
+    function getNonce(
+        address sender,
+        uint24 srcChainSelector,
+        uint24 dstChainSelector
+    ) external view returns (uint256) {
         return s.router().nonce[sender][srcChainSelector][dstChainSelector];
     }
 }

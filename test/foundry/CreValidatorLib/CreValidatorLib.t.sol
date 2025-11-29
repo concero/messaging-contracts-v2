@@ -50,7 +50,7 @@ contract CreValidatorLibTest is Test {
         s_validatorLib.setIsWorkflowIdAllowed(s_creWorkflowId, true);
     }
 
-    function test_validateSignatures_success() public {
+    function test_validateSignatures_success() public view {
         assert(s_validatorLib.isValid(_getMessageReceipt(), _getValidation()));
     }
 
@@ -162,11 +162,11 @@ contract CreValidatorLibTest is Test {
 
     // INTERNAL FUNCTIONS
 
-    function _getValidation() internal returns (bytes memory) {
+    function _getValidation() internal pure returns (bytes memory) {
         return _getValidation(_getSignatures());
     }
 
-    function _getValidation(bytes[] memory signatures) internal returns (bytes memory) {
+    function _getValidation(bytes[] memory signatures) internal pure returns (bytes memory) {
         bytes
             memory reportContext = hex"000e8ce31db48e5e44619d24d9dadfc5f22a34db8205b2b25cd831eab02244c50000000000000000000000000000000000000000000000000000000048352a000000000000000000000000000000000000000000000000000000000000000000";
         bytes
@@ -175,7 +175,7 @@ contract CreValidatorLibTest is Test {
         return abi.encodePacked(rawReport, reportContext, abi.encode(signatures));
     }
 
-    function _getSignatures() internal returns (bytes[] memory) {
+    function _getSignatures() internal pure returns (bytes[] memory) {
         bytes
             memory signature1 = hex"d205b207538957f496d4fd150b9400f01aadd78f23afd4362c0cd7f2b11527d4233678d5c25f8465b8e73483f70b0b5ac3cf302182d3058c8d5dc4c03223958b00";
         bytes
@@ -209,7 +209,7 @@ contract CreValidatorLibTest is Test {
         return signatures;
     }
 
-    function _getMessageReceipt() internal returns (bytes memory) {
+    function _getMessageReceipt() internal pure returns (bytes memory) {
         bytes
             memory logData = hex"0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000010000000000000000000000000047eff953e7d2706cf0cbdd10f7afca8b4080864a000000000000000000000000000000000000000000000000000000000000007a01013882066eee000000000000000000000000000000000000000000000000000000000000000200001cf4b0e5669bb28c21db33bb184e42ecbecf117ef40000000000000000000018bb87f69a7e5ab2269e21fc78152c2f19908b0a49000493e00000010000000100000000000c48656c6c6f20776f726c6421000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000010310f1414ce4c5d1bbd1c4b8f846ea8985b8d9e";
 

@@ -11,15 +11,15 @@ contract MockPriceFeed {
         return 0;
     }
 
-    function getNativeNativeRate(uint24 chainSelector) external pure returns (uint256) {
+    function getNativeNativeRate(uint24) external pure returns (uint256) {
         return 0;
     }
 
-    function getLastGasPrice(uint24 chainSelector) external pure returns (uint256) {
+    function getLastGasPrice(uint24) external pure returns (uint256) {
         return 0;
     }
 
-    function getUsdRate(address token) external pure returns (uint256) {
+    function getUsdRate(address) external pure returns (uint256) {
         return 1;
     }
 }

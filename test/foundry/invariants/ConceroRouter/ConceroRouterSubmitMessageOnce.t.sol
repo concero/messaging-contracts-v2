@@ -11,7 +11,7 @@ import {MessageCodec} from "../../../../contracts/common/libraries/MessageCodec.
 import {IConceroRouter} from "../../../../contracts/interfaces/IConceroRouter.sol";
 import {IRelayer} from "../../../../contracts/interfaces/IRelayer.sol";
 import {ConceroTestClient} from "../../ConceroTestClient/ConceroTestClient.sol";
-import {console} from "forge-std/src/console.sol";
+import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
 
 contract ConceroRouterSubmitMessageHandler {
     using MessageCodec for IConceroRouter.MessageRequest;
@@ -23,6 +23,8 @@ contract ConceroRouterSubmitMessageHandler {
     address public immutable i_relayerLib;
     address public immutable i_validatorLib;
     uint24 public immutable i_dstChainSelector;
+
+    bytes[] internal s_internalValidatorConfigs = new bytes[](1);
 
     bytes[] public s_receipts;
     mapping(bytes32 => uint256) public s_processedCount;
@@ -41,6 +43,8 @@ contract ConceroRouterSubmitMessageHandler {
         i_relayerLib = relayerLib;
         i_validatorLib = validatorLib;
         i_dstChainSelector = dstChainSelector;
+
+        s_internalValidatorConfigs[0] = ValidatorCodec.encodeEvmConfig(100_000);
     }
 
     function submitNew(
@@ -55,7 +59,12 @@ contract ConceroRouterSubmitMessageHandler {
             payload
         );
 
-        bytes memory receipt = req.toMessageReceiptBytes(srcChainSelector, address(this), nonce);
+        bytes memory receipt = req.toMessageReceiptBytes(
+            srcChainSelector,
+            address(this),
+            nonce,
+            s_internalValidatorConfigs
+        );
 
         _submit(receipt);
     }

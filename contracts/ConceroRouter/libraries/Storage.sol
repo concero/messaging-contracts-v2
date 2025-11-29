@@ -10,9 +10,8 @@ import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 
 library Storage {
     bytes32 internal constant ROUTER =
-        keccak256(
-            abi.encode(uint256(keccak256(abi.encodePacked("concerorouter.router.storage"))) - 1)
-        ) & ~bytes32(uint256(0xff));
+        keccak256(abi.encode(uint256(keccak256(abi.encodePacked("concero.router.storage"))) - 1)) &
+            ~bytes32(uint256(0xff));
 
     struct FeeTokenConfig {
         bool isSupported;
@@ -25,7 +24,7 @@ library Storage {
         mapping(address feeToken => FeeTokenConfig feeTokenConfig) feeTokenConfigs;
         mapping(address sender => mapping(uint24 srcChainSelector => mapping(uint24 dstChainSelector => uint256 nonce))) nonce;
         mapping(bytes32 messageId => bool isProcessed) isMessageProcessed;
-        mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryAllowed;
+        mapping(bytes32 messageSubmissionHash => bool isAllowed) isMessageRetryable;
         mapping(address feeToken => uint256 totalFeeEarned) totalRelayerFeeEarned;
         mapping(address relayerLib => mapping(address feeToken => uint256 feeEarned)) relayerFeeEarned;
     }

@@ -7,12 +7,12 @@
 pragma solidity ^0.8.20;
 
 import {MessageCodec} from "../common/libraries/MessageCodec.sol";
-import {ClientBaseStorage as s} from "./libraries/ClientBaseStorage.sol";
+import {ClientStorage as s} from "./libraries/ClientStorage.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 
 abstract contract ConceroClientBase is IConceroClient {
-    using s for s.ConceroClientBase;
+    using s for s.ConceroClient;
     using MessageCodec for bytes;
 
     address internal immutable i_conceroRouter;
@@ -30,17 +30,17 @@ abstract contract ConceroClientBase is IConceroClient {
     ) external {
         require(msg.sender == i_conceroRouter, InvalidConceroRouter(msg.sender));
 
-        s.ConceroClientBase storage s_conceroClientBase = s.clientBase();
+        s.ConceroClient storage s_conceroClient = s.client();
 
-        require(s_conceroClientBase.isRelayerAllowed[relayerLib], RelayerNotAllowed(relayerLib));
+        require(s_conceroClient.isRelayerLibAllowed[relayerLib], UnauthorizedRelayerLib(relayerLib));
 
         _validateMessageSubmission(validationChecks, validatorLibs);
 
         _conceroReceive(messageReceipt);
     }
 
-    function _setIsRelayerAllowed(address s_relayer, bool isAllowed) internal {
-        s.clientBase().isRelayerAllowed[s_relayer] = isAllowed;
+    function _setIsRelayerLibAllowed(address s_relayer, bool isAllowed) internal {
+        s.client().isRelayerLibAllowed[s_relayer] = isAllowed;
     }
 
     function _validateMessageSubmission(

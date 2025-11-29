@@ -117,7 +117,7 @@ contract RelayerLibTests is RelayerLibTest {
         s_relayerLib.validate(new bytes(0), s_relayer);
     }
 
-    function test_validate_RevertsIfRelayerNotAllowed() public {
+    function test_validate_RevertsIfUnauthorizedRelayerLib() public {
         vm.expectRevert(abi.encodeWithSelector(IRelayerLib.InvalidRelayer.selector));
         s_relayerLib.validate(new bytes(0), s_relayer);
     }

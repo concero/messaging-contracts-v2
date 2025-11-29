@@ -10,7 +10,7 @@ import {IConceroRouter} from "./IConceroRouter.sol";
 
 interface IConceroClient {
     error InvalidConceroRouter(address router);
-    error RelayerNotAllowed(address dstRelayerLib);
+    error UnauthorizedRelayerLib(address dstRelayerLib);
     error ValidatorsConsensusNotReached();
     error RequiredValidatorsCountUnset();
 

@@ -21,29 +21,20 @@ abstract contract ConceroClient is ConceroClientBase {
         bool[] calldata validationChecks,
         address[] calldata validatorLibs
     ) internal view virtual override {
-        _ensureValidations(validatorLibs, validationChecks);
-    }
-
-    function _ensureValidations(
-        address[] memory dstValidatorLibs,
-        bool[] calldata validationChecks
-    ) internal view virtual {
         s.ConceroClient storage s_conceroClient = s.client();
 
         uint256 requiredValidatorsCount = s_conceroClient.requiredValidatorsCount;
-
         require(requiredValidatorsCount != 0, RequiredValidatorsCountUnset());
-
         require(
             (requiredValidatorsCount == validationChecks.length) &&
-                (validationChecks.length == dstValidatorLibs.length),
+                (validationChecks.length == validatorLibs.length),
             ValidatorsConsensusNotReached()
         );
 
-        for (uint256 i; i < dstValidatorLibs.length; ++i) {
+        for (uint256 i; i < validatorLibs.length; ++i) {
             require(validationChecks[i], ValidatorsConsensusNotReached());
             require(
-                s_conceroClient.isValidatorAllowed[dstValidatorLibs[i]],
+                s_conceroClient.isValidatorAllowed[validatorLibs[i]],
                 ValidatorsConsensusNotReached()
             );
         }

@@ -50,16 +50,16 @@ contract ConceroClientTestBase is ConceroClientTest {
         s_conceroClient.conceroReceive(new bytes(0), new bool[](0), new address[](0), s_relayerLib);
     }
 
-    function test_conceroReceive_RevertsIfRelayerNotAllowed() public {
+    function test_conceroReceive_RevertsIfUnauthorizedRelayerLib() public {
         bytes memory messageReceipt = _buildMessageReceipt();
 
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
-        s_conceroClient.setIsRelayerAllowed(s_relayerLib, false);
+        s_conceroClient.setIsRelayerLibAllowed(s_relayerLib, false);
 
         vm.expectRevert(
-            abi.encodeWithSelector(IConceroClient.RelayerNotAllowed.selector, s_relayerLib)
+            abi.encodeWithSelector(IConceroClient.UnauthorizedRelayerLib.selector, s_relayerLib)
         );
 
         vm.prank(address(s_mockConceroRouter));

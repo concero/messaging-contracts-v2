@@ -23,4 +23,8 @@ contract ConceroRouterHarness is ConceroRouter {
     function exposed_getTotalRelayerFeeEarned(address feeToken) external view returns (uint256) {
         return s.router().totalRelayerFeeEarned[feeToken];
     }
+
+    function getNonce(address sender, uint24 srcChainSelector, uint24 dstChainSelector) external view returns (uint256) {
+        return s.router().nonce[sender][srcChainSelector][dstChainSelector];
+    }
 }

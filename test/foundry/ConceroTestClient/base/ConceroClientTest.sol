@@ -29,14 +29,14 @@ contract ConceroClientTest is ConceroTest {
         s_mockConceroRouter = makeAddr("mockConceroRouter");
 
         s_conceroClient = new ConceroTestClient(payable(address(s_mockConceroRouter)));
-        s_conceroClient.setIsRelayerAllowed(s_relayerLib, true);
+        s_conceroClient.setIsRelayerLibAllowed(s_relayerLib, true);
         s_conceroClient.setIsValidatorAllowed(s_validatorLib, true);
         s_conceroClient.setRequiredValidatorsCount(1);
 
         s_conceroClientAdvanced = new ConceroTestClientAdvanced(
             payable(address(s_mockConceroRouter))
         );
-        s_conceroClientAdvanced.setIsRelayerAllowed(s_relayerLib, true);
+        s_conceroClientAdvanced.setIsRelayerLibAllowed(s_relayerLib, true);
     }
 
     function _buildMessageRequest() internal view returns (IConceroRouter.MessageRequest memory) {

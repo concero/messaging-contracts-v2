@@ -49,7 +49,7 @@ abstract contract ConceroRouterTest is ConceroTest {
         vm.stopPrank();
 
         s_conceroClient = new ConceroTestClient(payable(s_dstConceroRouter));
-        s_conceroClient.setIsRelayerAllowed(s_relayerLib, true);
+        s_conceroClient.setIsRelayerLibAllowed(s_relayerLib, true);
         s_conceroClient.setIsValidatorAllowed(s_validatorLib, true);
         s_conceroClient.setRequiredValidatorsCount(1);
 

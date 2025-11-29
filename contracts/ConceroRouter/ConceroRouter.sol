@@ -95,7 +95,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
         require(
-            !s_router.isMessageRetryAllowed[messageSubmissionHash],
+            !s_router.isMessageRetryable[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
 
@@ -137,10 +137,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
 
         bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
         require(
-            s_router.isMessageRetryAllowed[messageSubmissionHash],
+            s_router.isMessageRetryable[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
-        s_router.isMessageRetryAllowed[messageSubmissionHash] = false;
+        s_router.isMessageRetryable[messageSubmissionHash] = false;
 
         (address receiver, ) = messageReceipt.evmDstChainData();
 
@@ -266,8 +266,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
         return s.router().isMessageProcessed[messageId];
     }
 
-    function isMessageRetryAllowed(bytes32 messageId) public view returns (bool) {
-        return s.router().isMessageRetryAllowed[messageId];
+    function isMessageRetryable(bytes32 messageId) public view returns (bool) {
+        return s.router().isMessageRetryable[messageId];
     }
 
     /* INTERNAL FUNCTIONS */
@@ -296,13 +296,12 @@ contract ConceroRouter is IConceroRouter, IRelayer, Base, ReentrancyGuard {
             s.router().isMessageProcessed[messageHash] = true;
             emit ConceroMessageDelivered(messageHash);
         } else {
-            /* @dev This check has been added to prevent malicious relayers
-                    from launching spam attacks on the dst chain. */
-            if (bytes4(res) == IConceroClient.RelayerNotAllowed.selector) {
-                revert IConceroClient.RelayerNotAllowed(relayerLib);
+            /* @dev This check prevents malicious relayers from spam-attacking ConceroClients. */
+            if (bytes4(res) == IConceroClient.UnauthorizedRelayerLib.selector) {
+                revert IConceroClient.UnauthorizedRelayerLib(relayerLib);
             }
 
-            s.router().isMessageRetryAllowed[messageSubmissionHash] = true;
+            s.router().isMessageRetryable[messageSubmissionHash] = true;
             emit ConceroMessageDeliveryFailed(messageHash, res);
         }
     }

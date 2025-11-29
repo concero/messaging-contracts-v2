@@ -21,8 +21,8 @@ contract ConceroTestClient is ConceroClient {
         }
     }
 
-    function setIsRelayerAllowed(address relayer, bool allowed) public {
-        _setIsRelayerAllowed(relayer, allowed);
+    function setIsRelayerLibAllowed(address relayer, bool allowed) public {
+        _setIsRelayerLibAllowed(relayer, allowed);
     }
 
     function setIsValidatorAllowed(address validator, bool allowed) public {

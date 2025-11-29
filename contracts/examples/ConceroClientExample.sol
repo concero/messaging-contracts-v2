@@ -26,7 +26,7 @@ contract ConceroClientExample is ConceroClientBase {
         i_relayerLib = relayerLib;
         i_validatorLib = validatorLib;
 
-        _setIsRelayerAllowed(relayerLib, true);
+        _setIsRelayerLibAllowed(relayerLib, true);
     }
 
     function _conceroReceive(bytes calldata messageReceipt) internal override {

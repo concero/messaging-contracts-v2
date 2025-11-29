@@ -17,8 +17,8 @@ contract ConceroTestClientAdvanced is ConceroAdvancedClient {
 
     function _conceroReceive(bytes calldata) internal view override {}
 
-    function setIsRelayerAllowed(address relayer, bool allowed) public {
-        _setIsRelayerAllowed(relayer, allowed);
+    function setIsRelayerLibAllowed(address relayer, bool allowed) public {
+        _setIsRelayerLibAllowed(relayer, allowed);
     }
 
     function setValidatorWeight(address validator, uint256 weight) public {

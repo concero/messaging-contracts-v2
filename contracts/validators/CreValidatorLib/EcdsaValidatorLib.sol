@@ -6,7 +6,6 @@
  */
 pragma solidity 0.8.28;
 
-import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IValidatorLib} from "../../interfaces/IValidatorLib.sol";
 
@@ -19,7 +18,7 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
     error InvalidSignersCount(uint256 signersCount, uint256 isAllowedArrLength);
 
     mapping(address signer => bool isAllowed) internal s_isSignerAllowed;
-    uint8 internal s_expectedSignersCount;
+    uint8 internal s_minSignersCount;
     uint256[50] private __gap;
 
     function isValid(
@@ -34,8 +33,8 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
         return s_isSignerAllowed[signer];
     }
 
-    function getExpectedSignersCount() external view returns (uint8) {
-        return s_expectedSignersCount;
+    function getMinSignersCount() external view returns (uint8) {
+        return s_minSignersCount;
     }
 
     // INTERNAL FUNCTIONS
@@ -44,23 +43,23 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
         (bytes[] memory signatures, bytes32 hash) = _extractSignaturesAndHash(validation);
 
         require(
-            signatures.length == s_expectedSignersCount,
-            InvalidSignaturesCount(signatures.length, s_expectedSignersCount)
+            signatures.length >= s_minSignersCount,
+            InvalidSignaturesCount(signatures.length, s_minSignersCount)
         );
 
         address[] memory signers = new address[](signatures.length);
 
         for (uint256 i; i < signatures.length; ++i) {
-            address signer = _recoverSignature(signatures[i], hash);
+            address signer = _recoverSigner(signatures[i], hash);
             require(s_isSignerAllowed[signer], InvalidSigner(signer));
-            for (uint256 k; k < signers.length; ++k) {
+            for (uint256 k; k < i; ++k) {
                 require(signer != signers[k], DuplicateSigner(signer));
             }
             signers[i] = signer;
         }
     }
 
-    function _recoverSignature(
+    function _recoverSigner(
         bytes memory signature,
         bytes32 hash
     ) internal pure virtual returns (address) {
@@ -79,8 +78,8 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
         }
     }
 
-    function _setExpectedSignersCount(uint8 expectedSignersCount) internal {
-        s_expectedSignersCount = expectedSignersCount;
+    function _setMinSignersCount(uint8 expectedSignersCount) internal {
+        s_minSignersCount = expectedSignersCount;
     }
 
     function _extractSignaturesAndHash(

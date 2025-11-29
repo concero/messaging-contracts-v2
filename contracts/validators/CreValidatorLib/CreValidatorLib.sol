@@ -66,8 +66,8 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
         _setAllowedSigners(signers, isAllowedArr);
     }
 
-    function setExpectedSignersCount(uint8 expectedSignersCount) external onlyRole(ADMIN) {
-        _setExpectedSignersCount(expectedSignersCount);
+    function setMinSignersCount(uint8 expectedSignersCount) external onlyRole(ADMIN) {
+        _setMinSignersCount(expectedSignersCount);
     }
 
     function setIsWorkflowIdAllowed(bytes32 id, bool isAllowed) external onlyRole(ADMIN) {

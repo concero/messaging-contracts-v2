@@ -8,8 +8,7 @@ pragma solidity 0.8.28;
 
 import {Test} from "forge-std/src/Test.sol";
 import {CreValidatorLib} from "../../../contracts/validators/CreValidatorLib/CreValidatorLib.sol";
-
-import {console} from "forge-std/src/console.sol";
+import {EcdsaValidatorLib} from "../../../contracts/validators/CreValidatorLib/EcdsaValidatorLib.sol";
 
 contract CreValidatorLibTest is Test {
     CreValidatorLib internal s_validatorLib = new CreValidatorLib();
@@ -23,6 +22,9 @@ contract CreValidatorLibTest is Test {
     address internal s_signer7 = 0xcdf20F8FFD41B02c680988b20e68735cc8C1ca17;
     address internal s_signer8 = 0xff9b062fcCb2f042311343048b9518068370F837;
     address internal s_signer9 = 0x4f99b550623e77B807df7cbED9C79D55E1163B48;
+
+    bytes32 internal s_creWorkflowId =
+        0x005abdaec2b4e01b66d0b021ecb27d59ccf2868968de657c7ded9c37a3b03a10;
 
     function setUp() public {
         s_validatorLib.initialize(address(this));
@@ -44,20 +46,136 @@ contract CreValidatorLibTest is Test {
         }
 
         s_validatorLib.setAllowedSigners(signers, isAllowedArr);
-        s_validatorLib.setExpectedSignersCount(uint8(signers.length));
-        s_validatorLib.setIsWorkflowIdAllowed(
-            0x005abdaec2b4e01b66d0b021ecb27d59ccf2868968de657c7ded9c37a3b03a10,
-            true
-        );
+        s_validatorLib.setMinSignersCount(uint8(signers.length));
+        s_validatorLib.setIsWorkflowIdAllowed(s_creWorkflowId, true);
     }
 
-    function test_validateSignatures() public {
+    function test_validateSignatures_success() public {
         assert(s_validatorLib.isValid(_getMessageReceipt(), _getValidation()));
+    }
+
+    function test_validateSignatures_InvalidSignaturesCount_revert() public {
+        bytes[] memory signatures = _getSignatures();
+        s_validatorLib.setMinSignersCount(s_validatorLib.getMinSignersCount() + 1);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                EcdsaValidatorLib.InvalidSignaturesCount.selector,
+                signatures.length,
+                s_validatorLib.getMinSignersCount()
+            )
+        );
+        s_validatorLib.isValid(_getMessageReceipt(), _getValidation(signatures));
+    }
+
+    function test_validateSignatures_InvalidSigner_revert() public {
+        bytes[] memory signatures = _getSignatures();
+        signatures[0][3] = bytes1(uint8(1));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                EcdsaValidatorLib.InvalidSigner.selector,
+                0x354Fd1D36b72268eFD2B8611910708Eb44312F84
+            )
+        );
+        s_validatorLib.isValid(_getMessageReceipt(), _getValidation(signatures));
+    }
+
+    function test_validateSignatures_DuplicateSigner_revert() public {
+        bytes[] memory signatures = _getSignatures();
+        signatures[4] = signatures[1];
+
+        vm.expectRevert(
+            abi.encodeWithSelector(EcdsaValidatorLib.DuplicateSigner.selector, s_signer2)
+        );
+        s_validatorLib.isValid(_getMessageReceipt(), _getValidation(signatures));
+    }
+
+    function test_validateSignatures_InvalidCreWorkflowId_revert() public {
+        s_validatorLib.setIsWorkflowIdAllowed(s_creWorkflowId, false);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CreValidatorLib.InvalidCreWorkflowId.selector, s_creWorkflowId)
+        );
+        s_validatorLib.isValid(_getMessageReceipt(), _getValidation());
+    }
+
+    function testFuzz_setAllowedSigners_success(address[] memory signers) public {
+        bool[] memory isAllowedArr = new bool[](signers.length);
+        for (uint256 i; i < isAllowedArr.length; ++i) {
+            isAllowedArr[i] = true;
+        }
+
+        s_validatorLib.setAllowedSigners(signers, isAllowedArr);
+
+        for (uint256 i; i < signers.length; ++i) {
+            assert(s_validatorLib.isSignerAllowed(signers[i]));
+        }
+
+        for (uint256 i; i < isAllowedArr.length; ++i) {
+            isAllowedArr[i] = false;
+        }
+
+        s_validatorLib.setAllowedSigners(signers, isAllowedArr);
+
+        for (uint256 i; i < signers.length; ++i) {
+            assert(s_validatorLib.isSignerAllowed(signers[i]) == false);
+        }
+    }
+
+    function testFuzz_setMinSignersCount_success(uint8 minSignersCount) public {
+        s_validatorLib.setMinSignersCount(minSignersCount);
+        assert(s_validatorLib.getMinSignersCount() == minSignersCount);
+    }
+
+    function testFuzz_initialize_revert(address fakeAdmin) public {
+        vm.expectRevert("Initializable: contract is already initialized");
+        s_validatorLib.initialize(fakeAdmin);
+    }
+
+    function test_setAllowedSignersAccessControl_revert() public {
+        address fakeAdmin = makeAddr("fakeAdmin");
+        vm.expectRevert(
+            "AccessControl: account 0x3306edf2df2adba41a53cae2db0c1610ebcf13b9 is missing role 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42"
+        );
+        vm.prank(fakeAdmin);
+        s_validatorLib.setAllowedSigners(new address[](1), new bool[](1));
+    }
+
+    function test_setMinSignersCountAccessControl_revert() public {
+        address fakeAdmin = makeAddr("fakeAdmin");
+        vm.expectRevert(
+            "AccessControl: account 0x3306edf2df2adba41a53cae2db0c1610ebcf13b9 is missing role 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42"
+        );
+        vm.prank(fakeAdmin);
+        s_validatorLib.setMinSignersCount(uint8(1));
+    }
+
+    function test_setIsWorkflowIdAllowedAccessControl_revert() public {
+        address fakeAdmin = makeAddr("fakeAdmin");
+        vm.expectRevert(
+            "AccessControl: account 0x3306edf2df2adba41a53cae2db0c1610ebcf13b9 is missing role 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42"
+        );
+        vm.prank(fakeAdmin);
+        s_validatorLib.setIsWorkflowIdAllowed(s_creWorkflowId, false);
     }
 
     // INTERNAL FUNCTIONS
 
     function _getValidation() internal returns (bytes memory) {
+        return _getValidation(_getSignatures());
+    }
+
+    function _getValidation(bytes[] memory signatures) internal returns (bytes memory) {
+        bytes
+            memory reportContext = hex"000e8ce31db48e5e44619d24d9dadfc5f22a34db8205b2b25cd831eab02244c50000000000000000000000000000000000000000000000000000000048352a000000000000000000000000000000000000000000000000000000000000000000";
+        bytes
+            memory rawReport = hex"01115515065110d69856ba0ce52a3993946cfaef9646554f4c5bd166dd4e800ab46929b60e0000000100000001005abdaec2b4e01b66d0b021ecb27d59ccf2868968de657c7ded9c37a3b03a1066666634313464303336dddddb8a8e41c194ac6542a0ad7ba663a72741e00004361850ddbced44d2c34178636e0bb1290024a0979a7ab593fd5c4e99f2a9d616";
+
+        return abi.encodePacked(rawReport, reportContext, abi.encode(signatures));
+    }
+
+    function _getSignatures() internal returns (bytes[] memory) {
         bytes
             memory signature1 = hex"d205b207538957f496d4fd150b9400f01aadd78f23afd4362c0cd7f2b11527d4233678d5c25f8465b8e73483f70b0b5ac3cf302182d3058c8d5dc4c03223958b00";
         bytes
@@ -76,10 +194,6 @@ contract CreValidatorLibTest is Test {
             memory signature8 = hex"0ae9258d491714311c75c907c905b1751e6756a115ef902a942a0396af7b24c15a241f402f7196a8eaba1aee4daf2755ce0d8db3255da6bea3cbfafaf315e1cc00";
         bytes
             memory signature9 = hex"88702485aeb04af188eec3b34358b14e6fa726bde84ee993ba7f104259584f5f4f884b6baba74b6609c541acf7494afaeaf793188810746b355fc9a2065e5ae101";
-        bytes
-            memory reportContext = hex"000e8ce31db48e5e44619d24d9dadfc5f22a34db8205b2b25cd831eab02244c50000000000000000000000000000000000000000000000000000000048352a000000000000000000000000000000000000000000000000000000000000000000";
-        bytes
-            memory rawReport = hex"01115515065110d69856ba0ce52a3993946cfaef9646554f4c5bd166dd4e800ab46929b60e0000000100000001005abdaec2b4e01b66d0b021ecb27d59ccf2868968de657c7ded9c37a3b03a1066666634313464303336dddddb8a8e41c194ac6542a0ad7ba663a72741e00004361850ddbced44d2c34178636e0bb1290024a0979a7ab593fd5c4e99f2a9d616";
 
         bytes[] memory signatures = new bytes[](9);
         signatures[0] = signature1;
@@ -92,7 +206,7 @@ contract CreValidatorLibTest is Test {
         signatures[7] = signature8;
         signatures[8] = signature9;
 
-        return abi.encodePacked(rawReport, reportContext, abi.encode(signatures));
+        return signatures;
     }
 
     function _getMessageReceipt() internal returns (bytes memory) {
@@ -101,5 +215,15 @@ contract CreValidatorLibTest is Test {
 
         (bytes memory messageReceipt, , ) = abi.decode(logData, (bytes, address[], address));
         return messageReceipt;
+    }
+
+    function _signHash(
+        string memory wallet,
+        bytes32 hashToSign
+    ) internal returns (bytes memory, address) {
+        (address signer, uint256 signerPk) = makeAddrAndKey(wallet);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, hashToSign);
+
+        return (abi.encodePacked(r, s, v - 27), signer);
     }
 }

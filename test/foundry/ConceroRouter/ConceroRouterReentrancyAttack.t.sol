@@ -394,11 +394,69 @@ contract MaliciousRelayerLib is IRelayerLib {
     }
 }
 
+contract AttackingRelayerLib {
+    address internal immutable i_conceroRouter;
+    uint256 internal s_counter;
+
+    constructor(address conceroRouter) {
+        i_conceroRouter = conceroRouter;
+    }
+
+    function getFee(
+        IConceroRouter.MessageRequest calldata messageRequest,
+        bytes[] calldata
+    ) external returns (uint256) {
+        if (s_counter == 2) return 0.001 ether;
+
+        ++s_counter;
+
+        IConceroRouter(i_conceroRouter).conceroSend(messageRequest);
+
+        return 0.001 ether;
+    }
+
+    function isFeeTokenSupported(address) public pure returns (bool) {
+        return true;
+    }
+
+    function validate(bytes calldata, address) external {}
+}
+
+contract AttackingValidatorLib {
+    address internal immutable i_conceroRouter;
+    uint256 internal s_counter;
+
+    constructor(address conceroRouter) {
+        i_conceroRouter = conceroRouter;
+    }
+
+    function getFeeAndValidatorConfig(
+        IConceroRouter.MessageRequest calldata messageRequest
+    ) external returns (uint256, bytes memory) {
+        if (s_counter == 2) return (0.001 ether, new bytes(1));
+
+        ++s_counter;
+
+        IConceroRouter(i_conceroRouter).conceroSend(messageRequest);
+
+        return (0.001 ether, new bytes(1));
+    }
+
+    function isFeeTokenSupported(address) public pure returns (bool) {
+        return true;
+    }
+
+    function validate(bytes calldata, address) external {}
+}
+
 contract ConceroRouterReentrancyAttack is ConceroRouterTest {
     using MessageCodec for bytes;
     using MessageCodec for IConceroRouter.MessageRequest;
 
     AttackingConceroClient internal s_attackingConceroClient;
+    AttackingRelayerLib internal s_attackingRelayerLib;
+    AttackingValidatorLib internal s_attackingValidatorLib;
+
     MaliciousRelayerLib internal s_maliciousRelayerLib;
     MaliciousERC20Token internal s_maliciousToken;
 
@@ -410,6 +468,9 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
             s_validatorLib,
             s_relayerLib
         );
+
+        s_attackingRelayerLib = new AttackingRelayerLib(address(s_conceroRouter));
+        s_attackingValidatorLib = new AttackingValidatorLib(address(s_conceroRouter));
 
         s_maliciousRelayerLib = new MaliciousRelayerLib(address(s_conceroRouter));
         s_maliciousToken = new MaliciousERC20Token(
@@ -473,6 +534,42 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
         );
 
         assert(s_attackingConceroClient.getCounter() == 0);
+    }
+
+    function test_reentrantInRelayerGetFee_revert_StateChangeDuringStaticCall() public {
+        IConceroRouter.MessageRequest memory messageRequest = IConceroRouter.MessageRequest({
+            dstChainSelector: DST_CHAIN_SELECTOR,
+            srcBlockConfirmations: 10,
+            feeToken: address(0),
+            relayerLib: address(s_attackingRelayerLib),
+            validatorLibs: s_validatorLibs,
+            validatorConfigs: new bytes[](1),
+            relayerConfig: new bytes(0),
+            dstChainData: MessageCodec.encodeEvmDstChainData(address(s_conceroClient), 300_000),
+            payload: "test"
+        });
+
+        vm.expectRevert();
+        s_conceroRouter.conceroSend{value: 1 ether}(messageRequest);
+    }
+
+    function test_reentrantInValidatorGetFee_revert_StateChangeDuringStaticCall() public {
+        s_validatorLibs[0] = address(s_attackingValidatorLib);
+
+        IConceroRouter.MessageRequest memory messageRequest = IConceroRouter.MessageRequest({
+            dstChainSelector: DST_CHAIN_SELECTOR,
+            srcBlockConfirmations: 10,
+            feeToken: address(0),
+            relayerLib: address(s_attackingRelayerLib),
+            validatorLibs: s_validatorLibs,
+            validatorConfigs: new bytes[](1),
+            relayerConfig: new bytes(0),
+            dstChainData: MessageCodec.encodeEvmDstChainData(address(s_conceroClient), 300_000),
+            payload: "test"
+        });
+
+        vm.expectRevert();
+        s_conceroRouter.conceroSend{value: 1 ether}(messageRequest);
     }
 
     /**

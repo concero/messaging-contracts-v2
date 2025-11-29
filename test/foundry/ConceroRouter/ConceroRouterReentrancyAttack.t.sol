@@ -414,12 +414,6 @@ contract AttackingRelayerLib {
 
         return 0.001 ether;
     }
-
-    function isFeeTokenSupported(address) public pure returns (bool) {
-        return true;
-    }
-
-    function validate(bytes calldata, address) external {}
 }
 
 contract AttackingValidatorLib {
@@ -441,12 +435,6 @@ contract AttackingValidatorLib {
 
         return (0.001 ether, new bytes(1));
     }
-
-    function isFeeTokenSupported(address) public pure returns (bool) {
-        return true;
-    }
-
-    function validate(bytes calldata, address) external {}
 }
 
 contract ConceroRouterReentrancyAttack is ConceroRouterTest {

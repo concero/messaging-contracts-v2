@@ -9,6 +9,7 @@ enum ProxyEnum {
 	verifierProxy = "verifierProxy",
 	priceFeedProxy = "priceFeedProxy",
 	creValidatorLibProxy = "creValidatorLibProxy",
+	relayerLibProxy = "relayerLibProxy",
 }
 
 const viemReceiptConfig: WaitForTransactionReceiptParameters = {
@@ -43,6 +44,9 @@ const envPrefixes: EnvPrefixes = {
 	creValidatorLibProxy: "CONCERO_CRE_VALIDATOR_LIB_PROXY",
 	creValidatorLibProxyAdmin: "CONCERO_CRE_VALIDATOR_LIB_PROXY_ADMIN",
 	creValidatorLib: "CONCERO_CRE_VALIDATOR_LIB",
+	relayerLib: "CONCERO_RELAYER_LIB",
+	relayerLibProxy: "CONCERO_RELAYER_LIB_PROXY",
+	relayerLibProxyAdmin: "CONCERO_RELAYER_LIB_PROXY_ADMIN",
 };
 
 export { viemReceiptConfig, writeContractConfig, ProxyEnum, envPrefixes, getViemReceiptConfig };

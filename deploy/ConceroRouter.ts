@@ -63,7 +63,7 @@ const deployRouter: DeploymentFunction = async function (
 
 	const conceroVerifierNetwork = getConceroVerifierNetwork(networkType);
 
-	const defaultArgs: DeployArgs = {
+	const defaultArgs = {
 		chainSelector: chain.chainSelector,
 		conceroPriceFeed: getEnvVar(`CONCERO_PRICE_FEED_PROXY_${getNetworkEnvKey(name)}`),
 		conceroVerifier: getEnvVar(
@@ -82,7 +82,7 @@ const deployRouter: DeploymentFunction = async function (
 
 	const deployment = await deploy("ConceroRouter", {
 		from: deployer,
-		args: [args.chainSelector, args.conceroPriceFeed],
+		args: [args.chainSelector],
 		log: true,
 		autoMine: true,
 		// maxFeePerGas,

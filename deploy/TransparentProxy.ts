@@ -28,6 +28,8 @@ const deployTransparentProxy: (
 		implementationKey = "priceFeed";
 	} else if (proxyType === ProxyEnum.creValidatorLibProxy) {
 		implementationKey = "creValidatorLib";
+	} else if (proxyType === ProxyEnum.relayerLibProxy) {
+		implementationKey = "relayerLib";
 	} else {
 		throw new Error(`Proxy type ${proxyType} not found`);
 	}

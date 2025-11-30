@@ -21,6 +21,9 @@ export type EnvPrefixes = {
 	creValidatorLib: string;
 	creValidatorLibProxy: string;
 	creValidatorLibProxyAdmin: string;
+	relayerLib: string;
+	relayerLibProxy: string;
+	relayerLibProxyAdmin: string;
 };
 /**
  * Update an environment variable in the .env file

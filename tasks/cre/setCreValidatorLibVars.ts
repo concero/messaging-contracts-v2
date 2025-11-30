@@ -88,7 +88,7 @@ async function setExpectedSignersCount(conceroNetworkName: ConceroTestnetNetwork
 	const currentExpectedSignersCount = await publicClient.readContract({
 		address: validatorLib,
 		abi: validatorLibAbi,
-		functionName: "getExpectedSignersCount",
+		functionName: "getMinSignersCount",
 		args: [],
 	});
 
@@ -99,13 +99,13 @@ async function setExpectedSignersCount(conceroNetworkName: ConceroTestnetNetwork
 	const hash = await walletClient.writeContract({
 		address: validatorLib,
 		abi: validatorLibAbi,
-		functionName: "setExpectedSignersCount",
+		functionName: "setMinSignersCount",
 		args: [donSigners.length],
 	});
 
 	const { status } = await publicClient.waitForTransactionReceipt({ hash });
 
-	log(status + " : " + hash, "setExpectedSignersCount", conceroNetworkName);
+	log(status + " : " + hash, "setMinSignersCount", conceroNetworkName);
 }
 
 export async function setIsWorkflowIdAllowed(conceroNetworkName: ConceroTestnetNetworkNames) {

@@ -11,7 +11,7 @@ export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetwor
 
 	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
 	const relayerLib = getEnvVar(
-		`CONCERO_RELAYER_LIB_${getNetworkEnvKey(conceroNetworkName)}`,
+		`CONCERO_RELAYER_LIB_PROXY_${getNetworkEnvKey(conceroNetworkName)}`,
 	) as Address;
 	const { abi: relayerLibAbi } = await import(
 		"../../artifacts/contracts/relayers/RelayerLib/RelayerLib.sol/RelayerLib.json"

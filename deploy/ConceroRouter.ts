@@ -1,7 +1,6 @@
 import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { zeroAddress } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { getConceroVerifierNetwork } from "../constants/conceroNetworks";
@@ -66,13 +65,9 @@ const deployRouter: DeploymentFunction = async function (
 	const defaultArgs = {
 		chainSelector: chain.chainSelector,
 		conceroPriceFeed: getEnvVar(`CONCERO_PRICE_FEED_PROXY_${getNetworkEnvKey(name)}`),
-		conceroVerifier: getEnvVar(
-			`CONCERO_VERIFIER_PROXY_${getNetworkEnvKey(conceroVerifierNetwork.name)}`,
-		),
 		conceroVerifierSubId: getEnvVar(
 			`CLF_SUBID_${getNetworkEnvKey(conceroVerifierNetwork.name)}`,
 		),
-		clfSigners: getCLFDonSigners(networkType),
 	};
 
 	const args: DeployArgs = {
@@ -89,6 +84,11 @@ const deployRouter: DeploymentFunction = async function (
 		// maxPriorityFeePerGas,
 	});
 
+	await hre.tenderly.verify({
+		name: "ConceroRouter",
+		address: deployment.address,
+	});
+
 	log(`Deployed at: ${deployment.address}`, "deployRouter", name);
 	updateEnvVariable(
 		`CONCERO_ROUTER_${getNetworkEnvKey(name)}`,
@@ -99,7 +99,5 @@ const deployRouter: DeploymentFunction = async function (
 	return deployment;
 };
 
-deployRouter.tags = ["ConceroRouter"];
-
-export default deployRouter;
 export { deployRouter };
+deployRouter.tags = ["ConceroRouter"];

@@ -8,6 +8,7 @@ import deployPauseTask from "./deployPause.task";
 import { deployPriceFeedTask } from "./deployPriceFeed/deployPriceFeedTask";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { setRouterVariables } from "./deployRouter/setRouterVariables";
+import { submitMessage } from "./deployRouter/submitMessage.task";
 import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
 import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
@@ -73,4 +74,5 @@ export {
 	triggerCreTask,
 	deployCreValidatorLibTask,
 	deployRelayerLibTask,
+	submitMessage,
 };

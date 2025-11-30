@@ -28,8 +28,9 @@ const config: HardhatUserConfig = {
 		disambiguatePaths: false,
 	},
 	tenderly: {
-		username: "olegkron",
-		project: "own",
+		username: "Lufaque",
+		project: "concero",
+		privateVerification: false,
 	},
 	paths: {
 		artifacts: "artifacts",

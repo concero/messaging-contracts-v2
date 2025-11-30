@@ -28,7 +28,7 @@ const deployConceroClientExample: DeploymentFunction = async function (
 
 	const defaultArgs = {
 		conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
-		relayerLib: getEnvVar(`CONCERO_RELAYER_LIB_${getNetworkEnvKey(name)}`),
+		relayerLib: getEnvVar(`CONCERO_RELAYER_LIB_PROXY_${getNetworkEnvKey(name)}`),
 		validatorLib: getEnvVar(`CONCERO_CRE_VALIDATOR_LIB_PROXY_${getNetworkEnvKey(name)}`),
 		chainSelector: chain.chainSelector,
 	};

@@ -9,7 +9,6 @@ pragma solidity 0.8.28;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
-import {Utils} from "contracts/common/libraries/Utils.sol";
 import {Base} from "contracts/common/Base.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IRelayer} from "contracts/interfaces/IRelayer.sol";
@@ -17,6 +16,7 @@ import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
 import {MessageCodec} from "../../common/libraries/MessageCodec.sol";
 import {ValidatorCodec} from "../../common/libraries/ValidatorCodec.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract RelayerLib is AccessControlUpgradeable, IRelayerLib, Base {
     using SafeERC20 for IERC20;
@@ -106,7 +106,7 @@ contract RelayerLib is AccessControlUpgradeable, IRelayerLib, Base {
 
         for (uint256 i = 0; i < tokens.length; ++i) {
             if (tokens[i] == address(0)) {
-                Utils.transferNative(msg.sender, address(this).balance);
+                Address.sendValue(payable(msg.sender), address(this).balance);
             } else {
                 uint256 tokenBalance = IERC20(tokens[i]).balanceOf(address(this));
 

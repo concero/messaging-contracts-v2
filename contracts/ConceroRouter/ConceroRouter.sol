@@ -10,6 +10,7 @@ import {CommonErrors} from "../common/CommonErrors.sol";
 import {IConceroClient} from "../interfaces/IConceroClient.sol";
 import {IConceroRouter} from "../interfaces/IConceroRouter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRelayerLib} from "../interfaces/IRelayerLib.sol";
 import {IRelayer} from "../interfaces/IRelayer.sol";
 import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
@@ -17,7 +18,6 @@ import {MessageCodec} from "../common/libraries/MessageCodec.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Storage as s} from "./libraries/Storage.sol";
-import {Utils} from "../common/libraries/Utils.sol";
 import {ValidatorCodec} from "../common/libraries/ValidatorCodec.sol";
 
 contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
@@ -164,7 +164,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             if (relayerFee == 0) continue;
 
             if (tokens[i] == address(0)) {
-                Utils.transferNative(msg.sender, relayerFee);
+                Address.sendValue(payable(msg.sender), relayerFee);
             } else {
                 IERC20(tokens[i]).safeTransfer(msg.sender, relayerFee);
             }

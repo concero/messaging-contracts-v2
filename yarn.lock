@@ -918,7 +918,7 @@
 
 "@concero/contract-utils@https://github.com/concero/contract-utils":
   version "1.0.0"
-  resolved "https://github.com/concero/contract-utils#296777f20ced951d5714f888674350c79aaa2e74"
+  resolved "https://github.com/concero/contract-utils#df4bdcd095430a812e2a4c7726ef762245f3611e"
 
 "@concero/rpcs@https://github.com/concero/rpcs":
   version "1.0.0"

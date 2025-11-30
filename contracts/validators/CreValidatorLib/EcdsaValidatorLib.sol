@@ -18,6 +18,7 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
     error DuplicateSigner(address signer);
     error InvalidSigner(address signer);
     error InvalidSignersCount(uint256 signersCount, uint256 isAllowedArrLength);
+    error LengthMismatch(uint256, uint256);
 
     mapping(address signer => bool isAllowed) internal s_isSignerAllowed;
     mapping(uint24 => uint32 dstChainGasLimit) internal s_dstChainGasLimits;
@@ -46,6 +47,10 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
 
     function getMinSignersCount() external view returns (uint8) {
         return s_minSignersCount;
+    }
+
+    function getDstChainGasLimit(uint24 chainSelector) public view returns (uint32) {
+        return s_dstChainGasLimits[chainSelector];
     }
 
     // INTERNAL FUNCTIONS
@@ -91,6 +96,20 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
 
     function _setMinSignersCount(uint8 expectedSignersCount) internal {
         s_minSignersCount = expectedSignersCount;
+    }
+
+    function _setDstChainGasLimits(
+        uint24[] calldata dstChainSelectors,
+        uint32[] calldata gasLimits
+    ) internal {
+        require(
+            dstChainSelectors.length == gasLimits.length,
+            LengthMismatch(dstChainSelectors.length, gasLimits.length)
+        );
+
+        for (uint256 i; i < dstChainSelectors.length; ++i) {
+            s_dstChainGasLimits[dstChainSelectors[i]] = gasLimits[i];
+        }
     }
 
     function _extractSignaturesAndHash(

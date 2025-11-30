@@ -85,6 +85,13 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
         s_isCreWorkflowIdAllowed[id] = isAllowed;
     }
 
+    function setDstChainGasLimits(
+        uint24[] calldata dstChainSelectors,
+        uint32[] calldata gasLimits
+    ) external onlyRole(ADMIN) {
+        _setDstChainGasLimits(dstChainSelectors, gasLimits);
+    }
+
     // INTERNAL FUNCTIONS
 
     function _extractSignaturesAndHash(

@@ -44,6 +44,11 @@ const deployConceroCreValidatorLib: DeploymentFunction = async function (
 		autoMine: true,
 	});
 
+	await hre.tenderly.verify({
+		name: "CreValidatorLib",
+		address: deployment.address,
+	});
+
 	log(`Deployed at: ${deployment.address}`, "CreValidatorLib", name);
 	updateEnvVariable(
 		`CONCERO_CRE_VALIDATOR_LIB_${getNetworkEnvKey(name)}`,

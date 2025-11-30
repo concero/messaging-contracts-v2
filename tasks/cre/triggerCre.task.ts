@@ -16,9 +16,9 @@ task("trigger-cre", "").setAction(async taskArgs => {
 				batch: [
 					{
 						messageId:
-							"0xb8160fc063ca1b66f0a4f3e22ae18b43bae2da5d0a642a2354ce03fb71d65309",
+							"0x48147a8e75ea1c6ce3aae570c4b1e0b5ae79aae561d161634807f91ee3c510eb",
 						srcChainSelector: 80002,
-						blockNumber: 29735000,
+						blockNumber: 29739120,
 					},
 				],
 			},

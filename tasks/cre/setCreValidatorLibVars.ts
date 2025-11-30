@@ -14,9 +14,12 @@ const donSigners = [
 	"0xcdf20F8FFD41B02c680988b20e68735cc8C1ca17",
 	"0xff9b062fcCb2f042311343048b9518068370F837",
 	"0x4f99b550623e77B807df7cbED9C79D55E1163B48",
+	"0xe55fcaf921e76c6bbcf9415bba12b1236f07b0c3",
 ];
 
 const workflowId = "0x005abdaec2b4e01b66d0b021ecb27d59ccf2868968de657c7ded9c37a3b03a10";
+
+const dstChainGasLimit = 100_000n;
 
 async function isDonSignerAllowed(
 	signer: Address,
@@ -92,7 +95,7 @@ async function setExpectedSignersCount(conceroNetworkName: ConceroTestnetNetwork
 		args: [],
 	});
 
-	if (currentExpectedSignersCount === donSigners.length) {
+	if (currentExpectedSignersCount === donSigners.length - 3) {
 		return;
 	}
 
@@ -100,7 +103,7 @@ async function setExpectedSignersCount(conceroNetworkName: ConceroTestnetNetwork
 		address: validatorLib,
 		abi: validatorLibAbi,
 		functionName: "setMinSignersCount",
-		args: [donSigners.length],
+		args: [donSigners.length - 3],
 	});
 
 	const { status } = await publicClient.waitForTransactionReceipt({ hash });
@@ -145,8 +148,54 @@ export async function setIsWorkflowIdAllowed(conceroNetworkName: ConceroTestnetN
 	log(status + " : " + hash, "setIsWorkflowIdAllowed", conceroNetworkName);
 }
 
+export async function setDstChainVerificationGasLimit(
+	conceroNetworkName: ConceroTestnetNetworkNames,
+) {
+	const conceroNetwork = conceroNetworks[conceroNetworkName];
+	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
+	const validatorLib = getEnvVar(
+		`CONCERO_CRE_VALIDATOR_LIB_PROXY_${getNetworkEnvKey(conceroNetworkName)}`,
+	);
+	const { abi: creValidatorLibAbi } = await import(
+		"../../artifacts/contracts/validators/CreValidatorLib/CreValidatorLib.sol/CreValidatorLib.json"
+	);
+	const { abi: ecdsaValidatorAbi } = await import(
+		"../../artifacts/contracts/validators/CreValidatorLib/EcdsaValidatorLib.sol/EcdsaValidatorLib.json"
+	);
+	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
+
+	const dstChainSelectorsToUpdate = [];
+
+	for (const conceroNetwork in conceroNetworks) {
+		const currentGasLimit = await publicClient.readContract({
+			address: validatorLib,
+			abi: validatorLibAbi,
+			functionName: "getDstChainGasLimit",
+			args: [conceroNetworks[conceroNetwork].chainSelector],
+		});
+
+		if (currentGasLimit === dstChainGasLimit) continue;
+
+		dstChainSelectorsToUpdate.push(conceroNetworks[conceroNetwork].chainSelector);
+	}
+
+	if (dstChainSelectorsToUpdate.length === 0) return;
+
+	const hash = await walletClient.writeContract({
+		address: validatorLib,
+		abi: validatorLibAbi,
+		functionName: "setDstChainGasLimits",
+		args: [dstChainSelectorsToUpdate, dstChainSelectorsToUpdate.map(_ => dstChainGasLimit)],
+	});
+
+	const { status } = await publicClient.waitForTransactionReceipt({ hash });
+
+	log(status + " : " + hash, "setDstChainGasLimits", conceroNetworkName);
+}
+
 export async function setCreValidatorLibVars(conceroNetworkName: ConceroTestnetNetworkNames) {
 	await setCreDonSigners(conceroNetworkName);
 	await setExpectedSignersCount(conceroNetworkName);
 	await setIsWorkflowIdAllowed(conceroNetworkName);
+	await setDstChainVerificationGasLimit(conceroNetworkName);
 }

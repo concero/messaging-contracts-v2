@@ -18,7 +18,7 @@ import {IConceroRouter} from "./IConceroRouter.sol";
 interface IRelayerLib {
     error InvalidRelayer(address relayer);
     /// @notice Thrown when an unsupported or malformed operator config type is encountered.
-    /// @param InvalidOperatorConfigType Numeric type identifier that was rejected.
+    /// @notice InvalidOperatorConfigType Numeric type identifier that was rejected.
     error InvalidOperatorConfigType(uint8);
 
     /**

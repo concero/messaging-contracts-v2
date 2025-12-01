@@ -134,7 +134,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         );
     }
 
-    /// @inheritdoc IRelayer
+    /// @inheritdoc IConceroRouter
     function retryMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,

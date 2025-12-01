@@ -29,9 +29,6 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
     /// @notice Thrown when the same signer appears more than once in the signature set.
     /// @param signer Address of the duplicated signer.
     error DuplicateSigner(address signer);
-    /// @notice Thrown when the length of the `signers` array does not match `isAllowedArr` length.
-    /// @param signersCount Length of the provided signers array.
-    /// @param isAllowedArrLength Length of the provided `isAllowed` flags array.
     error InvalidSigner(address signer);
     error InvalidSignersCount(uint256 signersCount, uint256 isAllowedArrLength);
     error LengthMismatch(uint256, uint256);

@@ -112,7 +112,10 @@ contract RelayerLib is AccessControlUpgradeable, IRelayerLib, Base {
         address[] calldata relayers,
         bool[] calldata isAllowed
     ) external onlyRole(ADMIN) {
-        require(relayers.length == isAllowed.length, CommonErrors.LengthMismatch());
+        require(
+            relayers.length == isAllowed.length,
+            CommonErrors.LengthMismatch(relayers.length, isAllowed.length)
+        );
 
         for (uint256 i = 0; i < relayers.length; i++) {
             s_isAllowedRelayer[relayers[i]] = isAllowed[i];

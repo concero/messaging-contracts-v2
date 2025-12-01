@@ -138,7 +138,13 @@ contract SetNativeNativeRatesTest is ConceroTest {
         rates[0] = RATE_A;
         rates[1] = RATE_B;
 
-        vm.expectRevert(CommonErrors.LengthMismatch.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CommonErrors.LengthMismatch.selector,
+                chainSelectors.length,
+                rates.length
+            )
+        );
         s_conceroPriceFeed.setNativeNativeRates(chainSelectors, rates);
 
         vm.stopPrank();

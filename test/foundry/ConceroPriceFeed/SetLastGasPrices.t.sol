@@ -101,7 +101,13 @@ contract SetLastGasPricesTest is ConceroTest {
         gasPrices[0] = GAS_PRICE_A;
         gasPrices[1] = GAS_PRICE_B;
 
-        vm.expectRevert(CommonErrors.LengthMismatch.selector);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CommonErrors.LengthMismatch.selector,
+                chainSelectors.length,
+                gasPrices.length
+            )
+        );
         s_conceroPriceFeed.setLastGasPrices(chainSelectors, gasPrices);
 
         vm.stopPrank();

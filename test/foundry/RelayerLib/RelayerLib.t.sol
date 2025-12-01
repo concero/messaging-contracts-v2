@@ -178,7 +178,13 @@ contract RelayerLibTests is RelayerLibTest {
         bool[] memory isAllowed = new bool[](1);
         isAllowed[0] = true;
 
-        vm.expectRevert(abi.encodeWithSelector(CommonErrors.LengthMismatch.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CommonErrors.LengthMismatch.selector,
+                relayers.length,
+                isAllowed.length
+            )
+        );
 
         s_relayerLib.setRelayers(relayers, isAllowed);
     }

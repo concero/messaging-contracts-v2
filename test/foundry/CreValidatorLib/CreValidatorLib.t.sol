@@ -9,8 +9,13 @@ pragma solidity 0.8.28;
 import {Test} from "forge-std/src/Test.sol";
 import {CreValidatorLib} from "../../../contracts/validators/CreValidatorLib/CreValidatorLib.sol";
 import {EcdsaValidatorLib} from "../../../contracts/validators/CreValidatorLib/EcdsaValidatorLib.sol";
+import {MessageCodec} from "../../../contracts/common/libraries/MessageCodec.sol";
+import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
+import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 
 contract CreValidatorLibTest is Test {
+    using ValidatorCodec for bytes;
+
     CreValidatorLib internal s_validatorLib = new CreValidatorLib();
 
     address internal s_signer1 = 0x4d7D71C7E584CfA1f5c06275e5d283b9D3176924;
@@ -100,6 +105,27 @@ contract CreValidatorLibTest is Test {
         s_validatorLib.isValid(_getMessageReceipt(), _getValidation());
     }
 
+    function testFuzz_setWorkflowId(bytes32 workflowId, bool isAllowed) public {
+        s_validatorLib.setIsWorkflowIdAllowed(workflowId, isAllowed);
+        assert(s_validatorLib.isWorkflowIdAllowed(workflowId) == isAllowed);
+    }
+
+    function testFuzz_getFeeAndValidatorConfig(uint24 chainSelector, uint32 gasLimit) public {
+        uint32[] memory gasLimits = new uint32[](1);
+        gasLimits[0] = gasLimit;
+
+        uint24[] memory chainSelectors = new uint24[](1);
+        chainSelectors[0] = chainSelector;
+
+        s_validatorLib.setDstChainGasLimits(chainSelectors, gasLimits);
+
+        (, bytes memory validatorConfig) = s_validatorLib.getFeeAndValidatorConfig(
+            _buildMessageRequest(chainSelector, gasLimit)
+        );
+
+        assert(validatorConfig.evmConfig() == gasLimit);
+    }
+
     function testFuzz_setAllowedSigners_success(address[] memory signers) public {
         bool[] memory isAllowedArr = new bool[](signers.length);
         for (uint256 i; i < isAllowedArr.length; ++i) {
@@ -126,6 +152,34 @@ contract CreValidatorLibTest is Test {
     function testFuzz_setMinSignersCount_success(uint8 minSignersCount) public {
         s_validatorLib.setMinSignersCount(minSignersCount);
         assert(s_validatorLib.getMinSignersCount() == minSignersCount);
+    }
+
+    function testFuzz_setDstChainGasLimits(uint24[] calldata chainSelectors) public {
+        uint32[] memory gasLimits = new uint32[](chainSelectors.length);
+        for (uint256 i; i < chainSelectors.length; ++i) {
+            gasLimits[i] = (chainSelectors[i] % 5) * 100;
+        }
+
+        s_validatorLib.setDstChainGasLimits(chainSelectors, gasLimits);
+
+        for (uint256 i; i < chainSelectors.length; ++i) {
+            assert(s_validatorLib.getDstChainGasLimit(chainSelectors[i]) == gasLimits[i]);
+        }
+    }
+
+    function testFuzz_setDstChainGasLimits_Unauthorized_revert(
+        uint24[] calldata chainSelectors
+    ) public {
+        uint32[] memory gasLimits = new uint32[](chainSelectors.length);
+        for (uint256 i; i < chainSelectors.length; ++i) {
+            gasLimits[i] = (chainSelectors[i] % 5) * 100;
+        }
+
+        vm.prank(makeAddr("fake admin"));
+        vm.expectRevert(
+            "AccessControl: account 0xf27a21f2bffe296e9b45ed70680e8410d81d2e95 is missing role 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42"
+        );
+        s_validatorLib.setDstChainGasLimits(chainSelectors, gasLimits);
     }
 
     function testFuzz_initialize_revert(address fakeAdmin) public {
@@ -225,5 +279,28 @@ contract CreValidatorLibTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, hashToSign);
 
         return (abi.encodePacked(r, s, v - 27), signer);
+    }
+
+    function _buildMessageRequest(
+        uint24 dstChainSelector,
+        uint32 dstChainGasLimit
+    ) internal returns (IConceroRouter.MessageRequest memory) {
+        address[] memory validatorLibs = new address[](1);
+
+        return
+            IConceroRouter.MessageRequest({
+                dstChainSelector: dstChainSelector,
+                srcBlockConfirmations: 0,
+                feeToken: address(0),
+                dstChainData: MessageCodec.encodeEvmDstChainData(
+                    makeAddr("client"),
+                    dstChainGasLimit
+                ),
+                validatorLibs: validatorLibs,
+                relayerLib: makeAddr("relayer"),
+                validatorConfigs: new bytes[](1),
+                relayerConfig: new bytes(1),
+                payload: ""
+            });
     }
 }

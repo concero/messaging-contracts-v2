@@ -8,10 +8,7 @@ pragma solidity 0.8.28;
 
 library CommonErrors {
     error Unauthorized();
-    error LengthMismatch();
+    error LengthMismatch(uint256, uint256);
     error InvalidAmount();
-    error InvalidRequest();
     error InvalidAddress();
-    error TransferFailed(bytes error);
-    error InsufficientFee(uint256 provided, uint256 required);
 }

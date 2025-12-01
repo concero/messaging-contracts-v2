@@ -7,6 +7,17 @@
 pragma solidity ^0.8.20;
 
 interface IConceroRouter {
+    /// @notice Message description used when sending a cross-chain Concero message.
+    /// @dev
+    /// - `dstChainSelector`: target chain identifier for the message.
+    /// - `srcBlockConfirmations`: number of source chain confirmations required before processing.
+    /// - `feeToken`: address of the token used to pay fees (address(0) for native token).
+    /// - `relayerLib`: relayer library responsible for pricing and validating relayers.
+    /// - `validatorLibs`: set of validator libraries that must validate the message.
+    /// - `validatorConfigs`: per-validator configuration blobs to be embedded in the message.
+    /// - `relayerConfig`: configuration blob for the relayer on the destination chain.
+    /// - `dstChainData`: encoded destination chain data (e.g. receiver address, gas limit).
+    /// - `payload`: arbitrary payload passed to the destination client.
     struct MessageRequest {
         uint24 dstChainSelector;
         uint64 srcBlockConfirmations;
@@ -19,27 +30,56 @@ interface IConceroRouter {
         bytes payload;
     }
 
+    /// @notice Breakdown of the fee paid for a message.
+    /// @dev
+    /// - `relayer`: amount paid to the relayer lib / relayer.
+    /// - `validatorsFee`: individual fees paid to validators.
+    /// - `token`: address of the fee token (address(0) for native).
     struct Fee {
         uint256 relayer;
         uint256[] validatorsFee;
         address token;
     }
 
+    /// @notice Thrown when the caller provides less fee than required for the message.
+    /// @param provided Amount of fee supplied by the caller.
+    /// @param required Amount of fee required by the router.
     error InsufficientFee(uint256 provided, uint256 required);
-    error UnsupportedFeeToken();
-    error PayloadTooLarge(uint256 receivedLength, uint256 expectedLength);
+
+    /// @notice Thrown when the destination chain data is empty.
     error EmptyDstChainData();
 
+    /// @notice Thrown when the number of validator configs does not match the number of validator libs.
+    /// @param validatorConfigsCount Length of `validatorConfigs` array.
+    /// @param validatorLibsCount Length of `validatorLibs` array.
     error InvalidValidatorConfigsCount(uint256 validatorConfigsCount, uint256 validatorLibsCount);
-    error InvalidGasLimit();
 
+    /// @notice Emitted when a Concero message is constructed and ready to be relayed cross-chain.
+    /// @param messageId Unique identifier (hash) of the message receipt.
+    /// @param messageReceipt Packed message receipt bytes containing all routing metadata.
+    /// @param validatorLibs Addresses of validator libraries required to validate the message.
+    /// @param relayerLib Address of the relayer library responsible for this message.
     event ConceroMessageSent(
         bytes32 indexed messageId,
         bytes messageReceipt,
         address[] validatorLibs,
         address relayerLib
     );
+
+    /// @notice Emitted when the fee for a Concero message is successfully collected.
+    /// @param messageId Unique identifier (hash) of the message.
+    /// @param fee Breakdown of the total fee paid (relayer + validators + token).
     event ConceroMessageFeePaid(bytes32 indexed messageId, Fee fee);
+
+    /// @notice Emitted when a Concero message is received on the destination chain.
+    /// @dev
+    /// - Includes raw validations, validator libs and their evaluation results.
+    /// @param messageId Unique identifier (hash) of the message.
+    /// @param messageReceipt Packed message receipt bytes.
+    /// @param validations Validator proofs corresponding to `validatorLibs`.
+    /// @param validatorLibs Validator libraries used during validation.
+    /// @param validationChecks Boolean results for each validator (true if valid).
+    /// @param relayerLib Relayer library that submitted the message.
     event ConceroMessageReceived(
         bytes32 indexed messageId,
         bytes messageReceipt,
@@ -48,7 +88,14 @@ interface IConceroRouter {
         bool[] validationChecks,
         address relayerLib
     );
+
+    /// @notice Emitted when a Concero message is successfully delivered to the destination client.
+    /// @param messageId Unique identifier (hash) of the delivered message.
     event ConceroMessageDelivered(bytes32 indexed messageId);
+
+    /// @notice Emitted when a Concero message delivery to the destination client fails.
+    /// @param messageId Unique identifier (hash) of the message that failed.
+    /// @param error Return data from the failed call (may contain revert reason).
     event ConceroMessageDeliveryFailed(bytes32 indexed messageId, bytes error);
 
     /**
@@ -62,6 +109,17 @@ interface IConceroRouter {
         MessageRequest calldata messageRequest
     ) external payable returns (bytes32 messageId);
 
+    /// @notice Retries delivery of a previously submitted message that failed to execute.
+    /// @dev
+    /// - Can be called by anyone once a submission is marked as retryable.
+    /// - Checks that the message has not been successfully processed yet.
+    /// - Clears the `isMessageRetryable` flag before re-attempting delivery.
+    /// - Allows overriding the gas limit used for the receiver call.
+    /// @param messageReceipt Packed encoded message receipt.
+    /// @param validationChecks Cached validation results from the previous submission.
+    /// @param validatorLibs Validator libs that were used when the message was first submitted.
+    /// @param relayerLib Relayer lib used for the original submission.
+    /// @param gasLimitOverride New gas limit to use for the receiver call.
     function retryMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,

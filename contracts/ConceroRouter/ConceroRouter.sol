@@ -20,6 +20,13 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Storage as s} from "./libraries/Storage.sol";
 import {ValidatorCodec} from "../common/libraries/ValidatorCodec.sol";
 
+/// @title ConceroRouter
+/// @notice Core router contract that coordinates Concero cross-chain messaging.
+/// @dev
+/// - Accepts message requests from Concero clients and emits them for relayers.
+/// - Collects and distributes fees to relayers and validators.
+/// - Validates and delivers messages on the destination chain via registered validator libs.
+/// - Implements retry logic for failed deliveries.
 contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     using s for s.Router;
     using SafeERC20 for IERC20;
@@ -37,7 +44,12 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
 
     receive() external payable {}
 
-    /* @inheritdoc IConceroRouter */
+    /// @inheritdoc IConceroRouter
+    /// @dev
+    /// - Validates the message request (destination data, validator config lengths).
+    /// - Collects fees for relayer and validators.
+    /// - Builds a packed message receipt and emits `ConceroMessageSent` and `ConceroMessageFeePaid`.
+    /// - Returns a deterministic `messageId` (hash of the message receipt).
     function conceroSend(
         MessageRequest calldata messageRequest
     ) external payable returns (bytes32) {
@@ -64,6 +76,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         return messageId;
     }
 
+    /// @inheritdoc IRelayer
     function submitMessage(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
@@ -121,6 +134,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         );
     }
 
+    /// @inheritdoc IRelayer
     function retryMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,
@@ -154,6 +168,12 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         );
     }
 
+    /// @notice Withdraws accumulated relayer fees for the caller across multiple fee tokens.
+    /// @dev
+    /// - For each token in `tokens`, sends the earned fee balance to `msg.sender`.
+    /// - Supports both native token (`address(0)`) and ERC-20 fee tokens.
+    /// - Emits `RelayerFeeWithdrawn` for each non-zero withdrawal.
+    /// @param tokens List of fee token addresses to withdraw (use address(0) for native).
     function withdrawRelayerFee(address[] calldata tokens) external nonReentrant {
         s.Router storage s_router = s.router();
 
@@ -179,15 +199,19 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     function getMessageFee(MessageRequest calldata messageRequest) external view returns (uint256) {
         _validateMessageParams(messageRequest);
 
-        (, bytes[] memory operatorConfigs, uint256 validatorsFee) = _getValidatorsFeeAndConfigs(
+        (, bytes[] memory validatorConfigs, uint256 validatorsFee) = _getValidatorsFeeAndConfigs(
             messageRequest
         );
 
         return
-            IRelayerLib(messageRequest.relayerLib).getFee(messageRequest, operatorConfigs) +
+            IRelayerLib(messageRequest.relayerLib).getFee(messageRequest, validatorConfigs) +
             validatorsFee;
     }
 
+    /// @notice Returns the total relayer fee accrued for a given relayer library and token.
+    /// @param relayerLib Address of the relayer library.
+    /// @param feeToken Address of the fee token (use address(0) for native).
+    /// @return Amount of fees earned and currently stored in the router.
     function getRelayerFeeEarned(
         address relayerLib,
         address feeToken
@@ -195,16 +219,39 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         return s.router().relayerFeeEarned[relayerLib][feeToken];
     }
 
+    // @notice Checks if a message has already been successfully processed.
+    /// @param messageId Hash of the message receipt (message ID).
+    /// @return True if the message delivery succeeded, otherwise false.
     function isMessageProcessed(bytes32 messageId) public view returns (bool) {
         return s.router().isMessageProcessed[messageId];
     }
 
+    /// @notice Checks if a message submission is currently marked as retryable.
+    /// @param messageId Hash of the (receipt, validationChecks) tuple.
+    /// @return True if the message can be retried, otherwise false.
     function isMessageRetryable(bytes32 messageId) public view returns (bool) {
         return s.router().isMessageRetryable[messageId];
     }
 
     /* INTERNAL FUNCTIONS */
 
+    /// @notice Delivers a message to the receiver on the destination chain.
+    /// @dev
+    /// - Performs a low-level call to the receiver's `conceroReceive` function with a gas limit.
+    /// - On success:
+    ///   * marks the message as processed,
+    ///   * emits `ConceroMessageDelivered`.
+    /// - On failure:
+    ///   * marks the message submission as retryable,
+    ///   * emits `ConceroMessageDeliveryFailed` including the returned data.
+    /// @param messageReceipt Encoded message receipt.
+    /// @param validatorLibs Validator libs used for validation.
+    /// @param validationChecks Result of each validator check (1: valid, 0: invalid/unused).
+    /// @param messageHash Hash of `messageReceipt`.
+    /// @param messageSubmissionHash Hash of (`messageReceipt`, `validationChecks`).
+    /// @param receiver Target contract implementing `IConceroClient`.
+    /// @param relayerLib Relayer lib used in the submission.
+    /// @param gasLimit Gas limit allocated for the receiver call.
     function _deliverMessage(
         bytes calldata messageReceipt,
         address[] calldata validatorLibs,
@@ -234,6 +281,17 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         }
     }
 
+    /// @notice Executes validator checks for a given message on this destination chain.
+    /// @dev
+    /// - For each validator:
+    ///   * reads its internal gas config from the message,
+    ///   * staticcalls `IValidatorLib.isValid` with the given validation proof,
+    ///   * expects a single 32-byte word that decodes to 1 on success.
+    /// - If a validation proof is empty or the call fails, the corresponding check is false.
+    /// @param messageReceipt Encoded message receipt.
+    /// @param validations Validator proofs (one per validator).
+    /// @param dstValidatorLibs Validator libraries deployed on this chain.
+    /// @return validationChecks Boolean array indicating which validators approved the message.
     function _performValidationChecks(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
@@ -280,6 +338,15 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         );
     }
 
+    /// @notice Collects message fees from the caller and accounts them to the relayer.
+    /// @dev
+    /// - Queries validator fees and configs via `_getValidatorsFeeAndConfigs`.
+    /// - Queries relayer fee via `IRelayerLib.getFee`.
+    /// - Ensures correct `msg.value` (for native fee) or pulls ERC-20 tokens from sender.
+    /// - Accumulates the total fee into `relayerFeeEarned[relayerLib][feeToken]`.
+    /// @param messageRequest Message request being sent.
+    /// @return fee Fee breakdown (per-validator + relayer + fee token).
+    /// @return operatorConfigs Validator operator configs obtained from validator libs.
     function _collectMessageFee(
         MessageRequest calldata messageRequest
     ) internal returns (Fee memory, bytes[] memory) {
@@ -299,10 +366,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         uint256 totalRelayerFee = relayerFee + totalValidatorsFee;
 
         if (messageRequest.feeToken == address(0)) {
-            require(
-                msg.value == totalRelayerFee,
-                CommonErrors.InsufficientFee(msg.value, totalRelayerFee)
-            );
+            require(msg.value == totalRelayerFee, InsufficientFee(msg.value, totalRelayerFee));
         } else {
             IERC20(messageRequest.feeToken).safeTransferFrom(
                 msg.sender,
@@ -325,6 +389,14 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         );
     }
 
+    /// @notice Computes validator fees and configs for a given message request.
+    /// @dev
+    /// - Iterates over `validatorLibs` and calls `getFeeAndValidatorConfig` on each.
+    /// - Aggregates the per-validator fees into `totalValidatorsFee`.
+    /// @param messageRequest Message request being priced.
+    /// @return validatorsFee Array of fees per validator.
+    /// @return validatorConfigs Array of validator configs to embed in the message.
+    /// @return totalValidatorsFee Sum of all validator fees.
     function _getValidatorsFeeAndConfigs(
         MessageRequest calldata messageRequest
     ) internal view returns (uint256[] memory, bytes[] memory, uint256) {

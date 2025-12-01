@@ -64,6 +64,8 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
     // INITIALIZER
 
     function initialize(address admin) public initializer {
+        _setRoleAdmin(ADMIN, DEFAULT_ADMIN_ROLE);
+
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(ADMIN, admin);
     }

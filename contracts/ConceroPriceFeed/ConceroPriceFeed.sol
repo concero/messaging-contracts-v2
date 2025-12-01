@@ -55,7 +55,10 @@ contract ConceroPriceFeed is IConceroPriceFeed {
         uint24[] calldata chainSelectors,
         uint256[] calldata rates
     ) external onlyFeedUpdater {
-        require(chainSelectors.length == rates.length, CommonErrors.LengthMismatch());
+        require(
+            chainSelectors.length == rates.length,
+            CommonErrors.LengthMismatch(chainSelectors.length, rates.length)
+        );
 
         s.PriceFeed storage priceFeedStorage = s.priceFeed();
 

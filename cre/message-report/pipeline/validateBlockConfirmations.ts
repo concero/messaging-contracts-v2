@@ -13,7 +13,7 @@ export const validateBlockConfirmations = (
 	}
 
 	let finalityBlockConfirmations: bigint = 0n;
-	if (logParsedReceipt.srcChainData.blockConfirmations === UINT64_MAX) {
+	if (logParsedReceipt.srcChainData.blockConfirmations !== UINT64_MAX) {
 		finalityBlockConfirmations = logParsedReceipt.srcChainData.blockConfirmations;
 	} else {
 		finalityBlockConfirmations = BigInt(
@@ -21,7 +21,7 @@ export const validateBlockConfirmations = (
 				.finalityConfirmations ?? 0,
 		);
 	}
-	if ((logBlockNumber || 0n) + finalityBlockConfirmations < currentChainBlockNumber) {
+	if (logBlockNumber + finalityBlockConfirmations < currentChainBlockNumber) {
 		throw new DomainError(ErrorCode.UNKNOWN_ERROR, "Block was not finalized ");
 	}
 };

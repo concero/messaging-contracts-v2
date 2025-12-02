@@ -35,7 +35,7 @@ async function deployRelayerLibTask(taskArgs: any, hre: HardhatRuntimeEnvironmen
 		await deployTransparentProxy(hre, ProxyEnum.relayerLibProxy, initializerCallData);
 	}
 
-	if (taskArgs.implementation) {
+	if (taskArgs.implementation && !taskArgs.proxy) {
 		await upgradeProxyImplementation(hre, ProxyEnum.relayerLibProxy, false);
 	}
 

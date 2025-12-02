@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { PrivateKeyAccount } from "viem";
 
 import {
 	DEPLOY_CONFIG_TESTNET,
@@ -40,7 +41,13 @@ export async function upgradeProxyImplementation(
 		"../../artifacts/contracts/Proxy/ConceroProxyAdmin.sol/ConceroProxyAdmin.json"
 	);
 
-	const viemAccount = getViemAccount(type, "proxyDeployer");
+	let viemAccount: PrivateKeyAccount;
+	if (proxyType === ProxyEnum.priceFeedProxy) {
+		viemAccount = getViemAccount(type, "priceFeedProxyDeployer");
+	} else {
+		viemAccount = getViemAccount(type, "proxyDeployer");
+	}
+
 	const { walletClient, publicClient } = getFallbackClients(
 		conceroNetworks[chainName],
 		viemAccount,

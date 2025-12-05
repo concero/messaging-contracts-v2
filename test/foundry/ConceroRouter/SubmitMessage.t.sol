@@ -6,9 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/console.sol";
 import {Vm} from "forge-std/src/Vm.sol";
-
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IConceroClient} from "contracts/interfaces/IConceroClient.sol";
@@ -341,7 +339,9 @@ contract SubmitMessage is ConceroRouterTest {
         validations[0] = abi.encode(true);
         validations[1] = abi.encode(true);
 
-        vm.expectRevert(abi.encodeWithSelector(IConceroRouter.DuplicateValidatorLibs.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(IRelayer.DuplicateValidatorLib.selector, s_validatorLib)
+        );
 
         vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(

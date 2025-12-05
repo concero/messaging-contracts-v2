@@ -301,7 +301,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         for (uint256 i; i < dstValidatorLibs.length; ++i) {
             for (uint256 k; k < dstValidatorLibs.length; ++k) {
                 if (i == k) continue;
-                require(dstValidatorLibs[i] != dstValidatorLibs[k], DuplicateValidatorLibs());
+                require(
+                    dstValidatorLibs[i] != dstValidatorLibs[k],
+                    DuplicateValidatorLib(dstValidatorLibs[i])
+                );
             }
         }
 

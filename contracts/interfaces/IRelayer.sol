@@ -15,12 +15,13 @@ interface IRelayer {
     error MessageAlreadyProcessed(bytes32 messageHash);
     error MessageSubmissionAlreadyProcessed(bytes32 messageSubmissionHash);
     error InvalidValidationsCount(uint256 validatorLibsCount, uint256 validationsCount);
+    error DuplicateValidatorLib(address validatorLib);
 
     /// @notice Emitted when a relayer successfully withdraws its accumulated fees.
-    /// @param realayer Address of the relayer (or relayer lib) withdrawing the fees.
+    /// @param relayer Address of the relayer (or relayer lib) withdrawing the fees.
     /// @param token Address of the fee token (use address(0) for native token).
     /// @param amount Amount of fees withdrawn.
-    event RelayerFeeWithdrawn(address indexed realayer, address indexed token, uint256 amount);
+    event RelayerFeeWithdrawn(address indexed relayer, address indexed token, uint256 amount);
 
     /// @notice Submits a validated message to the destination chain for execution.
     /// @dev

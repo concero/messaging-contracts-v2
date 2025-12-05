@@ -40,32 +40,6 @@ contract ConceroClientAdvancedTest is ConceroClientTest {
         );
     }
 
-    function test_TwoSameValidators_RevertsValidatorsConsensusNotReached() public {
-        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
-
-        address[] memory dstValidatorLibs = new address[](2);
-        dstValidatorLibs[0] = s_validatorLib;
-        dstValidatorLibs[1] = s_validatorLib;
-
-        bytes memory messageReceipt = _buildMessageReceipt(messageRequest);
-
-        bool[] memory validationChecks = new bool[](2);
-        validationChecks[0] = true;
-        validationChecks[1] = true;
-
-        vm.expectRevert(
-            abi.encodeWithSelector(IConceroClient.ValidatorsConsensusNotReached.selector)
-        );
-
-        vm.prank(address(s_mockConceroRouter));
-        s_conceroClientAdvanced.conceroReceive(
-            messageReceipt,
-            validationChecks,
-            dstValidatorLibs,
-            s_relayerLib
-        );
-    }
-
     function test_NotEnoughWeight_RevertsValidatorsConsensusNotReached() public {
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 

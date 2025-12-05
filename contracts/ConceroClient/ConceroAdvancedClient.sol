@@ -33,14 +33,6 @@ abstract contract ConceroAdvancedClient is ConceroClientBase {
         // when requiredWeight is 0, validation checks are not required
 
         for (uint256 i; i < dstValidatorLibs.length && i < validationChecks.length; ++i) {
-            for (uint256 k; k < dstValidatorLibs.length; ++k) {
-                if (i == k) continue;
-                require(
-                    dstValidatorLibs[i] != dstValidatorLibs[k],
-                    ValidatorsConsensusNotReached()
-                );
-            }
-
             if (validationChecks[i]) {
                 totalWeight += s_advancedClient.validatorWeights[dstValidatorLibs[i]];
             }

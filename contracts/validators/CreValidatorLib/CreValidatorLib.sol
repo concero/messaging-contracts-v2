@@ -9,6 +9,7 @@ pragma solidity 0.8.28;
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {EcdsaValidatorLib} from "./EcdsaValidatorLib.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
+import {CommonErrors} from "../../common/CommonErrors.sol";
 import {ValidatorCodec} from "../../common/libraries/ValidatorCodec.sol";
 
 /// @title CreValidatorLib
@@ -77,9 +78,16 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
     /// - CRE-based validation is treated as zero-cost here;
     ///   only relayer fees are expected to be paid.
     /// - Kept for compatibility with the `IValidatorLib` fee API.
+    /// - MUST revert with `FeeTokenNotSupported` if the fee token is not supported.
     /// @dev messageRequest Unused; present to match the interface shape.
     /// @return Always returns 0.
-    function getFee(IConceroRouter.MessageRequest calldata) public pure returns (uint256) {
+    function getFee(
+        IConceroRouter.MessageRequest calldata messageRequest
+    ) public pure returns (uint256) {
+        require(
+            isFeeTokenSupported(messageRequest.feeToken),
+            CommonErrors.FeeTokenNotSupported(messageRequest.feeToken)
+        );
         return 0;
     }
 

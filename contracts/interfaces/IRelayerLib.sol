@@ -30,6 +30,7 @@ interface IRelayerLib {
      *   * gas limits,
      *   * and any operator-specific configuration passed in `operatorConfig`.
      * - Called by the Concero router when computing the total message fee.
+     * - MUST revert with `FeeTokenNotSupported` if the fee token is not supported.
      * @param messageRequest Full message request being sent via the router.
      * @param operatorConfig Operator-specific configuration blobs (already resolved for this relayer).
      * @return The fee amount denominated in `messageRequest.feeToken`.

@@ -56,6 +56,21 @@ contract RelayerLibTests is RelayerLibTest {
         assertTrue(fee > 0, "Fee should be greater than 0");
     }
 
+    function test_getFee_RevertsIfFeeTokenIsNotSupported() public {
+        address unsupportedFeeToken = makeAddr("UnsupportedFeeToken");
+        IConceroRouter.MessageRequest memory messageRequest = _createMessageRequest(
+            DST_CHAIN_SELECTOR,
+            GAS_LIMIT
+        );
+        messageRequest.feeToken = unsupportedFeeToken;
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CommonErrors.FeeTokenNotSupported.selector, unsupportedFeeToken)
+        );
+
+        s_relayerLib.getFee(messageRequest, s_internalValidatorConfigs);
+    }
+
     function test_getFee_RevertsIfDstGasPriceIsZero() public {
         vm.startPrank(s_feedUpdater);
         uint24[] memory chainSelectors = new uint24[](1);
@@ -254,5 +269,12 @@ contract RelayerLibTests is RelayerLibTest {
 
         uint256 balanceAfter = IERC20(s_usdc).balanceOf(address(this));
         assertEq(balanceAfter, balanceBefore + 1 ether, "Balance should be increased by 1 ether");
+    }
+
+    /* isFeeTokenSupported */
+
+    function test_isFeeTokenSupported() public {
+        assertTrue(s_relayerLib.isFeeTokenSupported(address(0)));
+        assertFalse(s_relayerLib.isFeeTokenSupported(makeAddr("UnsupportedFeeToken")));
     }
 }

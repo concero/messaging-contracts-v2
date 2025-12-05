@@ -11,6 +11,7 @@ import {CreValidatorLib} from "../../../contracts/validators/CreValidatorLib/Cre
 import {EcdsaValidatorLib} from "../../../contracts/validators/CreValidatorLib/EcdsaValidatorLib.sol";
 import {MessageCodec} from "../../../contracts/common/libraries/MessageCodec.sol";
 import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
+import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 
 contract CreValidatorLibTest is Test {
@@ -212,6 +213,23 @@ contract CreValidatorLibTest is Test {
         );
         vm.prank(fakeAdmin);
         s_validatorLib.setIsWorkflowIdAllowed(s_creWorkflowId, false);
+    }
+
+    function test_getFee_RevertsIfFeeTokenIsNotSupported() public {
+        address unsupportedFeeToken = makeAddr("UnsupportedFeeToken");
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(1000, 100_000);
+        messageRequest.feeToken = unsupportedFeeToken;
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CommonErrors.FeeTokenNotSupported.selector, unsupportedFeeToken)
+        );
+
+        s_validatorLib.getFee(messageRequest);
+    }
+
+    function test_isFeeTokenSupported() public {
+        assertTrue(s_validatorLib.isFeeTokenSupported(address(0)));
+        assertFalse(s_validatorLib.isFeeTokenSupported(makeAddr("UnsupportedFeeToken")));
     }
 
     // INTERNAL FUNCTIONS

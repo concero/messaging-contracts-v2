@@ -11,4 +11,5 @@ library CommonErrors {
     error LengthMismatch(uint256, uint256);
     error InvalidAmount();
     error InvalidAddress();
+    error FeeTokenNotSupported(address feeToken);
 }

@@ -68,6 +68,11 @@ contract RelayerLib is AccessControlUpgradeable, IRelayerLib, Base {
         IConceroRouter.MessageRequest calldata messageRequest,
         bytes[] calldata validatorConfigs
     ) external view returns (uint256) {
+        require(
+            isFeeTokenSupported(messageRequest.feeToken),
+            CommonErrors.FeeTokenNotSupported(messageRequest.feeToken)
+        );
+
         uint32 totalValidatorGasLimit = _getTotalValidatorsGasLimit(validatorConfigs);
 
         (uint256 dstNativeRate, uint256 dstGasPrice) = i_conceroPriceFeed

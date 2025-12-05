@@ -6,8 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {console} from "forge-std/src/console.sol";
-
+import {Vm} from "forge-std/src/Vm.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {IConceroClient} from "contracts/interfaces/IConceroClient.sol";
@@ -309,6 +308,46 @@ contract SubmitMessage is ConceroRouterTest {
             messageReceipt,
             validations,
             new address[](1),
+            s_relayerLib
+        );
+    }
+
+    function test_submitMessage_RevertsDuplicateValidatorLibs() public {
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+
+        address[] memory dstValidatorLibs = new address[](2);
+        dstValidatorLibs[0] = s_validatorLib;
+        dstValidatorLibs[1] = s_validatorLib; // same validator library
+
+        bytes[] memory dstValidatorConfigs = new bytes[](2);
+        dstValidatorConfigs[0] = new bytes(0);
+        dstValidatorConfigs[1] = new bytes(0);
+
+        messageRequest.validatorLibs = dstValidatorLibs;
+        messageRequest.validatorConfigs = dstValidatorConfigs;
+
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.recordLogs();
+        vm.prank(s_user);
+        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
+
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes memory messageReceipt = abi.decode(entries[0].data, (bytes));
+
+        bytes[] memory validations = new bytes[](2);
+        validations[0] = abi.encode(true);
+        validations[1] = abi.encode(true);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IRelayer.DuplicateValidatorLib.selector, s_validatorLib)
+        );
+
+        vm.prank(s_relayer);
+        s_dstConceroRouter.submitMessage(
+            messageReceipt,
+            validations,
+            dstValidatorLibs,
             s_relayerLib
         );
     }

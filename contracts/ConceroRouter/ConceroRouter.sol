@@ -287,6 +287,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     ///   * reads its internal gas config from the message,
     ///   * staticcalls `IValidatorLib.isValid` with the given validation proof,
     ///   * expects a single 32-byte word that decodes to 1 on success.
+    /// - Checks for duplicate validator libraries.
     /// - If a validation proof is empty or the call fails, the corresponding check is false.
     /// @param messageReceipt Encoded message receipt.
     /// @param validations Validator proofs (one per validator).
@@ -297,6 +298,16 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bytes[] calldata validations,
         address[] memory dstValidatorLibs
     ) internal view returns (bool[] memory) {
+        for (uint256 i; i < dstValidatorLibs.length; ++i) {
+            for (uint256 k; k < dstValidatorLibs.length; ++k) {
+                if (i == k) continue;
+                require(
+                    dstValidatorLibs[i] != dstValidatorLibs[k],
+                    DuplicateValidatorLib(dstValidatorLibs[i])
+                );
+            }
+        }
+
         bool[] memory validationChecks = new bool[](dstValidatorLibs.length);
         bytes[] memory internalValidatorConfigs = messageReceipt.internalValidatorsConfig();
 

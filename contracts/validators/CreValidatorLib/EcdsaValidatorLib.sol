@@ -127,7 +127,10 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
 
     /// @notice Recovers the signer address from a signature and message hash.
     /// @dev
-    /// - Assumes the last byte of the signature stores `v - 27` and adjusts it by adding 27.
+    /// - Normalize v to the standard 27/28 range
+    ///   * If v < 2, it is a CRE validator case - add 27 to normalize
+    ///   * If v >= 35, it is an EIP-155 format - extract recovery ID and normalize to 27/28
+    ///   * Otherwise, v is already 27/28 (standard format), leave unchanged
     /// - Uses OpenZeppelin's `ECDSA.recover` under the hood.
     /// @param signature Raw ECDSA signature bytes.
     /// @param hash Message hash that was signed (already prefixed if required).
@@ -136,7 +139,17 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
         bytes memory signature,
         bytes32 hash
     ) internal pure virtual returns (address) {
-        signature[signature.length - 1] = bytes1(uint8(signature[signature.length - 1]) + 27);
+        require(signature.length == 65, "Invalid signature length");
+
+        uint8 v = uint8(signature[64]);
+
+        if (v < 2) {
+            signature[64] = bytes1(v + 27);
+        } else if (v >= 35) {
+            uint8 recoveryId = uint8((v - 35) % 2);
+            signature[64] = bytes1(recoveryId + 27);
+        }
+
         return hash.recover(signature);
     }
 

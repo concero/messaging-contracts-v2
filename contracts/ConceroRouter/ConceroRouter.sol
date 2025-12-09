@@ -102,7 +102,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bool[] memory validationChecks = _performValidationChecks(
             messageReceipt,
             validations,
-            validatorLibs
+            validatorLibs,
+            false
         );
 
         bytes32 messageSubmissionHash = keccak256(
@@ -163,6 +164,50 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             messageReceipt,
             validatorLibs,
             validationChecks,
+            messageHash,
+            messageSubmissionHash,
+            receiver,
+            relayerLib,
+            uint32(gasleft())
+        );
+    }
+
+    function retryMessageSubmissionWithValidation(
+        bytes calldata messageReceipt,
+        bytes[] calldata validations,
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs,
+        address relayerLib
+    ) external nonReentrant {
+        s.Router storage s_router = s.router();
+
+        bytes32 messageHash = keccak256(messageReceipt);
+        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
+
+        bytes32 messageSubmissionHash = keccak256(
+            abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks)
+        );
+        require(
+            s_router.isMessageRetryable[messageSubmissionHash],
+            MessageSubmissionAlreadyProcessed(messageSubmissionHash)
+        );
+        s_router.isMessageRetryable[messageSubmissionHash] = false;
+
+        (address receiver, ) = messageReceipt.evmDstChainData();
+
+        IRelayerLib(relayerLib).validate(messageReceipt, msg.sender);
+
+        bool[] memory newValidationChecks = _performValidationChecks(
+            messageReceipt,
+            validations,
+            validatorLibs,
+            true
+        );
+
+        _deliverMessage(
+            messageReceipt,
+            validatorLibs,
+            newValidationChecks,
             messageHash,
             messageSubmissionHash,
             receiver,
@@ -295,11 +340,13 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     /// @param messageReceipt Encoded message receipt.
     /// @param validations Validator proofs (one per validator).
     /// @param dstValidatorLibs Validator libraries deployed on this chain.
+    /// @param isRetry Whether the validation checks are being performed for a retry.
     /// @return validationChecks Boolean array indicating which validators approved the message.
     function _performValidationChecks(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
-        address[] memory dstValidatorLibs
+        address[] memory dstValidatorLibs,
+        bool isRetry
     ) internal view returns (bool[] memory) {
         for (uint256 i; i < dstValidatorLibs.length; ++i) {
             for (uint256 k; k < dstValidatorLibs.length; ++k) {
@@ -327,7 +374,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
                 );
 
                 (bool success, bytes memory result) = dstValidatorLibs[i].staticcall{
-                    gas: validationGasLimit
+                    gas: isRetry ? gasleft() : validationGasLimit
                 }(callData);
 
                 if (success && result.length == 32) {

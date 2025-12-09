@@ -105,7 +105,9 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             validatorLibs
         );
 
-        bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
+        bytes32 messageSubmissionHash = keccak256(
+            abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks)
+        );
         require(
             !s_router.isMessageRetryable[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
@@ -147,7 +149,9 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bytes32 messageHash = keccak256(messageReceipt);
         require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
 
-        bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
+        bytes32 messageSubmissionHash = keccak256(
+            abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks)
+        );
         require(
             s_router.isMessageRetryable[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
@@ -248,7 +252,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     /// @param validatorLibs Validator libs used for validation.
     /// @param validationChecks Result of each validator check (1: valid, 0: invalid/unused).
     /// @param messageHash Hash of `messageReceipt`.
-    /// @param messageSubmissionHash Hash of (`messageReceipt`, `validationChecks`).
+    /// @param messageSubmissionHash Hash of (`messageReceipt`, `relayerLib`, `validatorLibs`, `validationChecks`).
     /// @param receiver Target contract implementing `IConceroClient`.
     /// @param relayerLib Relayer lib used in the submission.
     /// @param gasLimit Gas limit allocated for the receiver call.

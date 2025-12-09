@@ -115,7 +115,9 @@ contract SubmitMessage is ConceroRouterTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
-        bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
+        bytes32 messageSubmissionHash = keccak256(
+            abi.encode(messageReceipt, s_relayerLib, validatorLibs, validationChecks)
+        );
 
         s_conceroClient.setRevertFlag(true);
 

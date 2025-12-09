@@ -114,18 +114,15 @@ interface IConceroRouter {
     /// - Can be called by anyone once a submission is marked as retryable.
     /// - Checks that the message has not been successfully processed yet.
     /// - Clears the `isMessageRetryable` flag before re-attempting delivery.
-    /// - Allows overriding the gas limit used for the receiver call.
     /// @param messageReceipt Packed encoded message receipt.
     /// @param validationChecks Cached validation results from the previous submission.
     /// @param validatorLibs Validator libs that were used when the message was first submitted.
     /// @param relayerLib Relayer lib used for the original submission.
-    /// @param gasLimitOverride New gas limit to use for the receiver call.
     function retryMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,
-        address relayerLib,
-        uint32 gasLimitOverride
+        address relayerLib
     ) external;
 
     /**

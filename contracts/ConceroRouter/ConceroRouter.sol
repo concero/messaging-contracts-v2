@@ -141,8 +141,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,
-        address relayerLib,
-        uint32 gasLimitOverride
+        address relayerLib
     ) external nonReentrant {
         s.Router storage s_router = s.router();
 
@@ -168,7 +167,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             messageSubmissionHash,
             receiver,
             relayerLib,
-            gasLimitOverride
+            uint32(gasleft())
         );
     }
 

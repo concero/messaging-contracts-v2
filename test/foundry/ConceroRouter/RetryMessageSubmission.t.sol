@@ -28,8 +28,6 @@ contract RetryMessageSubmission is ConceroRouterTest {
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = s_validatorLib;
 
-        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
-
         s_conceroClient.setRevertFlag(true);
 
         vm.prank(s_relayer);
@@ -48,8 +46,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             validatorLibs,
-            s_relayerLib,
-            gasLimit
+            s_relayerLib
         );
     }
 
@@ -64,8 +61,6 @@ contract RetryMessageSubmission is ConceroRouterTest {
 
         vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
-
-        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -82,8 +77,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             validatorLibs,
-            s_relayerLib,
-            gasLimit
+            s_relayerLib
         );
     }
 
@@ -96,7 +90,6 @@ contract RetryMessageSubmission is ConceroRouterTest {
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = s_validatorLib;
 
-        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
         bytes32 messageSubmissionHash = keccak256(
             abi.encode(messageReceipt, s_relayerLib, validatorLibs, validationChecks)
         );
@@ -113,8 +106,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             validatorLibs,
-            s_relayerLib,
-            gasLimit
+            s_relayerLib
         );
     }
 
@@ -136,8 +128,6 @@ contract RetryMessageSubmission is ConceroRouterTest {
         vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
 
-        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
-
         // First retry
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageDeliveryFailed(
@@ -150,8 +140,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             validatorLibs,
-            s_relayerLib,
-            gasLimit
+            s_relayerLib
         );
 
         // Second retry
@@ -166,8 +155,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             validatorLibs,
-            s_relayerLib,
-            gasLimit
+            s_relayerLib
         );
 
         s_conceroClient.setRevertFlag(false);
@@ -181,8 +169,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             validatorLibs,
-            s_relayerLib,
-            gasLimit
+            s_relayerLib
         );
     }
 
@@ -198,8 +185,6 @@ contract RetryMessageSubmission is ConceroRouterTest {
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = s_validatorLib;
 
-        (, uint32 gasLimit) = this.decodeEvmDstChainData(messageReceipt);
-
         s_conceroClient.setRevertFlag(true);
         vm.prank(s_relayer);
         s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
@@ -214,8 +199,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             validatorLibs,
-            s_relayerLib,
-            gasLimit
+            s_relayerLib
         );
     }
 
@@ -317,8 +301,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             validatorLibs,
-            s_relayerLib,
-            SUBMIT_MSG_GAS_OVERHEAD
+            s_relayerLib
         );
     }
 

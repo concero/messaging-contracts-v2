@@ -215,8 +215,7 @@ contract AttackingConceroClient is ConceroClient {
                 messageReceipt,
                 validationChecks,
                 validatorLibs,
-                i_relayerLib,
-                1_000_000
+                i_relayerLib
             );
         }
     }
@@ -494,8 +493,7 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             s_validatorLibs,
-            s_relayerLib,
-            1_000_000
+            s_relayerLib
         );
 
         assert(s_attackingConceroClient.getCounter() == 0);
@@ -517,8 +515,7 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             s_validatorLibs,
-            s_relayerLib,
-            1_000_000
+            s_relayerLib
         );
 
         assert(s_attackingConceroClient.getCounter() == 0);

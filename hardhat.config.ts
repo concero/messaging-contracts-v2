@@ -17,6 +17,11 @@ import "solidity-coverage";
 
 import { conceroNetworks } from "./constants";
 import "./tasks";
+import { getTrezorDeployEnabled } from "./utils/getTrezorDeployEnabled";
+
+if (getTrezorDeployEnabled()) {
+	require("@yankeguo/hardhat-trezor");
+}
 
 const enableGasReport = process.env.REPORT_GAS !== "false";
 

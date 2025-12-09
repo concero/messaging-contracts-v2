@@ -25,7 +25,7 @@ const deployRouter = async function (
 	const transactionData = (await contractFactory.getDeployTransaction(chain.chainId)).data;
 
 	log(
-		`${contractName} input data: ${transactionData} \n size: ${(data.length - 2) / 2}`,
+		`${contractName} input data: ${transactionData} \n size: ${(transactionData.length - 2) / 2}`,
 		"bytecode",
 		chain.name,
 	);

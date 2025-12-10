@@ -19,6 +19,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Storage as s} from "./libraries/Storage.sol";
 import {ValidatorCodec} from "../common/libraries/ValidatorCodec.sol";
+import {Utils} from "../common/libraries/Utils.sol";
 
 /// @title ConceroRouter
 /// @notice Core router contract that coordinates Concero cross-chain messaging.
@@ -276,7 +277,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
             relayerLib
         );
 
-        (bool success, bytes memory res) = receiver.call{gas: gasLimit}(callData);
+        (bool success, bytes memory res) = Utils.safeCall(receiver, gasLimit, 0, 256, callData);
 
         if (success) {
             s.router().isMessageProcessed[messageHash] = true;

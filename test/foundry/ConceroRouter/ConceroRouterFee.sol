@@ -16,6 +16,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MockPriceFeed} from "../mocks/MockPriceFeed.sol";
 import {ConceroRouterHarness} from "../harnesses/ConceroRouterHarness.sol";
 import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
+import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
 
 contract FeeCalculation is ConceroRouterTest {
     uint256 internal VALIDATOR_FEE = 0.01 ether;
@@ -42,11 +43,30 @@ contract FeeCalculation is ConceroRouterTest {
 
     function test_chargeFeeInErc20() public {
         vm.startPrank(s_deployer);
-        s_conceroRouter = new ConceroRouterHarness(SRC_CHAIN_SELECTOR);
-        s_conceroRouter.initialize();
+        s_conceroRouter = ConceroRouterHarness(
+            payable(
+                address(
+                    new TransparentUpgradeableProxy(
+                        address(new ConceroRouterHarness(SRC_CHAIN_SELECTOR)),
+                        s_deployer,
+                        abi.encodeWithSelector(ConceroRouter.initialize.selector)
+                    )
+                )
+            )
+        );
 
-        s_dstConceroRouter = new ConceroRouterHarness(DST_CHAIN_SELECTOR);
-        s_dstConceroRouter.initialize();
+        s_dstConceroRouter = ConceroRouterHarness(
+            payable(
+                address(
+                    new TransparentUpgradeableProxy(
+                        address(new ConceroRouterHarness(DST_CHAIN_SELECTOR)),
+                        s_deployer,
+                        abi.encodeWithSelector(ConceroRouter.initialize.selector)
+                    )
+                )
+            )
+        );
+        vm.stopPrank();
 
         deal(address(s_usdc), s_user, 100 ether);
 

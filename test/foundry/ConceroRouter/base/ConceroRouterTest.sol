@@ -15,6 +15,8 @@ import {MockConceroValidatorLib} from "../../mocks/MockConceroValidatorLib.sol";
 import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
 import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
+import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
+import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 
 abstract contract ConceroRouterTest is ConceroTest {
     ConceroTestClient internal s_conceroClient;
@@ -31,11 +33,29 @@ abstract contract ConceroRouterTest is ConceroTest {
         s_validatorLibs[0] = s_validatorLib;
         s_internalValidatorConfigs[0] = ValidatorCodec.encodeEvmConfig(100_000);
 
-        s_conceroRouter = new ConceroRouterHarness(SRC_CHAIN_SELECTOR);
-        s_conceroRouter.initialize();
+        s_conceroRouter = ConceroRouterHarness(
+            payable(
+                address(
+                    new TransparentUpgradeableProxy(
+                        address(new ConceroRouterHarness(SRC_CHAIN_SELECTOR)),
+                        s_deployer,
+                        abi.encodeWithSelector(ConceroRouter.initialize.selector)
+                    )
+                )
+            )
+        );
 
-        s_dstConceroRouter = new ConceroRouterHarness(DST_CHAIN_SELECTOR);
-        s_dstConceroRouter.initialize();
+        s_dstConceroRouter = ConceroRouterHarness(
+            payable(
+                address(
+                    new TransparentUpgradeableProxy(
+                        address(new ConceroRouterHarness(DST_CHAIN_SELECTOR)),
+                        s_deployer,
+                        abi.encodeWithSelector(ConceroRouter.initialize.selector)
+                    )
+                )
+            )
+        );
 
         s_conceroClient = new ConceroTestClient(payable(s_dstConceroRouter));
         s_conceroClient.setIsRelayerLibAllowed(s_relayerLib, true);

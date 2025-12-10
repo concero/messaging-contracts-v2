@@ -1,4 +1,9 @@
-import { Runtime, consensusIdenticalAggregation, cre } from "@chainlink/cre-sdk";
+import {
+	Runtime,
+	consensusIdenticalAggregation,
+	consensusMedianAggregation,
+	cre,
+} from "@chainlink/cre-sdk";
 import {
 	Transport,
 	type PublicClient as ViemPublicClient,
@@ -18,6 +23,7 @@ export class PublicClient {
 	static createHttpTransport(runtime: Runtime<GlobalConfig>, url: string): Transport {
 		return custom({
 			async request({ method, params }) {
+				const isMedianAggregation = method === "eth_blockNumber";
 				const body = [
 					{
 						jsonrpc: "2.0",
@@ -26,27 +32,64 @@ export class PublicClient {
 						params,
 					},
 				];
-				const fetcher = CRE.buildFetcher(runtime, {
-					url,
-					method: "POST",
-					body,
-					headers: {
-						"Content-Type": "application/json",
-					},
-				});
-
 				const httpClient = new cre.capabilities.HTTPClient();
-				const rawResponseBody = httpClient
-					.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(runtime.config)
-					.result();
 
-				const responseBody: Record<number, Record<string, unknown>>[] =
-					Utility.safeJSONParse(rawResponseBody);
-				const result: any = (
-					Object.values(responseBody || {}) as Record<string, unknown>[]
-				)?.map(i => i?.result)?.[0];
+				if (isMedianAggregation) {
+					const fetcher = CRE.buildFetcher<unknown, bigint>(
+						runtime,
+						{
+							url,
+							method: "POST",
+							body,
+							headers: {
+								"Content-Type": "application/json",
+							},
+						},
+						decodedResponse => {
+							const responseBody: Record<number, Record<string, unknown>>[] =
+								Utility.safeJSONParse(decodedResponse);
+							const result: any = (
+								Object.values(responseBody || {}) as Record<string, unknown>[]
+							)?.map(i => i?.result)?.[0];
 
-				return result;
+							return BigInt(result);
+						},
+					);
+
+					const result = httpClient
+						.sendRequest(runtime, fetcher, consensusMedianAggregation())(runtime.config)
+						.result();
+
+					return BigInt(result);
+				} else {
+					const fetcher = CRE.buildFetcher(
+						runtime,
+						{
+							url,
+							method: "POST",
+							body,
+							headers: {
+								"Content-Type": "application/json",
+							},
+						},
+						decodedResponse => {
+							const responseBody: Record<number, Record<string, unknown>>[] =
+								Utility.safeJSONParse(decodedResponse);
+							const result: any = (
+								Object.values(responseBody || {}) as Record<string, unknown>[]
+							)?.map(i => i?.result)?.[0];
+
+							return result;
+						},
+					);
+					const result = httpClient
+						.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(
+							runtime.config,
+						)
+						.result();
+
+					return result;
+				}
 			},
 		});
 	}

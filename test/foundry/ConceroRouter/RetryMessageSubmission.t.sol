@@ -347,7 +347,6 @@ contract RetryMessageSubmission is ConceroRouterTest {
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
         // 6. Retry the message with validation
-        vm.prank(s_relayer);
         s_dstConceroRouter.retryMessageSubmissionWithValidation(
             messageReceipt,
             validations,

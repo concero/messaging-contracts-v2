@@ -92,6 +92,16 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             InvalidValidationsCount(validatorLibs.length, validations.length)
         );
 
+        for (uint256 i; i < validatorLibs.length; ++i) {
+            for (uint256 k; k < validatorLibs.length; ++k) {
+                if (i == k) continue;
+                require(
+                    validatorLibs[i] != validatorLibs[k],
+                    DuplicateValidatorLib(validatorLibs[i])
+                );
+            }
+        }
+
         s.Router storage s_router = s.router();
 
         bytes32 messageHash = keccak256(messageReceipt);
@@ -188,7 +198,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
 
         s_router.isMessageRetryable[messageSubmissionHash] = false;
 
-        IRelayerLib(relayerLib).validate(messageReceipt, msg.sender);
         bool[] memory newValidationChecks = _performValidationChecks(
             messageReceipt,
             validations,
@@ -333,26 +342,16 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     /// - If a validation proof is empty or the call fails, the corresponding check is false.
     /// @param messageReceipt Encoded message receipt.
     /// @param validations Validator proofs (one per validator).
-    /// @param dstValidatorLibs Validator libraries deployed on this chain.
+    /// @param validatorLibs Validator libraries deployed on this chain.
     /// @param isRetry Whether the validation checks are being performed for a retry.
     /// @return validationChecks Boolean array indicating which validators approved the message.
     function _performValidationChecks(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
-        address[] memory dstValidatorLibs,
+        address[] memory validatorLibs,
         bool isRetry
     ) internal view returns (bool[] memory) {
-        for (uint256 i; i < dstValidatorLibs.length; ++i) {
-            for (uint256 k; k < dstValidatorLibs.length; ++k) {
-                if (i == k) continue;
-                require(
-                    dstValidatorLibs[i] != dstValidatorLibs[k],
-                    DuplicateValidatorLib(dstValidatorLibs[i])
-                );
-            }
-        }
-
-        bool[] memory validationChecks = new bool[](dstValidatorLibs.length);
+        bool[] memory validationChecks = new bool[](validatorLibs.length);
         bytes[] memory internalValidatorConfigs = messageReceipt.internalValidatorsConfig();
 
         for (uint256 i; i < validationChecks.length; ++i) {
@@ -367,7 +366,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
                     validations[i]
                 );
 
-                (bool success, bytes memory result) = dstValidatorLibs[i].staticcall{
+                (bool success, bytes memory result) = validatorLibs[i].staticcall{
                     gas: isRetry ? gasleft() : validationGasLimit
                 }(callData);
 

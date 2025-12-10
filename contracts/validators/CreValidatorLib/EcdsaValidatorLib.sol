@@ -36,7 +36,7 @@ abstract contract EcdsaValidatorLib is IValidatorLib {
     mapping(address signer => bool isAllowed) internal s_isSignerAllowed;
     mapping(uint24 => uint32 dstChainGasLimit) internal s_dstChainGasLimits;
     uint8 internal s_minSignersCount;
-    uint256[50] private __gap;
+    uint256[47] private __gap;
 
     // VIEW FUNCTION //
 

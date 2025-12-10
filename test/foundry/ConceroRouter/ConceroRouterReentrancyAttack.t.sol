@@ -20,6 +20,8 @@ import {Vm} from "forge-std/src/Vm.sol";
 import {MockPriceFeed} from "../mocks/MockPriceFeed.sol";
 import {ConceroRouterHarness} from "../harnesses/ConceroRouterHarness.sol";
 import {ValidatorCodec} from "../../../contracts/common/libraries/ValidatorCodec.sol";
+import {TransparentUpgradeableProxy} from "contracts/Proxy/TransparentUpgradeableProxy.sol";
+import {ConceroRouter} from "contracts/ConceroRouter/ConceroRouter.sol";
 
 /**
  * @title MaliciousERC20Token
@@ -648,7 +650,17 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
      */
     function test_tokenTransferReentrancyVulnerability() public {
         vm.startPrank(s_deployer);
-        ConceroRouterHarness maliciousRouter = new ConceroRouterHarness(SRC_CHAIN_SELECTOR);
+        ConceroRouterHarness maliciousRouter = ConceroRouterHarness(
+            payable(
+                address(
+                    new TransparentUpgradeableProxy(
+                        address(new ConceroRouterHarness(SRC_CHAIN_SELECTOR)),
+                        s_deployer,
+                        abi.encodeWithSelector(ConceroRouter.initialize.selector)
+                    )
+                )
+            )
+        );
         vm.stopPrank();
 
         // Deploy a new malicious token for this specific test

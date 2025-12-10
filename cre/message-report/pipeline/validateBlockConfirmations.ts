@@ -10,13 +10,18 @@ export const validateBlockConfirmations = (
 		return;
 	}
 
-	const requestBlockNumbers = Number(logParsedReceipt.srcChainData.blockConfirmations);
-	const configBlockNumber =
+	const requestedFinalityBlockNumbers = logParsedReceipt.srcChainData.blockConfirmations;
+	const protocolFinalityBlockNumber = BigInt(
 		ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector)
-			.finalityConfirmations || 0;
+			.finalityConfirmations || 0,
+	);
 
-	const finalityBlocksDelta = Math.max(requestBlockNumbers, configBlockNumber);
-	if (logBlockNumber + BigInt(finalityBlocksDelta) < currentChainBlockNumber) {
+	const finalityBlocksDelta =
+		requestedFinalityBlockNumbers > protocolFinalityBlockNumber
+			? requestedFinalityBlockNumbers
+			: protocolFinalityBlockNumber;
+
+	if (logBlockNumber + finalityBlocksDelta < currentChainBlockNumber) {
 		throw new DomainError(ErrorCode.UNKNOWN_ERROR, "Block was not finalized");
 	}
 };

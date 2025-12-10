@@ -11,15 +11,10 @@ export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetwor
 	const conceroNetwork = conceroNetworks[conceroNetworkName];
 	const hre = require("hardhat");
 
-	const [ethersSigner] = await hre.ethers.getSigners();
-
 	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
 	const relayerLib = getEnvVar(
 		`CONCERO_RELAYER_LIB_PROXY_${getNetworkEnvKey(conceroNetworkName)}`,
 	) as Address;
-	// const { abi: relayerLibAbi } = await import(
-	// 	"../../artifacts/contracts/relayers/RelayerLib/RelayerLib.sol/RelayerLib.json"
-	// );
 
 	const { abi: relayerLibAbi } = hre.artifacts.readArtifactSync("RelayerLib");
 
@@ -35,10 +30,20 @@ export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetwor
 	const functionArgs = [[relayer], [true]];
 
 	if (getTrezorDeployEnabled()) {
-		const contract = hre.ethers.Contract(relayerLib, relayerLibAbi, ethersSigner);
-		const unsignedTx = await contract.setRelayers.populateTransaction(functionArgs);
-		const signedTx = await ethersSigner.signTransaction(unsignedTx);
-		hash = await publicClient.sendRawTransaction({ serializedTransaction: signedTx });
+		const [ethersSigner] = await hre.ethers.getSigners();
+		const ethersContract = new hre.ethers.Contract(relayerLib, relayerLibAbi, ethersSigner);
+		const unsignedTx = await ethersContract.setRelayers.populateTransaction(
+			functionArgs[0],
+			functionArgs[1],
+		);
+
+		log(
+			`Size: ${(unsignedTx.data.length - 2) / 2}, Input data: ${unsignedTx.data}, Address: ${unsignedTx.to}`,
+			"setRelayers",
+			conceroNetworkName,
+		);
+
+		hash = (await ethersSigner.sendTransaction(unsignedTx)).hash as Hash;
 	} else {
 		hash = await walletClient.writeContract({
 			address: relayerLib,

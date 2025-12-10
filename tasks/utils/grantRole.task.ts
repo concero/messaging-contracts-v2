@@ -1,23 +1,54 @@
 import { task } from "hardhat/config";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { Hash } from "viem";
 
-import { getFallbackClients } from "../../utils";
+import { conceroNetworks } from "../../constants";
+import { getFallbackClients, log } from "../../utils";
+import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
+
+// ADMIN role: 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42
 
 export async function grantRole(hre: HardhatRuntimeEnvironment, taskArgs: any) {
 	const account = taskArgs.account;
 	const role = taskArgs.role;
 	const contract = taskArgs.contract;
+	const conceroNetwork = conceroNetworks[hre.network.name];
 	const { abi: accessControlAbi } = hre.artifacts.readArtifactSync("AccessControlUpgradeable");
-
-	const { walletClient, publicClient } = getFallbackClients(hre.network);
+	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
+	const [ethersSigner] = await hre.ethers.getSigners();
+	const functionArgs = [role, account];
 
 	const hasRole = await publicClient.readContract({
 		address: contract,
 		abi: accessControlAbi,
 		functionName: "hasRole",
-		args: [],
+		args: functionArgs,
 	});
+
+	if (hasRole === true) return;
+
+	let hash: Hash;
+
+	if (getTrezorDeployEnabled()) {
+		const ethersContract = new hre.ethers.Contract(contract, accessControlAbi, ethersSigner);
+		const unsignedTx = await ethersContract.grantRole.populateTransaction(
+			functionArgs[0],
+			functionArgs[1],
+		);
+		hash = (await ethersSigner.sendTransaction(unsignedTx)).hash as Hash;
+	} else {
+		hash = await walletClient.writeContract({
+			address: contract,
+			abi: accessControlAbi,
+			functionName: "grantRole",
+			args: functionArgs,
+		});
+	}
+
+	const { status } = await publicClient.waitForTransactionReceipt({ hash });
+
+	log(status + " : " + hash, "grantRole", hre.network.name);
 }
 
 task("grant-role", "")
@@ -27,3 +58,5 @@ task("grant-role", "")
 	.setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
 		await grantRole(hre, taskArgs);
 	});
+
+export default {};

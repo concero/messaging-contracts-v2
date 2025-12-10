@@ -6,7 +6,6 @@ import { ProxyEnum } from "../../constants";
 import { deployProxyAdmin, deployRouter, deployTransparentProxy } from "../../deploy";
 import { compileContracts } from "../../utils/compileContracts";
 import { upgradeProxyImplementation } from "../utils";
-import { setRouterVariables } from "./setRouterVariables";
 
 async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 	compileContracts({ quiet: true });
@@ -24,10 +23,6 @@ async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 
 	if (taskArgs.implementation) {
 		await upgradeProxyImplementation(hre, ProxyEnum.routerProxy, false);
-	}
-
-	if (taskArgs.vars) {
-		await setRouterVariables(hre);
 	}
 }
 

@@ -1,7 +1,7 @@
 import { HTTPPayload, Report, Runtime } from "@chainlink/cre-sdk";
 import { keccak256 } from "viem";
 
-import { DecodedArgs, DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
+import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { ChainsManager, PublicClient } from "../systems";
 import { buildResponseFromBatches } from "./buildResponseFromBatches";
 import { decodeArgs } from "./decodeArgs";
@@ -10,6 +10,7 @@ import { parseMessageSentLog } from "./parseMessageSentLog";
 import { sendReportsToRelayer } from "./sendReportsToRelayer";
 import { validateBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
+import { validateMessageVersion } from "./validateMessageVersion";
 import { validateValidatorLib } from "./validateValidatorLib";
 
 async function fetchReport(
@@ -37,7 +38,7 @@ async function fetchReport(
 		publicClient.getBlockNumber(),
 	]);
 	const parsedLog = parseMessageSentLog(log);
-
+	validateMessageVersion(parsedLog.receipt.version, runtime);
 	runtime.log(`Got ConceroMessageSent Log`);
 	validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, currentBlockNumber);
 	validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);

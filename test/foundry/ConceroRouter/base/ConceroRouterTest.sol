@@ -32,8 +32,10 @@ abstract contract ConceroRouterTest is ConceroTest {
         s_internalValidatorConfigs[0] = ValidatorCodec.encodeEvmConfig(100_000);
 
         s_conceroRouter = new ConceroRouterHarness(SRC_CHAIN_SELECTOR);
+        s_conceroRouter.initialize();
 
         s_dstConceroRouter = new ConceroRouterHarness(DST_CHAIN_SELECTOR);
+        s_dstConceroRouter.initialize();
 
         s_conceroClient = new ConceroTestClient(payable(s_dstConceroRouter));
         s_conceroClient.setIsRelayerLibAllowed(s_relayerLib, true);

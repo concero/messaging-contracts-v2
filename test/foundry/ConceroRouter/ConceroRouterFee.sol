@@ -43,6 +43,10 @@ contract FeeCalculation is ConceroRouterTest {
     function test_chargeFeeInErc20() public {
         vm.startPrank(s_deployer);
         s_conceroRouter = new ConceroRouterHarness(SRC_CHAIN_SELECTOR);
+        s_conceroRouter.initialize();
+
+        s_dstConceroRouter = new ConceroRouterHarness(DST_CHAIN_SELECTOR);
+        s_dstConceroRouter.initialize();
 
         deal(address(s_usdc), s_user, 100 ether);
 

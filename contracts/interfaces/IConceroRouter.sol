@@ -125,6 +125,25 @@ interface IConceroRouter {
         address relayerLib
     ) external;
 
+    /// @notice Retries delivery of a previously submitted message that failed to execute with re-validation process.
+    /// @dev
+    /// - Can be called by anyone once a submission is marked as retryable.
+    /// - Checks that the message has not been successfully processed yet.
+    /// - Clears the `isMessageRetryable` flag before re-attempting delivery.
+    /// - Performs re-validation of the message using the provided relayer lib and validator libs.
+    /// @param messageReceipt Packed encoded message receipt.
+    /// @param validations Validator proofs corresponding to `validatorLibs`.
+    /// @param validationChecks Result of first validation checks. Is needed to get the message submission hash.
+    /// @param validatorLibs Validator libs that were used when the message was first submitted.
+    /// @param relayerLib Relayer lib used for the original submission.
+    function retryMessageSubmissionWithValidation(
+        bytes calldata messageReceipt,
+        bytes[] calldata validations,
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs,
+        address relayerLib
+    ) external;
+
     /**
      * @notice Before sending a message, you must call getMessageFee.
      *         If you choose to pay fees in the native token, pass the

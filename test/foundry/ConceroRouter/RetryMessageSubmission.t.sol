@@ -17,6 +17,7 @@ import {ConceroTestClient} from "../ConceroTestClient/ConceroTestClient.sol";
 import {ConceroTestClientAdvanced} from "../ConceroTestClient/ConceroTestClientAdvanced.sol";
 import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
 import {MockConceroValidatorLib} from "../mocks/MockConceroValidatorLib.sol";
+import {ValidatorCodec} from "contracts/common/libraries/ValidatorCodec.sol";
 
 contract RetryMessageSubmission is ConceroRouterTest {
     function test_retryMessageSubmission_Success() public {
@@ -252,14 +253,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
         messageRequest.validatorConfigs = validatorConfigs;
 
         // 4. Send the message
-        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
-
-        vm.recordLogs();
-        vm.prank(s_user);
-        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
-
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-        bytes memory messageReceipt = abi.decode(entries[0].data, (bytes));
+        (, bytes memory messageReceipt) = _conceroSend(messageRequest);
 
         // 5. Second validator will return false
         // It means that the message is not valid and should be retried
@@ -269,8 +263,6 @@ contract RetryMessageSubmission is ConceroRouterTest {
         );
 
         bytes[] memory validations = new bytes[](2);
-        validations[0] = abi.encode(true);
-        validations[1] = abi.encode(false);
 
         // 6. Submit the message with the right order of validator libs
         vm.prank(s_relayer);
@@ -299,6 +291,66 @@ contract RetryMessageSubmission is ConceroRouterTest {
         vm.prank(s_relayer);
         s_dstConceroRouter.retryMessageSubmission(
             messageReceipt,
+            validationChecks,
+            validatorLibs,
+            s_relayerLib
+        );
+    }
+
+    /**
+     * @notice Test to ensure that retryMessageSubmissionWithValidation behaves correctly.
+     * @dev    This test uses two validator libraries.
+     *         Both validator libraries are required for a successful validation.
+     *         During the initial submitMessage call, one of the validators is expected to fail with an out-of-gas error.
+     *         After that, retryMessageSubmissionWithValidation is called with the same arguments, and both validations are expected to succeed.
+     */
+    function test_retryMessageSubmissionWithValidation_Success() public {
+        // 1. Create a second validator library and set it as allowed on the client
+        address validatorLib2 = address(new MockConceroValidatorLib());
+
+        s_conceroClient.setIsValidatorAllowed(validatorLib2, true);
+        s_conceroClient.setRequiredValidatorsCount(2);
+
+        // 2. Prepare the messageRequest
+        address[] memory validatorLibs = new address[](2);
+        validatorLibs[0] = s_validatorLib;
+        validatorLibs[1] = validatorLib2;
+
+        bytes[] memory validatorConfigs = new bytes[](2);
+        validatorConfigs[0] = new bytes(0);
+        validatorConfigs[1] = new bytes(0);
+
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+        messageRequest.validatorLibs = validatorLibs;
+        messageRequest.validatorConfigs = validatorConfigs;
+
+        // 3. Set the validation gas limit for the second validator to 0
+        MockConceroValidatorLib(validatorLib2).setValidationGasLimit(0);
+
+        // 4. Send the message
+        (bytes32 messageId, bytes memory messageReceipt) = _conceroSend(messageRequest);
+
+        bytes[] memory validations = new bytes[](2);
+        validations[0] = abi.encode(true);
+        validations[1] = abi.encode(false);
+
+        // 5. Submit the message
+        // Second validator should revert with out-of-gas error
+        vm.prank(s_relayer);
+        s_dstConceroRouter.submitMessage(messageReceipt, validations, validatorLibs, s_relayerLib);
+
+        bool[] memory validationChecks = new bool[](2);
+        validationChecks[0] = true;
+        validationChecks[1] = false;
+
+        vm.expectEmit(true, false, false, false);
+        emit IConceroRouter.ConceroMessageDelivered(messageId);
+
+        // 6. Retry the message with validation
+        vm.prank(s_relayer);
+        s_dstConceroRouter.retryMessageSubmissionWithValidation(
+            messageReceipt,
+            validations,
             validationChecks,
             validatorLibs,
             s_relayerLib

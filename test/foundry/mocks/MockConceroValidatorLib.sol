@@ -19,6 +19,7 @@ contract MockConceroValidatorLib is IValidatorLib {
     }
 
     uint256 internal s_validationFeeInNative = 0.01 ether;
+    uint32 internal s_validationGasLimit = 100_000;
     ValidationBehavior public behavior = ValidationBehavior.ReturnTrue;
 
     error ValidationRevert();
@@ -48,7 +49,7 @@ contract MockConceroValidatorLib is IValidatorLib {
     function getValidatorConfig(
         IConceroRouter.MessageRequest calldata
     ) public view virtual returns (bytes memory) {
-        return ValidatorCodec.encodeEvmConfig(100_000);
+        return ValidatorCodec.encodeEvmConfig(s_validationGasLimit);
     }
 
     function isFeeTokenSupported(address) public pure returns (bool) {
@@ -69,5 +70,9 @@ contract MockConceroValidatorLib is IValidatorLib {
 
     function setBehavior(ValidationBehavior _behavior) external {
         behavior = _behavior;
+    }
+
+    function setValidationGasLimit(uint32 gasLimit) external {
+        s_validationGasLimit = gasLimit;
     }
 }

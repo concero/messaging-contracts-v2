@@ -145,17 +145,14 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         address relayerLib
     ) external nonReentrant {
         s.Router storage s_router = s.router();
-
-        bytes32 messageHash = keccak256(messageReceipt);
-        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
-
-        bytes32 messageSubmissionHash = keccak256(
-            abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks)
+        (bytes32 messageHash, bytes32 messageSubmissionHash) = _validateRetryableMessage(
+            s_router,
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            relayerLib
         );
-        require(
-            s_router.isMessageRetryable[messageSubmissionHash],
-            MessageSubmissionAlreadyProcessed(messageSubmissionHash)
-        );
+
         s_router.isMessageRetryable[messageSubmissionHash] = false;
 
         (address receiver, ) = messageReceipt.evmDstChainData();
@@ -172,6 +169,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         );
     }
 
+    /// @inheritdoc IConceroRouter
     function retryMessageSubmissionWithValidation(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
@@ -180,29 +178,25 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         address relayerLib
     ) external nonReentrant {
         s.Router storage s_router = s.router();
-
-        bytes32 messageHash = keccak256(messageReceipt);
-        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
-
-        bytes32 messageSubmissionHash = keccak256(
-            abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks)
+        (bytes32 messageHash, bytes32 messageSubmissionHash) = _validateRetryableMessage(
+            s_router,
+            messageReceipt,
+            validationChecks,
+            validatorLibs,
+            relayerLib
         );
-        require(
-            s_router.isMessageRetryable[messageSubmissionHash],
-            MessageSubmissionAlreadyProcessed(messageSubmissionHash)
-        );
+
         s_router.isMessageRetryable[messageSubmissionHash] = false;
 
-        (address receiver, ) = messageReceipt.evmDstChainData();
-
         IRelayerLib(relayerLib).validate(messageReceipt, msg.sender);
-
         bool[] memory newValidationChecks = _performValidationChecks(
             messageReceipt,
             validations,
             validatorLibs,
             true
         );
+
+        (address receiver, ) = messageReceipt.evmDstChainData();
 
         _deliverMessage(
             messageReceipt,
@@ -397,6 +391,27 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
                 messageRequest.validatorLibs.length
             )
         );
+    }
+
+    function _validateRetryableMessage(
+        s.Router storage s_router,
+        bytes calldata messageReceipt,
+        bool[] calldata validationChecks,
+        address[] calldata validatorLibs,
+        address relayerLib
+    ) internal view returns (bytes32, bytes32) {
+        bytes32 messageHash = keccak256(messageReceipt);
+        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
+
+        bytes32 messageSubmissionHash = keccak256(
+            abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks)
+        );
+        require(
+            s_router.isMessageRetryable[messageSubmissionHash],
+            MessageSubmissionAlreadyProcessed(messageSubmissionHash)
+        );
+
+        return (messageHash, messageSubmissionHash);
     }
 
     /// @notice Collects message fees from the caller and accounts them to the relayer.

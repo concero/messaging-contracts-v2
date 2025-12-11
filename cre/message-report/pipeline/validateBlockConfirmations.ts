@@ -14,12 +14,12 @@ export const validateBlockConfirmations = (
 
 	let blockConfirmationsDelta: bigint = 0n;
 	if (logParsedReceipt.srcChainData.blockConfirmations === UINT64_MAX) {
-		blockConfirmationsDelta = logParsedReceipt.srcChainData.blockConfirmations;
-	} else {
 		blockConfirmationsDelta = BigInt(
 			ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector)
 				.finalityConfirmations ?? 0,
 		);
+	} else {
+		blockConfirmationsDelta = logParsedReceipt.srcChainData.blockConfirmations;
 	}
 
 	if (logBlockNumber + blockConfirmationsDelta < currentChainBlockNumber) {

@@ -10,18 +10,18 @@ export const validateBlockConfirmations = (
 		return;
 	}
 
-	const requestedFinalityBlockNumbers = logParsedReceipt.srcChainData.blockConfirmations;
-	const protocolFinalityBlockNumber = BigInt(
+	const requestedBlockConfirmations = logParsedReceipt.srcChainData.blockConfirmations;
+	const finalityBlockConfirmations = BigInt(
 		ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector)
 			.finalityConfirmations || 0,
 	);
 
-	const finalityBlocksDelta =
-		requestedFinalityBlockNumbers > protocolFinalityBlockNumber
-			? requestedFinalityBlockNumbers
-			: protocolFinalityBlockNumber;
+	const blockConfirmationsDelta =
+		requestedBlockConfirmations > finalityBlockConfirmations
+			? requestedBlockConfirmations
+			: finalityBlockConfirmations;
 
-	if (logBlockNumber + finalityBlocksDelta < currentChainBlockNumber) {
-		throw new DomainError(ErrorCode.UNKNOWN_ERROR, "Block was not finalized");
+	if (logBlockNumber + blockConfirmationsDelta < currentChainBlockNumber) {
+		throw new DomainError(ErrorCode.UNKNOWN_ERROR, "Not enough block confirmations");
 	}
 };

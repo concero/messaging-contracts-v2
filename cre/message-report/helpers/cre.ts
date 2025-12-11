@@ -11,6 +11,7 @@ export namespace CRE {
 			body?: RequestBody;
 			headers?: Record<string, string>;
 		},
+		mapper?: (decodedResponse: string) => ResponseBody,
 	): (sendRequester: HTTPSendRequester, config: GlobalConfig) => ResponseBody {
 		return (sendRequester: HTTPSendRequester, config: GlobalConfig): ResponseBody => {
 			const rawRequestBody =
@@ -32,7 +33,9 @@ export namespace CRE {
 				throw new Error(`HTTP request failed with status: ${response.statusCode}`);
 			}
 
-			return new TextDecoder().decode(response.body) as ResponseBody;
+			const decodedResponse = new TextDecoder().decode(response.body);
+
+			return mapper ? mapper(decodedResponse) : (decodedResponse as ResponseBody);
 		};
 	}
 }

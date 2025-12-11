@@ -33,7 +33,7 @@ async function fetchReport(
 			publicClient,
 			routerAddress,
 			item.messageId,
-			BigInt(Number(item.blockNumber)),
+			BigInt(item.blockNumber),
 		),
 		publicClient.getBlockNumber(),
 	]);

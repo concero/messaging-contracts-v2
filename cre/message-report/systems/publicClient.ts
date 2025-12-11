@@ -18,14 +18,12 @@ export class PublicClient {
 	static createHttpTransport(runtime: Runtime<GlobalConfig>, url: string): Transport {
 		return custom({
 			async request({ method, params }) {
-				const body = [
-					{
-						jsonrpc: "2.0",
-						id: Date.now(),
-						method,
-						params,
-					},
-				];
+				const body = {
+					jsonrpc: "2.0",
+					id: Date.now(),
+					method,
+					params,
+				};
 				const fetcher = CRE.buildFetcher(runtime, {
 					url,
 					method: "POST",
@@ -40,11 +38,9 @@ export class PublicClient {
 					.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(runtime.config)
 					.result();
 
-				const responseBody: Record<number, Record<string, unknown>>[] =
+				const responseBody: Record<string, unknown> =
 					Utility.safeJSONParse(rawResponseBody);
-				const result: any = (
-					Object.values(responseBody || {}) as Record<string, unknown>[]
-				)?.map(i => i?.result)?.[0];
+				const result: any = responseBody?.result;
 
 				return result;
 			},

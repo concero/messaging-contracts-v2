@@ -24,14 +24,12 @@ export class PublicClient {
 		return custom({
 			async request({ method, params }) {
 				const isMedianAggregation = method === "eth_blockNumber";
-				const body = [
-					{
-						jsonrpc: "2.0",
-						id: Date.now(),
-						method,
-						params,
-					},
-				];
+				const body = {
+					jsonrpc: "2.0",
+					id: Date.now(),
+					method,
+					params,
+				};
 				const httpClient = new cre.capabilities.HTTPClient();
 
 				if (isMedianAggregation) {
@@ -46,13 +44,10 @@ export class PublicClient {
 							},
 						},
 						decodedResponse => {
-							const responseBody: Record<number, Record<string, unknown>>[] =
+							const responseBody: Record<string, unknown> =
 								Utility.safeJSONParse(decodedResponse);
-							const result: any = (
-								Object.values(responseBody || {}) as Record<string, unknown>[]
-							)?.map(i => i?.result)?.[0];
 
-							return BigInt(result);
+							return BigInt(responseBody.result as string);
 						},
 					);
 
@@ -73,22 +68,17 @@ export class PublicClient {
 							},
 						},
 						decodedResponse => {
-							const responseBody: Record<number, Record<string, unknown>>[] =
+							const responseBody: Record<string, unknown> =
 								Utility.safeJSONParse(decodedResponse);
-							const result: any = (
-								Object.values(responseBody || {}) as Record<string, unknown>[]
-							)?.map(i => i?.result)?.[0];
 
-							return result;
+							return responseBody.result as string;
 						},
 					);
-					const result = httpClient
+					return httpClient
 						.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(
 							runtime.config,
 						)
 						.result();
-
-					return result;
 				}
 			},
 		});

@@ -73,8 +73,10 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 		validateDecodedArgs(args);
 		runtime.log(`Decoded args: ${JSON.stringify(args)}`);
 
-		const fetchReportPromises = args.batch.map(item => fetchReport(runtime, item));
-		const reports = await Promise.all(fetchReportPromises);
+		const results = await Promise.allSettled(
+			args.batch.map(item => fetchReport(runtime, item)),
+		);
+		const reports = results.filter(r => r.status === "fulfilled").map(r => r.value);
 		const response = buildResponseFromBatches(reports);
 		sendReportsToRelayer(runtime, response);
 

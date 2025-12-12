@@ -1,112 +1,214 @@
-import type { Address } from "viem";
+import { type PublicClient, createPublicClient, http } from "viem";
 
 import { task } from "hardhat/config";
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { getNetworkEnvKey } from "@concero/contract-utils";
-
 import { conceroNetworks } from "../constants";
 import { getFallbackClients } from "../utils";
-import { getEnvVar } from "../utils/getEnvVar";
 import { log } from "../utils/log";
 
-async function measureNetworkFinalization(networkName: string): Promise<{
+interface MeasureResult {
 	networkName: string;
 	chainId: number;
 	blocksToFinalize: number;
+	secondsToFinalize: number;
 	error?: string;
-}> {
+}
+
+interface AggregatedResult {
+	networkName: string;
+	chainId: number;
+	avgBlocks: number;
+	minBlocks: number;
+	maxBlocks: number;
+	avgSeconds: number;
+	minSeconds: number;
+	maxSeconds: number;
+	samples: number;
+	error?: string;
+}
+
+function formatTime(seconds: number): string {
+	if (seconds < 60) {
+		return `${Math.round(seconds)}s`;
+	}
+	const minutes = Math.floor(seconds / 60);
+	const remainingSeconds = Math.round(seconds % 60);
+	return `${minutes}m ${remainingSeconds}s`;
+}
+
+async function singleMeasure(
+	publicClient: PublicClient,
+): Promise<{ blocks: number; seconds: number }> {
+	const [latestBlock, finalizedBlock] = await Promise.all([
+		publicClient.getBlock({ blockTag: "latest" }),
+		publicClient.getBlock({ blockTag: "finalized" }),
+	]);
+
+	return {
+		blocks: Number(latestBlock.number - finalizedBlock.number),
+		seconds: Number(latestBlock.timestamp - finalizedBlock.timestamp),
+	};
+}
+
+async function measureWithRpcUrl(
+	rpcUrl: string,
+	iterations: number,
+	delay: number,
+): Promise<AggregatedResult> {
 	try {
-		const network = conceroNetworks[networkName];
-		if (!network) {
-			throw new Error(`Network ${networkName} not found`);
-		}
-
-		// Get router address from env
-		const routerAddress = getEnvVar(
-			`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(networkName)}` as any,
-		);
-		if (!routerAddress) {
-			throw new Error(`Router address not found for ${networkName}`);
-		}
-
-		const { walletClient, publicClient } = getFallbackClients(network as any);
-
-		// Capture latest block before sending transaction
-		const latestBeforeTx = await publicClient.getBlockNumber();
-
-		log(
-			`${networkName}: Sending transaction to router ${routerAddress}`,
-			"measureFinalization",
-		);
-
-		// Send foo() transaction with minimal gas
-		const txHash = await walletClient.sendTransaction({
-			to: routerAddress as Address,
-			data: "0x",
-			gas: 30000n,
+		const publicClient = createPublicClient({
+			transport: http(rpcUrl),
 		});
 
-		log(`${networkName}: Transaction sent: ${txHash}`, "measureFinalization");
+		const chainId = Number(await publicClient.getChainId());
+		const samples: { blocks: number; seconds: number }[] = [];
 
-		// Get transaction block number
-		const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
-		const txBlockNumber = receipt.blockNumber;
+		for (let i = 0; i < iterations; i++) {
+			const result = await singleMeasure(publicClient as PublicClient);
+			samples.push(result);
 
-		log(`${networkName}: Transaction mined in block: ${txBlockNumber}`, "measureFinalization");
-
-		// Wait until our specific block becomes finalized
-		let attempts = 0;
-		const maxAttempts = 1000;
-
-		while (attempts < maxAttempts) {
-			try {
-				// Try to get our specific block with finalized tag
-				const finalizedBlock = await publicClient.getBlock({
-					blockNumber: txBlockNumber,
-					blockTag: "finalized" as any,
-				});
-
-				if (finalizedBlock && finalizedBlock.number === txBlockNumber) {
-					// Our block is now finalized! Calculate how many blocks passed since sending
-					const latestAfterFinalization = await publicClient.getBlockNumber();
-					const blocksToFinalize = Number(latestAfterFinalization - latestBeforeTx);
-
-					log(
-						`${networkName}: ✅ Block ${txBlockNumber} is finalized! Latest before: ${latestBeforeTx}, Latest after: ${latestAfterFinalization}, Lag: ${blocksToFinalize} blocks`,
-						"measureFinalization",
-					);
-
-					return {
-						networkName,
-						chainId: network.chainId,
-						blocksToFinalize,
-					};
-				}
-			} catch (error: any) {
-				// Our block is not finalized yet, continue waiting
+			if (iterations > 1) {
+				log(
+					`  Sample ${i + 1}/${iterations}: ${result.blocks} blocks (${formatTime(result.seconds)})`,
+					"measureFinalization",
+				);
 			}
 
-			attempts++;
-			await new Promise(resolve => setTimeout(resolve, 200));
+			if (i < iterations - 1) {
+				await new Promise(resolve => setTimeout(resolve, delay));
+			}
 		}
 
-		throw new Error(
-			`Timeout waiting for block ${txBlockNumber} finalization after ${maxAttempts} attempts`,
-		);
+		const blocks = samples.map(s => s.blocks);
+		const seconds = samples.map(s => s.seconds);
+
+		return {
+			networkName: rpcUrl,
+			chainId,
+			avgBlocks: Math.round(blocks.reduce((a, b) => a + b, 0) / blocks.length),
+			minBlocks: Math.min(...blocks),
+			maxBlocks: Math.max(...blocks),
+			avgSeconds: seconds.reduce((a, b) => a + b, 0) / seconds.length,
+			minSeconds: Math.min(...seconds),
+			maxSeconds: Math.max(...seconds),
+			samples: iterations,
+		};
 	} catch (error: any) {
 		return {
-			networkName,
+			networkName: rpcUrl,
 			chainId: 0,
-			blocksToFinalize: 0,
+			avgBlocks: 0,
+			minBlocks: 0,
+			maxBlocks: 0,
+			avgSeconds: 0,
+			minSeconds: 0,
+			maxSeconds: 0,
+			samples: 0,
 			error: error.message,
 		};
 	}
 }
 
-task("measure-finalization-real", "Send foo() transaction and measure blocks to finalization")
+async function measureNetworkFinalization(
+	networkName: string,
+	iterations: number,
+	delay: number,
+): Promise<AggregatedResult> {
+	try {
+		const network = conceroNetworks[networkName as keyof typeof conceroNetworks];
+		if (!network) {
+			throw new Error(`Network ${networkName} not found`);
+		}
+
+		const { publicClient } = getFallbackClients(network as any);
+		const samples: { blocks: number; seconds: number }[] = [];
+
+		log(`${networkName}: Measuring...`, "measureFinalization");
+
+		for (let i = 0; i < iterations; i++) {
+			const result = await singleMeasure(publicClient as PublicClient);
+			samples.push(result);
+
+			if (iterations > 1) {
+				log(
+					`  Sample ${i + 1}/${iterations}: ${result.blocks} blocks (${formatTime(result.seconds)})`,
+					"measureFinalization",
+				);
+			}
+
+			if (i < iterations - 1) {
+				await new Promise(resolve => setTimeout(resolve, delay));
+			}
+		}
+
+		const blocks = samples.map(s => s.blocks);
+		const seconds = samples.map(s => s.seconds);
+
+		return {
+			networkName,
+			chainId: network.chainId,
+			avgBlocks: Math.round(blocks.reduce((a, b) => a + b, 0) / blocks.length),
+			minBlocks: Math.min(...blocks),
+			maxBlocks: Math.max(...blocks),
+			avgSeconds: seconds.reduce((a, b) => a + b, 0) / seconds.length,
+			minSeconds: Math.min(...seconds),
+			maxSeconds: Math.max(...seconds),
+			samples: iterations,
+		};
+	} catch (error: any) {
+		return {
+			networkName,
+			chainId: 0,
+			avgBlocks: 0,
+			minBlocks: 0,
+			maxBlocks: 0,
+			avgSeconds: 0,
+			minSeconds: 0,
+			maxSeconds: 0,
+			samples: 0,
+			error: error.message,
+		};
+	}
+}
+
+function formatResult(result: AggregatedResult): string {
+	if (result.samples === 1) {
+		return `${result.avgBlocks} blocks (${formatTime(result.avgSeconds)})`;
+	}
+	return `avg: ${result.avgBlocks} blocks (${formatTime(result.avgSeconds)}) | min: ${result.minBlocks} (${formatTime(result.minSeconds)}) | max: ${result.maxBlocks} (${formatTime(result.maxSeconds)})`;
+}
+
+task("measure-finalization-real", "Measure blocks lag between latest and finalized")
 	.addOptionalParam("networks", "Comma-separated list of networks to test", "")
+	.addOptionalParam("rpcUrl", "Direct RPC URL to use (ignores networks param)", "")
+	.addOptionalParam("iterations", "Number of samples to take", "1")
+	.addOptionalParam("delay", "Delay between samples in ms", "1000")
 	.setAction(async (taskArgs: any, hre: HardhatRuntimeEnvironment) => {
+		const iterations = parseInt(taskArgs.iterations, 10);
+		const delay = parseInt(taskArgs.delay, 10);
+
+		if (iterations > 1) {
+			log(
+				`Taking ${iterations} samples with ${delay}ms delay between each`,
+				"measureFinalization",
+			);
+		}
+
+		// If rpcUrl provided, use it directly
+		if (taskArgs.rpcUrl) {
+			log(`Using direct RPC URL: ${taskArgs.rpcUrl}`, "measureFinalization");
+			const result = await measureWithRpcUrl(taskArgs.rpcUrl, iterations, delay);
+
+			log(`\n=== RESULTS ===`, "measureFinalization");
+			if (result.error) {
+				log(`❌ Chain ${result.chainId}: ${result.error}`, "measureFinalization");
+			} else {
+				log(`✅ Chain ${result.chainId}: ${formatResult(result)}`, "measureFinalization");
+			}
+			return;
+		}
+
 		const networksToTest = taskArgs.networks
 			? taskArgs.networks.split(",").map((name: string) => name.trim())
 			: ["arbitrumSepolia"];
@@ -116,23 +218,19 @@ task("measure-finalization-real", "Send foo() transaction and measure blocks to 
 			"measureFinalization",
 		);
 
-		// Run measurements async for all networks
-		const promises = networksToTest.map((networkName: string) =>
-			measureNetworkFinalization(networkName),
-		);
+		// Run sequentially to avoid rate limits and for cleaner output
+		const results: AggregatedResult[] = [];
+		for (const networkName of networksToTest) {
+			const result = await measureNetworkFinalization(networkName, iterations, delay);
+			results.push(result);
+		}
 
-		const results = await Promise.all(promises);
-
-		// Output results
 		log(`\n=== RESULTS ===`, "measureFinalization");
 		for (const result of results) {
 			if (result.error) {
 				log(`❌ ${result.networkName}: ${result.error}`, "measureFinalization");
 			} else {
-				log(
-					`✅ ${result.networkName}: ${result.blocksToFinalize} blocks to finalize`,
-					"measureFinalization",
-				);
+				log(`✅ ${result.networkName}: ${formatResult(result)}`, "measureFinalization");
 			}
 		}
 	});

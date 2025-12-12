@@ -51,7 +51,7 @@ export class ChainsManager {
 
 		console.log(JSON.stringify(chains[80002]), typeof chains);
 
-		currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chainsResponse)));
+		currentChainsHashSum = sha256(Buffer.from(chainsResponse)).toLowerCase();
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {

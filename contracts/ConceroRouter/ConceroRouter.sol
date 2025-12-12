@@ -158,7 +158,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,
         address relayerLib
-    ) external nonReentrant {
+    )
+        external
+        //        uint32 gasLimit
+        nonReentrant
+    {
         s.Router storage s_router = s.router();
         (bytes32 messageHash, bytes32 messageSubmissionHash) = _validateRetryableMessage(
             s_router,
@@ -167,8 +171,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             validatorLibs,
             relayerLib
         );
-
-        s_router.isMessageRetryable[messageSubmissionHash] = false;
 
         (address receiver, ) = messageReceipt.evmDstChainData();
 
@@ -191,7 +193,12 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,
         address relayerLib
-    ) external nonReentrant {
+    )
+        external
+        //        bytes[] calldata internalValidatorConfigsOverrides,
+        //        uint32 gasLimit
+        nonReentrant
+    {
         s.Router storage s_router = s.router();
         (bytes32 messageHash, bytes32 messageSubmissionHash) = _validateRetryableMessage(
             s_router,
@@ -200,8 +207,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             validatorLibs,
             relayerLib
         );
-
-        s_router.isMessageRetryable[messageSubmissionHash] = false;
 
         bool[] memory newValidationChecks = _performValidationChecks(
             messageReceipt,
@@ -427,7 +432,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,
         address relayerLib
-    ) internal view returns (bytes32, bytes32) {
+    ) internal returns (bytes32, bytes32) {
         bytes32 messageHash = keccak256(messageReceipt);
         require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
 
@@ -441,6 +446,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             s_router.isMessageRetryable[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
+
+        s_router.isMessageRetryable[messageSubmissionHash] = false;
 
         return (messageHash, messageSubmissionHash);
     }

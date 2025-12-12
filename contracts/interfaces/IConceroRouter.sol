@@ -118,11 +118,13 @@ interface IConceroRouter {
     /// @param validationChecks Cached validation results from the previous submission.
     /// @param validatorLibs Validator libs that were used when the message was first submitted.
     /// @param relayerLib Relayer lib used for the original submission.
+    /// @param gasLimitOverride gas limit override for calling a client contract
     function retryMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,
-        address relayerLib
+        address relayerLib,
+        uint32 gasLimitOverride
     ) external;
 
     /// @notice Retries delivery of a previously submitted message that failed to execute with re-validation process.
@@ -136,12 +138,16 @@ interface IConceroRouter {
     /// @param validationChecks Result of first validation checks. Is needed to get the message submission hash.
     /// @param validatorLibs Validator libs that were used when the message was first submitted.
     /// @param relayerLib Relayer lib used for the original submission.
+    /// @param internalValidatorConfigsOverrides config used for messageSubmission revalidation
+    /// @param gasLimitOverride gas limit override for calling a client contract
     function retryMessageSubmissionWithRevalidation(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,
-        address relayerLib
+        address relayerLib,
+        bytes[] calldata internalValidatorConfigsOverrides,
+        uint32 gasLimitOverride
     ) external;
 
     /**

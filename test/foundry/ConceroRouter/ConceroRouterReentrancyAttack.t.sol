@@ -12,6 +12,7 @@ import {IConceroRouter} from "../../../contracts/interfaces/IConceroRouter.sol";
 import {IRelayerLib} from "../../../contracts/interfaces/IRelayerLib.sol";
 import {IValidatorLib} from "../../../contracts/interfaces/IValidatorLib.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
+import {ConceroTest} from "./utils/ConceroTest.sol";
 import {MessageCodec} from "../../../contracts/common/libraries/MessageCodec.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -215,7 +216,8 @@ contract AttackingConceroClient is ConceroClient {
                 messageReceipt,
                 validationChecks,
                 validatorLibs,
-                i_relayerLib
+                i_relayerLib,
+                ConceroTest.CLIENT_GAS_LIMIT
             );
         }
     }
@@ -493,7 +495,8 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             s_validatorLibs,
-            s_relayerLib
+            s_relayerLib,
+            CLIENT_GAS_LIMIT
         );
 
         assert(s_attackingConceroClient.getCounter() == 0);
@@ -515,7 +518,8 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
             messageReceipt,
             validationChecks,
             s_validatorLibs,
-            s_relayerLib
+            s_relayerLib,
+            CLIENT_GAS_LIMIT
         );
 
         assert(s_attackingConceroClient.getCounter() == 0);

@@ -346,13 +346,19 @@ contract RetryMessageSubmission is ConceroRouterTest {
         vm.expectEmit(true, false, false, false);
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
+        uint32 gasLimitOverride = 1_000_000;
+        bytes[] memory validatorConfigsOverrides = new bytes[](1);
+        validatorConfigsOverrides[0] = ValidatorCodec.encodeEvmConfig(VALIDATION_GAS_LIMIT);
+
         // 6. Retry the message with revalidation
         s_dstConceroRouter.retryMessageSubmissionWithRevalidation(
             messageReceipt,
             validations,
             validationChecks,
             validatorLibs,
-            s_relayerLib
+            s_relayerLib,
+            validatorConfigsOverrides,
+            gasLimitOverride
         );
     }
 

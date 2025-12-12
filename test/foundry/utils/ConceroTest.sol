@@ -29,6 +29,7 @@ abstract contract ConceroTest is Test {
     uint64 internal constant MAX_CONCERO_MESSAGE_SIZE = 1000000; // 1 mb
     uint8 internal constant MAX_CONCERO_VALIDATORS_COUNT = 20;
     uint32 internal constant VALIDATION_GAS_LIMIT = 100_000;
+    uint32 internal constant CLIENT_GAS_LIMIT = 200_000;
 
     uint32 public constant SUBMIT_MSG_GAS_OVERHEAD = 150_000;
     uint32 public constant VRF_MSG_REPORT_REQUEST_GAS_OVERHEAD = 330_000;

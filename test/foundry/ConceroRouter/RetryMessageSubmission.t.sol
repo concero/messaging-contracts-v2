@@ -298,13 +298,13 @@ contract RetryMessageSubmission is ConceroRouterTest {
     }
 
     /**
-     * @notice Test to ensure that retryMessageSubmissionWithValidation behaves correctly.
+     * @notice Test to ensure that retryMessageSubmissionWithRevalidation behaves correctly.
      * @dev    This test uses two validator libraries.
      *         Both validator libraries are required for a successful validation.
      *         During the initial submitMessage call, one of the validators is expected to fail with an out-of-gas error.
-     *         After that, retryMessageSubmissionWithValidation is called with the same arguments, and both validations are expected to succeed.
+     *         After that, retryMessageSubmissionWithRevalidation is called with the same arguments, and both validations are expected to succeed.
      */
-    function test_retryMessageSubmissionWithValidation_Success() public {
+    function test_retryMessageSubmissionWithRevalidation_Success() public {
         // 1. Create a second validator library and set it as allowed on the client
         address validatorLib2 = address(new MockConceroValidatorLib());
 
@@ -347,7 +347,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
         emit IConceroRouter.ConceroMessageDelivered(messageId);
 
         // 6. Retry the message with validation
-        s_dstConceroRouter.retryMessageSubmissionWithValidation(
+        s_dstConceroRouter.retryMessageSubmissionWithRevalidation(
             messageReceipt,
             validations,
             validationChecks,

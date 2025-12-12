@@ -136,7 +136,7 @@ interface IConceroRouter {
     /// @param validationChecks Result of first validation checks. Is needed to get the message submission hash.
     /// @param validatorLibs Validator libs that were used when the message was first submitted.
     /// @param relayerLib Relayer lib used for the original submission.
-    function retryMessageSubmissionWithValidation(
+    function retryMessageSubmissionWithRevalidation(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
         bool[] calldata validationChecks,

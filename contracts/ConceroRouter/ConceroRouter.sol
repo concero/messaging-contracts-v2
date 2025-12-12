@@ -92,6 +92,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             InvalidValidationsCount(validatorLibs.length, validations.length)
         );
 
+        // @dev verification that validators are unique
         for (uint256 i; i < validatorLibs.length; ++i) {
             for (uint256 k; k < validatorLibs.length; ++k) {
                 if (i == k) continue;
@@ -116,9 +117,13 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             false
         );
 
-        bytes32 messageSubmissionHash = keccak256(
-            abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks)
+        bytes32 messageSubmissionHash = getMessageSubmissionHash(
+            messageReceipt,
+            relayerLib,
+            validatorLibs,
+            validationChecks
         );
+
         require(
             !s_router.isMessageRetryable[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
@@ -180,7 +185,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     }
 
     /// @inheritdoc IConceroRouter
-    function retryMessageSubmissionWithValidation(
+    function retryMessageSubmissionWithRevalidation(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
         bool[] calldata validationChecks,
@@ -203,6 +208,13 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             validations,
             validatorLibs,
             true
+        );
+
+        messageSubmissionHash = getMessageSubmissionHash(
+            messageReceipt,
+            relayerLib,
+            validatorLibs,
+            validationChecks
         );
 
         (address receiver, ) = messageReceipt.evmDstChainData();
@@ -278,10 +290,27 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     }
 
     /// @notice Checks if a message submission is currently marked as retryable.
-    /// @param messageId Hash of the (receipt, validationChecks) tuple.
+    /// @param messageId Hash of the message receipt.
+    /// @param messageSubmissionHash Hash of the message submission.
     /// @return True if the message can be retried, otherwise false.
-    function isMessageRetryable(bytes32 messageId) public view returns (bool) {
-        return s.router().isMessageRetryable[messageId];
+    function isMessageSubmissionRetryable(
+        bytes32 messageId,
+        bytes32 messageSubmissionHash
+    ) public view returns (bool) {
+        s.Router storage s_router = s.router();
+
+        return
+            !s_router.isMessageProcessed[messageId] &&
+            s_router.isMessageRetryable[messageSubmissionHash];
+    }
+
+    function getMessageSubmissionHash(
+        bytes calldata messageReceipt,
+        address relayerLib,
+        address[] calldata validatorLibs,
+        bool[] memory validationChecks
+    ) public pure returns (bytes32) {
+        return keccak256(abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks));
     }
 
     /* INTERNAL FUNCTIONS */
@@ -402,8 +431,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bytes32 messageHash = keccak256(messageReceipt);
         require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
 
-        bytes32 messageSubmissionHash = keccak256(
-            abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks)
+        bytes32 messageSubmissionHash = getMessageSubmissionHash(
+            messageReceipt,
+            relayerLib,
+            validatorLibs,
+            validationChecks
         );
         require(
             s_router.isMessageRetryable[messageSubmissionHash],

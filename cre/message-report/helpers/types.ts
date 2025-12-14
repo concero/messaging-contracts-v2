@@ -38,5 +38,6 @@ export type DecodedMessageSentReceipt = {
 
 	relayerLib: Hex;
 	validatorLibs: Hex[];
+	internalValidatorConfigs: Hex[];
 	payload: Hex;
 };

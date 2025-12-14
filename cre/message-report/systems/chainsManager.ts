@@ -35,7 +35,7 @@ let currentChainsHashSum: string = "";
 
 export class ChainsManager {
 	static enrichOptions(runtime: Runtime<GlobalConfig>) {
-		const fetcher = CRE.buildFetcher<unknown>(runtime, {
+		const fetcher = CRE.buildFetcher(runtime, {
 			url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
 			method: "GET",
 			headers: {
@@ -51,7 +51,7 @@ export class ChainsManager {
 
 		console.log(JSON.stringify(chains[80002]), typeof chains);
 
-		currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chainsResponse)));
+		currentChainsHashSum = sha256(Buffer.from(chainsResponse)).toLowerCase();
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {

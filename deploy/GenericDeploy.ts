@@ -1,12 +1,23 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
-import { log, updateEnvVariable } from "../utils";
+import { EnvFileName } from "../types/deploymentVariables";
+import { log, updateEnvAddress } from "../utils";
+import { ContractPrefix } from "../utils/updateEnvVariable";
 
-const genericDeploy = async (
-	hre: HardhatRuntimeEnvironment,
-	contractName: string,
+export interface ITxParams {
+	gasLimit: bigint;
+}
+
+export interface IGenericDeployParams {
+	hre: HardhatRuntimeEnvironment;
+	contractName: string;
+	contractPrefix: ContractPrefix;
+	txParams?: Partial<ITxParams>;
+}
+
+export const genericDeploy = async (
+	{ hre, contractName, contractPrefix, txParams }: IGenericDeployParams,
 	...contractConstructorArgs: any[]
 ) => {
 	const [deployer] = await hre.ethers.getSigners();
@@ -18,8 +29,13 @@ const genericDeploy = async (
 		chain.name,
 	);
 
-	const contractFactory = await hre.ethers.getContractFactory(contractName);
-	const transactionData = (await contractFactory.getDeployTransaction(chain.chainId)).data;
+	const contractFactory = await hre.ethers.getContractFactory(contractName, {
+		...(txParams?.gasLimit && {
+			estimateGas: () => new Promise(resolve => resolve(txParams.gasLimit!)),
+		}),
+	});
+	const transactionData = (await contractFactory.getDeployTransaction(...contractConstructorArgs))
+		.data;
 
 	log(
 		`${contractName} input data: ${transactionData} \n size: ${(transactionData.length - 2) / 2}`,
@@ -35,10 +51,12 @@ const genericDeploy = async (
 		address: deploymentAddress,
 	});
 
-	log(`Deployed at: ${deploymentAddress}`, "deployRouter", name);
-	updateEnvVariable(
-		`CONCERO_ROUTER_${getNetworkEnvKey(name)}`,
+	log(`Deployed at: ${deploymentAddress}`, `deploy ${contractName}`, chain.name);
+
+	updateEnvAddress(
+		contractPrefix,
+		chain.name,
 		deploymentAddress,
-		`deployments.${chain.networkType}`,
+		`deployments.${chain.type}` as EnvFileName,
 	);
 };

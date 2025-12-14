@@ -11,6 +11,8 @@ import {
 } from "../../constants";
 import { EnvPrefixes, IProxyType } from "../../types/deploymentVariables";
 import { err, getEnvAddress, getFallbackClients, getViemAccount, log } from "../../utils";
+import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
+import { ethersSignerCallContract } from "./ethersSignerCallContract";
 
 export async function upgradeProxyImplementation(
 	hre: HardhatRuntimeEnvironment,
@@ -37,9 +39,7 @@ export async function upgradeProxyImplementation(
 		return;
 	}
 
-	const { abi: proxyAdminAbi } = await import(
-		"../../artifacts/contracts/Proxy/ConceroProxyAdmin.sol/ConceroProxyAdmin.json"
-	);
+	const { abi: proxyAdminAbi } = hre.artifacts.readArtifactSync("ProxyAdmin");
 
 	let viemAccount: PrivateKeyAccount;
 	if (proxyType === ProxyEnum.priceFeedProxy) {
@@ -68,15 +68,29 @@ export async function upgradeProxyImplementation(
 		gasLimit = config.priceFeed.gasLimit;
 	}
 
-	const txHash = await walletClient.writeContract({
-		address: proxyAdmin,
-		abi: proxyAdminAbi,
-		functionName: "upgradeAndCall",
-		account: viemAccount,
-		args: [conceroProxy, implementation, "0x"],
-		chain: viemChain,
-		...(gasLimit ? { gas: gasLimit } : {}),
-	});
+	const functionArgs = [conceroProxy, implementation, "0x"];
+
+	let txHash;
+
+	if (getTrezorDeployEnabled()) {
+		txHash = await ethersSignerCallContract(
+			hre,
+			proxyAdmin,
+			proxyAdminAbi,
+			"upgradeAndCall",
+			...functionArgs,
+		);
+	} else {
+		txHash = await walletClient.writeContract({
+			address: proxyAdmin,
+			abi: proxyAdminAbi,
+			functionName: "upgradeAndCall",
+			account: viemAccount,
+			args: functionArgs,
+			chain: viemChain,
+			...(gasLimit ? { gas: gasLimit } : {}),
+		});
+	}
 
 	const receipt = await publicClient.waitForTransactionReceipt({
 		...getViemReceiptConfig(conceroNetworks[chainName]),

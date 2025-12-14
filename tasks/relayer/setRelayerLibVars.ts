@@ -4,6 +4,7 @@ import { Address, Hash } from "viem";
 import { ConceroTestnetNetworkNames, conceroNetworks } from "../../constants/conceroNetworks";
 import { getEnvVar, getFallbackClients, log } from "../../utils";
 import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
+import { ethersSignerCallContract } from "../utils/ethersSignerCallContract";
 
 const relayer = "0x51aa24026e9367987e931caabd6519fb491a274a";
 
@@ -30,20 +31,13 @@ export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetwor
 	const functionArgs = [[relayer], [true]];
 
 	if (getTrezorDeployEnabled()) {
-		const [ethersSigner] = await hre.ethers.getSigners();
-		const ethersContract = new hre.ethers.Contract(relayerLib, relayerLibAbi, ethersSigner);
-		const unsignedTx = await ethersContract.setRelayers.populateTransaction(
-			functionArgs[0],
-			functionArgs[1],
-		);
-
-		log(
-			`Size: ${(unsignedTx.data.length - 2) / 2}, Input data: ${unsignedTx.data}, Address: ${unsignedTx.to}`,
+		hash = await ethersSignerCallContract(
+			hre,
+			relayerLib,
+			relayerLibAbi,
 			"setRelayers",
-			conceroNetworkName,
+			...functionArgs,
 		);
-
-		hash = (await ethersSigner.sendTransaction(unsignedTx)).hash as Hash;
 	} else {
 		hash = await walletClient.writeContract({
 			address: relayerLib,

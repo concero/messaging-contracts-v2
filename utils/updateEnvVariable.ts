@@ -8,6 +8,8 @@ import { ConceroNetworkNames } from "../types/ConceroNetwork";
 import { EnvFileName, EnvPrefixes } from "../types/deploymentVariables";
 import log from "./log";
 
+export type ContractPrefix = keyof EnvPrefixes;
+
 export function updateEnvVariable(key: string, newValue: string, envFileName: EnvFileName) {
 	const filePath = path.join(__dirname, `../.env.${envFileName}`);
 	if (!filePath) throw new Error(`File not found: ${filePath}`);
@@ -33,7 +35,7 @@ export function updateEnvVariable(key: string, newValue: string, envFileName: En
 }
 
 export function updateEnvAddress(
-	prefix: keyof EnvPrefixes,
+	prefix: ContractPrefix,
 	networkPostfix?: ConceroNetworkNames | string,
 	newValue: string,
 	envFileName: EnvFileName,

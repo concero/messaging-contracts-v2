@@ -59,4 +59,6 @@ export const genericDeploy = async (
 		deploymentAddress,
 		`deployments.${chain.type}` as EnvFileName,
 	);
+
+	return contract.deploymentTransaction()?.hash;
 };

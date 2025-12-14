@@ -44,6 +44,7 @@ export const genericDeploy = async (
 	);
 
 	const contract = await contractFactory.deploy(...contractConstructorArgs);
+	await contract.deploymentTransaction()?.wait();
 	const deploymentAddress = await contract.getAddress();
 
 	await hre.tenderly.verify({

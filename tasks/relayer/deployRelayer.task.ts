@@ -1,16 +1,14 @@
 import { task } from "hardhat/config";
 
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
-import { encodeFunctionData } from "viem";
+import { Address, encodeFunctionData } from "viem";
 
 import { ProxyEnum } from "../../constants";
-import { deployProxyAdmin, deployRouter, deployTransparentProxy } from "../../deploy";
+import { deployProxyAdmin, deployTransparentProxy } from "../../deploy";
 import deployRelayerLib from "../../deploy/RelayerLib";
-import { getViemAccount } from "../../utils";
-import { compileContracts } from "../../utils/compileContracts";
+import { compileContracts } from "../../utils";
 import { upgradeProxyImplementation } from "../utils";
 import { setRelayerLibVars } from "./setRelayerLibVars";
-import { setRouterVariables } from "./setRouterVariables";
 
 async function deployRelayerLibTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 	compileContracts({ quiet: true });
@@ -22,14 +20,13 @@ async function deployRelayerLibTask(taskArgs: any, hre: HardhatRuntimeEnvironmen
 	if (taskArgs.proxy) {
 		await deployProxyAdmin(hre, ProxyEnum.relayerLibProxy);
 
-		const { abi } = await import(
-			"../../artifacts/contracts/validators/CreValidatorLib/CreValidatorLib.sol/CreValidatorLib.json"
-		);
-		const privateKeyAccount = getViemAccount("testnet", "deployer");
+		const { abi } = hre.artifacts.readArtifactSync("CreValidatorLib");
+		const [ethersSigner] = await hre.ethers.getSigners();
+
 		const initializerCallData = encodeFunctionData({
 			abi,
 			functionName: "initialize",
-			args: [privateKeyAccount.address],
+			args: [ethersSigner.address as Address],
 		});
 
 		await deployTransparentProxy(hre, ProxyEnum.relayerLibProxy, initializerCallData);

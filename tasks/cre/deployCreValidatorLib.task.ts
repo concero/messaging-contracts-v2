@@ -1,12 +1,12 @@
 import { task } from "hardhat/config";
 
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
-import { encodeFunctionData } from "viem";
+import { Address, encodeFunctionData } from "viem";
 
 import { ProxyEnum } from "../../constants";
 import { deployProxyAdmin, deployTransparentProxy } from "../../deploy";
 import deployConceroCreValidatorLib from "../../deploy/CocneroCreValidatorLib";
-import { compileContracts, getViemAccount } from "../../utils";
+import { compileContracts } from "../../utils";
 import { upgradeProxyImplementation } from "../utils";
 import { setCreValidatorLibVars } from "./setCreValidatorLibVars";
 
@@ -18,14 +18,13 @@ async function deployCreValidatorLibTask(taskArgs: any, hre: HardhatRuntimeEnvir
 	}
 
 	if (taskArgs.proxy) {
-		const { abi } = await import(
-			"../../artifacts/contracts/validators/CreValidatorLib/CreValidatorLib.sol/CreValidatorLib.json"
-		);
-		const privateKeyAccount = getViemAccount("testnet", "deployer");
+		const { abi } = hre.artifacts.readArtifactSync("CreValidatorLib");
+		const [ethersSigner] = await hre.ethers.getSigners();
+
 		const initializerCallData = encodeFunctionData({
 			abi,
 			functionName: "initialize",
-			args: [privateKeyAccount.address],
+			args: [ethersSigner.address as Address],
 		});
 
 		await deployProxyAdmin(hre, ProxyEnum.creValidatorLibProxy);

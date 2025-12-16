@@ -12,6 +12,7 @@ import {
 } from "../types/ConceroNetwork";
 import { getEnvVar, getWallet } from "../utils";
 import { createViemChain } from "../utils/createViemChain";
+import { getTrezorDeployEnabled } from "../utils/getTrezorDeployEnabled";
 import { urls } from "./rpcUrls";
 
 const mainnetProxyDeployerPK = getWallet("mainnet", "proxyDeployer", "privateKey");
@@ -20,6 +21,8 @@ const localhostProxyDeployerPK = getWallet("localhost", "proxyDeployer", "privat
 const mainnetDeployerPK = getWallet("mainnet", "deployer", "privateKey");
 const testnetDeployerPK = getWallet("testnet", "deployer", "privateKey");
 const localhostDeployerPK = getWallet("localhost", "deployer", "privateKey");
+
+const trezorDeployEnabled = getTrezorDeployEnabled();
 
 const testnetAccounts = [testnetDeployerPK, testnetProxyDeployerPK];
 
@@ -50,20 +53,20 @@ const testingNetworks: Record<"localhost", ConceroLocalNetwork> &
 		chainId: Number(process.env.LOCALHOST_FORK_CHAIN_ID),
 		type: networkTypes.localhost,
 		saveDeployments: false,
-		accounts: [
-			{
-				privateKey: localhostProxyDeployerPK,
-				balance: "10000000000000000000000",
-			},
-			{
-				privateKey: localhostDeployerPK,
-				balance: "10000000000000000000000",
-			},
-			{
-				privateKey: getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
-				balance: "10000000000000000000000",
-			},
-		],
+		// accounts: [
+		// 	{
+		// 		privateKey: localhostProxyDeployerPK,
+		// 		balance: "10000000000000000000000",
+		// 	},
+		// 	{
+		// 		privateKey: localhostDeployerPK,
+		// 		balance: "10000000000000000000000",
+		// 	},
+		// 	{
+		// 		privateKey: getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
+		// 		balance: "10000000000000000000000",
+		// 	},
+		// ],
 		chainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
 		confirmations: 1,
 		viemChain: hardhatViemChain,
@@ -80,11 +83,11 @@ const testingNetworks: Record<"localhost", ConceroLocalNetwork> &
 		viemChain: localhostViemChain,
 		confirmations: 1,
 		chainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
-		accounts: [
-			localhostDeployerPK,
-			localhostProxyDeployerPK,
-			getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
-		],
+		// accounts: [
+		// 	localhostDeployerPK,
+		// 	localhostProxyDeployerPK,
+		// 	getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
+		// ],
 		saveDeployments: true,
 		url: process.env.LOCALHOST_RPC_URL || "http://localhost:8545",
 	},
@@ -95,11 +98,11 @@ const testingNetworks: Record<"localhost", ConceroLocalNetwork> &
 		viemChain: localhostViemChain,
 		confirmations: 1,
 		chainSelector: BigInt(process.env.CL_CCIP_CHAIN_SELECTOR_LOCALHOST || "0"),
-		accounts: [
-			localhostDeployerPK,
-			localhostProxyDeployerPK,
-			getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
-		],
+		// accounts: [
+		// 	localhostDeployerPK,
+		// 	localhostProxyDeployerPK,
+		// 	getEnvVar("TESTNET_OPERATOR_PRIVATE_KEY"),
+		// ],
 		saveDeployments: true,
 		url: process.env.LOCALHOST_RPC_URL || "http://localhost:8545",
 	},
@@ -143,10 +146,17 @@ function createExtendedNetworks<T extends string>(
 					type: networkType,
 					url: urls[networkKey]?.[0] || "",
 					saveDeployments: false,
-					accounts,
+					...(!trezorDeployEnabled && { accounts }),
 					chainSelector: BigInt(network.chainSelector),
 					confirmations: 1,
 					viemChain,
+					...(trezorDeployEnabled && {
+						trezorDerivationPaths: [
+							[44, 60, 0, 0, 0],
+							[44, 60, 0, 0, 1],
+						],
+						trezorInsecureDerivation: true,
+					}),
 				},
 			];
 		}),

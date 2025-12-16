@@ -10,20 +10,24 @@ import { parseMessageSentLog } from "./parseMessageSentLog";
 import { sendReportsToRelayer } from "./sendReportsToRelayer";
 import { validateBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
+import { validateMessageVersion } from "./validateMessageVersion";
 import { validateValidatorLib } from "./validateValidatorLib";
 
 async function fetchReport(
 	runtime: Runtime<GlobalConfig>,
 	item: DecodedArgs["batch"][number],
 ): Promise<{ report: ReturnType<Report["x_generatedCodeOnly_unwrap"]>; messageId: string }> {
-	const routerAddress = ChainsManager.getOptionsBySelector(item.srcChainSelector).deployments
-		.router;
+	const routerAddress = ChainsManager.getOptionsBySelector(item.srcChainSelector)?.deployments
+		?.router;
 	if (!routerAddress) {
 		throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Router deployment not found");
 	}
 
 	runtime.log(`Got routerAddress=${routerAddress}`);
-	if (!routerAddress) throw new Error("Router");
+	if (!routerAddress) {
+		throw new DomainError(ErrorCode.INVALID_DATA, "Router Deployment not found");
+	}
+
 	const publicClient = PublicClient.create(runtime, item.srcChainSelector);
 
 	const [log, currentBlockNumber] = await Promise.all([
@@ -32,13 +36,16 @@ async function fetchReport(
 			publicClient,
 			routerAddress,
 			item.messageId,
-			BigInt(Number(item.blockNumber)),
+			BigInt(item.blockNumber),
 		),
 		publicClient.getBlockNumber(),
 	]);
 	const parsedLog = parseMessageSentLog(log);
+	runtime.log(
+		`Got log txHash=${log.transactionHash}, blockNumber=${currentBlockNumber.toString()}: ${Utility.safeJSONStringify(parsedLog)}`,
+	);
 
-	runtime.log(`Got ConceroMessageSent Log`);
+	validateMessageVersion(parsedLog.receipt.version, runtime);
 	validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, currentBlockNumber);
 	validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
 
@@ -72,8 +79,16 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 		validateDecodedArgs(args);
 		runtime.log(`Decoded args: ${JSON.stringify(args)}`);
 
-		const fetchReportPromises = args.batch.map(item => fetchReport(runtime, item));
-		const reports = await Promise.all(fetchReportPromises);
+		const results = await Promise.allSettled(
+			args.batch.map(item => fetchReport(runtime, item)),
+		);
+
+		const failed = results.filter(r => r.status === "rejected").map(i => i.reason);
+		if (failed.length > 0) {
+			runtime.log(`Failed: ${failed.map(String).join(", ")}`);
+		}
+
+		const reports = results.filter(r => r.status === "fulfilled").map(r => r.value);
 		const response = buildResponseFromBatches(reports);
 		sendReportsToRelayer(runtime, response);
 

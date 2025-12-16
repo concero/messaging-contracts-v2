@@ -15,10 +15,11 @@ import {IRelayerLib} from "../interfaces/IRelayerLib.sol";
 import {IRelayer} from "../interfaces/IRelayer.sol";
 import {IValidatorLib} from "../interfaces/IValidatorLib.sol";
 import {MessageCodec} from "../common/libraries/MessageCodec.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Storage as s} from "./libraries/Storage.sol";
 import {ValidatorCodec} from "../common/libraries/ValidatorCodec.sol";
+import {Utils} from "../common/libraries/Utils.sol";
 
 /// @title ConceroRouter
 /// @notice Core router contract that coordinates Concero cross-chain messaging.
@@ -27,7 +28,7 @@ import {ValidatorCodec} from "../common/libraries/ValidatorCodec.sol";
 /// - Collects and distributes fees to relayers and validators.
 /// - Validates and delivers messages on the destination chain via registered validator libs.
 /// - Implements retry logic for failed deliveries.
-contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
+contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
     using s for s.Router;
     using SafeERC20 for IERC20;
     using MessageCodec for MessageRequest;
@@ -38,8 +39,14 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
 
     uint24 internal immutable i_chainSelector;
 
-    constructor(uint24 chainSelector) ReentrancyGuard() {
+    constructor(uint24 chainSelector) {
         i_chainSelector = chainSelector;
+    }
+
+    // INITIALIZER //
+
+    function initialize() external initializer {
+        __ReentrancyGuard_init();
     }
 
     receive() external payable {}
@@ -331,7 +338,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
 
         (address receiver, ) = messageReceipt.evmDstChainData();
 
-        (bool success, bytes memory res) = receiver.call{gas: gasLimit}(callData);
+        (bool success, bytes memory res) = Utils.safeCall(receiver, gasLimit, 0, 256, callData);
 
         if (success) {
             s.router().isMessageProcessed[messageHash] = true;

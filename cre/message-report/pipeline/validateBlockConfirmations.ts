@@ -1,7 +1,7 @@
+import { maxUint64 } from "viem";
+
 import { DecodedMessageSentReceipt, DomainError, ErrorCode } from "../helpers";
 import { ChainsManager } from "../systems";
-
-const UINT64_MAX = 18446744073709551615n;
 
 export const validateBlockConfirmations = (
 	logBlockNumber: bigint,
@@ -12,16 +12,17 @@ export const validateBlockConfirmations = (
 		return;
 	}
 
-	let finalityBlockConfirmations: bigint = 0n;
-	if (logParsedReceipt.srcChainData.blockConfirmations !== UINT64_MAX) {
-		finalityBlockConfirmations = logParsedReceipt.srcChainData.blockConfirmations;
-	} else {
-		finalityBlockConfirmations = BigInt(
+	let blockConfirmationsDelta: bigint = 0n;
+	if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
+		blockConfirmationsDelta = BigInt(
 			ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector)
-				.finalityConfirmations ?? 0,
+				.finalityConfirmations,
 		);
+	} else {
+		blockConfirmationsDelta = logParsedReceipt.srcChainData.blockConfirmations;
 	}
-	if (logBlockNumber + finalityBlockConfirmations < currentChainBlockNumber) {
-		throw new DomainError(ErrorCode.UNKNOWN_ERROR, "Block was not finalized ");
+
+	if (logBlockNumber + blockConfirmationsDelta > currentChainBlockNumber) {
+		throw new DomainError(ErrorCode.UNKNOWN_ERROR, "Not enough block confirmations");
 	}
 };

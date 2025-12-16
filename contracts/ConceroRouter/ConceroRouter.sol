@@ -147,7 +147,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         address relayerLib,
         uint32 gasLimitOverride
     ) external nonReentrant {
-        bytes32 messageHash = _validateRetryableMessage(
+        bytes32 messageHash = _validateRetryableMessageSubmission(
             messageReceipt,
             validationChecks,
             validatorLibs,
@@ -174,7 +174,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bytes[] calldata internalValidatorConfigsOverrides,
         uint32 gasLimitOverride
     ) external nonReentrant {
-        bytes32 messageHash = _validateRetryableMessage(
+        bytes32 messageHash = _validateRetryableMessageSubmission(
             messageReceipt,
             validationChecks,
             validatorLibs,
@@ -401,7 +401,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         );
     }
 
-    function _validateRetryableMessage(
+    function _validateRetryableMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,

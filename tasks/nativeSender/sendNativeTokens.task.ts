@@ -9,7 +9,7 @@ import { NativeTokenSender } from "./NativeTokenSender";
 async function sendNativeTokensTask(taskArgs: any) {
 	const transactionGasLimit = 1000000n;
 	const chainNames = taskArgs.networks.split(",").map((n: string) => n.trim());
-	const privateKey = getEnvVar("TESTNET_DEPLOYER_PRIVATE_KEY");
+	const privateKey = getEnvVar("TESTNET_DONOR_PRIVATE_KEY");
 
 	if (!privateKey) {
 		throw new Error("TESTNET_DEPLOYER_PRIVATE_KEY is not set");

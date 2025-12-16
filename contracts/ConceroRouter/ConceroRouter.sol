@@ -94,8 +94,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
 
         _validateValidatorLibs(validatorLibs);
 
-        //        s.Router storage s_router = s.router();
-
         bytes32 messageHash = keccak256(messageReceipt);
         require(!s.router().isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
 
@@ -136,7 +134,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             validatorLibs,
             validationChecks,
             messageHash,
-            messageSubmissionHash,
             relayerLib,
             gasLimit
         );
@@ -150,7 +147,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         address relayerLib,
         uint32 gasLimitOverride
     ) external nonReentrant {
-        (bytes32 messageHash, bytes32 messageSubmissionHash) = _validateRetryableMessage(
+        bytes32 messageHash = _validateRetryableMessage(
             messageReceipt,
             validationChecks,
             validatorLibs,
@@ -162,7 +159,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             validatorLibs,
             validationChecks,
             messageHash,
-            messageSubmissionHash,
             relayerLib,
             gasLimitOverride
         );
@@ -178,7 +174,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bytes[] calldata internalValidatorConfigsOverrides,
         uint32 gasLimitOverride
     ) external nonReentrant {
-        (bytes32 messageHash, ) = _validateRetryableMessage(
+        bytes32 messageHash = _validateRetryableMessage(
             messageReceipt,
             validationChecks,
             validatorLibs,
@@ -192,14 +188,20 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
             internalValidatorConfigsOverrides
         );
 
-        // todo: mb emit new event in case we have new submission
+        emit ConceroMessageReceived(
+            messageHash,
+            messageReceipt,
+            validations,
+            validatorLibs,
+            newValidationChecks,
+            relayerLib
+        );
 
         _deliverMessage(
             messageReceipt,
             validatorLibs,
             newValidationChecks,
             messageHash,
-            getMessageSubmissionHash(messageReceipt, relayerLib, validatorLibs, validationChecks),
             relayerLib,
             gasLimitOverride
         );
@@ -302,7 +304,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
     /// @param validatorLibs Validator libs used for validation.
     /// @param validationChecks Result of each validator check (1: valid, 0: invalid/unused).
     /// @param messageHash Hash of `messageReceipt`.
-    /// @param messageSubmissionHash Hash of (`messageReceipt`, `relayerLib`, `validatorLibs`, `validationChecks`).
     /// @param relayerLib Relayer lib used in the submission.
     /// @param gasLimit Gas limit allocated for the receiver call.
     function _deliverMessage(
@@ -310,10 +311,16 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         address[] calldata validatorLibs,
         bool[] memory validationChecks,
         bytes32 messageHash,
-        bytes32 messageSubmissionHash,
         address relayerLib,
         uint32 gasLimit
     ) internal {
+        bytes32 messageSubmissionHash = getMessageSubmissionHash(
+            messageReceipt,
+            relayerLib,
+            validatorLibs,
+            validationChecks
+        );
+
         bytes memory callData = abi.encodeWithSelector(
             IConceroClient.conceroReceive.selector,
             messageReceipt,
@@ -399,7 +406,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
         bool[] calldata validationChecks,
         address[] calldata validatorLibs,
         address relayerLib
-    ) internal returns (bytes32, bytes32) {
+    ) internal returns (bytes32) {
         s.Router storage s_router = s.router();
 
         bytes32 messageHash = keccak256(messageReceipt);
@@ -418,7 +425,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuard {
 
         s_router.isMessageRetryable[messageSubmissionHash] = false;
 
-        return (messageHash, messageSubmissionHash);
+        return messageHash;
     }
 
     /// @notice Collects message fees from the caller and accounts them to the relayer.

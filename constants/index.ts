@@ -10,6 +10,7 @@ import { simulationConfig } from "./clf/simulationConfig";
 import { conceroNetworks } from "./conceroNetworks";
 import { DEPLOY_CONFIG_TESTNET } from "./deployConfigTestnet";
 import {
+	ADMIN_SLOT,
 	ProxyEnum,
 	envPrefixes,
 	getViemReceiptConfig,
@@ -21,6 +22,7 @@ import { gasFeeConfig, gasFeeConfigVerifier, networkGasConfig } from "./gasConfi
 import { urls } from "./rpcUrls";
 
 export {
+	ADMIN_SLOT,
 	secrets,
 	CLF_DON_HOSTED_SECRETS_SLOT,
 	CLF_MAINNET_TTL,

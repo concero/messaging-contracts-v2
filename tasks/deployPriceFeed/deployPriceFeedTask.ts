@@ -3,7 +3,7 @@ import { task } from "hardhat/config";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ProxyEnum } from "../../constants";
-import { deployPriceFeed, deployProxyAdmin, deployTransparentProxy } from "../../deploy";
+import { deployPriceFeed, deployTransparentProxy } from "../../deploy";
 import { compileContracts } from "../../utils/compileContracts";
 import { upgradeProxyImplementation } from "../utils";
 
@@ -15,7 +15,6 @@ async function deployPriceFeedTask(taskArgs: any, hre: HardhatRuntimeEnvironment
 	}
 
 	if (taskArgs.proxy) {
-		await deployProxyAdmin(hre, ProxyEnum.priceFeedProxy);
 		await deployTransparentProxy(hre, ProxyEnum.priceFeedProxy);
 	}
 

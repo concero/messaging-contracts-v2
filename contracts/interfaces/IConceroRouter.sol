@@ -41,11 +41,21 @@ interface IConceroRouter {
         address token;
     }
 
+    /// @notice Parameters used to retry a previously created message submission.
+    /// @dev Must match **exactly** the parameters used in the original submission, regardless of the retry path:
+    ///      - `retryMessageSubmission` re-attempts delivery after a client-side failure (no revalidation).
+    ///      - `retryMessageSubmissionWithRevalidation` re-runs validation first (e.g., validator-side/config issues),
+    ///        but the submission payload and metadata in this struct must still be identical to the original submit.
     struct RetryMessageSubmissionParams {
+        /// @notice Encoded message receipt to be delivered to the destination client (must match the original submission).
         bytes messageReceipt;
+        /// @notice Validator library addresses associated with the original submission.
         address[] validatorLibs;
+        /// @notice Validator-produced proofs from the original submission.
         bytes[] validations;
+        /// @notice Boolean validation check results from the original submission.
         bool[] validationChecks;
+        /// @notice Relayer library address associated with the original submission.
         address relayerLib;
     }
 
@@ -106,6 +116,15 @@ interface IConceroRouter {
     /// @param error Return data from the failed call (may contain revert reason).
     event ConceroMessageDeliveryFailed(bytes32 indexed messageId, bytes error);
 
+    /// @notice Emitted when a previously submitted Concero message is retried with revalidation.
+    /// @dev `newValidationChecks` contains the (possibly updated) set of validation check results used for the retry attempt.
+    /// @param messageId Unique identifier of the Concero message being retried.
+    /// @param newValidationChecks Boolean array representing the validation checks/results applied on retry.
+    event ConceroMessageSubmissionRetriedWithRevalidation(
+        bytes32 indexed messageId,
+        bool[] newValidationChecks
+    );
+
     /**
      * @notice Concero allows you to send messages from one blockchain
      *         to another using the `conceroSend` function. This enables
@@ -117,27 +136,32 @@ interface IConceroRouter {
         MessageRequest calldata messageRequest
     ) external payable returns (bytes32 messageId);
 
-    /// @notice Retries delivery of a previously submitted message that failed to execute.
-    /// @dev
-    /// - Can be called by anyone once a submission is marked as retryable.
-    /// - Checks that the message has not been successfully processed yet.
-    /// - Clears the `isMessageRetryable` flag before re-attempting delivery.
-    /// @param retryMessageSubmissionParams params to retry message submission
-    /// @param gasLimitOverride gas limit override for calling a client contract
+    /// @notice Retries delivery of a previously submitted message that failed to execute due to a client-side error.
+    /// @dev Use this retry when **all validator-contract checks have already passed successfully**, but the submission
+    ///      failed on the **client side** (e.g., client revert / wrong dst chain gas limit),
+    ///      meaning you only need to repeat the client call.
+    ///      - The retry must be performed using the **exact same parameters** and the **same validation checks/results**
+    ///        that were used for the original successful validation phase.
+    ///      - Can be called by anyone once a submission is marked as retryable.
+    ///      - Reverts if the message has already been successfully processed.
+    /// @param retryMessageSubmissionParams Params used to retry the message submission (must match the original submission).
+    /// @param gasLimitOverride Gas limit override for calling the client contract.
     function retryMessageSubmission(
         RetryMessageSubmissionParams calldata retryMessageSubmissionParams,
         uint32 gasLimitOverride
     ) external;
 
-    /// @notice Retries delivery of a previously submitted message that failed to execute with re-validation process.
-    /// @dev
-    /// - Can be called by anyone once a submission is marked as retryable.
-    /// - Checks that the message has not been successfully processed yet.
-    /// - Clears the `isMessageRetryable` flag before re-attempting delivery.
-    /// - Performs re-validation of the message using the provided relayer lib and validator libs.
-    /// @param retryMessageSubmissionParams params to retry message submission
-    /// @param internalValidatorConfigsOverrides config used for messageSubmission revalidation
-    /// @param gasLimitOverride gas limit override for calling a client contract
+    /// @notice Retries delivery of a previously submitted message that failed due to unsuccessful/invalid validator-side checks,
+    ///         by re-running the validation phase before re-attempting the client call.
+    /// @dev Use this retry when **one or more validator-contract validations did not pass**, typically due to validator
+    ///      configuration issues, outdated/incorrect validator setup, or similar validator-side problems.
+    ///      - Unlike `retryMessageSubmission`, this function **must re-run the validation stage** before retrying the client call.
+    ///      - `internalValidatorConfigsOverrides` can be provided to fix/override validator configuration for the revalidation run.
+    ///      - Can be called by anyone once a submission is marked as retryable.
+    ///      - Reverts if the message has already been successfully processed.
+    /// @param retryMessageSubmissionParams Params used to retry the message submission.
+    /// @param internalValidatorConfigsOverrides Validator config overrides used for message submission revalidation.
+    /// @param gasLimitOverride Gas limit override for calling the client contract.
     function retryMessageSubmissionWithRevalidation(
         RetryMessageSubmissionParams calldata retryMessageSubmissionParams,
         bytes[] calldata internalValidatorConfigsOverrides,

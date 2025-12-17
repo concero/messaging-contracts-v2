@@ -41,6 +41,14 @@ interface IConceroRouter {
         address token;
     }
 
+    struct RetryMessageSubmissionParams {
+        bytes messageReceipt;
+        address[] validatorLibs;
+        bytes[] validations;
+        bool[] validationChecks;
+        address relayerLib;
+    }
+
     /// @notice Thrown when the caller provides less fee than required for the message.
     /// @param provided Amount of fee supplied by the caller.
     /// @param required Amount of fee required by the router.
@@ -114,16 +122,10 @@ interface IConceroRouter {
     /// - Can be called by anyone once a submission is marked as retryable.
     /// - Checks that the message has not been successfully processed yet.
     /// - Clears the `isMessageRetryable` flag before re-attempting delivery.
-    /// @param messageReceipt Packed encoded message receipt.
-    /// @param validationChecks Cached validation results from the previous submission.
-    /// @param validatorLibs Validator libs that were used when the message was first submitted.
-    /// @param relayerLib Relayer lib used for the original submission.
+    /// @param retryMessageSubmissionParams params to retry message submission
     /// @param gasLimitOverride gas limit override for calling a client contract
     function retryMessageSubmission(
-        bytes calldata messageReceipt,
-        bool[] calldata validationChecks,
-        address[] calldata validatorLibs,
-        address relayerLib,
+        RetryMessageSubmissionParams calldata retryMessageSubmissionParams,
         uint32 gasLimitOverride
     ) external;
 
@@ -133,19 +135,11 @@ interface IConceroRouter {
     /// - Checks that the message has not been successfully processed yet.
     /// - Clears the `isMessageRetryable` flag before re-attempting delivery.
     /// - Performs re-validation of the message using the provided relayer lib and validator libs.
-    /// @param messageReceipt Packed encoded message receipt.
-    /// @param validations Validator proofs corresponding to `validatorLibs`.
-    /// @param validationChecks Result of first validation checks. Is needed to get the message submission hash.
-    /// @param validatorLibs Validator libs that were used when the message was first submitted.
-    /// @param relayerLib Relayer lib used for the original submission.
+    /// @param retryMessageSubmissionParams params to retry message submission
     /// @param internalValidatorConfigsOverrides config used for messageSubmission revalidation
     /// @param gasLimitOverride gas limit override for calling a client contract
     function retryMessageSubmissionWithRevalidation(
-        bytes calldata messageReceipt,
-        bytes[] calldata validations,
-        bool[] calldata validationChecks,
-        address[] calldata validatorLibs,
-        address relayerLib,
+        RetryMessageSubmissionParams calldata retryMessageSubmissionParams,
         bytes[] calldata internalValidatorConfigsOverrides,
         uint32 gasLimitOverride
     ) external;

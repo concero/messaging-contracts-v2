@@ -26,7 +26,7 @@ export class PublicClient {
 				const isMedianAggregation = method === "eth_blockNumber";
 				const body = {
 					jsonrpc: "2.0",
-					id: Date.now(),
+					id: crypto.randomUUID(),
 					method,
 					params,
 				};

@@ -3,7 +3,7 @@ import { task } from "hardhat/config";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ProxyEnum } from "../../constants";
-import { deployProxyAdmin, deployRouter, deployTransparentProxy } from "../../deploy";
+import { deployRouter, deployTransparentProxy } from "../../deploy";
 import { compileContracts } from "../../utils";
 import { upgradeProxyImplementation } from "../utils";
 
@@ -15,7 +15,6 @@ async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 	}
 
 	if (taskArgs.proxy) {
-		await deployProxyAdmin(hre, ProxyEnum.routerProxy);
 		await deployTransparentProxy(hre, ProxyEnum.routerProxy);
 	}
 
@@ -27,7 +26,6 @@ async function deployRouterTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 task("deploy-router", "Deploy ConceroRouter")
 	.addFlag("proxy", "Deploy proxy")
 	.addFlag("implementation", "Deploy implementation")
-	.addFlag("vars", "Set contract variables")
 	.setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
 		await deployRouterTask(taskArgs, hre);
 	});

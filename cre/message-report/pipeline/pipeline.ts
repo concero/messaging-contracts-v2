@@ -24,9 +24,6 @@ async function fetchReport(
 	}
 
 	runtime.log(`Got routerAddress=${routerAddress}`);
-	if (!routerAddress) {
-		throw new DomainError(ErrorCode.INVALID_DATA, "Router Deployment not found");
-	}
 
 	const publicClient = PublicClient.create(runtime, item.srcChainSelector);
 

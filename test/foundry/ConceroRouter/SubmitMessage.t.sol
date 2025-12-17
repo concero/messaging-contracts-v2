@@ -115,7 +115,13 @@ contract SubmitMessage is ConceroRouterTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
-        bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
+        bytes32 messageSubmissionHash = s_dstConceroRouter.getMessageSubmissionHash(
+            messageReceipt,
+            s_relayerLib,
+            validatorLibs,
+            validationChecks,
+            validations
+        );
 
         s_conceroClient.setRevertFlag(true);
 
@@ -146,7 +152,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             validatorLibs,
             validationChecks,
@@ -210,7 +215,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             validatorLibs,
             expectedValidationChecks,
@@ -239,7 +243,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             validatorLibs,
             expectedValidationChecks,
@@ -265,7 +268,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             new address[](1),
             expectedValidationChecks,
@@ -296,7 +298,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             new address[](1),
             expectedValidationChecks,

@@ -35,6 +35,33 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
     using MessageCodec for bytes;
     using ValidatorCodec for bytes;
 
+    /// @notice Parameters required to deliver a message to the destination client contract.
+    /// @dev This struct bundles everything needed to perform the `conceroReceive` call and to track delivery state.
+    ///      - `messageHash` is the unique identifier used to mark a message as processed and to emit delivery events.
+    ///      - `messageSubmissionHash` identifies the original submission record that can be marked as retryable on failure.
+    ///      - `isRetry` indicates whether this delivery attempt is executed as part of a retry flow:
+    ///        * when `false`, a failed delivery may mark the original submission as retryable;
+    ///        * when `true`, failures must **not** create/mark new retryable submissions (only the original submission is retryable).
+    struct DeliverMessageParams {
+        /// @notice Encoded message receipt passed to the client’s `conceroReceive`.
+        bytes messageReceipt;
+        /// @notice Addresses of validator libraries used for this delivery attempt.
+        address[] validatorLibs;
+        /// @notice Validation checks applied for this delivery attempt (must correspond to the validation phase).
+        bool[] validationChecks;
+        /// @notice Unique hash of the message used for processed-tracking and delivery events.
+        bytes32 messageHash;
+        /// @notice Hash identifying the original submission record for retryability tracking.
+        bytes32 messageSubmissionHash;
+        /// @notice Address of the relayer library associated with this delivery attempt.
+        address relayerLib;
+        /// @notice Destination client contract that will receive the message (`conceroReceive` target).
+        address receiver;
+        /// @notice Gas limit used for the low-level call to the client contract.
+        uint32 gasLimit;
+        /// @notice Whether this delivery attempt is a retry (true) or the initial attempt (false).
+        bool isRetry;
+    }
     uint8 internal constant NATIVE_DECIMALS = 18;
 
     uint24 internal immutable i_chainSelector;
@@ -99,28 +126,35 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
             InvalidValidationsCount(validatorLibs.length, validations.length)
         );
 
-        s.Router storage s_router = s.router();
+        _validateValidatorLibs(validatorLibs);
 
         bytes32 messageHash = keccak256(messageReceipt);
-        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
+        require(!s.router().isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
 
         IRelayerLib(relayerLib).validate(messageReceipt, msg.sender);
 
         bool[] memory validationChecks = _performValidationChecks(
             messageReceipt,
             validations,
-            validatorLibs
+            validatorLibs,
+            messageReceipt.internalValidatorsConfig()
         );
 
-        bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
+        bytes32 messageSubmissionHash = getMessageSubmissionHash(
+            messageReceipt,
+            relayerLib,
+            validatorLibs,
+            validationChecks,
+            validations
+        );
+
         require(
-            !s_router.isMessageRetryable[messageSubmissionHash],
+            !s.router().isMessageRetryable[messageSubmissionHash],
             MessageSubmissionAlreadyProcessed(messageSubmissionHash)
         );
 
         emit ConceroMessageReceived(
             messageHash,
-            messageReceipt,
             validations,
             validatorLibs,
             validationChecks,
@@ -130,48 +164,77 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         (address receiver, uint32 gasLimit) = messageReceipt.evmDstChainData();
 
         _deliverMessage(
-            messageReceipt,
-            validatorLibs,
-            validationChecks,
-            messageHash,
-            messageSubmissionHash,
-            receiver,
-            relayerLib,
-            gasLimit
+            DeliverMessageParams({
+                messageReceipt: messageReceipt,
+                validatorLibs: validatorLibs,
+                validationChecks: validationChecks,
+                messageHash: messageHash,
+                messageSubmissionHash: messageSubmissionHash,
+                relayerLib: relayerLib,
+                receiver: receiver,
+                gasLimit: gasLimit,
+                isRetry: false
+            })
         );
     }
 
     /// @inheritdoc IConceroRouter
     function retryMessageSubmission(
-        bytes calldata messageReceipt,
-        bool[] calldata validationChecks,
-        address[] calldata validatorLibs,
-        address relayerLib,
+        RetryMessageSubmissionParams calldata retryMessageSubmissionParams,
         uint32 gasLimitOverride
     ) external nonReentrant {
-        s.Router storage s_router = s.router();
+        bytes32 messageHash = _validateRetryableMessageSubmission(retryMessageSubmissionParams);
 
-        bytes32 messageHash = keccak256(messageReceipt);
-        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
-
-        bytes32 messageSubmissionHash = keccak256(abi.encode(messageReceipt, validationChecks));
-        require(
-            s_router.isMessageRetryable[messageSubmissionHash],
-            MessageSubmissionAlreadyProcessed(messageSubmissionHash)
-        );
-        s_router.isMessageRetryable[messageSubmissionHash] = false;
-
-        (address receiver, ) = messageReceipt.evmDstChainData();
+        (address receiver, ) = retryMessageSubmissionParams.messageReceipt.evmDstChainData();
 
         _deliverMessage(
-            messageReceipt,
-            validatorLibs,
-            validationChecks,
-            messageHash,
-            messageSubmissionHash,
-            receiver,
-            relayerLib,
-            gasLimitOverride
+            DeliverMessageParams({
+                messageReceipt: retryMessageSubmissionParams.messageReceipt,
+                validatorLibs: retryMessageSubmissionParams.validatorLibs,
+                validationChecks: retryMessageSubmissionParams.validationChecks,
+                messageHash: messageHash,
+                messageSubmissionHash: getMessageSubmissionHash(
+                    retryMessageSubmissionParams.messageReceipt,
+                    retryMessageSubmissionParams.relayerLib,
+                    retryMessageSubmissionParams.validatorLibs,
+                    retryMessageSubmissionParams.validationChecks,
+                    retryMessageSubmissionParams.validations
+                ),
+                relayerLib: retryMessageSubmissionParams.relayerLib,
+                receiver: receiver,
+                gasLimit: gasLimitOverride,
+                isRetry: true
+            })
+        );
+    }
+
+    /// @inheritdoc IConceroRouter
+    function retryMessageSubmissionWithRevalidation(
+        RetryMessageSubmissionParams calldata retryMessageSubmissionParams,
+        bytes[] calldata internalValidatorConfigsOverrides,
+        uint32 gasLimitOverride
+    ) external nonReentrant {
+        bytes32 messageHash = _validateRetryableMessageSubmission(retryMessageSubmissionParams);
+
+        bool[] memory newValidationChecks = _performValidationChecks(
+            retryMessageSubmissionParams.messageReceipt,
+            retryMessageSubmissionParams.validations,
+            retryMessageSubmissionParams.validatorLibs,
+            internalValidatorConfigsOverrides
+        );
+
+        emit ConceroMessageSubmissionRetriedWithRevalidation(messageHash, newValidationChecks);
+
+        (address receiver, ) = retryMessageSubmissionParams.messageReceipt.evmDstChainData();
+
+        _deliverMessage(
+            _retryMessageParamsToDeliverMessageParams(
+                retryMessageSubmissionParams,
+                messageHash,
+                newValidationChecks,
+                receiver,
+                gasLimitOverride
+            )
         );
     }
 
@@ -234,57 +297,81 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
     }
 
     /// @notice Checks if a message submission is currently marked as retryable.
-    /// @param messageId Hash of the (receipt, validationChecks) tuple.
+    /// @param messageId Hash of the message receipt.
+    /// @param messageSubmissionHash Hash of the message submission.
     /// @return True if the message can be retried, otherwise false.
-    function isMessageRetryable(bytes32 messageId) public view returns (bool) {
-        return s.router().isMessageRetryable[messageId];
+    function isMessageSubmissionRetryable(
+        bytes32 messageId,
+        bytes32 messageSubmissionHash
+    ) public view returns (bool) {
+        s.Router storage s_router = s.router();
+
+        return
+            !s_router.isMessageProcessed[messageId] &&
+            s_router.isMessageRetryable[messageSubmissionHash];
+    }
+
+    function getMessageSubmissionHash(
+        bytes memory messageReceipt,
+        address relayerLib,
+        address[] memory validatorLibs,
+        bool[] memory validationChecks,
+        bytes[] memory validations
+    ) public pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks, validations)
+            );
     }
 
     /* INTERNAL FUNCTIONS */
 
-    /// @notice Delivers a message to the receiver on the destination chain.
-    /// @dev
-    /// - Performs a low-level call to the receiver's `conceroReceive` function with a gas limit.
-    /// - On success:
-    ///   * marks the message as processed,
-    ///   * emits `ConceroMessageDelivered`.
-    /// - On failure:
-    ///   * marks the message submission as retryable,
-    ///   * emits `ConceroMessageDeliveryFailed` including the returned data.
-    /// @param messageReceipt Encoded message receipt.
-    /// @param validatorLibs Validator libs used for validation.
-    /// @param validationChecks Result of each validator check (1: valid, 0: invalid/unused).
-    /// @param messageHash Hash of `messageReceipt`.
-    /// @param messageSubmissionHash Hash of (`messageReceipt`, `validationChecks`).
-    /// @param receiver Target contract implementing `IConceroClient`.
-    /// @param relayerLib Relayer lib used in the submission.
-    /// @param gasLimit Gas limit allocated for the receiver call.
-    function _deliverMessage(
-        bytes calldata messageReceipt,
-        address[] calldata validatorLibs,
-        bool[] memory validationChecks,
-        bytes32 messageHash,
-        bytes32 messageSubmissionHash,
-        address receiver,
-        address relayerLib,
-        uint32 gasLimit
-    ) internal {
+    /// @notice Delivers a message to the receiver on the destination chain by calling the client’s `conceroReceive`.
+    /// @dev Performs a low-level call to `IConceroClient(receiver).conceroReceive(...)` with an explicit gas limit.
+    ///
+    ///      **Success path**
+    ///      - Marks the message as processed (`isMessageProcessed[messageHash] = true`).
+    ///      - Emits `ConceroMessageDelivered(messageHash)`.
+    ///
+    ///      **Failure path**
+    ///      - Treats the failure as a **client-side execution failure** (the call reverted / returned failure).
+    ///      - If this is the **initial (non-retry) delivery attempt** (`isRetry == false`):
+    ///        * marks the original submission as retryable (`isMessageRetryable[messageSubmissionHash] = true`),
+    ///          so the client call can be repeated later using the original submission.
+    ///      - If this is called from a **retry flow** (`isRetry == true`):
+    ///        * does **not** create/mark any new retryable submission (only the originally created submission may be retried).
+    ///      - Emits `ConceroMessageDeliveryFailed(messageHash, returnedData)` with the raw returned/revert data.
+    /// @param deliverMessageParams Parameters used to perform the delivery call to the client contract.
+    function _deliverMessage(DeliverMessageParams memory deliverMessageParams) internal {
         bytes memory callData = abi.encodeWithSelector(
             IConceroClient.conceroReceive.selector,
-            messageReceipt,
-            validationChecks,
-            validatorLibs,
-            relayerLib
+            deliverMessageParams.messageReceipt,
+            deliverMessageParams.validationChecks,
+            deliverMessageParams.validatorLibs,
+            deliverMessageParams.relayerLib
         );
 
-        (bool success, bytes memory res) = Utils.safeCall(receiver, gasLimit, 0, 256, callData);
+        (bool success, bytes memory res) = Utils.safeCall(
+            deliverMessageParams.receiver,
+            deliverMessageParams.gasLimit,
+            0,
+            256,
+            callData
+        );
 
         if (success) {
-            s.router().isMessageProcessed[messageHash] = true;
-            emit ConceroMessageDelivered(messageHash);
+            s.router().isMessageProcessed[deliverMessageParams.messageHash] = true;
+            emit ConceroMessageDelivered(deliverMessageParams.messageHash);
         } else {
-            s.router().isMessageRetryable[messageSubmissionHash] = true;
-            emit ConceroMessageDeliveryFailed(messageHash, res);
+            /* @dev If _deliverMessage was called from retry functions,
+             *      we do not create a new submission and do not
+             *      allow it to be retried. Only the submission that was
+             *      originally created can be retried. */
+            if (!deliverMessageParams.isRetry) {
+                s.router().isMessageRetryable[deliverMessageParams.messageSubmissionHash] = true;
+            }
+
+            emit ConceroMessageDeliveryFailed(deliverMessageParams.messageHash, res);
         }
     }
 
@@ -298,25 +385,16 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
     /// - If a validation proof is empty or the call fails, the corresponding check is false.
     /// @param messageReceipt Encoded message receipt.
     /// @param validations Validator proofs (one per validator).
-    /// @param dstValidatorLibs Validator libraries deployed on this chain.
+    /// @param validatorLibs Validator libraries deployed on this chain.
+    /// @param internalValidatorConfigs Config containing the information necessary to perform correct validation on the dst chain in validatorLibs
     /// @return validationChecks Boolean array indicating which validators approved the message.
     function _performValidationChecks(
         bytes calldata messageReceipt,
         bytes[] calldata validations,
-        address[] memory dstValidatorLibs
+        address[] memory validatorLibs,
+        bytes[] memory internalValidatorConfigs
     ) internal view returns (bool[] memory) {
-        for (uint256 i; i < dstValidatorLibs.length; ++i) {
-            for (uint256 k; k < dstValidatorLibs.length; ++k) {
-                if (i == k) continue;
-                require(
-                    dstValidatorLibs[i] != dstValidatorLibs[k],
-                    DuplicateValidatorLib(dstValidatorLibs[i])
-                );
-            }
-        }
-
-        bool[] memory validationChecks = new bool[](dstValidatorLibs.length);
-        bytes[] memory internalValidatorConfigs = messageReceipt.internalValidatorsConfig();
+        bool[] memory validationChecks = new bool[](validatorLibs.length);
 
         for (uint256 i; i < validationChecks.length; ++i) {
             if (validations[i].length == 0) {
@@ -330,7 +408,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
                     validations[i]
                 );
 
-                (bool success, bytes memory result) = dstValidatorLibs[i].staticcall{
+                (bool success, bytes memory result) = validatorLibs[i].staticcall{
                     gas: validationGasLimit
                 }(callData);
 
@@ -354,6 +432,29 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
                 messageRequest.validatorLibs.length
             )
         );
+    }
+
+    function _validateRetryableMessageSubmission(
+        RetryMessageSubmissionParams memory retryMessageSubmissionParams
+    ) internal view returns (bytes32) {
+        s.Router storage s_router = s.router();
+
+        bytes32 messageHash = keccak256(retryMessageSubmissionParams.messageReceipt);
+        require(!s_router.isMessageProcessed[messageHash], MessageAlreadyProcessed(messageHash));
+
+        bytes32 messageSubmissionHash = getMessageSubmissionHash(
+            retryMessageSubmissionParams.messageReceipt,
+            retryMessageSubmissionParams.relayerLib,
+            retryMessageSubmissionParams.validatorLibs,
+            retryMessageSubmissionParams.validationChecks,
+            retryMessageSubmissionParams.validations
+        );
+        require(
+            s_router.isMessageRetryable[messageSubmissionHash],
+            MessageSubmissionNotRetryable(messageSubmissionHash)
+        );
+
+        return messageHash;
     }
 
     /// @notice Collects message fees from the caller and accounts them to the relayer.
@@ -429,5 +530,44 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         }
 
         return (validatorsFee, validatorConfigs, totalValidatorsFee);
+    }
+
+    function _validateValidatorLibs(address[] calldata validatorLibs) internal pure {
+        // @dev verification that validators are unique
+        for (uint256 i; i < validatorLibs.length; ++i) {
+            for (uint256 k = i + 1; k < validatorLibs.length; ++k) {
+                require(
+                    validatorLibs[i] != validatorLibs[k],
+                    DuplicateValidatorLib(validatorLibs[i])
+                );
+            }
+        }
+    }
+
+    function _retryMessageParamsToDeliverMessageParams(
+        RetryMessageSubmissionParams memory retryMessageSubmissionParams,
+        bytes32 messageHash,
+        bool[] memory validationChecks,
+        address receiver,
+        uint32 gasLimitOverride
+    ) internal pure returns (DeliverMessageParams memory) {
+        return
+            DeliverMessageParams({
+                messageReceipt: retryMessageSubmissionParams.messageReceipt,
+                validatorLibs: retryMessageSubmissionParams.validatorLibs,
+                validationChecks: validationChecks,
+                messageHash: messageHash,
+                messageSubmissionHash: getMessageSubmissionHash(
+                    retryMessageSubmissionParams.messageReceipt,
+                    retryMessageSubmissionParams.relayerLib,
+                    retryMessageSubmissionParams.validatorLibs,
+                    validationChecks,
+                    retryMessageSubmissionParams.validations
+                ),
+                relayerLib: retryMessageSubmissionParams.relayerLib,
+                receiver: receiver,
+                gasLimit: gasLimitOverride,
+                isRetry: true
+            });
     }
 }

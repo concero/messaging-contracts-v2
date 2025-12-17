@@ -41,12 +41,7 @@ export async function upgradeProxyImplementation(
 
 	const { abi: proxyAdminAbi } = hre.artifacts.readArtifactSync("ProxyAdmin");
 
-	let viemAccount: PrivateKeyAccount;
-	if (proxyType === ProxyEnum.priceFeedProxy) {
-		viemAccount = getViemAccount(type, "priceFeedProxyDeployer");
-	} else {
-		viemAccount = getViemAccount(type, "proxyDeployer");
-	}
+	const viemAccount = getViemAccount(type, "deployer");
 
 	const { walletClient, publicClient } = getFallbackClients(
 		conceroNetworks[chainName],

@@ -3,11 +3,12 @@ import { task } from "hardhat/config";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 import { Address, encodeFunctionData } from "viem";
 
-import { ProxyEnum } from "../../constants";
-import { deployProxyAdmin, deployTransparentProxy } from "../../deploy";
+import { ADMIN_ROLE, ProxyEnum } from "../../constants";
+import { deployTransparentProxy } from "../../deploy";
 import deployConceroCreValidatorLib from "../../deploy/CocneroCreValidatorLib";
-import { compileContracts } from "../../utils";
+import { compileContracts, getEnvAddress } from "../../utils";
 import { upgradeProxyImplementation } from "../utils";
+import { grantRole } from "../utils/grantRole.task";
 import { setCreValidatorLibVars } from "./setCreValidatorLibVars";
 
 async function deployCreValidatorLibTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
@@ -27,7 +28,6 @@ async function deployCreValidatorLibTask(taskArgs: any, hre: HardhatRuntimeEnvir
 			args: [ethersSigner.address as Address],
 		});
 
-		await deployProxyAdmin(hre, ProxyEnum.creValidatorLibProxy);
 		await deployTransparentProxy(hre, ProxyEnum.creValidatorLibProxy, initializerCallData);
 	}
 
@@ -38,12 +38,26 @@ async function deployCreValidatorLibTask(taskArgs: any, hre: HardhatRuntimeEnvir
 	if (taskArgs.vars) {
 		await setCreValidatorLibVars(hre.network.name);
 	}
+
+	if (taskArgs.admin) {
+		const [creValidatorLibProxy] = getEnvAddress(
+			ProxyEnum.creValidatorLibProxy,
+			hre.network.name,
+		);
+
+		await grantRole(hre, {
+			role: ADMIN_ROLE,
+			account: taskArgs.admin,
+			contract: creValidatorLibProxy,
+		});
+	}
 }
 
 task("deploy-cre-validator-lib", "")
 	.addFlag("proxy", "Deploy proxy")
 	.addFlag("implementation", "Deploy implementation")
 	.addFlag("vars", "")
+	.addOptionalParam("admin", "Second admin address")
 	.setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
 		await deployCreValidatorLibTask(taskArgs, hre);
 	});

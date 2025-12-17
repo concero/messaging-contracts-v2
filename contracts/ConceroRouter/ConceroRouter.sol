@@ -184,6 +184,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         bytes32 messageHash = _validateRetryableMessageSubmission(
             messageReceipt,
             validationChecks,
+            validations,
             validatorLibs,
             relayerLib
         );
@@ -291,9 +292,13 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         bytes calldata messageReceipt,
         address relayerLib,
         address[] calldata validatorLibs,
-        bool[] memory validationChecks
+        bool[] memory validationChecks,
+        bytes[] calldata validations
     ) public pure returns (bytes32) {
-        return keccak256(abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks));
+        return
+            keccak256(
+                abi.encode(messageReceipt, relayerLib, validatorLibs, validationChecks, validations)
+            );
     }
 
     /* INTERNAL FUNCTIONS */
@@ -411,6 +416,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
     function _validateRetryableMessageSubmission(
         bytes calldata messageReceipt,
         bool[] calldata validationChecks,
+        bytes[] calldata validations,
         address[] calldata validatorLibs,
         address relayerLib
     ) internal returns (bytes32) {
@@ -423,7 +429,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
             messageReceipt,
             relayerLib,
             validatorLibs,
-            validationChecks
+            validationChecks,
+            validations
         );
         require(
             s_router.isMessageRetryable[messageSubmissionHash],

@@ -155,7 +155,6 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
 
         emit ConceroMessageReceived(
             messageHash,
-            messageReceipt,
             validations,
             validatorLibs,
             validationChecks,

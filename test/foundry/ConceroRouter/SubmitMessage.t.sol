@@ -152,7 +152,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             validatorLibs,
             validationChecks,
@@ -216,7 +215,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             validatorLibs,
             expectedValidationChecks,
@@ -245,7 +243,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             validatorLibs,
             expectedValidationChecks,
@@ -271,7 +268,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             new address[](1),
             expectedValidationChecks,
@@ -302,7 +298,6 @@ contract SubmitMessage is ConceroRouterTest {
         vm.expectEmit(true, false, false, true);
         emit IConceroRouter.ConceroMessageReceived(
             messageId,
-            messageReceipt,
             validations,
             new address[](1),
             expectedValidationChecks,

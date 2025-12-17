@@ -95,14 +95,12 @@ interface IConceroRouter {
     /// @dev
     /// - Includes raw validations, validator libs and their evaluation results.
     /// @param messageId Unique identifier (hash) of the message.
-    /// @param messageReceipt Packed message receipt bytes.
     /// @param validations Validator proofs corresponding to `validatorLibs`.
     /// @param validatorLibs Validator libraries used during validation.
     /// @param validationChecks Boolean results for each validator (true if valid).
     /// @param relayerLib Relayer library that submitted the message.
     event ConceroMessageReceived(
         bytes32 indexed messageId,
-        bytes messageReceipt,
         bytes[] validations,
         address[] validatorLibs,
         bool[] validationChecks,

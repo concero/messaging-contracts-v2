@@ -12,7 +12,6 @@ import {IConceroRouter} from "../../../contracts/interfaces/IConceroRouter.sol";
 import {IRelayerLib} from "../../../contracts/interfaces/IRelayerLib.sol";
 import {IValidatorLib} from "../../../contracts/interfaces/IValidatorLib.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
-import {ConceroTest} from "./utils/ConceroTest.sol";
 import {MessageCodec} from "../../../contracts/common/libraries/MessageCodec.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -214,12 +213,18 @@ contract AttackingConceroClient is ConceroClient {
             bool[] memory validationChecks = new bool[](1);
             validationChecks[0] = true;
 
+            IConceroRouter.RetryMessageSubmissionParams
+                memory retryMessageSubmissionParams = IConceroRouter.RetryMessageSubmissionParams({
+                    messageReceipt: messageReceipt,
+                    validatorLibs: validatorLibs,
+                    validations: new bytes[](1),
+                    relayerLib: i_relayerLib,
+                    validationChecks: validationChecks
+                });
+
             IConceroRouter(i_conceroRouter).retryMessageSubmission(
-                messageReceipt,
-                validationChecks,
-                validatorLibs,
-                i_relayerLib,
-                ConceroTest.CLIENT_GAS_LIMIT
+                retryMessageSubmissionParams,
+                200_000
             );
         }
     }
@@ -493,13 +498,15 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
-        s_conceroRouter.retryMessageSubmission(
-            messageReceipt,
-            validationChecks,
-            s_validatorLibs,
-            s_relayerLib,
-            CLIENT_GAS_LIMIT
-        );
+        IConceroRouter.RetryMessageSubmissionParams
+            memory retryMessageSubmissionParams = IConceroRouter.RetryMessageSubmissionParams({
+                messageReceipt: messageReceipt,
+                validatorLibs: s_validatorLibs,
+                validations: validations,
+                relayerLib: s_relayerLib,
+                validationChecks: validationChecks
+            });
+        s_conceroRouter.retryMessageSubmission(retryMessageSubmissionParams, CLIENT_GAS_LIMIT);
 
         assert(s_attackingConceroClient.getCounter() == 0);
     }
@@ -516,13 +523,16 @@ contract ConceroRouterReentrancyAttack is ConceroRouterTest {
         bool[] memory validationChecks = new bool[](1);
         validationChecks[0] = true;
 
-        s_conceroRouter.retryMessageSubmission(
-            messageReceipt,
-            validationChecks,
-            s_validatorLibs,
-            s_relayerLib,
-            CLIENT_GAS_LIMIT
-        );
+        IConceroRouter.RetryMessageSubmissionParams
+            memory retryMessageSubmissionParams = IConceroRouter.RetryMessageSubmissionParams({
+                messageReceipt: messageReceipt,
+                validatorLibs: s_validatorLibs,
+                validations: validations,
+                relayerLib: s_relayerLib,
+                validationChecks: validationChecks
+            });
+
+        s_conceroRouter.retryMessageSubmission(retryMessageSubmissionParams, CLIENT_GAS_LIMIT);
 
         assert(s_attackingConceroClient.getCounter() == 0);
     }

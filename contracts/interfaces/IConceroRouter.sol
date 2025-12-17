@@ -72,6 +72,8 @@ interface IConceroRouter {
     /// @param validatorLibsCount Length of `validatorLibs` array.
     error InvalidValidatorConfigsCount(uint256 validatorConfigsCount, uint256 validatorLibsCount);
 
+    error MessageSubmissionNotRetryable(bytes32 messageSubmossionHash);
+
     /// @notice Emitted when a Concero message is constructed and ready to be relayed cross-chain.
     /// @param messageId Unique identifier (hash) of the message receipt.
     /// @param messageReceipt Packed message receipt bytes containing all routing metadata.

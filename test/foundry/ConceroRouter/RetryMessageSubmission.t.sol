@@ -113,7 +113,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                IRelayer.MessageSubmissionAlreadyProcessed.selector,
+                IConceroRouter.MessageSubmissionNotRetryable.selector,
                 messageSubmissionHash
             )
         );
@@ -323,7 +323,7 @@ contract RetryMessageSubmission is ConceroRouterTest {
         // Should revert because the submission hash is different
         vm.expectRevert(
             abi.encodeWithSelector(
-                IRelayer.MessageSubmissionAlreadyProcessed.selector,
+                IConceroRouter.MessageSubmissionNotRetryable.selector,
                 messageSubmissionHash
             )
         );

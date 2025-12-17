@@ -452,7 +452,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         );
         require(
             s_router.isMessageRetryable[messageSubmissionHash],
-            MessageSubmissionAlreadyProcessed(messageSubmissionHash)
+            MessageSubmissionNotRetryable(messageSubmissionHash)
         );
 
         return messageHash;

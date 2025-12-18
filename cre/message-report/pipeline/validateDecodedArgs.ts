@@ -51,7 +51,7 @@ export function validateDecodedArgs(decodedArgs: DecodedArgs): void {
 			);
 		}
 
-		if (!isValidChainSelector(item)) {
+		if (!isValidChainSelector(item.srcChainSelector)) {
 			throw new DomainError(
 				ErrorCode.INVALID_CHAIN_DATA,
 				"srcChainSelector must be a finite positive integer",

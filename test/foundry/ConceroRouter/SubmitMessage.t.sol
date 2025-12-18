@@ -353,6 +353,28 @@ contract SubmitMessage is ConceroRouterTest {
         );
     }
 
+    function test_submitMessage_RevertsIfChainForked() public {
+        bytes memory messageReceipt;
+        bytes[] memory validations;
+        address[] memory dstValidatorLibs;
+
+        uint256 chain1 = uint200(block.chainid);
+        uint256 chain2 = chain1 + 1;
+        vm.chainId(chain2);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IConceroRouter.ForkedChain.selector, chain1, chain2)
+        );
+
+        vm.prank(s_relayer);
+        s_dstConceroRouter.submitMessage(
+            messageReceipt,
+            validations,
+            dstValidatorLibs,
+            s_relayerLib
+        );
+    }
+
     function decodeDstChainSelector(bytes calldata messageReceipt) external pure returns (uint24) {
         return MessageCodec.dstChainSelector(messageReceipt);
     }

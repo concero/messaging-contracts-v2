@@ -65,9 +65,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
     uint8 internal constant NATIVE_DECIMALS = 18;
 
     uint24 internal immutable i_chainSelector;
+    uint256 internal immutable i_chainID;
 
     constructor(uint24 chainSelector) {
         i_chainSelector = chainSelector;
+        i_chainID = block.chainid;
     }
 
     // INITIALIZER //
@@ -87,6 +89,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
     function conceroSend(
         MessageRequest calldata messageRequest
     ) external payable returns (bytes32) {
+        _whenChainNotForked();
         _validateMessageParams(messageRequest);
         (Fee memory fee, bytes[] memory validatorConfigs) = _collectMessageFee(messageRequest);
 
@@ -117,6 +120,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         address[] calldata validatorLibs,
         address relayerLib
     ) external nonReentrant {
+        _whenChainNotForked();
+
         require(
             messageReceipt.dstChainSelector() == i_chainSelector,
             InvalidDstChainSelector(messageReceipt.dstChainSelector(), i_chainSelector)
@@ -183,6 +188,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         RetryMessageSubmissionParams calldata retryMessageSubmissionParams,
         uint32 gasLimitOverride
     ) external nonReentrant {
+        _whenChainNotForked();
+
         bytes32 messageHash = _validateRetryableMessageSubmission(retryMessageSubmissionParams);
 
         (address receiver, ) = retryMessageSubmissionParams.messageReceipt.evmDstChainData();
@@ -214,6 +221,8 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         bytes[] calldata internalValidatorConfigsOverrides,
         uint32 gasLimitOverride
     ) external nonReentrant {
+        _whenChainNotForked();
+
         bytes32 messageHash = _validateRetryableMessageSubmission(retryMessageSubmissionParams);
 
         bool[] memory newValidationChecks = _performValidationChecks(
@@ -569,5 +578,11 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
                 gasLimit: gasLimitOverride,
                 isRetry: true
             });
+    }
+
+    /// @notice Validates that the chain ID has not diverged after deployment.
+    /// @dev Reverts if the chain IDs do not match.
+    function _whenChainNotForked() internal view {
+        if (i_chainID != block.chainid) revert ForkedChain(i_chainID, block.chainid);
     }
 }

@@ -20,7 +20,7 @@ const donSigners = [
 	"0xe55fcaf921e76c6bbcf9415bba12b1236f07b0c3",
 ];
 
-const workflowId = "0x0073929f2a9b980a15cdfa169ab56a1275aa2a6a28e9a457a74e62d1c5bdd27f";
+const workflowId = "0x0084af5c5e279e9e802bb0f2762760eb5e0d5ee1942095b3af96881478bd4db1";
 
 const dstChainGasLimit = 100_000n;
 
@@ -59,7 +59,13 @@ export async function setCreDonSigners(
 	const signersToSet = [];
 
 	for (const signer of donSigners) {
-		if (await isDonSignerAllowed(signer, publicClient, validatorLib, validatorLibAbi)) continue;
+		const isSignerAllowed = await isDonSignerAllowed(
+			signer,
+			publicClient,
+			validatorLib,
+			validatorLibAbi,
+		);
+		if (isSignerAllowed) continue;
 		signersToSet.push(signer);
 	}
 
@@ -225,6 +231,8 @@ export async function setDstChainVerificationGasLimit(
 			functionName: "getDstChainGasLimit",
 			args: [conceroNetworks[conceroNetwork].chainSelector],
 		});
+
+		console.log(currentGasLimit);
 
 		if (currentGasLimit === dstChainGasLimit) continue;
 

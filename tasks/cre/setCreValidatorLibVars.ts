@@ -20,7 +20,7 @@ const donSigners = [
 	"0xe55fcaf921e76c6bbcf9415bba12b1236f07b0c3",
 ];
 
-const workflowId = "0x0084af5c5e279e9e802bb0f2762760eb5e0d5ee1942095b3af96881478bd4db1";
+const workflowId = "0x007c90aadb33e5f82ba13f66ba3cd0cd465d4d33ccf3b49c47acafcde21d3f8f";
 
 const dstChainGasLimit = 100_000n;
 
@@ -232,9 +232,7 @@ export async function setDstChainVerificationGasLimit(
 			args: [conceroNetworks[conceroNetwork].chainSelector],
 		});
 
-		console.log(currentGasLimit);
-
-		if (currentGasLimit === dstChainGasLimit) continue;
+		if (BigInt(currentGasLimit) === dstChainGasLimit) continue;
 
 		dstChainSelectorsToUpdate.push(conceroNetworks[conceroNetwork].chainSelector);
 	}

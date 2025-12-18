@@ -14,6 +14,8 @@ export namespace CRE {
 		mapper?: (decodedResponse: string) => ResponseBody,
 	): (sendRequester: HTTPSendRequester, config: GlobalConfig) => ResponseBody {
 		return (sendRequester: HTTPSendRequester, config: GlobalConfig): ResponseBody => {
+			const start = Date.now();
+
 			const rawRequestBody =
 				typeof options.body === "string" ? options.body : JSON.stringify(options.body);
 			const bodyRequestBytes = options.body ? new TextEncoder().encode(rawRequestBody) : null;
@@ -29,8 +31,12 @@ export namespace CRE {
 				})
 				.result();
 
+			const dTime = Date.now() - start;
 			if (!ok(response)) {
-				throw new Error(`HTTP request failed with status: ${response.statusCode}`);
+				runtime.log(`buildFetcher Failed ${JSON.stringify(response)} in ${dTime}ms`);
+				throw new Error(`HTTP request failed with status: ${response.statusCode} `);
+			} else {
+				runtime.log(`buildFetcher Succeeded ${JSON.stringify(response)} in ${dTime}ms`);
 			}
 
 			const decodedResponse = new TextDecoder().decode(response.body);

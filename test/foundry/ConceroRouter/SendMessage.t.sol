@@ -43,13 +43,30 @@ contract SendMessage is ConceroRouterTest {
     }
 
     function test_conceroSend_RevertIfEmptyDstChainData() public {
+        bytes memory emptyBytes = bytes("");
         IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
-        messageRequest.dstChainData = bytes("");
+        messageRequest.dstChainData = emptyBytes;
 
-        vm.expectRevert(IConceroRouter.EmptyDstChainData.selector);
+        // Empty bytes
+        vm.expectRevert(IConceroRouter.InvalidDstChainDataLength.selector);
         s_conceroRouter.getMessageFee(messageRequest);
 
-        vm.expectRevert(IConceroRouter.EmptyDstChainData.selector);
+        // Empty bytes
+        vm.expectRevert(IConceroRouter.InvalidDstChainDataLength.selector);
+        s_conceroRouter.conceroSend(messageRequest);
+
+        // Data length more than 24 bytes
+        bytes memory invalidData = bytes(abi.encodePacked(address(1), uint64(100_000)));
+        messageRequest.dstChainData = invalidData;
+
+        vm.expectRevert(IConceroRouter.InvalidDstChainDataLength.selector);
+        s_conceroRouter.conceroSend(messageRequest);
+
+        // Data length less than 24 bytes
+        invalidData = bytes(abi.encodePacked(address(1), uint16(1000)));
+        messageRequest.dstChainData = invalidData;
+
+        vm.expectRevert(IConceroRouter.InvalidDstChainDataLength.selector);
         s_conceroRouter.conceroSend(messageRequest);
     }
 

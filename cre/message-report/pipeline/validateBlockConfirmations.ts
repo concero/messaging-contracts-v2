@@ -8,12 +8,13 @@ export const validateBlockConfirmations = (
 	logParsedReceipt: DecodedMessageSentReceipt,
 	currentChainBlockNumber: bigint,
 ): void => {
-	if (logParsedReceipt.srcChainData.blockConfirmations === 0n) {
-		return;
-	}
-
 	let blockConfirmationsDelta: bigint = 0n;
-	if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
+	if (logParsedReceipt.srcChainData.blockConfirmations === 0n) {
+		blockConfirmationsDelta = BigInt(
+			ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector)
+				.minBlockConfirmations,
+		);
+	} else if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
 		blockConfirmationsDelta = BigInt(
 			ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector)
 				.finalityConfirmations,

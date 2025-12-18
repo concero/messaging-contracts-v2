@@ -63,6 +63,7 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
         bool isRetry;
     }
     uint8 internal constant NATIVE_DECIMALS = 18;
+    uint8 internal constant EVM_DST_CHAIN_DATA_LENGTH = 24;
 
     uint24 internal immutable i_chainSelector;
 
@@ -424,7 +425,10 @@ contract ConceroRouter is IConceroRouter, IRelayer, ReentrancyGuardUpgradeable {
     }
 
     function _validateMessageParams(MessageRequest calldata messageRequest) internal pure {
-        require(messageRequest.dstChainData.length > 0, EmptyDstChainData());
+        require(
+            messageRequest.dstChainData.length == EVM_DST_CHAIN_DATA_LENGTH,
+            InvalidDstChainDataLength()
+        );
         require(
             messageRequest.validatorConfigs.length == messageRequest.validatorLibs.length,
             InvalidValidatorConfigsCount(

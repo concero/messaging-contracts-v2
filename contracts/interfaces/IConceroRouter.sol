@@ -64,8 +64,8 @@ interface IConceroRouter {
     /// @param required Amount of fee required by the router.
     error InsufficientFee(uint256 provided, uint256 required);
 
-    /// @notice Thrown when the destination chain data is empty.
-    error EmptyDstChainData();
+    /// @notice Thrown when the destination chain data length is invalid.
+    error InvalidDstChainDataLength();
 
     /// @notice Thrown when the number of validator configs does not match the number of validator libs.
     /// @param validatorConfigsCount Length of `validatorConfigs` array.

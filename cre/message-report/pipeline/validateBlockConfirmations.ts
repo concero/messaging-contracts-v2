@@ -15,10 +15,13 @@ export const validateBlockConfirmations = async (
 	});
 
 	let blockConfirmationsDelta: bigint;
-	if (logParsedReceipt.srcChainData.blockConfirmations === 0n) {
-		blockConfirmationsDelta = BigInt(chainsOptions.minBlockConfirmations);
-	} else if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
+	if (
+		logParsedReceipt.srcChainData.blockConfirmations === maxUint64 ||
+		chainsOptions.finalityTagEnabled
+	) {
 		blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations);
+	} else if (logParsedReceipt.srcChainData.blockConfirmations === 0n) {
+		blockConfirmationsDelta = BigInt(chainsOptions.minBlockConfirmations);
 	} else {
 		blockConfirmationsDelta = logParsedReceipt.srcChainData.blockConfirmations;
 	}

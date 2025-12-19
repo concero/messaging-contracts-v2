@@ -54,6 +54,32 @@ contract RetryMessageSubmission is ConceroRouterTest {
         );
     }
 
+    function test_retryMessageSubmission_RevertsIfChainForked() public {
+        bytes memory messageReceipt;
+        bytes[] memory validations;
+        bool[] memory validationChecks;
+        address[] memory validatorLibs;
+
+        uint256 chain1 = uint200(block.chainid);
+        uint256 chain2 = chain1 + 1;
+        vm.chainId(chain2);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IConceroRouter.ForkedChain.selector, chain1, chain2)
+        );
+
+        s_dstConceroRouter.retryMessageSubmission(
+            IConceroRouter.RetryMessageSubmissionParams({
+                messageReceipt: messageReceipt,
+                validatorLibs: validatorLibs,
+                validations: validations,
+                validationChecks: validationChecks,
+                relayerLib: s_relayerLib
+            }),
+            CLIENT_GAS_LIMIT
+        );
+    }
+
     function test_retryMessageSubmission_RevertsIfMessageAlreadyProcessed() public {
         (, bytes memory messageReceipt) = _conceroSend();
 
@@ -395,6 +421,35 @@ contract RetryMessageSubmission is ConceroRouterTest {
         validatorConfigsOverrides[1] = ValidatorCodec.encodeEvmConfig(VALIDATION_GAS_LIMIT);
 
         // 6. Retry the message with revalidation
+        s_dstConceroRouter.retryMessageSubmissionWithRevalidation(
+            IConceroRouter.RetryMessageSubmissionParams({
+                messageReceipt: messageReceipt,
+                validatorLibs: validatorLibs,
+                validations: validations,
+                validationChecks: validationChecks,
+                relayerLib: s_relayerLib
+            }),
+            validatorConfigsOverrides,
+            gasLimitOverride
+        );
+    }
+
+    function test_retryMessageSubmissionWithRevalidation_RevertsIfChainForked() public {
+        bytes memory messageReceipt;
+        bytes[] memory validations;
+        bool[] memory validationChecks;
+        address[] memory validatorLibs;
+        bytes[] memory validatorConfigsOverrides;
+        uint32 gasLimitOverride;
+
+        uint256 chain1 = uint200(block.chainid);
+        uint256 chain2 = chain1 + 1;
+        vm.chainId(chain2);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IConceroRouter.ForkedChain.selector, chain1, chain2)
+        );
+
         s_dstConceroRouter.retryMessageSubmissionWithRevalidation(
             IConceroRouter.RetryMessageSubmissionParams({
                 messageReceipt: messageReceipt,

@@ -117,4 +117,18 @@ contract SendMessage is ConceroRouterTest {
 
         s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
     }
+
+    function test_conceroSend_RevertsIfChainForked() public {
+        IConceroRouter.MessageRequest memory messageRequest;
+
+        uint256 chain1 = uint200(block.chainid);
+        uint256 chain2 = chain1 + 1;
+        vm.chainId(chain2);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IConceroRouter.ForkedChain.selector, chain1, chain2)
+        );
+
+        s_conceroRouter.conceroSend(messageRequest);
+    }
 }

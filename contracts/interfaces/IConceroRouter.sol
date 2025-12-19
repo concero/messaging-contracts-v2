@@ -74,6 +74,11 @@ interface IConceroRouter {
 
     error MessageSubmissionNotRetryable(bytes32 messageSubmossionHash);
 
+    /// @notice Thrown when the chain ID has diverged after deployment.
+    /// @param expected Expected chain ID.
+    /// @param actual Actual chain ID.
+    error ForkedChain(uint256 expected, uint256 actual);
+
     /// @notice Emitted when a Concero message is constructed and ready to be relayed cross-chain.
     /// @param messageId Unique identifier (hash) of the message receipt.
     /// @param messageReceipt Packed message receipt bytes containing all routing metadata.

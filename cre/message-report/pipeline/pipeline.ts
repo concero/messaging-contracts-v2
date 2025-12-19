@@ -86,8 +86,11 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 		}
 
 		const reports = results.filter(r => r.status === "fulfilled").map(r => r.value);
-		const response = buildResponseFromBatches(reports);
-		sendReportsToRelayer(runtime, response);
+
+		if (reports.length > 0) {
+			const response = buildResponseFromBatches(reports);
+			sendReportsToRelayer(runtime, response);
+		}
 
 		return "success";
 	} catch (error) {

@@ -2,6 +2,7 @@ import { HTTPSendRequester, Runtime, ok } from "@chainlink/cre-sdk";
 
 import { GlobalConfig } from "./types";
 
+const LOG_TAG = "buildFetcher";
 export namespace CRE {
 	export function buildFetcher<RequestBody = unknown, ResponseBody = string>(
 		runtime: Runtime<GlobalConfig>,
@@ -15,10 +16,14 @@ export namespace CRE {
 	): (sendRequester: HTTPSendRequester, config: GlobalConfig) => ResponseBody {
 		return (sendRequester: HTTPSendRequester, config: GlobalConfig): ResponseBody => {
 			const start = Date.now();
-
+			runtime.log(`${LOG_TAG} request started`);
 			const rawRequestBody =
-				typeof options.body === "string" ? options.body : JSON.stringify(options.body);
-			const bodyRequestBytes = options.body ? new TextEncoder().encode(rawRequestBody) : null;
+				typeof options.body === "string"
+					? options.body
+					: JSON.stringify(options?.body || {});
+			const bodyRequestBytes = options?.body
+				? new TextEncoder().encode(rawRequestBody)
+				: null;
 
 			const response = sendRequester
 				.sendRequest({
@@ -30,18 +35,21 @@ export namespace CRE {
 					...(options.headers && { headers: options.headers }),
 				})
 				.result();
+			runtime.log(`${LOG_TAG} respond to request`);
 
 			const dTime = Date.now() - start;
 			if (!ok(response)) {
-				runtime.log(`buildFetcher Failed ${JSON.stringify(response)} in ${dTime}ms`);
-				throw new Error(`HTTP request failed with status: ${response.statusCode} `);
+				runtime.log(`${LOG_TAG} request failed in ${dTime}ms ${JSON.stringify(response)}`);
+				return null as ResponseBody;
 			} else {
-				runtime.log(`buildFetcher Succeeded ${JSON.stringify(response)} in ${dTime}ms`);
+				const decodedResponse = new TextDecoder().decode(response.body);
+
+				runtime.log(
+					`${LOG_TAG} request succeeded in ${dTime}ms ${JSON.stringify(decodedResponse)}`,
+				);
+
+				return mapper ? mapper(decodedResponse) : (decodedResponse as ResponseBody);
 			}
-
-			const decodedResponse = new TextDecoder().decode(response.body);
-
-			return mapper ? mapper(decodedResponse) : (decodedResponse as ResponseBody);
 		};
 	}
 }

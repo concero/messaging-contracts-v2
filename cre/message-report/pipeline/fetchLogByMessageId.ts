@@ -17,7 +17,12 @@ export async function fetchLogByMessageId(
 	const toBlock = blockNumber;
 
 	runtime.log(
-		`${LOG_TAG} Fetching ${JSON.stringify({ address, messageId, fromBlock: String(fromBlock), toBlock: String(toBlock) })}`,
+		`${LOG_TAG} Fetching ${JSON.stringify({
+			address,
+			messageId,
+			fromBlock: String(fromBlock),
+			toBlock: String(toBlock),
+		})}`,
 	);
 	let logs: Log[] = [];
 
@@ -35,18 +40,18 @@ export async function fetchLogByMessageId(
 		// runtime.log(`${LOG_TAG} Fetched successfully ${Utility.safeJSONStringify({ logs })})`);
 		runtime.log(`${LOG_TAG} Fetched successfully`);
 	} catch (e) {
-		runtime.log(`${LOG_TAG} Fetching failed`);
-		throw e;
+		runtime.log(`${LOG_TAG} Logs request failed`);
+		throw new DomainError(ErrorCode.UNKNOWN_ERROR, `${LOG_TAG} Logs request failed. ${e}`);
 	}
 
-	if (!logs.length) {
-		runtime.log(`${LOG_TAG} Logs are empty (length=${logs.length})`);
+	if (!logs?.length) {
+		runtime.log(`${LOG_TAG} Logs are empty (length=${logs.length}) `);
 		throw new DomainError(ErrorCode.EVENT_NOT_FOUND, "Logs are empty");
 	}
 
-	const log = logs.find(log => {
+	const log = logs?.find(log => {
 		const logMessageId = log?.topics?.[1]?.toLowerCase();
-		return logMessageId === messageId.toLowerCase();
+		return logMessageId === messageId?.toLowerCase();
 	});
 
 	if (!log) {

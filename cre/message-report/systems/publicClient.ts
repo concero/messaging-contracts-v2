@@ -22,76 +22,87 @@ const chainSelectorToClient: Record<number, ViemPublicClient> = {};
 
 const LOG_TAG = "PublicClient";
 
+let requestId: number = 0;
+
 export class PublicClient {
 	static createHttpTransport(runtime: Runtime<GlobalConfig>, url: string): Transport {
 		return custom({
 			async request({ method, params }) {
-				const isMedianAggregation = method === "eth_blockNumber";
-				const body = {
-					jsonrpc: "2.0",
-					id: crypto.randomUUID(),
-					method,
-					params,
-				};
-				const httpClient = new cre.capabilities.HTTPClient();
+				try {
+					requestId++;
+					const isMedianAggregation = method === "eth_blockNumber";
+					const body = {
+						jsonrpc: "2.0",
+						id: requestId,
+						method,
+						params,
+					};
+					const httpClient = new cre.capabilities.HTTPClient();
 
-				if (isMedianAggregation) {
-					const fetcher = CRE.buildFetcher(
-						runtime,
-						{
-							url,
-							method: "POST",
-							body,
-							headers: {
-								"Content-Type": "application/json",
-							},
-						},
-						decodedResponse => {
-							const responseBody: Record<string, unknown> =
-								Utility.safeJSONParse(decodedResponse);
-
-							return BigInt(responseBody.result as string);
-						},
-					);
-
-					const result = httpClient
-						.sendRequest(runtime, fetcher, consensusMedianAggregation())(runtime.config)
-						.result();
-
-					return result;
-				} else {
-					const fetcher = CRE.buildFetcher(
-						runtime,
-						{
-							url,
-							method: "POST",
-							body,
-							headers: {
-								"Content-Type": "application/json",
-							},
-						},
-						decodedResponse => {
-							const responseBody: Record<string, unknown> =
-								Utility.safeJSONParse(decodedResponse);
-
-							return {
-								result: responseBody.result as string,
-								hash: sha256(Buffer.from(decodedResponse)),
-							};
-						},
-					);
-					const rawResponse = httpClient
-						.sendRequest(
+					if (isMedianAggregation) {
+						const fetcher = CRE.buildFetcher(
 							runtime,
-							fetcher,
-							ConsensusAggregationByFields({
-								result: ignore,
-								hash: identical,
-							}),
-						)(runtime.config)
-						.result();
+							{
+								url,
+								method: "POST",
+								body,
+								headers: {
+									"Content-Type": "application/json",
+								},
+							},
+							decodedResponse => {
+								const responseBody: Record<string, unknown> =
+									Utility.safeJSONParse(decodedResponse);
 
-					return rawResponse.result;
+								return BigInt(responseBody.result as string);
+							},
+						);
+
+						const result = httpClient
+							.sendRequest(runtime, fetcher, consensusMedianAggregation())(
+								runtime.config,
+							)
+							.result();
+
+						return result;
+					} else {
+						const fetcher = CRE.buildFetcher(
+							runtime,
+							{
+								url,
+								method: "POST",
+								body,
+								headers: {
+									"Content-Type": "application/json",
+								},
+							},
+							decodedResponse => {
+								const responseBody: Record<string, unknown> =
+									Utility.safeJSONParse(decodedResponse);
+
+								const result = responseBody.result as string;
+								return {
+									result,
+									hash: sha256(Buffer.from(decodedResponse)),
+								};
+							},
+						);
+						const rawResponse = httpClient
+							.sendRequest(
+								runtime,
+								fetcher,
+								ConsensusAggregationByFields({
+									result: ignore,
+									hash: identical,
+								}),
+							)(runtime.config)
+							.result();
+
+						return rawResponse.result;
+					}
+				} catch (e) {
+					runtime.log(`${LOG_TAG} unhandled error: ${e}`);
+					return null;
 				}
 			},
 		});

@@ -71,10 +71,9 @@ export class ChainsManager {
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {
-		const originalChainsChecksum =
-			"0x1587d7c0ec4d68b8bc0e5df67dfa15d19e0929e8dfaa46484d3a565f1b091873"; /* runtime
+		const originalChainsChecksum = runtime
 			.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
-			.result().value;*/
+			.result().value;
 
 		if (originalChainsChecksum !== currentChainsHashSum) {
 			runtime.log(currentChainsHashSum);

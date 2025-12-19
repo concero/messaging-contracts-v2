@@ -15,10 +15,7 @@ export const validateBlockConfirmations = async (
 	});
 
 	let blockConfirmationsDelta: bigint;
-	if (
-		logParsedReceipt.srcChainData.blockConfirmations === maxUint64 ||
-		chainsOptions.finalityTagEnabled
-	) {
+	if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
 		blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations);
 	} else if (logParsedReceipt.srcChainData.blockConfirmations === 0n) {
 		blockConfirmationsDelta = BigInt(chainsOptions.minBlockConfirmations);

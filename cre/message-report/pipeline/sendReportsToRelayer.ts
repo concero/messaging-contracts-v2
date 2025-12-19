@@ -1,4 +1,5 @@
-import { Runtime, consensusIdenticalAggregation, cre } from "@chainlink/cre-sdk";
+import { ConsensusAggregationByFields, Runtime, cre, identical, ignore } from "@chainlink/cre-sdk";
+import { sha256 } from "viem";
 
 import { CRE, GlobalConfig } from "../helpers";
 import { type buildResponseFromBatches } from "./buildResponseFromBatches";
@@ -17,17 +18,28 @@ export const sendReportsToRelayer = (
 				: "empty"),
 	);
 
-	const fetcher = CRE.buildFetcher(runtime, {
-		url: "https://relayer.concero.io/api/v1/callback/cre",
-		method: "POST",
-		body: response,
-		headers: {
-			"Content-Type": "application/json",
+	const fetcher = CRE.buildFetcher(
+		runtime,
+		{
+			url: "https://relayer.concero.io/api/v1/callback/cre",
+			method: "POST",
+			body: response,
+			headers: {
+				"Content-Type": "application/json",
+			},
 		},
-	});
+		decodedResponse => ({
+			result: decodedResponse,
+			hash: sha256(Buffer.from(decodedResponse)),
+		}),
+	);
 	const httpClient = new cre.capabilities.HTTPClient();
 
 	httpClient
-		.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(runtime.config)
+		.sendRequest(
+			runtime,
+			fetcher,
+			ConsensusAggregationByFields({ result: ignore, hash: identical }),
+		)(runtime.config)
 		.result();
 };

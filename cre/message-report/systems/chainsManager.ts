@@ -1,4 +1,4 @@
-import { Runtime, consensusIdenticalAggregation, cre } from "@chainlink/cre-sdk";
+import { ConsensusAggregationByFields, Runtime, cre, identical, ignore } from "@chainlink/cre-sdk";
 import { sha256 } from "viem";
 
 import { CRE, DomainError, ErrorCode, GlobalConfig } from "../helpers";
@@ -36,23 +36,37 @@ let currentChainsHashSum: string = "";
 
 export class ChainsManager {
 	static enrichOptions(runtime: Runtime<GlobalConfig>) {
-		const fetcher = CRE.buildFetcher(runtime, {
-			url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
+		const fetcher = CRE.buildFetcher(
+			runtime,
+			{
+				url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
 			},
-		});
+			decodedResponse => {
+				return { result: decodedResponse, hash: sha256(Buffer.from(decodedResponse)) };
+			},
+		);
 		const httpClient = new cre.capabilities.HTTPClient();
 
-		const chainsResponse = httpClient
-			.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(runtime.config)
+		const rawResponse = httpClient
+			.sendRequest(
+				runtime,
+				fetcher,
+				ConsensusAggregationByFields({
+					result: ignore,
+					hash: identical,
+				}),
+			)(runtime.config)
 			.result();
-		chains = JSON.parse(chainsResponse);
+
+		chains = JSON.parse(rawResponse.result);
 
 		console.log(JSON.stringify(chains[80002]), typeof chains);
 
-		currentChainsHashSum = sha256(Buffer.from(chainsResponse)).toLowerCase();
+		currentChainsHashSum = sha256(Buffer.from(rawResponse.result)).toLowerCase();
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {

@@ -1,8 +1,10 @@
 import {
+	ConsensusAggregationByFields,
 	Runtime,
-	consensusIdenticalAggregation,
 	consensusMedianAggregation,
 	cre,
+	identical,
+	ignore,
 } from "@chainlink/cre-sdk";
 import {
 	Transport,
@@ -10,6 +12,7 @@ import {
 	createPublicClient,
 	custom,
 	fallback,
+	sha256,
 } from "viem";
 
 import { CRE, DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
@@ -33,7 +36,7 @@ export class PublicClient {
 				const httpClient = new cre.capabilities.HTTPClient();
 
 				if (isMedianAggregation) {
-					const fetcher = CRE.buildFetcher<unknown, bigint>(
+					const fetcher = CRE.buildFetcher(
 						runtime,
 						{
 							url,
@@ -55,7 +58,7 @@ export class PublicClient {
 						.sendRequest(runtime, fetcher, consensusMedianAggregation())(runtime.config)
 						.result();
 
-					return BigInt(result);
+					return result;
 				} else {
 					const fetcher = CRE.buildFetcher(
 						runtime,
@@ -71,14 +74,24 @@ export class PublicClient {
 							const responseBody: Record<string, unknown> =
 								Utility.safeJSONParse(decodedResponse);
 
-							return responseBody.result as string;
+							return {
+								result: responseBody.result as string,
+								hash: sha256(Buffer.from(decodedResponse)),
+							};
 						},
 					);
-					return httpClient
-						.sendRequest(runtime, fetcher, consensusIdenticalAggregation())(
-							runtime.config,
-						)
+					const rawResponse = httpClient
+						.sendRequest(
+							runtime,
+							fetcher,
+							ConsensusAggregationByFields({
+								result: ignore,
+								hash: identical,
+							}),
+						)(runtime.config)
 						.result();
+
+					return rawResponse.result;
 				}
 			},
 		});

@@ -17,10 +17,7 @@ export const validateBlockConfirmations = async (
 
 	let blockConfirmationsDelta: bigint;
 	// if supported, use finalized blockNumber in the over cases use delta between log.blockNumber and chain.blockNumber
-	if (
-		logParsedReceipt.srcChainData.blockConfirmations === maxUint64 &&
-		chainsOptions.finalityTagEnabled
-	) {
+	if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
 		if (chainsOptions.finalityTagEnabled) {
 			const lastFinalizedBlock = await client.getBlock({
 				blockTag: "finalized",

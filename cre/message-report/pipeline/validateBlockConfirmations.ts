@@ -11,11 +11,29 @@ export const validateBlockConfirmations = async (
 	const chainsOptions = ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector);
 
 	const actualChainBlock = await client.getBlock({
-		blockTag: chainsOptions.finalityTagEnabled ? "finalized" : "latest",
+		blockTag:
+			logParsedReceipt.srcChainData.blockConfirmations === maxUint64 &&
+			chainsOptions.finalityTagEnabled
+				? "finalized"
+				: "latest",
 	});
 
 	let blockConfirmationsDelta: bigint;
 	if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
+		if (chainsOptions.finalityTagEnabled) {
+			const lastFinalizedBlock = (
+				await client.getBlock({
+					blockTag: "finalized",
+				})
+			).number;
+
+			if (logBlockNumber > lastFinalizedBlock) {
+				throw new DomainError(ErrorCode.UNKNOWN_ERROR, "Not enough block confirmations");
+			}
+
+			return;
+		}
+
 		blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations);
 	} else if (logParsedReceipt.srcChainData.blockConfirmations === 0n) {
 		blockConfirmationsDelta = BigInt(chainsOptions.minBlockConfirmations);

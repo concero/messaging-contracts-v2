@@ -27,23 +27,18 @@ async function fetchReport(
 
 	const publicClient = PublicClient.create(runtime, item.srcChainSelector);
 
-	const [log, currentBlockNumber] = await Promise.all([
-		fetchLogByMessageId(
-			runtime,
-			publicClient,
-			routerAddress,
-			item.messageId,
-			BigInt(item.blockNumber),
-		),
-		publicClient.getBlockNumber(),
-	]);
-	const parsedLog = parseMessageSentLog(log);
-	runtime.log(
-		`Got log txHash=${log.transactionHash}, blockNumber=${currentBlockNumber.toString()}: ${Utility.safeJSONStringify(parsedLog)}`,
+	const log = await fetchLogByMessageId(
+		runtime,
+		publicClient,
+		routerAddress,
+		item.messageId,
+		BigInt(item.blockNumber),
 	);
+	const parsedLog = parseMessageSentLog(log);
+	runtime.log(`Got log txHash=${log.transactionHash}, ${Utility.safeJSONStringify(parsedLog)}`);
 
 	validateMessageVersion(parsedLog.receipt.version, runtime);
-	validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, currentBlockNumber);
+	await validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, publicClient);
 	validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
 
 	if (!log || !log?.data) {

@@ -1,29 +1,29 @@
-import { maxUint64 } from "viem";
+import { PublicClient, maxUint64 } from "viem";
 
 import { DecodedMessageSentReceipt, DomainError, ErrorCode } from "../helpers";
 import { ChainsManager } from "../systems";
 
-export const validateBlockConfirmations = (
+export const validateBlockConfirmations = async (
 	logBlockNumber: bigint,
 	logParsedReceipt: DecodedMessageSentReceipt,
-	currentChainBlockNumber: bigint,
-): void => {
-	let blockConfirmationsDelta: bigint = 0n;
+	client: PublicClient,
+): Promise<void> => {
+	const chainsOptions = ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector);
+
+	const actualChainBlock = await client.getBlock({
+		blockTag: chainsOptions.finalityTagEnabled ? "finalized" : "latest",
+	});
+
+	let blockConfirmationsDelta: bigint;
 	if (logParsedReceipt.srcChainData.blockConfirmations === 0n) {
-		blockConfirmationsDelta = BigInt(
-			ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector)
-				.minBlockConfirmations,
-		);
+		blockConfirmationsDelta = BigInt(chainsOptions.minBlockConfirmations);
 	} else if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
-		blockConfirmationsDelta = BigInt(
-			ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector)
-				.finalityConfirmations,
-		);
+		blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations);
 	} else {
 		blockConfirmationsDelta = logParsedReceipt.srcChainData.blockConfirmations;
 	}
 
-	if (logBlockNumber + blockConfirmationsDelta > currentChainBlockNumber) {
+	if (logBlockNumber + blockConfirmationsDelta > BigInt(actualChainBlock.number)) {
 		throw new DomainError(ErrorCode.UNKNOWN_ERROR, "Not enough block confirmations");
 	}
 };

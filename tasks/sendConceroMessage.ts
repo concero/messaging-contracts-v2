@@ -34,6 +34,8 @@ interface SendMessageParams {
 	logPrefix?: string;
 }
 
+const largePayload = "0x" + "1".repeat(150_000);
+
 /**
  * Sends a single Concero message and returns the result
  */
@@ -53,7 +55,7 @@ async function sendSingleMessage({
 			address: clientAddress,
 			abi: [...exampleClientAbi, ...routerAbi],
 			functionName: "sendConceroMessage",
-			args: [dstChainClient, dstChainSelector, 0],
+			args: [dstChainClient, dstChainSelector, 0, largePayload],
 			account: walletClient.account,
 			value,
 		});

@@ -12,6 +12,7 @@ export const validateBlockConfirmations = async (
 	logBlockNumber: bigint,
 	logParsedReceipt: DecodedMessageSentReceipt,
 	client: PublicClient,
+	runtime,
 ): Promise<void> => {
 	const chainsOptions = ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector);
 
@@ -38,6 +39,8 @@ export const validateBlockConfirmations = async (
 	}
 
 	const actualChainBlock = await client.getBlockNumber();
+
+	runtime.log("actualChainBlock: " + actualChainBlock);
 
 	if (logBlockNumber + blockConfirmationsDelta > actualChainBlock) {
 		throw confirmationsError;

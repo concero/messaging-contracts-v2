@@ -4,7 +4,7 @@ import { type Address, type Log, type PublicClient } from "viem";
 import { ConceroMessageSentEvent } from "../abi";
 import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
 
-const LOG_TAG = "fetchLogByMessageId";
+const LOG_TAG = "FETCH_LOG";
 
 export async function fetchLogByMessageId(
 	runtime: Runtime<GlobalConfig>,
@@ -37,7 +37,7 @@ export async function fetchLogByMessageId(
 			fromBlock,
 			toBlock,
 		});
-		// runtime.log(`${LOG_TAG} Fetched successfully ${Utility.safeJSONStringify({ logs })})`);
+
 		runtime.log(`${LOG_TAG} Fetched successfully`);
 	} catch (e) {
 		runtime.log(`${LOG_TAG} Logs request failed`);

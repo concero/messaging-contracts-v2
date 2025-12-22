@@ -38,7 +38,12 @@ async function fetchReport(
 	runtime.log(`Got log txHash=${log.transactionHash}, ${Utility.safeJSONStringify(parsedLog)}`);
 
 	validateMessageVersion(parsedLog.receipt.version, runtime);
-	await validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, publicClient);
+	await validateBlockConfirmations(
+		parsedLog.blockNumber,
+		parsedLog.receipt,
+		publicClient,
+		runtime,
+	);
 	validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
 
 	if (!log || !log?.data) {

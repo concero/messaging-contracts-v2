@@ -2,6 +2,7 @@ import { Runtime, consensusIdenticalAggregation, cre } from "@chainlink/cre-sdk"
 import { sha256 } from "viem";
 
 import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { headers } from "../helpers/constants";
 import { fetcher } from "../helpers/fetcher";
 
 export enum DeploymentType {
@@ -43,28 +44,22 @@ export class ChainsManager {
 		httpClient
 			.sendRequest(
 				runtime,
-				fetcher.build(
-					runtime,
-					{
-						url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
-						method: "GET",
-						headers: { "Content-Type": "application/json" },
-					},
-					decodedResponse => decodedResponse,
-				),
+				fetcher.build(runtime, {
+					url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
+					method: "GET",
+					headers,
+				}),
 				consensusIdenticalAggregation(),
 			)()
 			.result();
 
-		const rawChains = fetcher.getResponse();
+		chains = fetcher.getResponse();
 
-		if (rawChains === null) {
+		if (chains === null) {
 			throw new DomainError(ErrorCode.FAILED_TO_FETCH_CHAINS_CONFIG);
 		}
 
-		chains = JSON.parse(rawChains);
-
-		currentChainsHashSum = sha256(Buffer.from(rawChains)).toLowerCase();
+		currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chains))).toLowerCase();
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {

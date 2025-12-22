@@ -44,7 +44,18 @@ contract ConceroClientExample is ConceroClientBase {
         uint64 blockConfirmations
     ) external payable {
         IConceroRouter(i_conceroRouter).conceroSend{value: msg.value}(
-            _buildMessageRequest(receiver, dstChainSelector, blockConfirmations)
+            _buildMessageRequest(receiver, dstChainSelector, blockConfirmations, "")
+        );
+    }
+
+    function sendConceroMessage(
+        address receiver,
+        uint24 dstChainSelector,
+        uint64 blockConfirmations,
+        bytes calldata payload
+    ) external payable {
+        IConceroRouter(i_conceroRouter).conceroSend{value: msg.value}(
+            _buildMessageRequest(receiver, dstChainSelector, blockConfirmations, payload)
         );
     }
 
@@ -54,14 +65,15 @@ contract ConceroClientExample is ConceroClientBase {
     ) external view returns (uint256) {
         return
             IConceroRouter(i_conceroRouter).getMessageFee(
-                _buildMessageRequest(receiver, dstChainSelector, 0)
+                _buildMessageRequest(receiver, dstChainSelector, 0, "")
             );
     }
 
     function _buildMessageRequest(
         address receiver,
         uint24 dstChainSelector,
-        uint64 blockConfirmations
+        uint64 blockConfirmations,
+        bytes memory payload
     ) internal view returns (IConceroRouter.MessageRequest memory) {
         address[] memory validatorLibs = new address[](1);
         validatorLibs[0] = i_validatorLib;
@@ -76,7 +88,7 @@ contract ConceroClientExample is ConceroClientBase {
                 validatorConfigs: new bytes[](1),
                 relayerConfig: new bytes(1),
                 dstChainData: MessageCodec.encodeEvmDstChainData(receiver, 300_000),
-                payload: "Hello world!"
+                payload: payload
             });
     }
 }

@@ -6,10 +6,6 @@ export namespace Utility {
 	}
 
 	export function safeJSONParse<T = unknown>(json: string): T {
-		if (typeof json !== "string") {
-			json = JSON.stringify(json);
-		}
-
 		const parsed = JSON.parse(json, (key, value) => {
 			if (
 				key === "blockNumber" &&

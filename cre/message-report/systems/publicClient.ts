@@ -12,7 +12,7 @@ import {
 	fallback,
 } from "viem";
 
-import { DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
+import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { headers } from "../helpers/constants";
 import { fetcher } from "../helpers/fetcher";
 import { ChainsManager } from "./chainsManager";
@@ -27,58 +27,47 @@ export class PublicClient {
 	static createHttpTransport(runtime: Runtime<GlobalConfig>, url: string): Transport {
 		return custom({
 			async request({ method, params }) {
-				try {
-					requestId++;
-					const isMedianAggregation = method === "eth_blockNumber";
-					const body = {
-						jsonrpc: "2.0",
-						id: requestId,
-						method,
-						params,
-					};
-					const httpClient = new cre.capabilities.HTTPClient();
+				requestId++;
+				const isMedianAggregation = method === "eth_blockNumber";
+				const body = {
+					jsonrpc: "2.0",
+					id: requestId,
+					method,
+					params,
+				};
+				const httpClient = new cre.capabilities.HTTPClient();
 
-					if (isMedianAggregation) {
-						httpClient
-							.sendRequest(
-								runtime,
-								fetcher.build(
-									runtime,
-									{ url, method: "POST", body, headers },
-									decodedResponse => {
-										const responseBody: Record<string, unknown> =
-											Utility.safeJSONParse(decodedResponse as string);
-										return BigInt(responseBody.result as string);
-									},
-								),
-								consensusMedianAggregation(),
-							)()
-							.result();
+				let response: any;
 
-						return fetcher.getResponse();
-					} else {
-						httpClient
-							.sendRequest(
-								runtime,
-								fetcher.build(
-									runtime,
-									{ url, method: "POST", body, headers },
-									decodedResponse => {
-										const responseBody: Record<string, unknown> =
-											Utility.safeJSONParse(decodedResponse as string);
-										return responseBody.result as string;
-									},
-								),
-								consensusIdenticalAggregation(),
-							)()
-							.result();
+				if (isMedianAggregation) {
+					httpClient
+						.sendRequest(
+							runtime,
+							fetcher.build(runtime, { url, method: "POST", body, headers }, res =>
+								BigInt(JSON.parse(res as string).result),
+							),
+							consensusMedianAggregation(),
+						)()
+						.result();
 
-						return fetcher.getResponse();
-					}
-				} catch (e) {
-					runtime.log(`${LOG_TAG} unhandled error: ${e}`);
-					return null;
+					response = fetcher.getResponse();
+				} else {
+					httpClient
+						.sendRequest(
+							runtime,
+							fetcher.build(runtime, { url, method: "POST", body, headers }),
+							consensusIdenticalAggregation(),
+						)()
+						.result();
+
+					response = fetcher.getResponse();
 				}
+
+				if (!response.result) {
+					throw new DomainError(ErrorCode.RPC_REQUEST_FAILED, response);
+				}
+
+				return response.result;
 			},
 		});
 	}

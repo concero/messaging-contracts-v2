@@ -73,8 +73,8 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 		ChainsManager.validateOptions(runtime);
 
 		const args = decodeArgs(payload);
-		validateDecodedArgs(args);
 		runtime.log(`Decoded args: ${JSON.stringify(args)}`);
+		validateDecodedArgs(args);
 
 		const results = await Promise.allSettled(
 			args.batch.map(item => fetchReport(runtime, item)),

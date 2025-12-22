@@ -1,6 +1,6 @@
 import { Runtime } from "@chainlink/cre-sdk";
 
-import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { GlobalConfig } from "../helpers";
 
 export const validateMessageVersion = (version: number, runtime: Runtime<GlobalConfig>): void => {
 	const allowedVersions = [1];

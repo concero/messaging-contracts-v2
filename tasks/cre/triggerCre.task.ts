@@ -50,4 +50,4 @@ task("trigger-cre", "").setAction(async taskArgs => {
 
 export default {};
 
-// {"batch": [ { "messageId": "0xed6b3e288128195b5d0ffd23833b74dce5f67e4a1a9cf9e0b8968c1bf9902ea6", "srcChainSelector": 80002, "blockNumber": "29635176" } ]}
+// {"batch": [ { "messageId": "0xa5ef2eb6096605cdacee2ba74885532f724405fa02eda9e5aaeeb1cc479e4e92", "srcChainSelector": 11155111, "blockNumber": "9889384" } ]}

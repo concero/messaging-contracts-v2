@@ -1,10 +1,8 @@
 import {
-	ConsensusAggregationByFields,
 	Runtime,
+	consensusIdenticalAggregation,
 	consensusMedianAggregation,
 	cre,
-	identical,
-	ignore,
 } from "@chainlink/cre-sdk";
 import {
 	Transport,
@@ -12,10 +10,11 @@ import {
 	createPublicClient,
 	custom,
 	fallback,
-	sha256,
 } from "viem";
 
-import { CRE, DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
+import { DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
+import { headers } from "../helpers/constants";
+import { fetcher } from "../helpers/fetcher";
 import { ChainsManager } from "./chainsManager";
 
 const chainSelectorToClient: Record<number, ViemPublicClient> = {};
@@ -40,65 +39,41 @@ export class PublicClient {
 					const httpClient = new cre.capabilities.HTTPClient();
 
 					if (isMedianAggregation) {
-						const fetcher = CRE.buildFetcher(
-							runtime,
-							{
-								url,
-								method: "POST",
-								body,
-								headers: {
-									"Content-Type": "application/json",
-								},
-							},
-							decodedResponse => {
-								const responseBody: Record<string, unknown> =
-									Utility.safeJSONParse(decodedResponse);
-
-								return BigInt(responseBody.result as string);
-							},
-						);
-
-						const result = httpClient
-							.sendRequest(runtime, fetcher, consensusMedianAggregation())(
-								runtime.config,
-							)
-							.result();
-
-						return result;
-					} else {
-						const fetcher = CRE.buildFetcher(
-							runtime,
-							{
-								url,
-								method: "POST",
-								body,
-								headers: {
-									"Content-Type": "application/json",
-								},
-							},
-							decodedResponse => {
-								const responseBody: Record<string, unknown> =
-									Utility.safeJSONParse(decodedResponse);
-
-								const result = responseBody.result as string;
-								return {
-									result,
-									hash: sha256(Buffer.from(decodedResponse)),
-								};
-							},
-						);
-						const rawResponse = httpClient
+						httpClient
 							.sendRequest(
 								runtime,
-								fetcher,
-								ConsensusAggregationByFields({
-									result: ignore,
-									hash: identical,
-								}),
-							)(runtime.config)
+								fetcher.build(
+									runtime,
+									{ url, method: "POST", body, headers },
+									decodedResponse => {
+										const responseBody: Record<string, unknown> =
+											Utility.safeJSONParse(decodedResponse as string);
+										return BigInt(responseBody.result as string);
+									},
+								),
+								consensusMedianAggregation(),
+							)()
 							.result();
 
-						return rawResponse.result;
+						return fetcher.getResponse();
+					} else {
+						httpClient
+							.sendRequest(
+								runtime,
+								fetcher.build(
+									runtime,
+									{ url, method: "POST", body, headers },
+									decodedResponse => {
+										const responseBody: Record<string, unknown> =
+											Utility.safeJSONParse(decodedResponse as string);
+										return responseBody.result as string;
+									},
+								),
+								consensusIdenticalAggregation(),
+							)()
+							.result();
+
+						return fetcher.getResponse();
 					}
 				} catch (e) {
 					runtime.log(`${LOG_TAG} unhandled error: ${e}`);
@@ -127,11 +102,7 @@ export class PublicClient {
 				id: Number(chain.id),
 				name: chain.name,
 				nativeCurrency: chain.nativeCurrency,
-				rpcUrls: {
-					default: {
-						http: chain.rpcUrls,
-					},
-				},
+				rpcUrls: { default: { http: chain.rpcUrls } },
 			},
 			transport: fallback(
 				chain.rpcUrls.map(i => PublicClient.createHttpTransport(runtime, i)),

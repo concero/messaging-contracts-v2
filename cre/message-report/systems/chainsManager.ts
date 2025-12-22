@@ -1,7 +1,8 @@
-import { ConsensusAggregationByFields, Runtime, cre, identical, ignore } from "@chainlink/cre-sdk";
+import { Runtime, consensusIdenticalAggregation, cre } from "@chainlink/cre-sdk";
 import { sha256 } from "viem";
 
-import { CRE, DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { fetcher } from "../helpers/fetcher";
 
 export enum DeploymentType {
 	Router = "router",
@@ -37,37 +38,33 @@ let currentChainsHashSum: string = "";
 
 export class ChainsManager {
 	static enrichOptions(runtime: Runtime<GlobalConfig>) {
-		const fetcher = CRE.buildFetcher(
-			runtime,
-			{
-				url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
-				method: "GET",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			},
-			decodedResponse => {
-				return { result: decodedResponse, hash: sha256(Buffer.from(decodedResponse)) };
-			},
-		);
 		const httpClient = new cre.capabilities.HTTPClient();
 
-		const rawResponse = httpClient
+		httpClient
 			.sendRequest(
 				runtime,
-				fetcher,
-				ConsensusAggregationByFields({
-					result: ignore,
-					hash: identical,
-				}),
-			)(runtime.config)
+				fetcher.build(
+					runtime,
+					{
+						url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
+						method: "GET",
+						headers: { "Content-Type": "application/json" },
+					},
+					decodedResponse => decodedResponse,
+				),
+				consensusIdenticalAggregation(),
+			)()
 			.result();
 
-		chains = JSON.parse(rawResponse.result);
+		const rawChains = fetcher.getResponse();
 
-		console.log(JSON.stringify(chains[80002]), typeof chains);
+		if (rawChains === null) {
+			throw new DomainError(ErrorCode.FAILED_TO_FETCH_CHAINS_CONFIG);
+		}
 
-		currentChainsHashSum = sha256(Buffer.from(rawResponse.result)).toLowerCase();
+		chains = JSON.parse(rawChains);
+
+		currentChainsHashSum = sha256(Buffer.from(rawChains)).toLowerCase();
 	}
 
 	static validateOptions(runtime: Runtime<GlobalConfig>): void {

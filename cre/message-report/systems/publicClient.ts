@@ -94,11 +94,19 @@ export class PublicClient {
 				rpcUrls: { default: { http: chain.rpcUrls } },
 			},
 			transport: fallback(
-				chain.rpcUrls.map(i => PublicClient.createHttpTransport(runtime, i)),
+				this.shuffle(chain.rpcUrls).map(i => PublicClient.createHttpTransport(runtime, i)),
 			),
 		});
 		chainSelectorToClient[chainSelector] = client;
 
 		return client;
+	}
+
+	static shuffle(arr: any[]) {
+		for (let i = arr.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[arr[i], arr[j]] = [arr[j], arr[i]];
+		}
+		return arr;
 	}
 }

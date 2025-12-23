@@ -23,45 +23,34 @@ const LOG_TAG = "PublicClient";
 
 let requestId: number = 0;
 
+function buildRequester(
+	runtime: Runtime<GlobalConfig>,
+	isMedianAggregation: boolean,
+	url: string,
+	body: any,
+) {
+	const consensusDecoder = isMedianAggregation
+		? (res: unknown) => BigInt(JSON.parse(res as string).result)
+		: undefined;
+
+	return new cre.capabilities.HTTPClient().sendRequest(
+		runtime,
+		fetcher.build(runtime, { url, method: "POST", body, headers }, consensusDecoder),
+		isMedianAggregation ? consensusMedianAggregation() : consensusIdenticalAggregation<any>(),
+	)();
+}
+
 export class PublicClient {
 	static createHttpTransport(runtime: Runtime<GlobalConfig>, url: string): Transport {
 		return custom({
 			async request({ method, params }) {
 				requestId++;
 				const isMedianAggregation = method === "eth_blockNumber";
-				const body = {
-					jsonrpc: "2.0",
-					id: requestId,
-					method,
-					params,
-				};
-				const httpClient = new cre.capabilities.HTTPClient();
+				const body = { jsonrpc: "2.0", id: requestId, method, params };
 
-				let response: any;
+				buildRequester(runtime, isMedianAggregation, url, body).result();
 
-				if (isMedianAggregation) {
-					httpClient
-						.sendRequest(
-							runtime,
-							fetcher.build(runtime, { url, method: "POST", body, headers }, res =>
-								BigInt(JSON.parse(res as string).result),
-							),
-							consensusMedianAggregation(),
-						)()
-						.result();
-
-					response = fetcher.getResponse();
-				} else {
-					httpClient
-						.sendRequest(
-							runtime,
-							fetcher.build(runtime, { url, method: "POST", body, headers }),
-							consensusIdenticalAggregation(),
-						)()
-						.result();
-
-					response = fetcher.getResponse();
-				}
+				const response = fetcher.getResponse();
 
 				if (!response.result) {
 					throw new DomainError(ErrorCode.RPC_REQUEST_FAILED, response);

@@ -3,7 +3,7 @@ import { sha256 } from "viem";
 
 import { GlobalConfig } from "./types";
 
-const LOG_TAG = "BUILD_FETCHER";
+const LOG_TAG = "FETCHER";
 
 export namespace CRE {
 	export interface IFetcherOptions {

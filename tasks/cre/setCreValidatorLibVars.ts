@@ -21,6 +21,7 @@ const donSigners = [
 ];
 
 const workflowId = "0x00bca5032ffb43db1e47cad0bae9366da6c8615e4fbe840830f681747ce05f3c";
+const minSignersCount = 7;
 
 const dstChainGasLimit = 100_000n;
 
@@ -123,13 +124,13 @@ async function setExpectedSignersCount(
 		args: [],
 	});
 
-	if (currentExpectedSignersCount === donSigners.length - 3) {
+	if (currentExpectedSignersCount === minSignersCount) {
 		return;
 	}
 
 	let hash;
 
-	const functionArgs = [donSigners.length - 3];
+	const functionArgs = [minSignersCount];
 
 	if (getTrezorDeployEnabled()) {
 		hash = await ethersSignerCallContract(

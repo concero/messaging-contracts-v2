@@ -20,7 +20,7 @@ const donSigners = [
 	"0xe55fcaf921e76c6bbcf9415bba12b1236f07b0c3",
 ];
 
-const workflowId = "0x00bca5032ffb43db1e47cad0bae9366da6c8615e4fbe840830f681747ce05f3c";
+const workflowId = "0x00cc1d0ed7ce245736630dfcdd97bd691781ab1855e19e621a694d6093c0f5f0";
 const minSignersCount = 7;
 
 const dstChainGasLimit = 100_000n;

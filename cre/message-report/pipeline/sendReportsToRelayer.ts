@@ -9,7 +9,6 @@ export const sendReportsToRelayer = (
 	runtime: Runtime<GlobalConfig>,
 	response: ReturnType<typeof buildResponseFromBatches>,
 ): void => {
-	//const relayerCallbackURL = runtime.getSecret({ id: "RELAYER_CALLBACK_URL" }).result().value;
 	runtime.log(
 		"Response: " +
 			(Object.keys(response).length > 0
@@ -23,7 +22,7 @@ export const sendReportsToRelayer = (
 		.sendRequest(
 			runtime,
 			fetcher.build(runtime, {
-				url: "https://relayer.concero.io/api/v1/callback/cre",
+				url: runtime.getSecret({ id: "RELAYER_CALLBACK_URL" }).result().value,
 				method: "POST",
 				body: response,
 				headers,

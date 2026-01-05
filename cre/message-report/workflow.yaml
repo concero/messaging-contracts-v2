@@ -21,13 +21,21 @@ local-simulation:
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.testnet.json"
-    secrets-path: "../secrets.yaml"
+    secrets-path: "../secrets.testnet.yaml"
 
 # ==========================================================================
 production-testnet:
   user-workflow:
-    workflow-name: "message-report"
+    workflow-name: "testnet-messaging"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.testnet.json"
-    secrets-path: "../secrets.yaml"
+    secrets-path: "../secrets.testnet.yaml"
+
+production-mainnet:
+  user-workflow:
+    workflow-name: "mainnet-messaging"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.testnet.json" # TODO: move to mainnet
+    secrets-path: "../secrets.mainnet.yaml"

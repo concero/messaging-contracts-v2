@@ -29,3 +29,12 @@ production-testnet:
       url: https://gateway.tenderly.co/public/sepolia
     - chain-name: ethereum-mainnet
       url: https://ethereum-public.nodies.app
+
+production-mainnet:
+  account:
+    workflow-owner-address: "0xdddddb8a8e41c194ac6542a0ad7ba663a72741e0"
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://gateway.tenderly.co/public/sepolia
+    - chain-name: ethereum-mainnet
+      url: https://ethereum-public.nodies.app

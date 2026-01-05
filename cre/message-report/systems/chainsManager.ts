@@ -45,7 +45,7 @@ export class ChainsManager {
 			.sendRequest(
 				runtime,
 				fetcher.build(runtime, {
-					url: "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.minified.json",
+					url: runtime.getSecret({ id: "CHAINS_CONFIG_URL" }).result().value,
 					method: "GET",
 					headers,
 				}),

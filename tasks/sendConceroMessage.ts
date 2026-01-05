@@ -34,7 +34,7 @@ interface SendMessageParams {
 	logPrefix?: string;
 }
 
-const largePayload = "0x" + "1".repeat(90_000);
+const largePayload = "0x" + "1".repeat(150_000);
 
 /**
  * Sends a single Concero message and returns the result

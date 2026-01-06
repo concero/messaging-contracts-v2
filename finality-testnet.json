@@ -1,0 +1,857 @@
+{
+  "abstractSepolia": {
+    "chainId": 11124,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 24545,
+    "avgBlocks": 2072
+  },
+  "apechainCurtis": {
+    "chainId": 33111,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2598,
+    "avgBlocks": 36
+  },
+  "arbitrumSepolia": {
+    "chainId": 421614,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1344.3333333333333,
+    "avgBlocks": 4591
+  },
+  "astarShibuya": {
+    "chainId": 81,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 36,
+    "avgBlocks": 5
+  },
+  "auroraTestnet": {
+    "chainId": 1313161555,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 5.333333333333333,
+    "avgBlocks": 9
+  },
+  "avalancheFuji": {
+    "chainId": 43113,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "b2Testnet": {
+    "chainId": 1123,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 360,
+    "avgBlocks": 180
+  },
+  "baseSepolia": {
+    "chainId": 84532,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1555.3333333333333,
+    "avgBlocks": 778
+  },
+  "berachainBepolia": {
+    "chainId": 80069,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 4.333333333333333,
+    "avgBlocks": 2
+  },
+  "bitlayerTestnet": {
+    "chainId": 200810,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "blastSepolia": {
+    "chainId": 168587773,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1472,
+    "avgBlocks": 736
+  },
+  "bnbTestnet": {
+    "chainId": 97,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 12.333333333333334,
+    "avgBlocks": 28
+  },
+  "bobSepolia": {
+    "chainId": 808813,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1461.3333333333333,
+    "avgBlocks": 731
+  },
+  "botanixTestnet": {
+    "chainId": 3636,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "campv2Testnet": {
+    "chainId": 123420001114,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 189.66666666666666,
+    "avgBlocks": 189
+  },
+  "celoAlfajores": {
+    "chainId": 44787,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "coreTestnet": {
+    "chainId": 1114,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 6,
+    "avgBlocks": 2
+  },
+  "cronosTestnet": {
+    "chainId": 338,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 8.333333333333334,
+    "avgBlocks": 16
+  },
+  "ethereumSepolia": {
+    "chainId": 11155111,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1044,
+    "avgBlocks": 79
+  },
+  "expchainTestnet": {
+    "chainId": 18880,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 368.3333333333333,
+    "avgBlocks": 74
+  },
+  "flowTestnet": {
+    "chainId": 545,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "fraxtalHolesky": {
+    "chainId": 2522,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "gnosisChiado": {
+    "chainId": 10200,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 175,
+    "avgBlocks": 32
+  },
+  "hashkeyTestnet": {
+    "chainId": 133,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "hederaTestnet": {
+    "chainId": 296,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "inkSepolia": {
+    "chainId": 763373,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1304.6666666666667,
+    "avgBlocks": 1305
+  },
+  "irysTestnet": {
+    "chainId": 1270,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 504,
+    "avgBlocks": 50
+  },
+  "kaiaKairos": {
+    "chainId": 1001,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 62571.666666666664,
+    "avgBlocks": 62572
+  },
+  "kavaTestnet": {
+    "chainId": 2221,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 11.666666666666666,
+    "avgBlocks": 2
+  },
+  "lensSepolia": {
+    "chainId": 37111,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 16773,
+    "avgBlocks": 152
+  },
+  "lineaSepolia": {
+    "chainId": 59141,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 7395.333333333333,
+    "avgBlocks": 3698
+  },
+  "litheumTestnet": {
+    "chainId": 1174,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "mantapacificSepolia": {
+    "chainId": 3441006,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1356.6666666666667,
+    "avgBlocks": 136
+  },
+  "mantleSepolia": {
+    "chainId": 5003,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1420,
+    "avgBlocks": 710
+  },
+  "megaethTestnet": {
+    "chainId": 6342,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "metisSepolia": {
+    "chainId": 59902,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "modeTestnet": {
+    "chainId": 919,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 4490.666666666667,
+    "avgBlocks": 2245
+  },
+  "monadTestnet": {
+    "chainId": 10143,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 14.333333333333334,
+    "avgBlocks": 36
+  },
+  "morphHolesky": {
+    "chainId": 2810,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "oasissapphireTestnet": {
+    "chainId": 23295,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "opbnbTestnet": {
+    "chainId": 5611,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 11.666666666666666,
+    "avgBlocks": 44
+  },
+  "optimismSepolia": {
+    "chainId": 11155420,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1322,
+    "avgBlocks": 661
+  },
+  "polygonAmoy": {
+    "chainId": 80002,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 2,
+    "avgBlocks": 1
+  },
+  "pulsechainTestnet": {
+    "chainId": 943,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 810,
+    "avgBlocks": 74
+  },
+  "roninSaigon": {
+    "chainId": 2021,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 6,
+    "avgBlocks": 2
+  },
+  "scrollSepolia": {
+    "chainId": 534351,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 21997,
+    "avgBlocks": 4105
+  },
+  "seiTestnet": {
+    "chainId": 1328,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 10,
+    "avgBlocks": 26
+  },
+  "seismicDevnet": {
+    "chainId": 5124,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 126,
+    "avgBlocks": 63
+  },
+  "shibariumPuppynet": {
+    "chainId": 157,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 66.66666666666667,
+    "avgBlocks": 13
+  },
+  "soneiumMinato": {
+    "chainId": 1946,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 60266,
+    "avgBlocks": 30133
+  },
+  "sonicBlaze": {
+    "chainId": 57054,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 15,
+    "avgBlocks": 8
+  },
+  "taikoTestnet": {
+    "chainId": 167009,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "unichainSepolia": {
+    "chainId": 1301,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1717.6666666666667,
+    "avgBlocks": 1718
+  },
+  "wemixTestnet": {
+    "chainId": 1112,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 22.333333333333332,
+    "avgBlocks": 22
+  },
+  "worldchainTestnet": {
+    "chainId": 4801,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 3861.3333333333335,
+    "avgBlocks": 1931
+  },
+  "xlayerSepolia": {
+    "chainId": 195,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "xomarketTestnet": {
+    "chainId": 1000101,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1767707636,
+    "avgBlocks": 1678348
+  },
+  "zircuitTestnet": {
+    "chainId": 48899,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "zksyncSepolia": {
+    "chainId": 300,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 10029.333333333334,
+    "avgBlocks": 1309
+  },
+  "riseTestnet": {
+    "chainId": 11155931,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2753,
+    "avgBlocks": 2753
+  },
+  "pharosTestnet": {
+    "chainId": 688689,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "zenchainTestnet": {
+    "chainId": 8408,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 12,
+    "avgBlocks": 2
+  },
+  "okxTestnet": {
+    "chainId": 65,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "kromaSepolia": {
+    "chainId": 2358,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "polygonZkevmCardona": {
+    "chainId": 2442,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 4173737,
+    "avgBlocks": 1313820
+  },
+  "fantomTestnet": {
+    "chainId": 4002,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "l3xSepolia": {
+    "chainId": 12325,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "plumeSepolia": {
+    "chainId": 98867,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1712.3333333333333,
+    "avgBlocks": 66
+  },
+  "katanaTestnet": {
+    "chainId": 129399,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1727,
+    "avgBlocks": 1727
+  },
+  "mindTestnet": {
+    "chainId": 192940,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 4200,
+    "avgBlocks": 78
+  },
+  "merlinTestnet": {
+    "chainId": 686868,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "hemiTestnet": {
+    "chainId": 743111,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 860,
+    "avgBlocks": 72
+  },
+  "treasureTestnet": {
+    "chainId": 978658,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "cornTestnet": {
+    "chainId": 21000001,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "harmonyTestnet": {
+    "chainId": 1666700000,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "rootstockTestnet": {
+    "chainId": 31,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "orderlySepolia": {
+    "chainId": 4460,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1702,
+    "avgBlocks": 851
+  },
+  "somniaTestnet": {
+    "chainId": 50312,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "oasisEmeraldTestnet": {
+    "chainId": 42261,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "0gLabsTestnet": {
+    "chainId": 16602,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "victionTestnet": {
+    "chainId": 89,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "dodochainTestnet": {
+    "chainId": 53457,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "moonbeamTestnet": {
+    "chainId": 1287,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 87,
+    "avgBlocks": 4
+  },
+  "heliosTestnet": {
+    "chainId": 42000,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "hyperliquidTestnet": {
+    "chainId": 998,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "plasmaTestnet": {
+    "chainId": 9746,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 4.333333333333333,
+    "avgBlocks": 4
+  },
+  "dogechainTestnet": {
+    "chainId": 568,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "injectiveTestnet": {
+    "chainId": 1439,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "iotexTestnet": {
+    "chainId": 4690,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "xdcNetworkTestnet": {
+    "chainId": 51,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 8.666666666666666,
+    "avgBlocks": 3
+  },
+  "cantoTestnet": {
+    "chainId": 7701,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "evmosTestnet": {
+    "chainId": 9000,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "confluxTestnet": {
+    "chainId": 71,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 348,
+    "avgBlocks": 280
+  },
+  "morphTestnet": {
+    "chainId": 2710,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "liskTestnet": {
+    "chainId": 4202,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 3098.6666666666665,
+    "avgBlocks": 1549
+  },
+  "gravityTestnet": {
+    "chainId": 13505,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "bouncebitTestnet": {
+    "chainId": 6000,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "iotaevmTestnet": {
+    "chainId": 1075,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "taraxaTestnet": {
+    "chainId": 842,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "educhainTestnet": {
+    "chainId": 656476,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2100,
+    "avgBlocks": 25
+  },
+  "ailayerTestnet": {
+    "chainId": 2648,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "cotiTestnet": {
+    "chainId": 7082400,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "inevmTestnet": {
+    "chainId": 2424,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "mezoTestnet": {
+    "chainId": 31611,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 5,
+    "avgBlocks": 1
+  },
+  "sophonTestnet": {
+    "chainId": 531050104,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 9673359,
+    "avgBlocks": 186568
+  },
+  "crossfiTestnet": {
+    "chainId": 4157,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "bifrostTestnet": {
+    "chainId": 49088,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 8,
+    "avgBlocks": 3
+  },
+  "carbonTestnet": {
+    "chainId": 9792,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "duckchainTestnet": {
+    "chainId": 202105,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "findoraTestnet": {
+    "chainId": 2153,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "formTestnet": {
+    "chainId": 132902,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "mintSepolia": {
+    "chainId": 1687,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "rariTestnet": {
+    "chainId": 1918988905,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 36151,
+    "avgBlocks": 1
+  },
+  "cscTestnet": {
+    "chainId": 53,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "eclipseTestnet": {
+    "chainId": 555666,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "fuseTestnet": {
+    "chainId": 123,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "flareNetworkTestnet": {
+    "chainId": 114,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "filecoinTestnet": {
+    "chainId": 314159,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 26970,
+    "avgBlocks": 899
+  },
+  "etherlinkTestnet": {
+    "chainId": 128123,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 14,
+    "avgBlocks": 3
+  },
+  "storyTestnet": {
+    "chainId": 1315,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "nibiruTestnet": {
+    "chainId": 6911,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 2,
+    "avgBlocks": 0
+  },
+  "tacTestnet": {
+    "chainId": 2391,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0.3333333333333333,
+    "avgBlocks": 0
+  },
+  "ethereumClassicTestnet": {
+    "chainId": 63,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "eosevmTestnet": {
+    "chainId": 15557,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "acalaTestnet": {
+    "chainId": 595,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "bevmTestnet": {
+    "chainId": 11503,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "bahamutTestnet": {
+    "chainId": 4090,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "enulsTestnet": {
+    "chainId": 120,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "godwokenTestnet": {
+    "chainId": 71401,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "sankoTestnet": {
+    "chainId": 1992,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "apeChainTestnet": {
+    "chainId": 33111,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "oralChainTestnet": {
+    "chainId": 4143398064,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "bittorrentTestnet": {
+    "chainId": 1029,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "realTestnet": {
+    "chainId": 18233,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "bobaNetworkTestnet": {
+    "chainId": 28882,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2690,
+    "avgBlocks": 1345
+  },
+  "xrplevmTestnet": {
+    "chainId": 1449000,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "horizeneonTestnet": {
+    "chainId": 1663,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  }
+}

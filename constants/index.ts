@@ -7,7 +7,7 @@ import {
 	CLF_TESTNET_TTL,
 } from "./clf/secretsConfig";
 import { simulationConfig } from "./clf/simulationConfig";
-import { conceroNetworks } from "./conceroNetworks";
+import { conceroNetworks, mainnetNetworks, testnetNetworks } from "./conceroNetworks";
 import { DEPLOY_CONFIG_TESTNET } from "./deployConfigTestnet";
 import {
 	ADMIN_SLOT,
@@ -33,6 +33,8 @@ export {
 	CLF_TESTNET_TTL,
 	simulationConfig,
 	conceroNetworks,
+	mainnetNetworks,
+	testnetNetworks,
 	viemReceiptConfig,
 	writeContractConfig,
 	ProxyEnum,

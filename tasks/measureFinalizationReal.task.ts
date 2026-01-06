@@ -1,9 +1,13 @@
+import { task } from "hardhat/config";
+
+import * as fs from "fs";
+import * as path from "path";
+
+import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import { type PublicClient, createPublicClient, http } from "viem";
 
-import { task } from "hardhat/config";
-import type { HardhatRuntimeEnvironment } from "hardhat/types";
-
-import { conceroNetworks } from "../constants";
+import { conceroNetworks, mainnetNetworks, testnetNetworks } from "../constants";
+import type { ConceroNetwork } from "../types/ConceroNetwork";
 import { getFallbackClients } from "../utils";
 import { log } from "../utils/log";
 
@@ -28,6 +32,16 @@ interface AggregatedResult {
 	error?: string;
 }
 
+interface FinalityCheckResult {
+	chainId: number;
+	finalityTagEnabled: boolean;
+	minBlockConfirmations: number | null;
+	avgSeconds?: number;
+	avgBlocks?: number;
+}
+
+type OutputJson = Record<string, FinalityCheckResult>;
+
 function formatTime(seconds: number): string {
 	if (seconds < 60) {
 		return `${Math.round(seconds)}s`;
@@ -35,6 +49,23 @@ function formatTime(seconds: number): string {
 	const minutes = Math.floor(seconds / 60);
 	const remainingSeconds = Math.round(seconds % 60);
 	return `${minutes}m ${remainingSeconds}s`;
+}
+
+// Check if RPC supports "finalized" block tag
+async function checkFinalitySupport(publicClient: PublicClient): Promise<boolean> {
+	try {
+		await publicClient.getBlock({ blockTag: "finalized" });
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+// Determine minBlockConfirmations based on finalization time
+function getMinBlockConfirmations(avgSeconds: number): number {
+	if (avgSeconds < 30) return 1;
+	if (avgSeconds < 120) return 3;
+	return 5;
 }
 
 async function singleMeasure(
@@ -233,6 +264,117 @@ task("measure-finalization-real", "Measure blocks lag between latest and finaliz
 				log(`✅ ${result.networkName}: ${formatResult(result)}`, "measureFinalization");
 			}
 		}
+	});
+
+// Check all networks for finality tag support and measure finalization time
+task(
+	"check-finality-support",
+	"Check all networks for finalized tag support and measure finalization",
+)
+	.addParam("env", "Network environment: testnet or mainnet")
+	.addOptionalParam(
+		"output",
+		"Output JSON file path (default: finality-{env}.json in project root)",
+	)
+	.addOptionalParam("iterations", "Number of samples to take per network", "3")
+	.addOptionalParam("delay", "Delay between samples in ms", "1000")
+	.setAction(async (taskArgs: any, hre: HardhatRuntimeEnvironment) => {
+		const env = taskArgs.env as "testnet" | "mainnet";
+		if (env !== "testnet" && env !== "mainnet") {
+			throw new Error("--env must be 'testnet' or 'mainnet'");
+		}
+
+		const iterations = parseInt(taskArgs.iterations, 10);
+		const delay = parseInt(taskArgs.delay, 10);
+		const outputPath = taskArgs.output || path.join(process.cwd(), `finality-${env}.json`);
+
+		const networks = env === "testnet" ? testnetNetworks : mainnetNetworks;
+		const networkNames = Object.keys(networks);
+
+		log(
+			`Checking ${networkNames.length} ${env} networks for finality support...`,
+			"checkFinality",
+		);
+		log(`Taking ${iterations} samples per network with ${delay}ms delay`, "checkFinality");
+
+		const results: OutputJson = {};
+
+		for (const networkName of networkNames) {
+			const network = networks[networkName as keyof typeof networks] as ConceroNetwork;
+
+			log(`\n[${networkName}] Checking...`, "checkFinality");
+
+			try {
+				const { publicClient } = getFallbackClients(network);
+
+				// Check if finality tag is supported
+				const finalitySupported = await checkFinalitySupport(publicClient as PublicClient);
+
+				if (!finalitySupported) {
+					log(`  ❌ Finality tag NOT supported`, "checkFinality");
+					results[networkName] = {
+						chainId: network.chainId,
+						finalityTagEnabled: false,
+						minBlockConfirmations: null,
+					};
+					continue;
+				}
+
+				log(`  ✅ Finality tag supported, measuring...`, "checkFinality");
+
+				// Measure finalization time
+				const samples: { blocks: number; seconds: number }[] = [];
+				for (let i = 0; i < iterations; i++) {
+					const result = await singleMeasure(publicClient as PublicClient);
+					samples.push(result);
+
+					log(
+						`    Sample ${i + 1}/${iterations}: ${result.blocks} blocks (${formatTime(result.seconds)})`,
+						"checkFinality",
+					);
+
+					if (i < iterations - 1) {
+						await new Promise(resolve => setTimeout(resolve, delay));
+					}
+				}
+
+				const avgSeconds = samples.reduce((a, b) => a + b.seconds, 0) / samples.length;
+				const avgBlocks = Math.round(
+					samples.reduce((a, b) => a + b.blocks, 0) / samples.length,
+				);
+				const minBlockConfirmations = getMinBlockConfirmations(avgSeconds);
+
+				log(
+					`  Result: avg ${avgBlocks} blocks (${formatTime(avgSeconds)}) → minBlockConfirmations: ${minBlockConfirmations}`,
+					"checkFinality",
+				);
+
+				results[networkName] = {
+					chainId: network.chainId,
+					finalityTagEnabled: true,
+					minBlockConfirmations,
+					avgSeconds,
+					avgBlocks,
+				};
+			} catch (error: any) {
+				log(`  ❌ Error: ${error.message}`, "checkFinality");
+				results[networkName] = {
+					chainId: network.chainId,
+					finalityTagEnabled: false,
+					minBlockConfirmations: null,
+				};
+			}
+		}
+
+		// Write results to JSON file
+		fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
+		log(`\n=== COMPLETE ===`, "checkFinality");
+		log(`Results written to: ${outputPath}`, "checkFinality");
+
+		// Summary
+		const supported = Object.values(results).filter(r => r.finalityTagEnabled).length;
+		const total = Object.keys(results).length;
+		log(`Finality supported: ${supported}/${total} networks`, "checkFinality");
 	});
 
 export default "measure-finalization-real";

@@ -1,11 +1,11 @@
+import { task } from "hardhat/config";
+
 import { execSync } from "child_process";
 import fs from "fs";
 
-import { task } from "hardhat/config";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-
 import { getNetworkEnvKey } from "@concero/contract-utils";
 import { testnetNetworks } from "@concero/v2-networks";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { getEnvVar } from "../../utils";
 import { prepareCLFDist } from "./prepareCLFDist";

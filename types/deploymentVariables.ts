@@ -12,9 +12,18 @@ export type EnvPrefixes = {
 	verifier: string;
 	verifierProxy: string;
 	verifierProxyAdmin: string;
+	priceFeed: string;
+	priceFeedProxy: string;
+	priceFeedProxyAdmin: string;
 	lpToken: string;
 	create3Factory: string;
 	pause: string;
+	creValidatorLib: string;
+	creValidatorLibProxy: string;
+	creValidatorLibProxyAdmin: string;
+	relayerLib: string;
+	relayerLibProxy: string;
+	relayerLibProxyAdmin: string;
 };
 /**
  * Update an environment variable in the .env file
@@ -29,5 +38,6 @@ export type EnvFileName =
 	| "ccip"
 	| "deployments.mainnet"
 	| "deployments.testnet"
+	| "deployments.localhost"
 	| "apikeys"
 	| "tokens";

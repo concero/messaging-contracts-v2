@@ -1,9 +1,8 @@
-import { decodeEventLog, zeroAddress } from "viem";
-
 import { task } from "hardhat/config";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { decodeEventLog } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { getEnvVar, getFallbackClients, log } from "../utils";
@@ -35,6 +34,8 @@ interface SendMessageParams {
 	logPrefix?: string;
 }
 
+const largePayload = "0x" + "1".repeat(150_000);
+
 /**
  * Sends a single Concero message and returns the result
  */
@@ -54,7 +55,7 @@ async function sendSingleMessage({
 			address: clientAddress,
 			abi: [...exampleClientAbi, ...routerAbi],
 			functionName: "sendConceroMessage",
-			args: [dstChainClient, dstChainSelector],
+			args: [dstChainClient, dstChainSelector, 0],
 			account: walletClient.account,
 			value,
 		});
@@ -136,7 +137,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 		log(`Client address: ${clientAddress}`, "send-concero-message");
 
 		const { abi: exampleClientAbi } = await import(
-			"../artifacts/contracts/ConceroClient/ConceroClientExample.sol/ConceroClientExample.json"
+			"../artifacts/contracts/examples/ConceroClientExample.sol/ConceroClientExample.json"
 		);
 		const { abi: CONCERO_ROUTER_ABI } = await import(
 			"../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
@@ -166,13 +167,14 @@ task("send-concero-message", "Send a test Concero message through the client")
 			gasLimit: 100000,
 		};
 
-		const value = await publicClient.readContract({
-			address: srcConceroRouter,
-			abi: CONCERO_ROUTER_ABI,
+		const value = (await publicClient.readContract({
+			address: clientAddress,
+			abi: [...exampleClientAbi, ...CONCERO_ROUTER_ABI],
 			functionName: "getMessageFee",
-			args: [Number(dstChainSelector), false, zeroAddress, dstChainData],
-		});
-		log(`Sending with value: ${taskArgs.value} ETH`, "send-concero-message");
+			args: [dstChainData.receiver, Number(dstChainSelector)],
+		})) as bigint;
+
+		log(`Sending with value: ${value} ETH`, "send-concero-message");
 
 		const concurrency = parseInt(taskArgs.concurrency);
 

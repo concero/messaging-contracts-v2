@@ -1,15 +1,12 @@
-import { Address, zeroAddress } from "viem";
-
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { Address, zeroAddress } from "viem";
 
 import { conceroNetworks } from "../../../constants";
 import { getConceroVerifierNetwork } from "../../../constants/conceroNetworks";
 import { deployRouter, deployVerifier } from "../../../deploy";
 import { getCLFDonSigners } from "../../../deploy/ConceroRouter";
-import { deployContracts, setRouterPriceFeeds, setRouterSupportedChains } from "../../../tasks";
-import { setVerifierPriceFeeds } from "../../../tasks/setVerifierPriceFeeds";
+import { deployContracts, setRouterSupportedChains } from "../../../tasks";
 import { getEnvVar, getFallbackClients, log, updateEnvVariable } from "../../../utils";
 
 export async function deployPseudoRemoteConceroRouter(
@@ -37,6 +34,9 @@ export async function deployPseudoRemoteConceroRouter(
 	const args = {
 		chainSelector: 137n,
 		usdc: zeroAddress,
+		conceroPriceFeed: getEnvVar(
+			`CONCERO_PRICE_FEED_PROXY_${getNetworkEnvKey(conceroVerifierNetwork.name)}`,
+		),
 		conceroVerifier: getEnvVar(
 			`CONCERO_VERIFIER_PROXY_${getNetworkEnvKey(conceroVerifierNetwork.name)}`,
 		),
@@ -51,7 +51,7 @@ export async function deployPseudoRemoteConceroRouter(
 		from: deployer,
 		args: [
 			args.chainSelector,
-			args.feedUpdater,
+			args.conceroPriceFeed,
 			args.conceroVerifier,
 			args.conceroVerifierSubId,
 			args.clfSigners,
@@ -70,7 +70,8 @@ export async function deployPseudoRemoteConceroRouter(
 	);
 
 	// VARIABLE SETTING
-	await setRouterPriceFeeds(deployment.address, walletClient);
+	// TODO: set gasFeeConfig
+	// TODO: set price feeds on ConceroPriceFeed
 	await setRouterSupportedChains(deployment.address, walletClient, {
 		chainSelectors: [1n, 137n],
 		supportedStates: [true, true],

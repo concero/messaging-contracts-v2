@@ -1,7 +1,6 @@
+import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-
-import { getNetworkEnvKey } from "@concero/contract-utils";
 
 import { conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
@@ -27,19 +26,21 @@ const deployConceroClientExample: DeploymentFunction = async function (
 	const chain = conceroNetworks[name as ConceroNetworkNames];
 	const { type: networkType } = chain;
 
-	const defaultArgs: DeployArgs = {
+	const defaultArgs = {
 		conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
+		relayerLib: getEnvVar(`CONCERO_RELAYER_LIB_PROXY_${getNetworkEnvKey(name)}`),
+		validatorLib: getEnvVar(`CONCERO_CRE_VALIDATOR_LIB_PROXY_${getNetworkEnvKey(name)}`),
 		chainSelector: chain.chainSelector,
 	};
 
-	const args: DeployArgs = {
+	const args = {
 		...defaultArgs,
 		...overrideArgs,
 	};
 
 	const deployment = await deploy("ConceroClientExample", {
 		from: deployer,
-		args: [args.conceroRouter],
+		args: [args.conceroRouter, args.relayerLib, args.validatorLib],
 		log: true,
 		autoMine: true,
 	});
@@ -54,6 +55,7 @@ const deployConceroClientExample: DeploymentFunction = async function (
 	return deployment;
 };
 
-export { deployConceroClientExample };
-
 deployConceroClientExample.tags = ["ConceroClientExample"];
+
+export { deployConceroClientExample };
+export default deployConceroClientExample;

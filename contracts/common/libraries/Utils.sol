@@ -6,37 +6,7 @@
  */
 pragma solidity 0.8.28;
 
-import {CommonConstants} from "../CommonConstants.sol";
-import {CommonErrors} from "../CommonErrors.sol";
-
 library Utils {
-    error NotAContract(address target);
-    error DelegateCallFailed(bytes response);
-
-    function safeDelegateCall(address target, bytes memory args) internal returns (bytes memory) {
-        require(isContract(target), NotAContract(target));
-
-        (bool success, bytes memory response) = target.delegatecall(args);
-        if (!success) {
-            revert DelegateCallFailed(response);
-        }
-
-        return response;
-    }
-
-    /**
-     * @notice Checks if the provided address is a contract.
-     * @param addr The address to check.
-     * @return bool True if the address is a contract, false otherwise.
-     */
-    function isContract(address addr) internal view returns (bool) {
-        uint256 size;
-        assembly {
-            size := extcodesize(addr)
-        }
-        return size > 0;
-    }
-
     function safeCall(
         address _target,
         uint256 _gas,
@@ -73,38 +43,5 @@ library Utils {
             returndatacopy(add(_returnData, 0x20), 0, _toCopy)
         }
         return (_success, _returnData);
-    }
-
-    /**
-     * @notice Converts a USD basis points amount to native currency
-     * @param bpsUSD The amount in USD basis points
-     * @return The equivalent amount in native currency
-     */
-    function convertUsdBpsToNative(
-        uint16 bpsUSD,
-        uint256 nativeUSDRate
-    ) internal pure returns (uint256) {
-        require(
-            nativeUSDRate != 0,
-            CommonErrors.RequiredVariableUnset(CommonErrors.RequiredVariableUnsetType.NativeUSDRate)
-        );
-
-        uint256 usdAmount = (uint256(bpsUSD) * 1e18) / CommonConstants.BPS_DENOMINATOR;
-
-        uint256 nativeAmount = (usdAmount * 1e18) / nativeUSDRate;
-
-        //        console.logString("BPS USD:");
-        //        console.logUint(bpsUSD);
-        //
-        //        console.logString("Native USD Rate:");
-        //        console.logUint(nativeUSDRate);
-        //
-        //        console.logString("USD Amount:");
-        //        console.logUint(usdAmount);
-        //
-        //        console.logString("Native Amount:");
-        //        console.logUint(nativeAmount);
-
-        return nativeAmount;
     }
 }

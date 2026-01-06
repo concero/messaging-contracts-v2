@@ -1,8 +1,6 @@
-import process from "process";
-
-import { Address } from "viem";
-
 import { getNetworkEnvKey } from "@concero/contract-utils";
+import process from "process";
+import { Address } from "viem";
 
 import { envPrefixes } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";

@@ -1,6 +1,6 @@
-import { type Address } from "viem";
-
 import { task } from "hardhat/config";
+
+import { type Address } from "viem";
 
 import { conceroNetworks } from "../../constants";
 import { getFallbackClients } from "../../utils";

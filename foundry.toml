@@ -7,15 +7,15 @@ src = "contracts"
 out = "foundry-artifacts"
 cache_path = "cache/foundry"
 test = "test/foundry"
-via_ir = false
 
-libs = ["node_modules", "./contracts/"]
-allow_paths = ["node_modules", "./contracts/"]
+libs = ["node_modules", "./src/contracts/"]
+allow_paths = ["node_modules", "./src/contracts/"]
+
+#[fuzz]
+#runs = 1000
+#depth = 500
 
 remappings = [
     "@chainlink/=node_modules/@chainlink/",
-    "@uniswap/=node_modules/@uniswap/",
-    "sushiswap-v3-periphery/contracts/=node_modules/sushiswap-v3-periphery/contracts/",
-    "forge-std/=node_modules/forge-std/",
-    "contracts/=contracts/",
+    "forge-std/=node_modules/forge-std/"
 ]

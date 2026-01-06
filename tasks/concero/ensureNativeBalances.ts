@@ -1,9 +1,9 @@
+import { task } from "hardhat/config";
+
 import readline from "readline";
 
 import { formatEther, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-
-import { task } from "hardhat/config";
 
 import { viemReceiptConfig } from "../../constants";
 import { mainnetNetworks, testnetNetworks } from "../../constants/conceroNetworks";

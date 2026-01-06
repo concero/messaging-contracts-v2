@@ -922,7 +922,7 @@
 
 "@concero/rpcs@https://github.com/concero/rpcs#feature/v3/config":
   version "1.0.0"
-  resolved "https://github.com/concero/rpcs#be5c08bf857dcb4435083cfc66fd5518c6db30b3"
+  resolved "https://github.com/concero/rpcs#cc76bb14c1d7598366694aac05c9ee901476a9ef"
   dependencies:
     acorn "8.14.0"
     acorn-walk "8.3.4"
@@ -933,7 +933,7 @@
 
 "@concero/v2-networks@https://github.com/concero/v2-networks#feature/v3/config":
   version "1.0.0"
-  resolved "https://github.com/concero/v2-networks#c491f8aa59d39319a01088014d09af98dc201527"
+  resolved "https://github.com/concero/v2-networks#3b56af9756995520ebdd41a060c1ef3b76dc9998"
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"

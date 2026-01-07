@@ -922,7 +922,7 @@
 
 "@concero/rpcs@https://github.com/concero/rpcs#feature/v3/config":
   version "1.0.0"
-  resolved "https://github.com/concero/rpcs#cc76bb14c1d7598366694aac05c9ee901476a9ef"
+  resolved "https://github.com/concero/rpcs#ea463e87b96b46aa726200d59b27e9820834731a"
   dependencies:
     acorn "8.14.0"
     acorn-walk "8.3.4"

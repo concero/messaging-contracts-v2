@@ -1,0 +1,812 @@
+{
+  "arbitrum": {
+    "chainId": 42161,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 12829.4,
+    "avgBlocks": 51322
+  },
+  "ethereum": {
+    "chainId": 1,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 916.8,
+    "avgBlocks": 75
+  },
+  "polygon": {
+    "chainId": 137,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 8.4,
+    "avgBlocks": 4
+  },
+  "optimism": {
+    "chainId": 10,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1005.6,
+    "avgBlocks": 503
+  },
+  "avalanche": {
+    "chainId": 43114,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "base": {
+    "chainId": 8453,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1004,
+    "avgBlocks": 502
+  },
+  "bsc": {
+    "chainId": 56,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 11.4,
+    "avgBlocks": 16
+  },
+  "okx": {
+    "chainId": 66,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "gnosis": {
+    "chainId": 100,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 213,
+    "avgBlocks": 41
+  },
+  "shibarium": {
+    "chainId": 109,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 96,
+    "avgBlocks": 19
+  },
+  "heco": {
+    "chainId": 128,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "sonic": {
+    "chainId": 146,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 5.2,
+    "avgBlocks": 4
+  },
+  "hashkey": {
+    "chainId": 177,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2284.4,
+    "avgBlocks": 1142
+  },
+  "xlayer": {
+    "chainId": 196,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1076.6,
+    "avgBlocks": 1077
+  },
+  "bsquared": {
+    "chainId": 223,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 910,
+    "avgBlocks": 455
+  },
+  "mind": {
+    "chainId": 228,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 17504,
+    "avgBlocks": 17651
+  },
+  "lens": {
+    "chainId": 232,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 25859.8,
+    "avgBlocks": 1627
+  },
+  "fantom": {
+    "chainId": 250,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "fraxtal": {
+    "chainId": 252,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 3242,
+    "avgBlocks": 1621
+  },
+  "kroma": {
+    "chainId": 255,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1063.2,
+    "avgBlocks": 532
+  },
+  "hedera": {
+    "chainId": 295,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "zksync": {
+    "chainId": 324,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 27709,
+    "avgBlocks": 6025
+  },
+  "worldchain": {
+    "chainId": 480,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1162,
+    "avgBlocks": 581
+  },
+  "astar": {
+    "chainId": 592,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 1806,
+    "avgBlocks": 265
+  },
+  "metis": {
+    "chainId": 1088,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "polygonZkevm": {
+    "chainId": 1101,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 3021863.4,
+    "avgBlocks": 943376
+  },
+  "wemix": {
+    "chainId": 1111,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 7.4,
+    "avgBlocks": 7
+  },
+  "core": {
+    "chainId": 1116,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 6,
+    "avgBlocks": 2
+  },
+  "soneium": {
+    "chainId": 1868,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1654.4,
+    "avgBlocks": 827
+  },
+  "ronin": {
+    "chainId": 2020,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 12,
+    "avgBlocks": 4
+  },
+  "botanix": {
+    "chainId": 3637,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "merlin": {
+    "chainId": 4200,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 104.8,
+    "avgBlocks": 25
+  },
+  "mantle": {
+    "chainId": 5000,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1439.2,
+    "avgBlocks": 720
+  },
+  "kaia": {
+    "chainId": 8217,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 27412,
+    "avgBlocks": 27374
+  },
+  "l3x": {
+    "chainId": 12324,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "mode": {
+    "chainId": 34443,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2042.4,
+    "avgBlocks": 1021
+  },
+  "celo": {
+    "chainId": 42220,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1438.8,
+    "avgBlocks": 1439
+  },
+  "hemi": {
+    "chainId": 43111,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1680,
+    "avgBlocks": 140
+  },
+  "zircuit": {
+    "chainId": 48900,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1665.6,
+    "avgBlocks": 833
+  },
+  "ink": {
+    "chainId": 57073,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2105,
+    "avgBlocks": 2105
+  },
+  "linea": {
+    "chainId": 59144,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 4091.6,
+    "avgBlocks": 2007
+  },
+  "bob": {
+    "chainId": 60808,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2232.8,
+    "avgBlocks": 1116
+  },
+  "treasure": {
+    "chainId": 61166,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "berachain": {
+    "chainId": 80094,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 5.4,
+    "avgBlocks": 3
+  },
+  "blast": {
+    "chainId": 81457,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 21819.6,
+    "avgBlocks": 10910
+  },
+  "plume": {
+    "chainId": 98866,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1544.4,
+    "avgBlocks": 2596
+  },
+  "taiko": {
+    "chainId": 167000,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 10739.2,
+    "avgBlocks": 1499
+  },
+  "bitlayer": {
+    "chainId": 200901,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "scroll": {
+    "chainId": 534352,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 3331.4,
+    "avgBlocks": 1189
+  },
+  "katana": {
+    "chainId": 747474,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1526.6,
+    "avgBlocks": 1527
+  },
+  "corn": {
+    "chainId": 21000000,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 37669,
+    "avgBlocks": 561
+  },
+  "harmony": {
+    "chainId": 1666600000,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "monad": {
+    "chainId": 143,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 8.6,
+    "avgBlocks": 22
+  },
+  "rootstock": {
+    "chainId": 30,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "orderly": {
+    "chainId": 291,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 3937.6,
+    "avgBlocks": 1969
+  },
+  "somniaNetwork": {
+    "chainId": 5031,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "oasisEmerald": {
+    "chainId": 42262,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "0gLabs": {
+    "chainId": 16661,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 1
+  },
+  "viction": {
+    "chainId": 88,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "oralChain": {
+    "chainId": 108160679,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "megaeth": {
+    "chainId": 4326,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "enuls": {
+    "chainId": 119,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "hyperliquid": {
+    "chainId": 999,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 5.4,
+    "avgBlocks": 5
+  },
+  "cronos": {
+    "chainId": 25,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 1.4,
+    "avgBlocks": 2
+  },
+  "kava": {
+    "chainId": 2222,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "unichain": {
+    "chainId": 130,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1139.4,
+    "avgBlocks": 1139
+  },
+  "mantapacific": {
+    "chainId": 169,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 616,
+    "avgBlocks": 62
+  },
+  "moonbeam": {
+    "chainId": 1284,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 48,
+    "avgBlocks": 6
+  },
+  "aurora": {
+    "chainId": 1313161554,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 8.2,
+    "avgBlocks": 13
+  },
+  "sei": {
+    "chainId": 1329,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "plasma": {
+    "chainId": 9745,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 8.8,
+    "avgBlocks": 9
+  },
+  "opBnb": {
+    "chainId": 204,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 19.4,
+    "avgBlocks": 79
+  },
+  "pulseChain": {
+    "chainId": 369,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 742,
+    "avgBlocks": 72
+  },
+  "dogechain": {
+    "chainId": 2000,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "bobaNetwork": {
+    "chainId": 288,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 1700,
+    "avgBlocks": 850
+  },
+  "fuse": {
+    "chainId": 122,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "injective": {
+    "chainId": 1776,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "abstract": {
+    "chainId": 2741,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 13118.6,
+    "avgBlocks": 23183
+  },
+  "flareNetwork": {
+    "chainId": 14,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "apeChain": {
+    "chainId": 33139,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 8997.8,
+    "avgBlocks": 6102
+  },
+  "ioTex": {
+    "chainId": 4689,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "xdcNetwork": {
+    "chainId": 50,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 3.6,
+    "avgBlocks": 2
+  },
+  "filecoin": {
+    "chainId": 314,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 480,
+    "avgBlocks": 16
+  },
+  "canto": {
+    "chainId": 7700,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "evmos": {
+    "chainId": 9001,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 11.4,
+    "avgBlocks": 3
+  },
+  "flow": {
+    "chainId": 747,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "conflux": {
+    "chainId": 1030,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 262,
+    "avgBlocks": 202
+  },
+  "etherlink": {
+    "chainId": 42793,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 28.2,
+    "avgBlocks": 31
+  },
+  "morph": {
+    "chainId": 2818,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "bittorrent": {
+    "chainId": 199,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "ethereumPow": {
+    "chainId": 10001,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "lisk": {
+    "chainId": 1135,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 4017.6,
+    "avgBlocks": 2009
+  },
+  "story": {
+    "chainId": 1514,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "gravityChain": {
+    "chainId": 1625,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 3148.4,
+    "avgBlocks": 3772
+  },
+  "nibiru": {
+    "chainId": 6900,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 3.6,
+    "avgBlocks": 2
+  },
+  "iotaevm": {
+    "chainId": 8822,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "bitgert": {
+    "chainId": 32520,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "real": {
+    "chainId": 111188,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "taraxa": {
+    "chainId": 841,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "acala": {
+    "chainId": 787,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 28.8,
+    "avgBlocks": 2
+  },
+  "bevm": {
+    "chainId": 1501,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "degen": {
+    "chainId": 666666666,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2108,
+    "avgBlocks": 33
+  },
+  "educhain": {
+    "chainId": 41923,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 15190.4,
+    "avgBlocks": 10543
+  },
+  "eosevm": {
+    "chainId": 17777,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "xrplevm": {
+    "chainId": 1440000,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 5.8,
+    "avgBlocks": 1
+  },
+  "bahamut": {
+    "chainId": 5165,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 3,
+    "avgSeconds": 854.4,
+    "avgBlocks": 71
+  },
+  "ham": {
+    "chainId": 5112,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "ailayer": {
+    "chainId": 2649,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 7.8,
+    "avgBlocks": 3
+  },
+  "coti": {
+    "chainId": 2632500,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "horizeneon": {
+    "chainId": 7332,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 503124,
+    "avgBlocks": 100
+  },
+  "inevm": {
+    "chainId": 2525,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 3476799,
+    "avgBlocks": 143
+  },
+  "clv": {
+    "chainId": 1024,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "mezonetwork": {
+    "chainId": 31612,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 7.2,
+    "avgBlocks": 2
+  },
+  "sophon": {
+    "chainId": 50104,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 18513.8,
+    "avgBlocks": 16307
+  },
+  "crossfi": {
+    "chainId": 4158,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "bifrostnetwork": {
+    "chainId": 996,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "carbon": {
+    "chainId": 9790,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 1,
+    "avgSeconds": 0,
+    "avgBlocks": 0
+  },
+  "csc": {
+    "chainId": 52,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "duckchain": {
+    "chainId": 5545,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 2127,
+    "avgBlocks": 11
+  },
+  "findora": {
+    "chainId": 2152,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "formnetwork": {
+    "chainId": 478,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  },
+  "mint": {
+    "chainId": 185,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 5408,
+    "avgBlocks": 2704
+  },
+  "rari": {
+    "chainId": 0,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null,
+    "error": "No URLs configured for chain: name"
+  },
+  "sanko": {
+    "chainId": 1996,
+    "finalityTagEnabled": true,
+    "minBlockConfirmations": 5,
+    "avgSeconds": 18302,
+    "avgBlocks": 225
+  },
+  "godwoken": {
+    "chainId": 71402,
+    "finalityTagEnabled": false,
+    "minBlockConfirmations": null
+  }
+}

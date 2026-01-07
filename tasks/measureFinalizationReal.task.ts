@@ -105,9 +105,10 @@ async function singleMeasure(
 		publicClient.getBlock({ blockTag: "finalized" }),
 	]);
 
+	// Use Math.max to handle edge cases where finalized might be slightly ahead due to async
 	return {
-		blocks: Number(latestBlock.number - finalizedBlock.number),
-		seconds: Number(latestBlock.timestamp - finalizedBlock.timestamp),
+		blocks: Math.max(0, Number(latestBlock.number - finalizedBlock.number)),
+		seconds: Math.max(0, Number(latestBlock.timestamp - finalizedBlock.timestamp)),
 	};
 }
 
@@ -221,26 +222,56 @@ async function handleMeasureFinalization(
 			throw new Error("--env must be 'testnet' or 'mainnet'");
 		}
 
-		const outputPath = taskArgs.output || path.join(process.cwd(), `finality-${env}.json`);
+		// Determine output path: --output can be a directory or full file path
+		const defaultFileName = `finality-${env}.json`;
+		let outputPath: string;
+		if (taskArgs.output) {
+			// If output ends with / or is an existing directory, append default filename
+			if (taskArgs.output.endsWith("/") || taskArgs.output.endsWith(path.sep)) {
+				outputPath = path.join(taskArgs.output, defaultFileName);
+			} else {
+				outputPath = taskArgs.output;
+			}
+		} else {
+			outputPath = path.join(process.cwd(), defaultFileName);
+		}
+
 		const networks = env === "testnet" ? testnetNetworks : mainnetNetworks;
 		const networkNames = Object.keys(networks);
+
+		// Ensure output directory exists
+		const outputDir = path.dirname(outputPath);
+		if (!fs.existsSync(outputDir)) {
+			fs.mkdirSync(outputDir, { recursive: true });
+		}
 
 		log(`\nChecking ${networkNames.length} ${env} networks...`, "measureFinalization");
 
 		for (const networkName of networkNames) {
-			const network = networks[networkName as keyof typeof networks] as ConceroNetwork;
-			const { publicClient } = getFallbackClients(network);
-			results[networkName] = await measureFinality(
-				publicClient as PublicClient,
-				networkName,
-				network.chainId,
-				iterations,
-				delay,
-			);
+			try {
+				const network = networks[networkName as keyof typeof networks] as ConceroNetwork;
+				const { publicClient } = getFallbackClients(network);
+				results[networkName] = await measureFinality(
+					publicClient as PublicClient,
+					networkName,
+					network.chainId,
+					iterations,
+					delay,
+				);
+			} catch (error: any) {
+				log(`\n[${networkName}] ❌ Error: ${error.message}`, "measureFinalization");
+				results[networkName] = {
+					chainId: 0,
+					finalityTagEnabled: false,
+					minBlockConfirmations: null,
+					error: error.message,
+				};
+			}
+
+			// Write incrementally after each network to avoid data loss
+			fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
 		}
 
-		// Write results to JSON
-		fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
 		log(`\n=== COMPLETE ===`, "measureFinalization");
 		log(`Results written to: ${outputPath}`, "measureFinalization");
 
@@ -295,26 +326,29 @@ async function handleMeasureFinalization(
 	log(`\nTesting networks: ${networksToTest.join(", ")}`, "measureFinalization");
 
 	for (const networkName of networksToTest) {
-		const network = conceroNetworks[networkName as keyof typeof conceroNetworks];
-		if (!network) {
-			log(`\n[${networkName}] ❌ Network not found in config`, "measureFinalization");
+		try {
+			const network = conceroNetworks[networkName as keyof typeof conceroNetworks];
+			if (!network) {
+				throw new Error("Network not found in config");
+			}
+
+			const { publicClient } = getFallbackClients(network as ConceroNetwork);
+			results[networkName] = await measureFinality(
+				publicClient as PublicClient,
+				networkName,
+				network.chainId,
+				iterations,
+				delay,
+			);
+		} catch (error: any) {
+			log(`\n[${networkName}] ❌ Error: ${error.message}`, "measureFinalization");
 			results[networkName] = {
 				chainId: 0,
 				finalityTagEnabled: false,
 				minBlockConfirmations: null,
-				error: "Network not found",
+				error: error.message,
 			};
-			continue;
 		}
-
-		const { publicClient } = getFallbackClients(network as ConceroNetwork);
-		results[networkName] = await measureFinality(
-			publicClient as PublicClient,
-			networkName,
-			network.chainId,
-			iterations,
-			delay,
-		);
 	}
 
 	// Print summary
@@ -360,8 +394,8 @@ async function handleMeasureFinalization(
  * npx hardhat measure-finalization --env testnet --iterations 10 --delay 2000
  *
  * @example
- * // All mainnet networks with custom output path
- * npx hardhat measure-finalization --env mainnet --output ./data/finality.json
+ * // All mainnet networks with custom output directory
+ * npx hardhat measure-finalization --env mainnet --output ./data/
  */
 task("measure-finalization", "Check finality tag support and measure finalization times")
 	.addOptionalParam("networks", "Comma-separated list of networks to test")
@@ -370,7 +404,7 @@ task("measure-finalization", "Check finality tag support and measure finalizatio
 		"env",
 		"Network environment (testnet|mainnet) - checks ALL networks, writes JSON",
 	)
-	.addOptionalParam("output", "Output JSON file path (default: finality-{env}.json)")
+	.addOptionalParam("output", "Output directory or file path (default: ./finality-{env}.json)")
 	.addOptionalParam("iterations", "Number of samples to take", "3")
 	.addOptionalParam("delay", "Delay between samples in ms", "1000")
 	.setAction(handleMeasureFinalization);

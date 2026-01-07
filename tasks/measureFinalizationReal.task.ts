@@ -379,23 +379,23 @@ async function handleMeasureFinalization(
  *
  * @example
  * // Single network by name
- * npx hardhat measure-finalization --networks arbitrumSepolia
+ * yarn hardhat measure-finalization --networks arbitrumSepolia
  *
  * @example
  * // Multiple networks
- * npx hardhat measure-finalization --networks "arbitrum,base,optimism"
+ * yarn hardhat measure-finalization --networks "arbitrum,base,optimism"
  *
  * @example
  * // Direct RPC URL
- * npx hardhat measure-finalization --rpcurl "https://arb1.arbitrum.io/rpc"
+ * yarn hardhat measure-finalization --rpcurl "https://arb1.arbitrum.io/rpc"
  *
  * @example
  * // All testnet networks with JSON output
- * npx hardhat measure-finalization --env testnet --iterations 10 --delay 2000
+ * yarn hardhat measure-finalization --env testnet --iterations 5 --delay 2000
  *
  * @example
  * // All mainnet networks with custom output directory
- * npx hardhat measure-finalization --env mainnet --output ./data/
+ * yarn hardhat measure-finalization --env mainnet --output ./data/
  */
 task("measure-finalization", "Check finality tag support and measure finalization times")
 	.addOptionalParam("networks", "Comma-separated list of networks to test")

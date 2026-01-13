@@ -142,6 +142,8 @@ task("send-concero-message", "Send a test Concero message through the client")
 		const { abi: CONCERO_ROUTER_ABI } = await import(
 			"../artifacts/contracts/ConceroRouter/ConceroRouter.sol/ConceroRouter.json"
 		);
+		const { abi: relayerAbi } = hre.artifacts.readArtifactSync("RelayerLib");
+		const { abi: priceFeedAbi } = hre.artifacts.readArtifactSync("ConceroPriceFeed");
 
 		const dstNetwork = conceroNetworks[taskArgs.dstnetwork];
 		if (!dstNetwork) {
@@ -169,7 +171,7 @@ task("send-concero-message", "Send a test Concero message through the client")
 
 		const value = (await publicClient.readContract({
 			address: clientAddress,
-			abi: [...exampleClientAbi, ...CONCERO_ROUTER_ABI],
+			abi: [...exampleClientAbi, ...CONCERO_ROUTER_ABI, ...relayerAbi, ...priceFeedAbi],
 			functionName: "getMessageFee",
 			args: [dstChainData.receiver, Number(dstChainSelector)],
 		})) as bigint;

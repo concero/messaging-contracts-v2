@@ -7,6 +7,8 @@
 pragma solidity 0.8.28;
 
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
 import {EcdsaValidatorLib} from "./EcdsaValidatorLib.sol";
 import {IConceroRouter} from "../../interfaces/IConceroRouter.sol";
 import {CommonErrors} from "../../common/CommonErrors.sol";
@@ -29,13 +31,10 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
     /// @param receivedWorkflowId Workflow ID extracted from the report.
     error InvalidCreWorkflowId(bytes32 receivedWorkflowId);
 
-    /// @notice Thrown when the message hash inside the report does not match the actual `messageReceipt` hash.
-    /// @param messageReceiptHash Hash of the actual message receipt.
-    /// @param validationMessageReceiptHash Hash embedded in the report (from validation data).
-    error MessageReceiptHashMismatch(
-        bytes32 messageReceiptHash,
-        bytes32 validationMessageReceiptHash
-    );
+    /// @notice Thrown when a provided Merkle proof is invalid or does not match the expected Merkle root.
+    /// @param merkleRoot Merkle root against which the proof was verified.
+    /// @param leaf Leaf value that was proven to be part of the Merkle tree.
+    error InvalidMerkleProof(bytes32 merkleRoot, bytes32 leaf);
 
     bytes32 internal constant ADMIN = keccak256("ADMIN");
 
@@ -68,8 +67,9 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
     // workflow_owner           // offset 119, size 20
     // report_id                // offset 139, size  2
     //
-    // We additionally expect the Concero message hash to be embedded between
+    // We additionally expect a Merkle root to be embedded between
     // RAW_REPORT_METADATA_LENGTH and RAW_REPORT_LENGTH in `validation`.
+    // This Merkle root commits to a tree that includes the Concero message hash.
 
     // VIEW FUNCTIONS
 
@@ -176,10 +176,10 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
 
     // INTERNAL FUNCTIONS
 
-    /// @notice Extracts signatures and the signed message hash from the CRE validation blob.
+    /// @notice Extracts signatures and the signed Merkle root hash from the CRE validation blob.
     /// @dev
     /// - Expects:
-    ///   `validation = abi.encodePacked(rawReport, reportContext, abi.encode(signatures))`
+    ///   `validation = abi.encodePacked(rawReport, reportContext, abi.encode(signatures, proof))`
     /// - Returns:
     ///   * `signatures` decoded from `validation[SIGNATURES_OFFSET:]`,
     ///   * `hash` = keccak256( keccak256(rawReport) || reportContext ).
@@ -188,9 +188,11 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
     /// @return hash Message hash to be used for ECDSA recovery.
     function _extractSignaturesAndHash(
         bytes calldata validation
-    ) internal pure override returns (bytes[] memory, bytes32) {
+    ) internal pure override returns (bytes[] memory sigs, bytes32) {
+        (sigs, ) = abi.decode(validation[SIGNATURES_OFFSET:], (bytes[], bytes32[]));
+
         return (
-            abi.decode(validation[SIGNATURES_OFFSET:], (bytes[])),
+            sigs,
             keccak256(
                 abi.encodePacked(
                     keccak256(validation[:RAW_REPORT_LENGTH]),
@@ -203,13 +205,15 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
     /// @notice Performs additional CRE-specific validation logic.
     /// @dev
     /// - Steps:
-    ///   1. Extract `workflow_execution_id` from the `rawReport` and ensure it is allowed.
-    ///   2. Extract the message receipt hash embedded in `validation` and
-    ///      ensure it equals `keccak256(messageReceipt)`.
+    ///   1. Extract `workflow_execution_id` from the `rawReport` and ensure it is allowlisted.
+    ///   2. Extract the Merkle root embedded in `validation`.
+    ///   3. Verify, using the provided Merkle proof, that messageReceipt) hash
+    ///      is included in the Merkle tree committed to by the extracted Merkle root.
     ///
     /// @param messageReceipt Packed Concero message receipt.
-    /// @param validation Validation blob containing the CRE report.
-    /// @return Always returns true if no `require` fails.
+    /// @param validation Validation blob containing the CRE report, Merkle root,
+    ///        and a Merkle proof of inclusion.
+    /// @return Always returns true if no validation check fails.
     function _checkValidation(
         bytes calldata messageReceipt,
         bytes calldata validation
@@ -222,15 +226,15 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
 
         require(s_isCreWorkflowIdAllowed[workflowId], InvalidCreWorkflowId(workflowId));
 
-        bytes32 messageReceiptHash = keccak256(messageReceipt);
-        bytes32 validationMessageReceiptHash = bytes32(
-            validation[RAW_REPORT_METADATA_LENGTH:RAW_REPORT_LENGTH]
+        (, bytes32[] memory proof) = abi.decode(
+            validation[SIGNATURES_OFFSET:],
+            (bytes[], bytes32[])
         );
 
-        require(
-            messageReceiptHash == validationMessageReceiptHash,
-            MessageReceiptHashMismatch(messageReceiptHash, validationMessageReceiptHash)
-        );
+        bytes32 merkleRoot = bytes32(validation[RAW_REPORT_METADATA_LENGTH:RAW_REPORT_LENGTH]);
+        bytes32 leaf = keccak256(messageReceipt);
+
+        require(MerkleProof.verify(proof, merkleRoot, leaf), InvalidMerkleProof(merkleRoot, leaf));
 
         return true;
     }

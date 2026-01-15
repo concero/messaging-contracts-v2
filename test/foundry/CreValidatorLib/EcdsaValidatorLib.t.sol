@@ -7,6 +7,9 @@
 pragma solidity 0.8.28;
 
 import {Test} from "forge-std/src/Test.sol";
+import {Vm} from "forge-std/src/Vm.sol";
+
+import {Merkle} from "@murky/Merkle.sol";
 
 import {CreValidatorLib} from "contracts/validators/CreValidatorLib/CreValidatorLib.sol";
 
@@ -15,6 +18,8 @@ contract EcdsaValidatorLibSignatureTest is Test {
     address public admin;
     uint256 public signerPrivateKey;
     address public signerAddress;
+
+    Merkle m;
 
     function setUp() public {
         admin = makeAddr("admin");
@@ -44,6 +49,8 @@ contract EcdsaValidatorLibSignatureTest is Test {
         bytes32 workflowId = keccak256("test-workflow");
         vm.prank(admin);
         validator.setIsWorkflowIdAllowed(workflowId, true);
+
+        m = new Merkle();
     }
 
     /**
@@ -74,23 +81,89 @@ contract EcdsaValidatorLibSignatureTest is Test {
         bytes[] memory signatures = new bytes[](1);
         signatures[0] = signature;
 
+        bytes32[] memory proof;
+
         // Build complete validation bytes
         bytes memory validation = abi.encodePacked(
             rawReport,
             reportContext,
-            abi.encode(signatures)
+            abi.encode(signatures, proof)
         );
 
         assertTrue(validator.isValid(messageReceipt, validation));
+    }
+
+    function test_merkleRoot_gas() public {
+        vm.pauseGasMetering();
+        bytes memory messageReceipt = abi.encodePacked("test message");
+        bytes32 messageReceiptHash = keccak256(messageReceipt);
+
+        uint256 index = 9_999;
+        uint256 length = 10_000;
+
+        (bytes32 merkleRoot, bytes32[] memory messageReceiptHashes) = _getRootAndHashes(
+            messageReceiptHash,
+            index,
+            length
+        );
+
+        bytes memory validation = _buildValidation(merkleRoot, messageReceiptHashes, index);
+
+        vm.resumeGasMetering();
+        validator.isValid(messageReceipt, validation);
+    }
+
+    function testFuzz_merkleRoot_Success(
+        bytes calldata messageReceipt,
+        uint256 index,
+        uint256 length
+    ) public view {
+        vm.assume(messageReceipt.length > 0);
+        // Murky library doesn't allow single leaf merkle tree
+        length = bound(length, 2, 10_000);
+        index = bound(index, 0, length - 1);
+
+        bytes32 messageReceiptHash = keccak256(messageReceipt);
+
+        (bytes32 merkleRoot, bytes32[] memory hashes) = _getRootAndHashes(
+            messageReceiptHash,
+            index,
+            length
+        );
+        bytes memory validation = _buildValidation(merkleRoot, hashes, index);
+
+        assertTrue(validator.isValid(messageReceipt, validation));
+    }
+
+    function test_InvalidMerkleProof_revert() public {
+        bytes memory correctMessage = abi.encodePacked("test message");
+        bytes memory wrongMessage = abi.encodePacked("wrong message");
+
+        bytes32 wrongMessageHash = keccak256(wrongMessage);
+
+        // Build validation with merkle root from wrongMessage
+        (bytes32 merkleRoot, bytes32[] memory hashes) = _getRootAndHashes(wrongMessageHash, 0, 10);
+        bytes memory validation = _buildValidation(merkleRoot, hashes, 0);
+
+        // Try to validate correctMessage with proof from wrongMessage
+        bytes32 expectedLeaf = keccak256(correctMessage);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                CreValidatorLib.InvalidMerkleProof.selector,
+                merkleRoot,
+                expectedLeaf
+            )
+        );
+        validator.isValid(correctMessage, validation);
     }
 
     /**
      * @notice This test demonstrates that EIP-155 signatures pass validation
      */
     function test_EIP155Signature_Success() public view {
-        // Create a mock message receipt
-        bytes memory messageReceipt = abi.encodePacked("test message");
-        bytes32 messageReceiptHash = keccak256(messageReceipt);
+        // Create a mock message receipt and get the hash (abi.encodePacked("test message"))
+        bytes32 messageReceiptHash = keccak256(abi.encodePacked("test message"));
 
         // Build a mock CRE validation structure
         bytes memory rawReport = _buildMockRawReport(messageReceiptHash);
@@ -120,14 +193,16 @@ contract EcdsaValidatorLibSignatureTest is Test {
         bytes[] memory signatures = new bytes[](1);
         signatures[0] = signature;
 
+        bytes32[] memory proof;
+
         // Build complete validation bytes
         bytes memory validation = abi.encodePacked(
             rawReport,
             reportContext,
-            abi.encode(signatures)
+            abi.encode(signatures, proof)
         );
 
-        assertTrue(validator.isValid(messageReceipt, validation));
+        assertTrue(validator.isValid(abi.encodePacked("test message"), validation));
     }
 
     /**
@@ -162,11 +237,13 @@ contract EcdsaValidatorLibSignatureTest is Test {
         bytes[] memory signatures = new bytes[](1);
         signatures[0] = signature;
 
+        bytes32[] memory proof;
+
         // Build complete validation bytes
         bytes memory validation = abi.encodePacked(
             rawReport,
             reportContext,
-            abi.encode(signatures)
+            abi.encode(signatures, proof)
         );
 
         assertTrue(validator.isValid(messageReceipt, validation));
@@ -250,5 +327,43 @@ contract EcdsaValidatorLibSignatureTest is Test {
         }
 
         return report;
+    }
+
+    function _buildValidation(
+        bytes32 merkleRoot,
+        bytes32[] memory messageReceiptHashes,
+        uint256 index
+    ) internal view returns (bytes memory) {
+        bytes32[] memory proof = m.getProof(messageReceiptHashes, index);
+
+        bytes memory rawReport = _buildMockRawReport(merkleRoot);
+        bytes memory reportContext = new bytes(96);
+
+        bytes32 validationHash = keccak256(abi.encodePacked(keccak256(rawReport), reportContext));
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, validationHash);
+
+        bytes[] memory signatures = new bytes[](1);
+        signatures[0] = abi.encodePacked(r, s, v);
+
+        return abi.encodePacked(rawReport, reportContext, abi.encode(signatures, proof));
+    }
+
+    function _getRootAndHashes(
+        bytes32 messageReceiptHash,
+        uint256 index,
+        uint256 length
+    ) private view returns (bytes32 root, bytes32[] memory messageReceiptHashes) {
+        messageReceiptHashes = new bytes32[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            if (i == index) {
+                messageReceiptHashes[i] = messageReceiptHash;
+            } else {
+                messageReceiptHashes[i] = keccak256(abi.encodePacked("another message"));
+            }
+        }
+
+        root = m.getRoot(messageReceiptHashes);
     }
 }

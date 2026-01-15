@@ -2150,6 +2150,10 @@
   resolved "https://registry.yarnpkg.com/@mobily/ts-belt/-/ts-belt-3.13.1.tgz#8f8ce2a2eca41d88c2ca70c84d0f47d0f7f5cd5f"
   integrity sha512-K5KqIhPI/EoCTbA6CGbrenM9s41OouyK8A03fGJJcla/zKucsgLbz8HNbeseoLarRPgyWJsUyCYqFhI7t3Ra9Q==
 
+"@murky@https://github.com/dmfxyz/murky":
+  version "0.1.0"
+  resolved "https://github.com/dmfxyz/murky#991e371eb1dfa9f86701869eb08ec4e98c3cc0b0"
+
 "@noble/ciphers@1.3.0":
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@noble/ciphers/-/ciphers-1.3.0.tgz#f64b8ff886c240e644e5573c097f86e5b43676dc"
@@ -3947,9 +3951,9 @@
     "@trezor/type-utils" "1.1.9"
     "@trezor/utils" "9.4.4"
 
-"@trezor/connect-web@^9.6.4":
+"@trezor/connect-web@9.6.4":
   version "9.6.4"
-  resolved "https://registry.yarnpkg.com/@trezor/connect-web/-/connect-web-9.6.4.tgz#fa1b3199e62af7132f3ffdf0751ac49b30cce283"
+  resolved "https://registry.npmjs.org/@trezor/connect-web/-/connect-web-9.6.4.tgz#fa1b3199e62af7132f3ffdf0751ac49b30cce283"
   integrity sha512-Dip0+B2NKso8noux0mrsyy/Sz3Y0ZEn4Lq7CqM0hif4iu38FIPaUOWaR9BtDLj5TDYDi/sXHHkP+90gPobwigA==
   dependencies:
     "@trezor/connect" "9.6.4"
@@ -4423,9 +4427,9 @@
     "@xrplf/isomorphic" "^1.0.1"
     ripple-keypairs "^2.0.0"
 
-"@yankeguo/hardhat-trezor@^0.1.4":
+"@yankeguo/hardhat-trezor@0.1.4":
   version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@yankeguo/hardhat-trezor/-/hardhat-trezor-0.1.4.tgz#e0d4808acb7e20b1612f692129b2c6fcdd8ea6eb"
+  resolved "https://registry.npmjs.org/@yankeguo/hardhat-trezor/-/hardhat-trezor-0.1.4.tgz#e0d4808acb7e20b1612f692129b2c6fcdd8ea6eb"
   integrity sha512-HXwUjTn35wuCFrxbJWZIwDy/1zFVFfvFZ7tN7bLdK4rezg/iDs3O6q1YqdqH9h75HK3l8XT7KjKH6IhE0Yp6Ow==
   dependencies:
     "@nomicfoundation/ethereumjs-util" "^9.0.4"

@@ -17,7 +17,7 @@
 # ==========================================================================
 local-simulation:
   user-workflow:
-    workflow-name: "message-report"
+    workflow-name: "local-simulation"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.testnet.json"
@@ -37,5 +37,5 @@ production-mainnet:
     workflow-name: "mainnet-messaging"
   workflow-artifacts:
     workflow-path: "./main.ts"
-    config-path: "./config.testnet.json" # TODO: move to mainnet
+    config-path: "./config.mainnet.json"
     secrets-path: "../secrets.mainnet.yaml"

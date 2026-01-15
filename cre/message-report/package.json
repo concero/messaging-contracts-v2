@@ -9,8 +9,9 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@chainlink/cre-sdk": "1.0.1",
+    "@openzeppelin/merkle-tree": "1.0.8",
     "json-stable-stringify": "1.3.0",
-    "viem": "2.40.3"
+    "viem": "2.44.2"
   },
   "devDependencies": {
     "@types/bun": "v1.3.1"

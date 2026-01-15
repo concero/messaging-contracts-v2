@@ -1,4 +1,6 @@
 import { HTTPSendRequester, Runtime } from "@chainlink/cre-sdk";
+import { SendRequester } from "@chainlink/cre-sdk/dist/generated-sdk/capabilities/networking/http/v1alpha/client_sdk_gen";
+import type { Response } from "@chainlink/cre-sdk/dist/generated/capabilities/networking/http/v1alpha/client_pb";
 import { sha256 } from "viem";
 
 import { GlobalConfig } from "./types";
@@ -11,6 +13,38 @@ export namespace CRE {
 		method: "GET" | "POST";
 		body?: any;
 		headers?: Record<string, string>;
+	}
+
+	export function parseCreRawHttpResponse(res: Response) {
+		return JSON.parse(new TextDecoder().decode(res.body));
+	}
+
+	export function sendHttpRequestSync(sendRequester: HTTPSendRequester, params: IFetcherOptions) {
+		return parseCreRawHttpResponse(sendRequester.sendRequest(params).result());
+	}
+
+	export function buildSendRequestPromises(
+		sendRequester: HTTPSendRequester,
+		paramsArr: IFetcherOptions[],
+	) {
+		return paramsArr.map(params => sendRequester.sendRequest(params));
+	}
+
+	export function fulfillSendRequestPromises(
+		promises: ReturnType<SendRequester["sendRequest"]>[],
+	) {
+		const results = [];
+		for (const promise of promises) {
+			const res = promise.result();
+
+			if (res.statusCode == 200) {
+				results.push(parseCreRawHttpResponse(res));
+			} else {
+				results.push(null);
+			}
+		}
+
+		return results;
 	}
 
 	export class Fetcher {

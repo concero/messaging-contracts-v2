@@ -232,7 +232,8 @@ contract CreValidatorLib is AccessControlUpgradeable, EcdsaValidatorLib {
         );
 
         bytes32 merkleRoot = bytes32(validation[RAW_REPORT_METADATA_LENGTH:RAW_REPORT_LENGTH]);
-        bytes32 leaf = keccak256(messageReceipt);
+        bytes32 messageHash = keccak256(messageReceipt);
+        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(messageHash))));
 
         require(MerkleProof.verify(proof, merkleRoot, leaf), InvalidMerkleProof(merkleRoot, leaf));
 

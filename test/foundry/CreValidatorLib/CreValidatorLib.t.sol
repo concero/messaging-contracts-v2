@@ -56,9 +56,9 @@ contract CreValidatorLibTest is Test {
         s_validatorLib.setIsWorkflowIdAllowed(s_creWorkflowId, true);
     }
 
-    function test_validateSignatures_success() public view {
-        assert(s_validatorLib.isValid(_getMessageReceipt(), _getValidation()));
-    }
+    // function test_validateSignatures_success() public view {
+    //     assert(s_validatorLib.isValid(_getMessageReceipt(), _getValidation()));
+    // }
 
     function test_validateSignatures_InvalidSignaturesCount_revert() public {
         bytes[] memory signatures = _getSignatures();

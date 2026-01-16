@@ -11,6 +11,11 @@ import log from "./log";
 export type ContractPrefix = keyof EnvPrefixes;
 
 export function updateEnvVariable(key: string, newValue: string, envFileName: EnvFileName) {
+	const deployEnv = process.env.DEPLOY_TO_STAGE?.toLowerCase();
+	if (deployEnv === "true") {
+		envFileName = "deployments.stage";
+	}
+
 	const filePath = path.join(__dirname, `../.env.${envFileName}`);
 	if (!filePath) throw new Error(`File not found: ${filePath}`);
 

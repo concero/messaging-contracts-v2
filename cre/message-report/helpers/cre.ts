@@ -8,43 +8,67 @@ import { GlobalConfig } from "./types";
 const LOG_TAG = "FETCHER";
 
 export namespace CRE {
-	export interface IFetcherOptions {
+	export interface IRequestOptions {
 		url: string;
 		method: "GET" | "POST";
 		body?: any;
 		headers?: Record<string, string>;
 	}
 
-	export function parseCreRawHttpResponse(res: Response) {
-		return JSON.parse(new TextDecoder().decode(res.body));
+	export interface IHttpPromiseResult {
+		ok: boolean;
+		response: Response | Error;
 	}
 
-	export function sendHttpRequestSync(sendRequester: HTTPSendRequester, params: IFetcherOptions) {
+	export function parseCreRawHttpResponse(res: Response) {
+		try {
+			return JSON.parse(new TextDecoder().decode(res.body));
+		} catch {
+			return null;
+		}
+	}
+
+	export function sendHttpRequestSync(sendRequester: HTTPSendRequester, params: IRequestOptions) {
 		return parseCreRawHttpResponse(sendRequester.sendRequest(params).result());
 	}
 
 	export function buildSendRequestPromises(
 		sendRequester: HTTPSendRequester,
-		paramsArr: IFetcherOptions[],
+		paramsArr: IRequestOptions[],
 	) {
 		return paramsArr.map(params => sendRequester.sendRequest(params));
 	}
 
 	export function fulfillSendRequestPromises(
 		promises: ReturnType<SendRequester["sendRequest"]>[],
-	) {
-		const results = [];
-		for (const promise of promises) {
-			const res = promise.result();
-
-			if (res.statusCode == 200) {
-				results.push(parseCreRawHttpResponse(res));
-			} else {
-				results.push(null);
+	): IHttpPromiseResult[] {
+		return promises.map(promise => {
+			try {
+				return { ok: true, response: promise.result() };
+			} catch (e) {
+				return { ok: false, response: e as Error };
 			}
+		});
+	}
+
+	export class AsyncFetcher {
+		private promises: ReturnType<SendRequester["sendRequest"]>[] = [];
+
+		constructor(private readonly sendRequester: HTTPSendRequester) {}
+
+		add(request: IRequestOptions) {
+			this.promises.push(this.sendRequester.sendRequest(request));
 		}
 
-		return results;
+		batchAdd(requests: IRequestOptions[]) {
+			requests.forEach(req => this.add(req));
+		}
+
+		wait() {
+			const results = fulfillSendRequestPromises(this.promises);
+			this.promises = [];
+			return results;
+		}
 	}
 
 	export class Fetcher {
@@ -59,7 +83,7 @@ export namespace CRE {
 
 		build(
 			runtime: Runtime<GlobalConfig>,
-			options: CRE.IFetcherOptions,
+			options: CRE.IRequestOptions,
 			consensusDecoder?: (decodedResponse: unknown) => unknown,
 		): (sendRequester: HTTPSendRequester) => unknown {
 			return (sendRequester: HTTPSendRequester) => {

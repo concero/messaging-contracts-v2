@@ -11,9 +11,11 @@ export enum DeploymentType {
 }
 export type DeploymentAddress = `0x${string}`;
 
+export type ChainSelector = number;
+
 export type Chain = {
 	id: string;
-	chainSelector: number;
+	chainSelector: ChainSelector;
 	name: string;
 	isTestnet: boolean;
 	finalityTagEnabled: boolean;

@@ -5,10 +5,11 @@ import {
 	consensusIdenticalAggregation,
 	cre,
 } from "@chainlink/cre-sdk";
-import { SimpleMerkleTree } from "@openzeppelin/merkle-tree";
+import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { Hex, Log } from "viem";
 
 import { DecodedArgs, GlobalConfig, Utility } from "../helpers";
+import { RpcRequester } from "../helpers/RpcRequester";
 import { ChainsManager } from "../systems";
 import { buildValidation } from "./buildValidation";
 import { decodeArgs } from "./decodeArgs";
@@ -20,13 +21,14 @@ import { validateDecodedArgs } from "./validateDecodedArgs";
 import { validateMessageVersion } from "./validateMessageVersion";
 import { validateValidatorLib } from "./validateValidatorLib";
 
-let merkleTree: SimpleMerkleTree;
+let merkleTree: StandardMerkleTree<Hex[]>;
 let messageIds: Hex[];
 
 function parseLogs(runtime: Runtime<GlobalConfig>, logs: Log[]) {
 	const parsedLogs = [];
 	for (const log of logs) {
 		const parsedLog = parseMessageSentLog(log);
+
 		runtime.log(
 			`Got log txHash=${log.transactionHash}, ${Utility.safeJSONStringify(parsedLog)}`,
 		);
@@ -50,11 +52,24 @@ function fetchMessagesAndGenerateProof(
 	return (sendRequester: HTTPSendRequester) => {
 		ChainsManager.enrichOptions(runtime, sendRequester, chainsConfigHash);
 
-		const logs = fetchLogsByMessageIds(runtime, sendRequester, args.batch);
+		const rpcRequester = new RpcRequester(
+			Object.fromEntries(
+				[...new Set(args.batch.map(i => i.srcChainSelector))].map(s => [
+					s,
+					ChainsManager.getOptionsBySelector(s).rpcUrls,
+				]),
+			),
+			sendRequester,
+		);
+
+		const logs = fetchLogsByMessageIds(runtime, rpcRequester, args.batch);
 		const parsedLogs = parseLogs(runtime, logs);
 
 		messageIds = parsedLogs.map(log => log.data.messageId);
-		merkleTree = SimpleMerkleTree.of(messageIds);
+		merkleTree = StandardMerkleTree.of(
+			messageIds.map(id => [id]),
+			["bytes32"],
+		);
 
 		return merkleTree.root;
 	};

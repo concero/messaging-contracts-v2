@@ -1,5 +1,5 @@
 import { Report } from "@chainlink/cre-sdk";
-import { SimpleMerkleTree } from "@openzeppelin/merkle-tree";
+import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { Hex } from "viem";
 
 export interface IReport {
@@ -19,7 +19,7 @@ export interface IValidation {
 export const buildValidation = (
 	report: ReturnType<Report["x_generatedCodeOnly_unwrap"]>,
 	messageIds: Hex[],
-	merkleTree: SimpleMerkleTree,
+	merkleTree: StandardMerkleTree<Hex[]>,
 ): IValidation => {
 	const validation: IValidation = {
 		report: {
@@ -34,7 +34,7 @@ export const buildValidation = (
 	};
 
 	messageIds.forEach((messageId: Hex) => {
-		validation.proofs[messageId] = merkleTree.getProof(messageId) as Hex[];
+		validation.proofs[messageId] = merkleTree.getProof([messageId]) as Hex[];
 	});
 
 	return validation;

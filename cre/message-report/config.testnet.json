@@ -1,4 +1,6 @@
 {
     "authorizedPublicKey": "0xae87d176c5fa3c25dcc91ed3a3776bc83ce3d21d",
-    "deploymentsUrl": "https://raw.githubusercontent.com/concero/messaging-contracts-v2/refs/heads/master/.env.deployments.testnet"
+    "relayerCallbackUrl": "https://testnet.relayer.concero.io/api/v1/callback/cre",
+    "chainsConfigUrl": "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.testnet.minified.json",
+    "allowedMessageVersions": [1]
 }

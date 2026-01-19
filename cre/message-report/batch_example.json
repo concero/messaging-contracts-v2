@@ -9,11 +9,6 @@
       "messageId": "0x1891ac5113677396cacda3155fd831c11dcf5ccee431a5d49ced211a0bad1a33",
       "blockNumber": "10014271",
       "srcChainSelector": "11155111"
-    },
-    {
-      "messageId": "0x1f23ff0f3d0250b6ffb9580d5b9dbeca9e923bcd5b114c92863456d2bf943049",
-      "blockNumber": "38116127",
-      "srcChainSelector": "11155420"
     }
   ]
 }

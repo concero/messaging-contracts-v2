@@ -1,23 +1,24 @@
-import { Hex, Log, decodeEventLog } from "viem";
+import { Hex, decodeEventLog } from "viem";
 
 import { ConceroMessageSentEvent } from "../abi";
 import { DecodedMessageSentReceipt, DomainError, ErrorCode, MessageSentLogData } from "../helpers";
 import { MessagingCodec } from "./codec";
+import { IFetchLogsResult } from "./fetchLogsByMessageIds";
 
-export const parseMessageSentLog = (
-	log: Log,
-): {
+export interface IParsedLog {
 	blockNumber: bigint;
 	transactionHash: Hex;
 	data: MessageSentLogData;
 	receipt: DecodedMessageSentReceipt;
 	rawMessageReceipt: Hex;
-} => {
+}
+
+export const parseMessageSentLog = (res: IFetchLogsResult): IParsedLog => {
 	try {
 		const decodedLog = decodeEventLog({
 			abi: [ConceroMessageSentEvent.eventAbi],
-			topics: log.topics,
-			data: log.data,
+			topics: res.log.topics,
+			data: res.log.data,
 			strict: true,
 			eventName: ConceroMessageSentEvent.name,
 		});
@@ -25,8 +26,8 @@ export const parseMessageSentLog = (
 
 		const receipt = MessagingCodec.decodeReceipt(data.messageReceipt);
 		return {
-			blockNumber: log.blockNumber!,
-			transactionHash: log.transactionHash!,
+			blockNumber: BigInt(res.log.blockNumber!),
+			transactionHash: res.log.transactionHash!,
 			data,
 			receipt,
 			rawMessageReceipt: data.messageReceipt,

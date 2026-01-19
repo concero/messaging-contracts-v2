@@ -72,14 +72,7 @@ export namespace CRE {
 	}
 
 	export class Fetcher {
-		private response: any | null = null;
 		private MAX_RESPONSE_LENGTH = 20_000;
-
-		getResponse() {
-			const res = this.response;
-			this.response = null;
-			return res;
-		}
 
 		build(
 			runtime: Runtime<GlobalConfig>,
@@ -108,14 +101,10 @@ export namespace CRE {
 					})
 					.result();
 
-				this.response = res;
-
 				const dTime = Date.now() - start;
 				const decodedResponse = new TextDecoder().decode(res.body);
 
 				runtime.log(`${LOG_TAG} request fulfilled in ${dTime}ms ${decodedResponse}`);
-
-				this.response = JSON.parse(decodedResponse);
 
 				return decodedResponse.length > this.MAX_RESPONSE_LENGTH
 					? sha256(res.body)

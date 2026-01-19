@@ -10,6 +10,8 @@ export interface IRpcRequest {
 	chainSelector: ChainSelector;
 }
 
+export type IRpcResponse = any | null;
+
 export class RpcRequester {
 	private readonly rpcs: Record<ChainSelector, string[]>;
 	private requests: (CRE.IRequestOptions & { chainSelector: ChainSelector })[] = [];
@@ -43,7 +45,7 @@ export class RpcRequester {
 		});
 	}
 
-	wait() {
+	wait(): IRpcResponse {
 		let results = this.asyncFetcher.wait();
 		let failedRequestsIdxes = this.findFailedRequestsIdxes(results);
 		let retryCounter = 0;

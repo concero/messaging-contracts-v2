@@ -6,17 +6,19 @@ import {
 	cre,
 } from "@chainlink/cre-sdk";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
-import { Hex, Log } from "viem";
+import { Hex, type Log } from "viem";
 
-import { DecodedArgs, GlobalConfig, Utility } from "../helpers";
+import { DecodedArgs, DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
 import { RpcRequester } from "../helpers/RpcRequester";
-import { ChainsManager } from "../systems";
+import { ChainSelector, ChainsManager } from "../systems";
 import { buildValidation } from "./buildValidation";
 import { decodeArgs } from "./decodeArgs";
+import { fetchBlockNumbers } from "./fetchBlockNumbers";
 import { fetchLogsByMessageIds } from "./fetchLogsByMessageIds";
 import { generateReport } from "./generateReport";
 import { parseMessageSentLog } from "./parseMessageSentLog";
 import { sendReportsToRelayer } from "./sendReportsToRelayer";
+import { validateMessagesBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
 import { validateMessageVersion } from "./validateMessageVersion";
 import { validateValidatorLib } from "./validateValidatorLib";
@@ -24,22 +26,25 @@ import { validateValidatorLib } from "./validateValidatorLib";
 let merkleTree: StandardMerkleTree<Hex[]>;
 let messageIds: Hex[];
 
-function parseLogs(runtime: Runtime<GlobalConfig>, logs: Log[]) {
+function parseLogs(
+	runtime: Runtime<GlobalConfig>,
+	logs: { chainSelector: ChainSelector; log: Log }[],
+) {
 	const parsedLogs = [];
 	for (const log of logs) {
-		const parsedLog = parseMessageSentLog(log);
+		try {
+			const parsedLog = parseMessageSentLog(log);
 
-		runtime.log(
-			`Got log txHash=${log.transactionHash}, ${Utility.safeJSONStringify(parsedLog)}`,
-		);
-		validateMessageVersion(parsedLog.receipt.version, runtime);
-		// validateBlockConfirmations(parsedLog.blockNumber, parsedLog.receipt, publicClient, runtime);
-		validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
-		// if (!log || !log?.data) {
-		// 	runtime.log(`Log where messageId=${parsedLog.data.messageId} not found`);
-		// }
+			runtime.log(
+				`Got log txHash=${log.log.transactionHash}, ${Utility.safeJSONStringify(parsedLog)}`,
+			);
+			validateMessageVersion(parsedLog.receipt.version, runtime);
+			validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
 
-		parsedLogs.push(parsedLog);
+			parsedLogs.push(parsedLog);
+		} catch (e) {
+			runtime.log(`Error parsing log ${JSON.stringify(e)}`);
+		}
 	}
 	return parsedLogs;
 }
@@ -64,8 +69,17 @@ function fetchMessagesAndGenerateProof(
 
 		const logs = fetchLogsByMessageIds(runtime, rpcRequester, args.batch);
 		const parsedLogs = parseLogs(runtime, logs);
+		const blockNumbers = fetchBlockNumbers(runtime, rpcRequester, parsedLogs);
 
-		messageIds = parsedLogs.map(log => log.data.messageId);
+		const validatedMessages = validateMessagesBlockConfirmations(
+			runtime,
+			parsedLogs,
+			blockNumbers,
+		);
+
+		if (validatedMessages.length == 0) throw new DomainError(ErrorCode.LOGS_NOT_FOUND);
+
+		messageIds = validatedMessages.map(log => log.data.messageId);
 		merkleTree = StandardMerkleTree.of(
 			messageIds.map(id => [id]),
 			["bytes32"],

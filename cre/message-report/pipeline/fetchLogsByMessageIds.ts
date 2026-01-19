@@ -4,7 +4,12 @@ import { type Log, encodeEventTopics, toHex } from "viem";
 import { ConceroMessageSentEvent } from "../abi";
 import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { IRpcRequest, RpcRequester } from "../helpers/RpcRequester";
-import { ChainsManager } from "../systems";
+import { ChainSelector, ChainsManager } from "../systems";
+
+export interface IFetchLogsResult {
+	chainSelector: ChainSelector;
+	log: Log;
+}
 
 const LOG_TAG = "FETCH_LOG";
 
@@ -58,11 +63,38 @@ function buildGetLogsReqParams(
 	return reqParams;
 }
 
+function buildResponse(runtime: Runtime<GlobalConfig>, items: DecodedArgs["batch"], logs: Log[][]) {
+	const response = [];
+	const itemsMap = items.reduce((acc, i) => {
+		acc[i.messageId.toLowerCase()] = i;
+		return acc;
+	}, {});
+
+	for (const log of logs) {
+		for (const l of log) {
+			const logRes = itemsMap[l.topics[1].toLowerCase()];
+			if (!logRes) {
+				runtime.log(
+					`${LOG_TAG} ConceroMessageSentLog for message ${l.topics.toString()} not found`,
+				);
+				continue;
+			}
+
+			response.push({
+				log: l,
+				chainSelector: logRes.chainSelector,
+			});
+		}
+	}
+
+	return response;
+}
+
 export function fetchLogsByMessageIds(
 	runtime: Runtime<GlobalConfig>,
 	rpcRequester: RpcRequester,
 	items: DecodedArgs["batch"],
-): Log[] {
+): IFetchLogsResult[] {
 	rpcRequester.batchAdd(buildGetLogsReqParams(runtime, items));
 	const logs = rpcRequester.wait();
 
@@ -71,8 +103,7 @@ export function fetchLogsByMessageIds(
 		throw new DomainError(ErrorCode.LOGS_NOT_FOUND, "Logs are empty");
 	}
 
-	// TODO: double check if log really exists
-	return logs.map(res => res[0]);
+	return buildResponse(runtime, items, logs);
 
 	// TODO: move to top level
 	// const log = logs?.find(log => {

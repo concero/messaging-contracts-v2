@@ -1,10 +1,11 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Hex } from "viem";
 
-import { ADMIN_SLOT, DEPLOY_CONFIG_TESTNET, ProxyEnum, conceroNetworks } from "../constants";
-import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
-import { getEnvAddress, getFallbackClients, getViemAccount, log, updateEnvAddress } from "../utils";
-import { genericDeploy } from "./GenericDeploy";
+import { genericDeploy } from "@concero/contract-utils";
+
+import { DEPLOY_CONFIG_TESTNET, ProxyEnum, conceroNetworks } from "../constants";
+import { EnvFileName, EnvPrefixes, IProxyType } from "../types/deploymentVariables";
+import { getEnvAddress, log, updateEnvAddress } from "../utils";
 
 export const deployTransparentProxy: (
 	hre: HardhatRuntimeEnvironment,
@@ -44,11 +45,10 @@ export const deployTransparentProxy: (
 		gasLimit = config.proxy.gasLimit;
 	}
 
-	await genericDeploy(
+	const deployment = await genericDeploy(
 		{
 			hre,
 			contractName: "TransparentUpgradeableProxy",
-			contractPrefix: proxyType,
 			txParams: {
 				gasLimit: BigInt(gasLimit),
 			},
@@ -58,22 +58,18 @@ export const deployTransparentProxy: (
 		callData ?? "0x",
 	);
 
-	const [proxyAddress] = getEnvAddress(proxyType, name);
-	const viemAccount = getViemAccount(networkType, "deployer");
-	const { publicClient } = getFallbackClients(chain, viemAccount);
-
-	const proxyAdminBytes = await publicClient.getStorageAt({
-		address: proxyAddress as Hex,
-		slot: ADMIN_SLOT as Hex,
-	});
-
-	const proxyAdminAddress = `0x${proxyAdminBytes!.slice(-40)}` as Hex;
+	updateEnvAddress(
+		proxyType,
+		deployment.chain.name,
+		deployment.address,
+		`deployments.${deployment.chain.type}` as EnvFileName,
+	);
 
 	log(
-		`Deployed at: ${proxyAdminAddress}. initialOwner: ${deployer.address}`,
+		`Deployed at: ${deployment.proxyAdminAddress}. initialOwner: ${deployer.address}`,
 		`deployProxyAdmin: ${proxyType}`,
 		name,
 	);
 
-	updateEnvAddress(`${proxyType}Admin`, name, proxyAdminAddress, `deployments.${networkType}`);
+	updateEnvAddress(`${proxyType}Admin`, name, deployment.proxyAdminAddress as Hex, `deployments.${networkType}`);
 };

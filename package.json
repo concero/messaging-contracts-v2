@@ -31,7 +31,7 @@
     "@chainlink/env-enc": "1.0.5",
     "@chainlink/hardhat-chainlink": "0.0.4",
     "@chainlink/solhint-plugin-chainlink-solidity": "1.0.1",
-    "@concero/contract-utils": "https://github.com/concero/contract-utils",
+    "@concero/contract-utils": "https://github.com/concero/contract-utils#feature/v3/export-generic-deploy",
     "@concero/rpcs": "https://github.com/concero/rpcs",
     "@concero/v2-networks": "https://github.com/concero/v2-networks",
     "@nomicfoundation/hardhat-chai-matchers": "2.0.8",

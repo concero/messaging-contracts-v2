@@ -51,7 +51,9 @@ export class ChainsManager {
 
 		const currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chains))).toLowerCase();
 		if (chainsConfigHash !== currentChainsHashSum) {
-			runtime.log(currentChainsHashSum);
+			runtime.log(
+				`Invalid chains hash. Current: ${chainsConfigHash}. Expected: ${currentChainsHashSum}`,
+			);
 			throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
 		}
 	}

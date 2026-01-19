@@ -24,6 +24,14 @@ local-simulation:
     secrets-path: "../secrets.testnet.yaml"
 
 # ==========================================================================
+stage-testnet:
+  user-workflow:
+    workflow-name: "stage-messaging"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.stage.json"
+    secrets-path: "../secrets.stage.yaml"
+
 production-testnet:
   user-workflow:
     workflow-name: "testnet-messaging"

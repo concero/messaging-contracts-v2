@@ -21,6 +21,15 @@ local-simulation:
       url: https://ethereum-sepolia-public.nodies.app
 
 # ==========================================================================
+stage-testnet:
+  account:
+    workflow-owner-address: "0xdddddb8a8e41c194ac6542a0ad7ba663a72741e0"
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://ethereum-sepolia-public.nodies.app
+    - chain-name: ethereum-mainnet
+      url: https://ethereum-public.nodies.app
+
 production-testnet:
   account:
     workflow-owner-address: "0xdddddb8a8e41c194ac6542a0ad7ba663a72741e0"

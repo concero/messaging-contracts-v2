@@ -20,8 +20,8 @@ const donSigners = [
 	"0xe55fcaf921e76c6bbcf9415bba12b1236f07b0c3",
 ];
 
-const stageWorkflowId = "0x00dc777b7431527c7b4186006db9077af09c66b4bdf9d975b3eca0496ba5be7b";
-const testnetWorkflowId = "0x00061ca35eed83caa909161a15443a7589ebd926a5ffd6f44bbca81100a96959";
+const stageWorkflowId = "0x00c55c7328e4024cab99892d7bf1172b5edd477c07afee6a69f9e3b05c6c5555";
+const testnetWorkflowId = "0x008821056dd518f81dc15733f48b6c4240d8d892d6c62f3a4dcd6ddb27d54dc5";
 const workflowId = testnetWorkflowId;
 const minSignersCount = 7;
 

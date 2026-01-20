@@ -4,7 +4,12 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Hash } from "viem";
 
 import { conceroNetworks } from "../../constants";
-import { ethersSignerCallContract, getTrezorDeployEnabled, log } from "../../utils";
+import {
+	ethersSignerCallContract,
+	getFallbackClients,
+	getTrezorDeployEnabled,
+	log,
+} from "../../utils";
 
 // ADMIN role: 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42
 

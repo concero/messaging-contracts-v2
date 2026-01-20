@@ -5,9 +5,13 @@ import {
 	err,
 	ethersSignerCallContract,
 	genericDeploy,
+	getClients,
 	getEnvVar,
+	getFallbackClients,
 	getNetworkEnvKey,
+	getTestClient,
 	getTrezorDeployEnabled,
+	getViemAccount,
 	getWallet,
 	log,
 	warn,
@@ -24,7 +28,6 @@ import {
 } from "./getEthersSignerAndProvider";
 import { getGasParameters } from "./getGasParameters";
 import { getHashSum } from "./getHashSum";
-import { getClients, getFallbackClients, getTestClient, getViemAccount } from "./getViemClients";
 
 export {
 	compileContracts,

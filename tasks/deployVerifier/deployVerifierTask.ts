@@ -3,7 +3,7 @@ import { task } from "hardhat/config";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ProxyEnum, conceroNetworks } from "../../constants";
-import { deployProxyAdmin, deployTransparentProxy, deployVerifier } from "../../deploy/";
+import { deployTransparentProxy, deployVerifier } from "../../deploy/";
 import { getEnvAddress } from "../../utils/";
 import { compileContracts } from "../../utils/compileContracts";
 import { addCLFConsumer } from "../clf";
@@ -15,7 +15,6 @@ async function deployVerifierTask(taskArgs: any, hre: HardhatRuntimeEnvironment)
 	const conceroNetwork = conceroNetworks[hre.network.name];
 
 	if (taskArgs.proxy) {
-		await deployProxyAdmin(hre, ProxyEnum.verifierProxy);
 		await deployTransparentProxy(hre, ProxyEnum.verifierProxy);
 		const [proxyAddress] = getEnvAddress(ProxyEnum.verifierProxy, hre.network.name);
 		await addCLFConsumer(conceroNetwork, [proxyAddress]);

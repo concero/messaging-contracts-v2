@@ -1,7 +1,6 @@
 import { task } from "hardhat/config";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { PrivateKeyAccount } from "viem";
 
 import {
 	DEPLOY_CONFIG_TESTNET,
@@ -10,8 +9,8 @@ import {
 	getViemReceiptConfig,
 } from "../../constants";
 import { EnvPrefixes, IProxyType } from "../../types/deploymentVariables";
+import { getTrezorDeployEnabled } from "../../utils";
 import { err, getEnvAddress, getFallbackClients, getViemAccount, log } from "../../utils";
-import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
 import { ethersSignerCallContract } from "./ethersSignerCallContract";
 
 export async function upgradeProxyImplementation(

@@ -1,11 +1,10 @@
 import { task } from "hardhat/config";
 
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { decodeEventLog } from "viem";
 
 import { conceroNetworks } from "../constants";
-import { getEnvVar, getFallbackClients, log } from "../utils";
+import { getEnvVar, getFallbackClients, getNetworkEnvKey, log } from "../utils";
 
 /**
  * Result of a successful message send operation

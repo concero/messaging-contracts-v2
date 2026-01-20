@@ -11,8 +11,8 @@ import {
 	ConceroNetwork,
 } from "../types/ConceroNetwork";
 import { getEnvVar, getWallet } from "../utils";
+import { getTrezorDeployEnabled } from "../utils";
 import { createViemChain } from "../utils/createViemChain";
-import { getTrezorDeployEnabled } from "../utils/getTrezorDeployEnabled";
 import { urls } from "./rpcUrls";
 
 const mainnetProxyDeployerPK = getWallet("mainnet", "proxyDeployer", "privateKey");

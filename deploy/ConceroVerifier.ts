@@ -1,10 +1,16 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { CLF_DON_HOSTED_SECRETS_SLOT, conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
-import { getEnvVar, getGasParameters, getHashSum, log, updateEnvVariable } from "../utils";
+import {
+	getEnvVar,
+	getGasParameters,
+	getHashSum,
+	getNetworkEnvKey,
+	log,
+	updateEnvVariable,
+} from "../utils";
 import { ClfJsCodeType, getClfJsCode } from "../utils/getClfJsCode";
 
 type DeployArgs = {

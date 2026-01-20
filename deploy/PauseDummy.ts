@@ -1,8 +1,8 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
-import { log, updateEnvVariable } from "../utils";
+import { EnvFileName } from "../types/deploymentVariables";
+import { getNetworkEnvKey, log, updateEnvVariable } from "../utils";
 
 const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = async function (
 	hre: HardhatRuntimeEnvironment,
@@ -24,7 +24,7 @@ const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = asyn
 		updateEnvVariable(
 			`CONCERO_PAUSE_${getNetworkEnvKey(name)}`,
 			deployment.address,
-			`deployments.${networkType}`,
+			`deployments.${networkType}` as EnvFileName,
 		);
 	}
 

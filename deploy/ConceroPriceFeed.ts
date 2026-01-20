@@ -1,10 +1,15 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { hardhatDeployWrapper } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { DEPLOY_CONFIG_TESTNET, conceroNetworks } from "../constants";
-import { getFallbackClients, getViemAccount, log, updateEnvVariable } from "../utils";
+import {
+	getFallbackClients,
+	getNetworkEnvKey,
+	getViemAccount,
+	log,
+	updateEnvVariable,
+} from "../utils";
 
 type DeployArgs = {
 	chainSelector: bigint;

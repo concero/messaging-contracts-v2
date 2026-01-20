@@ -4,7 +4,7 @@ import { type Address } from "viem";
 
 import { conceroNetworks } from "../../constants";
 import { getFallbackClients } from "../../utils";
-import log from "../../utils/log";
+import { log } from "../../utils";
 
 export async function callContractFunction(targetContract: Address) {
 	const chain = conceroNetworks.base;

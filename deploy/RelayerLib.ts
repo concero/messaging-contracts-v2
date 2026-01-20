@@ -1,11 +1,16 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
-import { getEnvVar } from "../utils";
-import { genericDeploy } from "./GenericDeploy";
+import { EnvFileName } from "../types/deploymentVariables";
+import {
+	genericDeploy,
+	getEnvFileName,
+	getEnvVar,
+	getNetworkEnvKey,
+	updateEnvAddress,
+} from "../utils";
 
 type DeploymentFunction = (
 	hre: HardhatRuntimeEnvironment,
@@ -24,9 +29,13 @@ const deployRelayerLib: DeploymentFunction = async function (
 		getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
 	];
 
-	await genericDeploy(
-		{ hre, contractName: "RelayerLib", contractPrefix: "relayerLib" },
-		...defaultArgs,
+	const deployment = await genericDeploy({ hre, contractName: "RelayerLib" }, ...defaultArgs);
+
+	updateEnvAddress(
+		"relayerLib",
+		deployment.address,
+		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
+		deployment.chainName,
 	);
 };
 

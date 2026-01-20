@@ -8,7 +8,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { conceroNetworks, viemReceiptConfig } from "../../constants";
 import { ConceroNetworkNames } from "../../types/ConceroNetwork";
 import { getFallbackClients } from "../../utils";
-import log from "../../utils/log";
+import { log } from "../../utils";
 
 export async function changeOwnership(
 	hre: HardhatRuntimeEnvironment,

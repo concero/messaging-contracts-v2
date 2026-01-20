@@ -1,10 +1,9 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Address, PublicClient } from "viem";
 
 import { ConceroTestnetNetworkNames, conceroNetworks } from "../../constants/conceroNetworks";
 import { getEnvVar, getFallbackClients, log } from "../../utils";
-import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
+import { getNetworkEnvKey, getTrezorDeployEnabled } from "../../utils";
 import { ethersSignerCallContract } from "../utils/ethersSignerCallContract";
 
 const donSigners = [

@@ -1,10 +1,8 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants/conceroNetworks";
+import { getNetworkEnvKey, log, updateEnvVariable } from "../utils";
 import { getFallbackClients } from "../utils";
-import log from "../utils/log";
-import updateEnvVariable from "../utils/updateEnvVariable";
 
 const deployPauseDummy: (hre: HardhatRuntimeEnvironment) => Promise<void> = async function (
 	hre: HardhatRuntimeEnvironment,

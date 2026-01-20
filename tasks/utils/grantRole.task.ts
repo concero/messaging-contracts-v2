@@ -5,7 +5,7 @@ import { Hash } from "viem";
 
 import { conceroNetworks } from "../../constants";
 import { getFallbackClients, log } from "../../utils";
-import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
+import { getTrezorDeployEnabled } from "../../utils";
 import { ethersSignerCallContract } from "./ethersSignerCallContract";
 
 // ADMIN role: 0xdf8b4c520ffe197c5343c6f5aec59570151ef9a492f2c624fd45ddde6135ec42

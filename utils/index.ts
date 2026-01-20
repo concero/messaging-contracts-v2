@@ -1,10 +1,20 @@
 import { configureDotEnv } from "./configureDotEnv";
 
+import {
+	err,
+	genericDeploy,
+	getEnvVar,
+	getNetworkEnvKey,
+	getTrezorDeployEnabled,
+	getWallet,
+	log,
+	warn,
+} from "@concero/contract-utils";
+
 import { compileContracts } from "./compileContracts";
+import { getEnvAddress } from "./createEnvAddressGetter";
 import { updateEnvAddress, updateEnvVariable } from "./createEnvUpdater";
-import { formatGas, shorten } from "./formatting";
 import { getEnvFileName } from "./getEnvFileName";
-import { getEnvAddress, getEnvVar } from "./getEnvVar";
 import {
 	getEthersSignerAndProvider,
 	getEthersV5FallbackSignerAndProvider,
@@ -14,14 +24,10 @@ import {
 import { getGasParameters } from "./getGasParameters";
 import { getHashSum } from "./getHashSum";
 import { getClients, getFallbackClients, getTestClient, getViemAccount } from "./getViemClients";
-import { getWallet } from "./getWallet";
-import { err, log, warn } from "./log";
 
 export {
 	compileContracts,
 	configureDotEnv,
-	shorten,
-	formatGas,
 	getEnvVar,
 	getEnvAddress,
 	getEthersV5FallbackSignerAndProvider,
@@ -41,4 +47,7 @@ export {
 	getWallet,
 	getGasParameters,
 	getEnvFileName,
+	getTrezorDeployEnabled,
+	genericDeploy,
+	getNetworkEnvKey,
 };

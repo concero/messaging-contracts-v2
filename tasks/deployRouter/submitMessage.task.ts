@@ -1,13 +1,12 @@
 import { task } from "hardhat/config";
 
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 import { Hex, encodeAbiParameters, encodePacked } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 import { conceroNetworks } from "../../constants";
 import { ConceroTestnetNetworkNames } from "../../constants/conceroNetworks";
-import { getEnvVar, getFallbackClients, log } from "../../utils";
+import { getEnvVar, getFallbackClients, getNetworkEnvKey, log } from "../../utils";
 
 async function submitMessage(networkName: ConceroTestnetNetworkNames) {
 	const network = conceroNetworks[networkName];

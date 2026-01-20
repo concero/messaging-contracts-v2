@@ -1,10 +1,9 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
 import { ConceroNetworkNames } from "../types/ConceroNetwork";
-import { getEnvVar, log, updateEnvVariable } from "../utils";
+import { getEnvVar, getNetworkEnvKey, log, updateEnvVariable } from "../utils";
 
 type DeployArgs = {
 	conceroRouter: string;

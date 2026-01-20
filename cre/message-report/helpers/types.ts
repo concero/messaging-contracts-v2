@@ -1,8 +1,10 @@
 import { Address, type Hash, Hex } from "viem";
 
 export type GlobalConfig = {
-	authorizedPublicKey: string;
-	deploymentsUrl: string;
+	authorizedPublicKey: Address;
+	relayerCallbackUrl: string;
+	chainsConfigUrl: string;
+	allowedMessageVersions: number[];
 };
 
 export type DecodedArgs = {

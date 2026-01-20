@@ -6,6 +6,7 @@ node_modules
 .env
 !./.env.deployments.mainnet
 !./.env.deployments.testnet
+!.env.deployments.stage
 !.env.clf
 !.env.tokens
 !.env.clccip

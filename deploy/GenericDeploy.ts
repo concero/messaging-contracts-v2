@@ -47,10 +47,14 @@ export const genericDeploy = async (
 	await contract.deploymentTransaction()?.wait();
 	const deploymentAddress = await contract.getAddress();
 
-	await hre.tenderly.verify({
-		name: contractName,
-		address: deploymentAddress,
-	});
+	try {
+		await hre.tenderly.verify({
+			name: contractName,
+			address: deploymentAddress,
+		});
+	} catch (e) {
+		console.error(JSON.stringify(e));
+	}
 
 	log(`Deployed at: ${deploymentAddress}`, `deploy ${contractName}`, chain.name);
 

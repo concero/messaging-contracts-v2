@@ -1,11 +1,10 @@
+import { genericDeploy } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Hex } from "viem";
 
-import { genericDeploy } from "@concero/contract-utils";
-
 import { DEPLOY_CONFIG_TESTNET, ProxyEnum, conceroNetworks } from "../constants";
-import { EnvFileName, EnvPrefixes, IProxyType } from "../types/deploymentVariables";
-import { getEnvAddress, log, updateEnvAddress } from "../utils";
+import { EnvPrefixes, IProxyType } from "../types/deploymentVariables";
+import { getEnvAddress, getEnvFileName, log, updateEnvAddress } from "../utils";
 
 export const deployTransparentProxy: (
 	hre: HardhatRuntimeEnvironment,
@@ -60,9 +59,9 @@ export const deployTransparentProxy: (
 
 	updateEnvAddress(
 		proxyType,
-		deployment.chain.name,
 		deployment.address,
-		`deployments.${deployment.chain.type}` as EnvFileName,
+		getEnvFileName(`deployments.${deployment.chain.type}`),
+		deployment.chain.name,
 	);
 
 	log(
@@ -71,5 +70,10 @@ export const deployTransparentProxy: (
 		name,
 	);
 
-	updateEnvAddress(`${proxyType}Admin`, name, deployment.proxyAdminAddress as Hex, `deployments.${networkType}`);
+	updateEnvAddress(
+		`${proxyType}Admin`,
+		deployment.proxyAdminAddress as Hex,
+		getEnvFileName(`deployments.${deployment.chain.type}`),
+		name,
+	);
 };

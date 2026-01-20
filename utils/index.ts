@@ -1,7 +1,9 @@
 import { configureDotEnv } from "./configureDotEnv";
 
 import { compileContracts } from "./compileContracts";
+import { updateEnvAddress, updateEnvVariable } from "./createEnvUpdater";
 import { formatGas, shorten } from "./formatting";
+import { getEnvFileName } from "./getEnvFileName";
 import { getEnvAddress, getEnvVar } from "./getEnvVar";
 import {
 	getEthersSignerAndProvider,
@@ -14,7 +16,6 @@ import { getHashSum } from "./getHashSum";
 import { getClients, getFallbackClients, getTestClient, getViemAccount } from "./getViemClients";
 import { getWallet } from "./getWallet";
 import { err, log, warn } from "./log";
-import { updateEnvAddress, updateEnvVariable } from "./updateEnvVariable";
 
 export {
 	compileContracts,
@@ -39,4 +40,5 @@ export {
 	updateEnvAddress,
 	getWallet,
 	getGasParameters,
+	getEnvFileName,
 };

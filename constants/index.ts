@@ -12,11 +12,11 @@ import { DEPLOY_CONFIG_TESTNET } from "./deployConfigTestnet";
 import {
 	ADMIN_ROLE,
 	ProxyEnum,
-	envPrefixes,
 	getViemReceiptConfig,
 	viemReceiptConfig,
 	writeContractConfig,
 } from "./deploymentVariables";
+import { envPrefixes } from "./envPrefixes";
 import { gasFeeConfig, gasFeeConfigVerifier, networkGasConfig } from "./gasConfig";
 // import { liveNetworks } from "./liveNetworks";
 import { urls } from "./rpcUrls";

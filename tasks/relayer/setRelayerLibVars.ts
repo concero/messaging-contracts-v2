@@ -1,6 +1,6 @@
+import { ConceroTestnetNetworkNames, conceroNetworks } from "@concero/contract-utils";
 import { Address, Hash } from "viem";
 
-import { ConceroTestnetNetworkNames, conceroNetworks } from "../../constants/conceroNetworks";
 import {
 	ethersSignerCallContract,
 	getEnvVar,

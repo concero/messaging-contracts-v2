@@ -2,9 +2,9 @@ import { task } from "hardhat/config";
 
 import { execSync } from "child_process";
 
+import { testnetNetworks } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { testnetNetworks } from "../../constants/conceroNetworks";
 import { getEnvVar, getNetworkEnvKey } from "../../utils";
 
 task("deploy-concero-pause-to-all-chains", "").setAction(

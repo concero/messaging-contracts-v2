@@ -1,3 +1,5 @@
+import { conceroNetworks } from "@concero/contract-utils";
+
 import { secrets } from "./clf/secrets";
 import {
 	CLF_DON_HOSTED_SECRETS_SLOT,
@@ -7,7 +9,6 @@ import {
 	CLF_TESTNET_TTL,
 } from "./clf/secretsConfig";
 import { simulationConfig } from "./clf/simulationConfig";
-import { conceroNetworks } from "./conceroNetworks";
 import { DEPLOY_CONFIG_TESTNET } from "./deployConfigTestnet";
 import {
 	ADMIN_ROLE,

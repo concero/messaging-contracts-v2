@@ -1,7 +1,7 @@
+import { ConceroTestnetNetworkNames, conceroNetworks } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Address, PublicClient } from "viem";
 
-import { ConceroTestnetNetworkNames, conceroNetworks } from "../../constants/conceroNetworks";
 import {
 	ethersSignerCallContract,
 	getEnvVar,

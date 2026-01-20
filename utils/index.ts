@@ -2,6 +2,7 @@ import { configureDotEnv } from "./configureDotEnv";
 
 import {
 	err,
+	ethersSignerCallContract,
 	genericDeploy,
 	getEnvVar,
 	getNetworkEnvKey,
@@ -50,4 +51,5 @@ export {
 	getTrezorDeployEnabled,
 	genericDeploy,
 	getNetworkEnvKey,
+	ethersSignerCallContract,
 };

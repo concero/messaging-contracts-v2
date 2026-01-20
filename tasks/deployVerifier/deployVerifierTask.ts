@@ -4,8 +4,8 @@ import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ProxyEnum, conceroNetworks } from "../../constants";
 import { deployTransparentProxy, deployVerifier } from "../../deploy/";
+import { compileContracts } from "../../utils";
 import { getEnvAddress } from "../../utils/";
-import { compileContracts } from "../../utils/compileContracts";
 import { addCLFConsumer } from "../clf";
 import { upgradeProxyImplementation } from "../utils/";
 import { setVerifierVariables } from "./setVerifierVariables";

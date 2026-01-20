@@ -1,5 +1,3 @@
-import fs from "fs";
-
 import * as envEnc from "@chainlink/env-enc";
 import * as dotenv from "dotenv";
 

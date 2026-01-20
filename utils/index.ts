@@ -1,6 +1,7 @@
 import { configureDotEnv } from "./configureDotEnv";
 
 import {
+	compileContracts,
 	err,
 	ethersSignerCallContract,
 	genericDeploy,
@@ -12,7 +13,6 @@ import {
 	warn,
 } from "@concero/contract-utils";
 
-import { compileContracts } from "./compileContracts";
 import { getEnvAddress } from "./createEnvAddressGetter";
 import { updateEnvAddress, updateEnvVariable } from "./createEnvUpdater";
 import { getEnvFileName } from "./getEnvFileName";

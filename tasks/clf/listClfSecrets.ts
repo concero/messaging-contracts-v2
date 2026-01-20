@@ -2,7 +2,7 @@ import { SecretsManager } from "@chainlink/functions-toolkit";
 
 import { gatewayUrls } from "../../constants/clf/gatewayUrls";
 import { ConceroNetwork } from "../../types/ConceroNetwork";
-import { getEnvVar, getEthersSignerAndProvider, log } from "../../utils";
+import { getEnvVar, getEthersSignerAndProvider, getNetworkEnvKey, log } from "../../utils";
 
 export async function listSecrets(
 	chain: ConceroNetwork,

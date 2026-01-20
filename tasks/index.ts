@@ -30,7 +30,6 @@ import {
 	displayVerifierGasFeeConfig,
 	readRouterGasFeeConfig,
 	readVerifierGasFeeConfig,
-	setRouterGasFeeConfig,
 	setVerifierGasFeeConfig,
 	upgradeProxyImplementation,
 } from "./utils";
@@ -46,7 +45,6 @@ export {
 	readVerifierGasFeeConfig,
 	displayRouterGasFeeConfig,
 	displayVerifierGasFeeConfig,
-	setRouterGasFeeConfig,
 	setVerifierGasFeeConfig,
 	deployPriceFeedTask,
 	deployRouterTask,

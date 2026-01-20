@@ -1,4 +1,4 @@
-import { Runtime } from "@chainlink/cre-sdk";
+import { Runtime, hexToBase64 } from "@chainlink/cre-sdk";
 
 import { GlobalConfig } from "../helpers";
 
@@ -6,7 +6,7 @@ export function generateReport(runtime: Runtime<GlobalConfig>, data: string) {
 	return runtime
 		.report({
 			encoderName: "evm",
-			encodedPayload: Buffer.from(new TextEncoder().encode(data)).toString("base64"),
+			encodedPayload: hexToBase64(data),
 			signingAlgo: "ecdsa",
 			hashingAlgo: "keccak256",
 		})

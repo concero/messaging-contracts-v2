@@ -17,5 +17,6 @@ allow_paths = ["node_modules", "./src/contracts/"]
 
 remappings = [
     "@chainlink/=node_modules/@chainlink/",
-    "forge-std/=node_modules/forge-std/"
+    "forge-std/=node_modules/forge-std/",
+	"@murky/=node_modules/@murky/src/"
 ]

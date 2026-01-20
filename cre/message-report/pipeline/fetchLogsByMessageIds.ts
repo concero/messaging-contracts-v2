@@ -63,7 +63,11 @@ function buildGetLogsReqParams(
 	return reqParams;
 }
 
-function buildResponse(runtime: Runtime<GlobalConfig>, items: DecodedArgs["batch"], logs: Log[][]) {
+function buildResponse(
+	runtime: Runtime<GlobalConfig>,
+	items: DecodedArgs["batch"],
+	logs: (Log[] | null)[],
+) {
 	const response = [];
 	const itemsMap = items.reduce((acc, i) => {
 		acc[i.messageId.toLowerCase()] = i;
@@ -71,6 +75,7 @@ function buildResponse(runtime: Runtime<GlobalConfig>, items: DecodedArgs["batch
 	}, {});
 
 	for (const log of logs) {
+		if (!log) continue;
 		for (const l of log) {
 			const logRes = itemsMap[l.topics[1].toLowerCase()];
 			if (!logRes) {
@@ -94,7 +99,7 @@ export function fetchLogsByMessageIds(
 	runtime: Runtime<GlobalConfig>,
 	rpcRequester: RpcRequester,
 	items: DecodedArgs["batch"],
-): IFetchLogsResult[] {
+): (IFetchLogsResult | null)[] {
 	rpcRequester.batchAdd(buildGetLogsReqParams(runtime, items));
 	const logs = rpcRequester.wait();
 

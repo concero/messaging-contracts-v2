@@ -28,11 +28,12 @@ let messageIds: Hex[];
 
 function parseLogs(
 	runtime: Runtime<GlobalConfig>,
-	logs: { chainSelector: ChainSelector; log: Log }[],
+	logs: ({ chainSelector: ChainSelector; log: Log } | null)[],
 ) {
 	const parsedLogs = [];
 	for (const log of logs) {
 		try {
+			if (!log) continue;
 			const parsedLog = parseMessageSentLog(log);
 
 			runtime.log(

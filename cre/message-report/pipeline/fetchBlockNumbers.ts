@@ -58,10 +58,12 @@ function buildBlockNumberRequests(requests: ILatestBlockRequest) {
 
 function buildLastBlockNumbersResponse(
 	blockNumberRequests: IRpcRequest[],
-	results: IRpcResponse[],
+	results: (IRpcResponse | null)[],
 ) {
 	const blockNumbers: ILatestBlockNumbers = {};
 	blockNumberRequests.forEach((req, i) => {
+		if (!results[i]) return;
+
 		blockNumbers[req.chainSelector] = {};
 
 		const blockType =

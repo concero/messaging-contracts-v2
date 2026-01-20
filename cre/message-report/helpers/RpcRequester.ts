@@ -16,7 +16,7 @@ export class RpcRequester {
 	private readonly rpcs: Record<ChainSelector, string[]>;
 	private requests: (CRE.IRequestOptions & { chainSelector: ChainSelector })[] = [];
 	private reqCounter: number = 0;
-	private readonly maxRetryCount = 3;
+	private readonly maxRetryCount = 5;
 	private readonly asyncFetcher;
 
 	constructor(_rpcs: typeof this.rpcs, sendRequester: HTTPSendRequester) {
@@ -57,7 +57,12 @@ export class RpcRequester {
 			this.batchRotateRpcs(failedRequests.map(r => r.chainSelector));
 
 			this.asyncFetcher.batchAdd(
-				failedRequests.map(r => ({ ...r, url: this.rpcs[r.chainSelector][0] })),
+				failedRequests.map(r => ({
+					headers,
+					method: "POST",
+					url: this.rpcs[r.chainSelector][0],
+					body: r.body,
+				})),
 			);
 
 			const retryResults = this.asyncFetcher.wait();

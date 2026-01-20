@@ -1,9 +1,14 @@
-import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
-import { ConceroNetworkNames } from "../types/ConceroNetwork";
-import { getEnvVar, getNetworkEnvKey, log, updateEnvVariable } from "../utils";
+import { EnvFileName } from "../types/deploymentVariables";
+import {
+	genericDeploy,
+	getEnvFileName,
+	getEnvVar,
+	getNetworkEnvKey,
+	updateEnvVariable,
+} from "../utils";
 
 type DeployArgs = {
 	conceroRouter: string;
@@ -13,17 +18,14 @@ type DeployArgs = {
 type DeploymentFunction = (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-) => Promise<Deployment>;
+) => Promise<void>;
 
-const deployConceroClientExample: DeploymentFunction = async function (
+export const deployConceroClientExample: DeploymentFunction = async (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-): Promise<Deployment> {
-	const { deployer } = await hre.getNamedAccounts();
-	const { deploy } = hre.deployments;
+): Promise<void> => {
 	const { name } = hre.network;
-	const chain = conceroNetworks[name as ConceroNetworkNames];
-	const { type: networkType } = chain;
+	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
 
 	const defaultArgs = {
 		conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
@@ -37,24 +39,19 @@ const deployConceroClientExample: DeploymentFunction = async function (
 		...overrideArgs,
 	};
 
-	const deployment = await deploy("ConceroClientExample", {
-		from: deployer,
-		args: [args.conceroRouter, args.relayerLib, args.validatorLib],
-		log: true,
-		autoMine: true,
-	});
-
-	log(`Deployed at: ${deployment.address}`, "ConceroClientExample", name);
-	updateEnvVariable(
-		`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(name)}`,
-		deployment.address,
-		`deployments.${networkType}`,
+	const deployment = await genericDeploy(
+		{
+			hre,
+			contractName: "ConceroClientExample",
+		},
+		args.conceroRouter,
+		args.relayerLib,
+		args.validatorLib,
 	);
 
-	return deployment;
+	updateEnvVariable(
+		`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(deployment.chainName)}`,
+		deployment.address,
+		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
+	);
 };
-
-deployConceroClientExample.tags = ["ConceroClientExample"];
-
-export { deployConceroClientExample };
-export default deployConceroClientExample;

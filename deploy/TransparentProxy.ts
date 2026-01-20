@@ -5,15 +5,11 @@ import { DEPLOY_CONFIG_TESTNET, ProxyEnum } from "../constants";
 import { EnvFileName, EnvPrefixes, IProxyType } from "../types/deploymentVariables";
 import { genericDeploy, getEnvAddress, getEnvFileName, log, updateEnvAddress } from "../utils";
 
-export const deployTransparentProxy: (
+export const deployTransparentProxy = async (
 	hre: HardhatRuntimeEnvironment,
 	proxyType: IProxyType,
 	callData?: Hex,
-) => Promise<void> = async (
-	hre: HardhatRuntimeEnvironment,
-	proxyType: IProxyType,
-	callData?: Hex,
-) => {
+): Promise<void> => {
 	const { name } = hre.network;
 	const [deployer] = await hre.ethers.getSigners();
 

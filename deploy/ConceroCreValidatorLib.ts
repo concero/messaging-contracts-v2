@@ -4,7 +4,7 @@ import { EnvFileName } from "../types/deploymentVariables";
 import { genericDeploy } from "../utils";
 import { getEnvFileName, updateEnvAddress } from "../utils";
 
-const deployConceroCreValidatorLib = async function (hre: HardhatRuntimeEnvironment) {
+export const deployConceroCreValidatorLib = async (hre: HardhatRuntimeEnvironment) => {
 	const deployment = await genericDeploy({
 		hre,
 		contractName: "CreValidatorLib",
@@ -17,6 +17,3 @@ const deployConceroCreValidatorLib = async function (hre: HardhatRuntimeEnvironm
 		deployment.chainName,
 	);
 };
-
-export { deployConceroCreValidatorLib };
-export default deployConceroCreValidatorLib;

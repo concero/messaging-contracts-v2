@@ -21,7 +21,7 @@ const donSigners = [
 ];
 
 const stageWorkflowId = "0x00c55c7328e4024cab99892d7bf1172b5edd477c07afee6a69f9e3b05c6c5555";
-const testnetWorkflowId = "0x008821056dd518f81dc15733f48b6c4240d8d892d6c62f3a4dcd6ddb27d54dc5";
+const testnetWorkflowId = "0x0022c832bea82da1dd7f837271a841fd8690447a1a4c70ae0d84cb66e15bfcdf";
 const workflowId = testnetWorkflowId;
 const minSignersCount = 7;
 

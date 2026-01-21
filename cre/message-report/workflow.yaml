@@ -34,7 +34,7 @@ stage-testnet:
 
 production-testnet:
   user-workflow:
-    workflow-name: "testnet-messaging"
+    workflow-name: "testnet-messaging-001"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.testnet.json"

@@ -21,7 +21,7 @@ function buildUniqRequests(parsedLogs: IParsedLog[]) {
 
 		if (
 			log.receipt.srcChainData.blockConfirmations === maxUint64 &&
-			ChainsManager.getOptionsBySelector(log.chainSelector).finalityTagEnabled
+			ChainsManager.getOptionsBySelector(log.receipt.srcChainSelector).finalityTagEnabled
 		) {
 			requests[log.receipt.srcChainSelector].finalized = true;
 		} else {
@@ -44,7 +44,7 @@ function buildBlockNumberRequests(requests: ILatestBlockRequest) {
 	const getFinalizedBlockReq = (chainSelector: ChainSelector) => ({
 		chainSelector,
 		method: getFinalizedBlockTag,
-		params: ["finalized"],
+		params: ["finalized", false],
 	});
 
 	for (const chainSelector in requests) {

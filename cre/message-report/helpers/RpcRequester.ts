@@ -33,6 +33,8 @@ export class RpcRequester {
 				params: r.params,
 			};
 
+			console.log(JSON.stringify(body));
+
 			const request = {
 				url: this.rpcs[r.chainSelector][0],
 				method: "POST",
@@ -66,6 +68,7 @@ export class RpcRequester {
 			);
 
 			const retryResults = this.asyncFetcher.wait();
+			console.log(JSON.stringify(CRE.parseCreRawHttpResponse(retryResults[0].response)));
 			this.mergeFailedResults(results, retryResults, failedRequestsIdxes);
 		}
 

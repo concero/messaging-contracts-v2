@@ -32,12 +32,12 @@ type DeployArgs = {
 type DeploymentFunction = (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-) => Promise<void>;
+) => Promise<IDeployResult>;
 
 export const deployVerifier: DeploymentFunction = async (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-): Promise<void> => {
+): Promise<IDeployResult> => {
 	const { name } = hre.network;
 	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
 
@@ -101,4 +101,6 @@ export const deployVerifier: DeploymentFunction = async (
 		deployment.address,
 		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
 	);
+
+	return deployment;
 };

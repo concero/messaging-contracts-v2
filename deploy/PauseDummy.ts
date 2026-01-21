@@ -1,9 +1,9 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { EnvFileName } from "../types/deploymentVariables";
-import { genericDeploy, getNetworkEnvKey, log, updateEnvVariable } from "../utils";
+import { IDeployResult, genericDeploy, getNetworkEnvKey, log, updateEnvVariable } from "../utils";
 
-export const deployPauseDummy = async (hre: HardhatRuntimeEnvironment): Promise<void> => {
+export const deployPauseDummy = async (hre: HardhatRuntimeEnvironment): Promise<IDeployResult> => {
 	const deployment = await genericDeploy(
 		{
 			hre,
@@ -19,4 +19,6 @@ export const deployPauseDummy = async (hre: HardhatRuntimeEnvironment): Promise<
 			`deployments.${deployment.chainType}` as EnvFileName,
 		);
 	}
+
+	return deployment;
 };

@@ -1,5 +1,6 @@
 import { configureDotEnv } from "./configureDotEnv";
 
+import type { IDeployResult } from "@concero/contract-utils";
 import {
 	compileContracts,
 	err,
@@ -56,3 +57,5 @@ export {
 	getNetworkEnvKey,
 	ethersSignerCallContract,
 };
+
+export type { IDeployResult };

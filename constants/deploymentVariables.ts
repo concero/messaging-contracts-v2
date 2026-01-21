@@ -1,7 +1,6 @@
+import { ConceroNetwork } from "@concero/contract-utils";
 import { WriteContractParameters } from "viem";
 import type { WaitForTransactionReceiptParameters } from "viem/actions/public/waitForTransactionReceipt";
-
-import { ConceroNetwork } from "@concero/contract-utils";
 
 enum ProxyEnum {
 	routerProxy = "routerProxy",

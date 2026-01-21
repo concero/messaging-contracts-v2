@@ -3,6 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { conceroNetworks } from "../constants";
 import { EnvFileName } from "../types/deploymentVariables";
 import {
+	IDeployResult,
 	genericDeploy,
 	getEnvFileName,
 	getEnvVar,
@@ -14,7 +15,7 @@ type DeploymentFunction = (hre: HardhatRuntimeEnvironment, overrideArgs?: any) =
 
 export const deployRelayerLib: DeploymentFunction = async (
 	hre: HardhatRuntimeEnvironment,
-): Promise<void> => {
+): Promise<IDeployResult> => {
 	const { name } = hre.network;
 	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
 
@@ -32,4 +33,6 @@ export const deployRelayerLib: DeploymentFunction = async (
 		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
 		deployment.chainName,
 	);
+
+	return deployment;
 };

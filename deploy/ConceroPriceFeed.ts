@@ -2,7 +2,13 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { DEPLOY_CONFIG_TESTNET, conceroNetworks } from "../constants";
 import { EnvFileName } from "../types/deploymentVariables";
-import { genericDeploy, getEnvFileName, getNetworkEnvKey, updateEnvVariable } from "../utils";
+import {
+	IDeployResult,
+	genericDeploy,
+	getEnvFileName,
+	getNetworkEnvKey,
+	updateEnvVariable,
+} from "../utils";
 
 type DeployArgs = {
 	chainSelector: bigint;
@@ -12,12 +18,12 @@ type DeployArgs = {
 type DeploymentFunction = (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-) => Promise<void>;
+) => Promise<IDeployResult>;
 
 export const deployPriceFeed: DeploymentFunction = async (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-) => {
+): Promise<IDeployResult> => {
 	const { name } = hre.network;
 	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
 
@@ -54,4 +60,6 @@ export const deployPriceFeed: DeploymentFunction = async (
 		deployment.address,
 		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
 	);
+
+	return deployment;
 };

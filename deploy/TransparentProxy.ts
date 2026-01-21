@@ -3,13 +3,20 @@ import { Hex } from "viem";
 
 import { DEPLOY_CONFIG_TESTNET, ProxyEnum } from "../constants";
 import { EnvFileName, EnvPrefixes, IProxyType } from "../types/deploymentVariables";
-import { genericDeploy, getEnvAddress, getEnvFileName, log, updateEnvAddress } from "../utils";
+import {
+	IDeployResult,
+	genericDeploy,
+	getEnvAddress,
+	getEnvFileName,
+	log,
+	updateEnvAddress,
+} from "../utils";
 
 export const deployTransparentProxy = async (
 	hre: HardhatRuntimeEnvironment,
 	proxyType: IProxyType,
 	callData?: Hex,
-): Promise<void> => {
+): Promise<IDeployResult> => {
 	const { name } = hre.network;
 	const [deployer] = await hre.ethers.getSigners();
 
@@ -59,13 +66,15 @@ export const deployTransparentProxy = async (
 	log(
 		`Deployed at: ${deployment.proxyAdminAddress}. initialOwner: ${deployer.address}`,
 		`deployProxyAdmin: ${proxyType}`,
-		name,
+		deployment.chainName,
 	);
 
 	updateEnvAddress(
 		`${proxyType}Admin`,
 		deployment.proxyAdminAddress as Hex,
 		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
-		name,
+		deployment.chainName,
 	);
+
+	return deployment;
 };

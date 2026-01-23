@@ -10,7 +10,7 @@ import {
 	ConceroLocalNetwork,
 	ConceroNetwork,
 } from "../types/ConceroNetwork";
-import { getEnvVar, getWallet } from "../utils";
+import { getWallet } from "../utils";
 import { createViemChain } from "../utils/createViemChain";
 import { getTrezorDeployEnabled } from "../utils/getTrezorDeployEnabled";
 import { urls } from "./rpcUrls";

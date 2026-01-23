@@ -11,24 +11,6 @@ import {
 	log,
 } from "../../utils";
 
-const donSigners = [
-	"0x4d7D71C7E584CfA1f5c06275e5d283b9D3176924",
-	"0x1A89c98E75983Ec384AD8e83EAf7D0176eEaF155",
-	"0xdE5CD1dD4300A0b4854F8223add60D20e1dFe21b",
-	"0x4D6CFd44F94408a39fB1af94a53c107A730ba161",
-	"0xF3BAa9A99B5ad64f50779F449Bac83bAAC8bfDb6",
-	"0xD7F22fB5382ff477d2fF5c702cAB0EF8abf18233",
-	"0xcdf20F8FFD41B02c680988b20e68735cc8C1ca17",
-	"0xff9b062fcCb2f042311343048b9518068370F837",
-	"0x4f99b550623e77B807df7cbED9C79D55E1163B48",
-	"0xe55fcaf921e76c6bbcf9415bba12b1236f07b0c3",
-];
-
-const workflowId = "0x00cc1d0ed7ce245736630dfcdd97bd691781ab1855e19e621a694d6093c0f5f0";
-const minSignersCount = 7;
-
-const dstChainGasLimit = 100_000n;
-
 async function isDonSignerAllowed(
 	signer: Address,
 	publicClient: PublicClient,
@@ -62,6 +44,11 @@ export async function setCreDonSigners(
 	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
 
 	const signersToSet = [];
+
+	const envKey = `CRE_DON_SIGNERS_${conceroNetwork.type.toUpperCase()}`;
+	const donSigners = getEnvVar(envKey)
+		.split(",")
+		.map(addr => addr.trim() as Address);
 
 	for (const signer of donSigners) {
 		const isSignerAllowed = await isDonSignerAllowed(
@@ -128,6 +115,8 @@ async function setExpectedSignersCount(
 		args: [],
 	});
 
+	const minSignersCount = getEnvVar(`CRE_MIN_SIGNERS_COUNT_${conceroNetwork.type.toUpperCase()}`);
+
 	if (currentExpectedSignersCount === minSignersCount) {
 		return;
 	}
@@ -174,6 +163,8 @@ export async function setIsWorkflowIdAllowed(
 		"../../artifacts/contracts/validators/CreValidatorLib/EcdsaValidatorLib.sol/EcdsaValidatorLib.json"
 	);
 	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
+
+	const workflowId = getEnvVar(`CRE_WORKFLOW_ID_${conceroNetwork.type.toUpperCase()}`);
 
 	const isWorkflowAllowed = await publicClient.readContract({
 		address: validatorLib,
@@ -228,6 +219,7 @@ export async function setDstChainVerificationGasLimit(
 	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
 
 	const dstChainSelectorsToUpdate = [];
+	const dstChainGasLimit = getEnvVar("CRE_DST_CHAIN_GAS_LIMIT");
 
 	for (const conceroNetwork in conceroNetworks) {
 		const currentGasLimit = await publicClient.readContract({

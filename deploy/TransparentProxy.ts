@@ -5,6 +5,7 @@ import { DEPLOY_CONFIG_TESTNET, ProxyEnum } from "../constants";
 import { EnvFileName, EnvPrefixes, IProxyType } from "../types/deploymentVariables";
 import {
 	IDeployResult,
+	extractProxyAdminAddress,
 	genericDeploy,
 	getEnvAddress,
 	getEnvFileName,
@@ -63,15 +64,17 @@ export const deployTransparentProxy = async (
 		deployment.chainName,
 	);
 
+	const proxyAdminAddress = extractProxyAdminAddress(deployment.receipt);
+
 	log(
-		`Deployed at: ${deployment.proxyAdminAddress}. initialOwner: ${deployer.address}`,
+		`Deployed at: ${proxyAdminAddress}. initialOwner: ${deployer.address}`,
 		`deployProxyAdmin: ${proxyType}`,
 		deployment.chainName,
 	);
 
 	updateEnvAddress(
 		`${proxyType}Admin`,
-		deployment.proxyAdminAddress as Hex,
+		proxyAdminAddress,
 		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
 		deployment.chainName,
 	);

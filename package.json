@@ -25,7 +25,8 @@
     "clean": "npm run clean:hardhat && npm run clean:forge",
     "size-contracts": "hardhat size-contracts",
     "check-updates": "npx npm-check-updates",
-    "prepare": "husky"
+    "prepare": "husky",
+    "upgrade:contract-utils": "yarn cache clean @concero/contract-utils && yarn upgrade @concero/contract-utils"
   },
   "devDependencies": {
     "@chainlink/env-enc": "1.0.5",

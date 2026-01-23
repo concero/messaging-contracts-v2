@@ -10,6 +10,7 @@ import {
 	getTrezorDeployEnabled,
 	log,
 } from "../../utils";
+import { getVerificationGasLimit } from "../../utils/getVerificationGasLimit";
 
 async function isDonSignerAllowed(
 	signer: Address,
@@ -219,7 +220,6 @@ export async function setDstChainVerificationGasLimit(
 	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
 
 	const dstChainSelectorsToUpdate = [];
-	const dstChainGasLimit = getEnvVar("CRE_DST_CHAIN_GAS_LIMIT");
 
 	for (const conceroNetwork in conceroNetworks) {
 		const currentGasLimit = await publicClient.readContract({
@@ -229,7 +229,11 @@ export async function setDstChainVerificationGasLimit(
 			args: [conceroNetworks[conceroNetwork].chainSelector],
 		});
 
-		if (BigInt(currentGasLimit) === dstChainGasLimit) continue;
+		const dstChainGasLimit = getVerificationGasLimit(
+			conceroNetworks[conceroNetwork].chainSelector,
+		);
+
+		if (currentGasLimit === dstChainGasLimit) continue;
 
 		dstChainSelectorsToUpdate.push(conceroNetworks[conceroNetwork].chainSelector);
 	}
@@ -238,7 +242,7 @@ export async function setDstChainVerificationGasLimit(
 
 	const functionArgs = [
 		dstChainSelectorsToUpdate,
-		dstChainSelectorsToUpdate.map(_ => dstChainGasLimit),
+		dstChainSelectorsToUpdate.map(chainSelector => getVerificationGasLimit(chainSelector)),
 	];
 
 	let hash;

@@ -28,3 +28,8 @@ export const gasFeeConfigVerifier = {
 	clfCallbackGasOverhead: 240000, // CLF::FunctionCoordinator::transmit + CLF::FunctionRouter::_callback
 	clfCallbackGasLimit: 50000, // CLF callback gas limit from our side (actual value about 40k)
 };
+
+// for example for polygonAmoy: 80002: 50000,
+export const dstChainVerificationGasLimits: Record<number, number> & { default: number } = {
+	default: 100000,
+};

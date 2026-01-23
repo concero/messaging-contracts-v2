@@ -1,6 +1,7 @@
 import { changeProxyAdminOwnerTask } from "./changeProxyAdminOwner.task";
 import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployCreValidatorLibTask } from "./cre/deployCreValidatorLib.task";
+import { extractDonSignersTask } from "./cre/extractDonSigners.task";
 import triggerCreTask from "./cre/triggerCre.task";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
@@ -73,4 +74,5 @@ export {
 	deployRelayerLibTask,
 	submitMessage,
 	grantRoleTask,
+	extractDonSignersTask,
 };

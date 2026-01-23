@@ -17,6 +17,7 @@ import {
 	viemReceiptConfig,
 	writeContractConfig,
 } from "./deploymentVariables";
+import { donRegistryAbi } from "./donRegistryAbi";
 import { envPrefixes } from "./envPrefixes";
 import { gasFeeConfig, gasFeeConfigVerifier, networkGasConfig } from "./gasConfig";
 // import { liveNetworks } from "./liveNetworks";
@@ -43,4 +44,5 @@ export {
 	networkGasConfig,
 	// liveNetworks,
 	DEPLOY_CONFIG_TESTNET,
+	donRegistryAbi,
 };

@@ -2,7 +2,7 @@ import { task } from "hardhat/config";
 
 import { getNetworkEnvKey } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { decodeEventLog, maxUint64 } from "viem";
+import { decodeEventLog } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { getEnvVar, getFallbackClients, log } from "../utils";
@@ -55,8 +55,9 @@ async function sendSingleMessage({
 			address: clientAddress,
 			abi: [...exampleClientAbi, ...routerAbi],
 			functionName: "sendConceroMessage",
-			args: [dstChainClient, dstChainSelector, maxUint64],
+			args: [dstChainClient, dstChainSelector, 0],
 			account: walletClient.account,
+
 			value,
 		});
 

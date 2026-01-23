@@ -50,13 +50,9 @@ function parseLogs(
 	return parsedLogs;
 }
 
-function fetchMessagesAndGenerateProof(
-	runtime: Runtime<GlobalConfig>,
-	args: DecodedArgs,
-	chainsConfigHash: Hex,
-) {
+function fetchMessagesAndGenerateProof(runtime: Runtime<GlobalConfig>, args: DecodedArgs) {
 	return (sendRequester: HTTPSendRequester) => {
-		ChainsManager.enrichOptions(runtime, sendRequester, chainsConfigHash);
+		ChainsManager.enrichOptions(runtime, sendRequester);
 
 		const rpcRequester = new RpcRequester(
 			Object.fromEntries(
@@ -97,15 +93,10 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 		runtime.log(`Decoded args: ${JSON.stringify(args)}`);
 		validateDecodedArgs(args);
 
-		const chainsConfigHash = runtime
-			.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
-			.result()
-			.value.toLowerCase() as Hex;
-
 		const merkleRoot = new cre.capabilities.HTTPClient()
 			.sendRequest(
 				runtime,
-				fetchMessagesAndGenerateProof(runtime, args, chainsConfigHash),
+				fetchMessagesAndGenerateProof(runtime, args),
 				consensusIdenticalAggregation<any>(),
 			)()
 			.result();

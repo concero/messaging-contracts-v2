@@ -75,8 +75,8 @@ contract ConceroClientExample is ConceroClientBase {
         uint64 blockConfirmations,
         bytes memory payload
     ) internal view returns (IConceroRouter.MessageRequest memory) {
-        address[] memory validatorLibs = new address[](1);
-        validatorLibs[0] = i_validatorLib;
+        address[] memory validatorLibs = new address[](0);
+        //        validatorLibs[0] = i_validatorLib;
 
         return
             IConceroRouter.MessageRequest({
@@ -85,7 +85,7 @@ contract ConceroClientExample is ConceroClientBase {
                 feeToken: address(0),
                 relayerLib: i_relayerLib,
                 validatorLibs: validatorLibs,
-                validatorConfigs: new bytes[](1),
+                validatorConfigs: new bytes[](0),
                 relayerConfig: new bytes(1),
                 dstChainData: MessageCodec.encodeEvmDstChainData(receiver, 300_000),
                 payload: payload

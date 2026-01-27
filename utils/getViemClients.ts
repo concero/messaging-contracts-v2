@@ -6,10 +6,10 @@ import {
 	createWalletClient,
 	fallback,
 	http,
+	nonceManager,
 	publicActions,
 	walletActions,
 } from "viem";
-import { nonceManager } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { PrivateKeyAccount } from "viem/accounts/types";
 import { PublicClient } from "viem/clients/createPublicClient";
@@ -88,14 +88,7 @@ function getFallbackClients(
 		urls[name].map(url =>
 			http(url, {
 				timeout: 10000,
-				retryCount: 1,
-				retryDelay: 250,
-				onFetchResponse: async response => {
-					if (response.status >= 400) {
-						throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
-					}
-					return response;
-				},
+				retryCount: 10,
 			}),
 		),
 	);

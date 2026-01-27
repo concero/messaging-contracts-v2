@@ -17,8 +17,9 @@ export type Chain = {
 	chainSelector: ChainSelector;
 	name: string;
 	isTestnet: boolean;
-	finalityTagEnabled: boolean;
-	finalityConfirmations: number;
+	finalityTagEnabled?: boolean;
+	finalityConfirmations?: number;
+	isFinalitySupported?: boolean;
 	minBlockConfirmations: number;
 	rpcUrls: string[];
 	blockExplorers: {

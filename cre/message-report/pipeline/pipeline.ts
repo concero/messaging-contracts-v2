@@ -21,6 +21,7 @@ import { sendReportsToRelayer } from "./sendReportsToRelayer";
 import { validateMessagesBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
 import { validateMessageVersion } from "./validateMessageVersion";
+import { validateSrcBlockConfirmations } from "./validateSrcBlockConfirmations";
 import { validateValidatorLib } from "./validateValidatorLib";
 
 let merkleTree: StandardMerkleTree<Hex[]>;
@@ -41,6 +42,7 @@ function parseLogs(
 			);
 			validateMessageVersion(parsedLog.receipt.version, runtime);
 			validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
+			validateSrcBlockConfirmations(parsedLog.receipt);
 
 			parsedLogs.push(parsedLog);
 		} catch (e) {

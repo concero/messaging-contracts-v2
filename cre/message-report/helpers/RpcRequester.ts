@@ -1,8 +1,10 @@
-import { HTTPSendRequester } from "@chainlink/cre-sdk";
+import { HTTPSendRequester, Runtime } from "@chainlink/cre-sdk";
 
 import { ChainSelector } from "../systems";
 import { headers } from "./constants";
 import { CRE } from "./cre";
+import { GlobalConfig } from "./types";
+import { Utility } from "./utility";
 
 export interface IRpcRequest {
 	method: string;
@@ -19,7 +21,11 @@ export class RpcRequester {
 	private readonly maxRetryCount = 15;
 	private readonly asyncFetcher;
 
-	constructor(rpcs: typeof this.rpcs, sendRequester: HTTPSendRequester) {
+	constructor(
+		rpcs: typeof this.rpcs,
+		sendRequester: HTTPSendRequester,
+		private readonly runtime: Runtime<GlobalConfig>,
+	) {
 		this.rpcs = rpcs;
 		this.asyncFetcher = new CRE.AsyncFetcher(sendRequester);
 	}
@@ -52,6 +58,8 @@ export class RpcRequester {
 
 		while (failedRequestsIdxes.length && retryCounter < this.maxRetryCount) {
 			++retryCounter;
+
+			this.runtime.log(`Retry attempt ${retryCounter}`);
 
 			const failedRequests = failedRequestsIdxes.map(i => this.requests[i]);
 			this.batchRotateRpcs(failedRequests.map(r => r.chainSelector));
@@ -99,6 +107,10 @@ export class RpcRequester {
 			if (retryRes && !this.isFailed(retryRes)) {
 				results[originalIdx] = retryRes;
 				retryResults.splice(i, 1);
+			} else {
+				this.runtime.log(
+					`Rpc request failed. Url: ${this.rpcs[this.requests[originalIdx].chainSelector][0]}. ${(retryRes.response as Error)?.message ?? Utility.safeJSONStringify(CRE.parseCreRawHttpResponse(retryRes.response))} `,
+				);
 			}
 		}
 	}

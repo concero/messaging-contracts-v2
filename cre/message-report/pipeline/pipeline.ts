@@ -46,7 +46,7 @@ function parseLogs(
 
 			parsedLogs.push(parsedLog);
 		} catch (e) {
-			runtime.log(`Error parsing log ${JSON.stringify(e)}`);
+			runtime.log(`Error parsing log with id ${log?.log.topics?.[1]} ${JSON.stringify(e)}`);
 		}
 	}
 	return parsedLogs;
@@ -64,6 +64,7 @@ function fetchMessagesAndGenerateProof(runtime: Runtime<GlobalConfig>, args: Dec
 				]),
 			),
 			sendRequester,
+			runtime,
 		);
 
 		const logs = fetchLogsByMessageIds(runtime, rpcRequester, args.batch);

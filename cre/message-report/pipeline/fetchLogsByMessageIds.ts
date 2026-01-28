@@ -78,12 +78,7 @@ function buildResponse(
 		if (!log) continue;
 		for (const l of log) {
 			const logRes = itemsMap[l.topics[1].toLowerCase()];
-			if (!logRes) {
-				runtime.log(
-					`${LOG_TAG} ConceroMessageSentLog for message ${l.topics.toString()} not found`,
-				);
-				continue;
-			}
+			if (!logRes) continue;
 
 			response.push({
 				log: l,

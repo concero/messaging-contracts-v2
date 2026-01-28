@@ -8,7 +8,7 @@ import { IParsedLog } from "./parseMessageSentLog";
 
 export type ILatestBlockNumbers = Record<number, { latest?: bigint; finalized?: bigint }>;
 
-type ILatestBlockRequest = Record<number, { latest: boolean; finalized: boolean }>;
+type ILatestBlockRequest = Record<number, { latest?: boolean; finalized?: boolean }>;
 
 const getLatestBlockNumberTag = "eth_blockNumber";
 const getFinalizedBlockTag = "eth_getBlockByNumber";
@@ -17,7 +17,7 @@ function buildUniqRequests(parsedLogs: IParsedLog[]) {
 	const requests: ILatestBlockRequest = {};
 
 	parsedLogs.forEach(log => {
-		requests[log.receipt.srcChainSelector] = { latest: false, finalized: false };
+		requests[log.receipt.srcChainSelector] ??= {};
 
 		if (
 			log.receipt.srcChainData.blockConfirmations === maxUint64 &&
@@ -64,13 +64,13 @@ function buildLastBlockNumbersResponse(
 	blockNumberRequests.forEach((req, i) => {
 		if (!results[i]) return;
 
-		blockNumbers[req.chainSelector] = {};
+		blockNumbers[req.chainSelector] ??= {};
 
 		const blockType =
 			blockNumberRequests[i].method === getLatestBlockNumberTag ? "latest" : "finalized";
-		const blockNumber =
+
+		blockNumbers[req.chainSelector][blockType] =
 			blockType === "finalized" ? BigInt(results[i].number) : BigInt(results[i]);
-		blockNumbers[req.chainSelector][blockType] = blockNumber;
 	});
 
 	return blockNumbers;

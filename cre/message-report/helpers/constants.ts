@@ -24,3 +24,5 @@ export const cacheSettingsJson: CacheSettingsJson = {
 	store: true,
 	maxAge: "10s",
 };
+
+export const defaultMinConfirmations = 1n;

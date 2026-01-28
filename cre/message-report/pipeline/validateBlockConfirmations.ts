@@ -2,6 +2,7 @@ import { Runtime } from "@chainlink/cre-sdk";
 import { Hex, maxUint64 } from "viem";
 
 import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { defaultMinConfirmations } from "../helpers/constants";
 import { ChainsManager } from "../systems";
 import { ILatestBlockNumbers } from "./fetchBlockNumbers";
 import { IParsedLog } from "./parseMessageSentLog";
@@ -31,7 +32,9 @@ export const validateBlockConfirmations = (
 			blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations!);
 		}
 	} else if (log.receipt.srcChainData.blockConfirmations === 0n) {
-		blockConfirmationsDelta = BigInt(chainsOptions.minBlockConfirmations);
+		blockConfirmationsDelta = BigInt(
+			chainsOptions.minBlockConfirmations ?? defaultMinConfirmations,
+		);
 	} else {
 		blockConfirmationsDelta = log.receipt.srcChainData.blockConfirmations;
 	}

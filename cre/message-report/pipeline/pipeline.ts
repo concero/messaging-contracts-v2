@@ -69,6 +69,7 @@ function fetchMessagesAndGenerateProof(runtime: Runtime<GlobalConfig>, args: Dec
 		const logs = fetchLogsByMessageIds(runtime, rpcRequester, args.batch);
 		const parsedLogs = parseLogs(runtime, logs);
 		const blockNumbers = fetchBlockNumbers(runtime, rpcRequester, parsedLogs);
+		runtime.log(`Fetched block numbers: ${Utility.safeJSONStringify(blockNumbers)}`);
 
 		const validatedMessages = validateMessagesBlockConfirmations(
 			runtime,
@@ -92,7 +93,10 @@ function fetchMessagesAndGenerateProof(runtime: Runtime<GlobalConfig>, args: Dec
 export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayload) {
 	try {
 		const args = decodeArgs(payload);
+
 		runtime.log(`Decoded args: ${JSON.stringify(args)}`);
+		runtime.log(`Decoded args count: ${args.batch.length}`);
+
 		validateDecodedArgs(args);
 
 		const merkleRoot = new cre.capabilities.HTTPClient()

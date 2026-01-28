@@ -109,15 +109,4 @@ export function fetchLogsByMessageIds(
 	}
 
 	return buildResponse(runtime, items, logs);
-
-	// TODO: move to top level
-	// const log = logs?.find(log => {
-	// 	const logMessageId = log?.topics?.[1]?.toLowerCase();
-	// 	return logMessageId === messageId?.toLowerCase();
-	// });
-	//
-	// if (!log) {
-	// 	runtime.log(`${LOG_TAG} Log not found`);
-	// 	throw new DomainError(ErrorCode.EVENT_NOT_FOUND);
-	// }
 }

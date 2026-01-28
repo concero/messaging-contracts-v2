@@ -20,8 +20,8 @@ local-simulation:
     workflow-name: "local-simulation"
   workflow-artifacts:
     workflow-path: "./main.ts"
-    config-path: "./config.testnet.json"
-    secrets-path: "../secrets.testnet.yaml"
+    config-path: "./config.stage.json"
+    secrets-path: "../secrets.stage.yaml"
 
 # ==========================================================================
 stage-testnet:

@@ -16,11 +16,11 @@ export class RpcRequester {
 	private readonly rpcs: Record<ChainSelector, string[]>;
 	private requests: (CRE.IRequestOptions & { chainSelector: ChainSelector })[] = [];
 	private reqCounter: number = 0;
-	private readonly maxRetryCount = 5;
+	private readonly maxRetryCount = 15;
 	private readonly asyncFetcher;
 
-	constructor(_rpcs: typeof this.rpcs, sendRequester: HTTPSendRequester) {
-		this.rpcs = _rpcs;
+	constructor(rpcs: typeof this.rpcs, sendRequester: HTTPSendRequester) {
+		this.rpcs = rpcs;
 		this.asyncFetcher = new CRE.AsyncFetcher(sendRequester);
 	}
 
@@ -32,8 +32,6 @@ export class RpcRequester {
 				method: r.method,
 				params: r.params,
 			};
-
-			console.log(JSON.stringify(body));
 
 			const request = {
 				url: this.rpcs[r.chainSelector][0],
@@ -68,7 +66,6 @@ export class RpcRequester {
 			);
 
 			const retryResults = this.asyncFetcher.wait();
-			console.log(JSON.stringify(CRE.parseCreRawHttpResponse(retryResults[0].response)));
 			this.mergeFailedResults(results, retryResults, failedRequestsIdxes);
 		}
 

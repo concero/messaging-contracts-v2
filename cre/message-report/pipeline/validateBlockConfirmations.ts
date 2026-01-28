@@ -19,7 +19,7 @@ export const validateBlockConfirmations = (
 	// if supported, use finalized blockNumber in the over cases use delta between log.blockNumber and chain.blockNumber
 	if (log.receipt.srcChainData.blockConfirmations === maxUint64) {
 		if (chainsOptions.finalityTagEnabled) {
-			const lastFinalizedBlock = latestBlockNumbers[log.receipt.srcChainSelector].finalized;
+			const lastFinalizedBlock = latestBlockNumbers[log.receipt.srcChainSelector]?.finalized;
 			if (!lastFinalizedBlock) throw new DomainError(ErrorCode.LATEST_BLOCK_NOT_FETCHED);
 
 			if (log.blockNumber > BigInt(lastFinalizedBlock)) {
@@ -28,7 +28,7 @@ export const validateBlockConfirmations = (
 
 			return;
 		} else {
-			blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations);
+			blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations!);
 		}
 	} else if (log.receipt.srcChainData.blockConfirmations === 0n) {
 		blockConfirmationsDelta = BigInt(chainsOptions.minBlockConfirmations);
@@ -36,7 +36,7 @@ export const validateBlockConfirmations = (
 		blockConfirmationsDelta = log.receipt.srcChainData.blockConfirmations;
 	}
 
-	const actualChainBlock = latestBlockNumbers[log.receipt.srcChainSelector].latest;
+	const actualChainBlock = latestBlockNumbers[log.receipt.srcChainSelector]?.latest;
 	if (!actualChainBlock) throw new DomainError(ErrorCode.LATEST_BLOCK_NOT_FETCHED);
 
 	if (log.blockNumber + blockConfirmationsDelta > actualChainBlock) {

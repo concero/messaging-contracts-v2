@@ -1,19 +1,18 @@
 import { HTTPSendRequester, Runtime } from "@chainlink/cre-sdk";
 import { SendRequester } from "@chainlink/cre-sdk/dist/generated-sdk/capabilities/networking/http/v1alpha/client_sdk_gen";
-import type { Response } from "@chainlink/cre-sdk/dist/generated/capabilities/networking/http/v1alpha/client_pb";
+import type {
+	Request,
+	Response,
+} from "@chainlink/cre-sdk/dist/generated/capabilities/networking/http/v1alpha/client_pb";
 import { sha256 } from "viem";
 
+import { cacheSettings, cacheSettingsJson, timeout, timeoutJson } from "./constants";
 import { GlobalConfig } from "./types";
 
 const LOG_TAG = "FETCHER";
 
 export namespace CRE {
-	export interface IRequestOptions {
-		url: string;
-		method: "GET" | "POST";
-		body?: any;
-		headers?: Record<string, string>;
-	}
+	export type IRequestOptions = Request;
 
 	export interface IHttpPromiseResult {
 		ok: boolean;
@@ -36,7 +35,9 @@ export namespace CRE {
 		sendRequester: HTTPSendRequester,
 		paramsArr: IRequestOptions[],
 	) {
-		return paramsArr.map(params => sendRequester.sendRequest(params));
+		return paramsArr.map(params =>
+			sendRequester.sendRequest({ ...params, timeout, cacheSettings }),
+		);
 	}
 
 	export function fulfillSendRequestPromises(
@@ -94,6 +95,8 @@ export namespace CRE {
 					.sendRequest({
 						url: options.url,
 						method: options.method,
+						timeout: timeoutJson,
+						cacheSettings: cacheSettingsJson,
 						...(bodyRequestBytes && {
 							body: Buffer.from(bodyRequestBytes).toString("base64"),
 						}),

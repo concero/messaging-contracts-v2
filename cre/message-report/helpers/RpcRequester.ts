@@ -109,7 +109,7 @@ export class RpcRequester {
 				retryResults.splice(i, 1);
 			} else {
 				this.runtime.log(
-					`Rpc request failed. Url: ${this.rpcs[this.requests[originalIdx].chainSelector][0]}. ${(retryRes.response as Error)?.message ?? Utility.safeJSONStringify(CRE.parseCreRawHttpResponse(retryRes.response))} `,
+					`Rpc request failed Url: ${this.rpcs[this.requests[originalIdx].chainSelector][0]} Code: ${(retryRes.response as Response).statusCode} Error: ${(retryRes.response as Error)?.message ?? Utility.safeJSONStringify(CRE.parseCreRawHttpResponse(retryRes.response))}`,
 				);
 			}
 		}

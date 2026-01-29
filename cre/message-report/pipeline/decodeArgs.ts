@@ -14,9 +14,7 @@ export function decodeArgs(payload: HTTPPayload): DecodedArgs {
 			blockNumber: String(batch.blockNumber),
 		}));
 
-		return {
-			batch,
-		};
+		return { batch };
 	} catch (e) {
 		throw new DomainError(ErrorCode.INVALID_DATA);
 	}

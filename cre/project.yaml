@@ -23,7 +23,7 @@ local-simulation:
 # ==========================================================================
 stage-testnet:
   account:
-    workflow-owner-address: "0xdddddb8a8e41c194ac6542a0ad7ba663a72741e0"
+    workflow-owner-address: "0x1D218D445b69c7eFa20be0DC120B8d001440f15C"
   rpcs:
     - chain-name: ethereum-testnet-sepolia
       url: https://ethereum-sepolia-public.nodies.app
@@ -32,7 +32,7 @@ stage-testnet:
 
 production-testnet:
   account:
-    workflow-owner-address: "0xdddddb8a8e41c194ac6542a0ad7ba663a72741e0"
+    workflow-owner-address: "0x1D218D445b69c7eFa20be0DC120B8d001440f15C"
   rpcs:
     - chain-name: ethereum-testnet-sepolia
       url: https://ethereum-sepolia-public.nodies.app
@@ -41,7 +41,7 @@ production-testnet:
 
 production-mainnet:
   account:
-    workflow-owner-address: "0xdddddb8a8e41c194ac6542a0ad7ba663a72741e0"
+    workflow-owner-address: "0x1D218D445b69c7eFa20be0DC120B8d001440f15C"
   rpcs:
     - chain-name: ethereum-testnet-sepolia
       url: https://ethereum-sepolia-public.nodies.app

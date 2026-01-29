@@ -21,6 +21,7 @@ export type MessageSentLogData = {
 	validatorLibs: Address[];
 	relayerLib: Address;
 };
+
 export type DecodedMessageSentReceipt = {
 	version: number;
 	srcChainSelector: number;
@@ -38,8 +39,8 @@ export type DecodedMessageSentReceipt = {
 		gasLimit: number | null;
 	};
 
-	relayerLib: Hex;
-	validatorLibs: Hex[];
+	relayerConfig: Hex;
+	validatorConfigs: Hex[];
 	internalValidatorConfigs: Hex[];
 	payload: Hex;
 };

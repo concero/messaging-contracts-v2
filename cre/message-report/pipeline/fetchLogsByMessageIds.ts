@@ -31,6 +31,12 @@ function buildGetLogsReqParams(
 			continue;
 		}
 
+		const rpcUrls = ChainsManager.getOptionsBySelector(item.srcChainSelector)?.rpcUrls;
+		if (!rpcUrls?.length) {
+			runtime.log(`Rpcs for chain ${item.srcChainSelector} not found`);
+			continue;
+		}
+
 		runtime.log(`Got routerAddress=${routerAddress}`);
 		runtime.log(
 			`${LOG_TAG} Fetching ${JSON.stringify({

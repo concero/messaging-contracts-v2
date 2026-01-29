@@ -96,17 +96,17 @@ export class RpcRequester {
 
 	private mergeFailedResults(
 		results: CRE.IHttpPromiseResult[],
-		failedRequestsResults: CRE.IHttpPromiseResult[],
-		retryResults: number[],
+		retryRequestResults: CRE.IHttpPromiseResult[],
+		failedRequestsIdxes: number[],
 	) {
 		// @dev We go in reverse order so that we can delete elements from the array we are iterating over without any problems.
-		for (let i = retryResults.length - 1; i >= 0; i--) {
-			const originalIdx = retryResults[i];
-			const retryRes = failedRequestsResults[i];
+		for (let i = failedRequestsIdxes.length - 1; i >= 0; i--) {
+			const originalIdx = failedRequestsIdxes[i];
+			const retryRes = retryRequestResults[i];
 
 			if (retryRes && !this.isFailed(retryRes)) {
 				results[originalIdx] = retryRes;
-				retryResults.splice(i, 1);
+				failedRequestsIdxes.splice(i, 1);
 			} else {
 				this.runtime.log(
 					`Rpc request failed Url: ${this.rpcs[this.requests[originalIdx].chainSelector][0]} Code: ${(retryRes.response as Response).statusCode} Error: ${(retryRes.response as Error)?.message ?? Utility.safeJSONStringify(CRE.parseCreRawHttpResponse(retryRes.response))}`,

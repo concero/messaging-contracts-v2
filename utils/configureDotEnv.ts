@@ -1,18 +1,30 @@
-import * as dotenv from "dotenv";
 import fs from "fs";
 
 import * as envEnc from "@chainlink/env-enc";
+import * as dotenv from "dotenv";
+
+const BASE_ENV_FILES = [".env", ".env.clf", ".env.clccip", ".env.tokens", ".env.wallets"];
+
+const STAGE_ENV = [".env.deployments.stage"];
 
 const ENV_FILES = [
-	".env",
-	".env.clf",
-	".env.clccip",
-	".env.tokens",
 	".env.deployments.mainnet",
 	".env.deployments.testnet",
 	".env.deployments.localhost",
-	".env.wallets",
 ];
+
+/**
+ * Returns the list of deployment files depending on DEPLOY_TO_STAGE
+ */
+function getDeploymentEnvFiles(): string[] {
+	const deployToStage = process.env.DEPLOY_TO_STAGE?.toLowerCase();
+
+	if (deployToStage === "true") {
+		return STAGE_ENV;
+	}
+
+	return ENV_FILES;
+}
 
 /**
  * Configures the dotenv with paths relative to a base directory.
@@ -21,7 +33,12 @@ const ENV_FILES = [
 function configureDotEnv(basePath = "./") {
 	const normalizedBasePath = basePath.endsWith("/") ? basePath : `${basePath}/`;
 
-	ENV_FILES.forEach(file => {
+	BASE_ENV_FILES.forEach(file => {
+		dotenv.config({ path: `${normalizedBasePath}${file}` });
+	});
+
+	const deploymentFiles = getDeploymentEnvFiles();
+	deploymentFiles.forEach(file => {
 		dotenv.config({ path: `${normalizedBasePath}${file}` });
 	});
 
@@ -29,20 +46,5 @@ function configureDotEnv(basePath = "./") {
 }
 
 configureDotEnv();
-
-function reloadDotEnv(basePath = "../../") {
-	const normalizedBasePath = basePath.endsWith("/") ? basePath : `${basePath}/`;
-
-	ENV_FILES.forEach(file => {
-		const fullPath = `${normalizedBasePath}${file}`;
-		const currentEnv = dotenv.parse(fs.readFileSync(fullPath));
-
-		Object.keys(currentEnv).forEach(key => {
-			delete process.env[key];
-		});
-
-		dotenv.config({ path: fullPath });
-	});
-}
 
 export { configureDotEnv };

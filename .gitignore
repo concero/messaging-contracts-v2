@@ -6,6 +6,7 @@ node_modules
 .env
 !./.env.deployments.mainnet
 !./.env.deployments.testnet
+!.env.deployments.stage
 !.env.clf
 !.env.tokens
 !.env.clccip
@@ -31,7 +32,9 @@ deployments/
 
 # other
 temp
-
+tmp.js
+tmp.wasm
+*.b64
 
 packages/foundry/out
 packages/foundry/node_modules
@@ -43,3 +46,5 @@ logs/
 .idea
 .vscode
 .DS_Store
+coverage_report
+.certora_internal

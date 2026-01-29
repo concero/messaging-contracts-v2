@@ -1,11 +1,4 @@
-import "solidity-coverage";
-
 import "./utils/configureDotEnv";
-
-import "hardhat-contract-sizer";
-import "hardhat-deploy";
-import "hardhat-deploy-ethers";
-import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 
 import "@chainlink/hardhat-chainlink";
@@ -16,9 +9,19 @@ import "@nomicfoundation/hardhat-verify";
 import "@nomicfoundation/hardhat-viem";
 import "@tenderly/hardhat-tenderly";
 import "@typechain/hardhat";
+import "hardhat-contract-sizer";
+import "hardhat-deploy";
+import "hardhat-deploy-ethers";
+import "hardhat-gas-reporter";
+import "solidity-coverage";
 
 import { conceroNetworks } from "./constants";
 import "./tasks";
+import { getTrezorDeployEnabled } from "./utils/getTrezorDeployEnabled";
+
+if (getTrezorDeployEnabled()) {
+	require("@yankeguo/hardhat-trezor");
+}
 
 const enableGasReport = process.env.REPORT_GAS !== "false";
 
@@ -30,8 +33,9 @@ const config: HardhatUserConfig = {
 		disambiguatePaths: false,
 	},
 	tenderly: {
-		username: "olegkron",
-		project: "own",
+		username: "Lufaque",
+		project: "concero",
+		privateVerification: false,
 	},
 	paths: {
 		artifacts: "artifacts",
@@ -43,6 +47,17 @@ const config: HardhatUserConfig = {
 		compilers: [
 			{
 				version: "0.8.28",
+				settings: {
+					viaIR: false,
+					evmVersion: "paris",
+					optimizer: {
+						enabled: true,
+						runs: 200,
+					},
+				},
+			},
+			{
+				version: "0.8.20",
 				settings: {
 					viaIR: false,
 					evmVersion: "paris",

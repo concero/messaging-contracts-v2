@@ -1,7 +1,6 @@
-import { Address, Hash, decodeEventLog, parseEther } from "viem";
-
 import { DeploymentManager } from "@concero/v2-operators/src/common/managers/DeploymentManager";
 import { globalConfig } from "@concero/v2-operators/src/constants";
+import { Address, Hash, decodeEventLog, parseEther } from "viem";
 
 import { ChainType } from "../../../clf/src/common/enums";
 import { OperatorRegistrationAction } from "../../../clf/src/operatorRegistration/types";

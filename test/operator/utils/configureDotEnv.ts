@@ -1,6 +1,7 @@
-import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+
+import * as dotenv from "dotenv";
 
 const ENV_FILES = [".env", ".env.deployments.mainnet", ".env.deployments.testnet", ".env.test"];
 

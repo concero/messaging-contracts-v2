@@ -6,173 +6,129 @@
  */
 pragma solidity 0.8.28;
 
-import {Vm} from "forge-std/src/Vm.sol";
-
-import {ConceroTypes} from "contracts/ConceroClient/ConceroTypes.sol";
-import {Namespaces} from "contracts/ConceroRouter/libraries/Storage.sol";
-import {RouterSlots} from "contracts/ConceroRouter/libraries/StorageSlots.sol";
-import {Types as RouterTypes} from "contracts/ConceroRouter/libraries/Types.sol";
-
 import {CommonErrors} from "contracts/common/CommonErrors.sol";
 import {ConceroRouterTest} from "./base/ConceroRouterTest.sol";
+import {IConceroRouter} from "contracts/interfaces/IConceroRouter.sol";
+import {MessageCodec} from "contracts/common/libraries/MessageCodec.sol";
+import {IRelayerLib} from "contracts/interfaces/IRelayerLib.sol";
+import {IValidatorLib} from "contracts/interfaces/IValidatorLib.sol";
 
 contract SendMessage is ConceroRouterTest {
-    ConceroTypes.EvmDstChainData internal dstChainData;
-    bytes internal message;
+    function test_conceroSend_NativeFee_gas() public {
+        vm.pauseGasMetering();
 
-    function setUp() public override {
-        super.setUp();
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
 
-        dstChainData = ConceroTypes.EvmDstChainData({
-            receiver: address(0x456),
-            gasLimit: 1_000_000
-        });
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
-        message = "Test message";
-
-        vm.deal(user, 100 ether);
-
-        vm.prank(deployer);
-        conceroRouter.setNativeUsdRate(NATIVE_USD_RATE);
-        uint24[] memory chainSelectors = new uint24[](1);
-        chainSelectors[0] = DST_CHAIN_SELECTOR;
-
-        uint256[] memory rates = new uint256[](1);
-        rates[0] = 1;
-
-        uint256[] memory gasPrices = new uint256[](1);
-        gasPrices[0] = 100_000; // 0.1 gwei
-
-        uint24[] memory chainselectors = new uint24[](1);
-        chainselectors[0] = DST_CHAIN_SELECTOR;
-        bool[] memory supported = new bool[](1);
-        supported[0] = true;
-
-        vm.startPrank(deployer);
-        conceroRouter.setSupportedChains(chainselectors, supported);
-        conceroRouter.setNativeNativeRates(chainSelectors, rates);
-        conceroRouter.setLastGasPrices(chainSelectors, gasPrices);
-        vm.stopPrank();
+        vm.resumeGasMetering();
+        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
     }
 
-    function test_conceroSend() public {
-        address feeToken = address(0);
-
-        vm.startPrank(user);
-
-        uint256 initialNonce = conceroRouter.getStorage(
-            Namespaces.ROUTER,
-            RouterSlots.nonce,
-            bytes32(0)
-        );
-        uint256 messageFee = conceroRouter.getMessageFee(
-            DST_CHAIN_SELECTOR,
-            false,
-            feeToken,
-            dstChainData
+    function testFuzz_conceroSend_NativeFee(
+        bytes memory payload,
+        uint32 gasLimit,
+        uint64 srcChainConfirmations
+    ) public {
+        vm.assume(gasLimit > 0);
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(
+            payload,
+            gasLimit,
+            srcChainConfirmations
         );
 
-        vm.recordLogs();
-        bytes32 messageId = conceroRouter.conceroSend{value: messageFee}(
-            DST_CHAIN_SELECTOR,
-            false,
-            feeToken,
-            dstChainData,
-            message
-        );
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
 
-        bytes memory srcChainData = abi.encode(
-            RouterTypes.EvmSrcChainData({sender: user, blockNumber: block.number})
-        );
-
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-        bool found = false;
-
-        for (uint i = 0; i < entries.length; i++) {
-            bytes32 conceroMessageSentEventSig = keccak256(
-                "ConceroMessageSent(bytes32,uint8,bool,uint24,bytes,address,bytes)"
-            );
-
-            if (entries[i].topics[0] == conceroMessageSentEventSig) {
-                found = true;
-                (
-                    uint8 versionFromEvent,
-                    bool shouldFinaliseSrcFromEvent,
-                    uint24 dstChainSelectorFromEvent,
-                    bytes memory dstChainDataFromEvent,
-                    address senderFromEvent,
-                    bytes memory messageFromEvent
-                ) = abi.decode(entries[i].data, (uint8, bool, uint24, bytes, address, bytes));
-
-                bytes32 messageIdFromEvent = entries[i].topics[1];
-
-                assertEq(dstChainSelectorFromEvent, 8453, "Incorrect dstChainSelector");
-                assertEq(
-                    senderFromEvent,
-                    0x0101010101010101010101010101010101010101,
-                    "Incorrect sender"
-                );
-                assertEq(
-                    keccak256(messageFromEvent),
-                    keccak256("Test message"),
-                    "Incorrect message"
-                );
-                break;
-            }
-        }
-
-        assertTrue(found, "ConceroMessageSent event not found");
-        uint256 finalNonce = conceroRouter.getStorage(
-            Namespaces.ROUTER,
-            RouterSlots.nonce,
-            bytes32(0)
-        );
-        assertEq(finalNonce, initialNonce + 1, "Nonce should be incremented by 1");
-
-        //        assertEq(
-        //            conceroRouter.getStorage(
-        //                Namespaces.ROUTER,
-        //                RouterSlots.isMessageSent,
-        //                bytes32(messageId)
-        //            ),
-        //            1,
-        //            "Message ID should be marked as sent"
-        //        );
-
-        vm.stopPrank();
+        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
     }
 
-    function test_RevertInsufficientFee() public {
-        uint24 dstChainSelector = DST_CHAIN_SELECTOR;
-        bool shouldFinaliseSrc = false;
-        address feeToken = address(0);
+    function test_conceroSend_RevertIfEmptyDstChainData() public {
+        bytes memory emptyBytes = bytes("");
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+        messageRequest.dstChainData = emptyBytes;
 
-        vm.startPrank(user);
+        // Empty bytes
+        vm.expectRevert(IConceroRouter.InvalidDstChainDataLength.selector);
+        s_conceroRouter.getMessageFee(messageRequest);
 
-        uint256 messageFee = conceroRouter.getMessageFee(
-            dstChainSelector,
-            shouldFinaliseSrc,
-            feeToken,
-            dstChainData
+        // Empty bytes
+        vm.expectRevert(IConceroRouter.InvalidDstChainDataLength.selector);
+        s_conceroRouter.conceroSend(messageRequest);
+
+        // Data length more than 24 bytes
+        bytes memory invalidData = bytes(abi.encodePacked(address(1), uint64(100_000)));
+        messageRequest.dstChainData = invalidData;
+
+        vm.expectRevert(IConceroRouter.InvalidDstChainDataLength.selector);
+        s_conceroRouter.conceroSend(messageRequest);
+
+        // Data length less than 24 bytes
+        invalidData = bytes(abi.encodePacked(address(1), uint16(1000)));
+        messageRequest.dstChainData = invalidData;
+
+        vm.expectRevert(IConceroRouter.InvalidDstChainDataLength.selector);
+        s_conceroRouter.conceroSend(messageRequest);
+    }
+
+    function test_conceroSend_RevertsIfInvalidValidatorConfigsCount() public {
+        address[] memory validatorLibs = new address[](1);
+        validatorLibs[0] = s_validatorLib;
+
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest(validatorLibs);
+        messageRequest.validatorConfigs = new bytes[](2);
+
+        bytes memory error = abi.encodeWithSelector(
+            IConceroRouter.InvalidValidatorConfigsCount.selector,
+            messageRequest.validatorConfigs.length,
+            validatorLibs.length
         );
-        uint256 insufficientFee = messageFee - 1;
+
+        vm.expectRevert(error);
+        s_conceroRouter.getMessageFee(messageRequest);
+
+        vm.expectRevert(error);
+        s_conceroRouter.conceroSend(messageRequest);
+    }
+
+    function test_conceroSend_EmitsConceroMessageSent() public {
+        IConceroRouter.MessageRequest memory messageRequest = _buildMessageRequest();
+
+        uint256 messageFee = s_conceroRouter.getMessageFee(messageRequest);
+
+        uint256 nonce = 1;
+
+        bytes memory packedMessage = MessageCodec.toMessageReceiptBytes(
+            messageRequest,
+            SRC_CHAIN_SELECTOR,
+            address(this),
+            nonce,
+            s_internalValidatorConfigs
+        );
+
+        bytes32 expectedMessageId = keccak256(packedMessage);
+
+        vm.expectEmit(true, true, false, true);
+        emit IConceroRouter.ConceroMessageSent(
+            expectedMessageId,
+            packedMessage,
+            messageRequest.validatorLibs,
+            s_relayerLib
+        );
+
+        s_conceroRouter.conceroSend{value: messageFee}(messageRequest);
+    }
+
+    function test_conceroSend_RevertsIfChainForked() public {
+        IConceroRouter.MessageRequest memory messageRequest;
+
+        uint256 chain1 = uint200(block.chainid);
+        uint256 chain2 = chain1 + 1;
+        vm.chainId(chain2);
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                CommonErrors.InsufficientFee.selector,
-                insufficientFee,
-                messageFee
-            )
+            abi.encodeWithSelector(IConceroRouter.ForkedChain.selector, chain1, chain2)
         );
 
-        conceroRouter.conceroSend{value: insufficientFee}(
-            dstChainSelector,
-            shouldFinaliseSrc,
-            feeToken,
-            dstChainData,
-            message
-        );
-
-        vm.stopPrank();
+        s_conceroRouter.conceroSend(messageRequest);
     }
 }

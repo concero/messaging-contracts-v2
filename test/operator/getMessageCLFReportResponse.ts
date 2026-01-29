@@ -1,6 +1,5 @@
-import { Address, Hash, encodePacked, zeroHash } from "viem";
-
 import { DeploymentManager } from "@concero/v2-operators/src/common/managers/DeploymentManager";
+import { Address, Hash, encodePacked, zeroHash } from "viem";
 
 import { EvmSrcChainData } from "../../clf/src/messageReport/types";
 import { simulateCLFScript } from "../../tasks/clf";

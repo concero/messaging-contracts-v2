@@ -1,7 +1,7 @@
+import { task, types } from "hardhat/config";
+
 import fs from "fs";
 import path from "path";
-
-import { task, types } from "hardhat/config";
 
 import { simulateScript } from "@chainlink/functions-toolkit";
 

@@ -213,9 +213,10 @@ export class NativeTokenSender {
 			console.log(`Balance on ${publicClient.chain?.name}: ${formatEther(actualBalance)}`);
 
 			if (actualBalance < amount) {
-				throw new Error(
-					`Insufficient balance for ${publicClient.chain?.name}. Required: ${formatEther(amount)}, Available: ${formatEther(actualBalance)}`,
+				console.log(
+					`🟡 Insufficient balance for ${publicClient.chain?.name}. Required: ${formatEther(amount)}, Available: ${formatEther(actualBalance)}`,
 				);
+				return;
 			}
 
 			const txHash = await walletClient.sendTransaction({

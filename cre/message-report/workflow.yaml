@@ -1,0 +1,49 @@
+# ==========================================================================
+# CRE WORKFLOW SETTINGS FILE
+# ==========================================================================
+# Workflow-specific settings for CRE CLI targets.
+# Each target defines user-workflow and workflow-artifacts groups.
+# Settings here override CRE Project Settings File values.
+#
+# Example custom target:
+# my-target:
+#   user-workflow:
+#     workflow-name: "MyExampleWorkflow"    # Required: Workflow Registry name
+#   workflow-artifacts:
+#     workflow-path: "./main.ts"            # Path to workflow entry point
+#     config-path: "./config.yaml"          # Path to config file
+#     secrets-path: "../secrets.yaml"       # Path to secrets file (project root by default)
+
+# ==========================================================================
+local-simulation:
+  user-workflow:
+    workflow-name: "local-simulation"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.stage.json"
+    secrets-path: "../secrets.stage.yaml"
+
+# ==========================================================================
+stage-testnet:
+  user-workflow:
+    workflow-name: "stage-messaging"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.stage.json"
+    secrets-path: "../secrets.stage.yaml"
+
+production-testnet:
+  user-workflow:
+    workflow-name: "testnet-messaging-001"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.testnet.json"
+    secrets-path: "../secrets.testnet.yaml"
+
+production-mainnet:
+  user-workflow:
+    workflow-name: "mainnet-messaging"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.mainnet.json"
+    secrets-path: "../secrets.mainnet.yaml"

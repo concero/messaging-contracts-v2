@@ -1,11 +1,11 @@
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../../constants";
-import { ConceroNetworkNames } from "../../types/ConceroNetwork";
+import { setVerifierGasFeeConfig } from "../utils";
 
-async function setVerifierVariables(hre: HardhatRuntimeEnvironment) {
-	const { live, name } = hre.network;
-	const network = conceroNetworks[name as ConceroNetworkNames];
+export async function setVerifierVariables(hre: HardhatRuntimeEnvironment) {
+	const { name } = hre.network;
+	const network = conceroNetworks[name];
+
+	await setVerifierGasFeeConfig(network);
 }
-
-export { setVerifierVariables };

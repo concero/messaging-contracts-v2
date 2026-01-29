@@ -73,9 +73,9 @@ export namespace CRE {
 	}
 
 	export class Fetcher {
-		private MAX_RESPONSE_LENGTH = 20_000;
+		private static readonly MAX_RESPONSE_LENGTH = 20_000;
 
-		build(
+		static build(
 			runtime: Runtime<GlobalConfig>,
 			options: CRE.IRequestOptions,
 			consensusDecoder?: (decodedResponse: unknown) => unknown,

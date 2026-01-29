@@ -1,2 +1,1 @@
-export * from './chainsManager'
-export * from './publicClient'
+export * from "./chainsManager";

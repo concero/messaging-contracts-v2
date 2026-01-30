@@ -1,7 +1,14 @@
 import * as envEnc from "@chainlink/env-enc";
 import * as dotenv from "dotenv";
 
-const BASE_ENV_FILES = [".env", ".env.clf", ".env.clccip", ".env.tokens", ".env.wallets"];
+const BASE_ENV_FILES = [
+	".env",
+	".env.clf",
+	".env.clccip",
+	".env.tokens",
+	".env.wallets",
+	".env.cre",
+];
 
 const STAGE_ENV = [".env.deployments.stage"];
 

@@ -10,6 +10,7 @@ node_modules
 !.env.clf
 !.env.tokens
 !.env.clccip
+!.env.cre
 
 # coverage
 coverage

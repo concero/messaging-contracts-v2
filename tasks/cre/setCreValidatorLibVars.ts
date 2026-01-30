@@ -11,6 +11,7 @@ import {
 	log,
 } from "../../utils";
 import { getVerificationGasLimit } from "../../utils/getVerificationGasLimit";
+import { isDeployToStage } from "../../utils/isDeployToStage";
 
 async function isDonSignerAllowed(
 	signer: Address,
@@ -165,7 +166,13 @@ export async function setIsWorkflowIdAllowed(
 	);
 	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
 
-	const workflowId = getEnvVar(`CRE_WORKFLOW_ID_${conceroNetwork.type.toUpperCase()}`);
+	const workflowId = getEnvVar(
+		isDeployToStage()
+			? "CRE_WORKFLOW_ID_STAGE"
+			: conceroNetwork.type === "mainnet"
+				? "CRE_WORKFLOW_ID_MAINNET"
+				: "CRE_WORKFLOW_ID_TESTNET",
+	);
 
 	const isWorkflowAllowed = await publicClient.readContract({
 		address: validatorLib,

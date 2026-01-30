@@ -47,8 +47,7 @@ export async function setCreDonSigners(
 
 	const signersToSet = [];
 
-	const envKey = `CRE_DON_SIGNERS_${conceroNetwork.type.toUpperCase()}`;
-	const donSigners = getEnvVar(envKey)
+	const donSigners = getEnvVar("CRE_DON_SIGNERS")
 		.split(",")
 		.map(addr => addr.trim() as Address);
 
@@ -117,7 +116,7 @@ async function setExpectedSignersCount(
 		args: [],
 	});
 
-	const minSignersCount = getEnvVar(`CRE_MIN_SIGNERS_COUNT_${conceroNetwork.type.toUpperCase()}`);
+	const minSignersCount = getEnvVar("CRE_MIN_SIGNERS_COUNT");
 
 	if (currentExpectedSignersCount === minSignersCount) {
 		return;

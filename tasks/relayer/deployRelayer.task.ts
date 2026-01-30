@@ -5,7 +5,7 @@ import { Address, encodeFunctionData } from "viem";
 
 import { ADMIN_ROLE, ProxyEnum } from "../../constants";
 import { deployTransparentProxy } from "../../deploy";
-import deployRelayerLib from "../../deploy/RelayerLib";
+import { deployRelayerLib } from "../../deploy/RelayerLib";
 import { compileContracts, getEnvAddress } from "../../utils";
 import { upgradeProxyImplementation } from "../utils";
 import { grantRole } from "../utils/grantRole.task";

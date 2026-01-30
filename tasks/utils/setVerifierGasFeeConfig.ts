@@ -1,10 +1,11 @@
-import { ProxyEnum } from "../../constants";
-import { gasFeeConfigVerifier } from "../../constants/gasConfig";
 import {
 	ConceroHardhatNetwork,
 	ConceroLocalNetwork,
 	ConceroNetwork,
-} from "../../types/ConceroNetwork";
+} from "@concero/contract-utils";
+
+import { ProxyEnum } from "../../constants";
+import { gasFeeConfigVerifier } from "../../constants/gasConfig";
 import { getEnvAddress, getFallbackClients, log } from "../../utils";
 
 export type AnyNetwork = ConceroNetwork | ConceroLocalNetwork | ConceroHardhatNetwork;

@@ -2,15 +2,15 @@ import { task } from "hardhat/config";
 
 import readline from "readline";
 
+import { mainnetNetworks, testnetNetworks } from "@concero/contract-utils";
 import { formatEther, parseEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 import { viemReceiptConfig } from "../../constants";
-import { mainnetNetworks, testnetNetworks } from "../../constants/conceroNetworks";
 import { type BalanceInfo } from "../../types/BalanceInfo";
 import { type ConceroNetwork } from "../../types/ConceroNetwork";
 import { getEnvVar, getFallbackClients } from "../../utils";
-import log, { err } from "../../utils/log";
+import { err, log } from "../../utils";
 
 const DEFAULT_TARGET_BALANCE = parseEther("0.001");
 

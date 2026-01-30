@@ -1,10 +1,14 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
-import { hardhatDeployWrapper } from "@concero/contract-utils";
-import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { DEPLOY_CONFIG_TESTNET, conceroNetworks } from "../constants";
-import { getFallbackClients, getViemAccount, log, updateEnvVariable } from "../utils";
+import { EnvFileName } from "../types/deploymentVariables";
+import {
+	IDeployResult,
+	genericDeploy,
+	getEnvFileName,
+	getNetworkEnvKey,
+	updateEnvVariable,
+} from "../utils";
 
 type DeployArgs = {
 	chainSelector: bigint;
@@ -14,16 +18,14 @@ type DeployArgs = {
 type DeploymentFunction = (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-) => Promise<Deployment>;
+) => Promise<IDeployResult>;
 
-const deployPriceFeed: DeploymentFunction = async function (
+export const deployPriceFeed: DeploymentFunction = async (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-): Promise<Deployment> {
+): Promise<IDeployResult> => {
 	const { name } = hre.network;
-
 	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
-	const { type: networkType } = chain;
 
 	const defaultArgs: DeployArgs = {
 		chainSelector: chain.chainSelector,
@@ -35,34 +37,29 @@ const deployPriceFeed: DeploymentFunction = async function (
 		...overrideArgs,
 	};
 
-	const deployerViemAccount = getViemAccount(networkType, "deployer");
-	const { publicClient } = getFallbackClients(chain, deployerViemAccount);
-
 	let gasLimit = 0;
 	const config = DEPLOY_CONFIG_TESTNET[name];
 	if (config?.priceFeed) {
 		gasLimit = config.priceFeed.gasLimit;
 	}
 
-	const deployment = await hardhatDeployWrapper("ConceroPriceFeed", {
-		hre,
-		args: [args.chainSelector, args.feedUpdater],
-		publicClient,
-		gasLimit,
-		log: true,
-	});
+	const deployment = await genericDeploy(
+		{
+			hre,
+			contractName: "ConceroPriceFeed",
+			txParams: {
+				gasLimit: BigInt(gasLimit),
+			},
+		},
+		args.chainSelector,
+		args.feedUpdater,
+	);
 
-	log(`Deployed at: ${deployment.address}`, "deployPriceFeed", name);
 	updateEnvVariable(
-		`CONCERO_PRICE_FEED_${getNetworkEnvKey(name)}`,
+		`CONCERO_PRICE_FEED_${getNetworkEnvKey(deployment.chainName)}`,
 		deployment.address,
-		`deployments.${networkType}`,
+		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
 	);
 
 	return deployment;
 };
-
-deployPriceFeed.tags = ["ConceroPriceFeed"];
-
-export default deployPriceFeed;
-export { deployPriceFeed };

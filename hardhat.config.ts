@@ -17,7 +17,7 @@ import "solidity-coverage";
 
 import { conceroNetworks } from "./constants";
 import "./tasks";
-import { getTrezorDeployEnabled } from "./utils/getTrezorDeployEnabled";
+import { getTrezorDeployEnabled } from "./utils";
 
 if (getTrezorDeployEnabled()) {
 	require("@yankeguo/hardhat-trezor");

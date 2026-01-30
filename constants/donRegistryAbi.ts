@@ -1,0 +1,62 @@
+export const donRegistryAbi = [
+	{
+		inputs: [
+			{ internalType: "uint256", name: "start", type: "uint256" },
+			{ internalType: "uint256", name: "limit", type: "uint256" },
+		],
+		name: "getDONs",
+		outputs: [
+			{
+				components: [
+					{ internalType: "uint32", name: "id", type: "uint32" },
+					{ internalType: "uint32", name: "configCount", type: "uint32" },
+					{ internalType: "uint8", name: "f", type: "uint8" },
+					{ internalType: "bool", name: "isPublic", type: "bool" },
+					{ internalType: "bool", name: "acceptsWorkflows", type: "bool" },
+					{ internalType: "bytes32[]", name: "nodeP2PIds", type: "bytes32[]" },
+					{ internalType: "string[]", name: "donFamilies", type: "string[]" },
+					{ internalType: "string", name: "name", type: "string" },
+					{ internalType: "bytes", name: "config", type: "bytes" },
+					{
+						components: [
+							{ internalType: "string", name: "capabilityId", type: "string" },
+							{ internalType: "bytes", name: "config", type: "bytes" },
+						],
+						internalType: "struct CapabilitiesRegistry.CapabilityConfiguration[]",
+						name: "capabilityConfigurations",
+						type: "tuple[]",
+					},
+				],
+				internalType: "struct CapabilitiesRegistry.DONInfo[]",
+				name: "",
+				type: "tuple[]",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [{ internalType: "bytes32", name: "p2pId", type: "bytes32" }],
+		name: "getNode",
+		outputs: [
+			{
+				components: [
+					{ internalType: "uint32", name: "nodeOperatorId", type: "uint32" },
+					{ internalType: "uint32", name: "configCount", type: "uint32" },
+					{ internalType: "uint32", name: "workflowDONId", type: "uint32" },
+					{ internalType: "bytes32", name: "signer", type: "bytes32" },
+					{ internalType: "bytes32", name: "p2pId", type: "bytes32" },
+					{ internalType: "bytes32", name: "encryptionPublicKey", type: "bytes32" },
+					{ internalType: "bytes32", name: "csaKey", type: "bytes32" },
+					{ internalType: "string[]", name: "capabilityIds", type: "string[]" },
+					{ internalType: "uint256[]", name: "capabilitiesDONIds", type: "uint256[]" },
+				],
+				internalType: "struct INodeInfoProvider.NodeInfo",
+				name: "nodeInfo",
+				type: "tuple",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+];

@@ -5,7 +5,7 @@ import { Address, encodeFunctionData } from "viem";
 
 import { ADMIN_ROLE, ProxyEnum } from "../../constants";
 import { deployTransparentProxy } from "../../deploy";
-import deployConceroCreValidatorLib from "../../deploy/CocneroCreValidatorLib";
+import { deployConceroCreValidatorLib } from "../../deploy/ConceroCreValidatorLib";
 import { compileContracts, getEnvAddress } from "../../utils";
 import { upgradeProxyImplementation } from "../utils";
 import { grantRole } from "../utils/grantRole.task";

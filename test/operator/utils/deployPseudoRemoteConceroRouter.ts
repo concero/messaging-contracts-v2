@@ -1,4 +1,3 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Address, zeroAddress } from "viem";
 
@@ -7,7 +6,13 @@ import { getConceroVerifierNetwork } from "../../../constants/conceroNetworks";
 import { deployRouter, deployVerifier } from "../../../deploy";
 import { getCLFDonSigners } from "../../../deploy/ConceroRouter";
 import { deployContracts, setRouterSupportedChains } from "../../../tasks";
-import { getEnvVar, getFallbackClients, log, updateEnvVariable } from "../../../utils";
+import {
+	getEnvVar,
+	getFallbackClients,
+	getNetworkEnvKey,
+	log,
+	updateEnvVariable,
+} from "../../../utils";
 
 export async function deployPseudoRemoteConceroRouter(
 	conceroVerifierAddress: Address,

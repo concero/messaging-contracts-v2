@@ -1,10 +1,14 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
+import { ConceroTestnetNetworkNames, conceroNetworks } from "@concero/contract-utils";
 import { Address, Hash } from "viem";
 
-import { ConceroTestnetNetworkNames, conceroNetworks } from "../../constants/conceroNetworks";
-import { getEnvVar, getFallbackClients, log } from "../../utils";
-import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
-import { ethersSignerCallContract } from "../utils/ethersSignerCallContract";
+import {
+	ethersSignerCallContract,
+	getEnvVar,
+	getFallbackClients,
+	getNetworkEnvKey,
+	getTrezorDeployEnabled,
+	log,
+} from "../../utils";
 
 const relayer = "0x51aa24026e9367987e931caabd6519fb491a274a";
 

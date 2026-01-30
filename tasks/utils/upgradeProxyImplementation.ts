@@ -1,7 +1,6 @@
 import { task } from "hardhat/config";
 
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { PrivateKeyAccount } from "viem";
 
 import {
 	DEPLOY_CONFIG_TESTNET,
@@ -10,9 +9,15 @@ import {
 	getViemReceiptConfig,
 } from "../../constants";
 import { EnvPrefixes, IProxyType } from "../../types/deploymentVariables";
-import { err, getEnvAddress, getFallbackClients, getViemAccount, log } from "../../utils";
-import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
-import { ethersSignerCallContract } from "./ethersSignerCallContract";
+import {
+	err,
+	ethersSignerCallContract,
+	getEnvAddress,
+	getFallbackClients,
+	getTrezorDeployEnabled,
+	getViemAccount,
+	log,
+} from "../../utils";
 
 export async function upgradeProxyImplementation(
 	hre: HardhatRuntimeEnvironment,
@@ -98,6 +103,7 @@ export async function upgradeProxyImplementation(
 		chainName,
 	);
 }
+
 task("upgrade-proxy-implementation", "Upgrades the proxy implementation")
 	.addFlag("pause", "Pause the proxy before upgrading", false)
 	.addParam("proxytype", "The type of the proxy to upgrade", undefined)

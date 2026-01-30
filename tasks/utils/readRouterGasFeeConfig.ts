@@ -73,7 +73,7 @@ export async function readRouterGasFeeConfig(
 
 export async function displayRouterGasFeeConfig(hre: HardhatRuntimeEnvironment) {
 	const { name } = hre.network;
-	const network = conceroNetworks[name as keyof typeof conceroNetworks] as ConceroNetwork;
+	const network = conceroNetworks[name as keyof typeof conceroNetworks];
 
 	if (!network) {
 		log(`Network ${name} not found in conceroNetworks`, "displayRouterGasFeeConfig");

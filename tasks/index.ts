@@ -9,8 +9,6 @@ import deployPauseTask from "./deployPause.task";
 import { deployPriceFeedTask } from "./deployPriceFeed/deployPriceFeedTask";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { submitMessage } from "./deployRouter/submitMessage.task";
-import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
-import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
 import { getLastGasPriceTask } from "./getLastGasPrice.task";
 import { getNativeNativeRateTask } from "./getNativeNativeRate.task";
@@ -49,8 +47,6 @@ export {
 	setVerifierGasFeeConfig,
 	deployPriceFeedTask,
 	deployRouterTask,
-	deployVerifierTask,
-	setVerifierVariables,
 	deployContracts,
 	setRouterSupportedChains,
 	setIsOperatorRegistered,

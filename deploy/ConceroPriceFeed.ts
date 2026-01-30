@@ -1,3 +1,4 @@
+import { getEnvVar } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { DEPLOY_CONFIG_TESTNET, conceroNetworks } from "../constants";
@@ -29,7 +30,11 @@ export const deployPriceFeed: DeploymentFunction = async (
 
 	const defaultArgs: DeployArgs = {
 		chainSelector: chain.chainSelector,
-		feedUpdater: process.env.FEED_UPDATER_ADDRESS!,
+		feedUpdater: getEnvVar(
+			chain.type === "mainnet"
+				? "MAINNET_FEED_UPDATER_ADDRESS"
+				: "TESTNET_FEED_UPDATER_ADDRESS",
+		),
 	};
 
 	const args: DeployArgs = {

@@ -18,7 +18,7 @@ async function deployPriceFeedTask(taskArgs: any, hre: HardhatRuntimeEnvironment
 		await deployTransparentProxy(hre, ProxyEnum.priceFeedProxy);
 	}
 
-	if (taskArgs.implementation) {
+	if (taskArgs.implementation && !taskArgs.proxy) {
 		await upgradeProxyImplementation(hre, ProxyEnum.priceFeedProxy, false);
 	}
 }

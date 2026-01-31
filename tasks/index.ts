@@ -13,6 +13,7 @@ import fetchTransactionTask from "./fetchTransaction.task";
 import { getLastGasPriceTask } from "./getLastGasPrice.task";
 import { getNativeNativeRateTask } from "./getNativeNativeRate.task";
 import { getNativeUsdRateTask } from "./getNativeUsdRate.task";
+import sendNativeTokenTrezor from "./nativeSender/sendNativeTokenTrezor.task";
 import { sendNativeTokensTask } from "./nativeSender/sendNativeTokens.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import { deployRelayerLibTask } from "./relayer/deployRelayer.task";
@@ -71,4 +72,5 @@ export {
 	submitMessage,
 	grantRoleTask,
 	extractDonSignersTask,
+	sendNativeTokenTrezor,
 };

@@ -927,7 +927,7 @@
 
 "@concero/contract-utils@https://github.com/concero/contract-utils#feature/v3/export-generic-deploy":
   version "1.0.0"
-  resolved "https://github.com/concero/contract-utils#9f57432ddf77177415452ded7deb7a9f06ddbb4b"
+  resolved "https://github.com/concero/contract-utils#9c9e210fb082077c574397408fee9e1af81b921d"
   dependencies:
     "@concero/concero-networks" "https://github.com/concero/concero-networks"
 

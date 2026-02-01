@@ -4,14 +4,15 @@ import { Hex } from "viem";
 import { DEPLOY_CONFIG_TESTNET, ProxyEnum } from "../constants";
 import { EnvFileName, EnvPrefixes, IProxyType } from "../types/deploymentVariables";
 import {
-	IDeployResult,
 	extractProxyAdminAddress,
 	genericDeploy,
 	getEnvAddress,
 	getEnvFileName,
+	IDeployResult,
 	log,
 	updateEnvAddress,
 } from "../utils";
+import { getTrezorAddress, getTrezorDeployEnabled } from "@concero/contract-utils";
 
 export const deployTransparentProxy = async (
 	hre: HardhatRuntimeEnvironment,
@@ -20,6 +21,7 @@ export const deployTransparentProxy = async (
 ): Promise<IDeployResult> => {
 	const { name } = hre.network;
 	const [deployer] = await hre.ethers.getSigners();
+	const isTrezorDeploy = getTrezorDeployEnabled();
 
 	let implementationKey: keyof EnvPrefixes;
 	if (proxyType === ProxyEnum.routerProxy) {
@@ -44,6 +46,8 @@ export const deployTransparentProxy = async (
 		gasLimit = config.proxy.gasLimit;
 	}
 
+	const initialOwner = isTrezorDeploy ? await getTrezorAddress() : deployer.address;
+
 	const deployment = await genericDeploy(
 		{
 			hre,
@@ -53,7 +57,7 @@ export const deployTransparentProxy = async (
 			},
 		},
 		initialImplementation,
-		deployer.address,
+		initialOwner,
 		callData ?? "0x",
 	);
 
@@ -67,7 +71,7 @@ export const deployTransparentProxy = async (
 	const proxyAdminAddress = extractProxyAdminAddress(deployment.receipt);
 
 	log(
-		`Deployed at: ${proxyAdminAddress}. initialOwner: ${deployer.address}`,
+		`Deployed at: ${proxyAdminAddress}. initialOwner: ${initialOwner}`,
 		`deployProxyAdmin: ${proxyType}`,
 		deployment.chainName,
 	);

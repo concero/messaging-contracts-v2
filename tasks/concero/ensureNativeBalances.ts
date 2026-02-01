@@ -9,8 +9,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { viemReceiptConfig } from "../../constants";
 import { type BalanceInfo } from "../../types/BalanceInfo";
 import { type ConceroNetwork } from "../../types/ConceroNetwork";
-import { getEnvVar, getFallbackClients } from "../../utils";
-import { err, log } from "../../utils";
+import { err, getEnvVar, getFallbackClients, log } from "../../utils";
 
 const DEFAULT_TARGET_BALANCE = parseEther("0.001");
 
@@ -33,17 +32,18 @@ const TARGET_ALIASES: Record<string, string[]> = {
 	mainnet: [],
 };
 
-const mainnetDonorAccount = privateKeyToAccount(`0x${MAINNET_DEPLOYER_PRIVATE_KEY}`);
-const testnetDonorAccount = privateKeyToAccount(`0x${TESTNET_DEPLOYER_PRIVATE_KEY}`);
-
 class BalanceChecker {
 	private readonly readlineInterface: readline.Interface;
+	private readonly mainnetDonorAccount;
+	private readonly testnetDonorAccount;
 
 	constructor() {
 		this.readlineInterface = readline.createInterface({
 			input: process.stdin,
 			output: process.stdout,
 		});
+		this.mainnetDonorAccount = privateKeyToAccount(`0x${MAINNET_DEPLOYER_PRIVATE_KEY}`);
+		this.testnetDonorAccount = privateKeyToAccount(`0x${TESTNET_DEPLOYER_PRIVATE_KEY}`);
 	}
 
 	async prompt(question: string): Promise<string> {
@@ -132,7 +132,7 @@ class BalanceChecker {
 
 	async ensureNativeBalances(isTestnet: boolean): Promise<void> {
 		const networks = isTestnet ? testnetNetworks : mainnetNetworks;
-		const donorAccount = isTestnet ? testnetDonorAccount : mainnetDonorAccount;
+		const donorAccount = isTestnet ? this.testnetDonorAccount : this.mainnetDonorAccount;
 		const networkType = isTestnet ? "testnet" : "mainnet";
 
 		const balancesByChain: Record<string, BalanceInfo[]> = {};

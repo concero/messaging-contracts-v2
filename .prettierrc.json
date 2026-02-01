@@ -3,7 +3,7 @@
     "printWidth": 120,
     "tabWidth": 4,
     "trailingComma": "all",
-    "plugins": ["prettier-plugin-solidity", "@trivago/prettier-plugin-sort-imports"],
+    "plugins": ["prettier-plugin-solidity"],
     "overrides": [
         {
             "files": ["**/*.ts"],
@@ -16,21 +16,7 @@
                 "singleQuote": false,
                 "bracketSpacing": true,
                 "semi": true,
-                "useTabs": true,
-                "importOrderSeparation": true,
-                "importOrderSortSpecifiers": true,
-                "importOrder": [
-                    "^.*config.*",
-                    "^(node:.*|assert|buffer|child_process|cluster|crypto|dgram|dns|events|fs|http|https|net|os|path|punycode|querystring|readline|stream|string_decoder|tls|url|util|v8|vm|worker_threads|zlib)(/.*)?$",
-                    "^\\u0000",
-                    "^@?\\w",
-                    "^(viem|ethers|hardhat)",
-                    "^@concero(/.*)?$",
-                    "^@lanca(/.*)?$",
-                    "^contracts/(.*)$",
-                    "^@(.*)$",
-                    "^[./]"
-                ]
+                "useTabs": true
             }
         },
         {

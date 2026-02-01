@@ -35,8 +35,10 @@ import {
 } from "./utils";
 import grantRoleTask from "./utils/grantRole.task";
 import withdrawFees from "./withdrawFees";
+import getDeployerBalance from "./getDeployerBalance.task";
 
 export {
+	getDeployerBalance,
 	ensureNativeBalances,
 	callContractFunction,
 	changeOwnership,

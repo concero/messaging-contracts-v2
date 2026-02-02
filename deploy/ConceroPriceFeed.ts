@@ -1,13 +1,13 @@
 import { getEnvVar } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { DEPLOY_CONFIG_TESTNET, conceroNetworks } from "../constants";
+import { conceroNetworks, DEPLOY_CONFIG_TESTNET } from "../constants";
 import { EnvFileName } from "../types/deploymentVariables";
 import {
-	IDeployResult,
 	genericDeploy,
 	getEnvFileName,
 	getNetworkEnvKey,
+	IDeployResult,
 	updateEnvVariable,
 } from "../utils";
 

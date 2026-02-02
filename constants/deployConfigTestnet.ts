@@ -28,4 +28,12 @@ export const DEPLOY_CONFIG_TESTNET: DeployConfigTestnet = {
 			gasLimit: 500000,
 		},
 	},
+	viction: {
+		priceFeed: {
+			gasLimit: 3_000_000,
+		},
+		proxy: {
+			gasLimit: 3_000_000,
+		},
+	},
 };

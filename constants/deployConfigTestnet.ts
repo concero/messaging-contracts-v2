@@ -36,4 +36,12 @@ export const DEPLOY_CONFIG_TESTNET: DeployConfigTestnet = {
 			gasLimit: 3_000_000,
 		},
 	},
+	skale: {
+		priceFeed: {
+			gasLimit: 200_000_000,
+		},
+		proxy: {
+			gasLimit: 200_000_000,
+		},
+	},
 };

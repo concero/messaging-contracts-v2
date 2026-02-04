@@ -929,7 +929,7 @@
 
 "@concero/concero-networks@https://github.com/concero/concero-networks":
   version "1.0.0"
-  resolved "https://github.com/concero/concero-networks#1e7990233b502a5de1ad2a789ab8c87d022674b6"
+  resolved "https://github.com/concero/concero-networks#6b95364a3fcc05bb4a77cab5bb0746c27957c705"
   dependencies:
     axios "1.13.2"
     esbuild "^0.27.0"
@@ -938,7 +938,7 @@
 
 "@concero/contract-utils@https://github.com/concero/contract-utils#feature/v3/export-generic-deploy":
   version "1.0.0"
-  resolved "https://github.com/concero/contract-utils#f97142aae5ae19825ab0968578422d8fc2f05287"
+  resolved "https://github.com/concero/contract-utils#48ad305657ddb4b3527de61dcc90175cafa9bd17"
   dependencies:
     "@concero/concero-networks" "https://github.com/concero/concero-networks"
 

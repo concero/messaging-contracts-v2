@@ -44,4 +44,12 @@ export const DEPLOY_CONFIG_TESTNET: DeployConfigTestnet = {
 			gasLimit: 200_000_000,
 		},
 	},
+	nebulaMainnet: {
+		priceFeed: {
+			gasLimit: 100_000_000,
+		},
+		proxy: {
+			gasLimit: 100_000_000,
+		},
+	},
 };

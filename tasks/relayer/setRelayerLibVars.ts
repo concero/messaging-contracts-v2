@@ -1,8 +1,11 @@
-import { ConceroTestnetNetworkNames, conceroNetworks } from "@concero/contract-utils";
+import {
+	conceroNetworks,
+	ConceroTestnetNetworkNames,
+	trezorWriteContract,
+} from "@concero/contract-utils";
 import { Address, Hash } from "viem";
 
 import {
-	ethersSignerCallContract,
 	getEnvVar,
 	getFallbackClients,
 	getNetworkEnvKey,
@@ -10,7 +13,8 @@ import {
 	log,
 } from "../../utils";
 
-const relayer = "0x51aa24026e9367987e931caabd6519fb491a274a";
+const testnetRelayer = "0x51aa24026e9367987e931caabd6519fb491a274a";
+const mainnetRelayer = "0x22BdE89606d9316404a21ff7ABb63ADCE506D198";
 
 export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetworkNames) {
 	const conceroNetwork = conceroNetworks[conceroNetworkName];
@@ -23,6 +27,8 @@ export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetwor
 
 	const { abi: relayerLibAbi } = hre.artifacts.readArtifactSync("RelayerLib");
 
+	const relayer = conceroNetwork.type === "mainnet" ? mainnetRelayer : testnetRelayer;
+
 	const isRelayerAllowed = await publicClient.readContract({
 		address: relayerLib,
 		abi: relayerLibAbi,
@@ -31,24 +37,23 @@ export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetwor
 	});
 
 	if (isRelayerAllowed === true) return;
+
+	log(`Setting relayer: ${relayer}`, conceroNetworkName);
+
 	let hash: Hash;
+
 	const functionArgs = [[relayer], [true]];
+	const writeContractParams = {
+		address: relayerLib,
+		abi: relayerLibAbi,
+		functionName: "setRelayers",
+		args: functionArgs,
+	};
 
 	if (getTrezorDeployEnabled()) {
-		hash = await ethersSignerCallContract(
-			hre,
-			relayerLib,
-			relayerLibAbi,
-			"setRelayers",
-			...functionArgs,
-		);
+		hash = await trezorWriteContract({ publicClient }, writeContractParams);
 	} else {
-		hash = await walletClient.writeContract({
-			address: relayerLib,
-			abi: relayerLibAbi,
-			functionName: "setRelayers",
-			args: functionArgs,
-		});
+		hash = await walletClient.writeContract(writeContractParams);
 	}
 
 	const { status } = await publicClient.waitForTransactionReceipt({ hash });

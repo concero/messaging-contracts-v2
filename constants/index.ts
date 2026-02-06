@@ -1,3 +1,5 @@
+import { conceroNetworks } from "@concero/contract-utils";
+
 import { secrets } from "./clf/secrets";
 import {
 	CLF_DON_HOSTED_SECRETS_SLOT,
@@ -7,23 +9,21 @@ import {
 	CLF_TESTNET_TTL,
 } from "./clf/secretsConfig";
 import { simulationConfig } from "./clf/simulationConfig";
-import { conceroNetworks, mainnetNetworks, testnetNetworks } from "./conceroNetworks";
 import { DEPLOY_CONFIG_TESTNET } from "./deployConfigTestnet";
 import {
-	ADMIN_SLOT,
 	ADMIN_ROLE,
 	ProxyEnum,
-	envPrefixes,
 	getViemReceiptConfig,
 	viemReceiptConfig,
 	writeContractConfig,
 } from "./deploymentVariables";
+import { donRegistryAbi } from "./donRegistryAbi";
+import { envPrefixes } from "./envPrefixes";
 import { gasFeeConfig, gasFeeConfigVerifier, networkGasConfig } from "./gasConfig";
 // import { liveNetworks } from "./liveNetworks";
 import { urls } from "./rpcUrls";
 
 export {
-	ADMIN_SLOT,
 	ADMIN_ROLE,
 	secrets,
 	CLF_DON_HOSTED_SECRETS_SLOT,
@@ -46,4 +46,5 @@ export {
 	networkGasConfig,
 	// liveNetworks,
 	DEPLOY_CONFIG_TESTNET,
+	donRegistryAbi,
 };

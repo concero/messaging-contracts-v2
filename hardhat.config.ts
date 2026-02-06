@@ -3,25 +3,20 @@ import { HardhatUserConfig } from "hardhat/config";
 
 import "@chainlink/hardhat-chainlink";
 import "@nomicfoundation/hardhat-chai-matchers";
-import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-network-helpers";
 import "@nomicfoundation/hardhat-verify";
 import "@nomicfoundation/hardhat-viem";
-import "@tenderly/hardhat-tenderly";
+import "@nomicfoundation/hardhat-ethers";
 import "@typechain/hardhat";
 import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "@tenderly/hardhat-tenderly";
 
 import { conceroNetworks } from "./constants";
 import "./tasks";
-import { getTrezorDeployEnabled } from "./utils/getTrezorDeployEnabled";
-
-if (getTrezorDeployEnabled()) {
-	require("@yankeguo/hardhat-trezor");
-}
 
 const enableGasReport = process.env.REPORT_GAS !== "false";
 

@@ -1,14 +1,14 @@
 import { task } from "hardhat/config";
 
+import { ConceroNetworkNames } from "@concero/contract-utils";
 import { abi as ownableAbi } from "@openzeppelin/contracts/build/contracts/Ownable.json";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 import { conceroNetworks, viemReceiptConfig } from "../../constants";
-import { ConceroNetworkNames } from "../../types/ConceroNetwork";
 import { getFallbackClients } from "../../utils";
-import log from "../../utils/log";
+import { log } from "../../utils";
 
 export async function changeOwnership(
 	hre: HardhatRuntimeEnvironment,

@@ -1,7 +1,7 @@
 import { type PublicClient } from "viem";
 
 import { ConceroNetwork } from "../types/ConceroNetwork";
-import { getFallbackClients } from "./getViemClients";
+import { getFallbackClients } from "../utils";
 
 interface GasParameters {
 	maxFeePerGas: bigint;

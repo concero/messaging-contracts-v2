@@ -17,16 +17,24 @@
 # ==========================================================================
 local-simulation:
   user-workflow:
-    workflow-name: "message-report"
+    workflow-name: "local-simulation"
   workflow-artifacts:
     workflow-path: "./main.ts"
-    config-path: "./config.testnet.json"
-    secrets-path: "../secrets.testnet.yaml"
+    config-path: "./config.stage.json"
+    secrets-path: "../secrets.stage.yaml"
 
 # ==========================================================================
+stage-testnet:
+  user-workflow:
+    workflow-name: "stage-messaging-001"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.stage.json"
+    secrets-path: "../secrets.stage.yaml"
+
 production-testnet:
   user-workflow:
-    workflow-name: "testnet-messaging"
+    workflow-name: "testnet-messaging-001"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.testnet.json"
@@ -37,5 +45,5 @@ production-mainnet:
     workflow-name: "mainnet-messaging"
   workflow-artifacts:
     workflow-path: "./main.ts"
-    config-path: "./config.testnet.json" # TODO: move to mainnet
+    config-path: "./config.mainnet.json"
     secrets-path: "../secrets.mainnet.yaml"

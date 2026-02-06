@@ -2,12 +2,11 @@ import { task } from "hardhat/config";
 
 import functionsCoordinatorAbi from "@chainlink/contracts/abi/v0.8/FunctionsCoordinator.json";
 import functionsRouterAbi from "@chainlink/contracts/abi/v0.8/FunctionsRouter.json";
-import { getNetworkEnvKey } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { decodeEventLog, getAbiItem } from "viem";
 
 import { conceroNetworks } from "../../constants";
-import { err, getEnvVar, getFallbackClients, log } from "../../utils";
+import { err, getEnvVar, getFallbackClients, getNetworkEnvKey, log } from "../../utils";
 
 //todo: base throws max block range 5000 error. find a better RPC to fetch signers for base.
 const mainnetNetworks = [

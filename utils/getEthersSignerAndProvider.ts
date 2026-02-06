@@ -1,8 +1,8 @@
+import { type ConceroNetworkNames } from "@concero/contract-utils";
 import { ethers as ethersv6 } from "ethers";
 import { ethers } from "ethers-v5";
 
 import { urls } from "../constants";
-import { type ConceroNetworkNames } from "../types/ConceroNetwork";
 
 //todo: deployer PK to be passed as arg
 //todo: rename to getEthersV5SignerAndProvider

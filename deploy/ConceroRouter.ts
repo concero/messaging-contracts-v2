@@ -1,14 +1,24 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
-import { genericDeploy } from "./GenericDeploy";
+import { EnvFileName } from "../types/deploymentVariables";
+import { IDeployResult, genericDeploy, getEnvFileName, updateEnvAddress } from "../utils";
 
-export const deployRouter = async (hre: HardhatRuntimeEnvironment) => {
-	const network = conceroNetworks[hre.network.name];
+export const deployRouter = async (hre: HardhatRuntimeEnvironment): Promise<IDeployResult> => {
+	const network = conceroNetworks[hre.network.name as keyof typeof conceroNetworks];
 	const args = { chainSelector: network.chainSelector };
 
-	await genericDeploy(
-		{ hre, contractName: "ConceroRouter", contractPrefix: "router" },
+	const deployment = await genericDeploy(
+		{ hre, contractName: "ConceroRouter" },
 		args.chainSelector,
 	);
+
+	updateEnvAddress(
+		"router",
+		deployment.address,
+		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
+		deployment.chainName,
+	);
+
+	return deployment;
 };

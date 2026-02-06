@@ -1,6 +1,7 @@
 import { changeProxyAdminOwnerTask } from "./changeProxyAdminOwner.task";
 import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployCreValidatorLibTask } from "./cre/deployCreValidatorLib.task";
+import { extractDonSignersTask } from "./cre/extractDonSigners.task";
 import triggerCreTask from "./cre/triggerCre.task";
 import { deployContracts } from "./deployContracts";
 import deployExampleClient from "./deployExampleClient";
@@ -8,13 +9,12 @@ import deployPauseTask from "./deployPause.task";
 import { deployPriceFeedTask } from "./deployPriceFeed/deployPriceFeedTask";
 import { deployRouterTask } from "./deployRouter/deployRouterTask";
 import { submitMessage } from "./deployRouter/submitMessage.task";
-import { deployVerifierTask } from "./deployVerifier/deployVerifierTask";
-import { setVerifierVariables } from "./deployVerifier/setVerifierVariables";
 import fetchTransactionTask from "./fetchTransaction.task";
 import measureFinalizationRealTask from "./measureFinalizationReal.task";
 import { getLastGasPriceTask } from "./getLastGasPrice.task";
 import { getNativeNativeRateTask } from "./getNativeNativeRate.task";
 import { getNativeUsdRateTask } from "./getNativeUsdRate.task";
+import sendNativeTokenTrezor from "./nativeSender/sendNativeTokenTrezor.task";
 import { sendNativeTokensTask } from "./nativeSender/sendNativeTokens.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import { deployRelayerLibTask } from "./relayer/deployRelayer.task";
@@ -36,8 +36,10 @@ import {
 } from "./utils";
 import grantRoleTask from "./utils/grantRole.task";
 import withdrawFees from "./withdrawFees";
+import getDeployerBalance from "./getDeployerBalance.task";
 
 export {
+	getDeployerBalance,
 	ensureNativeBalances,
 	callContractFunction,
 	changeOwnership,
@@ -49,8 +51,6 @@ export {
 	setVerifierGasFeeConfig,
 	deployPriceFeedTask,
 	deployRouterTask,
-	deployVerifierTask,
-	setVerifierVariables,
 	deployContracts,
 	setRouterSupportedChains,
 	setIsOperatorRegistered,
@@ -75,4 +75,6 @@ export {
 	deployRelayerLibTask,
 	submitMessage,
 	grantRoleTask,
+	extractDonSignersTask,
+	sendNativeTokenTrezor,
 };

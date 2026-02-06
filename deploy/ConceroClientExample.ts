@@ -1,10 +1,15 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
-import { Deployment } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
-import { ConceroNetworkNames } from "../types/ConceroNetwork";
-import { getEnvVar, log, updateEnvVariable } from "../utils";
+import { EnvFileName } from "../types/deploymentVariables";
+import {
+	IDeployResult,
+	genericDeploy,
+	getEnvFileName,
+	getEnvVar,
+	getNetworkEnvKey,
+	updateEnvVariable,
+} from "../utils";
 
 type DeployArgs = {
 	conceroRouter: string;
@@ -14,17 +19,14 @@ type DeployArgs = {
 type DeploymentFunction = (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-) => Promise<Deployment>;
+) => Promise<IDeployResult>;
 
-const deployConceroClientExample: DeploymentFunction = async function (
+export const deployConceroClientExample: DeploymentFunction = async (
 	hre: HardhatRuntimeEnvironment,
 	overrideArgs?: Partial<DeployArgs>,
-): Promise<Deployment> {
-	const { deployer } = await hre.getNamedAccounts();
-	const { deploy } = hre.deployments;
+): Promise<IDeployResult> => {
 	const { name } = hre.network;
-	const chain = conceroNetworks[name as ConceroNetworkNames];
-	const { type: networkType } = chain;
+	const chain = conceroNetworks[name as keyof typeof conceroNetworks];
 
 	const defaultArgs = {
 		conceroRouter: getEnvVar(`CONCERO_ROUTER_PROXY_${getNetworkEnvKey(name)}`),
@@ -38,24 +40,21 @@ const deployConceroClientExample: DeploymentFunction = async function (
 		...overrideArgs,
 	};
 
-	const deployment = await deploy("ConceroClientExample", {
-		from: deployer,
-		args: [args.conceroRouter, args.relayerLib, args.validatorLib],
-		log: true,
-		autoMine: true,
-	});
+	const deployment = await genericDeploy(
+		{
+			hre,
+			contractName: "ConceroClientExample",
+		},
+		args.conceroRouter,
+		args.relayerLib,
+		args.validatorLib,
+	);
 
-	log(`Deployed at: ${deployment.address}`, "ConceroClientExample", name);
 	updateEnvVariable(
-		`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(name)}`,
+		`CONCERO_CLIENT_EXAMPLE_${getNetworkEnvKey(deployment.chainName)}`,
 		deployment.address,
-		`deployments.${networkType}`,
+		getEnvFileName(`deployments.${deployment.chainType}` as EnvFileName),
 	);
 
 	return deployment;
 };
-
-deployConceroClientExample.tags = ["ConceroClientExample"];
-
-export { deployConceroClientExample };
-export default deployConceroClientExample;

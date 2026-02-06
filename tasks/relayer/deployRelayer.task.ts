@@ -5,11 +5,12 @@ import { Address, encodeFunctionData } from "viem";
 
 import { ADMIN_ROLE, ProxyEnum } from "../../constants";
 import { deployTransparentProxy } from "../../deploy";
-import deployRelayerLib from "../../deploy/RelayerLib";
+import { deployRelayerLib } from "../../deploy/RelayerLib";
 import { compileContracts, getEnvAddress } from "../../utils";
 import { upgradeProxyImplementation } from "../utils";
 import { grantRole } from "../utils/grantRole.task";
 import { setRelayerLibVars } from "./setRelayerLibVars";
+import { getTrezorAddress, getTrezorDeployEnabled, log } from "@concero/contract-utils";
 
 async function deployRelayerLibTask(taskArgs: any, hre: HardhatRuntimeEnvironment) {
 	compileContracts({ quiet: true });
@@ -19,13 +20,21 @@ async function deployRelayerLibTask(taskArgs: any, hre: HardhatRuntimeEnvironmen
 	}
 
 	if (taskArgs.proxy) {
-		const { abi } = hre.artifacts.readArtifactSync("CreValidatorLib");
+		const { abi } = hre.artifacts.readArtifactSync("RelayerLib");
+
+		// TODO: refactor it
 		const [ethersSigner] = await hre.ethers.getSigners();
+
+		const initialAdmin = getTrezorDeployEnabled()
+			? await getTrezorAddress()
+			: (ethersSigner.address as Address);
+
+		log(`Initial admin for relayer lib: ${initialAdmin}`, hre.network.name);
 
 		const initializerCallData = encodeFunctionData({
 			abi,
 			functionName: "initialize",
-			args: [ethersSigner.address as Address],
+			args: [initialAdmin],
 		});
 
 		await deployTransparentProxy(hre, ProxyEnum.relayerLibProxy, initializerCallData);

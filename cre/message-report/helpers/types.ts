@@ -1,8 +1,10 @@
 import { Address, type Hash, Hex } from "viem";
 
 export type GlobalConfig = {
-	authorizedPublicKey: string;
-	deploymentsUrl: string;
+	authorizedPublicKey: Address;
+	relayerCallbackUrl: string;
+	chainsConfigUrl: string;
+	allowedMessageVersions: number[];
 };
 
 export type DecodedArgs = {
@@ -19,6 +21,7 @@ export type MessageSentLogData = {
 	validatorLibs: Address[];
 	relayerLib: Address;
 };
+
 export type DecodedMessageSentReceipt = {
 	version: number;
 	srcChainSelector: number;
@@ -36,8 +39,8 @@ export type DecodedMessageSentReceipt = {
 		gasLimit: number | null;
 	};
 
-	relayerLib: Hex;
-	validatorLibs: Hex[];
+	relayerConfig: Hex;
+	validatorConfigs: Hex[];
 	internalValidatorConfigs: Hex[];
 	payload: Hex;
 };

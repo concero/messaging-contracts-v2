@@ -1,96 +1,117 @@
-import { HTTPPayload, Report, Runtime } from "@chainlink/cre-sdk";
-import { keccak256 } from "viem";
+import {
+	HTTPPayload,
+	HTTPSendRequester,
+	Runtime,
+	consensusIdenticalAggregation,
+	cre,
+} from "@chainlink/cre-sdk";
+import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
+import { Hex, type Log } from "viem";
 
 import { DecodedArgs, DomainError, ErrorCode, GlobalConfig, Utility } from "../helpers";
-import { ChainsManager, PublicClient } from "../systems";
-import { buildResponseFromBatches } from "./buildResponseFromBatches";
+import { RpcRequester } from "../helpers/RpcRequester";
+import { ChainSelector, ChainsManager } from "../systems";
+import { buildValidation } from "./buildValidation";
 import { decodeArgs } from "./decodeArgs";
-import { fetchLogByMessageId } from "./fetchLogByMessageId";
+import { fetchBlockNumbers } from "./fetchBlockNumbers";
+import { fetchLogsByMessageIds } from "./fetchLogsByMessageIds";
+import { generateReport } from "./generateReport";
 import { parseMessageSentLog } from "./parseMessageSentLog";
 import { sendReportsToRelayer } from "./sendReportsToRelayer";
-import { validateBlockConfirmations } from "./validateBlockConfirmations";
+import { validateMessagesBlockConfirmations } from "./validateBlockConfirmations";
 import { validateDecodedArgs } from "./validateDecodedArgs";
 import { validateMessageVersion } from "./validateMessageVersion";
+import { validateSrcBlockConfirmations } from "./validateSrcBlockConfirmations";
 import { validateValidatorLib } from "./validateValidatorLib";
 
-async function fetchReport(
+let merkleTree: StandardMerkleTree<Hex[]>;
+let messageIds: Hex[];
+
+function parseLogs(
 	runtime: Runtime<GlobalConfig>,
-	item: DecodedArgs["batch"][number],
-): Promise<{ report: ReturnType<Report["x_generatedCodeOnly_unwrap"]>; messageId: string }> {
-	const routerAddress = ChainsManager.getOptionsBySelector(item.srcChainSelector)?.deployments
-		?.router;
-	if (!routerAddress) {
-		throw new DomainError(ErrorCode.NO_CHAIN_DATA, "Router deployment not found");
+	logs: ({ chainSelector: ChainSelector; log: Log } | null)[],
+) {
+	const parsedLogs = [];
+	for (const log of logs) {
+		try {
+			if (!log) continue;
+			const parsedLog = parseMessageSentLog(log);
+
+			runtime.log(
+				`Got log txHash=${log.log.transactionHash}, ${Utility.safeJSONStringify(parsedLog)}`,
+			);
+			validateMessageVersion(parsedLog.receipt.version, runtime);
+			validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
+			validateSrcBlockConfirmations(parsedLog.receipt);
+
+			parsedLogs.push(parsedLog);
+		} catch (e) {
+			runtime.log(`Error parsing log with id ${log?.log.topics?.[1]} ${JSON.stringify(e)}`);
+		}
 	}
+	return parsedLogs;
+}
 
-	runtime.log(`Got routerAddress=${routerAddress}`);
+function fetchMessagesAndGenerateProof(runtime: Runtime<GlobalConfig>, args: DecodedArgs) {
+	return (sendRequester: HTTPSendRequester) => {
+		ChainsManager.enrichOptions(runtime, sendRequester);
 
-	const publicClient = PublicClient.create(runtime, item.srcChainSelector);
+		const rpcRequester = new RpcRequester(
+			Object.fromEntries(
+				[...new Set(args.batch.map(i => i.srcChainSelector))].map(s => [
+					s,
+					ChainsManager.getOptionsBySelector(s).rpcUrls,
+				]),
+			),
+			sendRequester,
+			runtime,
+		);
 
-	const log = await fetchLogByMessageId(
-		runtime,
-		publicClient,
-		routerAddress,
-		item.messageId,
-		BigInt(item.blockNumber),
-	);
-	const parsedLog = parseMessageSentLog(log);
-	runtime.log(`Got log txHash=${log.transactionHash}, ${Utility.safeJSONStringify(parsedLog)}`);
+		const logs = fetchLogsByMessageIds(runtime, rpcRequester, args.batch);
+		const parsedLogs = parseLogs(runtime, logs);
+		const blockNumbers = fetchBlockNumbers(runtime, rpcRequester, parsedLogs);
+		runtime.log(`Fetched block numbers: ${Utility.safeJSONStringify(blockNumbers)}`);
 
-	validateMessageVersion(parsedLog.receipt.version, runtime);
-	await validateBlockConfirmations(
-		parsedLog.blockNumber,
-		parsedLog.receipt,
-		publicClient,
-		runtime,
-	);
-	validateValidatorLib(parsedLog.receipt.srcChainSelector, parsedLog.data.validatorLibs);
+		const validatedMessages = validateMessagesBlockConfirmations(
+			runtime,
+			parsedLogs,
+			blockNumbers,
+		);
 
-	if (!log || !log?.data) {
-		runtime.log(`Log where messageId=${item.messageId} not found`);
-	}
+		if (validatedMessages.length == 0) throw new DomainError(ErrorCode.LOGS_NOT_FOUND);
 
-	return {
-		messageId: item.messageId,
-		report: runtime
-			.report({
-				encoderName: "evm",
-				encodedPayload: Buffer.from(
-					keccak256(parsedLog.rawMessageReceipt, "bytes"),
-				).toString("base64"),
-				signingAlgo: "ecdsa",
-				hashingAlgo: "keccak256",
-			})
-			.result()
-			.x_generatedCodeOnly_unwrap(),
+		messageIds = validatedMessages.map(log => log.data.messageId);
+		merkleTree = StandardMerkleTree.of(
+			messageIds.map(id => [id]),
+			["bytes32"],
+		);
+
+		return merkleTree.root;
 	};
 }
 
 // pipeline stages for each validation request
 export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayload) {
 	try {
-		ChainsManager.enrichOptions(runtime);
-		ChainsManager.validateOptions(runtime);
-
 		const args = decodeArgs(payload);
+
 		runtime.log(`Decoded args: ${JSON.stringify(args)}`);
+		runtime.log(`Decoded args count: ${args.batch.length}`);
+
 		validateDecodedArgs(args);
 
-		const results = await Promise.allSettled(
-			args.batch.map(item => fetchReport(runtime, item)),
-		);
+		const merkleRoot = new cre.capabilities.HTTPClient()
+			.sendRequest(
+				runtime,
+				fetchMessagesAndGenerateProof(runtime, args),
+				consensusIdenticalAggregation<any>(),
+			)()
+			.result();
 
-		const failed = results.filter(r => r.status === "rejected").map(i => i.reason);
-		if (failed.length > 0) {
-			runtime.log(`Failed: ${failed.map(String).join(", ")}`);
-		}
+		const report = generateReport(runtime, merkleRoot);
+		const validation = buildValidation(report, messageIds, merkleTree);
 
-		const reports = results.filter(r => r.status === "fulfilled").map(r => r.value);
-
-		if (reports.length > 0) {
-			const response = buildResponseFromBatches(reports);
-			sendReportsToRelayer(runtime, response);
-		}
+		sendReportsToRelayer(runtime, validation);
 
 		return "success";
 	} catch (error) {

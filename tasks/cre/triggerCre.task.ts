@@ -28,7 +28,7 @@ task("trigger-cre", "").setAction(async taskArgs => {
 		},
 	};
 
-	const jwt = await createJWT(body, "0x" + getEnvVar("CRE_REQUESTER_PRIVATE_KEY"));
+	const jwt = await createJWT(body, "0x" + getEnvVar("TESTNET_CRE_REQUESTER_PRIVATE_KEY"));
 
 	const res = await fetch(creUrl, {
 		method: "POST",

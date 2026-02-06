@@ -1,7 +1,7 @@
+import { task } from "hardhat/config";
+
 import { nonceManager } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-
-import { task } from "hardhat/config";
 
 import { getEnvVar } from "../../utils";
 import { NativeTokenSender } from "./NativeTokenSender";

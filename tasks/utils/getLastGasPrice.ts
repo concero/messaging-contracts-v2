@@ -1,7 +1,7 @@
+import { ConceroNetwork } from "@concero/contract-utils";
 import { formatUnits } from "viem";
 
 import { ProxyEnum, conceroNetworks } from "../../constants";
-import { ConceroNetwork } from "../../types/ConceroNetwork";
 import { err, getEnvAddress, getFallbackClients, log } from "../../utils";
 
 interface ConceroPriceFeedInfo {

@@ -47,16 +47,16 @@ export namespace MessagingCodec {
 
 		// relayer lib
 		const relayerLen = readUInt(3);
-		const relayerLib: Hex = `0x${readHex(relayerLen)}`;
+		const relayerConfig: Hex = `0x${readHex(relayerLen)}`;
 
 		// validator libs
 		const validatorCount = readUInt(3);
-		const validatorLibs: Hex[] = [];
+		const validatorConfigs: Hex[] = [];
 		const internalValidatorConfigs: Hex[] = [];
 
 		for (let i = 0; i < validatorCount; i++) {
 			const L = readUInt(3);
-			validatorLibs.push(`0x${readHex(L)}`);
+			validatorConfigs.push(`0x${readHex(L)}`);
 		}
 
 		for (let i = 0; i < validatorCount; i++) {
@@ -82,8 +82,8 @@ export namespace MessagingCodec {
 				receiver: dstReceiver,
 				gasLimit: dstGasLimit,
 			},
-			relayerLib,
-			validatorLibs,
+			relayerConfig,
+			validatorConfigs,
 			internalValidatorConfigs,
 			payload,
 		};

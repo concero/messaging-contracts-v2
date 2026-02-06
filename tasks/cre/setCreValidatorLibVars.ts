@@ -1,29 +1,17 @@
-import { getNetworkEnvKey } from "@concero/contract-utils";
+import { ConceroTestnetNetworkNames, conceroNetworks } from "@concero/contract-utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { Address, PublicClient } from "viem";
 
-import { ConceroTestnetNetworkNames, conceroNetworks } from "../../constants/conceroNetworks";
-import { getEnvVar, getFallbackClients, log } from "../../utils";
-import { getTrezorDeployEnabled } from "../../utils/getTrezorDeployEnabled";
-import { ethersSignerCallContract } from "../utils/ethersSignerCallContract";
-
-const donSigners = [
-	"0x4d7D71C7E584CfA1f5c06275e5d283b9D3176924",
-	"0x1A89c98E75983Ec384AD8e83EAf7D0176eEaF155",
-	"0xdE5CD1dD4300A0b4854F8223add60D20e1dFe21b",
-	"0x4D6CFd44F94408a39fB1af94a53c107A730ba161",
-	"0xF3BAa9A99B5ad64f50779F449Bac83bAAC8bfDb6",
-	"0xD7F22fB5382ff477d2fF5c702cAB0EF8abf18233",
-	"0xcdf20F8FFD41B02c680988b20e68735cc8C1ca17",
-	"0xff9b062fcCb2f042311343048b9518068370F837",
-	"0x4f99b550623e77B807df7cbED9C79D55E1163B48",
-	"0xe55fcaf921e76c6bbcf9415bba12b1236f07b0c3",
-];
-
-const workflowId = "0x00cc1d0ed7ce245736630dfcdd97bd691781ab1855e19e621a694d6093c0f5f0";
-const minSignersCount = 7;
-
-const dstChainGasLimit = 100_000n;
+import {
+	ethersSignerCallContract,
+	getEnvVar,
+	getFallbackClients,
+	getNetworkEnvKey,
+	getTrezorDeployEnabled,
+	log,
+} from "../../utils";
+import { getVerificationGasLimit } from "../../utils/getVerificationGasLimit";
+import { isDeployToStage } from "../../utils/isDeployToStage";
 
 async function isDonSignerAllowed(
 	signer: Address,
@@ -58,6 +46,10 @@ export async function setCreDonSigners(
 	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
 
 	const signersToSet = [];
+
+	const donSigners = getEnvVar("CRE_DON_SIGNERS")
+		.split(",")
+		.map(addr => addr.trim() as Address);
 
 	for (const signer of donSigners) {
 		const isSignerAllowed = await isDonSignerAllowed(
@@ -124,6 +116,8 @@ async function setExpectedSignersCount(
 		args: [],
 	});
 
+	const minSignersCount = getEnvVar("CRE_MIN_SIGNERS_COUNT");
+
 	if (currentExpectedSignersCount === minSignersCount) {
 		return;
 	}
@@ -170,6 +164,14 @@ export async function setIsWorkflowIdAllowed(
 		"../../artifacts/contracts/validators/CreValidatorLib/EcdsaValidatorLib.sol/EcdsaValidatorLib.json"
 	);
 	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
+
+	const workflowId = getEnvVar(
+		isDeployToStage()
+			? "CRE_WORKFLOW_ID_STAGE"
+			: conceroNetwork.type === "mainnet"
+				? "CRE_WORKFLOW_ID_MAINNET"
+				: "CRE_WORKFLOW_ID_TESTNET",
+	);
 
 	const isWorkflowAllowed = await publicClient.readContract({
 		address: validatorLib,
@@ -233,7 +235,11 @@ export async function setDstChainVerificationGasLimit(
 			args: [conceroNetworks[conceroNetwork].chainSelector],
 		});
 
-		if (BigInt(currentGasLimit) === dstChainGasLimit) continue;
+		const dstChainGasLimit = getVerificationGasLimit(
+			conceroNetworks[conceroNetwork].chainSelector,
+		);
+
+		if (currentGasLimit === dstChainGasLimit) continue;
 
 		dstChainSelectorsToUpdate.push(conceroNetworks[conceroNetwork].chainSelector);
 	}
@@ -242,7 +248,7 @@ export async function setDstChainVerificationGasLimit(
 
 	const functionArgs = [
 		dstChainSelectorsToUpdate,
-		dstChainSelectorsToUpdate.map(_ => dstChainGasLimit),
+		dstChainSelectorsToUpdate.map(chainSelector => getVerificationGasLimit(chainSelector)),
 	];
 
 	let hash;

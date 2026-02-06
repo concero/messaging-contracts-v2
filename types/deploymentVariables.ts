@@ -39,5 +39,6 @@ export type EnvFileName =
 	| "deployments.mainnet"
 	| "deployments.testnet"
 	| "deployments.localhost"
+	| "deployments.stage"
 	| "apikeys"
 	| "tokens";

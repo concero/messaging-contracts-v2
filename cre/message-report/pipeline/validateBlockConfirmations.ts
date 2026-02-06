@@ -1,48 +1,69 @@
-import { PublicClient, maxUint64 } from "viem";
+import { Runtime } from "@chainlink/cre-sdk";
+import { Hex, maxUint64 } from "viem";
 
-import { DecodedMessageSentReceipt, DomainError, ErrorCode } from "../helpers";
+import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { defaultMinConfirmations } from "../helpers/constants";
 import { ChainsManager } from "../systems";
+import { ILatestBlockNumbers } from "./fetchBlockNumbers";
+import { IParsedLog } from "./parseMessageSentLog";
 
-const confirmationsError = new DomainError(
-	ErrorCode.UNKNOWN_ERROR,
-	"Not enough block confirmations",
-);
+const confirmationsError = (messageId: Hex) =>
+	new DomainError(ErrorCode.EXPECTED_LOG_CONFIRMATIONS_NOT_REACHED, messageId);
 
-export const validateBlockConfirmations = async (
-	logBlockNumber: bigint,
-	logParsedReceipt: DecodedMessageSentReceipt,
-	client: PublicClient,
-	runtime,
-): Promise<void> => {
-	const chainsOptions = ChainsManager.getOptionsBySelector(logParsedReceipt.srcChainSelector);
+export const validateBlockConfirmations = (
+	log: IParsedLog,
+	latestBlockNumbers: ILatestBlockNumbers,
+) => {
+	const chainsOptions = ChainsManager.getOptionsBySelector(log.receipt.srcChainSelector);
 
 	let blockConfirmationsDelta: bigint;
 	// if supported, use finalized blockNumber in the over cases use delta between log.blockNumber and chain.blockNumber
-	if (logParsedReceipt.srcChainData.blockConfirmations === maxUint64) {
+	if (log.receipt.srcChainData.blockConfirmations === maxUint64) {
 		if (chainsOptions.finalityTagEnabled) {
-			const lastFinalizedBlock = await client.getBlock({
-				blockTag: "finalized",
-			});
+			const lastFinalizedBlock = latestBlockNumbers[log.receipt.srcChainSelector]?.finalized;
+			if (!lastFinalizedBlock) throw new DomainError(ErrorCode.LATEST_BLOCK_NOT_FETCHED);
 
-			if (logBlockNumber > BigInt(lastFinalizedBlock.number)) {
-				throw confirmationsError;
+			if (log.blockNumber > BigInt(lastFinalizedBlock)) {
+				throw confirmationsError(log.data.messageId);
 			}
 
 			return;
 		} else {
-			blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations);
+			blockConfirmationsDelta = BigInt(chainsOptions.finalityConfirmations!);
 		}
-	} else if (logParsedReceipt.srcChainData.blockConfirmations === 0n) {
-		blockConfirmationsDelta = BigInt(chainsOptions.minBlockConfirmations);
+	} else if (log.receipt.srcChainData.blockConfirmations === 0n) {
+		blockConfirmationsDelta = BigInt(
+			chainsOptions.minBlockConfirmations ?? defaultMinConfirmations,
+		);
 	} else {
-		blockConfirmationsDelta = logParsedReceipt.srcChainData.blockConfirmations;
+		blockConfirmationsDelta = log.receipt.srcChainData.blockConfirmations;
 	}
 
-	const actualChainBlock = await client.getBlockNumber();
+	const actualChainBlock = latestBlockNumbers[log.receipt.srcChainSelector]?.latest;
+	if (!actualChainBlock) throw new DomainError(ErrorCode.LATEST_BLOCK_NOT_FETCHED);
 
-	runtime.log("actualChainBlock: " + actualChainBlock);
-
-	if (logBlockNumber + blockConfirmationsDelta > actualChainBlock) {
-		throw confirmationsError;
+	if (log.blockNumber + blockConfirmationsDelta > actualChainBlock) {
+		throw confirmationsError(log.data.messageId);
 	}
 };
+
+export function validateMessagesBlockConfirmations(
+	runtime: Runtime<GlobalConfig>,
+	parsedLogs: IParsedLog[],
+	latestBlockNumbers: ILatestBlockNumbers,
+) {
+	const validMessages = [];
+
+	for (const log of parsedLogs) {
+		try {
+			validateBlockConfirmations(log, latestBlockNumbers);
+			validMessages.push(log);
+		} catch (e) {
+			runtime.log(
+				`Validate block confirmations error: ${JSON.stringify(e instanceof Error ? e.message : e)}`,
+			);
+		}
+	}
+
+	return validMessages;
+}

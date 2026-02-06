@@ -1,9 +1,7 @@
-import { Runtime, consensusIdenticalAggregation, cre } from "@chainlink/cre-sdk";
-import { sha256 } from "viem";
+import { HTTPSendRequester, Runtime } from "@chainlink/cre-sdk";
 
-import { DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { CRE, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { headers } from "../helpers/constants";
-import { fetcher } from "../helpers/fetcher";
 
 export enum DeploymentType {
 	Router = "router",
@@ -12,13 +10,16 @@ export enum DeploymentType {
 }
 export type DeploymentAddress = `0x${string}`;
 
+export type ChainSelector = number;
+
 export type Chain = {
 	id: string;
-	chainSelector: number;
+	chainSelector: ChainSelector;
 	name: string;
 	isTestnet: boolean;
-	finalityTagEnabled: boolean;
-	finalityConfirmations: number;
+	finalityTagEnabled?: boolean;
+	finalityConfirmations?: number;
+	isFinalitySupported?: boolean;
 	minBlockConfirmations: number;
 	rpcUrls: string[];
 	blockExplorers: {
@@ -35,42 +36,22 @@ export type Chain = {
 };
 
 let chains: Record<Chain["chainSelector"], Chain> = {};
-let currentChainsHashSum: string = "";
 
 export class ChainsManager {
-	static enrichOptions(runtime: Runtime<GlobalConfig>) {
-		const httpClient = new cre.capabilities.HTTPClient();
+	static enrichOptions(runtime: Runtime<GlobalConfig>, sendRequester: HTTPSendRequester) {
+		chains = CRE.sendHttpRequestSync(sendRequester, {
+			url: runtime.config.chainsConfigUrl,
+			method: "GET",
+			headers,
+		});
 
-		httpClient
-			.sendRequest(
-				runtime,
-				fetcher.build(runtime, {
-					url: runtime.getSecret({ id: "CHAINS_CONFIG_URL" }).result().value,
-					method: "GET",
-					headers,
-				}),
-				consensusIdenticalAggregation(),
-			)()
-			.result();
-
-		chains = fetcher.getResponse();
-
-		if (chains === null) {
-			throw new DomainError(ErrorCode.FAILED_TO_FETCH_CHAINS_CONFIG);
-		}
-
-		currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chains))).toLowerCase();
-	}
-
-	static validateOptions(runtime: Runtime<GlobalConfig>): void {
-		const originalChainsChecksum = runtime
-			.getSecret({ id: "CHAINS_CONFIG_HASHSUM" })
-			.result().value;
-
-		if (originalChainsChecksum !== currentChainsHashSum) {
-			runtime.log(currentChainsHashSum);
-			throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
-		}
+		// const currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chains))).toLowerCase();
+		// if (chainsConfigHash !== currentChainsHashSum) {
+		// 	runtime.log(
+		// 		`Invalid chains hash. Current: ${chainsConfigHash}. Expected: ${currentChainsHashSum}`,
+		// 	);
+		// 	throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
+		// }
 	}
 
 	static getOptionsBySelector(chainSelector: Chain["chainSelector"]): Chain {

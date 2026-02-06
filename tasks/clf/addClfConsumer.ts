@@ -2,7 +2,7 @@ import { SubscriptionManager } from "@chainlink/functions-toolkit";
 import { Address } from "viem";
 
 import { ConceroNetwork } from "../../types/ConceroNetwork";
-import { getEnvVar, log } from "../../utils";
+import { getEnvVar, getNetworkEnvKey, log } from "../../utils";
 
 export async function addCLFConsumer(chain: ConceroNetwork, consumerAddresses: Address[]) {
 	const hre = require("hardhat");

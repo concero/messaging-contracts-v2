@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { conceroNetworks } from "../constants";
 import { EnvFileName } from "../types/deploymentVariables";
-import { IDeployResult, genericDeploy, getEnvFileName, updateEnvAddress } from "../utils";
+import { genericDeploy, getEnvFileName, IDeployResult, updateEnvAddress } from "../utils";
 
 export const deployRouter = async (hre: HardhatRuntimeEnvironment): Promise<IDeployResult> => {
 	const network = conceroNetworks[hre.network.name as keyof typeof conceroNetworks];

@@ -1,8 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { EnvFileName } from "../types/deploymentVariables";
-import { genericDeploy } from "../utils";
-import { getEnvFileName, updateEnvAddress } from "../utils";
+import { genericDeploy, getEnvFileName, updateEnvAddress } from "../utils";
 
 export const deployConceroCreValidatorLib = async (hre: HardhatRuntimeEnvironment) => {
 	const deployment = await genericDeploy({

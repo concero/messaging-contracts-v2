@@ -12,8 +12,10 @@ import {
 	getTrezorDeployEnabled,
 	log,
 } from "../../utils";
+import { isDeployToStage } from "../../utils/isDeployToStage";
 
 const testnetRelayer = "0x51aa24026e9367987e931caabd6519fb491a274a";
+const stageRelayer = "0xd56489a60D9675dD5e5924fB685a4F2CBb1DFAC0";
 const mainnetRelayer = "0x22BdE89606d9316404a21ff7ABb63ADCE506D198";
 
 export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetworkNames) {
@@ -27,7 +29,12 @@ export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetwor
 
 	const { abi: relayerLibAbi } = hre.artifacts.readArtifactSync("RelayerLib");
 
-	const relayer = conceroNetwork.type === "mainnet" ? mainnetRelayer : testnetRelayer;
+	const relayer =
+		conceroNetwork.type === "mainnet"
+			? mainnetRelayer
+			: isDeployToStage()
+				? stageRelayer
+				: testnetRelayer;
 
 	const isRelayerAllowed = await publicClient.readContract({
 		address: relayerLib,

@@ -3,7 +3,7 @@ import ensureNativeBalances from "./concero/ensureNativeBalances";
 import { deployCreValidatorLibTask } from "./cre/deployCreValidatorLib.task";
 import { extractDonSignersTask } from "./cre/extractDonSigners.task";
 import triggerCreTask from "./cre/triggerCre.task";
-import { deployContracts } from "./deployContracts";
+
 import deployExampleClient from "./deployExampleClient";
 import deployPauseTask from "./deployPause.task";
 import { deployPriceFeedTask } from "./deployPriceFeed/deployPriceFeedTask";
@@ -18,9 +18,7 @@ import { sendNativeTokensTask } from "./nativeSender/sendNativeTokens.task";
 import deployConceroPauseToAllChains from "./pause/deployConceroPauseToAllChains";
 import { deployRelayerLibTask } from "./relayer/deployRelayer.task";
 import sendConceroMessage from "./sendConceroMessage";
-import { setIsOperatorRegistered } from "./setIsOperatorRegistered";
-import setOperator from "./setOperator";
-import { setRouterSupportedChains } from "./setRouterSupportedChains";
+
 import testScript from "./test";
 import updateAllRouterImplementations from "./updateAllRouterImplementations.task";
 import {
@@ -36,6 +34,7 @@ import {
 import grantRoleTask from "./utils/grantRole.task";
 import withdrawFees from "./withdrawFees";
 import getDeployerBalance from "./getDeployerBalance.task";
+import deployMessagingToChainTask from "./deployMessagingToChain.task";
 
 export {
 	getDeployerBalance,
@@ -50,17 +49,12 @@ export {
 	setVerifierGasFeeConfig,
 	deployPriceFeedTask,
 	deployRouterTask,
-	deployContracts,
-	setRouterSupportedChains,
-	setIsOperatorRegistered,
 	sendConceroMessage,
-	setOperator,
 	deployExampleClient,
 	withdrawFees,
 	deployConceroPauseToAllChains,
 	fetchTransactionTask,
 	testScript,
-	// sendValueTask,
 	updateAllRouterImplementations,
 	deployPauseTask,
 	getNativeUsdRateTask,
@@ -75,4 +69,5 @@ export {
 	grantRoleTask,
 	extractDonSignersTask,
 	sendNativeTokenTrezor,
+	deployMessagingToChainTask,
 };

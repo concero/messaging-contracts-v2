@@ -14,9 +14,9 @@ import {
 } from "../../utils";
 import { isDeployToStage } from "../../utils/isDeployToStage";
 
-const testnetRelayer = "0x51aa24026e9367987e931caabd6519fb491a274a";
-const stageRelayer = "0xd56489a60D9675dD5e5924fB685a4F2CBb1DFAC0";
-const mainnetRelayer = "0x22BdE89606d9316404a21ff7ABb63ADCE506D198";
+export const testnetRelayer = "0x51aa24026e9367987e931caabd6519fb491a274a";
+export const stageRelayer = "0xd56489a60D9675dD5e5924fB685a4F2CBb1DFAC0";
+export const mainnetRelayer = "0x22BdE89606d9316404a21ff7ABb63ADCE506D198";
 
 export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetworkNames) {
 	const conceroNetwork = conceroNetworks[conceroNetworkName];

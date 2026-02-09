@@ -9,7 +9,7 @@ import {
 } from "@concero/contract-utils";
 import { Address, formatUnits } from "viem";
 
-task("deployer-balance", "").setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
+export async function getDeployerBalance(hre: HardhatRuntimeEnvironment): Promise<bigint> {
 	const isTrezorDeploy = getTrezorDeployEnabled();
 
 	let address: Address;
@@ -23,11 +23,11 @@ task("deployer-balance", "").setAction(async (taskArgs, hre: HardhatRuntimeEnvir
 
 	const { publicClient } = getFallbackClients(conceroNetworks[hre.network.name]);
 
-	log(
-		`Balance: ${formatUnits(await publicClient.getBalance({ address }), 18)}`,
-		"balance",
-		hre.network.name,
-	);
+	return await publicClient.getBalance({ address });
+}
+
+task("deployer-balance", "").setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
+	log(`Balance: ${formatUnits(await getDeployerBalance(hre), 18)}`, "balance", hre.network.name);
 });
 
 export default {};

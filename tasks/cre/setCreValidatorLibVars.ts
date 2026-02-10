@@ -1,9 +1,11 @@
-import { ConceroTestnetNetworkNames, conceroNetworks } from "@concero/contract-utils";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
+import {
+	conceroNetworks,
+	ConceroTestnetNetworkNames,
+	trezorWriteContract,
+} from "@concero/contract-utils";
 import { Address, PublicClient } from "viem";
 
 import {
-	ethersSignerCallContract,
 	getEnvVar,
 	getFallbackClients,
 	getNetworkEnvKey,
@@ -27,10 +29,7 @@ async function isDonSignerAllowed(
 	});
 }
 
-export async function setCreDonSigners(
-	conceroNetworkName: ConceroTestnetNetworkNames,
-	hre: HardhatRuntimeEnvironment,
-) {
+export async function setCreDonSigners(conceroNetworkName: ConceroTestnetNetworkNames) {
 	const conceroNetwork = conceroNetworks[conceroNetworkName];
 
 	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
@@ -69,21 +68,17 @@ export async function setCreDonSigners(
 	let hash;
 	const functionArgs = [signersToSet, isAllowedArr];
 
+	const writeContractParams = {
+		address: validatorLib,
+		abi: validatorLibAbi,
+		functionName: "setAllowedSigners",
+		args: functionArgs,
+	};
+
 	if (getTrezorDeployEnabled()) {
-		hash = await ethersSignerCallContract(
-			hre,
-			validatorLib,
-			validatorLibAbi,
-			"setAllowedSigners",
-			...functionArgs,
-		);
+		hash = await trezorWriteContract({ publicClient }, writeContractParams);
 	} else {
-		hash = await walletClient.writeContract({
-			address: validatorLib,
-			abi: validatorLibAbi,
-			functionName: "setAllowedSigners",
-			args: functionArgs,
-		});
+		hash = await walletClient.writeContract(writeContractParams);
 	}
 
 	const { status } = await publicClient.waitForTransactionReceipt({ hash });
@@ -91,10 +86,7 @@ export async function setCreDonSigners(
 	log(status + " : " + hash, "setAllowedSigners", conceroNetworkName);
 }
 
-async function setExpectedSignersCount(
-	conceroNetworkName: ConceroTestnetNetworkNames,
-	hre: HardhatRuntimeEnvironment,
-) {
+async function setExpectedSignersCount(conceroNetworkName: ConceroTestnetNetworkNames) {
 	const conceroNetwork = conceroNetworks[conceroNetworkName];
 
 	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
@@ -125,22 +117,17 @@ async function setExpectedSignersCount(
 	let hash;
 
 	const functionArgs = [minSignersCount];
+	const writeContractParams = {
+		address: validatorLib,
+		abi: validatorLibAbi,
+		functionName: "setMinSignersCount",
+		args: functionArgs,
+	};
 
 	if (getTrezorDeployEnabled()) {
-		hash = await ethersSignerCallContract(
-			hre,
-			validatorLib,
-			validatorLibAbi,
-			"setMinSignersCount",
-			...functionArgs,
-		);
+		hash = await trezorWriteContract({ publicClient }, writeContractParams);
 	} else {
-		hash = await walletClient.writeContract({
-			address: validatorLib,
-			abi: validatorLibAbi,
-			functionName: "setMinSignersCount",
-			args: functionArgs,
-		});
+		hash = await walletClient.writeContract(writeContractParams);
 	}
 
 	const { status } = await publicClient.waitForTransactionReceipt({ hash });
@@ -148,10 +135,7 @@ async function setExpectedSignersCount(
 	log(status + " : " + hash, "setMinSignersCount", conceroNetworkName);
 }
 
-export async function setIsWorkflowIdAllowed(
-	conceroNetworkName: ConceroTestnetNetworkNames,
-	hre: HardhatRuntimeEnvironment,
-) {
+export async function setIsWorkflowIdAllowed(conceroNetworkName: ConceroTestnetNetworkNames) {
 	const conceroNetwork = conceroNetworks[conceroNetworkName];
 	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
 	const validatorLib = getEnvVar(
@@ -185,22 +169,17 @@ export async function setIsWorkflowIdAllowed(
 	}
 	let hash;
 	const functionArgs = [workflowId, true];
+	const writeContractParams = {
+		address: validatorLib,
+		abi: validatorLibAbi,
+		functionName: "setIsWorkflowIdAllowed",
+		args: functionArgs,
+	};
 
 	if (getTrezorDeployEnabled()) {
-		hash = await ethersSignerCallContract(
-			hre,
-			validatorLib,
-			validatorLibAbi,
-			"setIsWorkflowIdAllowed",
-			...functionArgs,
-		);
+		hash = await trezorWriteContract({ publicClient }, writeContractParams);
 	} else {
-		hash = await walletClient.writeContract({
-			address: validatorLib,
-			abi: validatorLibAbi,
-			functionName: "setIsWorkflowIdAllowed",
-			args: functionArgs,
-		});
+		hash = await walletClient.writeContract(writeContractParams);
 	}
 
 	const { status } = await publicClient.waitForTransactionReceipt({ hash });
@@ -210,7 +189,6 @@ export async function setIsWorkflowIdAllowed(
 
 export async function setDstChainVerificationGasLimit(
 	conceroNetworkName: ConceroTestnetNetworkNames,
-	hre: HardhatRuntimeEnvironment,
 ) {
 	const conceroNetwork = conceroNetworks[conceroNetworkName];
 	const { walletClient, publicClient } = getFallbackClients(conceroNetwork);
@@ -252,22 +230,17 @@ export async function setDstChainVerificationGasLimit(
 	];
 
 	let hash;
+	const writeContractParams = {
+		address: validatorLib,
+		abi: validatorLibAbi,
+		functionName: "setDstChainGasLimits",
+		args: functionArgs,
+	};
 
 	if (getTrezorDeployEnabled()) {
-		hash = await ethersSignerCallContract(
-			hre,
-			validatorLib,
-			validatorLibAbi,
-			"setDstChainGasLimits",
-			...functionArgs,
-		);
+		hash = await trezorWriteContract({ publicClient }, writeContractParams);
 	} else {
-		hash = await walletClient.writeContract({
-			address: validatorLib,
-			abi: validatorLibAbi,
-			functionName: "setDstChainGasLimits",
-			args: functionArgs,
-		});
+		hash = await walletClient.writeContract(writeContractParams);
 	}
 
 	const { status } = await publicClient.waitForTransactionReceipt({ hash });
@@ -276,10 +249,8 @@ export async function setDstChainVerificationGasLimit(
 }
 
 export async function setCreValidatorLibVars(conceroNetworkName: ConceroTestnetNetworkNames) {
-	const hre = require("hardhat");
-
-	await setCreDonSigners(conceroNetworkName, hre);
-	await setExpectedSignersCount(conceroNetworkName, hre);
-	await setIsWorkflowIdAllowed(conceroNetworkName, hre);
-	await setDstChainVerificationGasLimit(conceroNetworkName, hre);
+	await setCreDonSigners(conceroNetworkName);
+	await setExpectedSignersCount(conceroNetworkName);
+	await setIsWorkflowIdAllowed(conceroNetworkName);
+	await setDstChainVerificationGasLimit(conceroNetworkName);
 }

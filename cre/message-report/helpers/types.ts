@@ -5,6 +5,7 @@ export type GlobalConfig = {
 	relayerCallbackUrl: string;
 	chainsConfigUrl: string;
 	allowedMessageVersions: number[];
+	chainsConfigHash: Hash;
 };
 
 export type DecodedArgs = {

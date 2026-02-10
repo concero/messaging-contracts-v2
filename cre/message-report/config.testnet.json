@@ -2,5 +2,6 @@
     "authorizedPublicKey": "0xae87d176c5fa3c25dcc91ed3a3776bc83ce3d21d",
     "relayerCallbackUrl": "https://testnet.relayer.concero.io/api/v1/callback/cre",
     "chainsConfigUrl": "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.testnet.minified.json",
-    "allowedMessageVersions": [1]
+    "allowedMessageVersions": [1],
+    "chainsConfigHash": "0x25aa4ce2a379023c130db1484a1e86deca23f8085ce7b85812d0d3dec2c8879d"
 }

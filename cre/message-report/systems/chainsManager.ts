@@ -2,6 +2,7 @@ import { HTTPSendRequester, Runtime } from "@chainlink/cre-sdk";
 
 import { CRE, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { headers } from "../helpers/constants";
+import { sha256 } from "viem";
 
 export enum DeploymentType {
 	Router = "router",
@@ -45,13 +46,13 @@ export class ChainsManager {
 			headers,
 		});
 
-		// const currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chains))).toLowerCase();
-		// if (chainsConfigHash !== currentChainsHashSum) {
-		// 	runtime.log(
-		// 		`Invalid chains hash. Current: ${chainsConfigHash}. Expected: ${currentChainsHashSum}`,
-		// 	);
-		// 	throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
-		// }
+		const currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chains))).toLowerCase();
+		if (runtime.config.chainsConfigHash.toLowerCase() !== currentChainsHashSum) {
+			runtime.log(
+				`Invalid chains hash. Current: ${runtime.config.chainsConfigHash.toLowerCase()}. Expected: ${currentChainsHashSum}`,
+			);
+			throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
+		}
 	}
 
 	static getOptionsBySelector(chainSelector: Chain["chainSelector"]): Chain {

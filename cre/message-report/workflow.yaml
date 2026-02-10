@@ -42,7 +42,7 @@ production-testnet:
 
 production-mainnet:
   user-workflow:
-    workflow-name: "mainnet-messaging"
+    workflow-name: "mainnet-messaging-001"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.mainnet.json"

@@ -2,5 +2,6 @@
     "authorizedPublicKey": "0xD3e4dE088BbbB69e2887bd72aAaD6eb84f59b453",
     "relayerCallbackUrl": "https://relayer.concero.io/api/v1/callback/cre",
     "chainsConfigUrl": "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.mainnet.minified.json",
-    "allowedMessageVersions": [1]
+    "allowedMessageVersions": [1],
+    "chainsConfigHash": "0x520e933b4b31a1e58e81d238e842a18b033bf68d3f83497cd07fc822171a2b32"
 }

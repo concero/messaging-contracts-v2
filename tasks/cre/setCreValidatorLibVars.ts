@@ -108,7 +108,7 @@ async function setExpectedSignersCount(conceroNetworkName: ConceroTestnetNetwork
 		args: [],
 	});
 
-	const minSignersCount = getEnvVar("CRE_MIN_SIGNERS_COUNT");
+	const minSignersCount = Number(getEnvVar("CRE_MIN_SIGNERS_COUNT"));
 
 	if (currentExpectedSignersCount === minSignersCount) {
 		return;

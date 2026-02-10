@@ -5,6 +5,7 @@ import { decodeEventLog } from "viem";
 
 import { conceroNetworks } from "../constants";
 import { getEnvVar, getFallbackClients, getNetworkEnvKey, log } from "../utils";
+import { getTrezorDeployEnabled, trezorWriteContract } from "@concero/contract-utils";
 
 /**
  * Result of a successful message send operation
@@ -50,7 +51,8 @@ async function sendSingleMessage({
 	logPrefix = "send-concero-message",
 }: SendMessageParams): Promise<SendMessageResult> {
 	try {
-		const txHash = await walletClient.writeContract({
+		let txHash;
+		const writeContractParams = {
 			address: clientAddress,
 			abi: [...exampleClientAbi, ...routerAbi],
 			functionName: "sendConceroMessage",
@@ -58,7 +60,12 @@ async function sendSingleMessage({
 			account: walletClient.account,
 
 			value,
-		});
+		};
+		if (getTrezorDeployEnabled()) {
+			txHash = await trezorWriteContract({ publicClient }, writeContractParams);
+		} else {
+			txHash = await walletClient.writeContract(writeContractParams);
+		}
 
 		log(`Transaction submitted: ${txHash}`, logPrefix);
 		log("Waiting for transaction receipt...", logPrefix);

@@ -35,8 +35,11 @@ import grantRoleTask from "./utils/grantRole.task";
 import withdrawFees from "./withdrawFees";
 import getDeployerBalance from "./getDeployerBalance.task";
 import deployMessagingToChainTask from "./deployMessagingToChain.task";
+import updateWorkflowIdOnAllChainsTask from "./cre/updateWorkflowIdOnAllChains.task";
+import setVerifierVarsOnAllChainsTask from "./cre/setVerifierVarsOnAllChains.task";
 
 export {
+	setVerifierVarsOnAllChainsTask,
 	getDeployerBalance,
 	ensureNativeBalances,
 	callContractFunction,
@@ -70,4 +73,5 @@ export {
 	extractDonSignersTask,
 	sendNativeTokenTrezor,
 	deployMessagingToChainTask,
+	updateWorkflowIdOnAllChainsTask,
 };

@@ -50,16 +50,23 @@ export async function setCreDonSigners(conceroNetworkName: ConceroTestnetNetwork
 		.split(",")
 		.map(addr => addr.trim() as Address);
 
-	for (const signer of donSigners) {
+	const upsertSignersToSet = async (signer: Address) => {
 		const isSignerAllowed = await isDonSignerAllowed(
 			signer,
 			publicClient,
 			validatorLib,
 			validatorLibAbi,
 		);
-		if (isSignerAllowed) continue;
+		if (isSignerAllowed) return;
 		signersToSet.push(signer);
+	};
+
+	const promises = [];
+	for (const signer of donSigners) {
+		promises.push(upsertSignersToSet(signer));
 	}
+
+	await Promise.all(promises);
 
 	if (signersToSet.length === 0) return;
 
@@ -205,22 +212,33 @@ export async function setDstChainVerificationGasLimit(
 
 	const dstChainSelectorsToUpdate = [];
 
+	const upsertGasLimitToUpdate = async (conceroNetwork: string) => {
+		try {
+			const currentGasLimit = await publicClient.readContract({
+				address: validatorLib,
+				abi: validatorLibAbi,
+				functionName: "getDstChainGasLimit",
+				args: [conceroNetworks[conceroNetwork].chainSelector],
+			});
+			const dstChainGasLimit = getVerificationGasLimit(
+				conceroNetworks[conceroNetwork].chainSelector,
+			);
+
+			if (currentGasLimit === dstChainGasLimit) return;
+
+			dstChainSelectorsToUpdate.push(conceroNetworks[conceroNetwork].chainSelector);
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
+	const promises = [];
+
 	for (const conceroNetwork in conceroNetworks) {
-		const currentGasLimit = await publicClient.readContract({
-			address: validatorLib,
-			abi: validatorLibAbi,
-			functionName: "getDstChainGasLimit",
-			args: [conceroNetworks[conceroNetwork].chainSelector],
-		});
-
-		const dstChainGasLimit = getVerificationGasLimit(
-			conceroNetworks[conceroNetwork].chainSelector,
-		);
-
-		if (currentGasLimit === dstChainGasLimit) continue;
-
-		dstChainSelectorsToUpdate.push(conceroNetworks[conceroNetwork].chainSelector);
+		promises.push(upsertGasLimitToUpdate(conceroNetwork));
 	}
+
+	await Promise.all(promises);
 
 	if (dstChainSelectorsToUpdate.length === 0) return;
 

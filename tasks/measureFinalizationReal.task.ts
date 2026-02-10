@@ -13,9 +13,9 @@ import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import { type PublicClient, createPublicClient, http } from "viem";
 
 import { conceroNetworks, mainnetNetworks, testnetNetworks } from "../constants";
-import type { ConceroNetwork } from "../types/ConceroNetwork";
+import type { ConceroNetwork } from "@concero/contract-utils";
 import { getFallbackClients } from "../utils";
-import { log } from "../utils/log";
+import { log } from "../utils";
 
 // ============================================================================
 // Types

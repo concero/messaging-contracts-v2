@@ -115,9 +115,9 @@
     tslib "^2.6.2"
 
 "@aws-sdk/client-lambda@^3.563.0":
-  version "3.985.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-lambda/-/client-lambda-3.985.0.tgz#9cf11928fc19af98b6aed32122be43288ea45bf4"
-  integrity sha512-RFQVkOn9wn4LAYBDpOXyN+qY/akpGN1zJrEHkWbE+cXx/ypKo7nRt/r5jSTW2k0MttuI9ViVFemtGn69z22uBA==
+  version "3.986.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-lambda/-/client-lambda-3.986.0.tgz#95a13170b680e6e325c919b2940b1d6622a5a9b7"
+  integrity sha512-R0VrqSH622b0MmIULLCNbupyU9qqEn+vofIeKng+ALPJY6U7pq7MG0p+bbxLCGztLl0u2vmO237SPZYcFm3hCQ==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -129,7 +129,7 @@
     "@aws-sdk/middleware-user-agent" "^3.972.7"
     "@aws-sdk/region-config-resolver" "^3.972.3"
     "@aws-sdk/types" "^3.973.1"
-    "@aws-sdk/util-endpoints" "3.985.0"
+    "@aws-sdk/util-endpoints" "3.986.0"
     "@aws-sdk/util-user-agent-browser" "^3.972.3"
     "@aws-sdk/util-user-agent-node" "^3.972.5"
     "@smithy/config-resolver" "^4.4.6"
@@ -468,6 +468,17 @@
   version "3.985.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/util-endpoints/-/util-endpoints-3.985.0.tgz#a6393811e86aaf71e17aa3313551c19e54ed59f8"
   integrity sha512-vth7UfGSUR3ljvaq8V4Rc62FsM7GUTH/myxPWkaEgOrprz1/Pc72EgTXxj+cPPPDAfHFIpjhkB7T7Td0RJx+BA==
+  dependencies:
+    "@aws-sdk/types" "^3.973.1"
+    "@smithy/types" "^4.12.0"
+    "@smithy/url-parser" "^4.2.8"
+    "@smithy/util-endpoints" "^3.2.8"
+    tslib "^2.6.2"
+
+"@aws-sdk/util-endpoints@3.986.0":
+  version "3.986.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/util-endpoints/-/util-endpoints-3.986.0.tgz#16d3bd7227e5c3797a10a95d37898e511e75a72a"
+  integrity sha512-Mqi79L38qi1gCG3adlVdbNrSxvcm1IPDLiJPA3OBypY5ewxUyWbaA3DD4goG+EwET6LSFgZJcRSIh6KBNpP5pA==
   dependencies:
     "@aws-sdk/types" "^3.973.1"
     "@smithy/types" "^4.12.0"
@@ -918,7 +929,7 @@
 
 "@concero/concero-networks@https://github.com/concero/concero-networks":
   version "1.0.0"
-  resolved "https://github.com/concero/concero-networks#e2c4777c4eed6aa6c5944a0ec754a1d6890f4dfd"
+  resolved "https://github.com/concero/concero-networks#c8c6545f5bf200b589218d70d34f8ef959215ff8"
   dependencies:
     axios "1.13.2"
     esbuild "^0.27.0"
@@ -933,7 +944,7 @@
 
 "@concero/rpcs@https://github.com/concero/rpcs":
   version "1.0.0"
-  resolved "https://github.com/concero/rpcs#b5368ee98f5652f95140e45898fdfbd2511f27c1"
+  resolved "https://github.com/concero/rpcs#e76d1418e8b280ff308147326793762866ac4a6a"
   dependencies:
     acorn "8.14.0"
     acorn-walk "8.3.4"
@@ -944,7 +955,7 @@
 
 "@concero/v2-networks@https://github.com/concero/v2-networks":
   version "1.0.0"
-  resolved "https://github.com/concero/v2-networks#1c3c2eaa3c3a579e87197ae21681c7fc9b643e66"
+  resolved "https://github.com/concero/v2-networks#aaf94c310e7f5cc18a6fb0ae26c5df8aaa8be70e"
   dependencies:
     viem "^2.45.1"
 

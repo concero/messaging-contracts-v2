@@ -929,7 +929,7 @@
 
 "@concero/concero-networks@https://github.com/concero/concero-networks":
   version "1.0.0"
-  resolved "https://github.com/concero/concero-networks#c8c6545f5bf200b589218d70d34f8ef959215ff8"
+  resolved "https://github.com/concero/concero-networks#f9515f2fb8c4615370e808dc89f67329e926d3ab"
   dependencies:
     axios "1.13.2"
     esbuild "^0.27.0"
@@ -955,7 +955,7 @@
 
 "@concero/v2-networks@https://github.com/concero/v2-networks":
   version "1.0.0"
-  resolved "https://github.com/concero/v2-networks#aaf94c310e7f5cc18a6fb0ae26c5df8aaa8be70e"
+  resolved "https://github.com/concero/v2-networks#019f398bdbbac97b84b7718bfe9bf53581ee35e5"
   dependencies:
     viem "^2.45.1"
 

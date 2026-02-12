@@ -3,5 +3,5 @@
     "relayerCallbackUrl": "https://relayer.concero.io/api/v1/callback/cre",
     "chainsConfigUrl": "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.mainnet.compressed.json",
     "allowedMessageVersions": [1],
-    "chainsConfigHash": "0x8d3ef2604791bec7681689361809723f5eccdcbf53439131cec4e8f126e175e2"
+    "networkType": "mainnet"
 }

@@ -30,15 +30,15 @@ stage-testnet:
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.stage.json"
-    secrets-path: "../secrets.stage.yaml"
+    secrets-path: "../secrets.yaml"
 
 production-testnet:
   user-workflow:
-    workflow-name: "testnet-messaging-001"
+    workflow-name: "testnet-messaging-002"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.testnet.json"
-    secrets-path: "../secrets.testnet.yaml"
+    secrets-path: "../secrets.yaml"
 
 production-mainnet:
   user-workflow:
@@ -46,4 +46,4 @@ production-mainnet:
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.mainnet.json"
-    secrets-path: "../secrets.mainnet.yaml"
+    secrets-path: "../secrets.yaml"

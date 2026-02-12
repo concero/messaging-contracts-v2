@@ -2,7 +2,7 @@ import { HTTPSendRequester, Runtime } from "@chainlink/cre-sdk";
 
 import { CRE, DomainError, ErrorCode, GlobalConfig } from "../helpers";
 import { headers } from "../helpers/constants";
-import { sha256 } from "viem";
+import { Hex, sha256 } from "viem";
 
 export enum DeploymentType {
 	Router = "router",
@@ -39,7 +39,11 @@ export type Chain = {
 let chains: Record<Chain["chainSelector"], Chain> = {};
 
 export class ChainsManager {
-	static enrichOptions(runtime: Runtime<GlobalConfig>, sendRequester: HTTPSendRequester) {
+	static enrichOptions(
+		runtime: Runtime<GlobalConfig>,
+		sendRequester: HTTPSendRequester,
+		chainsConfigHash: Hex,
+	) {
 		chains = CRE.sendHttpRequestSync(sendRequester, {
 			url: runtime.config.chainsConfigUrl,
 			method: "GET",
@@ -47,9 +51,9 @@ export class ChainsManager {
 		});
 
 		const currentChainsHashSum = sha256(Buffer.from(JSON.stringify(chains))).toLowerCase();
-		if (runtime.config.chainsConfigHash.toLowerCase() !== currentChainsHashSum) {
+		if (chainsConfigHash.toLowerCase() !== currentChainsHashSum) {
 			runtime.log(
-				`Invalid chains hash. Current: ${runtime.config.chainsConfigHash.toLowerCase()}. Expected: ${currentChainsHashSum}`,
+				`Invalid chains hash. Current: ${chainsConfigHash.toLowerCase()}. Expected: ${currentChainsHashSum}`,
 			);
 			throw new DomainError(ErrorCode.INVALID_HASH_SUM, "Chains hash sum invalid");
 		}

@@ -5,7 +5,7 @@ export type GlobalConfig = {
 	relayerCallbackUrl: string;
 	chainsConfigUrl: string;
 	allowedMessageVersions: number[];
-	chainsConfigHash: Hash;
+	networkType: "mainnet" | "testnet" | "stage";
 };
 
 export type DecodedArgs = {

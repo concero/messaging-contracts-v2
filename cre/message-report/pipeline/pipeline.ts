@@ -1,9 +1,9 @@
 import {
+	consensusIdenticalAggregation,
+	cre,
 	HTTPPayload,
 	HTTPSendRequester,
 	Runtime,
-	consensusIdenticalAggregation,
-	cre,
 } from "@chainlink/cre-sdk";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { Hex, type Log } from "viem";
@@ -52,9 +52,13 @@ function parseLogs(
 	return parsedLogs;
 }
 
-function fetchMessagesAndGenerateProof(runtime: Runtime<GlobalConfig>, args: DecodedArgs) {
+function fetchMessagesAndGenerateProof(
+	runtime: Runtime<GlobalConfig>,
+	args: DecodedArgs,
+	chainsConfigHash: Hex,
+) {
 	return (sendRequester: HTTPSendRequester) => {
-		ChainsManager.enrichOptions(runtime, sendRequester);
+		ChainsManager.enrichOptions(runtime, sendRequester, chainsConfigHash);
 
 		const rpcRequester = new RpcRequester(
 			Object.fromEntries(
@@ -100,10 +104,22 @@ export async function pipeline(runtime: Runtime<GlobalConfig>, payload: HTTPPayl
 
 		validateDecodedArgs(args);
 
+		const { networkType } = runtime.config;
+
+		const chainsConfigHashSecretId =
+			networkType === "mainnet"
+				? "MAINNET_CHAINS_CONFIG_HASH"
+				: networkType === "testnet"
+					? "TESTNET_CHAINS_CONFIG_HASH"
+					: "STAGE_CHAINS_CONFIG_HASH";
+
+		const chainsConfigHash = runtime.getSecret({ id: chainsConfigHashSecretId }).result()
+			.value as Hex;
+
 		const merkleRoot = new cre.capabilities.HTTPClient()
 			.sendRequest(
 				runtime,
-				fetchMessagesAndGenerateProof(runtime, args),
+				fetchMessagesAndGenerateProof(runtime, args, chainsConfigHash),
 				consensusIdenticalAggregation<any>(),
 			)()
 			.result();

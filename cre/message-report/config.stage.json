@@ -3,5 +3,5 @@
     "relayerCallbackUrl": "https://stage.relayer.concero.io/api/v1/callback/cre",
     "chainsConfigUrl": "https://raw.githubusercontent.com/concero/concero-networks/refs/heads/master/output/chains.stage.minified.json",
     "allowedMessageVersions": [1],
-    "chainsConfigHash": "0x5927848dcfb9502ef17e36becea629ec2c5d2813d0262b3bc3b5b3f40b5ddee0"
+    "networkType": "stage"
 }

@@ -149,13 +149,7 @@ export const generateGasLimitConfigs = async (hre: HardhatRuntimeEnvironment): P
 		FUNC_NAME,
 	);
 
-	// TODO remove applyMultiplier for validatorLibGasLimits
-	// when we will add mapping to RelayerLib::setSubmitMsgGasOverhead(uint24[] calldata dstChainSelectors,uint32[] calldata gasLimits)
-	// it could be validatorLibGasLimits = gasLimits;
-	const validatorLibGasLimits = applyMultiplier(gasLimits, 300n);
-
-	// TODO This сalculations should remain unchanged after removing applyMultiplier for validatorLibGasLimits,
-	// but remove this comment, please
+	const validatorLibGasLimits = gasLimits;
 	const relayerGasLimits = applyMultiplier(gasLimits, RELAYER_LIB_GAS_MULTIPLIER_BPS);
 
 	writeGasLimitFile(

@@ -6,7 +6,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { ConceroNetwork, mainnetNetworks } from "@concero/contract-utils";
 
 import { dstChainVerificationGasLimits } from "../../constants";
-import { getEnvAddress, log, err, getViemAccount, getFallbackClients } from "../../utils";
+import { err, getEnvAddress, getFallbackClients, getViemAccount, log } from "../../utils";
 
 interface ValidNetwork {
 	network: ConceroNetwork;
@@ -63,10 +63,11 @@ async function estimateNetworkGasLimit(
 
 		log(`(${network.chainId}) Estimated gas limit: ${gasLimit}`, FUNC_NAME, network.name);
 		return gasLimit;
-	} catch {
+	} catch (e) {
 		const defaultGasLimit = dstChainVerificationGasLimits.default;
+
 		err(
-			`${network.name} (${network.chainId}) Error estimating gas limit, use default ${defaultGasLimit}`,
+			`${network.name} (${network.chainId}) Error estimating gas limit, use default ${defaultGasLimit}. Error: ${e.shortMessage}`,
 			FUNC_NAME,
 		);
 		return defaultGasLimit;
@@ -103,6 +104,14 @@ function writeGasLimitFile(fileName: string, content: string): void {
 	log(`Wrote gas limits to ${filePath}`, FUNC_NAME);
 }
 
+function ceilBigInt(n: bigint) {
+	const step = n > 100000000n ? 100_000n : 1_000n;
+	const q = n / step;
+	const r = n % step;
+	if (r === 0n) return n;
+	return n <= 0n ? q * step : (q + 1n) * step;
+}
+
 /**
  * Estimates on-chain gas limits for CreValidatorLib and RelayerLib, then writes them to config files.
  *
@@ -137,7 +146,7 @@ export const generateGasLimitConfigs = async (hre: HardhatRuntimeEnvironment): P
 		),
 	);
 	for (let i = 0; i < entries.length; i++) {
-		gasLimits[entries[i].network.chainId] = results[i];
+		gasLimits[entries[i].network.chainId] = ceilBigInt(results[i]);
 	}
 
 	const successStatistics = Object.entries(gasLimits).filter(

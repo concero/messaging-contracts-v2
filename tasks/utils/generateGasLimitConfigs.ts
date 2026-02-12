@@ -16,7 +16,7 @@ interface ValidNetwork {
 const FUNC_NAME = "generateGasLimitConfigs";
 const RELAYER_LIB_GAS_MULTIPLIER_BPS = 200n; // x2
 const BPS_DENOMINATOR = 100n;
-const ETHALON_TOTAL_GAS_LIMIT = 180000n; // Total gas limit observed on mainnet for the submitMessage call
+const STANDARD_TOTAL_GAS_LIMIT = 180000n; // Total gas limit observed on mainnet for the submitMessage call
 
 const messageReceipt =
 	"0x01082750000001000000000000000000000000000000000000000000000000000000000000000100001c4b198972ba7e35382aacf3a60ac7c81409b4b60600000000000000000000187349c40fd4387e899734b7519a45bd1ee908541f000493e0000001000000010000000000010000060100000186a0000000";
@@ -26,7 +26,7 @@ const validation =
 
 function calculateOverheadPct(gasLimit: bigint): bigint {
 	const totalGasLimit = (gasLimit * RELAYER_LIB_GAS_MULTIPLIER_BPS) / BPS_DENOMINATOR + gasLimit;
-	return 100n - (ETHALON_TOTAL_GAS_LIMIT * 100n) / totalGasLimit;
+	return 100n - (STANDARD_TOTAL_GAS_LIMIT * 100n) / totalGasLimit;
 }
 
 function collectValidNetworks(): Record<string, ValidNetwork> {

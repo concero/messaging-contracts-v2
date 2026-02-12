@@ -18,7 +18,7 @@ export const testnetRelayer = "0x51aa24026e9367987e931caabd6519fb491a274a";
 export const stageRelayer = "0xd56489a60D9675dD5e5924fB685a4F2CBb1DFAC0";
 export const mainnetRelayer = "0x22BdE89606d9316404a21ff7ABb63ADCE506D198";
 
-export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetworkNames) {
+export async function setIsAllowedRelayer(conceroNetworkName: ConceroTestnetNetworkNames) {
 	const conceroNetwork = conceroNetworks[conceroNetworkName];
 	const hre = require("hardhat");
 
@@ -66,4 +66,14 @@ export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetwor
 	const { status } = await publicClient.waitForTransactionReceipt({ hash });
 
 	log(status + " : " + hash, "setRelayers", conceroNetworkName);
+}
+
+export async function setSubmitMsgGasOverhead(conceroNetworkName: ConceroTestnetNetworkNames) {
+	// TODO - set submit msg gas overhead when we add mapping to RelayerLib smart-contract
+	// use ../../constants/relayerLibGasLimits.ts
+}
+
+export async function setRelayerLibVars(conceroNetworkName: ConceroTestnetNetworkNames) {
+	await setIsAllowedRelayer(conceroNetworkName);
+	await setSubmitMsgGasOverhead(conceroNetworkName);
 }

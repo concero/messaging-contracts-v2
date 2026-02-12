@@ -9,3 +9,4 @@ export { readRouterGasFeeConfig, displayRouterGasFeeConfig } from "./readRouterG
 export { readVerifierGasFeeConfig, displayVerifierGasFeeConfig } from "./readVerifierGasFeeConfig";
 export { setVerifierGasFeeConfig } from "./setVerifierGasFeeConfig";
 export { changeProxyAdminOwner } from "./changeProxyAdminOwner";
+export { generateGasLimitConfigs } from "./generateGasLimitConfigs";

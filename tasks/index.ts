@@ -37,6 +37,7 @@ import getDeployerBalance from "./getDeployerBalance.task";
 import deployMessagingToChainTask from "./deployMessagingToChain.task";
 import updateWorkflowIdOnAllChainsTask from "./cre/updateWorkflowIdOnAllChains.task";
 import setVerifierVarsOnAllChainsTask from "./cre/setVerifierVarsOnAllChains.task";
+import { generateGasLimitConfigsTask } from "./cre/generateGasLimitConfigs.task";
 
 export {
 	setVerifierVarsOnAllChainsTask,
@@ -74,4 +75,5 @@ export {
 	sendNativeTokenTrezor,
 	deployMessagingToChainTask,
 	updateWorkflowIdOnAllChainsTask,
+	generateGasLimitConfigsTask,
 };

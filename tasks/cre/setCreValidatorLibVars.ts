@@ -210,7 +210,7 @@ export async function setDstChainVerificationGasLimit(
 	);
 	const validatorLibAbi = [...creValidatorLibAbi, ...ecdsaValidatorAbi];
 
-	const dstChainSelectorsToUpdate = [];
+	const dstChainSelectorsToUpdate: bigint[] = [];
 
 	const upsertGasLimitToUpdate = async (conceroNetwork: string) => {
 		try {

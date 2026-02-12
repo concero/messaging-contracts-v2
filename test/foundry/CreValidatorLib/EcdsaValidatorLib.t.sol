@@ -112,6 +112,30 @@ contract EcdsaValidatorLibSignatureTest is Test {
         validator.isValid(messageReceipt, validation);
     }
 
+    function test_merkleRoot_gas_for100msgAnd4signer() public {
+        vm.pauseGasMetering();
+        bytes memory messageReceipt = abi.encodePacked("test message");
+
+        uint256 index = 99;
+        uint256 length = 100;
+
+        (bytes32 merkleRoot, bytes32[] memory messageReceiptHashes) = _getRootAndHashes(
+            messageReceipt,
+            index,
+            length
+        );
+
+        bytes memory validation = _buildValidationFor4Signer(
+            merkleRoot,
+            messageReceiptHashes,
+            index
+        );
+
+        vm.resumeGasMetering();
+        validator.isValid(messageReceipt, validation);
+        vm.pauseGasMetering();
+    }
+
     function testFuzz_merkleRoot_Success(
         bytes calldata messageReceipt,
         uint256 index,
@@ -342,6 +366,62 @@ contract EcdsaValidatorLibSignatureTest is Test {
         signatures[0] = abi.encodePacked(r, s, v);
 
         return abi.encodePacked(rawReport, reportContext, abi.encode(signatures, proof));
+    }
+
+    function _buildValidationFor4Signer(
+        bytes32 merkleRoot,
+        bytes32[] memory messageReceiptHashes,
+        uint256 index
+    ) internal returns (bytes memory) {
+        bytes32[] memory proof = m.getProof(messageReceiptHashes, index);
+
+        bytes memory rawReport = _buildMockRawReport(merkleRoot);
+        bytes memory reportContext = new bytes(96);
+
+        bytes32 validationHash = keccak256(abi.encodePacked(keccak256(rawReport), reportContext));
+
+        bytes[] memory signatures = _getSignaturesFor4Signers(validationHash);
+
+        return abi.encodePacked(rawReport, reportContext, abi.encode(signatures, proof));
+    }
+
+    function _getSignaturesFor4Signers(
+        bytes32 validationHash
+    ) private returns (bytes[] memory signatures) {
+        (address signer1, uint256 privateKey1) = makeAddrAndKey("signer1");
+        (address signer2, uint256 privateKey2) = makeAddrAndKey("signer2");
+        (address signer3, uint256 privateKey3) = makeAddrAndKey("signer3");
+
+        address[] memory signers = new address[](4);
+        signers[0] = signerAddress;
+        signers[1] = signer1;
+        signers[2] = signer2;
+        signers[3] = signer3;
+
+        bool[] memory isAllowed = new bool[](4);
+        isAllowed[0] = true;
+        isAllowed[1] = true;
+        isAllowed[2] = true;
+        isAllowed[3] = true;
+
+        vm.prank(admin);
+        validator.setAllowedSigners(signers, isAllowed);
+
+        vm.prank(admin);
+        validator.setMinSignersCount(4);
+
+        signatures = new bytes[](4);
+        signatures[0] = _sign(signerPrivateKey, validationHash);
+        signatures[1] = _sign(privateKey1, validationHash);
+        signatures[2] = _sign(privateKey2, validationHash);
+        signatures[3] = _sign(privateKey3, validationHash);
+
+        return signatures;
+    }
+
+    function _sign(uint256 privateKey, bytes32 digest) private pure returns (bytes memory) {
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey, digest);
+        return abi.encodePacked(r, s, v);
     }
 
     function _getRootAndHashes(

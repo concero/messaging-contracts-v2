@@ -29,7 +29,7 @@ export const gasFeeConfigVerifier = {
 	clfCallbackGasLimit: 50000, // CLF callback gas limit from our side (actual value about 40k)
 };
 
-// for example for polygonAmoy: 80002: 50000,
-export const dstChainVerificationGasLimits: Record<number, number> & { default: number } = {
-	default: 100000,
+// for example for polygonAmoy: 80002: 50000n,
+export const dstChainVerificationGasLimits: Record<number, bigint> & { default: bigint } = {
+	default: 80000n,
 };

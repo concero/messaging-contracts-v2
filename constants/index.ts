@@ -19,9 +19,12 @@ import {
 } from "./deploymentVariables";
 import { donRegistryAbi } from "./donRegistryAbi";
 import { envPrefixes } from "./envPrefixes";
+import { creValidatorLibGasLimits } from "./creValidatorLibGasLimits";
+import { relayerLibGasLimits } from "./relayerLibGasLimits";
 import { gasFeeConfig, gasFeeConfigVerifier, networkGasConfig } from "./gasConfig";
 // import { liveNetworks } from "./liveNetworks";
 import { urls } from "./rpcUrls";
+import { dstChainVerificationGasLimits } from "./gasConfig";
 
 export {
 	ADMIN_ROLE,
@@ -45,4 +48,7 @@ export {
 	// liveNetworks,
 	DEPLOY_CONFIG_TESTNET,
 	donRegistryAbi,
+	creValidatorLibGasLimits,
+	relayerLibGasLimits,
+	dstChainVerificationGasLimits,
 };

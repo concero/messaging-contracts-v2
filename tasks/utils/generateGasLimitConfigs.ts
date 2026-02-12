@@ -17,6 +17,8 @@ const FUNC_NAME = "generateGasLimitConfigs";
 const RELAYER_LIB_GAS_MULTIPLIER_BPS = 200n; // x2
 const BPS_DENOMINATOR = 100n;
 const STANDARD_TOTAL_GAS_LIMIT = 180000n; // Total gas limit observed on mainnet for the submitMessage call
+const DEFAULT_RELAYER_GAS_LIMIT_OVERHEAD = 115_000n;
+const DEFAULT_VALIDATION_GAS_LIMIT = 80_000n;
 
 const messageReceipt =
 	"0x01082750000001000000000000000000000000000000000000000000000000000000000000000100001c4b198972ba7e35382aacf3a60ac7c81409b4b60600000000000000000000187349c40fd4387e899734b7519a45bd1ee908541f000493e0000001000000010000000000010000060100000186a0000000";
@@ -85,14 +87,18 @@ function generateGasLimitsFileContent(
 	return `// Automatically generated config - generateGasLimitConfigs.task.ts\nexport const ${exportName}: Record<number, bigint> = {\n${entries}\n}`;
 }
 
-function applyMultiplier(
-	gasLimits: Record<number, bigint>,
-	multiplierBps: bigint,
-): Record<number, bigint> {
+function calculateRelayerGasLimits(gasLimits: Record<number, bigint>): Record<number, bigint> {
 	const result: Record<number, bigint> = {};
 
 	for (const [chainId, gas] of Object.entries(gasLimits)) {
-		result[Number(chainId)] = (gas * multiplierBps) / BPS_DENOMINATOR;
+		const gasLimitFactor =
+			maxBigInt(gas, DEFAULT_VALIDATION_GAS_LIMIT) /
+			minBigInt(gas, DEFAULT_VALIDATION_GAS_LIMIT);
+
+		result[Number(chainId)] =
+			gas > DEFAULT_RELAYER_GAS_LIMIT_OVERHEAD
+				? DEFAULT_RELAYER_GAS_LIMIT_OVERHEAD * gasLimitFactor
+				: DEFAULT_RELAYER_GAS_LIMIT_OVERHEAD / gasLimitFactor;
 	}
 
 	return result;
@@ -102,6 +108,14 @@ function writeGasLimitFile(fileName: string, content: string): void {
 	const filePath = path.resolve(__dirname, `../../constants/${fileName}.ts`);
 	fs.writeFileSync(filePath, content, "utf-8");
 	log(`Wrote gas limits to ${filePath}`, FUNC_NAME);
+}
+
+function maxBigInt(a: bigint, b: bigint) {
+	return a > b ? a : b;
+}
+
+function minBigInt(a: bigint, b: bigint) {
+	return a < b ? a : b;
 }
 
 function ceilBigInt(n: bigint) {
@@ -149,17 +163,8 @@ export const generateGasLimitConfigs = async (hre: HardhatRuntimeEnvironment): P
 		gasLimits[entries[i].network.chainId] = ceilBigInt(results[i]);
 	}
 
-	const successStatistics = Object.entries(gasLimits).filter(
-		([_, gas]) => gas !== dstChainVerificationGasLimits.default,
-	).length;
-
-	log(
-		`Succesful estimations: ${successStatistics}/${Object.keys(validNetworks).length}`,
-		FUNC_NAME,
-	);
-
 	const validatorLibGasLimits = gasLimits;
-	const relayerGasLimits = applyMultiplier(gasLimits, RELAYER_LIB_GAS_MULTIPLIER_BPS);
+	const relayerGasLimits = calculateRelayerGasLimits(gasLimits);
 
 	writeGasLimitFile(
 		"creValidatorLibGasLimits",

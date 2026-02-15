@@ -1,4 +1,4 @@
-import { Hex, decodeEventLog } from "viem";
+import { decodeEventLog, Hex } from "viem";
 
 import { ConceroMessageSentEvent } from "../abi";
 import { DecodedMessageSentReceipt, DomainError, ErrorCode, MessageSentLogData } from "../helpers";

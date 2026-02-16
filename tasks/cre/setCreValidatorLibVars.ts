@@ -214,17 +214,17 @@ export async function setDstChainVerificationGasLimit(
 
 	const upsertGasLimitToUpdate = async (conceroNetwork: string) => {
 		try {
-			const currentGasLimit = await publicClient.readContract({
+			const currentGasLimit = (await publicClient.readContract({
 				address: validatorLib,
 				abi: validatorLibAbi,
 				functionName: "getDstChainGasLimit",
 				args: [conceroNetworks[conceroNetwork].chainSelector],
-			});
+			})) as number;
 			const dstChainGasLimit = getVerificationGasLimit(
 				conceroNetworks[conceroNetwork].chainSelector,
 			);
 
-			if (currentGasLimit === dstChainGasLimit) return;
+			if (BigInt(currentGasLimit) === dstChainGasLimit) return;
 
 			dstChainSelectorsToUpdate.push(conceroNetworks[conceroNetwork].chainSelector);
 		} catch (e) {

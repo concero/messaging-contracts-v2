@@ -1,10 +1,16 @@
 {
-  "name": "@concero/contracts-v2",
+  "name": "@concero/messaging-contracts-v2",
   "version": "1.0.0",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": "security@concero.io",
   "homepage": "https://concero.io",
   "description": "Concero V2 Contracts. If you discover any security vulnerabilities, report them responsibly to security@concero.io. Thank you!",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "contracts"
+  ],
   "engines": {
     "node": "22"
   },
@@ -35,7 +41,7 @@
     "@concero/contract-utils": "https://github.com/concero/contract-utils#feature/v3/export-generic-deploy",
     "@concero/rpcs": "https://github.com/concero/rpcs",
     "@concero/v2-networks": "https://github.com/concero/v2-networks",
-    "@murky": "https://github.com/dmfxyz/murky",
+    "@murky/merkle": "https://github.com/dmfxyz/murky",
     "@nomicfoundation/hardhat-chai-matchers": "2.0.8",
     "@nomicfoundation/hardhat-ethers": "3.0.8",
     "@nomicfoundation/hardhat-network-helpers": "1.0.12",

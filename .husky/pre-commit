@@ -7,8 +7,8 @@
 # yarn hardhat compile
 # yarn format:ts
 # yarn format:sol
-#yarn lint:ts
-#yarn lint:sol
+# yarn lint:ts
+# yarn lint:sol --quiet
 # make test
 
 echo "✅ Pre-commit checks passed successfully."

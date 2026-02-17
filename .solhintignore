@@ -1,0 +1,5 @@
+# Test files run with a different solhint ruleset, ignore them here.
+
+./\*_/_.t.sol
+./node_modules/
+./contracts/Proxy/

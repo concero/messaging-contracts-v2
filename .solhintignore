@@ -2,4 +2,5 @@
 
 ./\*_/_.t.sol
 ./node_modules/
-./contracts/Proxy/
+./contracts/Proxy/ConceroProxyAdmin.sol
+./contracts/Proxy/TransparentUpgradeableProxy.sol

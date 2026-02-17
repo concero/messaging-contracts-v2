@@ -214,6 +214,14 @@ export async function setDstChainVerificationGasLimit(
 
 	const upsertGasLimitToUpdate = async (conceroNetwork: string) => {
 		try {
+			if (
+				!getEnvVar(
+					`CONCERO_CRE_VALIDATOR_LIB_${getNetworkEnvKey(conceroNetworks[conceroNetwork].name)}`,
+				)
+			) {
+				return;
+			}
+
 			const currentGasLimit = (await publicClient.readContract({
 				address: validatorLib,
 				abi: validatorLibAbi,

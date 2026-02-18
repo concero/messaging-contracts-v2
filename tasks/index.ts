@@ -38,8 +38,10 @@ import deployMessagingToChainTask from "./deployMessagingToChain.task";
 import updateWorkflowIdOnAllChainsTask from "./cre/updateWorkflowIdOnAllChains.task";
 import setVerifierVarsOnAllChainsTask from "./cre/setVerifierVarsOnAllChains.task";
 import { generateGasLimitConfigsTask } from "./cre/generateGasLimitConfigs.task";
+import deployExampleClientToAllChainsTask from "./deployExampleClientToAllChains.task";
 
 export {
+	deployExampleClientToAllChainsTask,
 	setVerifierVarsOnAllChainsTask,
 	getDeployerBalance,
 	ensureNativeBalances,

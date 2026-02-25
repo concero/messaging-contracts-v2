@@ -1,66 +1,129 @@
 import { Runtime } from "@chainlink/cre-sdk";
-import { type Log, encodeEventTopics, toHex } from "viem";
+import { Hex, type Log, encodeEventTopics, toHex } from "viem";
 
 import { ConceroMessageSentEvent } from "../abi";
 import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
+import { defaultGetLogsBlockDepth } from "../helpers/constants";
 import { IRpcRequest, RpcRequester } from "../helpers/RpcRequester";
-import { ChainSelector, ChainsManager } from "../systems";
+import { ChainSelector, ChainsManager, DeploymentAddress } from "../systems";
 
 export interface IFetchLogsResult {
 	chainSelector: ChainSelector;
 	log: Log;
 }
 
+interface ILogGroup {
+	chainSelector: ChainSelector;
+	routerAddress: DeploymentAddress;
+	messageIds: Hex[];
+	minBlock: bigint;
+	maxBlock: bigint;
+}
+
 const LOG_TAG = "FETCH_LOG";
+
+function groupItemsByChainAndProximity(
+	runtime: Runtime<GlobalConfig>,
+	items: DecodedArgs["batch"],
+): ILogGroup[] {
+	const byChain = new Map<ChainSelector, DecodedArgs["batch"]>();
+
+	for (const item of items) {
+		const chain = ChainsManager.getOptionsBySelector(item.srcChainSelector);
+
+		if (!chain?.deployments?.router) {
+			runtime.log(`Router deployment not found for chain ${item.srcChainSelector}`);
+			continue;
+		}
+
+		if (!chain.rpcUrls?.length) {
+			runtime.log(`Rpcs for chain ${item.srcChainSelector} not found`);
+			continue;
+		}
+
+		const existing = byChain.get(item.srcChainSelector);
+		if (existing) {
+			existing.push(item);
+		} else {
+			byChain.set(item.srcChainSelector, [item]);
+		}
+	}
+
+	const groups: ILogGroup[] = [];
+
+	for (const [chainSelector, chainItems] of byChain) {
+		const chain = ChainsManager.getOptionsBySelector(chainSelector);
+		const routerAddress = chain.deployments.router!;
+		const blockDepth = BigInt(chain.getLogsBlockDepth ?? Number(defaultGetLogsBlockDepth));
+
+		chainItems.sort((a, b) => Number(BigInt(a.blockNumber) - BigInt(b.blockNumber)));
+
+		let currentGroup: ILogGroup = {
+			chainSelector,
+			routerAddress,
+			messageIds: [chainItems[0].messageId],
+			minBlock: BigInt(chainItems[0].blockNumber),
+			maxBlock: BigInt(chainItems[0].blockNumber),
+		};
+
+		for (let i = 1; i < chainItems.length; i++) {
+			const block = BigInt(chainItems[i].blockNumber);
+			// +10n accounts for the fromBlock offset (minBlock - 10n)
+			if (block - currentGroup.minBlock + 10n <= blockDepth) {
+				currentGroup.messageIds.push(chainItems[i].messageId);
+				if (block > currentGroup.maxBlock) currentGroup.maxBlock = block;
+			} else {
+				groups.push(currentGroup);
+				currentGroup = {
+					chainSelector,
+					routerAddress,
+					messageIds: [chainItems[i].messageId],
+					minBlock: block,
+					maxBlock: block,
+				};
+			}
+		}
+
+		groups.push(currentGroup);
+	}
+
+	return groups;
+}
 
 function buildGetLogsReqParams(
 	runtime: Runtime<GlobalConfig>,
 	items: DecodedArgs["batch"],
 ): IRpcRequest[] {
-	const reqParams = [];
+	const groups = groupItemsByChainAndProximity(runtime, items);
+	const [eventSignature] = encodeEventTopics({
+		abi: [ConceroMessageSentEvent.eventAbi],
+	});
+	const reqParams: IRpcRequest[] = [];
 
-	for (const item of items) {
-		const fromBlock = BigInt(item.blockNumber) - 10n;
-		const toBlock = BigInt(item.blockNumber);
+	for (const group of groups) {
+		const fromBlock = group.minBlock - 10n;
+		const toBlock = group.maxBlock;
+		const messageIdsTopic =
+			group.messageIds.length === 1 ? group.messageIds[0] : group.messageIds;
 
-		const routerAddress = ChainsManager.getOptionsBySelector(item.srcChainSelector)?.deployments
-			?.router;
-
-		if (!routerAddress) {
-			runtime.log(`Router deployment not found for chain ${item.srcChainSelector}`);
-			continue;
-		}
-
-		const rpcUrls = ChainsManager.getOptionsBySelector(item.srcChainSelector)?.rpcUrls;
-		if (!rpcUrls?.length) {
-			runtime.log(`Rpcs for chain ${item.srcChainSelector} not found`);
-			continue;
-		}
-
-		runtime.log(`Got routerAddress=${routerAddress}`);
 		runtime.log(
 			`${LOG_TAG} Fetching ${JSON.stringify({
-				routerAddress,
-				messageId: item.messageId,
+				routerAddress: group.routerAddress,
+				messageIds: group.messageIds.length,
 				fromBlock: String(fromBlock),
 				toBlock: String(toBlock),
 			})}`,
 		);
 
 		reqParams.push({
-			chainSelector: item.srcChainSelector,
+			chainSelector: group.chainSelector,
 			method: "eth_getLogs",
 			params: [
 				{
-					address: routerAddress,
+					address: group.routerAddress,
 					fromBlock: toHex(fromBlock),
 					toBlock: toHex(toBlock),
-					topics: [
-						encodeEventTopics({
-							abi: [ConceroMessageSentEvent.eventAbi],
-							args: { messageId: item.messageId },
-						}),
-					],
+					topics: [eventSignature, messageIdsTopic],
 				},
 			],
 		});

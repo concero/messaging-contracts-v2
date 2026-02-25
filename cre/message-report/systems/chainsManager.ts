@@ -21,6 +21,7 @@ export type Chain = {
 	finalityTagEnabled?: boolean;
 	finalityConfirmations?: number;
 	isFinalitySupported?: boolean;
+	getLogsBlockDepth?: number;
 	minBlockConfirmations: number;
 	rpcUrls: string[];
 	blockExplorers: {

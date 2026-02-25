@@ -26,3 +26,5 @@ export const cacheSettingsJson: CacheSettingsJson = {
 };
 
 export const defaultMinConfirmations = 1n;
+
+export const defaultGetLogsBlockDepth = 1000n;

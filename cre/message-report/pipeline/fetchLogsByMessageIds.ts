@@ -3,7 +3,7 @@ import { Hex, type Log, encodeEventTopics, toHex } from "viem";
 
 import { ConceroMessageSentEvent } from "../abi";
 import { DecodedArgs, DomainError, ErrorCode, GlobalConfig } from "../helpers";
-import { defaultGetLogsBlockDepth } from "../helpers/constants";
+import { BLOCK_SAFETY_MARGIN } from "../helpers/constants";
 import { IRpcRequest, RpcRequester } from "../helpers/RpcRequester";
 import { ChainSelector, ChainsManager, DeploymentAddress } from "../systems";
 
@@ -54,7 +54,7 @@ function groupItemsByChainAndProximity(
 	for (const [chainSelector, chainItems] of byChain) {
 		const chain = ChainsManager.getOptionsBySelector(chainSelector);
 		const routerAddress = chain.deployments.router!;
-		const blockDepth = BigInt(chain.getLogsBlockDepth ?? Number(defaultGetLogsBlockDepth));
+		const blockDepth = BigInt(chain.getLogsBlockDepth ?? Number(BLOCK_SAFETY_MARGIN));
 
 		chainItems.sort((a, b) => Number(BigInt(a.blockNumber) - BigInt(b.blockNumber)));
 
@@ -69,7 +69,7 @@ function groupItemsByChainAndProximity(
 		for (let i = 1; i < chainItems.length; i++) {
 			const block = BigInt(chainItems[i].blockNumber);
 			// +10n accounts for the fromBlock offset (minBlock - 10n)
-			if (block - currentGroup.minBlock + 10n <= blockDepth) {
+			if (block - currentGroup.minBlock + BLOCK_SAFETY_MARGIN <= blockDepth) {
 				currentGroup.messageIds.push(chainItems[i].messageId);
 				if (block > currentGroup.maxBlock) currentGroup.maxBlock = block;
 			} else {
@@ -101,7 +101,7 @@ function buildGetLogsReqParams(
 	const reqParams: IRpcRequest[] = [];
 
 	for (const group of groups) {
-		const fromBlock = group.minBlock - 10n;
+		const fromBlock = group.minBlock - BLOCK_SAFETY_MARGIN;
 		const toBlock = group.maxBlock;
 		const messageIdsTopic =
 			group.messageIds.length === 1 ? group.messageIds[0] : group.messageIds;

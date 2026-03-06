@@ -21,7 +21,6 @@ export type Chain = {
 	finalityTagEnabled?: boolean;
 	finalityConfirmations?: number;
 	isFinalitySupported?: boolean;
-	getLogsBlockDepth?: number;
 	minBlockConfirmations: number;
 	rpcUrls: string[];
 	blockExplorers: {
@@ -35,6 +34,8 @@ export type Chain = {
 		decimals: number;
 	};
 	deployments: Partial<Record<DeploymentType, DeploymentAddress>>;
+	getLogsBlockDepth?: number;
+	batchRequestLimit?: number;
 };
 
 let chains: Record<Chain["chainSelector"], Chain> = {};

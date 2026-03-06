@@ -27,4 +27,6 @@ export const cacheSettingsJson: CacheSettingsJson = {
 
 export const defaultMinConfirmations = 1n;
 
-export const defaultGetLogsBlockDepth = 1000n;
+export const BLOCK_SAFETY_MARGIN = 10n;
+
+export const MAX_BATCH_REQUESTS = 8;

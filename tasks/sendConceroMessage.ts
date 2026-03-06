@@ -98,7 +98,7 @@ async function sendSingleMessage({
 		});
 
 		log("Message sent successfully!", logPrefix);
-		log(`Message ID: ${foundMessageSentLog.topics[2]}`, logPrefix);
+		log(`Message ID: ${foundMessageSentLog.topics[1]}`, logPrefix);
 		log(`Block Number: ${txReceipt.blockNumber}`, logPrefix);
 		log(`Transaction hash: ${txHash}`, logPrefix);
 

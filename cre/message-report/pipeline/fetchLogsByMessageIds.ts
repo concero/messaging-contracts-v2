@@ -12,7 +12,7 @@ export interface IFetchLogsResult {
 	log: Log;
 }
 
-interface ILogGroup {
+export interface ILogGroup {
 	chainSelector: ChainSelector;
 	routerAddress: DeploymentAddress;
 	messageIds: Hex[];
@@ -22,7 +22,7 @@ interface ILogGroup {
 
 const LOG_TAG = "FETCH_LOG";
 
-function groupItemsByChainAndProximity(
+export function groupItemsByChainAndProximity(
 	runtime: Runtime<GlobalConfig>,
 	items: DecodedArgs["batch"],
 ): ILogGroup[] {
